@@ -9,6 +9,11 @@ public:
 
 	void Collapse();
 
+	bool IsExpanded() const
+	{
+		return mExpanded;
+	}
+
 signals:
 	void StateChanged(bool Expanded);
 

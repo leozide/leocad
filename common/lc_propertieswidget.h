@@ -28,6 +28,16 @@ protected slots:
 	void PieceIdChanged(PieceInfo* Info);
 
 protected:
+	enum class CategoryIndex
+	{
+		Piece,
+		Camera,
+		CameraTransform,
+		Light,
+		ObjectTransform,
+		Count
+	};
+
 	enum class PropertyIndex
 	{
 		PieceId,
@@ -55,8 +65,12 @@ protected:
 		LightCastShadow,
 		LightAttenuationDistance,
 		LightAttenuationPower,
-		LightSizeX,
-		LightSizeY,
+		LightPointSize,
+		LightSpotSize,
+		LightDirectionalSize,
+		LightAreaSize,
+		LightAreaSizeX,
+		LightAreaSizeY,
 		LightSpotConeAngle,
 		LightSpotPenumbraAngle,
 		LightSpotTightness,
@@ -91,14 +105,28 @@ protected:
 		Piece,
 		Camera,
 		Light,
-		Multiple
+		Multiple,
+		Count
+	};
+
+	struct CategoryWidgets
+	{
+		lcCollapsibleWidgetButton* Button = nullptr;
+		std::vector<QWidget*> Widgets;
+		std::vector<int> SpacingRows;
+	};
+
+	struct PropertyWidgets
+	{
+		QLabel* Label = nullptr;
+		QWidget* Widget = nullptr;
 	};
 
 	PropertyIndex GetWidgetIndex(QWidget* Widget) const;
 
-	void AddPropertyCategory(const QString& Title);
+	void AddCategory(CategoryIndex Index, const QString& Title);
 	void AddSpacing();
-	void AddLabel(const QString& Text, const QString& ToolTip);
+	void AddLabel(PropertyIndex Index, const QString& Text, const QString& ToolTip);
 	void AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
 	void AddFloatProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, float Min, float Max);
 	void AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max);
@@ -124,29 +152,20 @@ protected:
 	void SetCamera(lcObject* Focus);
 	void SetLight(lcObject* Focus);
 
-	void ClearLayout();
-	void AddTransformCategory();
-	void SetPieceLayout();
-	void SetCameraLayout();
-	void SetLightLayout(lcLightType LightType, lcLightAreaShape LightAreaShape);
-
-	struct CategoryWidgets
-	{
-		lcCollapsibleWidgetButton* Button;
-		std::vector<QWidget*> Widgets;
-		std::vector<int> SpacingRows;
-	};
+	void CreateWidgets();
+	void SetLayoutMode(LayoutMode Mode);
+	void SetPropertyVisible(PropertyIndex Index, bool Visible);
+	void SetCategoryVisible(CategoryIndex Index, bool Visible);
+	void SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible);
 
 	lcObject* mFocusObject = nullptr;
 
-	std::array<QWidget*, static_cast<int>(PropertyIndex::Count)> mPropertyWidgets = {};
-	std::vector<std::unique_ptr<CategoryWidgets>> mCategories;
+	std::array<PropertyWidgets, static_cast<int>(PropertyIndex::Count)> mPropertyWidgets = {};
+	std::array<CategoryWidgets, static_cast<int>(CategoryIndex::Count)> mCategoryWidgets = {};
 
 	CategoryWidgets* mCurrentCategory = nullptr;
 	QGridLayout* mLayout = nullptr;
 	int mLayoutRow = 0;
 
-	LayoutMode mLayoutMode = LayoutMode::Empty;
-	lcLightType mLayoutLightType;
-	lcLightAreaShape mLayoutLightAreaShape;
+	LayoutMode mLayoutMode = LayoutMode::Count;
 };

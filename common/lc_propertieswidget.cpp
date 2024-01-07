@@ -13,8 +13,8 @@
 lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	: QWidget(Parent)
 {
-	mLayoutLightType = lcLightType::Count;
-	mLayoutLightAreaShape = lcLightAreaShape::Count;
+	CreateWidgets();
+	SetLayoutMode(LayoutMode::Empty);
 }
 
 lcPropertiesWidget::PropertyIndex lcPropertiesWidget::GetWidgetIndex(QWidget* Widget) const
@@ -23,7 +23,7 @@ lcPropertiesWidget::PropertyIndex lcPropertiesWidget::GetWidgetIndex(QWidget* Wi
 		return PropertyIndex::Count;
 
 	for (size_t Index = 0; Index < mPropertyWidgets.size(); Index++)
-		if (mPropertyWidgets[Index] == Widget)
+		if (mPropertyWidgets[Index].Widget == Widget)
 			return static_cast<PropertyIndex>(Index);
 
 	return PropertyIndex::Count;
@@ -33,25 +33,19 @@ void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 {
 	QObject* Button = sender();
 
-	for (const std::unique_ptr<CategoryWidgets>& Category : mCategories)
+	for (CategoryWidgets& Category : mCategoryWidgets)
 	{
-		if (Category->Button == Button)
+		if (Category.Button == Button)
 		{
-			for (QWidget* Widget : Category->Widgets)
-				Widget->setVisible(Expanded);
-
-			for (int Row : Category->SpacingRows)
-				mLayout->setRowMinimumHeight(Row, Expanded ? 5 : 0);
-
+			SetCategoryWidgetsVisible(Category, Expanded);
 			break;
 		}
 	}
 }
 
-void lcPropertiesWidget::AddPropertyCategory(const QString& Title)
+void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
 {
-	mCurrentCategory = new CategoryWidgets();
-	mCategories.emplace_back(std::unique_ptr<CategoryWidgets>(mCurrentCategory));
+	mCurrentCategory = &mCategoryWidgets[static_cast<int>(Index)];
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
 
@@ -70,7 +64,7 @@ void lcPropertiesWidget::AddSpacing()
 	mLayoutRow++;
 }
 
-void lcPropertiesWidget::AddLabel(const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddLabel(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
 	QLabel* Label = new QLabel(Text, this);
 	Label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -78,6 +72,8 @@ void lcPropertiesWidget::AddLabel(const QString& Text, const QString& ToolTip)
 
 	mLayout->addWidget(Label, mLayoutRow, 1);
 	mCurrentCategory->Widgets.push_back(Label);
+
+	mPropertyWidgets[static_cast<int>(Index)].Label = Label;
 }
 
 void lcPropertiesWidget::BoolChanged()
@@ -107,7 +103,7 @@ void lcPropertiesWidget::BoolChanged()
 
 void lcPropertiesWidget::UpdateBool(PropertyIndex Index, bool Value)
 {
-	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (Widget)
 	{
@@ -119,7 +115,7 @@ void lcPropertiesWidget::UpdateBool(PropertyIndex Index, bool Value)
 
 void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QCheckBox* Widget = new QCheckBox(this);
 	Widget->setToolTip(ToolTip);
@@ -129,7 +125,7 @@ void lcPropertiesWidget::AddBoolProperty(PropertyIndex Index, const QString& Tex
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -274,14 +270,14 @@ void lcPropertiesWidget::FloatChanged()
 		{
 			Model->SetLightAttenuationPower(Light, Value);
 		}
-		else if (Index == PropertyIndex::LightSizeX)
+		else if (Index == PropertyIndex::LightPointSize || Index == PropertyIndex::LightSpotSize || Index == PropertyIndex::LightDirectionalSize || Index == PropertyIndex::LightAreaSizeX)
 		{
 			lcVector2 LightSize = Light->GetSize();
 			LightSize[0] = Value;
 
 			Model->SetLightSize(Light, LightSize);
 		}
-		else if (Index == PropertyIndex::LightSizeY)
+		else if (Index == PropertyIndex::LightAreaSizeY)
 		{
 			lcVector2 LightSize = Light->GetSize();
 			LightSize[1] = Value;
@@ -305,7 +301,7 @@ void lcPropertiesWidget::FloatChanged()
 
 void lcPropertiesWidget::UpdateFloat(PropertyIndex Index, float Value)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 		
 	if (Widget)
 	{
@@ -317,7 +313,7 @@ void lcPropertiesWidget::UpdateFloat(PropertyIndex Index, float Value)
 
 void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, float Min, float Max)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
@@ -329,7 +325,7 @@ void lcPropertiesWidget::AddFloatProperty(PropertyIndex Index, const QString& Te
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -373,7 +369,7 @@ void lcPropertiesWidget::IntegerChanged()
 
 void lcPropertiesWidget::UpdateInteger(PropertyIndex Index, int Value)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (Widget)
 	{
@@ -385,7 +381,7 @@ void lcPropertiesWidget::UpdateInteger(PropertyIndex Index, int Value)
 
 void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
@@ -397,7 +393,7 @@ void lcPropertiesWidget::AddIntegerProperty(PropertyIndex Index, const QString& 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -434,7 +430,7 @@ void lcPropertiesWidget::StepNumberChanged()
 
 void lcPropertiesWidget::UpdateStepNumber(PropertyIndex Index, lcStep Step, lcStep Min, lcStep Max)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (Widget)
 	{
@@ -447,7 +443,7 @@ void lcPropertiesWidget::UpdateStepNumber(PropertyIndex Index, lcStep Step, lcSt
 
 void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
@@ -457,7 +453,7 @@ void lcPropertiesWidget::AddStepNumberProperty(PropertyIndex Index, const QStrin
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -497,7 +493,7 @@ void lcPropertiesWidget::StringChanged()
 
 void lcPropertiesWidget::UpdateString(PropertyIndex Index, const QString& Text)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (Widget)
 	{
@@ -509,7 +505,7 @@ void lcPropertiesWidget::UpdateString(PropertyIndex Index, const QString& Text)
 
 void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QLineEdit* Widget = new QLineEdit(this);
 	Widget->setToolTip(ToolTip);
@@ -519,7 +515,7 @@ void lcPropertiesWidget::AddStringProperty(PropertyIndex Index, const QString& T
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -562,7 +558,7 @@ void lcPropertiesWidget::StringListChanged(int Value)
 
 void lcPropertiesWidget::UpdateStringList(PropertyIndex Index, int ListIndex)
 {
-	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (Widget)
 	{
@@ -574,7 +570,7 @@ void lcPropertiesWidget::UpdateStringList(PropertyIndex Index, int ListIndex)
 
 void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, const QStringList& Strings)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QComboBox* Widget = new QComboBox(this);
 	Widget->setToolTip(ToolTip);
@@ -585,7 +581,7 @@ void lcPropertiesWidget::AddStringListProperty(PropertyIndex Index, const QStrin
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -609,7 +605,7 @@ void lcPropertiesWidget::ColorButtonClicked()
 
 void lcPropertiesWidget::UpdateColor(PropertyIndex Index, QColor Color)
 {
-	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (!ColorButton)
 		return;
@@ -623,7 +619,7 @@ void lcPropertiesWidget::UpdateColor(PropertyIndex Index, QColor Color)
 
 void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
@@ -636,7 +632,7 @@ void lcPropertiesWidget::AddColorProperty(PropertyIndex Index, const QString& Te
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
@@ -693,7 +689,7 @@ void lcPropertiesWidget::PieceColorButtonClicked()
 
 void lcPropertiesWidget::UpdatePieceColor(PropertyIndex Index, int ColorIndex)
 {
-	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(Index)]);
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (!ColorButton)
 		return;
@@ -707,7 +703,7 @@ void lcPropertiesWidget::UpdatePieceColor(PropertyIndex Index, int ColorIndex)
 
 void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
@@ -720,14 +716,14 @@ void lcPropertiesWidget::AddPieceColorProperty(PropertyIndex Index, const QStrin
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
 
 void lcPropertiesWidget::UpdatePieceId(PropertyIndex Index, const QString& Name)
 {
-	lcElidableToolButton* PieceIdButton = qobject_cast<lcElidableToolButton*>(mPropertyWidgets[static_cast<int>(Index)]);
+	lcElidableToolButton* PieceIdButton = qobject_cast<lcElidableToolButton*>(mPropertyWidgets[static_cast<int>(Index)].Widget);
 
 	if (!PieceIdButton)
 		return;
@@ -769,7 +765,7 @@ void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 
 void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip)
 {
-	AddLabel(Text, ToolTip);
+	AddLabel(Index, Text, ToolTip);
 
 	lcElidableToolButton* Widget = new lcElidableToolButton(this);
 	Widget->setToolTip(ToolTip);
@@ -786,60 +782,17 @@ void lcPropertiesWidget::AddPieceIdProperty(PropertyIndex Index, const QString& 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 	mCurrentCategory->Widgets.push_back(Widget);
 
-	mPropertyWidgets[static_cast<int>(Index)] = Widget;
+	mPropertyWidgets[static_cast<int>(Index)].Widget = Widget;
 
 	mLayoutRow++;
 }
 
-void lcPropertiesWidget::ClearLayout()
+void lcPropertiesWidget::CreateWidgets()
 {
-	for (const std::unique_ptr<CategoryWidgets>& Category : mCategories)
-	{
-		delete Category->Button;
-		qDeleteAll(Category->Widgets);
-	}
-
-	mCategories.clear();
-	mPropertyWidgets.fill(nullptr);
-
-	delete mLayout;
 	mLayout = new QGridLayout(this);
 	mLayout->setVerticalSpacing(1);
-	mLayoutRow = 0;
-	mCurrentCategory = nullptr;
-}
 
-void lcPropertiesWidget::AddTransformCategory()
-{
-	AddPropertyCategory(tr("Transform"));
-
-	AddFloatProperty(PropertyIndex::ObjectPositionX, tr("Position X"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::ObjectPositionY, tr("Y"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::ObjectPositionZ, tr("Z"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
-	AddSpacing();
-	AddFloatProperty(PropertyIndex::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
-
-	mLayout->setRowStretch(mLayout->rowCount(), 1);
-}
-
-void lcPropertiesWidget::SetEmpty()
-{
-	ClearLayout();
-
-	mFocusObject = nullptr;
-	mLayoutMode = LayoutMode::Empty;
-}
-
-void lcPropertiesWidget::SetPieceLayout()
-{
-	if (mLayoutMode == LayoutMode::Piece)
-		return;
-
-	ClearLayout();
-
-	AddPropertyCategory(tr("Piece"));
+	AddCategory(CategoryIndex::Piece, tr("Piece"));
 
 	AddPieceIdProperty(PropertyIndex::PieceId, tr("Part"), tr("Part Id"));
 	AddPieceColorProperty(PropertyIndex::PieceColor, tr("Color"), tr("Piece color"));
@@ -849,23 +802,147 @@ void lcPropertiesWidget::SetPieceLayout()
 	AddStepNumberProperty(PropertyIndex::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"));
 	AddStepNumberProperty(PropertyIndex::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"));
 
-	AddTransformCategory();
+	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
-	mLayoutMode = LayoutMode::Piece;
+	AddStringProperty(PropertyIndex::CameraName, tr("Name"), tr("Camera name"));
+	AddStringListProperty(PropertyIndex::CameraType, tr("Type"), tr("Camera type"), { tr("Perspective"), tr("Orthographic") });
+
+	AddSpacing();
+
+	AddFloatProperty(PropertyIndex::CameraFOV, tr("FOV"), tr("Field of view in degrees"), 0.1f, 179.9f);
+	AddFloatProperty(PropertyIndex::CameraNear, tr("Near"), tr("Near clipping distance"), 0.001f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraFar, tr("Far"), tr("Far clipping distance"), 0.001f, FLT_MAX);
+
+	AddCategory(CategoryIndex::CameraTransform, tr("Transform"));
+
+	AddFloatProperty(PropertyIndex::CameraPositionX, tr("Position X"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraPositionY, tr("Y"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraPositionZ, tr("Z"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+
+	AddSpacing();
+
+	AddFloatProperty(PropertyIndex::CameraTargetX, tr("Target X"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraTargetY, tr("Y"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraTargetZ, tr("Z"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+
+	AddSpacing();
+
+	AddFloatProperty(PropertyIndex::CameraUpX, tr("Up X"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraUpY, tr("Y"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::CameraUpZ, tr("Z"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+
+	AddCategory(CategoryIndex::Light, tr("Light"));
+
+	AddStringProperty(PropertyIndex::LightName, tr("Name"), tr("Light name"));
+	AddStringListProperty(PropertyIndex::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings());
+
+	AddSpacing();
+
+	AddColorProperty(PropertyIndex::LightColor, tr("Color"), tr("Light color"));
+	AddFloatProperty(PropertyIndex::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX);
+	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
+
+	AddSpacing();
+
+	AddFloatProperty(PropertyIndex::LightPointSize, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
+
+	AddFloatProperty(PropertyIndex::LightSpotSize, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), 0.0f, 179.9f);
+	AddFloatProperty(PropertyIndex::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), 0.0f, 179.9f);
+	AddFloatProperty(PropertyIndex::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), 0.0f, FLT_MAX);
+
+	AddFloatProperty(PropertyIndex::LightDirectionalSize, tr("Angle"), tr("Angular diameter of the light (Blender only)"), 0.0f, 180.0f);
+
+	AddStringListProperty(PropertyIndex::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), lcLight::GetAreaShapeStrings());
+	AddFloatProperty(PropertyIndex::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightAreaSizeY, tr("Y"), tr("The height of the area light"), 0.0f, FLT_MAX);
+	AddFloatProperty(PropertyIndex::LightAreaSize, tr("Size"), tr("The size of the area light"), 0.0f, FLT_MAX);
+	AddIntegerProperty(PropertyIndex::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), 1, INT_MAX);
+	AddIntegerProperty(PropertyIndex::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), 1, INT_MAX);
+
+	AddCategory(CategoryIndex::ObjectTransform, tr("Transform"));
+
+	AddFloatProperty(PropertyIndex::ObjectPositionX, tr("Position X"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectPositionY, tr("Y"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectPositionZ, tr("Z"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+
+	AddSpacing();
+
+	AddFloatProperty(PropertyIndex::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(PropertyIndex::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+
+	mLayout->setRowStretch(mLayout->rowCount(), 1);
+}
+
+void lcPropertiesWidget::SetLayoutMode(LayoutMode Mode)
+{
+	if (mLayoutMode == Mode)
+		return;
+
+	mLayoutMode = Mode;
+	const bool IsPiece = (mLayoutMode == LayoutMode::Piece);
+	const bool IsCamera = (mLayoutMode == LayoutMode::Camera);
+	const bool IsLight = (mLayoutMode == LayoutMode::Light);
+
+	SetCategoryVisible(CategoryIndex::Piece, IsPiece);
+	SetCategoryVisible(CategoryIndex::Camera, IsCamera);
+	SetCategoryVisible(CategoryIndex::CameraTransform, IsCamera);
+	SetCategoryVisible(CategoryIndex::Light, IsLight);
+	SetCategoryVisible(CategoryIndex::ObjectTransform, IsPiece || IsLight);
+}
+
+void lcPropertiesWidget::SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible)
+{
+	for (QWidget* Widget : Category.Widgets)
+		Widget->setVisible(Visible);
+
+	for (int Row : Category.SpacingRows)
+		mLayout->setRowMinimumHeight(Row, Visible ? 5 : 0);
+}
+
+void lcPropertiesWidget::SetPropertyVisible(PropertyIndex Index, bool Visible)
+{
+	PropertyWidgets& Property = mPropertyWidgets[static_cast<int>(Index)];
+
+	if (Property.Label)
+		Property.Label->setVisible(Visible);
+
+	if (Property.Widget)
+		Property.Widget->setVisible(Visible);
+}
+
+void lcPropertiesWidget::SetCategoryVisible(CategoryIndex Index, bool Visible)
+{
+	CategoryWidgets& Category = mCategoryWidgets[static_cast<int>(Index)];
+
+	Category.Button->setVisible(Visible);
+
+	SetCategoryWidgetsVisible(Category, Visible && Category.Button->IsExpanded());
+}
+
+void lcPropertiesWidget::SetEmpty()
+{
+	SetLayoutMode(LayoutMode::Empty);
+
+	mFocusObject = nullptr;
 }
 
 void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus)
 {
-	SetPieceLayout();
+	SetLayoutMode(LayoutMode::Piece);
 
-	lcModel* Model = gMainWindow->GetActiveModel();
 	lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
 	mFocusObject = Piece;
 
 	lcVector3 Position;
 	lcMatrix33 RelativeRotation;
+	lcModel* Model = gMainWindow->GetActiveModel();
 
-	Model->GetMoveRotateTransform(Position, RelativeRotation);
+	if (Model)
+		Model->GetMoveRotateTransform(Position, RelativeRotation);
 
 	UpdateFloat(PropertyIndex::ObjectPositionX, Position[0]);
 	UpdateFloat(PropertyIndex::ObjectPositionY, Position[1]);
@@ -939,44 +1016,9 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateStepNumber(PropertyIndex::PieceStepHide, StepHide ? StepHide : LC_STEP_MAX, StepShow + 1, LC_STEP_MAX);
 }
 
-void lcPropertiesWidget::SetCameraLayout()
-{
-	if (mLayoutMode == LayoutMode::Camera)
-		return;
-
-	ClearLayout();
-
-	AddPropertyCategory(tr("Camera"));
-	
-	AddStringProperty(PropertyIndex::CameraName, tr("Name"), tr("Camera name"));
-	AddStringListProperty(PropertyIndex::CameraType, tr("Type"), tr("Camera type"), { tr("Perspective"), tr("Orthographic") });
-	AddSpacing();
-	AddFloatProperty(PropertyIndex::CameraFOV, tr("FOV"), tr("Field of view in degrees"), 0.1f, 179.9f);
-	AddFloatProperty(PropertyIndex::CameraNear, tr("Near"), tr("Near clipping distance"), 0.001f, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraFar, tr("Far"), tr("Far clipping distance"), 0.001f, FLT_MAX);
-
-	AddPropertyCategory(tr("Transform"));
-
-	AddFloatProperty(PropertyIndex::CameraPositionX, tr("Position X"), tr("Camera position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraPositionY, tr("Y"), tr("Camera position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraPositionZ, tr("Z"), tr("Camera position"), -FLT_MAX, FLT_MAX);
-	AddSpacing();
-	AddFloatProperty(PropertyIndex::CameraTargetX, tr("Target X"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraTargetY, tr("Y"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraTargetZ, tr("Z"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
-	AddSpacing();
-	AddFloatProperty(PropertyIndex::CameraUpX, tr("Up X"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraUpY, tr("Y"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(PropertyIndex::CameraUpZ, tr("Z"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
-
-//	AddTransformCategory(Layout);
-
-	mLayoutMode = LayoutMode::Camera;
-}
-
 void lcPropertiesWidget::SetCamera(lcObject* Focus)
 {
-	SetCameraLayout();
+	SetLayoutMode(LayoutMode::Camera);
 
 	lcCamera* Camera = dynamic_cast<lcCamera*>(Focus);
 	mFocusObject = Camera;
@@ -1023,88 +1065,12 @@ void lcPropertiesWidget::SetCamera(lcObject* Focus)
 	UpdateFloat(PropertyIndex::CameraUpZ, UpVector[2]);
 }
 
-void lcPropertiesWidget::SetLightLayout(lcLightType LightType, lcLightAreaShape LightAreaShape)
-{
-	if (mLayoutMode == LayoutMode::Light && mLayoutLightType == LightType) // && LightAreaShape
-		return;
-
-	ClearLayout(); // todo: this causes a crash when changing light type
-
-	AddPropertyCategory(tr("Light"));
-
-	AddStringProperty(PropertyIndex::LightName, tr("Name"), tr("Light name"));
-	AddStringListProperty(PropertyIndex::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings());
-
-	AddSpacing();
-
-	AddColorProperty(PropertyIndex::LightColor, tr("Color"), tr("Light color"));
-	AddFloatProperty(PropertyIndex::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX);
-	AddFloatProperty(PropertyIndex::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX);
-	AddFloatProperty(PropertyIndex::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX);
-	AddBoolProperty(PropertyIndex::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
-
-	AddSpacing();
-
-	switch (LightType)
-	{
-	case lcLightType::Point:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
-		break;
-
-	case lcLightType::Spot:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
-		AddFloatProperty(PropertyIndex::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), 0.0f, 179.9f);
-		AddFloatProperty(PropertyIndex::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), 0.0f, 179.9f);
-		AddFloatProperty(PropertyIndex::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), 0.0f, FLT_MAX);
-		break;
-
-	case lcLightType::Directional:
-		AddFloatProperty(PropertyIndex::LightSizeX, tr("Angle"), tr("Angular diameter of the light (Blender only)"), 0.0f, 180.0f);
-		break;
-
-	case lcLightType::Area:
-		AddStringListProperty(PropertyIndex::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), lcLight::GetAreaShapeStrings());
-
-		switch (LightAreaShape)
-		{
-		case lcLightAreaShape::Rectangle:
-		case lcLightAreaShape::Ellipse:
-			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size X"), tr("The width of the area light"), 0.0f, FLT_MAX);
-			AddFloatProperty(PropertyIndex::LightSizeY, tr("Y"), tr("The height of the area light"), 0.0f, FLT_MAX);
-			break;
-
-		case lcLightAreaShape::Square:
-		case lcLightAreaShape::Disk:
-			AddFloatProperty(PropertyIndex::LightSizeX, tr("Size"), tr("The size of the area light"), 0.0f, FLT_MAX);
-			break;
-
-		case lcLightAreaShape::Count:
-			break;
-		}
-
-		AddIntegerProperty(PropertyIndex::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), 1, INT_MAX);
-		AddIntegerProperty(PropertyIndex::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), 1, INT_MAX);
-		break;
-
-	case lcLightType::Count:
-		break;
-	}
-
-	AddTransformCategory();
-
-	mLayoutLightType = LightType;
-	mLayoutMode = LayoutMode::Light;
-}
-
 void lcPropertiesWidget::SetLight(lcObject* Focus)
 {
+	SetLayoutMode(LayoutMode::Light);
+
 	lcLight* Light = dynamic_cast<lcLight*>(Focus);
 	mFocusObject = Light;
-
-	if (Light)
-		SetLightLayout(Light->GetLightType(), Light->GetAreaShape());
-	else
-		SetLightLayout(lcLightType::Count, lcLightAreaShape::Count);
 
 	QString Name;
 	lcLightType LightType = lcLightType::Point;
@@ -1151,21 +1117,44 @@ void lcPropertiesWidget::SetLight(lcObject* Focus)
 	UpdateFloat(PropertyIndex::LightAttenuationDistance, AttenuationDistance);
 	UpdateFloat(PropertyIndex::LightAttenuationPower, AttenuationPower);
 
-	UpdateFloat(PropertyIndex::LightSizeX, LightSize.x);
-	UpdateFloat(PropertyIndex::LightSizeY, LightSize.y);
+	const bool IsPointLight = Light && Light->IsPointLight();
+	SetPropertyVisible(PropertyIndex::LightPointSize, IsPointLight);
+
+	const bool IsSpotLight = Light && Light->IsSpotLight();
+	SetPropertyVisible(PropertyIndex::LightSpotSize, IsSpotLight);
+	SetPropertyVisible(PropertyIndex::LightSpotConeAngle, IsSpotLight);
+	SetPropertyVisible(PropertyIndex::LightSpotPenumbraAngle, IsSpotLight);
+	SetPropertyVisible(PropertyIndex::LightSpotTightness, IsSpotLight);
+
+	const bool IsDirectionalLight = Light && Light->IsDirectionalLight();
+	SetPropertyVisible(PropertyIndex::LightDirectionalSize, IsDirectionalLight);
+
+	const bool IsAreaLight = Light && Light->IsAreaLight();
+	SetPropertyVisible(PropertyIndex::LightAreaShape, IsAreaLight);
+
+	const bool IsSquare = IsAreaLight && (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
+	SetPropertyVisible(PropertyIndex::LightAreaSize, !IsSquare);
+	SetPropertyVisible(PropertyIndex::LightAreaSizeX, IsSquare);
+	SetPropertyVisible(PropertyIndex::LightAreaSizeY, IsSquare);
+
+	SetPropertyVisible(PropertyIndex::LightAreaGridX, IsAreaLight);
+	SetPropertyVisible(PropertyIndex::LightAreaGridY, IsAreaLight);
 
 	switch (LightType)
 	{
 	case lcLightType::Point:
+		UpdateFloat(PropertyIndex::LightPointSize, LightSize.x);
 		break;
 
 	case lcLightType::Spot:
+		UpdateFloat(PropertyIndex::LightSpotSize, LightSize.x);
 		UpdateFloat(PropertyIndex::LightSpotConeAngle, SpotConeAngle);
 		UpdateFloat(PropertyIndex::LightSpotPenumbraAngle, SpotPenumbraAngle);
 		UpdateFloat(PropertyIndex::LightSpotTightness, SpotTightness);
 		break;
 
 	case lcLightType::Directional:
+		UpdateFloat(PropertyIndex::LightDirectionalSize, LightSize.x);
 		break;
 
 	case lcLightType::Area:
@@ -1257,6 +1246,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 	{
 	case LayoutMode::Empty:
 	case LayoutMode::Multiple:
+	case LayoutMode::Count:
 		SetEmpty();
 		break;
 

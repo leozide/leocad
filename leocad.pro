@@ -201,6 +201,7 @@ SOURCES += \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
 	common/lc_modellistdialog.cpp \
+	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
@@ -273,6 +274,7 @@ HEADERS += \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
 	common/lc_modellistdialog.h \
+	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \

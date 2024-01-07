@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_array.h"
+#include "lc_objectproperty.h"
 
 class lcCollapsibleWidgetButton;
 
@@ -38,54 +39,6 @@ protected:
 		Count
 	};
 
-	enum class PropertyIndex
-	{
-		PieceId,
-		PieceColor,
-		PieceStepShow,
-		PieceStepHide,
-		CameraName,
-		CameraType,
-		CameraFOV,
-		CameraNear,
-		CameraFar,
-		CameraPositionX,
-		CameraPositionY,
-		CameraPositionZ,
-		CameraTargetX,
-		CameraTargetY,
-		CameraTargetZ,
-		CameraUpX,
-		CameraUpY,
-		CameraUpZ,
-		LightName,
-		LightType,
-		LightColor,
-		LightPower,
-		LightCastShadow,
-		LightAttenuationDistance,
-		LightAttenuationPower,
-		LightPointSize,
-		LightSpotSize,
-		LightDirectionalSize,
-		LightAreaSize,
-		LightAreaSizeX,
-		LightAreaSizeY,
-		LightSpotConeAngle,
-		LightSpotPenumbraAngle,
-		LightSpotTightness,
-		LightAreaShape,
-		LightAreaGridX,
-		LightAreaGridY,
-		ObjectPositionX,
-		ObjectPositionY,
-		ObjectPositionZ,
-		ObjectRotationX,
-		ObjectRotationY,
-		ObjectRotationZ,
-		Count
-	};
-
 	enum class PropertyType
 	{
 		Bool,
@@ -112,7 +65,7 @@ protected:
 	struct CategoryWidgets
 	{
 		lcCollapsibleWidgetButton* Button = nullptr;
-		std::vector<PropertyIndex> Properties;
+		std::vector<lcObjectPropertyId> Properties;
 		std::vector<int> SpacingRows;
 	};
 
@@ -122,30 +75,30 @@ protected:
 		QWidget* Widget = nullptr;
 	};
 
-	PropertyIndex GetWidgetIndex(QWidget* Widget) const;
+	lcObjectPropertyId GetWidgetPropertyId(QWidget* Widget) const;
 
 	void AddCategory(CategoryIndex Index, const QString& Title);
 	void AddSpacing();
-	void AddLabel(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddBoolProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddFloatProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, float Min, float Max);
-	void AddIntegerProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, int Min, int Max);
-	void AddStepNumberProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddStringProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddStringListProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip, const QStringList& Strings);
-	void AddColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddPieceColorProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
-	void AddPieceIdProperty(PropertyIndex Index, const QString& Text, const QString& ToolTip);
+	void AddLabel(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddBoolProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddFloatProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, float Min, float Max);
+	void AddIntegerProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, int Min, int Max);
+	void AddStepNumberProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddStringProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddStringListProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, const QStringList& Strings);
+	void AddColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
 
-	void UpdateBool(PropertyIndex Index, bool Value);
-	void UpdateFloat(PropertyIndex Index, float Value);
-	void UpdateInteger(PropertyIndex Index, int Value);
-	void UpdateStepNumber(PropertyIndex Index, lcStep Step, lcStep Min, lcStep Max);
-	void UpdateString(PropertyIndex Index, const QString& Text);
-	void UpdateStringList(PropertyIndex Index, int ListIndex);
-	void UpdateColor(PropertyIndex Index, QColor Color);
-	void UpdatePieceColor(PropertyIndex Index, int ColorIndex);
-	void UpdatePieceId(PropertyIndex Index, const QString& Name);
+	void UpdateBool(lcObjectPropertyId PropertyId, bool Value);
+	void UpdateFloat(lcObjectPropertyId PropertyId, float Value);
+	void UpdateInteger(lcObjectPropertyId PropertyId, int Value);
+	void UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep Step, lcStep Min, lcStep Max);
+	void UpdateString(lcObjectPropertyId PropertyId, const QString& Text);
+	void UpdateStringList(lcObjectPropertyId PropertyId, int ListIndex);
+	void UpdateColor(lcObjectPropertyId PropertyId, QColor Color);
+	void UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex);
+	void UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name);
 
 	void SetEmpty();
 	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);
@@ -154,13 +107,13 @@ protected:
 
 	void CreateWidgets();
 	void SetLayoutMode(LayoutMode Mode);
-	void SetPropertyVisible(PropertyIndex Index, bool Visible);
+	void SetPropertyVisible(lcObjectPropertyId PropertyId, bool Visible);
 	void SetCategoryVisible(CategoryIndex Index, bool Visible);
 	void SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible);
 
 	lcObject* mFocusObject = nullptr;
 
-	std::array<PropertyWidgets, static_cast<int>(PropertyIndex::Count)> mPropertyWidgets = {};
+	std::array<PropertyWidgets, static_cast<int>(lcObjectPropertyId::Count)> mPropertyWidgets = {};
 	std::array<CategoryWidgets, static_cast<int>(CategoryIndex::Count)> mCategoryWidgets = {};
 
 	CategoryWidgets* mCurrentCategory = nullptr;

@@ -4192,10 +4192,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 
 		lcPiece* Current = mPieces[CurrentIdx];
 
-		if (!Current->IsVisible(mCurrentStep))
-			continue;
-
-		if (PieceMatches(Current))
+		if (Current->IsVisible(mCurrentStep) && PieceMatches(Current))
 		{
 			if (FindAll)
 				Selection.Add(Current);

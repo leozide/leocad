@@ -2705,17 +2705,17 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_FIND_NEXT:
 		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, false);
+			ActiveModel->FindReplacePiece(true, false, false);
 		break;
 
 	case LC_EDIT_FIND_PREVIOUS:
 		if (ActiveModel)
-			ActiveModel->FindReplacePiece(false, false);
+			ActiveModel->FindReplacePiece(false, false, false);
 		break;
 
 	case LC_EDIT_FIND_ALL:
 		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, true);
+			ActiveModel->FindReplacePiece(true, true, false);
 		break;
 
 	case LC_EDIT_REPLACE:
@@ -2725,12 +2725,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_REPLACE_ALL:
 		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, true);
+			ActiveModel->FindReplacePiece(true, true, true);
 		break;
 
 	case LC_EDIT_REPLACE_NEXT:
 		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, false);
+			ActiveModel->FindReplacePiece(true, false, true);
 		break;
 
 	case LC_EDIT_SELECT_ALL:

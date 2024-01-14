@@ -312,7 +312,7 @@ public:
 	void UnhideSelectedPieces();
 	void UnhideAllPieces();
 
-	void FindReplacePiece(bool SearchForward, bool FindAll);
+	void FindReplacePiece(bool SearchForward, bool FindAll, bool Replace);
 
 	void UndoAction();
 	void RedoAction();

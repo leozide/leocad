@@ -4123,15 +4123,21 @@ void lcModel::UnhideAllPieces()
 	SaveCheckpoint(tr("Unhide"));
 }
 
-void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
+void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 {
 	if (mPieces.IsEmpty())
 		return;
 
-	auto PieceMatches = [](const lcPiece* Piece)
-	{
-		const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
+	// Are we going to replace colors?
+	const bool ReplaceColor = lcGetColorCode(Params.ReplaceColorIndex) != LC_COLOR_NOCOLOR;
+
+	// Check if we are supposed to actually replace something
+	const bool Replacing = Replace && (ReplaceColor || Params.ReplacePieceInfo);
+
+	auto PieceMatches = [&Params](const lcPiece* Piece)
+	{
 		if (Params.FindInfo && Params.FindInfo != Piece->mPieceInfo)
 			return false;
 
@@ -4141,36 +4147,40 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		return (lcGetColorCode(Params.FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params.FindColorIndex);
 	};
 
-	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	auto ReplacePiece = [&Params, ReplaceColor](lcPiece* Piece)
+	{
+		if (ReplaceColor)
+			Piece->SetColorIndex(Params.ReplaceColorIndex);
+
+		if (Params.ReplacePieceInfo)
+			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
+	};
+
 	int StartIdx = mPieces.GetSize() - 1;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	bool ReplacedSomething = false;
+
+	if (!FindAll)
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		// We have to find the currently focused piece, in order to find next/prev match and (optionally) to replace it
+		lcPiece* const FocusedPiece = dynamic_cast<lcPiece*>(GetFocusObject());
 
-		if (Piece->IsFocused() && Piece->IsVisible(mCurrentStep))
+		if (FocusedPiece)
 		{
-			if (PieceMatches(Piece))
+			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
 			{
-				const bool ReplaceColor = lcGetColorCode(Params.FindColorIndex) != LC_COLOR_NOCOLOR;
-
-				if (ReplaceColor)
-					Piece->SetColorIndex(Params.ReplaceColorIndex);
-
-				if (Params.ReplacePieceInfo)
-					Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
-
-				if (ReplaceColor || Params.ReplacePieceInfo)
+				if (FocusedPiece == mPieces[PieceIdx])
 				{
-					SaveCheckpoint(tr("Replacing Part"));
-					gMainWindow->UpdateSelectedObjects(false);
-					UpdateAllViews();
-					gMainWindow->UpdateTimeline(false, true);
+					StartIdx = PieceIdx;
+					break;
 				}
 			}
 
-			StartIdx = PieceIdx;
-			break;
+			if (Replacing && PieceMatches(FocusedPiece))
+			{
+				ReplacePiece(FocusedPiece);
+				ReplacedSomething = true;
+			}
 		}
 	}
 
@@ -4195,7 +4205,14 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		if (Current->IsVisible(mCurrentStep) && PieceMatches(Current))
 		{
 			if (FindAll)
+			{
 				Selection.Add(Current);
+				if (Replacing)
+				{
+					ReplacePiece(Current);
+					ReplacedSomething = true;
+				}
+			}
 			else
 			{
 				Focus = Current;
@@ -4211,6 +4228,14 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll)
 		SetSelectionAndFocus(Selection, nullptr, 0, false);
 	else
 		ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
+
+	if (ReplacedSomething)
+	{
+		SaveCheckpoint(tr("Replacing Part"));
+		gMainWindow->UpdateSelectedObjects(false);
+		UpdateAllViews();
+		gMainWindow->UpdateTimeline(false, true);
+	}
 }
 
 void lcModel::UndoAction()

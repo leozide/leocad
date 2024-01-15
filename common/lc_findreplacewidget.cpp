@@ -78,6 +78,12 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		mReplacePartComboBox->setCurrentIndex(0);
 	}
 
+	QToolButton* CloseButton = new QToolButton(this);
+	CloseButton->setAutoRaise(true);
+	CloseButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_CANCEL]);
+	CloseButton->setIcon(QIcon(":/stylesheet/close.png"));
+	Layout->addWidget(CloseButton, 0, 5);
+
 	lcPartsList PartsList;
 	Model->GetPartsList(gDefaultColor, false, true, PartsList);
 

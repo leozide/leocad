@@ -9,15 +9,16 @@
 	template void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
 	template void lcObjectProperty<T>::InsertTime(lcStep Start, lcStep Time); \
 	template void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time); \
+	template bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const; \
 	template void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const; \
 	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName);
 
-LC_OBJECT_PROPERTY(float);
-LC_OBJECT_PROPERTY(lcVector2i);
-LC_OBJECT_PROPERTY(lcVector2);
-LC_OBJECT_PROPERTY(lcVector3);
-LC_OBJECT_PROPERTY(lcVector4);
-LC_OBJECT_PROPERTY(lcMatrix33);
+LC_OBJECT_PROPERTY(float)
+LC_OBJECT_PROPERTY(lcVector2i)
+LC_OBJECT_PROPERTY(lcVector2)
+LC_OBJECT_PROPERTY(lcVector3)
+LC_OBJECT_PROPERTY(lcVector4)
+LC_OBJECT_PROPERTY(lcMatrix33)
 
 template<typename T>
 static void lcObjectPropertySaveValue(QTextStream& Stream, const T& Value)
@@ -181,6 +182,20 @@ void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time)
 		KeyIt->Step -= Time;
 		KeyIt++;
 	}
+}
+
+template<typename T>
+bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const
+{
+	for (typename std::vector<lcObjectPropertyKey<T>>::const_iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
+	{
+		if (KeyIt->Step == Time)
+			return true;
+		else if (KeyIt->Step > Time)
+			return false;
+	}
+
+	return false;
 }
 
 template<typename T>

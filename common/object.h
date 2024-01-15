@@ -102,6 +102,7 @@ public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
+	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
 

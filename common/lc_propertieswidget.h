@@ -4,6 +4,7 @@
 #include "lc_objectproperty.h"
 
 class lcCollapsibleWidgetButton;
+class lcKeyFrameWidget;
 
 class lcPropertiesWidget : public QWidget
 {
@@ -16,6 +17,7 @@ public:
 
 protected slots:
 	void CategoryStateChanged(bool Expanded);
+	void KeyFrameChanged();
 	void BoolChanged();
 	void FloatChanged();
 	void IntegerChanged();
@@ -72,24 +74,28 @@ protected:
 	struct PropertyWidgets
 	{
 		QLabel* Label = nullptr;
-		QWidget* Widget = nullptr;
+		QWidget* Editor = nullptr;
+		lcKeyFrameWidget* KeyFrame = nullptr;
 	};
 
-	lcObjectPropertyId GetWidgetPropertyId(QWidget* Widget) const;
+	lcObjectPropertyId GetEditorWidgetPropertyId(QWidget* Widget) const;
+	lcObjectPropertyId GetKeyFrameWidgetPropertyId(QWidget* Widget) const;
 
 	void AddCategory(CategoryIndex Index, const QString& Title);
 	void AddSpacing();
 	void AddLabel(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddBoolProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddFloatProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, float Min, float Max);
-	void AddIntegerProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, int Min, int Max);
-	void AddStepNumberProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddStringProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddStringListProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, const QStringList& Strings);
-	void AddColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
-	void AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
+	void AddKeyFrameWidget(lcObjectPropertyId PropertyId);
+	void AddBoolProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
+	void AddFloatProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, float Min, float Max);
+	void AddIntegerProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, int Min, int Max);
+	void AddStepNumberProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
+	void AddStringProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
+	void AddStringListProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, const QStringList& Strings);
+	void AddColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
+	void AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
+	void AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
 
+	void UpdateKeyFrameWidget(lcObjectPropertyId PropertyId);
 	void UpdateBool(lcObjectPropertyId PropertyId, bool Value);
 	void UpdateFloat(lcObjectPropertyId PropertyId, float Value);
 	void UpdateInteger(lcObjectPropertyId PropertyId, int Value);

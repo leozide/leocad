@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_propertieswidget.h"
+#include "lc_keyframewidget.h"
 #include "object.h"
 #include "piece.h"
 #include "camera.h"
@@ -17,13 +18,25 @@ lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	SetLayoutMode(LayoutMode::Empty);
 }
 
-lcObjectPropertyId lcPropertiesWidget::GetWidgetPropertyId(QWidget* Widget) const
+lcObjectPropertyId lcPropertiesWidget::GetEditorWidgetPropertyId(QWidget* Widget) const
 {
 	if (!Widget)
 		return lcObjectPropertyId::Count;
 
 	for (size_t Index = 0; Index < mPropertyWidgets.size(); Index++)
-		if (mPropertyWidgets[Index].Widget == Widget)
+		if (mPropertyWidgets[Index].Editor == Widget)
+			return static_cast<lcObjectPropertyId>(Index);
+
+	return lcObjectPropertyId::Count;
+}
+
+lcObjectPropertyId lcPropertiesWidget::GetKeyFrameWidgetPropertyId(QWidget* Widget) const
+{
+	if (!Widget)
+		return lcObjectPropertyId::Count;
+
+	for (size_t Index = 0; Index < mPropertyWidgets.size(); Index++)
+		if (mPropertyWidgets[Index].KeyFrame == Widget)
 			return static_cast<lcObjectPropertyId>(Index);
 
 	return lcObjectPropertyId::Count;
@@ -75,10 +88,51 @@ void lcPropertiesWidget::AddLabel(lcObjectPropertyId PropertyId, const QString& 
 	mPropertyWidgets[static_cast<int>(PropertyId)].Label = Label;
 }
 
+void lcPropertiesWidget::KeyFrameChanged()
+{
+	QCheckBox* Widget = qobject_cast<QCheckBox*>(sender());
+	lcObjectPropertyId PropertyId = GetKeyFrameWidgetPropertyId(Widget);
+
+	if (PropertyId == lcObjectPropertyId::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	// todo: toggle keys in model
+}
+
+void lcPropertiesWidget::UpdateKeyFrameWidget(lcObjectPropertyId PropertyId)
+{
+	lcKeyFrameWidget* Widget = mPropertyWidgets[static_cast<int>(PropertyId)].KeyFrame;
+
+	if (Widget)
+	{
+		QSignalBlocker Blocker(Widget);
+		lcModel* Model = gMainWindow->GetActiveModel();
+
+		Widget->setChecked(mFocusObject && Model && mFocusObject->HasKeyFrame(PropertyId, Model->GetCurrentStep()));
+	}
+}
+
+void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
+{
+	lcKeyFrameWidget* Widget = new lcKeyFrameWidget(this);
+	Widget->setToolTip(tr("Toggle Key Frame"));
+
+	connect(Widget, &QCheckBox::toggled, this, &lcPropertiesWidget::KeyFrameChanged);
+
+	mLayout->addWidget(Widget, mLayoutRow, 3);
+
+	mPropertyWidgets[static_cast<int>(PropertyId)].KeyFrame = Widget;
+}
+
 void lcPropertiesWidget::BoolChanged()
 {
 	QCheckBox* Widget = qobject_cast<QCheckBox*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -102,7 +156,7 @@ void lcPropertiesWidget::BoolChanged()
 
 void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool Value)
 {
-	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (Widget)
 	{
@@ -110,9 +164,11 @@ void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool Value)
 
 		Widget->setChecked(Value);
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -124,7 +180,10 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -132,7 +191,7 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 void lcPropertiesWidget::FloatChanged()
 {
 	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -300,7 +359,7 @@ void lcPropertiesWidget::FloatChanged()
 
 void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 		
 	if (Widget)
 	{
@@ -308,9 +367,11 @@ void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 
 		Widget->setText(lcFormatValueLocalized(Value));
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, float Min, float Max)
+void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, float Min, float Max)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -324,7 +385,10 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -332,7 +396,7 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 void lcPropertiesWidget::IntegerChanged()
 {
 	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -368,7 +432,7 @@ void lcPropertiesWidget::IntegerChanged()
 
 void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int Value)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (Widget)
 	{
@@ -376,9 +440,11 @@ void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int Value)
 
 		Widget->setText(lcFormatValueLocalized(Value));
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, int Min, int Max)
+void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, int Min, int Max)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -392,7 +458,10 @@ void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -400,7 +469,7 @@ void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const
 void lcPropertiesWidget::StepNumberChanged()
 {
 	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -429,7 +498,7 @@ void lcPropertiesWidget::StepNumberChanged()
 
 void lcPropertiesWidget::UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep Step, lcStep Min, lcStep Max)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (Widget)
 	{
@@ -438,9 +507,11 @@ void lcPropertiesWidget::UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep 
 		Widget->setValidator(new lcStepValidator(Min, Max, PropertyId == lcObjectPropertyId::PieceStepHide, Widget));
 		Widget->setText(Step == LC_STEP_MAX ? QString() : QString::number(Step));
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -452,7 +523,10 @@ void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, co
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -460,7 +534,7 @@ void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, co
 void lcPropertiesWidget::StringChanged()
 {
 	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -492,7 +566,7 @@ void lcPropertiesWidget::StringChanged()
 
 void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId, const QString& Text)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (Widget)
 	{
@@ -500,9 +574,11 @@ void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId, const QStri
 
 		Widget->setText(Text);
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -514,7 +590,10 @@ void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -522,7 +601,7 @@ void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const 
 void lcPropertiesWidget::StringListChanged(int Value)
 {
 	QComboBox* Widget = qobject_cast<QComboBox*>(sender());
-	lcObjectPropertyId PropertyId = GetWidgetPropertyId(Widget);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -557,7 +636,7 @@ void lcPropertiesWidget::StringListChanged(int Value)
 
 void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int ListIndex)
 {
-	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (Widget)
 	{
@@ -565,9 +644,11 @@ void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int Lis
 
 		Widget->setCurrentIndex(ListIndex);
 	}
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, const QStringList& Strings)
+void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames, const QStringList& Strings)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -580,7 +661,10 @@ void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, co
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -604,7 +688,7 @@ void lcPropertiesWidget::ColorButtonClicked()
 
 void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, QColor Color)
 {
-	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!ColorButton)
 		return;
@@ -614,9 +698,11 @@ void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, QColor Color
 
 	ColorButton->setIcon(Pixmap);
 	ColorButton->setText(QString("  ") + Color.name());
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -631,7 +717,10 @@ void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const Q
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -688,7 +777,7 @@ void lcPropertiesWidget::PieceColorButtonClicked()
 
 void lcPropertiesWidget::UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex)
 {
-	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!ColorButton)
 		return;
@@ -698,9 +787,11 @@ void lcPropertiesWidget::UpdatePieceColor(lcObjectPropertyId PropertyId, int Col
 
 	ColorButton->setIcon(Pixmap);
 	ColorButton->setText(QString("  ") + gColorList[ColorIndex].Name);
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
-void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -715,19 +806,24 @@ void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, co
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
 
 void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name)
 {
-	lcElidableToolButton* PieceIdButton = qobject_cast<lcElidableToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Widget);
+	lcElidableToolButton* PieceIdButton = qobject_cast<lcElidableToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!PieceIdButton)
 		return;
 
 	PieceIdButton->setText(Name);
+
+	UpdateKeyFrameWidget(PropertyId);
 }
 
 void lcPropertiesWidget::PieceIdButtonClicked()
@@ -762,7 +858,7 @@ void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 	Model->SetSelectedPiecesPieceInfo(Info);
 }
 
-void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip)
+void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
@@ -781,7 +877,10 @@ void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].Widget = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+
+	if (SupportsKeyFrames)
+		AddKeyFrameWidget(PropertyId);
 
 	mLayoutRow++;
 }
@@ -793,85 +892,85 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddCategory(CategoryIndex::Piece, tr("Piece"));
 
-	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Part"), tr("Part Id"));
-	AddPieceColorProperty(lcObjectPropertyId::PieceColor, tr("Color"), tr("Piece color"));
+	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Part"), tr("Part Id"), false);
+	AddPieceColorProperty(lcObjectPropertyId::PieceColor, tr("Color"), tr("Piece color"), false);
 
 	AddSpacing();
 
-	AddStepNumberProperty(lcObjectPropertyId::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"));
-	AddStepNumberProperty(lcObjectPropertyId::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"));
+	AddStepNumberProperty(lcObjectPropertyId::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"), false);
+	AddStepNumberProperty(lcObjectPropertyId::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"), false);
 
 	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
-	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"));
-	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), { tr("Perspective"), tr("Orthographic") });
+	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
+	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), false, { tr("Perspective"), tr("Orthographic") });
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::CameraFOV, tr("FOV"), tr("Field of view in degrees"), 0.1f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), 0.001f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), 0.001f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraFOV, tr("FOV"), tr("Field of view in degrees"), false, 0.1f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.001f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.001f, FLT_MAX);
 
 	AddCategory(CategoryIndex::CameraTransform, tr("Transform"));
 
-	AddFloatProperty(lcObjectPropertyId::CameraPositionX, tr("Position X"), tr("Camera position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraPositionY, tr("Y"), tr("Camera position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraPositionZ, tr("Z"), tr("Camera position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraPositionX, tr("Position X"), tr("Camera position"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraPositionY, tr("Y"), tr("Camera position"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraPositionZ, tr("Z"), tr("Camera position"), true, -FLT_MAX, FLT_MAX);
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::CameraTargetX, tr("Target X"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraTargetY, tr("Y"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraTargetZ, tr("Z"), tr("Camera target position"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraTargetX, tr("Target X"), tr("Camera target position"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraTargetY, tr("Y"), tr("Camera target position"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraTargetZ, tr("Z"), tr("Camera target position"), true, -FLT_MAX, FLT_MAX);
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::CameraUpX, tr("Up X"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraUpY, tr("Y"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraUpZ, tr("Z"), tr("Camera up direction"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraUpX, tr("Up X"), tr("Camera up direction"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraUpY, tr("Y"), tr("Camera up direction"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraUpZ, tr("Z"), tr("Camera up direction"), true, -FLT_MAX, FLT_MAX);
 
 	AddCategory(CategoryIndex::Light, tr("Light"));
 
-	AddStringProperty(lcObjectPropertyId::LightName, tr("Name"), tr("Light name"));
-	AddStringListProperty(lcObjectPropertyId::LightType, tr("Type"), tr("Light type"), lcLight::GetLightTypeStrings());
+	AddStringProperty(lcObjectPropertyId::LightName, tr("Name"), tr("Light name"), false);
+	AddStringListProperty(lcObjectPropertyId::LightType, tr("Type"), tr("Light type"), false, lcLight::GetLightTypeStrings());
 
 	AddSpacing();
 
-	AddColorProperty(lcObjectPropertyId::LightColor, tr("Color"), tr("Light color"));
-	AddFloatProperty(lcObjectPropertyId::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), 0.0f, FLT_MAX);
-	AddBoolProperty(lcObjectPropertyId::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"));
+	AddColorProperty(lcObjectPropertyId::LightColor, tr("Color"), tr("Light color"), true);
+	AddFloatProperty(lcObjectPropertyId::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightAttenuationDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightAttenuationPower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), true, 0.0f, FLT_MAX);
+	AddBoolProperty(lcObjectPropertyId::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"), false);
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::LightPointSize, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPointSize, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
 
-	AddFloatProperty(lcObjectPropertyId::LightSpotSize, tr("Radius"), tr("Shadow soft size (Blender only)"), 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), 0.0f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), 0.0f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightSpotSize, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), true, 0.0f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), true, 0.0f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::LightSpotTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), true, 0.0f, FLT_MAX);
 
-	AddFloatProperty(lcObjectPropertyId::LightDirectionalSize, tr("Angle"), tr("Angular diameter of the light (Blender only)"), 0.0f, 180.0f);
+	AddFloatProperty(lcObjectPropertyId::LightDirectionalSize, tr("Angle"), tr("Angular diameter of the light (Blender only)"), true, 0.0f, 180.0f);
 
-	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), lcLight::GetAreaShapeStrings());
-	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightAreaSizeY, tr("Y"), tr("The height of the area light"), 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightAreaSize, tr("Size"), tr("The size of the area light"), 0.0f, FLT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), 1, INT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), 1, INT_MAX);
+	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), false, lcLight::GetAreaShapeStrings());
+	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightAreaSizeY, tr("Y"), tr("The height of the area light"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightAreaSize, tr("Size"), tr("The size of the area light"), true, 0.0f, FLT_MAX);
+	AddIntegerProperty(lcObjectPropertyId::LightAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), true, 1, INT_MAX);
+	AddIntegerProperty(lcObjectPropertyId::LightAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), true, 1, INT_MAX);
 
 	AddCategory(CategoryIndex::ObjectTransform, tr("Transform"));
 
-	AddFloatProperty(lcObjectPropertyId::ObjectPositionX, tr("Position X"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::ObjectPositionY, tr("Y"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::ObjectPositionZ, tr("Z"), tr("Position of the object"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectPositionX, tr("Position X"), tr("Position of the object"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectPositionY, tr("Y"), tr("Position of the object"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectPositionZ, tr("Z"), tr("Position of the object"), true, -FLT_MAX, FLT_MAX);
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
 
 	mLayout->setRowStretch(mLayout->rowCount(), 1);
 }
@@ -909,8 +1008,11 @@ void lcPropertiesWidget::SetPropertyVisible(lcObjectPropertyId PropertyId, bool 
 	if (Property.Label)
 		Property.Label->setVisible(Visible);
 
-	if (Property.Widget)
-		Property.Widget->setVisible(Visible);
+	if (Property.Editor)
+		Property.Editor->setVisible(Visible);
+
+	if (Property.KeyFrame)
+		Property.KeyFrame->setVisible(Visible);
 }
 
 void lcPropertiesWidget::SetCategoryVisible(CategoryIndex Index, bool Visible)

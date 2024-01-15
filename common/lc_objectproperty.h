@@ -102,6 +102,7 @@ public:
 	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
+	bool HasKeyFrame(lcStep Time) const;
 
 	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);

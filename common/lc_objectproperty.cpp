@@ -187,6 +187,9 @@ void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time)
 template<typename T>
 bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const
 {
+	if (mKeys.size() <= 1)
+		return false;
+
 	for (typename std::vector<lcObjectPropertyKey<T>>::const_iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
 	{
 		if (KeyIt->Step == Time)

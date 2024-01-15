@@ -4130,11 +4130,11 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-	// Are we going to replace colors?
-	const bool ReplaceColor = lcGetColorCode(Params.ReplaceColorIndex) != LC_COLOR_NOCOLOR;
+	const bool ReplacePieceInfo = Replace && Params.ReplacePieceInfo;
+	const bool ReplaceColor = Replace && lcGetColorCode(Params.ReplaceColorIndex) != LC_COLOR_NOCOLOR;
 
 	// Check if we are supposed to actually replace something
-	const bool Replacing = Replace && (ReplaceColor || Params.ReplacePieceInfo);
+	const bool Replacing = (ReplaceColor || ReplacePieceInfo);
 
 	auto PieceMatches = [&Params](const lcPiece* Piece)
 	{
@@ -4147,18 +4147,17 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 		return (lcGetColorCode(Params.FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params.FindColorIndex);
 	};
 
-	auto ReplacePiece = [&Params, ReplaceColor](lcPiece* Piece)
+	auto ReplacePiece = [&Params, ReplacePieceInfo, ReplaceColor](lcPiece* Piece)
 	{
 		if (ReplaceColor)
 			Piece->SetColorIndex(Params.ReplaceColorIndex);
 
-		if (Params.ReplacePieceInfo)
+		if (ReplacePieceInfo)
 			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
 	};
 
 	int StartIdx = mPieces.GetSize() - 1;
-
-	bool ReplacedSomething = false;
+	int ReplacedCount = 0;
 
 	if (!FindAll)
 	{
@@ -4179,7 +4178,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			if (Replacing && PieceMatches(FocusedPiece))
 			{
 				ReplacePiece(FocusedPiece);
-				ReplacedSomething = true;
+				ReplacedCount++;
 			}
 		}
 	}
@@ -4210,7 +4209,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 				if (Replacing)
 				{
 					ReplacePiece(Current);
-					ReplacedSomething = true;
+					ReplacedCount++;
 				}
 			}
 			else
@@ -4229,9 +4228,9 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 	else
 		ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, false);
 
-	if (ReplacedSomething)
+	if (ReplacedCount)
 	{
-		SaveCheckpoint(tr("Replacing Part"));
+		SaveCheckpoint(tr("Replacing Piece(s)", "", ReplacedCount));
 		gMainWindow->UpdateSelectedObjects(false);
 		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);

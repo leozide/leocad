@@ -1,12 +1,12 @@
 #include "lc_global.h"
 #include "lc_findreplacewidget.h"
 #include "lc_colorpicker.h"
-#include "lc_library.h"
 #include "lc_mainwindow.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "lc_model.h"
 #include "lc_view.h"
+#include "lc_qutils.h"
 
 lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool Replace)
 	: QWidget(Parent)
@@ -72,23 +72,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		mReplacePartComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 		mReplacePartComboBox->setMinimumContentsLength(1);
 
-		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		std::vector<PieceInfo*> SortedPieces;
-		SortedPieces.reserve(Library->mPieces.size());
-
-		for (const auto& PartIt : Library->mPieces)
-			SortedPieces.push_back(PartIt.second);
-
-		auto PieceCompare = [](PieceInfo* Info1, PieceInfo* Info2)
-		{
-			return strcmp(Info1->m_strDescription, Info2->m_strDescription) < 0;
-		};
-
-		std::sort(SortedPieces.begin(), SortedPieces.end(), PieceCompare);
-
-		mReplacePartComboBox->addItem(QString(), QVariant::fromValue((void*)nullptr));
-		for (PieceInfo* Info : SortedPieces)
-			mReplacePartComboBox->addItem(QString::fromLatin1(Info->m_strDescription), QVariant::fromValue((void*)Info));
+		mReplacePartComboBox->setModel(new lcPieceIdStringModel(gMainWindow->GetActiveModel(), mReplacePartComboBox));
 
 		ReplaceColorPicker->SetCurrentColor(lcGetColorIndex(LC_COLOR_NOCOLOR));
 		mReplacePartComboBox->setCurrentIndex(0);

@@ -17,7 +17,7 @@
 #include "lc_findreplacewidget.h"
 
 lcFindReplaceParams lcView::mFindReplaceParams;
-lcFindReplaceWidget* lcView::mFindWidget;
+QPointer<lcFindReplaceWidget> lcView::mFindWidget;
 
 lcView* lcView::mLastFocusedView;
 std::vector<lcView*> lcView::mViews;

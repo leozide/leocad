@@ -351,7 +351,7 @@ protected:
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 
-	static lcFindReplaceWidget* mFindWidget;
+	static QPointer<lcFindReplaceWidget> mFindWidget;
 	static lcFindReplaceParams mFindReplaceParams;
 
 	static lcView* mLastFocusedView;

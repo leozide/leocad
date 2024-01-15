@@ -22,9 +22,11 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	Layout->addWidget(new QLabel(tr("Find:")), 0, 0);
 
 	lcColorPicker* FindColorPicker = new lcColorPicker(this, true);
+	FindColorPicker->setToolTip(tr("Search Color"));
 	Layout->addWidget(FindColorPicker, 0, 1);
 
 	mFindPartComboBox = new QComboBox(this);
+	mFindPartComboBox->setToolTip(tr("Search Part"));
 	mFindPartComboBox->setEditable(true);
 	mFindPartComboBox->setInsertPolicy(QComboBox::NoInsert);
 	Layout->addWidget(mFindPartComboBox, 0, 2);
@@ -51,9 +53,11 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		Layout->addWidget(new QLabel(tr("Replace:")), 1, 0);
 
 		ReplaceColorPicker = new lcColorPicker(this, true);
+		ReplaceColorPicker->setToolTip(tr("Replacement Color"));
 		Layout->addWidget(ReplaceColorPicker, 1, 1);
 
 		mReplacePartComboBox = new QComboBox(this);
+		mReplacePartComboBox->setToolTip(tr("Replacement Part"));
 		Layout->addWidget(mReplacePartComboBox, 1, 2);
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
@@ -80,9 +84,11 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	QToolButton* CloseButton = new QToolButton(this);
 	CloseButton->setAutoRaise(true);
-	CloseButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_CANCEL]);
 	CloseButton->setIcon(QIcon(":/stylesheet/close.png"));
+	CloseButton->setToolTip(tr("Close"));
 	Layout->addWidget(CloseButton, 0, 5);
+
+	connect(CloseButton, &QToolButton::clicked, this, &QObject::deleteLater);
 
 	lcPartsList PartsList;
 	Model->GetPartsList(gDefaultColor, false, true, PartsList);

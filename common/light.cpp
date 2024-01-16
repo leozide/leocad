@@ -23,7 +23,7 @@ static const std::array<QLatin1String, static_cast<int>(lcLightAreaShape::Count)
 lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	: lcObject(lcObjectType::Light), mLightType(LightType)
 {
-	mPosition.Reset(Position);
+	mPosition.SetValue(Position);
 
 	UpdateLightType();
 
@@ -52,7 +52,8 @@ void lcLight::UpdateLightType()
 		break;
 	}
 
-	mSize.Reset(Size);
+	mSize.RemoveAllKeys();
+	mSize.SetValue(Size);
 }
 
 QString lcLight::GetLightTypeString(lcLightType LightType)
@@ -128,13 +129,13 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	if (!mCastShadow)
 		Stream << QLatin1String("0 !LEOCAD LIGHT SHADOWLESS") << LineEnding;
 
-	mPosition.Save(Stream, "LIGHT", "POSITION");
-	mRotation.Save(Stream, "LIGHT", "ROTATION");
-	mColor.Save(Stream, "LIGHT", "COLOR");
-	mSize.Save(Stream, "LIGHT", "SIZE");
-	mPower.Save(Stream, "LIGHT", "POWER");
-	mAttenuationDistance.Save(Stream, "LIGHT", "ATTENUATION_DISTANCE");
-	mAttenuationPower.Save(Stream, "LIGHT", "ATTENUATION_POWER");
+	mPosition.Save(Stream, "LIGHT", "POSITION", true);
+	mRotation.Save(Stream, "LIGHT", "ROTATION", true);
+	mColor.Save(Stream, "LIGHT", "COLOR", true);
+	mSize.Save(Stream, "LIGHT", "SIZE", true);
+	mPower.Save(Stream, "LIGHT", "POWER", true);
+	mAttenuationDistance.Save(Stream, "LIGHT", "ATTENUATION_DISTANCE", true);
+	mAttenuationPower.Save(Stream, "LIGHT", "ATTENUATION_POWER", true);
 
 	switch (mLightType)
 	{
@@ -143,9 +144,9 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 		break;
 
 	case lcLightType::Spot:
-		mSpotConeAngle.Save(Stream, "LIGHT", "SPOT_CONE_ANGLE");
-		mSpotPenumbraAngle.Save(Stream, "LIGHT", "SPOT_PENUMBRA_ANGLE");
-		mSpotTightness.Save(Stream, "LIGHT", "SPOT_TIGHTNESS");
+		mSpotConeAngle.Save(Stream, "LIGHT", "SPOT_CONE_ANGLE", true);
+		mSpotPenumbraAngle.Save(Stream, "LIGHT", "SPOT_PENUMBRA_ANGLE", true);
+		mSpotTightness.Save(Stream, "LIGHT", "SPOT_TIGHTNESS", true);
 		break;
 
 	case lcLightType::Directional:
@@ -153,7 +154,7 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 	case lcLightType::Area:
 		Stream << QLatin1String("0 !LEOCAD LIGHT AREA_SHAPE ") << gLightAreaShapes[static_cast<int>(mAreaShape)] << LineEnding;
-		mAreaGrid.Save(Stream, "LIGHT", "AREA_GRID");
+		mAreaGrid.Save(Stream, "LIGHT", "AREA_GRID", true);
 		break;
 	}
 
@@ -1121,15 +1122,15 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 
 void lcLight::RemoveKeyFrames()
 {
-	mPosition.Reset();
-	mRotation.Reset();
-	mColor.Reset();
-	mSpotConeAngle.Reset();
-	mSpotPenumbraAngle.Reset();
-	mSpotTightness.Reset();
-	mAreaGrid.Reset();
-	mSize.Reset();
-	mPower.Reset();
-	mAttenuationDistance.Reset();
-	mAttenuationPower.Reset();
+	mPosition.RemoveAllKeys();
+	mRotation.RemoveAllKeys();
+	mColor.RemoveAllKeys();
+	mSpotConeAngle.RemoveAllKeys();
+	mSpotPenumbraAngle.RemoveAllKeys();
+	mSpotTightness.RemoveAllKeys();
+	mAreaGrid.RemoveAllKeys();
+	mSize.RemoveAllKeys();
+	mPower.RemoveAllKeys();
+	mAttenuationDistance.RemoveAllKeys();
+	mAttenuationPower.RemoveAllKeys();
 }

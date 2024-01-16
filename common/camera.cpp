@@ -24,9 +24,9 @@ lcCamera::lcCamera(bool Simple)
 		mState |= LC_CAMERA_SIMPLE;
 	else
 	{
-		mPosition.Reset(lcVector3(-250.0f, -250.0f, 75.0f));
-		mTargetPosition.Reset(lcVector3(0.0f, 0.0f, 0.0f));
-		mUpVector.Reset(lcVector3(-0.2357f, -0.2357f, 0.94281f));
+		mPosition.SetValue(lcVector3(-250.0f, -250.0f, 75.0f));
+		mTargetPosition.SetValue(lcVector3(0.0f, 0.0f, 0.0f));
+		mUpVector.SetValue(lcVector3(-0.2357f, -0.2357f, 0.94281f));
 
 		UpdatePosition(1);
 	}
@@ -47,9 +47,9 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
 
 	Initialize();
 
-	mPosition.Reset(lcVector3(ex, ey, ez));
-	mTargetPosition.Reset(lcVector3(tx, ty, tz));
-	mUpVector.Reset(UpVector);
+	mPosition.SetValue(lcVector3(ex, ey, ez));
+	mTargetPosition.SetValue(lcVector3(tx, ty, tz));
+	mUpVector.SetValue(UpVector);
 
 	UpdatePosition(1);
 }
@@ -138,9 +138,9 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA FOV ") << m_fovy << QLatin1String(" ZNEAR ") << m_zNear << QLatin1String(" ZFAR ") << m_zFar << LineEnding;
 
-	mPosition.Save(Stream, "CAMERA", "POSITION");
-	mTargetPosition.Save(Stream, "CAMERA", "TARGET_POSITION");
-	mUpVector.Save(Stream, "CAMERA", "UP_VECTOR");
+	mPosition.Save(Stream, "CAMERA", "POSITION", true);
+	mTargetPosition.Save(Stream, "CAMERA", "TARGET_POSITION", true);
+	mUpVector.Save(Stream, "CAMERA", "UP_VECTOR", true);
 
 	Stream << QLatin1String("0 !LEOCAD CAMERA ");
 
@@ -630,9 +630,9 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 
 void lcCamera::RemoveKeyFrames()
 {
-	mPosition.Reset();
-	mTargetPosition.Reset();
-	mUpVector.Reset();
+	mPosition.RemoveAllKeys();
+	mTargetPosition.RemoveAllKeys();
+	mUpVector.RemoveAllKeys();
 }
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const

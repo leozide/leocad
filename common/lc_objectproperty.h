@@ -71,14 +71,13 @@ public:
 		return mValue;
 	}
 
-	void Reset()
-	{
-		mKeys.clear();
-	}
-
-	void Reset(const T& Value)
+	void SetValue(const T& Value)
 	{
 		mValue = Value;
+	}
+
+	void RemoveAllKeys()
+	{
 		mKeys.clear();
 	}
 
@@ -88,10 +87,8 @@ public:
 	void RemoveTime(lcStep Start, lcStep Time);
 	bool HasKeyFrame(lcStep Time) const;
 
-	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
+	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);
-	void SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const;
-	void LoadKeysLDraw(QTextStream& Stream);
 
 protected:
 	T mValue;

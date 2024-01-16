@@ -118,8 +118,8 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 		Stream << LineEnding;
 	}
 
-	mPosition.SaveKeysLDraw(Stream, "PIECE", "POSITION");
-	mRotation.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
+	mPosition.Save(Stream, "PIECE", "POSITION", false);
+	mRotation.Save(Stream, "PIECE", "ROTATION", false);
 
 	Stream << "1 " << mColorCode << ' ';
 
@@ -155,10 +155,10 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 			mPivotMatrix = PivotMatrix;
 			mPivotPointValid = true;
 		}
-		else if (Token == QLatin1String("POSITION_KEY"))
-			mPosition.LoadKeysLDraw(Stream);
-		else if (Token == QLatin1String("ROTATION_KEY"))
-			mRotation.LoadKeysLDraw(Stream);
+		else if (mPosition.Load(Stream, Token, "POSITION"))
+			continue;
+		else if (mRotation.Load(Stream, Token, "ROTATION"))
+			continue;
 	}
 
 	return false;
@@ -378,8 +378,8 @@ void lcPiece::Initialize(const lcMatrix44& WorldMatrix, lcStep Step)
 {
 	mStepShow = Step;
 
-	mPosition.Reset(WorldMatrix.GetTranslation());
-	mRotation.Reset(lcMatrix33(WorldMatrix));
+	mPosition.SetValue(WorldMatrix.GetTranslation());
+	mRotation.SetValue(lcMatrix33(WorldMatrix));
 
 	UpdatePosition(Step);
 }
@@ -708,8 +708,8 @@ bool lcPiece::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 
 void lcPiece::RemoveKeyFrames()
 {
-	mPosition.Reset();
-	mRotation.Reset();
+	mPosition.RemoveAllKeys();
+	mRotation.RemoveAllKeys();
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const

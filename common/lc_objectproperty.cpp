@@ -5,7 +5,7 @@
 #define LC_OBJECT_PROPERTY(T) \
 	template void lcObjectProperty<T>::SaveKeysLDraw(QTextStream& Stream, const char* ObjectName, const char* VariableName) const; \
 	template void lcObjectProperty<T>::LoadKeysLDraw(QTextStream& Stream); \
-	template const T& lcObjectProperty<T>::CalculateKey(lcStep Step) const; \
+	template void lcObjectProperty<T>::Update(lcStep Step); \
 	template void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
 	template void lcObjectProperty<T>::InsertTime(lcStep Start, lcStep Time); \
 	template void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time); \
@@ -87,8 +87,11 @@ void lcObjectProperty<T>::LoadKeysLDraw(QTextStream& Stream)
 }
 
 template<typename T>
-const T& lcObjectProperty<T>::CalculateKey(lcStep Step) const
+void lcObjectProperty<T>::Update(lcStep Step)
 {
+	if (mKeys.empty())
+		return;
+
 	const lcObjectPropertyKey<T>* PreviousKey = &mKeys[0];
 
 	for (const lcObjectPropertyKey<T>& Key : mKeys)
@@ -99,12 +102,19 @@ const T& lcObjectProperty<T>::CalculateKey(lcStep Step) const
 		PreviousKey = &Key;
 	}
 
-	return PreviousKey->Value;
+	mValue = PreviousKey->Value;
 }
 
 template<typename T>
 void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
 {
+	if (!AddKey && mKeys.empty())
+	{
+		mValue = Value;
+
+		return;
+	}
+
 	for (typename std::vector<lcObjectPropertyKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
 	{
 		if (KeyIt->Step < Step)
@@ -187,9 +197,6 @@ void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time)
 template<typename T>
 bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const
 {
-	if (mKeys.size() <= 1)
-		return false;
-
 	for (typename std::vector<lcObjectPropertyKey<T>>::const_iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
 	{
 		if (KeyIt->Step == Time)
@@ -204,7 +211,7 @@ bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const
 template<typename T>
 void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName) const
 {
-	if (GetSize() == 1)
+	if (mKeys.empty())
 	{
 		Stream << QLatin1String("0 !LEOCAD ") << ObjectName << ' ' << VariableName << ' ';
 
@@ -222,7 +229,6 @@ bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const 
 	if (Token == VariableName)
 	{
 		lcObjectPropertyLoadValue(Stream, mValue);
-		ChangeKey(mValue, 1, true);
 
 		return true;
 	}

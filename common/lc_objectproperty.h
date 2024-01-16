@@ -64,7 +64,6 @@ public:
 	explicit lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{
-		ChangeKey(mValue, 1, true);
 	}
 
 	operator const T& () const
@@ -72,33 +71,18 @@ public:
 		return mValue;
 	}
 
-	int GetSize() const
-	{
-		return static_cast<int>(mKeys.size());
-	}
-
-	bool IsEmpty() const
-	{
-		return mKeys.empty();
-	}
-
-	void Update(lcStep Step)
-	{
-		mValue = CalculateKey(Step);
-	}
-
 	void Reset()
 	{
 		mKeys.clear();
-		ChangeKey(mValue, 1, true);
 	}
 
 	void Reset(const T& Value)
 	{
 		mValue = Value;
-		Reset();
+		mKeys.clear();
 	}
 
+	void Update(lcStep Step);
 	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -110,8 +94,6 @@ public:
 	void LoadKeysLDraw(QTextStream& Stream);
 
 protected:
-	const T& CalculateKey(lcStep Step) const;
-
 	T mValue;
 	std::vector<lcObjectPropertyKey<T>> mKeys;
 };

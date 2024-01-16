@@ -118,11 +118,8 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 		Stream << LineEnding;
 	}
 
-	if (mPosition.GetSize() > 1)
-		mPosition.SaveKeysLDraw(Stream, "PIECE", "POSITION");
-
-	if (mRotation.GetSize() > 1)
-		mRotation.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
+	mPosition.SaveKeysLDraw(Stream, "PIECE", "POSITION");
+	mRotation.SaveKeysLDraw(Stream, "PIECE", "ROTATION");
 
 	Stream << "1 " << mColorCode << ' ';
 

@@ -417,7 +417,6 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 
 	BaseIndex = mVertices.GetSize();
 
-	mVertices.SetGrow(lcMin(mVertices.GetSize(), 8 * 1024 * 1024));
 	mVertices.AllocGrow(DataVertices.GetSize());
 
 	for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
@@ -470,7 +469,6 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 			DstSection = AddSection(PrimitiveType, mMeshData->GetMaterial(ColorCode));
 		}
 
-		DstSection->mIndices.SetGrow(lcMin(DstSection->mIndices.GetSize(), 8 * 1024 * 1024));
 		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)

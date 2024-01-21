@@ -214,6 +214,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
+	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);
@@ -312,7 +313,7 @@ public:
 	}
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
-	void UpdatePosition(lcStep Step);
+	void UpdatePosition(lcStep Step) override;
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, bool FirstMove);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void CreateName(const lcArray<lcLight*>& Lights);

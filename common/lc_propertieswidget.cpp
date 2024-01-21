@@ -101,7 +101,10 @@ void lcPropertiesWidget::KeyFrameChanged()
 	if (!Model)
 		return;
 
-	// todo: toggle keys in model
+	if (mFocusObject)
+		Model->SetObjectsKeyFrame({ mFocusObject }, PropertyId, Widget->isChecked());
+	else
+		Model->SetObjectsKeyFrame(mSelection, PropertyId, Widget->isChecked());
 }
 
 void lcPropertiesWidget::UpdateKeyFrameWidget(lcObjectPropertyId PropertyId)
@@ -113,7 +116,30 @@ void lcPropertiesWidget::UpdateKeyFrameWidget(lcObjectPropertyId PropertyId)
 		QSignalBlocker Blocker(Widget);
 		lcModel* Model = gMainWindow->GetActiveModel();
 
-		Widget->setChecked(mFocusObject && Model && mFocusObject->HasKeyFrame(PropertyId, Model->GetCurrentStep()));
+		if (Model)
+		{
+			const lcStep Step = Model->GetCurrentStep();
+
+			if (mFocusObject)
+				Widget->setChecked(mFocusObject->HasKeyFrame(PropertyId, Step));
+			else
+			{
+				int KeyFrameCount = 0, NonKeyFrameCount = 0;
+
+				for (const lcObject* Object : mSelection)
+				{
+					if (Object->HasKeyFrame(PropertyId, Step))
+						KeyFrameCount++;
+					else
+						NonKeyFrameCount++;
+				}
+
+				if (KeyFrameCount && NonKeyFrameCount)
+					Widget->setCheckState(Qt::PartiallyChecked);
+				else
+					Widget->setCheckState(KeyFrameCount != 0 ? Qt::Checked : Qt::Unchecked);
+			}
+		}
 	}
 }
 
@@ -122,7 +148,7 @@ void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
 	lcKeyFrameWidget* Widget = new lcKeyFrameWidget(this);
 	Widget->setToolTip(tr("Toggle Key Frame"));
 
-	connect(Widget, &QCheckBox::toggled, this, &lcPropertiesWidget::KeyFrameChanged);
+	connect(Widget, &QCheckBox::stateChanged, this, &lcPropertiesWidget::KeyFrameChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 3);
 
@@ -1029,6 +1055,7 @@ void lcPropertiesWidget::SetEmpty()
 	SetLayoutMode(LayoutMode::Empty);
 
 	mFocusObject = nullptr;
+	mSelection.RemoveAll();
 }
 
 void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus)
@@ -1036,6 +1063,7 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 	SetLayoutMode(LayoutMode::Piece);
 
 	lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
+	mSelection = Selection;
 	mFocusObject = Piece;
 
 	lcVector3 Position;
@@ -1117,11 +1145,12 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateStepNumber(lcObjectPropertyId::PieceStepHide, StepHide ? StepHide : LC_STEP_MAX, StepShow + 1, LC_STEP_MAX);
 }
 
-void lcPropertiesWidget::SetCamera(lcObject* Focus)
+void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject* Focus)
 {
 	SetLayoutMode(LayoutMode::Camera);
 
 	lcCamera* Camera = dynamic_cast<lcCamera*>(Focus);
+	mSelection = Selection;
 	mFocusObject = Camera;
 
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
@@ -1166,11 +1195,12 @@ void lcPropertiesWidget::SetCamera(lcObject* Focus)
 	UpdateFloat(lcObjectPropertyId::CameraUpZ, UpVector[2]);
 }
 
-void lcPropertiesWidget::SetLight(lcObject* Focus)
+void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject* Focus)
 {
 	SetLayoutMode(LayoutMode::Light);
 
 	lcLight* Light = dynamic_cast<lcLight*>(Focus);
+	mSelection = Selection;
 	mFocusObject = Light;
 
 	QString Name;
@@ -1276,6 +1306,9 @@ void lcPropertiesWidget::SetLight(lcObject* Focus)
 
 void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* Focus)
 {
+	mFocusObject = nullptr;
+	mSelection.RemoveAll();
+
 	LayoutMode Mode = LayoutMode::Empty;
 
 	if (Focus)
@@ -1353,11 +1386,11 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 		break;
 
 	case LayoutMode::Camera:
-		SetCamera(Focus);
+		SetCamera(Selection, Focus);
 		break;
 
 	case LayoutMode::Light:
-		SetLight(Focus);
+		SetLight(Selection, Focus);
 		break;
 	}
 }

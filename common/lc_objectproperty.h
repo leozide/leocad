@@ -86,6 +86,7 @@ public:
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 	bool HasKeyFrame(lcStep Time) const;
+	bool SetKeyFrame(lcStep Time, bool KeyFrame);
 
 	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);

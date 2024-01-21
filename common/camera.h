@@ -272,6 +272,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
+	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);
@@ -280,7 +281,7 @@ public:
 	static bool FileLoad(lcFile& file);
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
-	void UpdatePosition(lcStep Step);
+	void UpdatePosition(lcStep Step) override;
 	void CopyPosition(const lcCamera* Camera);
 	void CopySettings(const lcCamera* Camera);
 

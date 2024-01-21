@@ -108,8 +108,8 @@ protected:
 
 	void SetEmpty();
 	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);
-	void SetCamera(lcObject* Focus);
-	void SetLight(lcObject* Focus);
+	void SetCamera(const lcArray<lcObject*>& Selection, lcObject* Focus);
+	void SetLight(const lcArray<lcObject*>& Selection, lcObject* Focus);
 
 	void CreateWidgets();
 	void SetLayoutMode(LayoutMode Mode);
@@ -117,6 +117,7 @@ protected:
 	void SetCategoryVisible(CategoryIndex Index, bool Visible);
 	void SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible);
 
+	lcArray<lcObject*> mSelection;
 	lcObject* mFocusObject = nullptr;
 
 	std::array<PropertyWidgets, static_cast<int>(lcObjectPropertyId::Count)> mPropertyWidgets = {};

@@ -2973,6 +2973,24 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	}
 }
 
+void lcModel::SetObjectsKeyFrame(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame)
+{
+	bool Modified = false;
+
+	for (lcObject* Object : Objects)
+	{
+		Modified |= Object->SetKeyFrame(PropertyId, mCurrentStep, KeyFrame);
+		Object->UpdatePosition(mCurrentStep);
+	}
+
+	if (Modified)
+	{
+		SaveCheckpoint(tr("Changing Key Frame"));
+		gMainWindow->UpdateSelectedObjects(false);
+		UpdateAllViews();
+	}
+}
+
 void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
 	bool Modified = false;

@@ -131,6 +131,7 @@ public:
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
+	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
 
 	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
@@ -185,7 +186,7 @@ public:
 	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait);
 	bool FileLoad(lcFile& file);
 
-	void UpdatePosition(lcStep Step);
+	void UpdatePosition(lcStep Step) override;
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void MovePivotPoint(const lcVector3& Distance);

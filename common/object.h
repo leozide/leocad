@@ -97,12 +97,14 @@ public:
 	virtual void SetFocused(quint32 Section, bool Focused) = 0;
 	virtual quint32 GetFocusSection() const = 0;
 
+	virtual void UpdatePosition(lcStep Step) = 0;
 	virtual quint32 GetAllowedTransforms() const = 0;
 	virtual lcVector3 GetSectionPosition(quint32 Section) const = 0;
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
 	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
+	virtual bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;
 

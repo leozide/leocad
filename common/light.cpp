@@ -1120,6 +1120,88 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	return false;
 }
 
+bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame)
+{
+	switch (PropertyId)
+	{
+	case lcObjectPropertyId::PieceId:
+	case lcObjectPropertyId::PieceColor:
+	case lcObjectPropertyId::PieceStepShow:
+	case lcObjectPropertyId::PieceStepHide:
+	case lcObjectPropertyId::CameraName:
+	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraFOV:
+	case lcObjectPropertyId::CameraNear:
+	case lcObjectPropertyId::CameraFar:
+	case lcObjectPropertyId::CameraPositionX:
+	case lcObjectPropertyId::CameraPositionY:
+	case lcObjectPropertyId::CameraPositionZ:
+	case lcObjectPropertyId::CameraTargetX:
+	case lcObjectPropertyId::CameraTargetY:
+	case lcObjectPropertyId::CameraTargetZ:
+	case lcObjectPropertyId::CameraUpX:
+	case lcObjectPropertyId::CameraUpY:
+	case lcObjectPropertyId::CameraUpZ:
+	case lcObjectPropertyId::LightName:
+	case lcObjectPropertyId::LightType:
+		return false;
+
+	case lcObjectPropertyId::LightColor:
+		return mColor.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightPower:
+		return mPower.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightCastShadow:
+		return false;
+
+	case lcObjectPropertyId::LightAttenuationDistance:
+		return mAttenuationDistance.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightAttenuationPower:
+		return mAttenuationPower.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightPointSize:
+	case lcObjectPropertyId::LightSpotSize:
+	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightAreaSize:
+	case lcObjectPropertyId::LightAreaSizeX:
+	case lcObjectPropertyId::LightAreaSizeY:
+		return mSize.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightSpotConeAngle:
+		return mSpotConeAngle.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightSpotPenumbraAngle:
+		return mSpotPenumbraAngle.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightSpotTightness:
+		return mSpotTightness.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightAreaShape:
+		return false;
+
+	case lcObjectPropertyId::LightAreaGridX:
+	case lcObjectPropertyId::LightAreaGridY:
+		return mAreaGrid.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::ObjectPositionX:
+	case lcObjectPropertyId::ObjectPositionY:
+	case lcObjectPropertyId::ObjectPositionZ:
+		return mPosition.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::ObjectRotationX:
+	case lcObjectPropertyId::ObjectRotationY:
+	case lcObjectPropertyId::ObjectRotationZ:
+		return mRotation.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::Count:
+		return false;
+	}
+
+	return false;
+}
+
 void lcLight::RemoveKeyFrames()
 {
 	mPosition.RemoveAllKeys();

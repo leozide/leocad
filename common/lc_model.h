@@ -4,6 +4,8 @@
 #include "lc_commands.h"
 #include "lc_array.h"
 
+enum class lcObjectPropertyId;
+
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
 #define LC_SEL_CAMERA                   0x0004 // At least 1 camera selected
@@ -357,6 +359,7 @@ public:
 	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
+	void SetObjectsKeyFrame(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
 	void SetSelectedPiecesPieceInfo(PieceInfo* Info);
 	void SetSelectedPiecesStepShow(lcStep Step);

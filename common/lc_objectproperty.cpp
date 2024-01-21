@@ -8,6 +8,7 @@
 	template void lcObjectProperty<T>::InsertTime(lcStep Start, lcStep Time); \
 	template void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time); \
 	template bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const; \
+	template bool lcObjectProperty<T>::SetKeyFrame(lcStep Time, bool KeyFrame); \
 	template void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const; \
 	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName);
 
@@ -171,6 +172,46 @@ bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const
 			return true;
 		else if (KeyIt->Step > Time)
 			return false;
+	}
+
+	return false;
+}
+
+template<typename T>
+bool lcObjectProperty<T>::SetKeyFrame(lcStep Time, bool KeyFrame)
+{
+	if (KeyFrame)
+	{
+		typename std::vector<lcObjectPropertyKey<T>>::const_iterator KeyIt;
+
+		for (KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
+		{
+			if (KeyIt->Step == Time)
+				return false;
+			else if (KeyIt->Step > Time)
+				break;
+		}
+
+		mKeys.insert(KeyIt, lcObjectPropertyKey<T>{ Time, mValue });
+
+		return true;
+	}
+	else
+	{
+		for (typename std::vector<lcObjectPropertyKey<T>>::const_iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
+		{
+			if (KeyIt->Step == Time)
+			{
+				if (mKeys.size() == 1)
+					mValue = KeyIt->Value;
+
+				mKeys.erase(KeyIt);
+
+				return true;
+			}
+			else if (KeyIt->Step > Time)
+				return false;
+		}
 	}
 
 	return false;

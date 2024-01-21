@@ -21,6 +21,13 @@ public:
 		*this = Array;
 	}
 
+	lcArray(std::initializer_list<T> Init)
+		: lcArray((int)Init.size())
+	{
+		for (const T& Element : Init)
+			Add(Element);
+	}
+
 	~lcArray()
 	{
 		delete[] mData;

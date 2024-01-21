@@ -1,6 +1,6 @@
 #pragma once
 
-class lcKeyFrameWidget : public QAbstractButton
+class lcKeyFrameWidget : public QCheckBox
 {
 	Q_OBJECT
 

@@ -706,6 +706,66 @@ bool lcPiece::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	return false;
 }
 
+bool lcPiece::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame)
+{
+	switch (PropertyId)
+	{
+	case lcObjectPropertyId::PieceId:
+	case lcObjectPropertyId::PieceColor:
+	case lcObjectPropertyId::PieceStepShow:
+	case lcObjectPropertyId::PieceStepHide:
+	case lcObjectPropertyId::CameraName:
+	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraFOV:
+	case lcObjectPropertyId::CameraNear:
+	case lcObjectPropertyId::CameraFar:
+	case lcObjectPropertyId::CameraPositionX:
+	case lcObjectPropertyId::CameraPositionY:
+	case lcObjectPropertyId::CameraPositionZ:
+	case lcObjectPropertyId::CameraTargetX:
+	case lcObjectPropertyId::CameraTargetY:
+	case lcObjectPropertyId::CameraTargetZ:
+	case lcObjectPropertyId::CameraUpX:
+	case lcObjectPropertyId::CameraUpY:
+	case lcObjectPropertyId::CameraUpZ:
+	case lcObjectPropertyId::LightName:
+	case lcObjectPropertyId::LightType:
+	case lcObjectPropertyId::LightColor:
+	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightCastShadow:
+	case lcObjectPropertyId::LightAttenuationDistance:
+	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPointSize:
+	case lcObjectPropertyId::LightSpotSize:
+	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightAreaSize:
+	case lcObjectPropertyId::LightAreaSizeX:
+	case lcObjectPropertyId::LightAreaSizeY:
+	case lcObjectPropertyId::LightSpotConeAngle:
+	case lcObjectPropertyId::LightSpotPenumbraAngle:
+	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightAreaShape:
+	case lcObjectPropertyId::LightAreaGridX:
+	case lcObjectPropertyId::LightAreaGridY:
+		return false;
+
+	case lcObjectPropertyId::ObjectPositionX:
+	case lcObjectPropertyId::ObjectPositionY:
+	case lcObjectPropertyId::ObjectPositionZ:
+		return mPosition.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::ObjectRotationX:
+	case lcObjectPropertyId::ObjectRotationY:
+	case lcObjectPropertyId::ObjectRotationZ:
+		return mRotation.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::Count:
+		return false;
+	}
+
+	return false;
+}
+
 void lcPiece::RemoveKeyFrames()
 {
 	mPosition.RemoveAllKeys();

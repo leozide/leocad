@@ -3184,16 +3184,6 @@ void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightColor(lcLight* Light, const lcVector3& Color)
-{
-	Light->SetColor(Color, mCurrentStep, gMainWindow->GetAddKeys());
-	Light->UpdatePosition(mCurrentStep);
-
-	SaveCheckpoint(tr("Changing Light Color"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-}
-
 void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
 {
 	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
@@ -3288,13 +3278,13 @@ void lcModel::SetLightPower(lcLight* Light, float Power)
 	UpdateAllViews();
 }
 
-void lcModel::SetObjectsBoolProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool Value)
+void lcModel::SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
 {
 	bool Modified = false;
 
 	for (lcObject* Object : Objects)
 	{
-		bool ObjectModified = Object->SetBoolProperty(PropertyId, Value);
+		bool ObjectModified = Object->SetPropertyValue(PropertyId, mCurrentStep, gMainWindow->GetAddKeys(), Value);
 
 		if (ObjectModified)
 		{

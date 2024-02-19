@@ -66,6 +66,16 @@ public:
 	int x, y;
 };
 
+inline bool operator==(const lcVector2i& a, const lcVector2i& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
+
+inline bool operator!=(const lcVector2i& a, const lcVector2i& b)
+{
+	return a.x != b.x || a.y != b.y;
+}
+
 class lcVector2
 {
 public:
@@ -2381,3 +2391,5 @@ inline lcVector4 lcAlgorithmicEdgeColor(const lcVector3& Value, const float Valu
 
 	return  lcVector4(lcLinearToSRGB(rgbf), 1.0f);
 }
+
+Q_DECLARE_METATYPE(lcVector3);

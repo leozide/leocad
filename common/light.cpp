@@ -499,9 +499,9 @@ bool lcLight::SetLightType(lcLightType LightType)
 	return true;
 }
 
-void lcLight::SetColor(const lcVector3& Color, lcStep Step, bool AddKey)
+bool lcLight::SetColor(const lcVector3& Color, lcStep Step, bool AddKey)
 {
-	mColor.ChangeKey(Color, Step, AddKey);
+	return mColor.ChangeKey(Color, Step, AddKey);
 }
 
 void lcLight::SetAttenuationDistance(float Distance, lcStep Step, bool AddKey)
@@ -1038,7 +1038,7 @@ void lcLight::DrawCone(lcContext* Context, float TargetDistance) const
 	Context->DrawIndexedPrimitives(GL_LINES, DrawPenumbra ? (ConeEdges * 2 + 4) * 2 : (ConeEdges + 4) * 2, GL_UNSIGNED_SHORT, 0);
 }
 
-bool lcLight::GetBoolProperty(lcObjectPropertyId PropertyId) const
+QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 {
 	switch (PropertyId)
 	{
@@ -1062,7 +1062,11 @@ bool lcLight::GetBoolProperty(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
+		break;
+
 	case lcObjectPropertyId::LightColor:
+		return QVariant::fromValue<lcVector3>(GetColor());
+
 	case lcObjectPropertyId::LightPower:
 		break;
 
@@ -1093,10 +1097,10 @@ bool lcLight::GetBoolProperty(lcObjectPropertyId PropertyId) const
 		break;
 	}
 
-	return false;
+	return QVariant();
 }
 
-bool lcLight::SetBoolProperty(lcObjectPropertyId PropertyId, bool Value)
+bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value)
 {
 	switch (PropertyId)
 	{
@@ -1120,12 +1124,16 @@ bool lcLight::SetBoolProperty(lcObjectPropertyId PropertyId, bool Value)
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
+		break;
+
 	case lcObjectPropertyId::LightColor:
+		return SetColor(Value.value<lcVector3>(), Step, AddKey);
+		
 	case lcObjectPropertyId::LightPower:
 		break;
 
 	case lcObjectPropertyId::LightCastShadow:
-		return SetCastShadow(Value);
+		return SetCastShadow(Value.toBool());
 
 	case lcObjectPropertyId::LightAttenuationDistance:
 	case lcObjectPropertyId::LightAttenuationPower:

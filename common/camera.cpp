@@ -566,7 +566,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	}
 }
 
-bool lcCamera::GetBoolProperty(lcObjectPropertyId PropertyId) const
+QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 {
 	switch (PropertyId)
 	{
@@ -617,11 +617,13 @@ bool lcCamera::GetBoolProperty(lcObjectPropertyId PropertyId) const
 		break;
 	}
 
-	return false;
+	return QVariant();
 }
 
-bool lcCamera::SetBoolProperty(lcObjectPropertyId PropertyId, bool Value)
+bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value)
 {
+	Q_UNUSED(Step);
+	Q_UNUSED(AddKey);
 	Q_UNUSED(Value);
 
 	switch (PropertyId)

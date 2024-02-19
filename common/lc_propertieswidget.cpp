@@ -169,45 +169,47 @@ void lcPropertiesWidget::BoolChanged()
 		return;
 
 	const bool Value = Widget->isChecked();
-	Model->SetObjectsBoolProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool DefaultValue)
 {
-	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
+	QCheckBox* CheckBox = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
-	if (Widget)
+	if (!CheckBox)
+		return;
+
+	QSignalBlocker Blocker(CheckBox);
+	bool Value = DefaultValue;
+	bool Partial = false;
+
+	if (mFocusObject)
+		Value = mFocusObject->GetPropertyValue(PropertyId).toBool();
+	else
 	{
-		QSignalBlocker Blocker(Widget);
+		bool First = true;
 
-		if (mFocusObject)
-			Widget->setChecked(mFocusObject->GetBoolProperty(PropertyId));
-		else
+		for (const lcObject* Object : mSelection)
 		{
-			bool First = true, Partial = false, Value = DefaultValue;
+			const bool ObjectValue = Object->GetPropertyValue(PropertyId).toBool();
 
-			for (const lcObject* Object : mSelection)
+			if (First)
 			{
-				const bool ObjectValue = Object->GetBoolProperty(PropertyId);
-
-				if (First)
-				{
-					Value = ObjectValue;
-					First = false;
-				}
-				else if (Value != ObjectValue)
-				{
-					Partial = true;
-					break;
-				}
+				Value = ObjectValue;
+				First = false;
 			}
-
-			if (Partial)
-				Widget->setCheckState(Qt::PartiallyChecked);
-			else
-				Widget->setCheckState(Value ? Qt::Checked : Qt::Unchecked);
+			else if (Value != ObjectValue)
+			{
+				Partial = true;
+				break;
+			}
 		}
 	}
+
+	if (Partial)
+		CheckBox->setCheckState(Qt::PartiallyChecked);
+	else
+		CheckBox->setCheckState(Value ? Qt::Checked : Qt::Unchecked);
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -715,33 +717,75 @@ void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, co
 
 void lcPropertiesWidget::ColorButtonClicked()
 {
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
 	QToolButton* ColorButton = qobject_cast<QToolButton*>(sender());
-	lcModel* Model = gMainWindow->GetActiveModel();
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(ColorButton);
 
-	if (!ColorButton || !Light || !Model)
+	if (PropertyId == lcObjectPropertyId::Count)
 		return;
 
-	QColor Color = QColorDialog::getColor(lcQColorFromVector3(Light->GetColor()), this, tr("Select Light Color"));
+	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
+	lcVector3 InitialValue(0.5f, 0.5f, 0.5f);
+
+	if (Light)
+		InitialValue = Light->GetColor();
+
+	QColor Color = QColorDialog::getColor(lcQColorFromVector3(InitialValue), this, tr("Select Light Color"));
 
 	if (!Color.isValid())
 		return;
 
-	Model->SetLightColor(Light, lcVector3FromQColor(Color));
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	const lcVector3 Value = lcVector3FromQColor(Color);
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(Value));
 }
 
-void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, QColor Color)
+void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, const lcVector3& DefaultValue)
 {
 	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!ColorButton)
 		return;
 
+	QSignalBlocker Blocker(ColorButton);
+	lcVector3 Value = DefaultValue;
+	bool Partial = false;
+
+	if (mFocusObject)
+		Value = mFocusObject->GetPropertyValue(PropertyId).value<lcVector3>();
+	else
+	{
+		bool First = true;
+
+		for (const lcObject* Object : mSelection)
+		{
+			const lcVector3 ObjectValue = Object->GetPropertyValue(PropertyId).value<lcVector3>();
+
+			if (First)
+			{
+				Value = ObjectValue;
+				First = false;
+			}
+			else if (Value != ObjectValue)
+			{
+				Partial = true;
+				break;
+			}
+		}
+	}
+
+	if (Partial)
+		Value = lcVector3(0.5f, 0.5f, 0.5f);
+
+	QColor Color = lcQColorFromVector3(Value);
 	QPixmap Pixmap(14, 14);
 	Pixmap.fill(Color);
 
 	ColorButton->setIcon(Pixmap);
-	ColorButton->setText(QString("  ") + Color.name());
+	ColorButton->setText(Partial ? tr(" Multiple Colors") : QString("  ") + Color.name());
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -1223,7 +1267,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 	QString Name;
 	lcLightType LightType = lcLightType::Point;
-	QColor Color(Qt::white);
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
 	lcVector2 LightSize(0.0f, 0.0f);
 	lcVector2i AreaGrid(2, 2);
@@ -1238,7 +1281,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	{
 		Name = Light->GetName();
 		LightType = Light->GetLightType();
-		Color = lcQColorFromVector3(Light->GetColor());
 
 		Position = Light->GetPosition();
 		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
@@ -1256,7 +1298,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 	UpdateString(lcObjectPropertyId::LightName, Name);
 	UpdateStringList(lcObjectPropertyId::LightType, static_cast<int>(LightType));
-	UpdateColor(lcObjectPropertyId::LightColor, Color);
+	UpdateColor(lcObjectPropertyId::LightColor, lcVector3(1.0f, 1.0f, 1.0f));
 
 	UpdateFloat(lcObjectPropertyId::LightPower, Power);
 	UpdateBool(lcObjectPropertyId::LightCastShadow, true);

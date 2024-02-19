@@ -82,7 +82,7 @@ public:
 	}
 
 	void Update(lcStep Step);
-	void ChangeKey(const T& Value, lcStep Step, bool AddKey);
+	bool ChangeKey(const T& Value, lcStep Step, bool AddKey);
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 	bool HasKeyFrame(lcStep Time) const;

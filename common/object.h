@@ -103,8 +103,8 @@ public:
 	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const = 0;
 	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const = 0;
 	virtual void DrawInterface(lcContext* Context, const lcScene& Scene) const = 0;
-	virtual bool GetBoolProperty(lcObjectPropertyId PropertyId) const = 0;
-	virtual bool SetBoolProperty(lcObjectPropertyId PropertyId, bool Value) = 0;
+	virtual QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const = 0;
+	virtual bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) = 0;
 	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
 	virtual bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) = 0;
 	virtual void RemoveKeyFrames() = 0;

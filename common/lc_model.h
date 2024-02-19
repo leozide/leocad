@@ -365,7 +365,7 @@ public:
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 
-	void SetObjectsBoolProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool Value);
+	void SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
 
 	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
 	void SetCameraFOV(lcCamera* Camera, float FOV);
@@ -374,7 +374,6 @@ public:
 	void SetCameraName(lcCamera* Camera, const QString& Name);
 
 	void SetLightType(lcLight* Light, lcLightType LightType);
-	void SetLightColor(lcLight* Light, const lcVector3& Color);
 	void SetLightAttenuationDistance(lcLight* Light, float Distance);
 	void SetLightAttenuationPower(lcLight* Light, float Power);
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);

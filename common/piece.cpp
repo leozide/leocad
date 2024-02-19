@@ -646,7 +646,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	}
 }
 
-bool lcPiece::GetBoolProperty(lcObjectPropertyId PropertyId) const
+QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 {
 	switch (PropertyId)
 	{
@@ -697,11 +697,13 @@ bool lcPiece::GetBoolProperty(lcObjectPropertyId PropertyId) const
 		break;
 	}
 
-	return false;
+	return QVariant();
 }
 
-bool lcPiece::SetBoolProperty(lcObjectPropertyId PropertyId, bool Value)
+bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value)
 {
+	Q_UNUSED(Step);
+	Q_UNUSED(AddKey);
 	Q_UNUSED(Value);
 
 	switch (PropertyId)

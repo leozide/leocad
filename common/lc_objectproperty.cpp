@@ -4,7 +4,7 @@
 
 #define LC_OBJECT_PROPERTY(T) \
 	template void lcObjectProperty<T>::Update(lcStep Step); \
-	template void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
+	template bool lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
 	template void lcObjectProperty<T>::InsertTime(lcStep Start, lcStep Time); \
 	template void lcObjectProperty<T>::RemoveTime(lcStep Start, lcStep Time); \
 	template bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const; \
@@ -75,13 +75,16 @@ void lcObjectProperty<T>::Update(lcStep Step)
 }
 
 template<typename T>
-void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
+bool lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
 {
 	if (!AddKey && mKeys.empty())
 	{
+		if (mValue == Value)
+			return false;
+
 		mValue = Value;
 
-		return;
+		return true;
 	}
 
 	for (typename std::vector<lcObjectPropertyKey<T>>::iterator KeyIt = mKeys.begin(); KeyIt != mKeys.end(); KeyIt++)
@@ -90,24 +93,40 @@ void lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey)
 			continue;
 
 		if (KeyIt->Step == Step)
+		{
+			if (KeyIt->Value == Value)
+				return false;
+
 			KeyIt->Value = Value;
+		}
 		else if (AddKey)
 			mKeys.insert(KeyIt, lcObjectPropertyKey<T>{ Step, Value });
 		else if (KeyIt == mKeys.begin())
+		{
+			if (KeyIt->Value == Value)
+				return false;
+
 			KeyIt->Value = Value;
+		}
 		else
 		{
 			KeyIt = KeyIt - 1;
+
+			if (KeyIt->Value == Value)
+				return false;
+
 			KeyIt->Value = Value;
 		}
 
-		return;
+		return true;
 	}
 
 	if (AddKey || mKeys.empty())
 		mKeys.emplace_back(lcObjectPropertyKey<T>{ Step, Value });
 	else
 		mKeys.back().Value = Value;
+
+	return true;
 }
 
 template<typename T>

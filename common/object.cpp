@@ -34,7 +34,11 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
+		break;
+
 	case lcObjectPropertyId::LightColor:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Color");
+
 	case lcObjectPropertyId::LightPower:
 		break;
 

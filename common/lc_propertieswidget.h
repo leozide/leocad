@@ -102,7 +102,7 @@ protected:
 	void UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep Step, lcStep Min, lcStep Max);
 	void UpdateString(lcObjectPropertyId PropertyId, const QString& Text);
 	void UpdateStringList(lcObjectPropertyId PropertyId, int ListIndex);
-	void UpdateColor(lcObjectPropertyId PropertyId, QColor Color);
+	void UpdateColor(lcObjectPropertyId PropertyId, const lcVector3& DefaultValue);
 	void UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex);
 	void UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name);
 

@@ -213,8 +213,8 @@ public:
 	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
-	bool GetBoolProperty(lcObjectPropertyId PropertyId) const override;
-	bool SetBoolProperty(lcObjectPropertyId PropertyId, bool Value) override;
+	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;
+	bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
@@ -227,7 +227,7 @@ public:
 		return (mState & LC_LIGHT_HIDDEN) == 0;
 	}
 
-	void SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
+	bool SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
 
 	lcVector3 GetColor() const
 	{

@@ -365,6 +365,8 @@ public:
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 
+	void SetObjectsBoolProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool Value);
+
 	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
 	void SetCameraFOV(lcCamera* Camera, float FOV);
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
@@ -382,7 +384,6 @@ public:
 	void SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightPower(lcLight* Light, float Power);
-	void SetLightCastShadow(lcLight* Light, bool CastShadow);
 	void SetLightName(lcLight* Light, const QString& Name);
 
 	void ShowPropertiesDialog();

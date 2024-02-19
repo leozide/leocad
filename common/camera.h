@@ -271,6 +271,8 @@ public:
 	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
+	bool GetBoolProperty(lcObjectPropertyId PropertyId) const override;
+	bool SetBoolProperty(lcObjectPropertyId PropertyId, bool Value) override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;

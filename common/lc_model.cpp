@@ -3288,14 +3288,25 @@ void lcModel::SetLightPower(lcLight* Light, float Power)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightCastShadow(lcLight* Light, bool CastShadow)
+void lcModel::SetObjectsBoolProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool Value)
 {
-	if (!Light->SetCastShadow(CastShadow))
+	bool Modified = false;
+
+	for (lcObject* Object : Objects)
+	{
+		bool ObjectModified = Object->SetBoolProperty(PropertyId, Value);
+
+		if (ObjectModified)
+		{
+			Object->UpdatePosition(mCurrentStep);
+			Modified = true;
+		}
+	}
+
+	if (!Modified)
 		return;
 
-	Light->UpdatePosition(mCurrentStep);
-
-	SaveCheckpoint(tr("Changing Light Shadow"));
+	SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

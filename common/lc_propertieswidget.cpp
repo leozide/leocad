@@ -168,19 +168,11 @@ void lcPropertiesWidget::BoolChanged()
 	if (!Model)
 		return;
 
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-	bool Value = Widget->isChecked();
-
-	if (Light)
-	{
-		if (PropertyId == lcObjectPropertyId::LightCastShadow)
-		{
-			Model->SetLightCastShadow(Light, Value);
-		}
-	}
+	const bool Value = Widget->isChecked();
+	Model->SetObjectsBoolProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool Value)
+void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool DefaultValue)
 {
 	QCheckBox* Widget = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
@@ -188,7 +180,33 @@ void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool Value)
 	{
 		QSignalBlocker Blocker(Widget);
 
-		Widget->setChecked(Value);
+		if (mFocusObject)
+			Widget->setChecked(mFocusObject->GetBoolProperty(PropertyId));
+		else
+		{
+			bool First = true, Partial = false, Value = DefaultValue;
+
+			for (const lcObject* Object : mSelection)
+			{
+				const bool ObjectValue = Object->GetBoolProperty(PropertyId);
+
+				if (First)
+				{
+					Value = ObjectValue;
+					First = false;
+				}
+				else if (Value != ObjectValue)
+				{
+					Partial = true;
+					break;
+				}
+			}
+
+			if (Partial)
+				Widget->setCheckState(Qt::PartiallyChecked);
+			else
+				Widget->setCheckState(Value ? Qt::Checked : Qt::Unchecked);
+		}
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -201,7 +219,7 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	QCheckBox* Widget = new QCheckBox(this);
 	Widget->setToolTip(ToolTip);
 
-	connect(Widget, &QCheckBox::toggled, this, &lcPropertiesWidget::BoolChanged);
+	connect(Widget, &QCheckBox::stateChanged, this, &lcPropertiesWidget::BoolChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
@@ -1212,7 +1230,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	float Power = 0.0f;
 	float AttenuationDistance = 0.0f;
 	float AttenuationPower = 0.0f;
-	bool CastShadow = true;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Rotation = lcVector3(0.0f, 0.0f, 0.0f);
 	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
@@ -1223,7 +1240,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		LightType = Light->GetLightType();
 		Color = lcQColorFromVector3(Light->GetColor());
 
-		CastShadow = Light->GetCastShadow();
 		Position = Light->GetPosition();
 		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
 		Power = Light->GetPower();
@@ -1243,7 +1259,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateColor(lcObjectPropertyId::LightColor, Color);
 
 	UpdateFloat(lcObjectPropertyId::LightPower, Power);
-	UpdateBool(lcObjectPropertyId::LightCastShadow, CastShadow);
+	UpdateBool(lcObjectPropertyId::LightCastShadow, true);
 
 	UpdateFloat(lcObjectPropertyId::LightAttenuationDistance, AttenuationDistance);
 	UpdateFloat(lcObjectPropertyId::LightAttenuationPower, AttenuationPower);
@@ -1345,28 +1361,22 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 				break;
 
 			case lcObjectType::Camera:
-				if (Mode != LayoutMode::Empty)
+				if (Mode == LayoutMode::Empty)
+					Mode = LayoutMode::Camera;
+				else if (Mode != LayoutMode::Camera)
 				{
 					Mode = LayoutMode::Multiple;
 					ObjectIdx = Selection.GetSize();
-				}
-				else
-				{
-					Mode = LayoutMode::Camera;
-					Focus = Selection[ObjectIdx];
 				}
 				break;
 
 			case lcObjectType::Light:
-				if (Mode != LayoutMode::Empty)
+				if (Mode == LayoutMode::Empty)
+					Mode = LayoutMode::Light;
+				else if (Mode != LayoutMode::Light)
 				{
 					Mode = LayoutMode::Multiple;
 					ObjectIdx = Selection.GetSize();
-				}
-				else
-				{
-					Mode = LayoutMode::Light;
-					Focus = Selection[ObjectIdx];
 				}
 				break;
 			}

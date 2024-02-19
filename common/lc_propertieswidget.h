@@ -96,7 +96,7 @@ protected:
 	void AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
 
 	void UpdateKeyFrameWidget(lcObjectPropertyId PropertyId);
-	void UpdateBool(lcObjectPropertyId PropertyId, bool Value);
+	void UpdateBool(lcObjectPropertyId PropertyId, bool DefaultValue);
 	void UpdateFloat(lcObjectPropertyId PropertyId, float Value);
 	void UpdateInteger(lcObjectPropertyId PropertyId, int Value);
 	void UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep Step, lcStep Min, lcStep Max);

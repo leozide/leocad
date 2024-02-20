@@ -1755,7 +1755,6 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	LoadLDraw(Buffer, lcGetActiveProject());
 
 	gMainWindow->UpdateTimeline(true, false);
-	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateSelectedObjects(true);
 	UpdateAllViews();
@@ -2318,7 +2317,6 @@ void lcModel::DeleteAllCameras()
 
 	mCameras.DeleteAll();
 
-	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateSelectedObjects(true);
 	UpdateAllViews();
 	SaveCheckpoint(tr("Resetting Cameras"));
@@ -2682,9 +2680,6 @@ bool lcModel::RemoveSelectedObjects()
 		else
 			CameraIdx++;
 	}
-
-	if (RemovedCamera)
-		gMainWindow->UpdateCameraMenu();
 
 	for (int LightIdx = 0; LightIdx < mLights.GetSize(); )
 	{
@@ -3120,7 +3115,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 
 	SaveCheckpoint(tr("Editing Camera"));
 	UpdateAllViews();
-	gMainWindow->UpdatePerspective();
+	gMainWindow->UpdateSelectedObjects(false);
 }
 
 void lcModel::SetCameraFOV(lcCamera* Camera, float FOV)
@@ -3250,10 +3245,6 @@ void lcModel::SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectProp
 	SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
-
-	// todo: fix hacky camera menu update
-	if (PropertyId == lcObjectPropertyId::CameraName)
-		gMainWindow->UpdateCameraMenu();
 }
 
 bool lcModel::AnyPiecesSelected() const
@@ -4253,7 +4244,6 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case lcTool::Camera:
-		gMainWindow->UpdateCameraMenu();
 		SaveCheckpoint(tr("New Camera"));
 		break;
 
@@ -4431,8 +4421,6 @@ void lcModel::EraserToolClicked(lcObject* Object)
 			}
 
 			mCameras.Remove((lcCamera*)Object);
-
-			gMainWindow->UpdateCameraMenu();
 		}
 		break;
 
@@ -4796,9 +4784,7 @@ void lcModel::UpdateInterface()
 	gMainWindow->SetTransformType(gMainWindow->GetTransformType());
 	gMainWindow->UpdateLockSnap();
 	gMainWindow->UpdateSnap();
-	gMainWindow->UpdateCameraMenu();
 	gMainWindow->UpdateModels();
-	gMainWindow->UpdatePerspective();
 	gMainWindow->UpdateShadingMode();
 	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateSelectionMode();

@@ -271,8 +271,6 @@ public:
 	void UpdateSnap();
 	void UpdateColor();
 	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
-	void UpdatePerspective();
-	void UpdateCameraMenu();
 	void UpdateShadingMode();
 	void UpdateSelectionMode();
 	void UpdateModels();
@@ -294,8 +292,9 @@ public slots:
 	void TogglePreviewWidget(bool Visible);
 
 protected slots:
+	void CameraMenuAboutToShow();
+	void ProjectionMenuAboutToShow();
 	void ViewFocusReceived();
-	void ViewCameraChanged();
 	void UpdateDockWidgetActions();
 	void UpdateGamepads();
 	void ModelTabContextMenuRequested(const QPoint& Point);

@@ -411,6 +411,8 @@ void lcMainWindow::CreateMenus()
 	for (int actionIdx = LC_VIEW_CAMERA_FIRST; actionIdx <= LC_VIEW_CAMERA_LAST; actionIdx++)
 		mCameraMenu->addAction(mActions[actionIdx]);
 
+	connect(mCameraMenu, &QMenu::aboutToShow, this, &lcMainWindow::CameraMenuAboutToShow);
+
 	mViewpointMenu = new QMenu(tr("&Viewpoints"), this);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_FRONT]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BACK]);
@@ -423,6 +425,8 @@ void lcMainWindow::CreateMenus()
 	mProjectionMenu = new QMenu(tr("Projection"), this);
 	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
 	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_ORTHO]);
+
+	connect(mProjectionMenu, &QMenu::aboutToShow, this, &lcMainWindow::ProjectionMenuAboutToShow);
 
 	mShadingMenu = new QMenu(tr("Sh&ading"), this);
 	mShadingMenu->addAction(mActions[LC_VIEW_SHADING_WIREFRAME]);
@@ -797,7 +801,6 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 {
 	lcView* NewView = new lcView(lcViewType::View, Model);
 
-	connect(NewView, SIGNAL(CameraChanged()), this, SLOT(ViewCameraChanged()));
 	connect(NewView, SIGNAL(FocusReceived()), this, SLOT(ViewFocusReceived()));
 
 	AddView(NewView);
@@ -1626,10 +1629,7 @@ void lcMainWindow::AddView(lcView* View)
 		return;
 
 	if (!TabWidget->GetActiveView())
-	{
 		TabWidget->SetActiveView(View);
-		UpdatePerspective();
-	}
 }
 
 void lcMainWindow::RemoveView(lcView* View)
@@ -1656,9 +1656,6 @@ void lcMainWindow::SetActiveView(lcView* ActiveView)
 		CurrentActiveView->SetTopSubmodelActive();
 
 	TabWidget->SetActiveView(ActiveView);
-
-	UpdateCameraMenu();
-	UpdatePerspective();
 }
 
 void lcMainWindow::SetTool(lcTool Tool)
@@ -2164,17 +2161,7 @@ void lcMainWindow::ViewFocusReceived()
 	SetActiveView(qobject_cast<lcView*>(sender()));
 }
 
-void lcMainWindow::ViewCameraChanged()
-{
-	lcView* View = qobject_cast<lcView*>(sender());
-
-	if (!View || !View->IsLastFocused())
-		return;
-
-	UpdateCameraMenu();
-}
-
-void lcMainWindow::UpdateCameraMenu()
+void lcMainWindow::CameraMenuAboutToShow()
 {
 	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
 	lcView* ActiveView = GetActiveView();
@@ -2203,11 +2190,9 @@ void lcMainWindow::UpdateCameraMenu()
 
 	if (!CurrentSet)
 		mActions[LC_VIEW_CAMERA_NONE]->setChecked(true);
-
-	UpdatePerspective();
 }
 
-void lcMainWindow::UpdatePerspective()
+void lcMainWindow::ProjectionMenuAboutToShow()
 {
 	lcView* ActiveView = GetActiveView();
 

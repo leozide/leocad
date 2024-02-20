@@ -212,7 +212,6 @@ void lcView::RemoveCamera()
 	else
 		mCamera->SetViewpoint(lcViewpoint::Home);
 
-	emit CameraChanged();
 	Redraw();
 }
 
@@ -1689,8 +1688,6 @@ void lcView::SetViewpoint(lcViewpoint Viewpoint)
 	mCamera->SetViewpoint(Viewpoint);
 	ZoomExtents();
 	Redraw();
-
-	emit CameraChanged();
 }
 
 void lcView::SetViewpoint(const lcVector3& Position)
@@ -1708,8 +1705,6 @@ void lcView::SetViewpoint(const lcVector3& Position)
 	mCamera->SetViewpoint(Position);
 	ZoomExtents();
 	Redraw();
-
-	emit CameraChanged();
 }
 
 void lcView::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
@@ -1726,8 +1721,6 @@ void lcView::SetViewpoint(const lcVector3& Position, const lcVector3& Target, co
 
 	mCamera->SetViewpoint(Position, Target, Up);
 	Redraw();
-
-	emit CameraChanged();
 }
 
 void lcView::SetCameraAngles(float Latitude, float Longitude)
@@ -1755,8 +1748,6 @@ void lcView::SetDefaultCamera()
 	mCamera->SetViewpoint(lcViewpoint::Home);
 	ZoomExtents();
 	Redraw();
-
-	emit CameraChanged();
 }
 
 void lcView::SetCamera(lcCamera* Camera, bool ForceCopy)
@@ -1801,7 +1792,6 @@ void lcView::SetCameraIndex(int Index)
 	lcCamera* Camera = Cameras[Index];
 	SetCamera(Camera, false);
 
-	emit CameraChanged();
 	Redraw();
 }
 
@@ -1811,9 +1801,6 @@ void lcView::SetProjection(bool Ortho)
 	{
 		mCamera->SetOrtho(Ortho);
 		Redraw();
-
-		if (gMainWindow)
-			gMainWindow->UpdatePerspective();
 	}
 	else
 	{

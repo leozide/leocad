@@ -284,7 +284,6 @@ public:
 
 signals:
 	void FocusReceived();
-	void CameraChanged();
 
 protected:
 	void DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const;

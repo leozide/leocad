@@ -155,6 +155,37 @@ void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
 	mPropertyWidgets[static_cast<int>(PropertyId)].KeyFrame = Widget;
 }
 
+std::pair<QVariant, bool> lcPropertiesWidget::GetUpdateValue(lcObjectPropertyId PropertyId, QVariant DefaultValue)
+{
+	QVariant Value = DefaultValue;
+	bool Partial = false;
+
+	if (mFocusObject)
+		Value = mFocusObject->GetPropertyValue(PropertyId);
+	else
+	{
+		bool First = true;
+
+		for (const lcObject* Object : mSelection)
+		{
+			const QVariant ObjectValue = Object->GetPropertyValue(PropertyId);
+
+			if (First)
+			{
+				Value = ObjectValue;
+				First = false;
+			}
+			else if (Value != ObjectValue)
+			{
+				Partial = true;
+				break;
+			}
+		}
+	}
+
+	return { Value, Partial };
+}
+
 void lcPropertiesWidget::BoolChanged()
 {
 	QCheckBox* Widget = qobject_cast<QCheckBox*>(sender());
@@ -180,36 +211,15 @@ void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool DefaultV
 		return;
 
 	QSignalBlocker Blocker(CheckBox);
-	bool Value = DefaultValue;
-	bool Partial = false;
+	QVariant Value;
+	bool Partial;
 
-	if (mFocusObject)
-		Value = mFocusObject->GetPropertyValue(PropertyId).toBool();
-	else
-	{
-		bool First = true;
-
-		for (const lcObject* Object : mSelection)
-		{
-			const bool ObjectValue = Object->GetPropertyValue(PropertyId).toBool();
-
-			if (First)
-			{
-				Value = ObjectValue;
-				First = false;
-			}
-			else if (Value != ObjectValue)
-			{
-				Partial = true;
-				break;
-			}
-		}
-	}
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
 
 	if (Partial)
 		CheckBox->setCheckState(Qt::PartiallyChecked);
 	else
-		CheckBox->setCheckState(Value ? Qt::Checked : Qt::Unchecked);
+		CheckBox->setCheckState(Value.toBool() ? Qt::Checked : Qt::Unchecked);
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -441,8 +451,9 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 
 void lcPropertiesWidget::IntegerChanged()
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+	// todo: switch to spinner and support mouse drag
+	QLineEdit* LineEdit = qobject_cast<QLineEdit*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(LineEdit);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -452,39 +463,32 @@ void lcPropertiesWidget::IntegerChanged()
 	if (!Model)
 		return;
 
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-	int Value = Widget->text().toInt();
-
-	// todo: mouse drag
-
-	if (Light)
-	{
-		if (PropertyId == lcObjectPropertyId::LightAreaGridX)
-		{
-			lcVector2i AreaGrid = Light->GetAreaGrid();
-			AreaGrid.x = Value;
-
-			Model->SetLightAreaGrid(Light, AreaGrid);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightAreaGridY)
-		{
-			lcVector2i AreaGrid = Light->GetAreaGrid();
-			AreaGrid.y = Value;
-
-			Model->SetLightAreaGrid(Light, AreaGrid);
-		}
-	}
+	const int Value = LineEdit->text().toInt();
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int Value)
+void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int DefaultValue)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
+	QLineEdit* LineEdit = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
-	if (Widget)
+	if (!LineEdit)
+		return;
+
+	QSignalBlocker Blocker(LineEdit);
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
+
+	if (Partial)
 	{
-		QSignalBlocker Blocker(Widget);
-
-		Widget->setText(lcFormatValueLocalized(Value));
+		LineEdit->clear();
+		LineEdit->setPlaceholderText(tr("Multiple Values"));
+	}
+	else
+	{
+		LineEdit->setText(QString::number(Value.toInt()));
+		LineEdit->setPlaceholderText(QString());
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -646,8 +650,8 @@ void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const 
 
 void lcPropertiesWidget::StringListChanged(int Value)
 {
-	QComboBox* Widget = qobject_cast<QComboBox*>(sender());
-	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+	QComboBox* ComboBox = qobject_cast<QComboBox*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(ComboBox);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -657,38 +661,36 @@ void lcPropertiesWidget::StringListChanged(int Value)
 	if (!Model)
 		return;
 
-	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-
-	if (Camera)
-	{
-		if (PropertyId == lcObjectPropertyId::CameraType)
-		{
-			Model->SetCameraOrthographic(Camera, Value == 1);
-		}
-	}
-	else if (Light)
-	{
-		if (PropertyId == lcObjectPropertyId::LightType)
-		{
-			Model->SetLightType(Light, static_cast<lcLightType>(Value));
-		}
-		else if (PropertyId == lcObjectPropertyId::LightAreaShape)
-		{
-			Model->SetLightAreaShape(Light, static_cast<lcLightAreaShape>(Value));
-		}
-	}
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int ListIndex)
+void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int DefaultValue)
 {
-	QComboBox* Widget = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
+	QComboBox* ComboBox = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
-	if (Widget)
+	if (!ComboBox)
+		return;
+
+	QSignalBlocker Blocker(ComboBox);
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
+	bool HasMultiple = (ComboBox->itemText(ComboBox->count() - 1) == tr("Multiple Values"));
+
+	if (Partial)
 	{
-		QSignalBlocker Blocker(Widget);
+		if (!HasMultiple)
+			ComboBox->addItem(tr("Multiple Values"));
 
-		Widget->setCurrentIndex(ListIndex);
+		ComboBox->setCurrentIndex(ComboBox->count() - 1);
+	}
+	else
+	{
+		if (HasMultiple)
+			ComboBox->removeItem(ComboBox->count() - 1);
+
+		ComboBox->setCurrentIndex(Value.toInt());
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -751,36 +753,12 @@ void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, const lcVect
 		return;
 
 	QSignalBlocker Blocker(ColorButton);
-	lcVector3 Value = DefaultValue;
-	bool Partial = false;
+	QVariant Value;
+	bool Partial;
 
-	if (mFocusObject)
-		Value = mFocusObject->GetPropertyValue(PropertyId).value<lcVector3>();
-	else
-	{
-		bool First = true;
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(DefaultValue));
 
-		for (const lcObject* Object : mSelection)
-		{
-			const lcVector3 ObjectValue = Object->GetPropertyValue(PropertyId).value<lcVector3>();
-
-			if (First)
-			{
-				Value = ObjectValue;
-				First = false;
-			}
-			else if (Value != ObjectValue)
-			{
-				Partial = true;
-				break;
-			}
-		}
-	}
-
-	if (Partial)
-		Value = lcVector3(0.5f, 0.5f, 0.5f);
-
-	QColor Color = lcQColorFromVector3(Value);
+	QColor Color = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
 	QPixmap Pixmap(14, 14);
 	Pixmap.fill(Color);
 
@@ -991,7 +969,7 @@ void lcPropertiesWidget::CreateWidgets()
 	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
 	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
-	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), false, { tr("Perspective"), tr("Orthographic") });
+	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), false, lcCamera::GetCameraTypeStrings());
 
 	AddSpacing();
 
@@ -1218,7 +1196,7 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Target(0.0f, 0.0f, 0.0f);
 	lcVector3 UpVector(0.0f, 0.0f, 0.0f);
-	bool Ortho = false;
+	lcCameraType CameraType = lcCameraType::Perspective;
 	float FoV = 60.0f;
 	float ZNear = 1.0f;
 	float ZFar = 100.0f;
@@ -1230,7 +1208,7 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 		Target = Camera->mTargetPosition;
 		UpVector = Camera->mUpVector;
 
-		Ortho = Camera->IsOrtho();
+		CameraType = Camera->GetCameraType();
 		FoV = Camera->m_fovy;
 		ZNear = Camera->m_zNear;
 		ZFar = Camera->m_zFar;
@@ -1238,7 +1216,7 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	}
 
 	UpdateString(lcObjectPropertyId::CameraName, Name);
-	UpdateStringList(lcObjectPropertyId::CameraType, Ortho ? 1 : 0);
+	UpdateStringList(lcObjectPropertyId::CameraType, static_cast<int>(CameraType));
 
 	UpdateFloat(lcObjectPropertyId::CameraFOV, FoV);
 	UpdateFloat(lcObjectPropertyId::CameraNear, ZNear);
@@ -1266,10 +1244,9 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	mFocusObject = Light;
 
 	QString Name;
-	lcLightType LightType = lcLightType::Point;
-	lcLightAreaShape LightAreaShape = lcLightAreaShape::Rectangle;
+	lcLightType LightType = lcLightType::Count;
+	lcLightAreaShape LightAreaShape = lcLightAreaShape::Count;
 	lcVector2 LightSize(0.0f, 0.0f);
-	lcVector2i AreaGrid(2, 2);
 	float Power = 0.0f;
 	float AttenuationDistance = 0.0f;
 	float AttenuationPower = 0.0f;
@@ -1281,6 +1258,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	{
 		Name = Light->GetName();
 		LightType = Light->GetLightType();
+		LightAreaShape = Light->GetAreaShape();
 
 		Position = Light->GetPosition();
 		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
@@ -1290,14 +1268,45 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 		SpotTightness = Light->GetSpotTightness();
-
-		LightAreaShape = Light->GetAreaShape();
 		LightSize = Light->GetSize();
-		AreaGrid = Light->GetAreaGrid();
+	}
+	else
+	{
+		bool First = true;
+		bool PartialLightType = false, PartialAreaShape = false;
+
+		for (const lcObject* Object : mSelection)
+		{
+			const lcLight* CurrentLight = dynamic_cast<const lcLight*>(Object);
+
+			if (!CurrentLight)
+				continue;
+
+			if (First)
+			{
+				LightType = CurrentLight->GetLightType();
+				LightAreaShape = CurrentLight->GetAreaShape();
+				First = false;
+			}
+			else
+			{
+				if (LightType != CurrentLight->GetLightType())
+					PartialLightType = true;
+
+				if (LightAreaShape != CurrentLight->GetAreaShape())
+					PartialAreaShape = true;
+			}
+		}
+
+		if (PartialLightType)
+			LightType = lcLightType::Count;
+
+		if (PartialAreaShape)
+			LightAreaShape = lcLightAreaShape::Count;
 	}
 
 	UpdateString(lcObjectPropertyId::LightName, Name);
-	UpdateStringList(lcObjectPropertyId::LightType, static_cast<int>(LightType));
+	UpdateStringList(lcObjectPropertyId::LightType, 0);
 	UpdateColor(lcObjectPropertyId::LightColor, lcVector3(1.0f, 1.0f, 1.0f));
 
 	UpdateFloat(lcObjectPropertyId::LightPower, Power);
@@ -1306,13 +1315,13 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateFloat(lcObjectPropertyId::LightAttenuationDistance, AttenuationDistance);
 	UpdateFloat(lcObjectPropertyId::LightAttenuationPower, AttenuationPower);
 
-	const bool IsPointLight = Light && Light->IsPointLight();
+	const bool IsPointLight = (LightType == lcLightType::Point);
 	SetPropertyVisible(lcObjectPropertyId::LightPointSize, IsPointLight);
 
 	if (IsPointLight)
 		UpdateFloat(lcObjectPropertyId::LightPointSize, LightSize.x);
 
-	const bool IsSpotLight = Light && Light->IsSpotLight();
+	const bool IsSpotLight = (LightType == lcLightType::Spot);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotSize, IsSpotLight);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotConeAngle, IsSpotLight);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotPenumbraAngle, IsSpotLight);
@@ -1326,19 +1335,19 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		UpdateFloat(lcObjectPropertyId::LightSpotTightness, SpotTightness);
 	}
 
-	const bool IsDirectionalLight = Light && Light->IsDirectionalLight();
+	const bool IsDirectionalLight = (LightType == lcLightType::Directional);
 	SetPropertyVisible(lcObjectPropertyId::LightDirectionalSize, IsDirectionalLight);
 
 	if (IsDirectionalLight)
 		UpdateFloat(lcObjectPropertyId::LightDirectionalSize, LightSize.x);
 
-	const bool IsAreaLight = Light && Light->IsAreaLight();
+	const bool IsAreaLight = (LightType == lcLightType::Area);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaShape, IsAreaLight);
 
-	const bool IsSquare = IsAreaLight && (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
-	SetPropertyVisible(lcObjectPropertyId::LightAreaSize, IsSquare);
-	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeX, !IsSquare);
-	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeY, !IsSquare);
+	const bool IsSquare = (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
+	SetPropertyVisible(lcObjectPropertyId::LightAreaSize, IsAreaLight && IsSquare);
+	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeX, IsAreaLight && !IsSquare);
+	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeY, IsAreaLight && !IsSquare);
 
 	SetPropertyVisible(lcObjectPropertyId::LightAreaGridX, IsAreaLight);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaGridY, IsAreaLight);
@@ -1349,8 +1358,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		UpdateFloat(lcObjectPropertyId::LightAreaSize, LightSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, LightSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, LightSize.y);
-		UpdateInteger(lcObjectPropertyId::LightAreaGridX, AreaGrid.x);
-		UpdateInteger(lcObjectPropertyId::LightAreaGridY, AreaGrid.y);
+		UpdateInteger(lcObjectPropertyId::LightAreaGridX, 0);
+		UpdateInteger(lcObjectPropertyId::LightAreaGridY, 0);
 	}
 
 	UpdateFloat(lcObjectPropertyId::ObjectPositionX, Position[0]);

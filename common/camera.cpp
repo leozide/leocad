@@ -58,6 +58,33 @@ lcCamera::~lcCamera()
 {
 }
 
+QString lcCamera::GetCameraTypeString(lcCameraType CameraType)
+{
+	switch (CameraType)
+	{
+	case lcCameraType::Perspective:
+		return QT_TRANSLATE_NOOP("Camera Type", "Perspective");
+
+	case lcCameraType::Orthographic:
+		return QT_TRANSLATE_NOOP("Camera Type", "Orthographic");
+
+	case lcCameraType::Count:
+		break;
+	}
+
+	return QString();
+}
+
+QStringList lcCamera::GetCameraTypeStrings()
+{
+	QStringList CameraType;
+
+	for (int CameraTypeIndex = 0; CameraTypeIndex < static_cast<int>(lcCameraType::Count); CameraTypeIndex++)
+		CameraType.push_back(GetCameraTypeString(static_cast<lcCameraType>(CameraTypeIndex)));
+
+	return CameraType;
+}
+
 lcViewpoint lcCamera::GetViewpoint(const QString& ViewpointName)
 {
 	const QLatin1String ViewpointNames[] =
@@ -130,6 +157,19 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 	}
 
 	mName = Prefix + QString::number(MaxCameraNumber + 1);
+}
+
+bool lcCamera::SetCameraType(lcCameraType CameraType)
+{
+	if (static_cast<int>(CameraType) < 0 || CameraType >= lcCameraType::Count)
+		return false;
+
+	if (GetCameraType() == CameraType)
+		return false;
+
+	SetOrtho(CameraType == lcCameraType::Orthographic);
+
+	return true;
 }
 
 void lcCamera::SaveLDraw(QTextStream& Stream) const
@@ -575,7 +615,11 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
+		break;
+
 	case lcObjectPropertyId::CameraType:
+		return static_cast<int>(GetCameraType());
+
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -633,7 +677,11 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
+		break;
+
 	case lcObjectPropertyId::CameraType:
+		return SetCameraType(static_cast<lcCameraType>(Value.toInt()));
+
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:

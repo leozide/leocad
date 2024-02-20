@@ -373,14 +373,11 @@ public:
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
 	void SetCameraName(lcCamera* Camera, const QString& Name);
 
-	void SetLightType(lcLight* Light, lcLightType LightType);
 	void SetLightAttenuationDistance(lcLight* Light, float Distance);
 	void SetLightAttenuationPower(lcLight* Light, float Power);
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightTightness(lcLight* Light, float Tightness);
-	void SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape);
-	void SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightPower(lcLight* Light, float Power);
 	void SetLightName(lcLight* Light, const QString& Name);

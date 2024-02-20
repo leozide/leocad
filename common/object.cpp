@@ -19,7 +19,11 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
+		break;
+
 	case lcObjectPropertyId::CameraType:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Camera Type");
+
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -33,8 +37,10 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
-	case lcObjectPropertyId::LightType:
 		break;
+
+	case lcObjectPropertyId::LightType:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Type");
 
 	case lcObjectPropertyId::LightColor:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Color");
@@ -56,9 +62,15 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
 	case lcObjectPropertyId::LightSpotTightness:
+		break;
+
 	case lcObjectPropertyId::LightAreaShape:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Shape");
+
 	case lcObjectPropertyId::LightAreaGridX:
 	case lcObjectPropertyId::LightAreaGridY:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Grid");
+
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:

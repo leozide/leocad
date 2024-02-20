@@ -3172,18 +3172,6 @@ void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
 	gMainWindow->UpdateCameraMenu();
 }
 
-void lcModel::SetLightType(lcLight* Light, lcLightType LightType)
-{
-	if (!Light->SetLightType(LightType))
-		return;
-
-	Light->UpdatePosition(mCurrentStep);
-
-	SaveCheckpoint(tr("Changing Light Type"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-}
-
 void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
 {
 	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
@@ -3230,30 +3218,6 @@ void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
 	Light->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing Spot Light Tightness"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-}
-
-void lcModel::SetLightAreaShape(lcLight* Light, lcLightAreaShape LightAreaShape)
-{
-	if (!Light->SetAreaShape(LightAreaShape))
-		return;
-
-	Light->UpdatePosition(mCurrentStep);
-
-	SaveCheckpoint(tr("Changing Area Light Shape"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-}
-
-void lcModel::SetLightAreaGrid(lcLight* Light, lcVector2i AreaGrid)
-{
-	if (!Light->SetAreaGrid(AreaGrid, mCurrentStep, gMainWindow->GetAddKeys()))
-		return;
-
-	Light->UpdatePosition(mCurrentStep);
-
-	SaveCheckpoint(tr("Changing Area Light Size"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

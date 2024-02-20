@@ -1061,8 +1061,10 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
-	case lcObjectPropertyId::LightType:
 		break;
+
+	case lcObjectPropertyId::LightType:
+		return static_cast<int>(GetLightType());
 
 	case lcObjectPropertyId::LightColor:
 		return QVariant::fromValue<lcVector3>(GetColor());
@@ -1084,9 +1086,17 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
 	case lcObjectPropertyId::LightSpotTightness:
+		break;
+
 	case lcObjectPropertyId::LightAreaShape:
+		return static_cast<int>(GetAreaShape());
+
 	case lcObjectPropertyId::LightAreaGridX:
+		return GetAreaGrid().x;
+
 	case lcObjectPropertyId::LightAreaGridY:
+		return GetAreaGrid().y;
+
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -1123,8 +1133,10 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
 	case lcObjectPropertyId::LightName:
-	case lcObjectPropertyId::LightType:
 		break;
+
+	case lcObjectPropertyId::LightType:
+		return SetLightType(static_cast<lcLightType>(Value.toInt()));
 
 	case lcObjectPropertyId::LightColor:
 		return SetColor(Value.value<lcVector3>(), Step, AddKey);
@@ -1146,9 +1158,17 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
 	case lcObjectPropertyId::LightSpotTightness:
+		break;
+
 	case lcObjectPropertyId::LightAreaShape:
+		return SetAreaShape(static_cast<lcLightAreaShape>(Value.toInt()));
+
 	case lcObjectPropertyId::LightAreaGridX:
+		return SetAreaGrid(lcVector2i(Value.toInt(), GetAreaGrid().y), Step, AddKey);
+
 	case lcObjectPropertyId::LightAreaGridY:
+		return SetAreaGrid(lcVector2i(GetAreaGrid().x, Value.toInt()), Step, AddKey);
+
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:

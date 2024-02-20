@@ -29,6 +29,13 @@ enum class lcViewpoint
 	Count
 };
 
+enum class lcCameraType
+{
+	Perspective,
+	Orthographic,
+	Count
+};
+
 enum lcCameraSection
 {
 	LC_CAMERA_SECTION_POSITION,
@@ -48,6 +55,8 @@ public:
 	lcCamera& operator=(const lcCamera&) = delete;
 	lcCamera& operator=(lcCamera&&) = delete;
 
+	static QString GetCameraTypeString(lcCameraType CameraType);
+	static QStringList GetCameraTypeStrings();
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
 	QString GetName() const override
@@ -62,6 +71,13 @@ public:
 	{
 		return (mState & LC_CAMERA_SIMPLE) != 0;
 	}
+
+	lcCameraType GetCameraType() const
+	{
+		return ((mState & LC_CAMERA_ORTHO) == 0) ? lcCameraType::Perspective : lcCameraType::Orthographic;
+	}
+
+	bool SetCameraType(lcCameraType CameraType);
 
 	bool IsOrtho() const
 	{

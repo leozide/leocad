@@ -179,6 +179,8 @@ int main(int argc, char *argv[])
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 #endif
+	qRegisterMetaType<lcVector3>("lcVector3");
+	QMetaType::registerComparators<lcVector3>();
 
 	QList<QPair<QString, bool>> LibraryPaths;
 

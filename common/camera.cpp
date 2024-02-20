@@ -115,9 +115,14 @@ void lcCamera::Initialize()
 	mState = 0;
 }
 
-void lcCamera::SetName(const QString& Name)
+bool lcCamera::SetName(const QString& Name)
 {
+	if (mName == Name)
+		return false;
+
 	mName = Name;
+
+	return true;
 }
 
 void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
@@ -614,8 +619,10 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::PieceColor:
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
-	case lcObjectPropertyId::CameraName:
 		break;
+
+	case lcObjectPropertyId::CameraName:
+		return GetName();
 
 	case lcObjectPropertyId::CameraType:
 		return static_cast<int>(GetCameraType());
@@ -668,7 +675,6 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 {
 	Q_UNUSED(Step);
 	Q_UNUSED(AddKey);
-	Q_UNUSED(Value);
 
 	switch (PropertyId)
 	{
@@ -676,8 +682,10 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::PieceColor:
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
-	case lcObjectPropertyId::CameraName:
 		break;
+
+	case lcObjectPropertyId::CameraName:
+		return SetName(Value.toString());
 
 	case lcObjectPropertyId::CameraType:
 		return SetCameraType(static_cast<lcCameraType>(Value.toInt()));

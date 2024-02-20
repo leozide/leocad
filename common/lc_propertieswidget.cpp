@@ -583,8 +583,8 @@ void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, co
 
 void lcPropertiesWidget::StringChanged()
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
-	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+	QLineEdit* LineEdit = qobject_cast<QLineEdit*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(LineEdit);
 
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -594,35 +594,32 @@ void lcPropertiesWidget::StringChanged()
 	if (!Model)
 		return;
 
-	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-	QString Text = Widget->text();
-
-	if (Camera)
-	{
-		if (PropertyId == lcObjectPropertyId::CameraName)
-		{
-			Model->SetCameraName(Camera, Text);
-		}
-	}
-	else if (Light)
-	{
-		if (PropertyId == lcObjectPropertyId::LightName)
-		{
-			Model->SetLightName(Light, Text);
-		}
-	}
+	QString Value = LineEdit->text();
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId, const QString& Text)
+void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
+	QLineEdit* LineEdit = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
-	if (Widget)
+	if (!LineEdit)
+		return;
+
+	QSignalBlocker Blocker(LineEdit);
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QString());
+
+	if (Partial)
 	{
-		QSignalBlocker Blocker(Widget);
-
-		Widget->setText(Text);
+		LineEdit->clear();
+		LineEdit->setPlaceholderText(tr("Multiple Values"));
+	}
+	else
+	{
+		LineEdit->setText(Value.toString());
+		LineEdit->setPlaceholderText(QString());
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -1199,7 +1196,6 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	float FoV = 60.0f;
 	float ZNear = 1.0f;
 	float ZFar = 100.0f;
-	QString Name;
 
 	if (Camera)
 	{
@@ -1210,10 +1206,9 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 		FoV = Camera->m_fovy;
 		ZNear = Camera->m_zNear;
 		ZFar = Camera->m_zFar;
-		Name = Camera->GetName();
 	}
 
-	UpdateString(lcObjectPropertyId::CameraName, Name);
+	UpdateString(lcObjectPropertyId::CameraName);
 	UpdateStringList(lcObjectPropertyId::CameraType);
 
 	UpdateFloat(lcObjectPropertyId::CameraFOV, FoV);
@@ -1241,7 +1236,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	mSelection = Selection;
 	mFocusObject = Light;
 
-	QString Name;
 	lcLightType LightType = lcLightType::Count;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Count;
 	lcVector2 LightSize(0.0f, 0.0f);
@@ -1254,7 +1248,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 	if (Light)
 	{
-		Name = Light->GetName();
 		LightType = Light->GetLightType();
 		LightAreaShape = Light->GetAreaShape();
 
@@ -1303,7 +1296,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 			LightAreaShape = lcLightAreaShape::Count;
 	}
 
-	UpdateString(lcObjectPropertyId::LightName, Name);
+	UpdateString(lcObjectPropertyId::LightName);
 	UpdateStringList(lcObjectPropertyId::LightType);
 	UpdateColor(lcObjectPropertyId::LightColor);
 

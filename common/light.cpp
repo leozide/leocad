@@ -484,6 +484,16 @@ void lcLight::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 	SetRotation(NewLocalToWorldMatrix, Step, AddKey);
 }
 
+bool lcLight::SetName(const QString& Name)
+{
+	if (mName == Name)
+		return false;
+
+	mName = Name;
+
+	return true;
+}
+
 bool lcLight::SetLightType(lcLightType LightType)
 {
 	if (static_cast<int>(LightType) < 0 || LightType >= lcLightType::Count)
@@ -1060,8 +1070,10 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::CameraUpX:
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
-	case lcObjectPropertyId::LightName:
 		break;
+
+	case lcObjectPropertyId::LightName:
+		return GetName();
 
 	case lcObjectPropertyId::LightType:
 		return static_cast<int>(GetLightType());
@@ -1132,8 +1144,10 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::CameraUpX:
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
-	case lcObjectPropertyId::LightName:
 		break;
+
+	case lcObjectPropertyId::LightName:
+		return SetName(Value.toString());
 
 	case lcObjectPropertyId::LightType:
 		return SetLightType(static_cast<lcLightType>(Value.toInt()));

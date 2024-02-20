@@ -64,7 +64,7 @@ public:
 		return mName;
 	}
 
-	void SetName(const QString& Name);
+	bool SetName(const QString& Name);
 	void CreateName(const lcArray<lcCamera*>& Cameras);
 
 	bool IsSimple() const

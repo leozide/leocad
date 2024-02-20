@@ -3159,19 +3159,6 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	UpdateAllViews();
 }
 
-void lcModel::SetCameraName(lcCamera* Camera, const QString& Name)
-{
-	if (Camera->GetName() == Name)
-		return;
-
-	Camera->SetName(Name);
-
-	SaveCheckpoint(tr("Renaming Camera"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-	gMainWindow->UpdateCameraMenu();
-}
-
 void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
 {
 	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
@@ -3263,19 +3250,10 @@ void lcModel::SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectProp
 	SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
-}
 
-void lcModel::SetLightName(lcLight* Light, const QString &Name)
-{
-	if (Light->GetName() == Name)
-		return;
-
-	Light->SetName(Name);
-
-	SaveCheckpoint(tr("Renaming Light"));
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
-	gMainWindow->UpdateCameraMenu();
+	// todo: fix hacky camera menu update
+	if (PropertyId == lcObjectPropertyId::CameraName)
+		gMainWindow->UpdateCameraMenu();
 }
 
 bool lcModel::AnyPiecesSelected() const

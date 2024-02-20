@@ -371,7 +371,6 @@ public:
 	void SetCameraFOV(lcCamera* Camera, float FOV);
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
-	void SetCameraName(lcCamera* Camera, const QString& Name);
 
 	void SetLightAttenuationDistance(lcLight* Light, float Distance);
 	void SetLightAttenuationPower(lcLight* Light, float Power);
@@ -380,7 +379,6 @@ public:
 	void SetSpotLightTightness(lcLight* Light, float Tightness);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightPower(lcLight* Light, float Power);
-	void SetLightName(lcLight* Light, const QString& Name);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

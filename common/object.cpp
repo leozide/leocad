@@ -18,8 +18,10 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::PieceColor:
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
-	case lcObjectPropertyId::CameraName:
 		break;
+
+	case lcObjectPropertyId::CameraName:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Renaming Camera");
 
 	case lcObjectPropertyId::CameraType:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Camera Type");
@@ -36,8 +38,10 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::CameraUpX:
 	case lcObjectPropertyId::CameraUpY:
 	case lcObjectPropertyId::CameraUpZ:
-	case lcObjectPropertyId::LightName:
 		break;
+
+	case lcObjectPropertyId::LightName:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Renaming Light");
 
 	case lcObjectPropertyId::LightType:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Type");

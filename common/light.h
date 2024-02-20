@@ -304,10 +304,7 @@ public:
 		return mCastShadow;
 	}
 
-	void SetName(const QString& Name)
-	{
-		mName = Name;
-	}
+	bool SetName(const QString& Name);
 
 	QString GetName() const override
 	{

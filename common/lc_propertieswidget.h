@@ -98,13 +98,13 @@ protected:
 	std::pair<QVariant, bool> GetUpdateValue(lcObjectPropertyId PropertyId, QVariant DefaultValue);
 
 	void UpdateKeyFrameWidget(lcObjectPropertyId PropertyId);
-	void UpdateBool(lcObjectPropertyId PropertyId, bool DefaultValue);
+	void UpdateBool(lcObjectPropertyId PropertyId);
 	void UpdateFloat(lcObjectPropertyId PropertyId, float Value);
-	void UpdateInteger(lcObjectPropertyId PropertyId, int DefaultValue);
+	void UpdateInteger(lcObjectPropertyId PropertyId);
 	void UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep Step, lcStep Min, lcStep Max);
 	void UpdateString(lcObjectPropertyId PropertyId, const QString& Text);
-	void UpdateStringList(lcObjectPropertyId PropertyId, int DefaultValue);
-	void UpdateColor(lcObjectPropertyId PropertyId, const lcVector3& DefaultValue);
+	void UpdateStringList(lcObjectPropertyId PropertyId);
+	void UpdateColor(lcObjectPropertyId PropertyId);
 	void UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex);
 	void UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name);
 

@@ -203,7 +203,7 @@ void lcPropertiesWidget::BoolChanged()
 	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool DefaultValue)
+void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId)
 {
 	QCheckBox* CheckBox = qobject_cast<QCheckBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
@@ -214,7 +214,7 @@ void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId, bool DefaultV
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, false);
 
 	if (Partial)
 		CheckBox->setCheckState(Qt::PartiallyChecked);
@@ -467,7 +467,7 @@ void lcPropertiesWidget::IntegerChanged()
 	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int DefaultValue)
+void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId)
 {
 	QLineEdit* LineEdit = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
@@ -478,7 +478,7 @@ void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId, int Defaul
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
 
 	if (Partial)
 	{
@@ -664,7 +664,7 @@ void lcPropertiesWidget::StringListChanged(int Value)
 	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
-void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int DefaultValue)
+void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId)
 {
 	QComboBox* ComboBox = qobject_cast<QComboBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
@@ -675,7 +675,7 @@ void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId, int Def
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, DefaultValue);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
 	bool HasMultiple = (ComboBox->itemText(ComboBox->count() - 1) == tr("Multiple Values"));
 
 	if (Partial)
@@ -745,7 +745,7 @@ void lcPropertiesWidget::ColorButtonClicked()
 	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(Value));
 }
 
-void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, const lcVector3& DefaultValue)
+void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId)
 {
 	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
@@ -756,7 +756,7 @@ void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId, const lcVect
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(DefaultValue));
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f)));
 
 	QColor Color = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
 	QPixmap Pixmap(14, 14);
@@ -1196,7 +1196,6 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Target(0.0f, 0.0f, 0.0f);
 	lcVector3 UpVector(0.0f, 0.0f, 0.0f);
-	lcCameraType CameraType = lcCameraType::Perspective;
 	float FoV = 60.0f;
 	float ZNear = 1.0f;
 	float ZFar = 100.0f;
@@ -1208,7 +1207,6 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 		Target = Camera->mTargetPosition;
 		UpVector = Camera->mUpVector;
 
-		CameraType = Camera->GetCameraType();
 		FoV = Camera->m_fovy;
 		ZNear = Camera->m_zNear;
 		ZFar = Camera->m_zFar;
@@ -1216,7 +1214,7 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	}
 
 	UpdateString(lcObjectPropertyId::CameraName, Name);
-	UpdateStringList(lcObjectPropertyId::CameraType, static_cast<int>(CameraType));
+	UpdateStringList(lcObjectPropertyId::CameraType);
 
 	UpdateFloat(lcObjectPropertyId::CameraFOV, FoV);
 	UpdateFloat(lcObjectPropertyId::CameraNear, ZNear);
@@ -1306,11 +1304,11 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	}
 
 	UpdateString(lcObjectPropertyId::LightName, Name);
-	UpdateStringList(lcObjectPropertyId::LightType, 0);
-	UpdateColor(lcObjectPropertyId::LightColor, lcVector3(1.0f, 1.0f, 1.0f));
+	UpdateStringList(lcObjectPropertyId::LightType);
+	UpdateColor(lcObjectPropertyId::LightColor);
 
 	UpdateFloat(lcObjectPropertyId::LightPower, Power);
-	UpdateBool(lcObjectPropertyId::LightCastShadow, true);
+	UpdateBool(lcObjectPropertyId::LightCastShadow);
 
 	UpdateFloat(lcObjectPropertyId::LightAttenuationDistance, AttenuationDistance);
 	UpdateFloat(lcObjectPropertyId::LightAttenuationPower, AttenuationPower);
@@ -1354,12 +1352,12 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 	if (IsAreaLight)
 	{
-		UpdateStringList(lcObjectPropertyId::LightAreaShape, static_cast<int>(LightAreaShape));
+		UpdateStringList(lcObjectPropertyId::LightAreaShape);
 		UpdateFloat(lcObjectPropertyId::LightAreaSize, LightSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, LightSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, LightSize.y);
-		UpdateInteger(lcObjectPropertyId::LightAreaGridX, 0);
-		UpdateInteger(lcObjectPropertyId::LightAreaGridY, 0);
+		UpdateInteger(lcObjectPropertyId::LightAreaGridX);
+		UpdateInteger(lcObjectPropertyId::LightAreaGridY);
 	}
 
 	UpdateFloat(lcObjectPropertyId::ObjectPositionX, Position[0]);

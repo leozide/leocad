@@ -155,9 +155,9 @@ void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
 	mPropertyWidgets[static_cast<int>(PropertyId)].KeyFrame = Widget;
 }
 
-std::pair<QVariant, bool> lcPropertiesWidget::GetUpdateValue(lcObjectPropertyId PropertyId, QVariant DefaultValue)
+std::pair<QVariant, bool> lcPropertiesWidget::GetUpdateValue(lcObjectPropertyId PropertyId)
 {
-	QVariant Value = DefaultValue;
+	QVariant Value;
 	bool Partial = false;
 
 	if (mFocusObject)
@@ -214,7 +214,7 @@ void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, false);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	if (Partial)
 		CheckBox->setCheckState(Qt::PartiallyChecked);
@@ -478,7 +478,7 @@ void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	if (Partial)
 	{
@@ -609,7 +609,7 @@ void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QString());
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	if (Partial)
 	{
@@ -672,7 +672,7 @@ void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 	bool HasMultiple = (ComboBox->itemText(ComboBox->count() - 1) == tr("Multiple Values"));
 
 	if (Partial)
@@ -725,7 +725,7 @@ void lcPropertiesWidget::ColorButtonClicked()
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f)));
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	QColor InitialColor = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
 
@@ -754,7 +754,7 @@ void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f)));
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	QColor Color = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
 	QPixmap Pixmap(14, 14);
@@ -820,7 +820,7 @@ void lcPropertiesWidget::PieceColorButtonClicked()
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
@@ -849,7 +849,7 @@ void lcPropertiesWidget::UpdatePieceColor(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	const int ColorIndex = Value.toInt();
 	QColor Color = Partial ? QColor(128, 128, 128) : QColor::fromRgbF(gColorList[ColorIndex].Value[0], gColorList[ColorIndex].Value[1], gColorList[ColorIndex].Value[2]);
@@ -896,7 +896,7 @@ void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId)
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
 
@@ -919,7 +919,7 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 	QVariant Value;
 	bool Partial;
 
-	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
 	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
 

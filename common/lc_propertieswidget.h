@@ -95,7 +95,7 @@ protected:
 	void AddPieceColorProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
 	void AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames);
 
-	std::pair<QVariant, bool> GetUpdateValue(lcObjectPropertyId PropertyId, QVariant DefaultValue);
+	std::pair<QVariant, bool> GetUpdateValue(lcObjectPropertyId PropertyId);
 
 	void UpdateKeyFrameWidget(lcObjectPropertyId PropertyId);
 	void UpdateBool(lcObjectPropertyId PropertyId);

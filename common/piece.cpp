@@ -90,6 +90,18 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	}
 }
 
+bool lcPiece::SetPieceId(PieceInfo* Info)
+{
+	if (mPieceInfo == Info)
+		return false;
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	Library->ReleasePieceInfo(mPieceInfo);
+	SetPieceInfo(Info, QString(), true);
+
+	return true;
+}
+
 void lcPiece::UpdateID()
 {
 	mID = mPieceInfo->mFileName;
@@ -651,7 +663,11 @@ QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	switch (PropertyId)
 	{
 	case lcObjectPropertyId::PieceId:
+		return QVariant::fromValue<void*>(mPieceInfo);
+
 	case lcObjectPropertyId::PieceColor:
+		return GetColorIndex();
+
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
@@ -704,12 +720,15 @@ bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 {
 	Q_UNUSED(Step);
 	Q_UNUSED(AddKey);
-	Q_UNUSED(Value);
 
 	switch (PropertyId)
 	{
 	case lcObjectPropertyId::PieceId:
+		return SetPieceId(static_cast<PieceInfo*>(Value.value<void*>()));
+
 	case lcObjectPropertyId::PieceColor:
+		return SetColorIndex(Value.toInt());
+
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:

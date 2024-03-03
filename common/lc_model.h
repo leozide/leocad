@@ -361,7 +361,6 @@ public:
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectsKeyFrame(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
-	void SetSelectedPiecesPieceInfo(PieceInfo* Info);
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 

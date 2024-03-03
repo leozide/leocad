@@ -722,13 +722,14 @@ void lcPropertiesWidget::ColorButtonClicked()
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
 
-	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-	lcVector3 InitialValue(0.5f, 0.5f, 0.5f);
+	QVariant Value;
+	bool Partial;
 
-	if (Light)
-		InitialValue = Light->GetColor();
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, QVariant::fromValue<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f)));
 
-	QColor Color = QColorDialog::getColor(lcQColorFromVector3(InitialValue), this, tr("Select Light Color"));
+	QColor InitialColor = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
+
+	QColor Color = QColorDialog::getColor(InitialColor, this, tr("Select Light Color"));
 
 	if (!Color.isValid())
 		return;
@@ -738,8 +739,8 @@ void lcPropertiesWidget::ColorButtonClicked()
 	if (!Model)
 		return;
 
-	const lcVector3 Value = lcVector3FromQColor(Color);
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(Value));
+	const lcVector3 FloatColor = lcVector3FromQColor(Color);
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(FloatColor));
 }
 
 void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId)
@@ -790,66 +791,73 @@ void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const Q
 
 void lcPropertiesWidget::PieceColorChanged(int ColorIndex)
 {
-	if (!mFocusObject || !mFocusObject->IsPiece())
+	lcColorPickerPopup* Popup = qobject_cast<lcColorPickerPopup*>(sender());
+	QMenu* Menu = qobject_cast<QMenu*>(Popup->parent());
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(Menu->parent());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(ColorButton);
+
+	Menu->close();
+
+	if (PropertyId == lcObjectPropertyId::Count)
 		return;
 
 	lcModel* Model = gMainWindow->GetActiveModel();
-	Model->SetSelectedPiecesColorIndex(ColorIndex);
+
+	if (!Model)
+		return;
+
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, ColorIndex);
 }
 
 void lcPropertiesWidget::PieceColorButtonClicked()
 {
 	QToolButton* ColorButton = qobject_cast<QToolButton*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(ColorButton);
 
-	if (!ColorButton || !mFocusObject || !mFocusObject->IsPiece())
+	if (!ColorButton)
 		return;
 
-	int ColorIndex = reinterpret_cast<lcPiece*>(mFocusObject)->GetColorIndex();
+	QVariant Value;
+	bool Partial;
 
-	lcColorPickerPopup* Popup = new lcColorPickerPopup(ColorButton, ColorIndex);
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+
+	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
+
+	QMenu* Menu = new QMenu(ColorButton);
+
+	QWidgetAction* Action = new QWidgetAction(Menu);
+	lcColorPickerPopup* Popup = new lcColorPickerPopup(Menu, ColorIndex);
+	Action->setDefaultWidget(Popup);
+	Menu->addAction(Action);
+
 	connect(Popup, &lcColorPickerPopup::Selected, this, &lcPropertiesWidget::PieceColorChanged);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	QScreen* Screen = Button->screen();
-	const QRect ScreenRect = Screen ? Screen->geometry() : QRect();
-#elif (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
-	QScreen* Screen = QGuiApplication::screenAt(ColorButton->mapToGlobal(ColorButton->rect().bottomLeft()));
-	const QRect ScreenRect = Screen ? Screen->geometry() : QApplication::desktop()->geometry();
-#else
-	const QRect ScreenRect = QApplication::desktop()->geometry();
-#endif
+	Menu->exec(ColorButton->mapToGlobal(ColorButton->rect().bottomLeft()));
 
-	QPoint Pos = ColorButton->mapToGlobal(ColorButton->rect().bottomLeft());
-
-	if (Pos.x() < ScreenRect.left())
-		Pos.setX(ScreenRect.left());
-	if (Pos.y() < ScreenRect.top())
-		Pos.setY(ScreenRect.top());
-
-	Popup->adjustSize();
-
-	if (Pos.x() + Popup->width() > ScreenRect.right())
-		Pos.setX(ScreenRect.right() - Popup->width());
-	if (Pos.y() + Popup->height() > ScreenRect.bottom())
-		Pos.setY(ScreenRect.bottom() - Popup->height());
-
-	Popup->move(Pos);
-	Popup->setFocus();
-	Popup->show();
+	delete Menu;
 }
 
-void lcPropertiesWidget::UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex)
+void lcPropertiesWidget::UpdatePieceColor(lcObjectPropertyId PropertyId)
 {
 	QToolButton* ColorButton = qobject_cast<QToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!ColorButton)
 		return;
-		
+
+	QSignalBlocker Blocker(ColorButton);
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+
+	const int ColorIndex = Value.toInt();
+	QColor Color = Partial ? QColor(128, 128, 128) : QColor::fromRgbF(gColorList[ColorIndex].Value[0], gColorList[ColorIndex].Value[1], gColorList[ColorIndex].Value[2]);
 	QPixmap Pixmap(14, 14);
-	Pixmap.fill(QColor::fromRgbF(gColorList[ColorIndex].Value[0], gColorList[ColorIndex].Value[1], gColorList[ColorIndex].Value[2]));
+	Pixmap.fill(Color);
 
 	ColorButton->setIcon(Pixmap);
-	ColorButton->setText(QString("  ") + gColorList[ColorIndex].Name);
+	ColorButton->setText(Partial ? tr(" Multiple Colors") : QString("  ") + gColorList[ColorIndex].Name);
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -877,14 +885,25 @@ void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, co
 	mLayoutRow++;
 }
 
-void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name)
+void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId)
 {
 	lcElidableToolButton* PieceIdButton = qobject_cast<lcElidableToolButton*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 
 	if (!PieceIdButton)
 		return;
 
-	PieceIdButton->setText(Name);
+	QSignalBlocker Blocker(PieceIdButton);
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+
+	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
+
+	if (Partial)
+		PieceIdButton->setText(tr("Multiple Pieces"));
+	else if (Info)
+		PieceIdButton->setText(Info->m_strDescription);
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -892,15 +911,22 @@ void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId, const QStr
 void lcPropertiesWidget::PieceIdButtonClicked()
 {
 	QToolButton* PieceIdButton = qobject_cast<QToolButton*>(sender());
-	lcPiece* Piece = dynamic_cast<lcPiece*>(mFocusObject);
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(PieceIdButton);
 
-	if (!PieceIdButton || !Piece)
+	if (!PieceIdButton)
 		return;
 
-	QMenu* Menu = new QMenu();
+	QVariant Value;
+	bool Partial;
+
+	std::tie(Value, Partial) = GetUpdateValue(PropertyId, 0);
+
+	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
+
+	QMenu* Menu = new QMenu(PieceIdButton);
 
 	QWidgetAction* Action = new QWidgetAction(Menu);
-	lcPieceIdPickerPopup* Popup = new lcPieceIdPickerPopup(gMainWindow->GetActiveModel(), Piece->mPieceInfo, Menu);
+	lcPieceIdPickerPopup* Popup = new lcPieceIdPickerPopup(gMainWindow->GetActiveModel(), Partial ? nullptr : Info, Menu);
 	Action->setDefaultWidget(Popup);
 	Menu->addAction(Action);
 
@@ -913,12 +939,17 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 
 void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 {
+	lcPieceIdPickerPopup* Popup = qobject_cast<lcPieceIdPickerPopup*>(sender());
+	QMenu* Menu = qobject_cast<QMenu*>(Popup->parent());
+	QToolButton* PieceIdButton = qobject_cast<QToolButton*>(Menu->parent());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(PieceIdButton);
+
 	lcModel* Model = gMainWindow->GetActiveModel();
 
 	if (!Model || !Info)
 		return;
 
-	Model->SetSelectedPiecesPieceInfo(Info);
+	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
 }
 
 void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
@@ -1127,15 +1158,11 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 
 	lcStep StepShow = 1;
 	lcStep StepHide = LC_STEP_MAX;
-	PieceInfo* Info = nullptr;
-	int ColorIndex = gDefaultColor;
 
 	if (Piece)
 	{
 		StepShow = Piece->GetStepShow();
 		StepHide = Piece->GetStepHide();
-		ColorIndex = Piece->GetColorIndex();
-		Info = Piece->mPieceInfo;
 	}
 	else
 	{
@@ -1154,8 +1181,6 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 			{
 				StepShow = SelectedPiece->GetStepShow();
 				StepHide = SelectedPiece->GetStepHide();
-				ColorIndex = SelectedPiece->GetColorIndex();
-				Info = SelectedPiece->mPieceInfo;
 
 				FirstPiece = false;
 			}
@@ -1166,18 +1191,12 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 
 				if (SelectedPiece->GetStepHide() != StepHide)
 					StepHide = 0;
-
-				if (SelectedPiece->GetColorIndex() != ColorIndex)
-					ColorIndex = gDefaultColor;
-
-				if (SelectedPiece->mPieceInfo != Info)
-					Info = nullptr;
 			}
 		}
 	}
 
-	UpdatePieceId(lcObjectPropertyId::PieceId, Info ? Info->m_strDescription : QString());
-	UpdatePieceColor(lcObjectPropertyId::PieceColor, ColorIndex);
+	UpdatePieceId(lcObjectPropertyId::PieceId);
+	UpdatePieceColor(lcObjectPropertyId::PieceColor);
 	UpdateStepNumber(lcObjectPropertyId::PieceStepShow, StepShow ? StepShow : LC_STEP_MAX, 1, StepHide - 1);
 	UpdateStepNumber(lcObjectPropertyId::PieceStepHide, StepHide ? StepHide : LC_STEP_MAX, StepShow + 1, LC_STEP_MAX);
 }

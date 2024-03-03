@@ -3008,30 +3008,6 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 	}
 }
 
-void lcModel::SetSelectedPiecesPieceInfo(PieceInfo* Info)
-{
-	bool Modified = false;
-
-	for (lcPiece* Piece : mPieces)
-	{
-		if (Piece->IsSelected() && Piece->mPieceInfo != Info)
-		{
-			lcPiecesLibrary* Library = lcGetPiecesLibrary();
-			Library->ReleasePieceInfo(Piece->mPieceInfo);
-			Piece->SetPieceInfo(Info, QString(), true);
-			Modified = true;
-		}
-	}
-
-	if (Modified)
-	{
-		SaveCheckpoint(tr("Setting Part"));
-		gMainWindow->UpdateSelectedObjects(false);
-		UpdateAllViews();
-		gMainWindow->UpdateTimeline(false, true);
-	}
-}
-
 void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
 	lcArray<lcPiece*> MovedPieces;
@@ -3245,6 +3221,12 @@ void lcModel::SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectProp
 	SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
+
+	// todo: fix hacky timeline update
+	if (PropertyId == lcObjectPropertyId::PieceId || PropertyId == lcObjectPropertyId::PieceColor)
+	{
+		gMainWindow->UpdateTimeline(false, true);
+	}
 }
 
 bool lcModel::AnyPiecesSelected() const

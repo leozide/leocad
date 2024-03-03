@@ -105,8 +105,8 @@ protected:
 	void UpdateString(lcObjectPropertyId PropertyId);
 	void UpdateStringList(lcObjectPropertyId PropertyId);
 	void UpdateColor(lcObjectPropertyId PropertyId);
-	void UpdatePieceColor(lcObjectPropertyId PropertyId, int ColorIndex);
-	void UpdatePieceId(lcObjectPropertyId PropertyId, const QString& Name);
+	void UpdatePieceColor(lcObjectPropertyId PropertyId);
+	void UpdatePieceId(lcObjectPropertyId PropertyId);
 
 	void SetEmpty();
 	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);

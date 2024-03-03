@@ -186,6 +186,7 @@ public:
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait);
+	bool SetPieceId(PieceInfo* Info);
 	bool FileLoad(lcFile& file);
 
 	void UpdatePosition(lcStep Step) override;
@@ -265,10 +266,15 @@ public:
 		return mColorIndex;
 	}
 
-	void SetColorIndex(int ColorIndex)
+	bool SetColorIndex(int ColorIndex)
 	{
+		if (mColorIndex == ColorIndex)
+			return false;
+
 		mColorIndex = ColorIndex;
 		mColorCode = lcGetColorCode(ColorIndex);
+
+		return true;
 	}
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)

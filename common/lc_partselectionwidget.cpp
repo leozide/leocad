@@ -885,6 +885,12 @@ void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 	QWidget::resizeEvent(Event);
 }
 
+void lcPartSelectionWidget::FocusFilter()
+{
+	mFilterWidget->setFocus();
+	mFilterWidget->selectAll();
+}
+
 void lcPartSelectionWidget::FilterCategoriesChanged(const QString& Text)
 {
 	if (mFilterCategoriesAction)

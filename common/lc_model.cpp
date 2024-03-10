@@ -1748,11 +1748,45 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 		LoadedInfos.push_back(Info);
 	}
 
+	// Remember the current step
+	const lcStep CurrentStep = mCurrentStep;
+
+	// Remember the camera names
+	std::vector<QString> CameraNames;
+	if (gMainWindow)
+	{
+		std::vector<lcView*> Views = lcView::GetModelViews(this);
+		CameraNames.resize( Views.size() );
+		for (unsigned int i = 0; i < Views.size(); i++)
+		{
+			lcCamera* Camera = Views[i]->GetCamera();
+			if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
+				CameraNames[i] = Camera->GetName();
+			else
+				CameraNames[i] = "";
+		}
+	}
+
 	DeleteModel();
 
 	QBuffer Buffer(&CheckPoint->File);
 	Buffer.open(QIODevice::ReadOnly);
 	LoadLDraw(Buffer, lcGetActiveProject());
+
+	// Reset the current step
+	mCurrentStep = CurrentStep;
+	CalculateStep(CurrentStep);
+
+	// Reset the cameras
+	if (gMainWindow)
+	{
+		std::vector<lcView*> Views = lcView::GetModelViews(this);
+		for (unsigned int i = 0; i < CameraNames.size(); i++)
+		{
+			if (CameraNames[i] != "")
+				Views[i]->SetCamera(CameraNames[i]);
+		}
+	}
 
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateCurrentStep();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QRegExp>
 
 namespace Ui {
 class lcRenderDialog;

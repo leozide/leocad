@@ -11,7 +11,7 @@ equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 4) {
 }
 
 greaterThan(QT_MAJOR_VERSION, 5) {
-	QT += openglwidgets
+	QT += openglwidgets core5compat
 	win32-msvc* {
 		QMAKE_CXXFLAGS += /std:c++17
 	}

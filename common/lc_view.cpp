@@ -1386,7 +1386,7 @@ void lcView::DrawGrid()
 		return;
 
 	const int Spacing = lcMax(Preferences.mGridLineSpacing, 1);
-	int MinX, MaxX, MinY, MaxY;
+	int MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	bool GridSizeValid = mModel->GetVisiblePiecesBoundingBox(Min, Max);
@@ -1418,24 +1418,31 @@ void lcView::DrawGrid()
 	{
 		MinX = (int)(floorf(Min[0] / (20.0f * Spacing))) - 1;
 		MinY = (int)(floorf(Min[1] / (20.0f * Spacing))) - 1;
+		MinZ = (int)(floorf(Min[2] / (20.0f * Spacing))) - 1;
 		MaxX = (int)(ceilf(Max[0] / (20.0f * Spacing))) + 1;
 		MaxY = (int)(ceilf(Max[1] / (20.0f * Spacing))) + 1;
+		MaxZ = (int)(ceilf(Max[2] / (20.0f * Spacing))) + 1;
 
 		MinX = lcMin(MinX, -2);
 		MinY = lcMin(MinY, -2);
+		MinZ = lcMin(MinZ, -1);
 		MaxX = lcMax(MaxX, 2);
 		MaxY = lcMax(MaxY, 2);
+		MaxZ = lcMax(MaxZ, 1);
 	}
 	else
 	{
 		MinX = -2;
 		MinY = -2;
+		MinZ = -1;
 		MaxX = 2;
 		MaxY = 2;
+		MaxZ = 1;
 	}
 
 	if (!mGridBuffer.IsValid() || MinX != mGridSettings[0] || MinY != mGridSettings[1] || MaxX != mGridSettings[2] || MaxY != mGridSettings[3] ||
-	    Spacing != mGridSettings[4] || (Preferences.mDrawGridStuds ? 1 : 0) != mGridSettings[5] || (Preferences.mDrawGridLines ? 1 : 0) != mGridSettings[6])
+	    Spacing != mGridSettings[4] || (Preferences.mDrawGridStuds ? 1 : 0) != mGridSettings[5] || (Preferences.mDrawGridLines ? 1 : 0) != mGridSettings[6] ||
+	    (Preferences.mDrawGridOrigin ? 1 : 0) != mGridSettings[7])
 	{
 		int VertexBufferSize = 0;
 
@@ -1491,22 +1498,28 @@ void lcView::DrawGrid()
 
 			for (int Step = MinX; Step < MaxX + 1; Step++)
 			{
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MinY * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MaxY * LineSpacing;
-				*CurVert++ = 0.0f;
+				if (Step || !Preferences.mDrawGridOrigin)
+				{
+					*CurVert++ = Step * LineSpacing;
+					*CurVert++ = MinY * LineSpacing;
+					*CurVert++ = 0.0f;
+					*CurVert++ = Step * LineSpacing;
+					*CurVert++ = MaxY * LineSpacing;
+					*CurVert++ = 0.0f;
+				}
 			}
 
 			for (int Step = MinY; Step < MaxY + 1; Step++)
 			{
-				*CurVert++ = MinX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = MaxX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
+				if (Step || !Preferences.mDrawGridOrigin)
+				{
+					*CurVert++ = MinX * LineSpacing;
+					*CurVert++ = Step * LineSpacing;
+					*CurVert++ = 0.0f;
+					*CurVert++ = MaxX * LineSpacing;
+					*CurVert++ = Step * LineSpacing;
+					*CurVert++ = 0.0f;
+				}
 			}
 		}
 
@@ -1517,6 +1530,7 @@ void lcView::DrawGrid()
 		mGridSettings[4] = Spacing;
 		mGridSettings[5] = (Preferences.mDrawGridStuds ? 1 : 0);
 		mGridSettings[6] = (Preferences.mDrawGridLines ? 1 : 0);
+		mGridSettings[7] = (Preferences.mDrawGridOrigin ? 1 : 0);
 
 		mContext->DestroyVertexBuffer(mGridBuffer);
 		mGridBuffer = mContext->CreateVertexBuffer(VertexBufferSize, Verts);
@@ -1561,24 +1575,27 @@ void lcView::DrawGrid()
 	{
 		struct lcGridVertex
 		{
-			float x, y;
+			float x, y, z;
 			quint32 Color;
 		};
 
 		const quint32 Red = LC_RGBA(204, 0, 0, 255);
 		const quint32 Green = LC_RGBA(0, 204, 0, 255);
+		const quint32 Blue = LC_RGBA(0, 0, 204, 255);
 		const float Scale = 20.0f * Spacing;
 
-		const lcGridVertex Verts[4] =
+		const lcGridVertex Verts[6] =
 		{
-			{ 0.0f, MinY * Scale, Green }, { 0.0f, MaxY * Scale, Green }, { MinX * Scale, 0.0f, Red }, { MaxX * Scale, 0.0f, Red }
+			{ 0.0f, (MinY-1) * Scale, 0.0f, Green }, { 0.0f, (MaxY+1) * Scale, 0.0f, Green },
+			{ (MinX-1) * Scale, 0.0f, 0.0f, Red }, { (MaxX+1) * Scale, 0.0f, 0.0f, Red },
+			{ 0.0f, 0.0f, (MinZ-0) * Scale, Blue }, { 0.0f, 0.0f, (MaxZ+0) * Scale, Blue }
 		};
 
 		mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
 		mContext->SetVertexBufferPointer(Verts);
-		mContext->SetVertexFormat(0, 2, 0, 0, 4, false);
+		mContext->SetVertexFormat(0, 3, 0, 0, 4, false);
 
-		mContext->DrawPrimitives(GL_LINES, 0, 4);
+		mContext->DrawPrimitives(GL_LINES, 0, 6);
 	}
 }
 

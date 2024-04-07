@@ -647,9 +647,9 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointSize:
-	case lcObjectPropertyId::LightSpotSize:
-	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
@@ -711,9 +711,9 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointSize:
-	case lcObjectPropertyId::LightSpotSize:
-	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
@@ -774,9 +774,9 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointSize:
-	case lcObjectPropertyId::LightSpotSize:
-	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
@@ -837,9 +837,9 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointSize:
-	case lcObjectPropertyId::LightSpotSize:
-	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:

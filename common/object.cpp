@@ -64,9 +64,9 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointSize:
-	case lcObjectPropertyId::LightSpotSize:
-	case lcObjectPropertyId::LightDirectionalSize:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:

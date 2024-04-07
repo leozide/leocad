@@ -3180,12 +3180,42 @@ void lcModel::SetSpotLightPOVRayTightness(lcLight* Light, float Tightness)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightSize(lcLight* Light, lcVector2 LightAreaSize)
+void lcModel::SetLightPointBlenderRadius(lcLight* Light, float Radius)
 {
-	Light->SetSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetPointBlenderRadius(Radius, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing Light Size"));
+	SaveCheckpoint(tr("Changing Point Light Blender Radius"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightSpotBlenderRadius(lcLight* Light, float Radius)
+{
+	Light->SetSpotBlenderRadius(Radius, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Spot Light Blender Radius"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightDirectionalBlenderAngle(lcLight* Light, float Angle)
+{
+	Light->SetDirectionalBlenderAngle(Angle, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Directional Light Blender Angle"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightAreaSize(lcLight* Light, lcVector2 LightAreaSize)
+{
+	Light->SetAreaSize(LightAreaSize, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Area Size"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

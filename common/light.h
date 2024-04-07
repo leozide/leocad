@@ -283,11 +283,32 @@ public:
 		return mAreaPOVRayGrid;
 	}
 
-	void SetSize(lcVector2 Size, lcStep Step, bool AddKey);
+	void SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
 
-	lcVector2 GetSize() const
+	float GetPointBlenderRadius() const
 	{
-		return mSize;
+		return mPointBlenderRadius;
+	}
+
+	void SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey);
+
+	float GetSpotBlenderRadius() const
+	{
+		return mSpotBlenderRadius;
+	}
+
+	void SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetDirectionalBlenderAngle() const
+	{
+		return mDirectionalBlenderAngle;
+	}
+
+	void SetAreaSize(lcVector2 Size, lcStep Step, bool AddKey);
+
+	lcVector2 GetAreaSize() const
+	{
+		return mAreaSize;
 	}
 
 	void SetBlenderPower(float Power, lcStep Step, bool AddKey);
@@ -325,8 +346,6 @@ public:
 	void CreateName(const lcArray<lcLight*>& Lights);
 
 protected:
-	void UpdateLightType();
-
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
 	void DrawDirectionalLight(lcContext* Context) const;
@@ -344,7 +363,10 @@ protected:
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
 	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
-	lcObjectProperty<lcVector2> mSize = lcObjectProperty<lcVector2>(lcVector2(0.0f, 0.0f));
+	lcObjectProperty<float> mPointBlenderRadius = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mSpotBlenderRadius = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.00918f * LC_DTOR);
+	lcObjectProperty<lcVector2> mAreaSize = lcObjectProperty<lcVector2>(lcVector2(200.0f, 200.0f));
 	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
 	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
 	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);

@@ -388,19 +388,31 @@ void lcPropertiesWidget::FloatChanged()
 		{
 			Model->SetLightPOVRayFadePower(Light, Value);
 		}
-		else if (PropertyId == lcObjectPropertyId::LightPointSize || PropertyId == lcObjectPropertyId::LightSpotSize || PropertyId == lcObjectPropertyId::LightDirectionalSize || PropertyId == lcObjectPropertyId::LightAreaSizeX)
+		else if (PropertyId == lcObjectPropertyId::LightPointBlenderRadius)
 		{
-			lcVector2 LightSize = Light->GetSize();
+			Model->SetLightPointBlenderRadius(Light, Value);
+		}
+		else if (PropertyId == lcObjectPropertyId::LightSpotBlenderRadius)
+		{
+			Model->SetLightSpotBlenderRadius(Light, Value);
+		}
+		else if (PropertyId == lcObjectPropertyId::LightDirectionalBlenderAngle)
+		{
+			Model->SetLightDirectionalBlenderAngle(Light, Value);
+		}
+		else if (PropertyId == lcObjectPropertyId::LightAreaSizeX)
+		{
+			lcVector2 LightSize = Light->GetAreaSize();
 			LightSize[0] = Value;
 
-			Model->SetLightSize(Light, LightSize);
+			Model->SetLightAreaSize(Light, LightSize);
 		}
 		else if (PropertyId == lcObjectPropertyId::LightAreaSizeY)
 		{
-			lcVector2 LightSize = Light->GetSize();
+			lcVector2 LightSize = Light->GetAreaSize();
 			LightSize[1] = Value;
 
-			Model->SetLightSize(Light, LightSize);
+			Model->SetLightAreaSize(Light, LightSize);
 		}
 		else if (PropertyId == lcObjectPropertyId::LightSpotConeAngle)
 		{
@@ -1043,14 +1055,14 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::LightPointSize, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPointBlenderRadius, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
 
-	AddFloatProperty(lcObjectPropertyId::LightSpotSize, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightSpotBlenderRadius, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), true, 0.0f, 179.9f);
 	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), true, 0.0f, 179.9f);
 	AddFloatProperty(lcObjectPropertyId::LightSpotPOVRayTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), true, 0.0f, FLT_MAX);
 
-	AddFloatProperty(lcObjectPropertyId::LightDirectionalSize, tr("Angle"), tr("Angular diameter of the light (Blender only)"), true, 0.0f, 180.0f);
+	AddFloatProperty(lcObjectPropertyId::LightDirectionalBlenderAngle, tr("Angle"), tr("Angular diameter of the light (Blender only)"), true, 0.0f, 180.0f);
 
 	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), false, lcLight::GetAreaShapeStrings());
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), true, 0.0f, FLT_MAX);
@@ -1262,7 +1274,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 	lcLightType LightType = lcLightType::Count;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Count;
-	lcVector2 LightSize(0.0f, 0.0f);
+	float PointBlenderRadius = 0.0f, SpotBlenderRadius = 0.0f, DirectionalBlenderAngle = 0.0f;
+	lcVector2 AreaSize(0.0f, 0.0f);
 	float BlenderPower = 0.0f, POVRayPower = 0.0f;
 	float FadeDistance = 0.0f;
 	float FadePower = 0.0f;
@@ -1284,7 +1297,10 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 		SpotTightness = Light->GetSpotPOVRayTightness();
-		LightSize = Light->GetSize();
+		PointBlenderRadius = Light->GetPointBlenderRadius();
+		SpotBlenderRadius = Light->GetSpotBlenderRadius();
+		DirectionalBlenderAngle = Light->GetDirectionalBlenderAngle();
+		AreaSize = Light->GetAreaSize();
 	}
 	else
 	{
@@ -1333,30 +1349,30 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateFloat(lcObjectPropertyId::LightPOVRayFadePower, FadePower);
 
 	const bool IsPointLight = (LightType == lcLightType::Point);
-	SetPropertyVisible(lcObjectPropertyId::LightPointSize, IsPointLight);
+	SetPropertyVisible(lcObjectPropertyId::LightPointBlenderRadius, IsPointLight);
 
 	if (IsPointLight)
-		UpdateFloat(lcObjectPropertyId::LightPointSize, LightSize.x);
+		UpdateFloat(lcObjectPropertyId::LightPointBlenderRadius, PointBlenderRadius);
 
 	const bool IsSpotLight = (LightType == lcLightType::Spot);
-	SetPropertyVisible(lcObjectPropertyId::LightSpotSize, IsSpotLight);
+	SetPropertyVisible(lcObjectPropertyId::LightSpotBlenderRadius, IsSpotLight);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotConeAngle, IsSpotLight);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotPenumbraAngle, IsSpotLight);
 	SetPropertyVisible(lcObjectPropertyId::LightSpotPOVRayTightness, IsSpotLight);
 
 	if (IsSpotLight)
 	{
-		UpdateFloat(lcObjectPropertyId::LightSpotSize, LightSize.x);
+		UpdateFloat(lcObjectPropertyId::LightSpotBlenderRadius, SpotBlenderRadius);
 		UpdateFloat(lcObjectPropertyId::LightSpotConeAngle, SpotConeAngle);
 		UpdateFloat(lcObjectPropertyId::LightSpotPenumbraAngle, SpotPenumbraAngle);
 		UpdateFloat(lcObjectPropertyId::LightSpotPOVRayTightness, SpotTightness);
 	}
 
 	const bool IsDirectionalLight = (LightType == lcLightType::Directional);
-	SetPropertyVisible(lcObjectPropertyId::LightDirectionalSize, IsDirectionalLight);
+	SetPropertyVisible(lcObjectPropertyId::LightDirectionalBlenderAngle, IsDirectionalLight);
 
 	if (IsDirectionalLight)
-		UpdateFloat(lcObjectPropertyId::LightDirectionalSize, LightSize.x);
+		UpdateFloat(lcObjectPropertyId::LightDirectionalBlenderAngle, DirectionalBlenderAngle);
 
 	const bool IsAreaLight = (LightType == lcLightType::Area);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaShape, IsAreaLight);
@@ -1372,9 +1388,9 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	if (IsAreaLight)
 	{
 		UpdateStringList(lcObjectPropertyId::LightAreaShape);
-		UpdateFloat(lcObjectPropertyId::LightAreaSize, LightSize.x);
-		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, LightSize.x);
-		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, LightSize.y);
+		UpdateFloat(lcObjectPropertyId::LightAreaSize, AreaSize.x);
+		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, AreaSize.x);
+		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, AreaSize.y);
 		UpdateInteger(lcObjectPropertyId::LightAreaPOVRayGridX);
 		UpdateInteger(lcObjectPropertyId::LightAreaPOVRayGridY);
 	}

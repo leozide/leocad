@@ -376,7 +376,10 @@ public:
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightPOVRayTightness(lcLight* Light, float Tightness);
-	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
+	void SetLightPointBlenderRadius(lcLight* Light, float Radius);
+	void SetLightSpotBlenderRadius(lcLight* Light, float Radius);
+	void SetLightDirectionalBlenderAngle(lcLight* Light, float Angle);
+	void SetLightAreaSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightBlenderPower(lcLight* Light, float Power);
 	void SetLightPOVRayPower(lcLight* Light, float Power);
 

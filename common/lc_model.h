@@ -375,7 +375,7 @@ public:
 	void SetLightPOVRayFadePower(lcLight* Light, float Power);
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
-	void SetSpotLightTightness(lcLight* Light, float Tightness);
+	void SetSpotLightPOVRayTightness(lcLight* Light, float Tightness);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
 	void SetLightPower(lcLight* Light, float Power);
 

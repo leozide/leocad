@@ -3170,12 +3170,12 @@ void lcModel::SetSpotLightPenumbraAngle(lcLight* Light, float Angle)
 	UpdateAllViews();
 }
 
-void lcModel::SetSpotLightTightness(lcLight* Light, float Tightness)
+void lcModel::SetSpotLightPOVRayTightness(lcLight* Light, float Tightness)
 {
-	Light->SetSpotTightness(Tightness, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetSpotPOVRayTightness(Tightness, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing Spot Light Tightness"));
+	SaveCheckpoint(tr("Changing Spot Light POV-Ray Tightness"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

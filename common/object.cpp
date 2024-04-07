@@ -69,14 +69,14 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
 		break;
 
 	case lcObjectPropertyId::LightAreaShape:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Shape");
 
-	case lcObjectPropertyId::LightAreaGridX:
-	case lcObjectPropertyId::LightAreaGridY:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Grid");
 
 	case lcObjectPropertyId::ObjectPositionX:

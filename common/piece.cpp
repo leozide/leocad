@@ -699,10 +699,10 @@ QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaGridX:
-	case lcObjectPropertyId::LightAreaGridY:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -760,10 +760,10 @@ bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaGridX:
-	case lcObjectPropertyId::LightAreaGridY:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -814,10 +814,10 @@ bool lcPiece::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaGridX:
-	case lcObjectPropertyId::LightAreaGridY:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
 		return false;
 
 	case lcObjectPropertyId::ObjectPositionX:
@@ -874,10 +874,10 @@ bool lcPiece::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotTightness:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaGridX:
-	case lcObjectPropertyId::LightAreaGridY:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
 		return false;
 
 	case lcObjectPropertyId::ObjectPositionX:

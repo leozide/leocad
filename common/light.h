@@ -262,11 +262,11 @@ public:
 		return mSpotPenumbraAngle;
 	}
 
-	void SetSpotTightness(float Angle, lcStep Step, bool AddKey);
+	void SetSpotPOVRayTightness(float Angle, lcStep Step, bool AddKey);
 
-	float GetSpotTightness() const
+	float GetSpotPOVRayTightness() const
 	{
-		return mSpotTightness;
+		return mSpotPOVRayTightness;
 	}
 
 	bool SetAreaShape(lcLightAreaShape LightAreaShape);
@@ -276,11 +276,11 @@ public:
 		return mAreaShape;
 	}
 
-	bool SetAreaGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey);
+	bool SetAreaPOVRayGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey);
 
-	lcVector2i GetAreaGrid() const
+	lcVector2i GetAreaPOVRayGrid() const
 	{
-		return mAreaGrid;
+		return mAreaPOVRayGrid;
 	}
 
 	void SetSize(lcVector2 Size, lcStep Step, bool AddKey);
@@ -343,8 +343,8 @@ protected:
 	lcObjectProperty<float> mPOVRayFadePower = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);
 	lcObjectProperty<float> mSpotPenumbraAngle = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mSpotTightness = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<lcVector2i> mAreaGrid = lcObjectProperty<lcVector2i>(lcVector2i(2, 2));
+	lcObjectProperty<float> mSpotPOVRayTightness = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<lcVector2i> mAreaPOVRayGrid = lcObjectProperty<lcVector2i>(lcVector2i(2, 2));
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
 
 	quint32 mState = 0;

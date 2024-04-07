@@ -2189,8 +2189,8 @@ bool Project::ExportPOVRay(const QString& FileName)
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
 			Power = Light->GetPower();
-			FadeDistance = Light->GetAttenuationDistance();
-			FadePower = Light->GetAttenuationPower();
+			FadeDistance = Light->GetPOVRayFadeDistance();
+			FadePower = Light->GetPOVRayFadePower();
 
 			switch (LightType)
 			{

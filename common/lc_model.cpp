@@ -3130,22 +3130,22 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightAttenuationDistance(lcLight* Light, float Distance)
+void lcModel::SetLightPOVRayFadeDistance(lcLight* Light, float Distance)
 {
-	Light->SetAttenuationDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetPOVRayFadeDistance(Distance, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing Light Attenuation Distance"));
+	SaveCheckpoint(tr("Changing Light POV-Ray Fade Distance"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }
 
-void lcModel::SetLightAttenuationPower(lcLight* Light, float Power)
+void lcModel::SetLightPOVRayFadePower(lcLight* Light, float Power)
 {
-	Light->SetAttenuationPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetPOVRayFadePower(Power, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing Light Attenuation Power"));
+	SaveCheckpoint(tr("Changing Light POV-Ray Fade Power"));
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }

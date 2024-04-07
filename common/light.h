@@ -234,18 +234,18 @@ public:
 		return mColor;
 	}
 
-	void SetAttenuationDistance(float Distance, lcStep Step, bool AddKey);
+	void SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey);
 
-	float GetAttenuationDistance() const
+	float GetPOVRayFadeDistance() const
 	{
-		return mAttenuationDistance;
+		return mPOVRayFadeDistance;
 	}
 
-	void SetAttenuationPower(float Power, lcStep Step, bool AddKey);
+	void SetPOVRayFadePower(float Power, lcStep Step, bool AddKey);
 
-	float GetAttenuationPower() const
+	float GetPOVRayFadePower() const
 	{
-		return mAttenuationPower;
+		return mPOVRayFadePower;
 	}
 
 	void SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
@@ -339,8 +339,8 @@ protected:
 	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
 	lcObjectProperty<lcVector2> mSize = lcObjectProperty<lcVector2>(lcVector2(0.0f, 0.0f));
 	lcObjectProperty<float> mPower = lcObjectProperty<float>(1.0f);
-	lcObjectProperty<float> mAttenuationDistance = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mAttenuationPower = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mPOVRayFadePower = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);
 	lcObjectProperty<float> mSpotPenumbraAngle = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotTightness = lcObjectProperty<float>(0.0f);

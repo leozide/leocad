@@ -371,8 +371,8 @@ public:
 	void SetCameraZNear(lcCamera* Camera, float ZNear);
 	void SetCameraZFar(lcCamera* Camera, float ZFar);
 
-	void SetLightAttenuationDistance(lcLight* Light, float Distance);
-	void SetLightAttenuationPower(lcLight* Light, float Power);
+	void SetLightPOVRayFadeDistance(lcLight* Light, float Distance);
+	void SetLightPOVRayFadePower(lcLight* Light, float Power);
 	void SetSpotLightConeAngle(lcLight* Light, float Angle);
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightTightness(lcLight* Light, float Tightness);

@@ -644,8 +644,8 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightColor:
 	case lcObjectPropertyId::LightPower:
 	case lcObjectPropertyId::LightCastShadow:
-	case lcObjectPropertyId::LightAttenuationDistance:
-	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightPointSize:
 	case lcObjectPropertyId::LightSpotSize:
 	case lcObjectPropertyId::LightDirectionalSize:
@@ -707,8 +707,8 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::LightColor:
 	case lcObjectPropertyId::LightPower:
 	case lcObjectPropertyId::LightCastShadow:
-	case lcObjectPropertyId::LightAttenuationDistance:
-	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightPointSize:
 	case lcObjectPropertyId::LightSpotSize:
 	case lcObjectPropertyId::LightDirectionalSize:
@@ -769,8 +769,8 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightColor:
 	case lcObjectPropertyId::LightPower:
 	case lcObjectPropertyId::LightCastShadow:
-	case lcObjectPropertyId::LightAttenuationDistance:
-	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightPointSize:
 	case lcObjectPropertyId::LightSpotSize:
 	case lcObjectPropertyId::LightDirectionalSize:
@@ -831,8 +831,8 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::LightColor:
 	case lcObjectPropertyId::LightPower:
 	case lcObjectPropertyId::LightCastShadow:
-	case lcObjectPropertyId::LightAttenuationDistance:
-	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightPointSize:
 	case lcObjectPropertyId::LightSpotSize:
 	case lcObjectPropertyId::LightDirectionalSize:

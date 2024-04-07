@@ -59,8 +59,8 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightCastShadow:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Shadow");
 
-	case lcObjectPropertyId::LightAttenuationDistance:
-	case lcObjectPropertyId::LightAttenuationPower:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightPointSize:
 	case lcObjectPropertyId::LightSpotSize:
 	case lcObjectPropertyId::LightDirectionalSize:

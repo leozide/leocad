@@ -133,7 +133,8 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	mRotation.Save(Stream, "LIGHT", "ROTATION", true);
 	mColor.Save(Stream, "LIGHT", "COLOR", true);
 	mSize.Save(Stream, "LIGHT", "SIZE", true);
-	mPower.Save(Stream, "LIGHT", "POWER", true);
+	mBlenderPower.Save(Stream, "LIGHT", "BLENDER_POWER", true);
+	mPOVRayPower.Save(Stream, "LIGHT", "POVRAY_POWER", true);
 	mPOVRayFadeDistance.Save(Stream, "LIGHT", "POVRAY_FADE_DISTANCE", true);
 	mPOVRayFadePower.Save(Stream, "LIGHT", "POVRAY_FADE_POWER", true);
 
@@ -238,7 +239,9 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 			continue;
 		else if (mSize.Load(Stream, Token, "SIZE"))
 			continue;
-		else if (mPower.Load(Stream, Token, "POWER"))
+		else if (mBlenderPower.Load(Stream, Token, "BLENDER_POWER"))
+			continue;
+		else if (mPOVRayPower.Load(Stream, Token, "POVRAY_POWER"))
 			continue;
 		else if (mPOVRayFadeDistance.Load(Stream, Token, "POVRAY_FADE_DISTANCE"))
 			continue;
@@ -568,9 +571,14 @@ void lcLight::SetSize(lcVector2 Size, lcStep Step, bool AddKey)
 	mSize.ChangeKey(Size, Step, AddKey);
 }
 
-void lcLight::SetPower(float Power, lcStep Step, bool AddKey)
+void lcLight::SetBlenderPower(float Power, lcStep Step, bool AddKey)
 {
-	mPower.ChangeKey(Power, Step, AddKey);
+	mBlenderPower.ChangeKey(Power, Step, AddKey);
+}
+
+void lcLight::SetPOVRayPower(float Power, lcStep Step, bool AddKey)
+{
+	mPOVRayPower.ChangeKey(Power, Step, AddKey);
 }
 
 bool lcLight::SetCastShadow(bool CastShadow)
@@ -594,7 +602,8 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mSpotPOVRayTightness.InsertTime(Start, Time);
 	mAreaPOVRayGrid.InsertTime(Start, Time);
 	mSize.InsertTime(Start, Time);
-	mPower.InsertTime(Start, Time);
+	mBlenderPower.InsertTime(Start, Time);
+	mPOVRayPower.InsertTime(Start, Time);
 	mPOVRayFadeDistance.InsertTime(Start, Time);
 	mPOVRayFadePower.InsertTime(Start, Time);
 }
@@ -609,7 +618,8 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mSpotPOVRayTightness.RemoveTime(Start, Time);
 	mAreaPOVRayGrid.RemoveTime(Start, Time);
 	mSize.RemoveTime(Start, Time);
-	mPower.RemoveTime(Start, Time);
+	mBlenderPower.RemoveTime(Start, Time);
+	mPOVRayPower.RemoveTime(Start, Time);
 	mPOVRayFadeDistance.RemoveTime(Start, Time);
 	mPOVRayFadePower.RemoveTime(Start, Time);
 }
@@ -624,7 +634,8 @@ void lcLight::UpdatePosition(lcStep Step)
 	mSpotPOVRayTightness.Update(Step);
 	mAreaPOVRayGrid.Update(Step);
 	mSize.Update(Step);
-	mPower.Update(Step);
+	mBlenderPower.Update(Step);
+	mPOVRayPower.Update(Step);
 	mPOVRayFadeDistance.Update(Step);
 	mPOVRayFadePower.Update(Step);
 
@@ -1081,7 +1092,8 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightColor:
 		return QVariant::fromValue<lcVector3>(GetColor());
 
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 		break;
 
 	case lcObjectPropertyId::LightCastShadow:
@@ -1155,7 +1167,8 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::LightColor:
 		return SetColor(Value.value<lcVector3>(), Step, AddKey);
 		
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 		break;
 
 	case lcObjectPropertyId::LightCastShadow:
@@ -1225,8 +1238,11 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightColor:
 		return mColor.HasKeyFrame(Time);
 
-	case lcObjectPropertyId::LightPower:
-		return mPower.HasKeyFrame(Time);
+	case lcObjectPropertyId::LightBlenderPower:
+		return mBlenderPower.HasKeyFrame(Time);
+
+	case lcObjectPropertyId::LightPOVRayPower:
+		return mPOVRayPower.HasKeyFrame(Time);
 
 	case lcObjectPropertyId::LightCastShadow:
 		return false;
@@ -1307,8 +1323,11 @@ bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::LightColor:
 		return mColor.SetKeyFrame(Time, KeyFrame);
 
-	case lcObjectPropertyId::LightPower:
-		return mPower.SetKeyFrame(Time, KeyFrame);
+	case lcObjectPropertyId::LightBlenderPower:
+		return mBlenderPower.SetKeyFrame(Time, KeyFrame);
+
+	case lcObjectPropertyId::LightPOVRayPower:
+		return mPOVRayPower.SetKeyFrame(Time, KeyFrame);
 
 	case lcObjectPropertyId::LightCastShadow:
 		return false;
@@ -1370,7 +1389,8 @@ void lcLight::RemoveKeyFrames()
 	mSpotPOVRayTightness.RemoveAllKeys();
 	mAreaPOVRayGrid.RemoveAllKeys();
 	mSize.RemoveAllKeys();
-	mPower.RemoveAllKeys();
+	mBlenderPower.RemoveAllKeys();
+	mPOVRayPower.RemoveAllKeys();
 	mPOVRayFadeDistance.RemoveAllKeys();
 	mPOVRayFadePower.RemoveAllKeys();
 }

@@ -377,7 +377,8 @@ public:
 	void SetSpotLightPenumbraAngle(lcLight* Light, float Angle);
 	void SetSpotLightPOVRayTightness(lcLight* Light, float Tightness);
 	void SetLightSize(lcLight* Light, lcVector2 LightAreaSize);
-	void SetLightPower(lcLight* Light, float Power);
+	void SetLightBlenderPower(lcLight* Light, float Power);
+	void SetLightPOVRayPower(lcLight* Light, float Power);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

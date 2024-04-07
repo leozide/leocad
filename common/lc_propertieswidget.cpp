@@ -372,9 +372,13 @@ void lcPropertiesWidget::FloatChanged()
 
 	if (Light)
 	{
-		if (PropertyId == lcObjectPropertyId::LightPower)
+		if (PropertyId == lcObjectPropertyId::LightBlenderPower)
 		{
-			Model->SetLightPower(Light, Value);
+			Model->SetLightBlenderPower(Light, Value);
+		}
+		else if (PropertyId == lcObjectPropertyId::LightPOVRayPower)
+		{
+			Model->SetLightPOVRayPower(Light, Value);
 		}
 		else if (PropertyId == lcObjectPropertyId::LightPOVRayFadeDistance)
 		{
@@ -1031,7 +1035,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddSpacing();
 
 	AddColorProperty(lcObjectPropertyId::LightColor, tr("Color"), tr("Light color"), true);
-	AddFloatProperty(lcObjectPropertyId::LightPower, tr("Power"), tr("Power of the light (Watts in Blender, multiplicative factor in POV-Ray)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Blender Power"), tr("Power of the light in Watts"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPOVRayPower, tr("POV-Ray Power"), tr("Power of the light (multiplicative factor)"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadePower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), true, 0.0f, FLT_MAX);
 	AddBoolProperty(lcObjectPropertyId::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"), false);
@@ -1258,7 +1263,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	lcLightType LightType = lcLightType::Count;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Count;
 	lcVector2 LightSize(0.0f, 0.0f);
-	float Power = 0.0f;
+	float BlenderPower = 0.0f, POVRayPower = 0.0f;
 	float FadeDistance = 0.0f;
 	float FadePower = 0.0f;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
@@ -1272,7 +1277,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 
 		Position = Light->GetPosition();
 		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
-		Power = Light->GetPower();
+		BlenderPower = Light->GetBlenderPower();
+		POVRayPower = Light->GetPOVRayPower();
 		FadeDistance = Light->GetPOVRayFadeDistance();
 		FadePower = Light->GetPOVRayFadePower();
 		SpotConeAngle = Light->GetSpotConeAngle();
@@ -1319,7 +1325,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateStringList(lcObjectPropertyId::LightType);
 	UpdateColor(lcObjectPropertyId::LightColor);
 
-	UpdateFloat(lcObjectPropertyId::LightPower, Power);
+	UpdateFloat(lcObjectPropertyId::LightBlenderPower, BlenderPower);
+	UpdateFloat(lcObjectPropertyId::LightPOVRayPower, POVRayPower);
 	UpdateBool(lcObjectPropertyId::LightCastShadow);
 
 	UpdateFloat(lcObjectPropertyId::LightPOVRayFadeDistance, FadeDistance);

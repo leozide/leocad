@@ -3190,9 +3190,19 @@ void lcModel::SetLightSize(lcLight* Light, lcVector2 LightAreaSize)
 	UpdateAllViews();
 }
 
-void lcModel::SetLightPower(lcLight* Light, float Power)
+void lcModel::SetLightBlenderPower(lcLight* Light, float Power)
 {
-	Light->SetPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->SetBlenderPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
+	Light->UpdatePosition(mCurrentStep);
+
+	SaveCheckpoint(tr("Changing Light Power"));
+	gMainWindow->UpdateSelectedObjects(false);
+	UpdateAllViews();
+}
+
+void lcModel::SetLightPOVRayPower(lcLight* Light, float Power)
+{
+	Light->SetPOVRayPower(Power, mCurrentStep, gMainWindow->GetAddKeys());
 	Light->UpdatePosition(mCurrentStep);
 
 	SaveCheckpoint(tr("Changing Light Power"));

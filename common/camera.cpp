@@ -642,7 +642,8 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
 	case lcObjectPropertyId::LightColor:
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
@@ -705,7 +706,8 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
 	case lcObjectPropertyId::LightColor:
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
@@ -767,7 +769,8 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
 	case lcObjectPropertyId::LightColor:
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
@@ -829,7 +832,8 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
 	case lcObjectPropertyId::LightColor:
-	case lcObjectPropertyId::LightPower:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:

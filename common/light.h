@@ -290,11 +290,18 @@ public:
 		return mSize;
 	}
 
-	void SetPower(float Power, lcStep Step, bool AddKey);
+	void SetBlenderPower(float Power, lcStep Step, bool AddKey);
 
-	float GetPower() const
+	float GetBlenderPower() const
 	{
-		return mPower;
+		return mBlenderPower;
+	}
+
+	void SetPOVRayPower(float Power, lcStep Step, bool AddKey);
+
+	float GetPOVRayPower() const
+	{
+		return mPOVRayPower;
 	}
 
 	bool SetCastShadow(bool CastShadow);
@@ -338,7 +345,8 @@ protected:
 	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
 	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
 	lcObjectProperty<lcVector2> mSize = lcObjectProperty<lcVector2>(lcVector2(0.0f, 0.0f));
-	lcObjectProperty<float> mPower = lcObjectProperty<float>(1.0f);
+	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
+	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
 	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mPOVRayFadePower = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);

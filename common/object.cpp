@@ -53,8 +53,11 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightColor:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Color");
 
-	case lcObjectPropertyId::LightPower:
-		break;
+	case lcObjectPropertyId::LightBlenderPower:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Blender Power");
+
+	case lcObjectPropertyId::LightPOVRayPower:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light POV-Ray Power");
 
 	case lcObjectPropertyId::LightCastShadow:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Shadow");

@@ -1324,7 +1324,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	SetPropertyVisible(lcObjectPropertyId::LightAreaShape, IsAreaLight);
 
 	const bool IsSquare = (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
-	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeX, IsAreaLight && !IsSquare);
+	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeX, IsAreaLight);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeY, IsAreaLight && !IsSquare);
 
 	SetPropertyVisible(lcObjectPropertyId::LightAreaPOVRayGridX, IsAreaLight);

@@ -365,8 +365,8 @@ protected:
 	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
 	lcObjectProperty<float> mPointBlenderRadius = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotBlenderRadius = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.00918f * LC_DTOR);
-	lcObjectProperty<lcVector2> mAreaSize = lcObjectProperty<lcVector2>(lcVector2(200.0f, 200.0f));
+	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.526f * LC_DTOR);
+	lcObjectProperty<lcVector2> mAreaSize = lcObjectProperty<lcVector2>(lcVector2(250.0f, 250.0f));
 	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
 	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
 	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);

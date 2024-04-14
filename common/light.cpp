@@ -23,6 +23,9 @@ static const std::array<QLatin1String, static_cast<int>(lcLightAreaShape::Count)
 lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	: lcObject(lcObjectType::Light), mLightType(LightType)
 {
+	if (LightType == lcLightType::Directional)
+		mBlenderPower = lcObjectProperty<float>(1.0f);
+
 	mPosition.SetValue(Position);
 
 	UpdatePosition(1);

@@ -110,7 +110,8 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	mPointBlenderRadius.Save(Stream, "LIGHT", "BLENDER_POINT_RADIUS", true);
 	mSpotBlenderRadius.Save(Stream, "LIGHT", "BLENDER_SPOT_RADIUS", true);
 	mDirectionalBlenderAngle.Save(Stream, "LIGHT", "BLENDER_DIRECTIONAL_ANGLE", true);
-	mAreaSize.Save(Stream, "LIGHT", "AREA_SIZE", true);
+	mAreaSizeX.Save(Stream, "LIGHT", "AREA_SIZE_X", true);
+	mAreaSizeY.Save(Stream, "LIGHT", "AREA_SIZE_Y", true);
 	mBlenderPower.Save(Stream, "LIGHT", "BLENDER_POWER", true);
 	mPOVRayPower.Save(Stream, "LIGHT", "POVRAY_POWER", true);
 	mPOVRayFadeDistance.Save(Stream, "LIGHT", "POVRAY_FADE_DISTANCE", true);
@@ -221,7 +222,9 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 			continue;
 		else if (mDirectionalBlenderAngle.Load(Stream, Token, "BLENDER_DIRECTIONAL_ANGLE"))
 			continue;
-		else if (mAreaSize.Load(Stream, Token, "AREA_SIZE"))
+		else if (mAreaSizeX.Load(Stream, Token, "AREA_SIZE_X"))
+			continue;
+		else if (mAreaSizeY.Load(Stream, Token, "AREA_SIZE_Y"))
 			continue;
 		else if (mBlenderPower.Load(Stream, Token, "BLENDER_POWER"))
 			continue;
@@ -337,7 +340,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 			float x = lcDot(IntersectionDirection, XAxis);
 			float y = lcDot(IntersectionDirection, YAxis);
-			const lcVector2& Size = mAreaSize;
+			const lcVector2 Size = { mAreaSizeX, mAreaSizeY };
 
 			if (fabsf(x) < Size.x / 2.0f && fabsf(y) < Size.y / 2.0f)
 			{
@@ -499,29 +502,29 @@ bool lcLight::SetColor(const lcVector3& Color, lcStep Step, bool AddKey)
 	return mColor.ChangeKey(Color, Step, AddKey);
 }
 
-void lcLight::SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey)
+bool lcLight::SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey)
 {
-	mPOVRayFadeDistance.ChangeKey(Distance, Step, AddKey);
+	return mPOVRayFadeDistance.ChangeKey(Distance, Step, AddKey);
 }
 
-void lcLight::SetPOVRayFadePower(float Power, lcStep Step, bool AddKey)
+bool lcLight::SetPOVRayFadePower(float Power, lcStep Step, bool AddKey)
 {
-	mPOVRayFadePower.ChangeKey(Power, Step, AddKey);
+	return mPOVRayFadePower.ChangeKey(Power, Step, AddKey);
 }
 
-void lcLight::SetSpotConeAngle(float Angle, lcStep Step, bool AddKey)
+bool lcLight::SetSpotConeAngle(float Angle, lcStep Step, bool AddKey)
 {
-	mSpotConeAngle.ChangeKey(Angle, Step, AddKey);
+	return mSpotConeAngle.ChangeKey(Angle, Step, AddKey);
 }
 
-void lcLight::SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey)
+bool lcLight::SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey)
 {
-	mSpotPenumbraAngle.ChangeKey(Angle, Step, AddKey);
+	return mSpotPenumbraAngle.ChangeKey(Angle, Step, AddKey);
 }
 
-void lcLight::SetSpotPOVRayTightness(float Tightness, lcStep Step, bool AddKey)
+bool lcLight::SetSpotPOVRayTightness(float Tightness, lcStep Step, bool AddKey)
 {
-	mSpotPOVRayTightness.ChangeKey(Tightness, Step, AddKey);
+	return mSpotPOVRayTightness.ChangeKey(Tightness, Step, AddKey);
 }
 
 bool lcLight::SetAreaShape(lcLightAreaShape AreaShape)
@@ -545,37 +548,39 @@ bool lcLight::SetAreaPOVRayGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey)
 	return true;
 }
 
-void lcLight::SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey)
+bool lcLight::SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey)
 {
-	mPointBlenderRadius.ChangeKey(Radius, Step, AddKey);
+	return mPointBlenderRadius.ChangeKey(Radius, Step, AddKey);
 }
 
-void lcLight::SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey)
+bool lcLight::SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey)
 {
-	mSpotBlenderRadius.ChangeKey(Radius, Step, AddKey);
+	return mSpotBlenderRadius.ChangeKey(Radius, Step, AddKey);
 }
 
-void lcLight::SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey)
+bool lcLight::SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey)
 {
-	mDirectionalBlenderAngle.ChangeKey(Angle, Step, AddKey);
+	return mDirectionalBlenderAngle.ChangeKey(Angle, Step, AddKey);
 }
 
-void lcLight::SetAreaSize(lcVector2 Size, lcStep Step, bool AddKey)
+bool lcLight::SetAreaSizeX(float Size, lcStep Step, bool AddKey)
 {
-	if (mAreaShape == lcLightAreaShape::Square || mAreaShape == lcLightAreaShape::Disk)
-		Size[1] = Size[0];
-
-	mAreaSize.ChangeKey(Size, Step, AddKey);
+	return mAreaSizeX.ChangeKey(Size, Step, AddKey);
 }
 
-void lcLight::SetBlenderPower(float Power, lcStep Step, bool AddKey)
+bool lcLight::SetAreaSizeY(float Size, lcStep Step, bool AddKey)
 {
-	mBlenderPower.ChangeKey(Power, Step, AddKey);
+	return mAreaSizeY.ChangeKey(Size, Step, AddKey);
 }
 
-void lcLight::SetPOVRayPower(float Power, lcStep Step, bool AddKey)
+bool lcLight::SetBlenderPower(float Power, lcStep Step, bool AddKey)
 {
-	mPOVRayPower.ChangeKey(Power, Step, AddKey);
+	return mBlenderPower.ChangeKey(Power, Step, AddKey);
+}
+
+bool lcLight::SetPOVRayPower(float Power, lcStep Step, bool AddKey)
+{
+	return mPOVRayPower.ChangeKey(Power, Step, AddKey);
 }
 
 bool lcLight::SetCastShadow(bool CastShadow)
@@ -601,7 +606,8 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mPointBlenderRadius.InsertTime(Start, Time);
 	mSpotBlenderRadius.InsertTime(Start, Time);
 	mDirectionalBlenderAngle.InsertTime(Start, Time);
-	mAreaSize.InsertTime(Start, Time);
+	mAreaSizeX.InsertTime(Start, Time);
+	mAreaSizeY.InsertTime(Start, Time);
 	mBlenderPower.InsertTime(Start, Time);
 	mPOVRayPower.InsertTime(Start, Time);
 	mPOVRayFadeDistance.InsertTime(Start, Time);
@@ -620,7 +626,8 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mPointBlenderRadius.RemoveTime(Start, Time);
 	mSpotBlenderRadius.RemoveTime(Start, Time);
 	mDirectionalBlenderAngle.RemoveTime(Start, Time);
-	mAreaSize.RemoveTime(Start, Time);
+	mAreaSizeX.RemoveTime(Start, Time);
+	mAreaSizeY.RemoveTime(Start, Time);
 	mBlenderPower.RemoveTime(Start, Time);
 	mPOVRayPower.RemoveTime(Start, Time);
 	mPOVRayFadeDistance.RemoveTime(Start, Time);
@@ -639,7 +646,8 @@ void lcLight::UpdatePosition(lcStep Step)
 	mPointBlenderRadius.Update(Step);
 	mSpotBlenderRadius.Update(Step);
 	mDirectionalBlenderAngle.Update(Step);
-	mAreaSize.Update(Step);
+	mAreaSizeX.Update(Step);
+	mAreaSizeY.Update(Step);
 	mBlenderPower.Update(Step);
 	mPOVRayPower.Update(Step);
 	mPOVRayFadeDistance.Update(Step);
@@ -750,7 +758,7 @@ void lcLight::DrawAreaLight(lcContext* Context) const
 	{
 		float Verts[4 * 3];
 		float* CurVert = Verts;
-		const lcVector2& Size = mAreaSize;
+		const lcVector2 Size = { mAreaSizeX, mAreaSizeY };
 
 		*CurVert++ = -Size.x / 2.0f;
 		*CurVert++ = -Size.y / 2.0f;
@@ -790,7 +798,7 @@ void lcLight::DrawAreaLight(lcContext* Context) const
 
 		for (int EdgeIndex = 0; EdgeIndex < CircleEdges; EdgeIndex++)
 		{
-			const lcVector2& Size = mAreaSize;
+			const lcVector2 Size = { mAreaSizeX, mAreaSizeY };
 			float c = cosf((float)EdgeIndex / CircleEdges * LC_2PI) * Size.x / 2.0f;
 			float s = sinf((float)EdgeIndex / CircleEdges * LC_2PI) * Size.y / 2.0f;
 
@@ -1099,24 +1107,43 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 		return QVariant::fromValue<lcVector3>(GetColor());
 
 	case lcObjectPropertyId::LightBlenderPower:
+		return GetBlenderPower();
+
 	case lcObjectPropertyId::LightPOVRayPower:
-		break;
+		return GetPOVRayPower();
 
 	case lcObjectPropertyId::LightCastShadow:
 		return GetCastShadow();
 
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
+		return GetPOVRayFadeDistance();
+
 	case lcObjectPropertyId::LightPOVRayFadePower:
+		return GetPOVRayFadePower();
+
 	case lcObjectPropertyId::LightPointBlenderRadius:
+		return GetPointBlenderRadius();
+
 	case lcObjectPropertyId::LightSpotBlenderRadius:
+		return GetSpotBlenderRadius();
+
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
+		return GetDirectionalBlenderAngle();
+
 	case lcObjectPropertyId::LightAreaSizeX:
+		return GetAreaSizeX();
+
 	case lcObjectPropertyId::LightAreaSizeY:
+		return GetAreaSizeY();
+
 	case lcObjectPropertyId::LightSpotConeAngle:
+		return GetSpotConeAngle();
+
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
+		return GetSpotPenumbraAngle();
+
 	case lcObjectPropertyId::LightSpotPOVRayTightness:
-		break;
+		return GetSpotPOVRayTightness();
 
 	case lcObjectPropertyId::LightAreaShape:
 		return static_cast<int>(GetAreaShape());
@@ -1174,24 +1201,43 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 		return SetColor(Value.value<lcVector3>(), Step, AddKey);
 		
 	case lcObjectPropertyId::LightBlenderPower:
+		return SetBlenderPower(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightPOVRayPower:
-		break;
+		return SetPOVRayPower(Value.toFloat(), Step, AddKey);
 
 	case lcObjectPropertyId::LightCastShadow:
 		return SetCastShadow(Value.toBool());
 
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
+		return SetPOVRayFadeDistance(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightPOVRayFadePower:
+		return SetPOVRayFadePower(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightPointBlenderRadius:
+		return SetPointBlenderRadius(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightSpotBlenderRadius:
+		return SetSpotBlenderRadius(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
+		return SetDirectionalBlenderAngle(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightAreaSizeX:
+		return SetAreaSizeX(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightAreaSizeY:
+		return SetAreaSizeY(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightSpotConeAngle:
+		return SetSpotConeAngle(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
+		return SetSpotPenumbraAngle(Value.toFloat(), Step, AddKey);
+
 	case lcObjectPropertyId::LightSpotPOVRayTightness:
-		break;
+		return SetSpotPOVRayTightness(Value.toFloat(), Step, AddKey);
 
 	case lcObjectPropertyId::LightAreaShape:
 		return SetAreaShape(static_cast<lcLightAreaShape>(Value.toInt()));
@@ -1268,10 +1314,11 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 		return mDirectionalBlenderAngle.HasKeyFrame(Time);
 
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
+		return mAreaSizeX.HasKeyFrame(Time);
+
 	case lcObjectPropertyId::LightAreaSizeY:
-		return mAreaSize.HasKeyFrame(Time);
+		return mAreaSizeY.HasKeyFrame(Time);
 
 	case lcObjectPropertyId::LightSpotConeAngle:
 		return mSpotConeAngle.HasKeyFrame(Time);
@@ -1359,10 +1406,11 @@ bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
 		return mDirectionalBlenderAngle.SetKeyFrame(Time, KeyFrame);
 
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
+		return mAreaSizeX.SetKeyFrame(Time, KeyFrame);
+
 	case lcObjectPropertyId::LightAreaSizeY:
-		return mAreaSize.SetKeyFrame(Time, KeyFrame);
+		return mAreaSizeY.SetKeyFrame(Time, KeyFrame);
 
 	case lcObjectPropertyId::LightSpotConeAngle:
 		return mSpotConeAngle.SetKeyFrame(Time, KeyFrame);
@@ -1409,7 +1457,8 @@ void lcLight::RemoveKeyFrames()
 	mPointBlenderRadius.RemoveAllKeys();
 	mSpotBlenderRadius.RemoveAllKeys();
 	mDirectionalBlenderAngle.RemoveAllKeys();
-	mAreaSize.RemoveAllKeys();
+	mAreaSizeX.RemoveAllKeys();
+	mAreaSizeY.RemoveAllKeys();
 	mBlenderPower.RemoveAllKeys();
 	mPOVRayPower.RemoveAllKeys();
 	mPOVRayFadeDistance.RemoveAllKeys();

@@ -63,17 +63,34 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Shadow");
 
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light POV-Ray Fade Distance");
+
 	case lcObjectPropertyId::LightPOVRayFadePower:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light POV-Ray Fade Power");
+
 	case lcObjectPropertyId::LightPointBlenderRadius:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Point Light Blender Radius");
+
 	case lcObjectPropertyId::LightSpotBlenderRadius:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Spot Light Blender Radius");
+
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Directional Light Blender Angle");
+
 	case lcObjectPropertyId::LightAreaSizeX:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Area X Size");
+
 	case lcObjectPropertyId::LightAreaSizeY:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Area Y Size");
+
 	case lcObjectPropertyId::LightSpotConeAngle:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light Cone Angle");
+
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light Penumbra Angle");
+
 	case lcObjectPropertyId::LightSpotPOVRayTightness:
-		break;
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light POV-Ray Tightness");
 
 	case lcObjectPropertyId::LightAreaShape:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Shape");

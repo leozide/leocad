@@ -372,60 +372,7 @@ void lcPropertiesWidget::FloatChanged()
 
 	if (Light)
 	{
-		if (PropertyId == lcObjectPropertyId::LightBlenderPower)
-		{
-			Model->SetLightBlenderPower(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightPOVRayPower)
-		{
-			Model->SetLightPOVRayPower(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightPOVRayFadeDistance)
-		{
-			Model->SetLightPOVRayFadeDistance(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightPOVRayFadePower)
-		{
-			Model->SetLightPOVRayFadePower(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightPointBlenderRadius)
-		{
-			Model->SetLightPointBlenderRadius(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightSpotBlenderRadius)
-		{
-			Model->SetLightSpotBlenderRadius(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightDirectionalBlenderAngle)
-		{
-			Model->SetLightDirectionalBlenderAngle(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightAreaSizeX)
-		{
-			lcVector2 LightSize = Light->GetAreaSize();
-			LightSize[0] = Value;
-
-			Model->SetLightAreaSize(Light, LightSize);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightAreaSizeY)
-		{
-			lcVector2 LightSize = Light->GetAreaSize();
-			LightSize[1] = Value;
-
-			Model->SetLightAreaSize(Light, LightSize);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightSpotConeAngle)
-		{
-			Model->SetSpotLightConeAngle(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightSpotPenumbraAngle)
-		{
-			Model->SetSpotLightPenumbraAngle(Light, Value);
-		}
-		else if (PropertyId == lcObjectPropertyId::LightSpotPOVRayTightness)
-		{
-			Model->SetSpotLightPOVRayTightness(Light, Value);
-		}
+		Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 	}
 }
 
@@ -1067,7 +1014,6 @@ void lcPropertiesWidget::CreateWidgets()
 	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), false, lcLight::GetAreaShapeStrings());
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeY, tr("Y"), tr("The height of the area light"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightAreaSize, tr("Size"), tr("The size of the area light"), true, 0.0f, FLT_MAX);
 	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), true, 1, INT_MAX);
 	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), true, 1, INT_MAX);
 
@@ -1300,7 +1246,7 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		PointBlenderRadius = Light->GetPointBlenderRadius();
 		SpotBlenderRadius = Light->GetSpotBlenderRadius();
 		DirectionalBlenderAngle = Light->GetDirectionalBlenderAngle();
-		AreaSize = Light->GetAreaSize();
+		AreaSize = { Light->GetAreaSizeX(), Light->GetAreaSizeX() };
 	}
 	else
 	{
@@ -1378,7 +1324,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	SetPropertyVisible(lcObjectPropertyId::LightAreaShape, IsAreaLight);
 
 	const bool IsSquare = (LightAreaShape == lcLightAreaShape::Square || LightAreaShape == lcLightAreaShape::Disk);
-	SetPropertyVisible(lcObjectPropertyId::LightAreaSize, IsAreaLight && IsSquare);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeX, IsAreaLight && !IsSquare);
 	SetPropertyVisible(lcObjectPropertyId::LightAreaSizeY, IsAreaLight && !IsSquare);
 
@@ -1388,7 +1333,6 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	if (IsAreaLight)
 	{
 		UpdateStringList(lcObjectPropertyId::LightAreaShape);
-		UpdateFloat(lcObjectPropertyId::LightAreaSize, AreaSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, AreaSize.x);
 		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, AreaSize.y);
 		UpdateInteger(lcObjectPropertyId::LightAreaPOVRayGridX);

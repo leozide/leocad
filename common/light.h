@@ -234,35 +234,35 @@ public:
 		return mColor;
 	}
 
-	void SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey);
+	bool SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey);
 
 	float GetPOVRayFadeDistance() const
 	{
 		return mPOVRayFadeDistance;
 	}
 
-	void SetPOVRayFadePower(float Power, lcStep Step, bool AddKey);
+	bool SetPOVRayFadePower(float Power, lcStep Step, bool AddKey);
 
 	float GetPOVRayFadePower() const
 	{
 		return mPOVRayFadePower;
 	}
 
-	void SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
+	bool SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
 
 	float GetSpotConeAngle() const
 	{
 		return mSpotConeAngle;
 	}
 
-	void SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey);
+	bool SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey);
 
 	float GetSpotPenumbraAngle() const
 	{
 		return mSpotPenumbraAngle;
 	}
 
-	void SetSpotPOVRayTightness(float Angle, lcStep Step, bool AddKey);
+	bool SetSpotPOVRayTightness(float Angle, lcStep Step, bool AddKey);
 
 	float GetSpotPOVRayTightness() const
 	{
@@ -283,42 +283,49 @@ public:
 		return mAreaPOVRayGrid;
 	}
 
-	void SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
+	bool SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
 
 	float GetPointBlenderRadius() const
 	{
 		return mPointBlenderRadius;
 	}
 
-	void SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey);
+	bool SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey);
 
 	float GetSpotBlenderRadius() const
 	{
 		return mSpotBlenderRadius;
 	}
 
-	void SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey);
+	bool SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey);
 
 	float GetDirectionalBlenderAngle() const
 	{
 		return mDirectionalBlenderAngle;
 	}
 
-	void SetAreaSize(lcVector2 Size, lcStep Step, bool AddKey);
+	bool SetAreaSizeX(float Size, lcStep Step, bool AddKey);
 
-	lcVector2 GetAreaSize() const
+	float GetAreaSizeX() const
 	{
-		return mAreaSize;
+		return mAreaSizeX;
 	}
 
-	void SetBlenderPower(float Power, lcStep Step, bool AddKey);
+	bool SetAreaSizeY(float Size, lcStep Step, bool AddKey);
+
+	float GetAreaSizeY() const
+	{
+		return mAreaSizeY;
+	}
+
+	bool SetBlenderPower(float Power, lcStep Step, bool AddKey);
 
 	float GetBlenderPower() const
 	{
 		return mBlenderPower;
 	}
 
-	void SetPOVRayPower(float Power, lcStep Step, bool AddKey);
+	bool SetPOVRayPower(float Power, lcStep Step, bool AddKey);
 
 	float GetPOVRayPower() const
 	{
@@ -366,7 +373,8 @@ protected:
 	lcObjectProperty<float> mPointBlenderRadius = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotBlenderRadius = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.526f * LC_DTOR);
-	lcObjectProperty<lcVector2> mAreaSize = lcObjectProperty<lcVector2>(lcVector2(250.0f, 250.0f));
+	lcObjectProperty<float> mAreaSizeX = lcObjectProperty<float>(250.0f);
+	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
 	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
 	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
 	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);

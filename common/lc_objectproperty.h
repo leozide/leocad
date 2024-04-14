@@ -33,7 +33,6 @@ enum class lcObjectPropertyId
 	LightPointBlenderRadius,
 	LightSpotBlenderRadius,
 	LightDirectionalBlenderAngle,
-	LightAreaSize,
 	LightAreaSizeX,
 	LightAreaSizeY,
 	LightSpotConeAngle,

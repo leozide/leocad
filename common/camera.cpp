@@ -650,7 +650,6 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightPointBlenderRadius:
 	case lcObjectPropertyId::LightSpotBlenderRadius:
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
@@ -714,7 +713,6 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::LightPointBlenderRadius:
 	case lcObjectPropertyId::LightSpotBlenderRadius:
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
@@ -777,7 +775,6 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightPointBlenderRadius:
 	case lcObjectPropertyId::LightSpotBlenderRadius:
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
@@ -840,7 +837,6 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::LightPointBlenderRadius:
 	case lcObjectPropertyId::LightSpotBlenderRadius:
 	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-	case lcObjectPropertyId::LightAreaSize:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:

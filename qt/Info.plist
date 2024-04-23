@@ -51,7 +51,7 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>leocad</string>
+	<string>LeoCAD</string>
 	<key>CFBundleIconFile</key>
 	<string>leocad.icns</string>
 	<key>CFBundleIdentifier</key>

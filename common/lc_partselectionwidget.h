@@ -212,6 +212,7 @@ public:
 	void LoadState(QSettings& Settings);
 	void SaveState(QSettings& Settings);
 	void DisableIconMode();
+	void FocusFilter();
 
 	void SetColorIndex(int ColorIndex)
 	{

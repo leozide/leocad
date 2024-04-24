@@ -59,6 +59,7 @@ void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
 {
 	mCurrentCategory = &mCategoryWidgets[static_cast<int>(Index)];
+	mCurrentCategory->CategoryIndex = Index;
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
 
@@ -236,6 +237,7 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
 
 	if (SupportsKeyFrames)
@@ -405,6 +407,7 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -472,6 +475,7 @@ void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -537,6 +541,7 @@ void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -601,6 +606,7 @@ void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const 
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -670,6 +676,7 @@ void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -745,6 +752,7 @@ void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const Q
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -841,6 +849,7 @@ void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -935,6 +944,7 @@ void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
+	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -957,6 +967,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddStepNumberProperty(lcObjectPropertyId::PieceStepShow, tr("Show"), tr("Step when piece is added to the model"), false);
 	AddStepNumberProperty(lcObjectPropertyId::PieceStepHide, tr("Hide"), tr("Step when piece is hidden"), false);
 
+	AddSpacing();
+
 	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
 	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
@@ -967,6 +979,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddFloatProperty(lcObjectPropertyId::CameraFOV, tr("FOV"), tr("Field of view in degrees"), false, 0.1f, 179.9f);
 	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.001f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.001f, FLT_MAX);
+
+	AddSpacing();
 
 	AddCategory(CategoryIndex::CameraTransform, tr("Transform"));
 
@@ -986,6 +1000,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddFloatProperty(lcObjectPropertyId::CameraUpY, tr("Y"), tr("Camera up direction"), true, -FLT_MAX, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::CameraUpZ, tr("Z"), tr("Camera up direction"), true, -FLT_MAX, FLT_MAX);
 
+	AddSpacing();
+
 	AddCategory(CategoryIndex::Light, tr("Light"));
 
 	AddStringProperty(lcObjectPropertyId::LightName, tr("Name"), tr("Light name"), false);
@@ -994,28 +1010,37 @@ void lcPropertiesWidget::CreateWidgets()
 	AddSpacing();
 
 	AddColorProperty(lcObjectPropertyId::LightColor, tr("Color"), tr("Light color"), true);
-	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Blender Power"), tr("Power of the light in Watts"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightPOVRayPower, tr("POV-Ray Power"), tr("Power of the light (multiplicative factor)"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives (POV-Ray only)"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadePower, tr("Fade Power"), tr("Light falloff rate (POV-Ray only)"), true, 0.0f, FLT_MAX);
 	AddBoolProperty(lcObjectPropertyId::LightCastShadow, tr("Cast Shadow"), tr("Cast a shadow from this light"), false);
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::LightPointBlenderRadius, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
-
-	AddFloatProperty(lcObjectPropertyId::LightSpotBlenderRadius, tr("Radius"), tr("Shadow soft size (Blender only)"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Spot Cone Angle"), tr("Angle in degrees of the spot light's beam"), true, 0.0f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Spot Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), true, 0.0f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::LightSpotPOVRayTightness, tr("Spot Tightness"), tr("Additional exponential spot light edge softening (POV-Ray only)"), true, 0.0f, FLT_MAX);
-
-	AddFloatProperty(lcObjectPropertyId::LightDirectionalBlenderAngle, tr("Angle"), tr("Angular diameter of the light (Blender only)"), true, 0.0f, 180.0f);
-
+	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Cone Angle"), tr("Angle in degrees of the spot light's beam"), true, 0.0f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), true, 0.0f, 179.9f);
 	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), false, lcLight::GetAreaShapeStrings());
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeY, tr("Y"), tr("The height of the area light"), true, 0.0f, FLT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridX, tr("Grid X"), tr("Number of point sources along the X axis (POV-Ray only)"), true, 1, INT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridY, tr("Y"), tr("Number of point sources along the Y axis (POV-Ray only)"), true, 1, INT_MAX);
+
+	AddSpacing();
+
+	AddCategory(CategoryIndex::LightBlender, tr("Blender Settings"));
+
+	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Power"), tr("Power of the light in Watts"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPointBlenderRadius, tr("Radius"), tr("Shadow soft size"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightSpotBlenderRadius, tr("Radius"), tr("Shadow soft size"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightDirectionalBlenderAngle, tr("Angle"), tr("Angular diameter of the light"), true, 0.0f, 180.0f);
+
+	AddSpacing();
+
+	AddCategory(CategoryIndex::LightPOVRay, tr("POV-Ray Settings"));
+
+	AddFloatProperty(lcObjectPropertyId::LightPOVRayPower, tr("Power"), tr("Power of the light (multiplicative factor)"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadePower, tr("Fade Power"), tr("Light falloff rate"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightSpotPOVRayTightness, tr("Tightness"), tr("Additional exponential spot light edge softening"), true, 0.0f, FLT_MAX);
+	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridX, tr("Grid X"), tr("Number of point sources along the X axis"), true, 1, INT_MAX);
+	AddIntegerProperty(lcObjectPropertyId::LightAreaPOVRayGridY, tr("Y"), tr("Number of point sources along the Y axis"), true, 1, INT_MAX);
+
+	AddSpacing();
 
 	AddCategory(CategoryIndex::ObjectTransform, tr("Transform"));
 
@@ -1028,6 +1053,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddFloatProperty(lcObjectPropertyId::ObjectRotationX, tr("Rotation X"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::ObjectRotationY, tr("Y"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::ObjectRotationZ, tr("Z"), tr("Rotation of the object in degrees"), true, -FLT_MAX, FLT_MAX);
+
+	AddSpacing();
 
 	mLayout->setRowStretch(mLayout->rowCount(), 1);
 }
@@ -1046,19 +1073,29 @@ void lcPropertiesWidget::SetLayoutMode(LayoutMode Mode)
 	SetCategoryVisible(CategoryIndex::Camera, IsCamera);
 	SetCategoryVisible(CategoryIndex::CameraTransform, IsCamera);
 	SetCategoryVisible(CategoryIndex::Light, IsLight);
+	SetCategoryVisible(CategoryIndex::LightBlender, IsLight);
+	SetCategoryVisible(CategoryIndex::LightPOVRay, IsLight);
 	SetCategoryVisible(CategoryIndex::ObjectTransform, IsPiece || IsLight);
 }
 
 void lcPropertiesWidget::SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible)
 {
 	for (lcObjectPropertyId PropertyId : Category.Properties)
-		SetPropertyVisible(PropertyId, Visible);
+		SetPropertyWidgetsVisible(PropertyId, Visible && mPropertyWidgets[static_cast<int>(PropertyId)].Visible);
 
 	for (int Row : Category.SpacingRows)
 		mLayout->setRowMinimumHeight(Row, Visible ? 5 : 0);
 }
 
 void lcPropertiesWidget::SetPropertyVisible(lcObjectPropertyId PropertyId, bool Visible)
+{
+	PropertyWidgets& Property = mPropertyWidgets[static_cast<int>(PropertyId)];
+	Property.Visible = Visible;
+
+	SetPropertyWidgetsVisible(PropertyId, Visible && mCategoryWidgets[static_cast<int>(Property.CategoryIndex)].Button->IsExpanded());
+}
+
+void lcPropertiesWidget::SetPropertyWidgetsVisible(lcObjectPropertyId PropertyId, bool Visible)
 {
 	PropertyWidgets& Property = mPropertyWidgets[static_cast<int>(PropertyId)];
 
@@ -1221,10 +1258,10 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	lcLightType LightType = lcLightType::Count;
 	lcLightAreaShape LightAreaShape = lcLightAreaShape::Count;
 	float PointBlenderRadius = 0.0f, SpotBlenderRadius = 0.0f, DirectionalBlenderAngle = 0.0f;
-	lcVector2 AreaSize(0.0f, 0.0f);
+	float AreaSizeX = 0.0f, AreaSizeY = 0.0f;
 	float BlenderPower = 0.0f, POVRayPower = 0.0f;
-	float FadeDistance = 0.0f;
-	float FadePower = 0.0f;
+	float POVRayFadeDistance = 0.0f;
+	float POVRayFadePower = 0.0f;
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
 	lcVector3 Rotation = lcVector3(0.0f, 0.0f, 0.0f);
 	float SpotConeAngle = 0.0f, SpotPenumbraAngle = 0.0f, SpotTightness = 0.0f;
@@ -1238,15 +1275,16 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 		Rotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
 		BlenderPower = Light->GetBlenderPower();
 		POVRayPower = Light->GetPOVRayPower();
-		FadeDistance = Light->GetPOVRayFadeDistance();
-		FadePower = Light->GetPOVRayFadePower();
+		POVRayFadeDistance = Light->GetPOVRayFadeDistance();
+		POVRayFadePower = Light->GetPOVRayFadePower();
 		SpotConeAngle = Light->GetSpotConeAngle();
 		SpotPenumbraAngle = Light->GetSpotPenumbraAngle();
 		SpotTightness = Light->GetSpotPOVRayTightness();
 		PointBlenderRadius = Light->GetPointBlenderRadius();
 		SpotBlenderRadius = Light->GetSpotBlenderRadius();
 		DirectionalBlenderAngle = Light->GetDirectionalBlenderAngle();
-		AreaSize = { Light->GetAreaSizeX(), Light->GetAreaSizeX() };
+		AreaSizeX = Light->GetAreaSizeX();
+		AreaSizeY = Light->GetAreaSizeX();
 	}
 	else
 	{
@@ -1291,8 +1329,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateFloat(lcObjectPropertyId::LightPOVRayPower, POVRayPower);
 	UpdateBool(lcObjectPropertyId::LightCastShadow);
 
-	UpdateFloat(lcObjectPropertyId::LightPOVRayFadeDistance, FadeDistance);
-	UpdateFloat(lcObjectPropertyId::LightPOVRayFadePower, FadePower);
+	UpdateFloat(lcObjectPropertyId::LightPOVRayFadeDistance, POVRayFadeDistance);
+	UpdateFloat(lcObjectPropertyId::LightPOVRayFadePower, POVRayFadePower);
 
 	const bool IsPointLight = (LightType == lcLightType::Point);
 	SetPropertyVisible(lcObjectPropertyId::LightPointBlenderRadius, IsPointLight);
@@ -1333,8 +1371,8 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	if (IsAreaLight)
 	{
 		UpdateStringList(lcObjectPropertyId::LightAreaShape);
-		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, AreaSize.x);
-		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, AreaSize.y);
+		UpdateFloat(lcObjectPropertyId::LightAreaSizeX, AreaSizeX);
+		UpdateFloat(lcObjectPropertyId::LightAreaSizeY, AreaSizeY);
 		UpdateInteger(lcObjectPropertyId::LightAreaPOVRayGridX);
 		UpdateInteger(lcObjectPropertyId::LightAreaPOVRayGridY);
 	}

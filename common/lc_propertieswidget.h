@@ -37,6 +37,8 @@ protected:
 		Camera,
 		CameraTransform,
 		Light,
+		LightBlender,
+		LightPOVRay,
 		ObjectTransform,
 		Count
 	};
@@ -69,6 +71,7 @@ protected:
 		lcCollapsibleWidgetButton* Button = nullptr;
 		std::vector<lcObjectPropertyId> Properties;
 		std::vector<int> SpacingRows;
+		CategoryIndex CategoryIndex;
 	};
 
 	struct PropertyWidgets
@@ -76,6 +79,8 @@ protected:
 		QLabel* Label = nullptr;
 		QWidget* Editor = nullptr;
 		lcKeyFrameWidget* KeyFrame = nullptr;
+		CategoryIndex CategoryIndex;
+		bool Visible = true;
 	};
 
 	lcObjectPropertyId GetEditorWidgetPropertyId(QWidget* Widget) const;
@@ -116,6 +121,7 @@ protected:
 	void CreateWidgets();
 	void SetLayoutMode(LayoutMode Mode);
 	void SetPropertyVisible(lcObjectPropertyId PropertyId, bool Visible);
+	void SetPropertyWidgetsVisible(lcObjectPropertyId PropertyId, bool Visible);
 	void SetCategoryVisible(CategoryIndex Index, bool Visible);
 	void SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible);
 

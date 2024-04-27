@@ -71,7 +71,7 @@ protected:
 		lcCollapsibleWidgetButton* Button = nullptr;
 		std::vector<lcObjectPropertyId> Properties;
 		std::vector<int> SpacingRows;
-		CategoryIndex CategoryIndex;
+		CategoryIndex Category;
 	};
 
 	struct PropertyWidgets
@@ -79,7 +79,7 @@ protected:
 		QLabel* Label = nullptr;
 		QWidget* Editor = nullptr;
 		lcKeyFrameWidget* KeyFrame = nullptr;
-		CategoryIndex CategoryIndex;
+		CategoryIndex Category;
 		bool Visible = true;
 	};
 

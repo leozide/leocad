@@ -59,7 +59,7 @@ void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
 {
 	mCurrentCategory = &mCategoryWidgets[static_cast<int>(Index)];
-	mCurrentCategory->CategoryIndex = Index;
+	mCurrentCategory->Category = Index;
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
 
@@ -237,7 +237,7 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 
 	mCurrentCategory->Properties.push_back(PropertyId);
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
 
 	if (SupportsKeyFrames)
@@ -407,7 +407,7 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -475,7 +475,7 @@ void lcPropertiesWidget::AddIntegerProperty(lcObjectPropertyId PropertyId, const
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -541,7 +541,7 @@ void lcPropertiesWidget::AddStepNumberProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -606,7 +606,7 @@ void lcPropertiesWidget::AddStringProperty(lcObjectPropertyId PropertyId, const 
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -676,7 +676,7 @@ void lcPropertiesWidget::AddStringListProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -752,7 +752,7 @@ void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const Q
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -849,7 +849,7 @@ void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, co
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -944,7 +944,7 @@ void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const
 
 	mCurrentCategory->Properties.push_back(PropertyId);
 	mPropertyWidgets[static_cast<int>(PropertyId)].Editor = Widget;
-	mPropertyWidgets[static_cast<int>(PropertyId)].CategoryIndex = mCurrentCategory->CategoryIndex;
+	mPropertyWidgets[static_cast<int>(PropertyId)].Category = mCurrentCategory->Category;
 
 	if (SupportsKeyFrames)
 		AddKeyFrameWidget(PropertyId);
@@ -1092,7 +1092,7 @@ void lcPropertiesWidget::SetPropertyVisible(lcObjectPropertyId PropertyId, bool 
 	PropertyWidgets& Property = mPropertyWidgets[static_cast<int>(PropertyId)];
 	Property.Visible = Visible;
 
-	SetPropertyWidgetsVisible(PropertyId, Visible && mCategoryWidgets[static_cast<int>(Property.CategoryIndex)].Button->IsExpanded());
+	SetPropertyWidgetsVisible(PropertyId, Visible && mCategoryWidgets[static_cast<int>(Property.Category)].Button->IsExpanded());
 }
 
 void lcPropertiesWidget::SetPropertyWidgetsVisible(lcObjectPropertyId PropertyId, bool Visible)

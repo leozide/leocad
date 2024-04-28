@@ -72,9 +72,6 @@ protected:
 	void CloseProcess();
 	bool PromptCancel();
 	void ShowResult();
-#ifdef Q_OS_WIN
-	int TerminateChildProcess(const qint64 Pid, const qint64 Ppid);
-#endif
 #ifndef QT_NO_PROCESS
 	lcRenderProcess* mProcess;
 #endif

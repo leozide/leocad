@@ -3,6 +3,7 @@
 
 #ifdef Q_OS_WIN
 
+#include <windows.h>
 #include <wininet.h>
 
 lcHttpReply::lcHttpReply(QObject* Parent, const QString& URL)

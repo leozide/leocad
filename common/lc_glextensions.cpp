@@ -11,6 +11,10 @@ GLfloat gMaxAnisotropy;
 
 #if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GLenum Severity, GLsizei Length, const GLchar* Message, GLvoid* UserParam)
 {
 	Q_UNUSED(Source);

@@ -273,7 +273,7 @@ bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const 
 		return true;
 	}
 
-	if (Token.endsWith(QLatin1String("_KEY")) && Token.leftRef(Token.size() - 4) == VariableName)
+	if (Token.endsWith(QLatin1String("_KEY")) && Token.left(Token.size() - 4) == VariableName)
 	{
 		QString StepString;
 		Stream >> StepString;

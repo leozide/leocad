@@ -13,7 +13,9 @@
 #include "lc_previewwidget.h"
 
 #ifdef Q_OS_WIN
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QtPlatformHeaders\QWindowsWindowFunctions>
+#endif
 #endif
 
 lcApplication* gApplication;
@@ -1239,7 +1241,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		gMainWindow->show();
 
 #ifdef Q_OS_WIN
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 		QWindowsWindowFunctions::setHasBorderInFullScreen(gMainWindow->windowHandle(), true);
+#endif
 #endif
 	}
 

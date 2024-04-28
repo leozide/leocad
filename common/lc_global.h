@@ -58,6 +58,7 @@ typedef quint32 lcStep;
 
 #ifdef Q_OS_WIN
 char* strcasestr(const char *s, const char *find);
+int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid);
 #else
 char* strupr(char* string);
 #endif

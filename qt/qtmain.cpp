@@ -10,6 +10,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4091)
+#include <windows.h>
 #include <dbghelp.h>
 #include <direct.h>
 #include <shlobj.h>
@@ -176,11 +177,11 @@ int main(int argc, char *argv[])
 
 	qRegisterMetaType<PieceInfo*>("PieceInfo*");
 	qRegisterMetaType<QList<int> >("QList<int>");
+	qRegisterMetaType<lcVector3>("lcVector3");
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
-#endif
-	qRegisterMetaType<lcVector3>("lcVector3");
 	QMetaType::registerComparators<lcVector3>();
+#endif
 
 	QList<QPair<QString, bool>> LibraryPaths;
 

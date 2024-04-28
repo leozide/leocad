@@ -8,10 +8,6 @@
 #include "lc_mainwindow.h"
 #include "lc_model.h"
 
-#ifdef Q_OS_WIN
-#include <TlHelp32.h>
-#endif
-
 #define LC_POVRAY_PREVIEW_WIDTH 768
 #define LC_POVRAY_PREVIEW_HEIGHT 432
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
@@ -109,7 +105,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
 
-		QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+		QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_FOLDER_STR)).isReadable())
 		{
 			BlenderConfigured = false;
@@ -239,8 +235,7 @@ bool lcRenderDialog::PromptCancel()
 			else if (mCommand == BLENDER_RENDER)
 				gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
 #ifdef Q_OS_WIN
-			TerminateChildProcess(mProcess->processId(),
-								  QCoreApplication::applicationPid());
+			lcTerminateChildProcess(this, mProcess->processId(), QCoreApplication::applicationPid());
 #endif
 			mProcess->kill();
 			CloseProcess();
@@ -430,7 +425,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		mBlendProgValue = 0;
 		mBlendProgMax   = 0;
 
-		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 		mDataPath = DataPathList.first();
 		 const QString DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath).arg(LC_BLENDER_ADDON_BLEND_FILE);
 
@@ -562,8 +557,13 @@ void lcRenderDialog::on_RenderButton_clicked()
 						if (Log.open(QFile::ReadOnly | QFile::Text))
 						{
 							QByteArray Ba = Log.readAll();
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+							const bool Error = QString(Ba).contains(QRegularExpression("(?:\\w)*ERROR: ", QRegularExpression::CaseInsensitiveOption));
+							const bool Warning = QString(Ba).contains(QRegularExpression("(?:\\w)*WARNING: ", QRegularExpression::CaseInsensitiveOption));
+#else
 							const bool Error = QString(Ba).contains(QRegExp("(?:\\w)*ERROR: ", Qt::CaseInsensitive));
 							const bool Warning = QString(Ba).contains(QRegExp("(?:\\w)*WARNING: ", Qt::CaseInsensitive));
+#endif
 							if (Error || Warning)
 							{
 								QMessageBox::Icon Icon = QMessageBox::Warning;
@@ -606,53 +606,6 @@ void lcRenderDialog::on_RenderButton_clicked()
 #endif
 }
 
-#ifdef Q_OS_WIN
-int lcRenderDialog::TerminateChildProcess(const qint64 Pid, const qint64 Ppid)
-{
-	DWORD pID        = DWORD(Pid);
-	DWORD ppID       = DWORD(Ppid);
-	HANDLE hSnapshot = INVALID_HANDLE_VALUE, hProcess = INVALID_HANDLE_VALUE;
-	PROCESSENTRY32 pe32;
-
-	if ((hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, ppID)) == INVALID_HANDLE_VALUE)
-	{
-		QMessageBox::warning(this, tr("Error"), QString("%1 failed: %1").arg("CreateToolhelp32Snapshot").arg(GetLastError()));
-		return -1;
-	}
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-	if (Process32First(hSnapshot, &pe32) == FALSE)
-	{
-		QMessageBox::warning(this, tr("Error"), QString("%1 failed: %2").arg("Process32First").arg(GetLastError()));
-		CloseHandle(hSnapshot);
-		return -2;
-	}
-	do
-	{
-		if (QString::fromWCharArray(pe32.szExeFile).contains(QRegExp("^(?:cmd\\.exe|conhost\\.exe|blender\\.exe)$", Qt::CaseInsensitive)))
-		{
-			if ((pe32.th32ProcessID == pID && pe32.th32ParentProcessID == ppID) || pe32.th32ParentProcessID == pID)
-			{
-				if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID)) == INVALID_HANDLE_VALUE)
-				{
-					QMessageBox::warning(this, tr("Error"), tr("%1 failed: %2").arg("OpenProcess").arg(GetLastError()));
-					return -3;
-				}
-				else
-				{
-					TerminateProcess(hProcess, 9);
-					CloseHandle(hProcess);
-				}
-			}
-		}
-	}
-	while (Process32Next(hSnapshot, &pe32));
-
-	CloseHandle(hSnapshot);
-
-	return 0;
-}
-#endif
-
 void lcRenderDialog::ReadStdOut()
 {
 	if (mCommand == POVRAY_RENDER)
@@ -660,13 +613,31 @@ void lcRenderDialog::ReadStdOut()
 
 	QString StdOut = QString(mProcess->readAllStandardOutput());
 	mStdOutList.append(StdOut);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QRegularExpression RxRenderProgress;
+	RxRenderProgress.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+#else
 	QRegExp RxRenderProgress;
 	RxRenderProgress.setCaseSensitivity(Qt::CaseInsensitive);
+#endif
 	bool BlenderVersion3 = lcGetProfileString(LC_PROFILE_BLENDER_VERSION).startsWith("v3");
+
 	if (BlenderVersion3)
 		RxRenderProgress.setPattern("Sample (\\d+)\\/(\\d+)");
 	else
 		RxRenderProgress.setPattern("(\\d+)\\/(\\d+) Tiles");
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QRegularExpressionMatch Match = RxRenderProgress.match(StdOut);
+	if (Match.hasMatch())
+	{
+		mBlendProgValue = Match.captured(1).toInt();
+		mBlendProgMax   = Match.captured(2).toInt();
+		ui->RenderProgress->setMaximum(mBlendProgMax);
+		ui->RenderProgress->setValue(mBlendProgValue);
+	}
+#else
 	if (StdOut.contains(RxRenderProgress))
 	{
 		mBlendProgValue = RxRenderProgress.cap(1).toInt();
@@ -674,6 +645,7 @@ void lcRenderDialog::ReadStdOut()
 		ui->RenderProgress->setMaximum(mBlendProgMax);
 		ui->RenderProgress->setValue(mBlendProgValue);
 	}
+#endif
 }
 
 QString lcRenderDialog::ReadStdErr(bool& HasError) const
@@ -698,8 +670,13 @@ QString lcRenderDialog::ReadStdErr(bool& HasError) const
 		returnLines << Line.trimmed() + "<br>";
 		if (mCommand == POVRAY_RENDER)
 		{
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+			if (Line.contains(QRegularExpression("^POV-Ray finished$", QRegularExpression::CaseInsensitiveOption)))
+				HasError = false;
+#else
 			if (Line.contains(QRegExp("^POV-Ray finished$", Qt::CaseSensitive)))
 				HasError = false;
+#endif
 		}
 		else if (mCommand == BLENDER_RENDER)
 		{

@@ -1757,15 +1757,24 @@ void lcBlenderPreferences::GetStandardOutput()
 
 void lcBlenderPreferences::ReadStdOut(const QString& StdOutput, QString& Errors)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QRegularExpression RxInfo("^INFO: ");
+	QRegularExpression RxData("^DATA: ");
+	QRegularExpression RxError("^(?:\\w)*ERROR: ", QRegularExpression::CaseInsensitiveOption);
+	QRegularExpression RxWarning("^(?:\\w)*WARNING: ", QRegularExpression::CaseInsensitiveOption);
+	QRegularExpression RxAddonVersion("^ADDON VERSION: ", QRegularExpression::CaseInsensitiveOption);
+	QStringList StdOutLines = StdOutput.split(QRegularExpression("\n|\r\n|\r"));
+#else
 	QRegExp RxInfo("^INFO: ");
 	QRegExp RxData("^DATA: ");
 	QRegExp RxError("^(?:\\w)*ERROR: ", Qt::CaseInsensitive);
 	QRegExp RxWarning("^(?:\\w)*WARNING: ", Qt::CaseInsensitive);
 	QRegExp RxAddonVersion("^ADDON VERSION: ", Qt::CaseInsensitive);
+	QStringList StdOutLines = StdOutput.split(QRegExp("\n|\r\n|\r"));
+#endif
 
 	bool ErrorEncountered = false;
 	QStringList Items, ErrorList;
-	QStringList StdOutLines = StdOutput.split(QRegExp("\n|\r\n|\r"));
 
 	const QString SaveAddonVersion = mAddonVersion;
 	const QString SaveVersion = mBlenderVersion;
@@ -1862,9 +1871,15 @@ void lcBlenderPreferences::ReadStdOut()
 
 	mStdOutList.append(StdOut);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QRegularExpression RxInfo("^INFO: ");
+	QRegularExpression RxError("(?:\\w)*ERROR: ", QRegularExpression::CaseInsensitiveOption);
+	QRegularExpression RxWarning("(?:\\w)*WARNING: ", QRegularExpression::CaseInsensitiveOption);
+#else
 	QRegExp RxInfo("^INFO: ");
 	QRegExp RxError("(?:\\w)*ERROR: ", Qt::CaseInsensitive);
 	QRegExp RxWarning("(?:\\w)*WARNING: ", Qt::CaseInsensitive);
+#endif
 
 	bool const Error = StdOut.contains(RxError);
 	bool const Warning = StdOut.contains(RxWarning);
@@ -2382,7 +2397,7 @@ void lcBlenderPreferences::ResetSettings()
 
 void lcBlenderPreferences::LoadSettings()
 {
-	QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+	QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 	gAddonPreferences->mDataDir = DataPathList.first();
 
 	if (QFileInfo(lcGetProfileString(LC_PROFILE_BLENDER_PATH)).isReadable())
@@ -2759,7 +2774,12 @@ void lcBlenderPreferences::ColorButtonClicked(bool)
 	connect(Popup, SIGNAL(selected(int)), SLOT(SetDefaultColor(int)));
 	Popup->setMinimumSize(300, 200);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	QScreen* Screen = screen();
+	const QRect DesktopGeom = Screen ? Screen->geometry() : QRect();
+#else
 	const QRect DesktopGeom = QApplication::desktop()->geometry();
+#endif
 
 	QPoint Pos = Parent->mapToGlobal(Parent->rect().bottomLeft());
 	if (Pos.x() < DesktopGeom.left())
@@ -3478,7 +3498,7 @@ int lcBlenderPreferences::ShowMessage(const QString& Header,  const QString& Tit
 			if (FixedWidth == MinimumWidth)
 			{
 				int Index = (MinimumWidth / FontWidth) - 1;
-				if (!Body.midRef(Index,1).isEmpty())
+				if (!Body.mid(Index,1).isEmpty())
 					FixedWidth = Body.indexOf(" ", Index);
 			}
 			else if (FixedWidth < MinimumWidth)
@@ -3666,12 +3686,12 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 
 		// Check the file path - if broken, convert separators, eat leading and trailing ones
 		FileInfo.filePath = QDir::fromNativeSeparators(FileInfo.ZipInfo.file_name);
-		QStringRef FilePathRef(&FileInfo.filePath);
+		QString FilePathRef(FileInfo.filePath);
 		while (FilePathRef.startsWith(QLatin1Char('.')) || FilePathRef.startsWith(QLatin1Char('/')))
 			FilePathRef = FilePathRef.mid(1);
 		while (FilePathRef.endsWith(QLatin1Char('/')))
 			FilePathRef.chop(1);
-		FileInfo.filePath = FilePathRef.toString();
+		FileInfo.filePath = FilePathRef;
 
 		const QString AbsPath = QDir::fromNativeSeparators(DestinationDir + QDir::separator() + FileInfo.filePath);
 

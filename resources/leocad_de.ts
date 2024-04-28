@@ -4277,7 +4277,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="786"/>
-        <source>  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).
+        <source>  --highlight-color: Rendering color for highlighted parts (#AARRGGBB).
 </source>
         <translation type="unfinished"></translation>
     </message>

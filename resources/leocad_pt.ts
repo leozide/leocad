@@ -4265,7 +4265,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="786"/>
-        <source>  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).
+        <source>  --highlight-color: Rendering color for highlighted parts (#AARRGGBB).
 </source>
         <translation type="unfinished"></translation>
     </message>

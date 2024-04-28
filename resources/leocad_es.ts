@@ -4315,7 +4315,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="786"/>
-        <source>  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).
+        <source>  --highlight-color: Rendering color for highlighted parts (#AARRGGBB).
 </source>
         <translation>  --highlight-color: Color de renderizado para piezas resaltadas (#AARRGGBB).
 </translation>

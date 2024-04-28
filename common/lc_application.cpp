@@ -785,7 +785,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --fade-steps-color <rgba>: Renderinng color for prior step parts (#AARRGGBB).\n");
 			Options.StdOut += tr("  --highlight: Highlight parts in the steps they appear.\n");
 			Options.StdOut += tr("  --no-highlight: Do not highlight parts in the steps they appear.\n");
-			Options.StdOut += tr("  --highlight-color: Renderinng color for highlighted parts (#AARRGGBB).\n");
+			Options.StdOut += tr("  --highlight-color: Rendering color for highlighted parts (#AARRGGBB).\n");
 			Options.StdOut += tr("  --shading <wireframe|flat|default|full>: Select shading mode for rendering.\n");
 			Options.StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
 			Options.StdOut += tr("  --aa-samples <count>: AntiAliasing sample size (1, 2, 4, or 8).\n");

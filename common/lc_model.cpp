@@ -1752,19 +1752,15 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	const lcStep CurrentStep = mCurrentStep;
 
 	// Remember the camera names
-	std::vector<QString> CameraNames;
-	if (gMainWindow)
+	std::vector<lcView*> Views = lcView::GetModelViews(this);
+	std::vector<QString> CameraNames(Views.size());
+
+	for (size_t ViewIndex = 0; ViewIndex < Views.size(); ViewIndex++)
 	{
-		std::vector<lcView*> Views = lcView::GetModelViews(this);
-		CameraNames.resize( Views.size() );
-		for (unsigned int i = 0; i < Views.size(); i++)
-		{
-			lcCamera* Camera = Views[i]->GetCamera();
-			if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
-				CameraNames[i] = Camera->GetName();
-			else
-				CameraNames[i] = "";
-		}
+		lcCamera* Camera = Views[ViewIndex]->GetCamera();
+
+		if (!Camera->IsSimple())
+			CameraNames[ViewIndex] = Camera->GetName();
 	}
 
 	DeleteModel();
@@ -1778,15 +1774,9 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	CalculateStep(CurrentStep);
 
 	// Reset the cameras
-	if (gMainWindow)
-	{
-		std::vector<lcView*> Views = lcView::GetModelViews(this);
-		for (unsigned int i = 0; i < CameraNames.size(); i++)
-		{
-			if (CameraNames[i] != "")
-				Views[i]->SetCamera(CameraNames[i]);
-		}
-	}
+	for (size_t ViewIndex = 0; ViewIndex < Views.size() && ViewIndex < CameraNames.size(); ViewIndex++)
+		if (!CameraNames[ViewIndex].isEmpty())
+			Views[ViewIndex]->SetCamera(CameraNames[ViewIndex]);
 
 	gMainWindow->UpdateTimeline(true, false);
 	gMainWindow->UpdateCurrentStep();

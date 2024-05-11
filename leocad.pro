@@ -23,7 +23,7 @@ qtHaveModule(gamepad) {
 }
 
 INCLUDEPATH += qt common
-CONFIG += precompile_header incremental c++11 force_debug_info
+CONFIG += precompile_header incremental c++17 force_debug_info
 
 win32 {
 	RC_ICONS = resources/leocad.ico

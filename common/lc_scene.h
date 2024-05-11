@@ -90,7 +90,7 @@ public:
 
 	void AddInterfaceObject(const lcObject* Object)
 	{
-		mInterfaceObjects.Add(Object);
+		mInterfaceObjects.emplace_back(Object);
 	}
 
 	void Draw(lcContext* Context) const;
@@ -115,8 +115,8 @@ protected:
 	bool mTranslucentFade;
 
 	std::function<void()> mPreTranslucentCallback;
-	lcArray<lcRenderMesh> mRenderMeshes;
-	lcArray<int> mOpaqueMeshes;
-	lcArray<lcTranslucentMeshInstance> mTranslucentMeshes;
-	lcArray<const lcObject*> mInterfaceObjects;
+	std::vector<lcRenderMesh> mRenderMeshes;
+	std::vector<int> mOpaqueMeshes;
+	std::vector<lcTranslucentMeshInstance> mTranslucentMeshes;
+	std::vector<const lcObject*> mInterfaceObjects;
 };

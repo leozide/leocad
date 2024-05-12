@@ -100,11 +100,11 @@ public:
 			else
 				return mModelWorld.GetTranslation();
 		}
-		else
+		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
-			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			if (ControlPointIndex < mControlPoints.size())
 			{
 				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMul(Transform, mModelWorld).GetTranslation();
@@ -154,12 +154,12 @@ public:
 		mHidden = Hidden;
 	}
 
-	const lcArray<lcPieceControlPoint>& GetControlPoints() const
+	const std::vector<lcPieceControlPoint>& GetControlPoints() const
 	{
 		return mControlPoints;
 	}
 
-	void SetControlPoints(const lcArray<lcPieceControlPoint>& ControlPoints)
+	void SetControlPoints(const std::vector<lcPieceControlPoint>& ControlPoints)
 	{
 		mControlPoints = ControlPoints;
 		UpdateMesh();
@@ -200,7 +200,7 @@ public:
 
 	bool InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd);
 	bool RemoveFocusedControlPoint();
-	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const;
+	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const;
 
 	lcGroup* GetTopGroup();
 
@@ -295,21 +295,19 @@ public:
 		{
 			if (mPivotPointValid)
 				return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
-			else
-				return mModelWorld.GetTranslation();
 		}
-		else
+		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
-			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			if (ControlPointIndex < mControlPoints.size())
 			{
 				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMul31(Transform.GetTranslation(), mModelWorld);
 			}
-
-			return mModelWorld.GetTranslation();
 		}
+
+		return mModelWorld.GetTranslation();
 	}
 
 	lcMatrix33 GetRelativeRotation() const
@@ -323,18 +321,18 @@ public:
 			else
 				return lcMatrix33(mModelWorld);
 		}
-		else
+		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
-			const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-			if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+			if (ControlPointIndex < mControlPoints.size())
 			{
 				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 				return lcMatrix33(lcMul(Transform, mModelWorld));
 			}
-
-			return lcMatrix33Identity();
 		}
+
+		return lcMatrix33Identity();
 	}
 
 	void ResetPivotPoint()
@@ -380,6 +378,6 @@ protected:
 	bool mHidden = false;
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_PIECE_SECTION_INVALID;
-	lcArray<lcPieceControlPoint> mControlPoints;
+	std::vector<lcPieceControlPoint> mControlPoints;
 	lcMesh* mMesh = nullptr;
 };

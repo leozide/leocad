@@ -77,7 +77,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	else
 		mID.clear();
 
-	mControlPoints.RemoveAll();
+	mControlPoints.clear();
 	delete mMesh;
 	mMesh = nullptr;
 
@@ -492,9 +492,9 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
 		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
 
-		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
+		for (quint32 ControlPointIndex = 0; ControlPointIndex < mControlPoints.size(); ControlPointIndex++)
 		{
-			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(mControlPoints[ControlPointIdx].Transform);
+			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(mControlPoints[ControlPointIndex].Transform);
 			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
 			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
 
@@ -504,7 +504,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			if (lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr, &Plane))
 			{
 				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx;
+				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex;
 				ObjectRayTest.Distance = Distance;
 				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 			}
@@ -608,7 +608,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 0);
 	}
 
-	if (!mControlPoints.IsEmpty() && AreControlPointsVisible())
+	if (!mControlPoints.empty() && AreControlPointsVisible())
 	{
 		float Verts[8 * 3];
 		float* CurVert = Verts;
@@ -637,15 +637,15 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		const lcVector4 ControlPointColor = lcVector4FromColor(Preferences.mControlPointColor);
 		const lcVector4 ControlPointFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
 
-		for (int ControlPointIdx = 0; ControlPointIdx < mControlPoints.GetSize(); ControlPointIdx++)
+		for (quint32 ControlPointIndex = 0; ControlPointIndex < mControlPoints.size(); ControlPointIndex++)
 		{
-			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIdx].Transform, WorldMatrix));
+			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIndex].Transform, WorldMatrix));
 
 			Context->SetVertexBufferPointer(Verts);
 			Context->SetVertexFormatPosition(3);
 			Context->SetIndexBufferPointer(Indices);
 
-			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIdx))
+			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex))
 				Context->SetColor(ControlPointFocusedColor);
 			else
 				Context->SetColor(ControlPointColor);
@@ -990,11 +990,11 @@ void lcPiece::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 
 		mModelWorld.SetTranslation(Position);
 	}
-	else
+	else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 	{
-		const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+		const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+		if (ControlPointIndex < mControlPoints.size())
 		{
 			const lcMatrix33 InverseWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mModelWorld));
 			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
@@ -1028,11 +1028,11 @@ void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 		SetPosition(Center + Distance, Step, AddKey);
 		SetRotation(NewLocalToWorldMatrix, Step, AddKey);
 	}
-	else
+	else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 	{
-		const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+		const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 
-		if (ControlPointIndex >= 0 && ControlPointIndex < mControlPoints.GetSize())
+		if (ControlPointIndex < mControlPoints.size())
 		{
 			lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
 			const lcMatrix33 PieceWorldMatrix(mModelWorld);
@@ -1096,7 +1096,7 @@ quint32 lcPiece::GetAllowedTransforms() const
 
 bool lcPiece::CanAddControlPoint() const
 {
-	if (mControlPoints.GetSize() >= LC_MAX_CONTROL_POINTS)
+	if (mControlPoints.size() >= LC_MAX_CONTROL_POINTS)
 		return false;
 
 	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
@@ -1106,7 +1106,7 @@ bool lcPiece::CanAddControlPoint() const
 bool lcPiece::CanRemoveControlPoint() const
 {
 	const quint32 Section = GetFocusSection();
-	return Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && mControlPoints.GetSize() > 2;
+	return Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && mControlPoints.size() > 2;
 }
 
 bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd)
@@ -1134,32 +1134,37 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 
 bool lcPiece::RemoveFocusedControlPoint()
 {
-	const int ControlPointIndex = GetFocusSection() - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+	quint32 Section = GetFocusSection();
 
-	if (ControlPointIndex < 0 || ControlPointIndex >= mControlPoints.GetSize() || mControlPoints.GetSize() <= 2)
+	if( Section < LC_PIECE_SECTION_CONTROL_POINT_FIRST )
+		return false;
+
+	const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+
+	if (ControlPointIndex >= mControlPoints.size() || mControlPoints.size() <= 2)
 		return false;
 
 	SetFocused(GetFocusSection(), false);
 	SetFocused(LC_PIECE_SECTION_POSITION, true);
-	mControlPoints.RemoveIndex(ControlPointIndex);
+	mControlPoints.erase(mControlPoints.begin() + ControlPointIndex);
 
 	UpdateMesh();
 
 	return true;
 }
 
-void lcPiece::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcPiece::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
 	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
 
 	if (!SynthInfo)
 	{
-		ControlPoints.RemoveAll();
+		ControlPoints.clear();
 	}
 	else
 	{
-		if (ControlPoints.GetSize() > LC_MAX_CONTROL_POINTS)
-			ControlPoints.SetSize(LC_MAX_CONTROL_POINTS);
+		if (ControlPoints.size() > LC_MAX_CONTROL_POINTS)
+			ControlPoints.resize(LC_MAX_CONTROL_POINTS);
 
 		SynthInfo->VerifyControlPoints(ControlPoints);
 	}

@@ -452,11 +452,9 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		{
 			Stream << QLatin1String("0 !LEOCAD SYNTH BEGIN\r\n");
 
-			const lcArray<lcPieceControlPoint>& ControlPoints = Piece->GetControlPoints();
-			for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
+			const std::vector<lcPieceControlPoint>& ControlPoints = Piece->GetControlPoints();
+			for (const lcPieceControlPoint& ControlPoint : ControlPoints)
 			{
-				const lcPieceControlPoint& ControlPoint = ControlPoints[ControlPointIdx];
-
 				Stream << QLatin1String("0 !LEOCAD SYNTH CONTROL_POINT");
 
 				const float* FloatMatrix = ControlPoint.Transform;
@@ -559,7 +557,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	lcCamera* Camera = nullptr;
 	lcLight* Light = nullptr;
 	lcArray<lcGroup*> CurrentGroups;
-	lcArray<lcPieceControlPoint> ControlPoints;
+	std::vector<lcPieceControlPoint> ControlPoints;
 	int CurrentStep = 1;
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
@@ -691,11 +689,11 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 				if (Token == QLatin1String("BEGIN"))
 				{
-					ControlPoints.RemoveAll();
+					ControlPoints.clear();
 				}
 				else if (Token == QLatin1String("END"))
 				{
-					ControlPoints.RemoveAll();
+					ControlPoints.clear();
 				}
 				else if (Token == QLatin1String("CONTROL_POINT"))
 				{
@@ -703,7 +701,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 					for (int TokenIdx = 0; TokenIdx < 13; TokenIdx++)
 						LineStream >> Numbers[TokenIdx];
 
-					lcPieceControlPoint& PieceControlPoint = ControlPoints.Add();
+					lcPieceControlPoint& PieceControlPoint = ControlPoints.emplace_back();
 					PieceControlPoint.Transform = lcMatrix44(lcVector4(Numbers[3], Numbers[9], -Numbers[6], 0.0f), lcVector4(Numbers[5], Numbers[11], -Numbers[8], 0.0f),
 					                                         lcVector4(-Numbers[4], -Numbers[10], Numbers[7], 0.0f), lcVector4(Numbers[0], Numbers[2], -Numbers[1], 1.0f));
 					PieceControlPoint.Scale = Numbers[12];
@@ -756,7 +754,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				Piece->SetColorCode(ColorCode);
 				Piece->VerifyControlPoints(ControlPoints);
 				Piece->SetControlPoints(ControlPoints);
-				ControlPoints.RemoveAll();
+				ControlPoints.clear();
 
 				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->IncludesModel(this))
 				{

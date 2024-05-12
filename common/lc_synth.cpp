@@ -12,12 +12,12 @@ class lcSynthInfoCurved : public lcSynthInfo
 public:
 	lcSynthInfoCurved(float Length, float DefaultScale, int NumSections, bool RigidEdges);
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
-	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
+	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
-	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 	static void AddTubeParts(lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections, float Radius, bool IsInner);
 
 	struct lcSynthComponent
@@ -51,7 +51,7 @@ class lcSynthInfoFlexSystemHose : public lcSynthInfoCurved
 public:
 	lcSynthInfoFlexSystemHose(float Length, int NumSections);
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -92,7 +92,7 @@ public:
 	lcSynthInfoBraidedString(float Length, int NumSections);
 
 protected:
-	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 };
 
@@ -101,10 +101,10 @@ class lcSynthInfoStraight : public lcSynthInfo
 public:
 	explicit lcSynthInfoStraight(float Length);
 
-	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 };
 
 class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
@@ -112,7 +112,7 @@ class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
 public:
 	explicit lcSynthInfoShockAbsorber(const char* SpringPart);
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -125,7 +125,7 @@ class lcSynthInfoActuator : public lcSynthInfoStraight
 public:
 	explicit lcSynthInfoActuator(const char* BodyPart, const char* PistonPart, const char* AxlePart, float Length, float AxleOffset);
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
@@ -141,11 +141,11 @@ class lcSynthInfoUniversalJoint : public lcSynthInfo
 public:
 	lcSynthInfoUniversalJoint(float Length, float EndOffset, const char* EndPart, const char* CenterPart);
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
-	void VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const override;
+	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
+	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
 	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const override;
 
 	float mEndOffset;
@@ -538,9 +538,9 @@ lcSynthInfoUniversalJoint::lcSynthInfoUniversalJoint(float Length, float EndOffs
 	mNondirectional = true;
 }
 
-void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoCurved::GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	ControlPoints.SetSize(2);
+	ControlPoints.resize(2);
 
 	float HalfLength = mLength / 2.0f;
 	float Scale = lcMin(mDefaultScale, HalfLength);
@@ -552,13 +552,13 @@ void lcSynthInfoCurved::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& Co
 	ControlPoints[1].Scale = Scale;
 }
 
-void lcSynthInfoCurved::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoCurved::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	if (ControlPoints.GetSize() < 2)
+	if (ControlPoints.size() < 2)
 		GetDefaultControlPoints(ControlPoints);
 }
 
-void lcSynthInfoFlexSystemHose::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoFlexSystemHose::GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
 	lcSynthInfoCurved::GetDefaultControlPoints(ControlPoints);
 
@@ -566,17 +566,17 @@ void lcSynthInfoFlexSystemHose::GetDefaultControlPoints(lcArray<lcPieceControlPo
 	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
 }
 
-void lcSynthInfoStraight::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoStraight::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	if (ControlPoints.GetSize() < 2)
+	if (ControlPoints.size() < 2)
 		GetDefaultControlPoints(ControlPoints);
 	else
-		ControlPoints.SetSize(2);
+		ControlPoints.resize(2);
 }
 
-void lcSynthInfoShockAbsorber::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoShockAbsorber::GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	ControlPoints.SetSize(2);
+	ControlPoints.resize(2);
 
 	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -mLength));
 	ControlPoints[1].Transform = lcMatrix44Translation(lcVector3(0.0f, 0.0f, 0.0f));
@@ -585,9 +585,9 @@ void lcSynthInfoShockAbsorber::GetDefaultControlPoints(lcArray<lcPieceControlPoi
 	ControlPoints[1].Scale = 1.0f;
 }
 
-void lcSynthInfoActuator::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoActuator::GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	ControlPoints.SetSize(2);
+	ControlPoints.resize(2);
 
 	ControlPoints[0].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, 0.0f, 0.0f));
 	ControlPoints[1].Transform = lcMatrix44(lcMatrix33(lcVector3(1.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f), lcVector3(0.0f, 1.0f, 0.0f)), lcVector3(0.0f, mLength, 0.0f));
@@ -596,21 +596,21 @@ void lcSynthInfoActuator::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& 
 	ControlPoints[1].Scale = 1.0f;
 }
 
-void lcSynthInfoUniversalJoint::GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoUniversalJoint::GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	ControlPoints.SetSize(1);
+	ControlPoints.resize(1);
 	float HalfLength = mLength / 2;
 
 	ControlPoints[0].Transform = lcMatrix44Translation(lcVector3(0.0f, HalfLength, 0.0f));
 	ControlPoints[0].Scale = 1.0f;
 }
 
-void lcSynthInfoUniversalJoint::VerifyControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const
+void lcSynthInfoUniversalJoint::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	if (ControlPoints.IsEmpty())
+	if (ControlPoints.empty())
 		GetDefaultControlPoints(ControlPoints);
 	else
-		ControlPoints.SetSize(1);
+		ControlPoints.resize(1);
 }
 
 float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const
@@ -658,19 +658,22 @@ float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const
 	return 0.0f;
 }
 
-void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
+	if (ControlPoints.empty())
+		return;
+
 	float SectionLength = 0.0f;
 
-	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize() - 1 && Sections.GetSize() < mNumSections + 2; ControlPointIdx++)
+	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size() - 1 && Sections.GetSize() < mNumSections + 2; ControlPointIndex++)
 	{
 		lcVector3 SegmentControlPoints[4];
 
-		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
-		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx + 1].Transform);
+		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex + 1].Transform);
 		StartTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mStart.Transform), lcMatrix33(StartTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), StartTransform.GetTranslation());
 
-		if (ControlPointIdx == 0)
+		if (ControlPointIndex == 0)
 		{
 			if (mRigidEdges)
 			{
@@ -686,8 +689,8 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
-		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIdx].Scale, 0.0f), StartTransform);
-		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIdx + 1].Scale, 0.0f), EndTransform);
+		SegmentControlPoints[1] = lcMul31(lcVector3(0.0f, ControlPoints[ControlPointIndex].Scale, 0.0f), StartTransform);
+		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIndex + 1].Scale, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
 		const int NumCurvePoints = 8192;
@@ -744,7 +747,7 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 			Sections.Add(lcMatrix44(lcMatrix33(Up, Tangent, Side), CurvePoints[CurrentPointIndex]));
 
 			if (SectionCallback)
-				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t);
+				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIndex, t);
 
 			if (Sections.GetSize() == mNumSections + 2)
 				break;
@@ -761,14 +764,14 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 
 	while (Sections.GetSize() < mNumSections + 2)
 	{
-		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints.back().Transform);
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
 		EndTransform.SetTranslation(Position);
 		Sections.Add(EndTransform);
 
 		if (SectionCallback)
-			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f);
+			SectionCallback(Position, static_cast<quint32>(ControlPoints.size()) - 1, 1.0f);
 
 		if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
 			SectionLength += mCenterLength;
@@ -780,19 +783,22 @@ void lcSynthInfoCurved::CalculateSections(const lcArray<lcPieceControlPoint>& Co
 	}
 }
 
-void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
+	if (ControlPoints.empty())
+		return;
+
 	float SectionLength = 0.0f;
 
-	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize() - 1 && Sections.GetSize() < mNumSections + 2; ControlPointIdx++)
+	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size() - 1 && Sections.GetSize() < mNumSections + 2; ControlPointIndex++)
 	{
 		lcVector3 SegmentControlPoints[4];
 
-		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
-		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx + 1].Transform);
+		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex + 1].Transform);
 		StartTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mStart.Transform), lcMatrix33(StartTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), StartTransform.GetTranslation());
 
-		if (ControlPointIdx == 0)
+		if (ControlPointIndex == 0)
 		{
 			if (mRigidEdges)
 			{
@@ -808,8 +814,8 @@ void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoi
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 
 		SegmentControlPoints[0] = StartTransform.GetTranslation();
-		SegmentControlPoints[1] = lcMul31(lcVector3(ControlPoints[ControlPointIdx].Scale, 0.0f, 0.0f), StartTransform);
-		SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIdx + 1].Scale, 0.0f, 0.0f), EndTransform);
+		SegmentControlPoints[1] = lcMul31(lcVector3(ControlPoints[ControlPointIndex].Scale, 0.0f, 0.0f), StartTransform);
+		SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIndex + 1].Scale, 0.0f, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
 		const int NumCurvePoints = 8192;
@@ -866,7 +872,7 @@ void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoi
 			Sections.Add(lcMatrix44(lcMatrix33(Tangent, Up, -Side), CurvePoints[CurrentPointIndex]));
 
 			if (SectionCallback)
-				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIdx, t);
+				SectionCallback(CurvePoints[CurrentPointIndex], ControlPointIndex, t);
 
 			if (Sections.GetSize() == mNumSections + 2)
 				break;
@@ -883,14 +889,14 @@ void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoi
 
 	while (Sections.GetSize() < mNumSections + 2)
 	{
-		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPoints.GetSize() - 1].Transform);
+		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints.back().Transform);
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(SectionLength, 0.0f, 0.0f), EndTransform);
 		EndTransform.SetTranslation(Position);
 		Sections.Add(EndTransform);
 
 		if (SectionCallback)
-			SectionCallback(Position, ControlPoints.GetSize() - 1, 1.0f);
+			SectionCallback(Position, static_cast<quint32>(ControlPoints.size()) - 1, 1.0f);
 
 		if (mCenterLength != 0.0f && (Sections.GetSize() == mNumSections / 2 + 1))
 			SectionLength += mCenterLength;
@@ -902,27 +908,27 @@ void lcSynthInfoBraidedString::CalculateSections(const lcArray<lcPieceControlPoi
 	}
 }
 
-void lcSynthInfoStraight::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoStraight::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
-	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
+	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size(); ControlPointIndex++)
 	{
-		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
+		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
 		Sections.Add(Transform);
 
 		if (SectionCallback)
-			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
+			SectionCallback(Transform.GetTranslation(), ControlPointIndex, 1.0f);
 	}
 }
 
-void lcSynthInfoUniversalJoint::CalculateSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoUniversalJoint::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
 {
-	for (int ControlPointIdx = 0; ControlPointIdx < ControlPoints.GetSize(); ControlPointIdx++)
+	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size(); ControlPointIndex++)
 	{
-		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIdx].Transform);
+		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
 		Sections.Add(Transform);
 
 		if (SectionCallback)
-			SectionCallback(Transform.GetTranslation(), ControlPointIdx, 1.0f);
+			SectionCallback(Transform.GetTranslation(), ControlPointIndex, 1.0f);
 	}
 }
 
@@ -1497,7 +1503,7 @@ void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, co
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const
+lcMesh* lcSynthInfo::CreateMesh(const std::vector<lcPieceControlPoint>& ControlPoints) const
 {
 	lcArray<lcMatrix44> Sections;
 
@@ -1520,11 +1526,11 @@ lcMesh* lcSynthInfo::CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoint
 	return nullptr;
 }
 
-int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const
+int lcSynthInfo::InsertControlPoint(std::vector<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const
 {
 	lcArray<lcMatrix44> Sections;
 
-	int BestSegment = -1;
+	quint32 BestSegment = UINT32_MAX;
 	float BestTime;
 	float BestDistance = FLT_MAX;
 	lcVector3 BestPosition;
@@ -1543,18 +1549,18 @@ int lcSynthInfo::InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints,
 		}
 	);
 
-	if (BestSegment != -1)
+	if (BestSegment != UINT32_MAX)
 	{
 		lcPieceControlPoint ControlPoint = ControlPoints[BestSegment];
 		ControlPoint.Transform.SetTranslation(BestPosition);
 
-		if (BestSegment != ControlPoints.GetSize() - 1)
+		if (BestSegment != ControlPoints.size() - 1)
 		{
 			lcPieceControlPoint NextControlPoint = ControlPoints[BestSegment + 1];
 			ControlPoint.Scale = ControlPoint.Scale * (1.0f - BestTime) + NextControlPoint.Scale * BestTime;
 		}
 
-		ControlPoints.InsertAt(BestSegment + 1, ControlPoint);
+		ControlPoints.insert(ControlPoints.begin() + BestSegment + 1, ControlPoint);
 	}
 
 	return BestSegment + 1;

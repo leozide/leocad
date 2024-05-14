@@ -1538,7 +1538,7 @@ int lcSynthInfo::InsertControlPoint(std::vector<lcPieceControlPoint>& ControlPoi
 	CalculateSections(ControlPoints, Sections,
 		[&](const lcVector3& CurvePoint, int SegmentIndex, float t)
 		{
-			float Distance = lcRayPointDistance(CurvePoint, Start, End);
+			float Distance = lcRayPointDistance(lcVector3LDrawToLeoCAD(CurvePoint), Start, End);
 			if (Distance < BestDistance)
 			{
 				BestSegment = SegmentIndex;

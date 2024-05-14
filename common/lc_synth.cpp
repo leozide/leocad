@@ -1515,8 +1515,6 @@ lcMesh* lcSynthInfo::CreateMesh(const std::vector<lcPieceControlPoint>& ControlP
 	AddParts(File, MeshData, Sections);
 
 	File.WriteU8(0);
-
-	lcArray<lcMeshLoaderTextureMap> TextureStack;
 	File.Seek(0, SEEK_SET);
 
 	lcMeshLoader MeshLoader(MeshData, false, nullptr, false);

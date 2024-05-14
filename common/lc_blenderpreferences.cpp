@@ -3631,7 +3631,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 
 	int Extracted = 0;
 
-	for (int FileIdx = 0; FileIdx < ZipFile.mFiles.GetSize(); FileIdx++)
+	for (quint32 FileIdx = 0; FileIdx < ZipFile.mFiles.size(); FileIdx++)
 	{
 		ZipFileInfo FileInfo(ZipFile.mFiles[FileIdx]);
 		quint32 Mode = FileInfo.ZipInfo.external_fa;
@@ -3742,7 +3742,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 	}
 
 	if (!Ok)
-		Result = tr("%1 of %2 files extracted.").arg(Extracted).arg(ZipFile.mFiles.GetSize());
+		Result = tr("%1 of %2 files extracted.").arg(Extracted).arg(ZipFile.mFiles.size());
 
 	return Ok;
 }

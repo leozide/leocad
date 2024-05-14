@@ -352,12 +352,12 @@ bool lcZipFile::ReadCentralDir()
 	quint64 PosInCentralDir = mCentralDirOffset;
 
 	mFile->Seek(PosInCentralDir + mBytesBeforeZipFile, SEEK_SET);
-	mFiles.AllocGrow((int)mNumEntries);
+	mFiles.reserve(mNumEntries);
 
 	for (quint64 FileNum = 0; FileNum < mNumEntries; FileNum++)
 	{
 		quint32 Magic, Number32;
-		lcZipFileInfo& FileInfo = mFiles.Add();
+		lcZipFileInfo& FileInfo = mFiles.emplace_back();
 		long Seek = 0;
 
 		FileInfo.write_buffer = nullptr;
@@ -569,7 +569,7 @@ bool lcZipFile::ReadCentralDir()
 
 bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength)
 {
-	for (int FileIdx = 0; FileIdx < mFiles.GetSize(); FileIdx++)
+	for (quint32 FileIdx = 0; FileIdx < mFiles.size(); FileIdx++)
 	{
 		lcZipFileInfo& FileInfo = mFiles[FileIdx];
 
@@ -580,7 +580,7 @@ bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLe
 	return false;
 }
 
-bool lcZipFile::ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength)
+bool lcZipFile::ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLength)
 {
 	QMutexLocker Lock(&mMutex);
 

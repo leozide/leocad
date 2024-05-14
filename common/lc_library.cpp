@@ -379,7 +379,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 	std::unique_ptr<lcLibrarySource> Source(new lcLibrarySource);
 	Source->Type = ZipFileType != lcZipFileType::StudStyle ? lcLibrarySourceType::Library : lcLibrarySourceType::StudStyle;
 
-	for (int FileIdx = 0; FileIdx < ZipFile->mFiles.GetSize(); FileIdx++)
+	for (quint32 FileIdx = 0; FileIdx < ZipFile->mFiles.size(); FileIdx++)
 	{
 		lcZipFileInfo& FileInfo = ZipFile->mFiles[FileIdx];
 		char NameBuffer[LC_PIECE_NAME_LEN];

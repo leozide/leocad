@@ -86,7 +86,6 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		}
 
 		lcLibraryMeshData MeshData;
-		lcArray<lcMeshLoaderTextureMap> TextureStack;
 		PieceFile.Seek(0, SEEK_SET);
 
 		lcMeshLoader MeshLoader(MeshData, true, CurrentProject, SearchProjectFolder);

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
-
 #ifdef DeleteFile
 #undef DeleteFile
 #endif
@@ -61,10 +59,10 @@ public:
 	bool OpenRead(std::unique_ptr<lcFile> File);
 	bool OpenWrite(const QString& FileName);
 
-	bool ExtractFile(int FileIndex, lcMemFile& File, quint32 MaxLength = 0xffffffff);
+	bool ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength = 0xffffffff);
 
-	lcArray<lcZipFileInfo> mFiles;
+	std::vector<lcZipFileInfo> mFiles;
 
 protected:
 	bool Open();

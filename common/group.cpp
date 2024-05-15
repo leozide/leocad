@@ -8,13 +8,9 @@ lcGroup::lcGroup()
 	mGroup = nullptr;
 }
 
-lcGroup::~lcGroup()
-{
-}
-
 void lcGroup::FileLoad(lcFile* File)
 {
-	lcint32 GroupIndex;
+	qint32 GroupIndex;
 	char Name[LC_MAX_GROUP_NAME + 1];
 
 	File->ReadU8();
@@ -30,9 +26,9 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 	if (!mName.isEmpty())
 	{
 		bool Found = false;
-		for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+		for (const lcGroup* const Group : Groups)
 		{
-			if (Groups[GroupIdx]->mName == mName)
+			if (Group->mName == mName)
 			{
 				Found = true;
 				break;
@@ -45,11 +41,11 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 
 	int Max = 0;
 	QString Prefix = QApplication::tr("Group #");
-	int Length = Prefix.length();
+	const int Length = Prefix.length();
 
-	for (int GroupIdx = 0; GroupIdx < Groups.GetSize(); GroupIdx++)
+	for (const lcGroup* const Group : Groups)
 	{
-		const QString& Name = Groups[GroupIdx]->mName;
+		const QString& Name = Group->mName;
 
 		if (Name.startsWith(Prefix))
 		{

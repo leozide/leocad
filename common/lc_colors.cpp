@@ -1,24 +1,14 @@
 #include "lc_global.h"
 #include "lc_colors.h"
 #include "lc_file.h"
+#include "lc_library.h"
+#include "lc_application.h"
 #include <float.h>
 
-lcArray<lcColor> gColorList;
+std::vector<lcColor> gColorList;
 lcColorGroup gColorGroups[LC_NUM_COLORGROUPS];
-int gNumUserColors;
 int gEdgeColor;
 int gDefaultColor;
-
-lcVector4 gInterfaceColors[LC_NUM_INTERFACECOLORS] = // todo: make the colors configurable and include the grid and other hardcoded colors here as well.
-{
-	lcVector4(0.898f, 0.298f, 0.400f, 1.000f), // LC_COLOR_SELECTED
-	lcVector4(0.400f, 0.298f, 0.898f, 1.000f), // LC_COLOR_FOCUSED
-	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // LC_COLOR_CAMERA
-	lcVector4(0.500f, 0.800f, 0.500f, 1.000f), // LC_COLOR_LIGHT
-	lcVector4(0.500f, 0.800f, 0.500f, 0.500f), // LC_COLOR_CONTROL_POINT
-	lcVector4(0.400f, 0.298f, 0.898f, 0.500f), // LC_COLOR_CONTROL_POINT_FOCUSED
-	lcVector4(0.098f, 0.898f, 0.500f, 1.000f)  // LC_COLOR_HIGHLIGHT
-};
 
 static void GetToken(char*& Ptr, char* Token)
 {
@@ -31,193 +21,54 @@ static void GetToken(char*& Ptr, char* Token)
 	*Token = 0;
 }
 
-int lcGetBrickLinkColor(int ColorIndex)
+static void lcAdjustStudStyleColors(std::vector<lcColor>& Colors, lcStudStyle StudStyle)
 {
-	struct lcBrickLinkEntry
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	if (!Preferences.mAutomateEdgeColor && !lcIsHighContrast(StudStyle))
+		return;
+
+	const lcVector4 Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
+	const lcVector4 DarkEdge = lcVector4FromColor(Preferences.mDarkEdgeColor);
+	const lcVector4 BlackEdge = lcVector4FromColor(Preferences.mBlackEdgeColor);
+
+	const float ContrastControl = Preferences.mPartEdgeContrast;
+	const float LightDarkControl = Preferences.mAutomateEdgeColor ? Preferences.mPartColorValueLDIndex : LC_SRGB_TO_LINEAR(Preferences.mPartColorValueLDIndex);
+
+	for (lcColor& Color : Colors)
 	{
-		int Code;
-		const char* Name;
-	};
+		const lcVector3 LinearColor = lcSRGBToLinear(lcVector3(Color.Value));
+		const float ValueLuminescence = lcLuminescence(LinearColor);
 
-	lcBrickLinkEntry BrickLinkColors[] =
-	{
-		{  41, "Aqua" },
-		{  11, "Black" },
-		{   7, "Blue" },
-		{  97, "Blue Violet" },                     // Blue-Violet
-		{  36, "Bright Green" },
-		{ 105, "Bright Light Blue" },
-		{ 110, "Bright Light Orange" },
-		{ 103, "Bright Light Yellow" },
-		{ 104, "Bright Pink" },
-		{   8, "Brown" },
-		{ 153, "Dark Azure" },
-		{  63, "Dark Blue" },
-		{ 109, "Dark Blue Violet" },                // Dark Blue-Violet
-		{  85, "Dark Bluish Gray" },
-		{ 120, "Dark Brown" },
-		{  91, "Dark Flesh" },
-		{  10, "Dark Gray" },
-		{  80, "Dark Green" },
-		{  68, "Dark Orange" },
-		{  47, "Dark Pink" },
-		{  89, "Dark Purple" },
-		{  59, "Dark Red" },
-		{  69, "Dark Tan" },
-		{  39, "Dark Turquoise" },
-		{  29, "Earth Orange" },
-		{ 106, "Fabuland Brown" },
-		{ 160, "Fabuland Orange" },                 // No match
-		{  28, "Flesh" },
-		{   6, "Green" },
-		{ 154, "Lavender" },
-		{ 152, "Light Aqua" },
-		{  62, "Light Blue" },
-		{  86, "Light Bluish Gray" },
-		{  90, "Light Flesh" },
-		{   9, "Light Gray" },
-		{  38, "Light Green" },
-		{  35, "Light Lime" },
-		{  32, "Light Orange" },
-		{  56, "Light Pink" },
-		{  93, "Light Purple" },
-		{  26, "Light Salmon" },
-		{  40, "Light Turquoise" },
-		{  44, "Light Violet" },
-		{  33, "Light Yellow" },
-		{  34, "Lime" },
-		{  72, "Maersk Blue" },
-		{  71, "Magenta" },
-		{ 156, "Medium Azure" },
-		{  42, "Medium Blue" },
-		{ 150, "Medium Dark Flesh" },
-		{  94, "Medium Dark Pink" },
-		{  37, "Medium Green" },
-		{ 157, "Medium Lavender" },
-		{  76, "Medium Lime" },
-		{  31, "Medium Orange" },
-		{  73, "Medium Violet" },
-		{ 155, "Olive Green" },
-		{   4, "Orange" },
-		{  23, "Pink" },
-		{  24, "Purple" },
-		{   5, "Red" },
-		{  88, "Reddish Brown" },
-		{  27, "Rust" },
-		{  25, "Salmon" },
-		{  55, "Sand Blue" },
-		{  48, "Sand Green" },
-		{  54, "Sand Purple" },
-		{  58, "Sand Red" },
-		{  87, "Sky Blue" },
-		{   2, "Tan" },
-		{  99, "Very Light Bluish Gray" },
-		{  49, "Very Light Gray" },
-		{  96, "Very Light Orange" },
-		{  43, "Violet" },
-		{   1, "White" },
-		{   3, "Yellow" },
-		{ 158, "Yellowish Green" },
-		{  13, "Trans Black" },                     // Trans-Black
-		{ 108, "Trans Bright Green" },              // Trans-Bright Green
-		{  12, "Trans Clear" },                     // Trans-Clear
-		{  14, "Trans Dark Blue" },                 // Trans-Dark Blue
-		{  50, "Trans Dark Pink" },                 // Trans-Dark Pink
-		{  20, "Trans Green" },                     // Trans-Green
-		{  15, "Trans Light Blue" },                // Trans-Light Blue
-		{ 114, "Trans Light Purple" },              // Trans-Light Purple
-		{  74, "Trans Medium Blue" },               // Trans-Medium Blue
-		{  16, "Trans Neon Green" },                // Trans-Neon Green
-		{  18, "Trans Neon Orange" },               // Trans-Neon Orange
-		{ 121, "Trans Neon Yellow" },               // Trans-Neon Yellow
-		{  98, "Trans Orange" },                    // Trans-Orange
-		{ 107, "Trans Pink" },                      // Trans-Pink
-		{  51, "Trans Purple" },                    // Trans-Purple
-		{  17, "Trans Red" },                       // Trans-Red
-		{ 113, "Trans Very Light Blue" },           // Trans-Very Lt Blue
-		{  19, "Trans Yellow" },                    // Trans-Yellow
-		{  57, "Chrome Antique Brass" },
-		{ 122, "Chrome Black" },
-		{  52, "Chrome Blue" },
-		{  21, "Chrome Gold" },
-		{  64, "Chrome Green" },
-		{  82, "Chrome Pink" },
-		{  22, "Chrome Silver" },
-		{  84, "Copper" },
-		{  81, "Flat Dark Gold" },
-		{  95, "Flat Silver" },
-		{  78, "Metal Blue" },
-		{  77, "Pearl Dark Gray" },
-		{ 115, "Pearl Gold" },
-		{  61, "Pearl Light Gold" },
-		{  66, "Pearl Light Gray" },
-		{ 119, "Pearl Very Light Gray" },
-		{  83, "Pearl White" },
-		{  65, "Metallic Gold" },
-		{  70, "Metallic Green" },
-		{  67, "Metallic Silver" },
-		{  46, "Glow In Dark Opaque" },
-		{ 118, "Glow In Dark Trans" },
-		{ 159, "Glow in Dark White" },              // No match
-		{  60, "Milky White" },
-		{ 101, "Glitter Trans Clear" },             // Glitter Trans-Clear
-		{ 100, "Glitter Trans Dark Pink" },         // Glitter Trans-Dark Pink
-		{ 102, "Glitter Trans Purple" },            // Glitter Trans-Purple
-		{ 116, "Speckle Black Copper" },            // Speckle Black-Copper
-		{ 151, "Speckle Black Gold" },              // Speckle Black-Gold
-		{ 111, "Speckle Black Silver" },            // Speckle Black-Silver
-		{ 117, "Speckle Dark Bluish Gray Silver" }, // Speckle DBGray-Silver
-	};
+		if (Preferences.mAutomateEdgeColor)
+		{
+			if (Color.Adjusted)
+				continue;
 
-	const char* Name = gColorList[ColorIndex].Name;
+			const float EdgeLuminescence = lcLuminescence(lcSRGBToLinear(lcVector3(Color.Edge)));
 
-	for (unsigned int Color = 0; Color < sizeof(BrickLinkColors) / sizeof(BrickLinkColors[0]); Color++)
-		if (!strcmp(Name, BrickLinkColors[Color].Name))
-			return BrickLinkColors[Color].Code;
-
-	return 0;
+			Color.Edge = lcAlgorithmicEdgeColor(LinearColor, ValueLuminescence, EdgeLuminescence, ContrastControl, LightDarkControl);
+			Color.Adjusted = true;
+		}
+		else
+		{
+			if (Color.Code == LC_STUD_CYLINDER_COLOR_CODE)
+				continue;
+			else if (Preferences.mBlackEdgeColorEnabled && Color.Code == 0)
+				Color.Edge = BlackEdge;
+			else if (Preferences.mDarkEdgeColorEnabled && ValueLuminescence < LightDarkControl)
+				Color.Edge = DarkEdge;
+			else if (Preferences.mPartEdgeColorEnabled)
+				Color.Edge = Edge;
+		}
+	}
 }
 
-bool lcLoadColorFile(lcFile& File)
+static std::vector<lcColor> lcParseColorFile(lcFile& File)
 {
 	char Line[1024], Token[1024];
-	lcArray<lcColor>& Colors = gColorList;
-	lcColor Color, MainColor, EdgeColor;
-
-	Colors.RemoveAll();
-
-	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
-		gColorGroups[GroupIdx].Colors.RemoveAll();
-
-	gColorGroups[0].Name = QApplication::tr("Solid Colors", "Colors");
-	gColorGroups[1].Name = QApplication::tr("Translucent Colors", "Colors");
-	gColorGroups[2].Name = QApplication::tr("Special Colors", "Colors");
-
-	MainColor.Code = 16;
-	MainColor.Translucent = false;
-	MainColor.Value[0] = 1.0f;
-	MainColor.Value[1] = 1.0f;
-	MainColor.Value[2] = 0.5f;
-	MainColor.Value[3] = 1.0f;
-	MainColor.Edge[0] = 0.2f;
-	MainColor.Edge[1] = 0.2f;
-	MainColor.Edge[2] = 0.2f;
-	MainColor.Edge[3] = 1.0f;
-	strcpy(MainColor.Name, "Main Color");
-	strcpy(MainColor.SafeName, "Main_Color");
-
-	EdgeColor.Code = 24;
-	EdgeColor.Translucent = false;
-	EdgeColor.Value[0] = 0.5f;
-	EdgeColor.Value[1] = 0.5f;
-	EdgeColor.Value[2] = 0.5f;
-	EdgeColor.Value[3] = 1.0f;
-	EdgeColor.Edge[0] = 0.2f;
-	EdgeColor.Edge[1] = 0.2f;
-	EdgeColor.Edge[2] = 0.2f;
-	EdgeColor.Edge[3] = 1.0f;
-	strcpy(EdgeColor.Name, "Edge Color");
-	strcpy(EdgeColor.SafeName, "Edge_Color");
+	std::vector<lcColor> Colors;
+	lcColor Color;
 
 	while (File.ReadLine(Line, sizeof(Line)))
 	{
@@ -232,11 +83,11 @@ bool lcLoadColorFile(lcFile& File)
 		if (strcmp(Token, "!COLOUR"))
 			continue;
 
-		bool GroupTranslucent = false;
-		bool GroupSpecial = false;
-
-		Color.Code = -1;
+		Color.Code = ~0U;
 		Color.Translucent = false;
+		Color.Chrome = false;
+		Color.Rubber = false;
+		Color.Group = LC_COLORGROUP_SOLID;
 		Color.Value[0] = FLT_MAX;
 		Color.Value[1] = FLT_MAX;
 		Color.Value[2] = FLT_MAX;
@@ -304,24 +155,32 @@ bool lcLoadColorFile(lcFile& File)
 					Color.Translucent = true;
 
 				if (Value == 128)
-					GroupTranslucent = true;
+					Color.Group = LC_COLORGROUP_TRANSLUCENT;
 				else if (Value != 0)
-					GroupSpecial = true;
+					Color.Group = LC_COLORGROUP_SPECIAL;
 			}
-			else if (!strcmp(Token, "CHROME") || !strcmp(Token, "PEARLESCENT") || !strcmp(Token, "RUBBER") ||
-			         !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
+			else if (!strcmp(Token, "CHROME"))
 			{
-				GroupSpecial = true;
+				Color.Chrome = true;
+				Color.Group = LC_COLORGROUP_SPECIAL;
+			}
+			else if (!strcmp(Token, "RUBBER"))
+			{
+				Color.Rubber = true;
+				Color.Group = LC_COLORGROUP_SPECIAL;
+			}
+			else if (!strcmp(Token, "PEARLESCENT") || !strcmp(Token, "MATTE_METALIC") || !strcmp(Token, "METAL") || !strcmp(Token, "LUMINANCE"))
+			{
+				Color.Group = LC_COLORGROUP_SPECIAL;
 			}
 			else if (!strcmp(Token, "MATERIAL"))
 			{
-				GroupSpecial = true;
+				Color.Group = LC_COLORGROUP_SPECIAL;
 				break; // Material is always last so ignore it and the rest of the line.
 			}
 		}
 
-		// Check if the new color is valid.
-		if (Color.Code == (lcuint32)-1 || Color.Value[0] == FLT_MAX)
+		if (Color.Code == ~0U || Color.Value[0] == FLT_MAX)
 			continue;
 
 		if (Color.Edge[0] == FLT_MAX)
@@ -331,87 +190,199 @@ bool lcLoadColorFile(lcFile& File)
 			Color.Edge[2] = 33.0f / 255.0f;
 		}
 
-		// Check for duplicates.
 		bool Duplicate = false;
 
-		for (int i = 0; i < Colors.GetSize(); i++)
+		for (lcColor& ExistingColor : Colors)
 		{
-			if (Colors[i].Code == Color.Code)
+			if (ExistingColor.Code == Color.Code)
 			{
-				Colors[i] = Color;
+				ExistingColor = Color;
 				Duplicate = true;
 				break;
 			}
 		}
 
-		if (Duplicate)
-			continue;
-
-		if (Color.Code == 16)
-		{
-			MainColor = Color;
-			continue;
-		}
-
-		if (Color.Code == 24)
-		{
-			EdgeColor = Color;
-			continue;
-		}
-
-		Colors.Add(Color);
-
-		if (GroupSpecial)
-			gColorGroups[LC_COLORGROUP_SPECIAL].Colors.Add(Colors.GetSize() - 1);
-		else if (GroupTranslucent)
-			gColorGroups[LC_COLORGROUP_TRANSLUCENT].Colors.Add(Colors.GetSize() - 1);
-		else
-			gColorGroups[LC_COLORGROUP_SOLID].Colors.Add(Colors.GetSize() - 1);
+		if (!Duplicate)
+			Colors.push_back(Color);
 	}
 
-	gDefaultColor = Colors.GetSize();
-	Colors.Add(MainColor);
-	gColorGroups[LC_COLORGROUP_SOLID].Colors.Add(gDefaultColor);
-
-	gNumUserColors = Colors.GetSize();
-
-	gEdgeColor = Colors.GetSize();
-	Colors.Add(EdgeColor);
-
-	return Colors.GetSize() > 2;
+	return Colors;
 }
 
-void lcLoadDefaultColors()
+bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 {
-	QResource Resource(":/resources/ldconfig.ldr");
+	std::vector<lcColor> Colors = lcParseColorFile(File);
+	const bool Valid = !Colors.empty();
 
-	if (!Resource.isValid())
-		return;
+	if (Valid)
+		lcAdjustStudStyleColors(Colors, StudStyle);
 
-	QByteArray Data;
+	bool FoundMain = false, FoundEdge = false, FoundStudCylinder = false, FoundNoColor = false;
 
-	if (Resource.isCompressed())
-		Data = qUncompress(Resource.data(), Resource.size());
-	else
-		Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
+	for (const lcColor& Color : Colors)
+	{
+		switch (Color.Code)
+		{
+			case 16:
+				FoundMain = true;
+				break;
 
-	lcMemFile MemSettings;
+			case 24:
+				FoundEdge = true;
+				break;
 
-	MemSettings.WriteBuffer(Data.constData(), Data.size());
-	MemSettings.Seek(0, SEEK_SET);
-	lcLoadColorFile(MemSettings);
+			case LC_STUD_CYLINDER_COLOR_CODE:
+				FoundStudCylinder = true;
+				break;
+
+			case LC_COLOR_NOCOLOR:
+				FoundNoColor = true;
+				break;
+		}
+	}
+
+	if (!FoundMain)
+	{
+		lcColor MainColor;
+
+		MainColor.Code = 16;
+		MainColor.Translucent = false;
+		MainColor.Chrome = false;
+		MainColor.Rubber = false;
+		MainColor.Group = LC_COLORGROUP_SOLID;
+		MainColor.Value[0] = 1.0f;
+		MainColor.Value[1] = 1.0f;
+		MainColor.Value[2] = 0.5f;
+		MainColor.Value[3] = 1.0f;
+		MainColor.Edge[0] = 0.2f;
+		MainColor.Edge[1] = 0.2f;
+		MainColor.Edge[2] = 0.2f;
+		MainColor.Edge[3] = 1.0f;
+		strcpy(MainColor.Name, "Main Color");
+		strcpy(MainColor.SafeName, "Main_Color");
+
+		Colors.push_back(MainColor);
+	}
+
+	if (!FoundEdge)
+	{
+		lcColor EdgeColor;
+
+		EdgeColor.Code = 24;
+		EdgeColor.Translucent = false;
+		EdgeColor.Chrome = false;
+		EdgeColor.Rubber = false;
+		EdgeColor.Group = LC_NUM_COLORGROUPS;
+		EdgeColor.Value[0] = 0.5f;
+		EdgeColor.Value[1] = 0.5f;
+		EdgeColor.Value[2] = 0.5f;
+		EdgeColor.Value[3] = 1.0f;
+		EdgeColor.Edge[0] = 0.2f;
+		EdgeColor.Edge[1] = 0.2f;
+		EdgeColor.Edge[2] = 0.2f;
+		EdgeColor.Edge[3] = 1.0f;
+		strcpy(EdgeColor.Name, "Edge Color");
+		strcpy(EdgeColor.SafeName, "Edge_Color");
+
+		Colors.push_back(EdgeColor);
+	}
+
+	if (!FoundStudCylinder)
+	{
+		const lcPreferences& Preferences = lcGetPreferences();
+		lcColor StudCylinderColor;
+
+		StudCylinderColor.Code = LC_STUD_CYLINDER_COLOR_CODE;
+		StudCylinderColor.Translucent = false;
+		StudCylinderColor.Chrome = false;
+		StudCylinderColor.Rubber = false;
+		StudCylinderColor.Group = LC_NUM_COLORGROUPS;
+		StudCylinderColor.Value = lcVector4FromColor(Preferences.mStudCylinderColor);
+		StudCylinderColor.Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
+		strcpy(StudCylinderColor.Name, "Stud Cylinder Color");
+		strcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
+
+		Colors.push_back(StudCylinderColor);
+	}
+
+	if (!FoundNoColor)
+	{
+		lcColor NoColor;
+
+		NoColor.Code = LC_COLOR_NOCOLOR;
+		NoColor.Translucent = false;
+		NoColor.Chrome = false;
+		NoColor.Rubber = false;
+		NoColor.Group = LC_NUM_COLORGROUPS;
+		NoColor.Value[0] = 0.5f;
+		NoColor.Value[1] = 0.5f;
+		NoColor.Value[2] = 0.5f;
+		NoColor.Value[3] = 1.0f;
+		NoColor.Edge[0] = 0.2f;
+		NoColor.Edge[1] = 0.2f;
+		NoColor.Edge[2] = 0.2f;
+		NoColor.Edge[3] = 1.0f;
+		strcpy(NoColor.Name, "No Color");
+		strcpy(NoColor.SafeName, "No_Color");
+
+		Colors.push_back(NoColor);
+	}
+
+	for (lcColor& Color : gColorList)
+		Color.Group = LC_NUM_COLORGROUPS;
+
+	for (int GroupIdx = 0; GroupIdx < LC_NUM_COLORGROUPS; GroupIdx++)
+		gColorGroups[GroupIdx].Colors.clear();
+
+	gColorGroups[0].Name = QApplication::tr("Solid", "Colors");
+	gColorGroups[1].Name = QApplication::tr("Translucent", "Colors");
+	gColorGroups[2].Name = QApplication::tr("Special", "Colors");
+
+	for (lcColor& Color : Colors)
+	{
+		int ColorIndex;
+
+		for (ColorIndex = 0; ColorIndex < static_cast<int>(gColorList.size()); ColorIndex++)
+			if (gColorList[ColorIndex].Code == Color.Code)
+				break;
+
+		if (ColorIndex == static_cast<int>(gColorList.size()))
+			gColorList.push_back(Color);
+		else
+			gColorList[ColorIndex] = Color;
+
+		if (Color.Group != LC_NUM_COLORGROUPS)
+			gColorGroups[Color.Group].Colors.push_back(ColorIndex);
+
+		if (Color.Code == 16)
+			gDefaultColor = ColorIndex;
+		else if (Color.Code == 24)
+			gEdgeColor = ColorIndex;
+	}
+
+	return Valid;
 }
 
-int lcGetColorIndex(lcuint32 ColorCode)
+void lcLoadDefaultColors(lcStudStyle StudStyle)
 {
-	for (int ColorIdx = 0; ColorIdx < gColorList.GetSize(); ColorIdx++)
+	lcDiskFile ConfigFile(":/resources/ldconfig.ldr");
+
+	if (ConfigFile.Open(QIODevice::ReadOnly))
+		lcLoadColorFile(ConfigFile, StudStyle);
+}
+
+int lcGetColorIndex(quint32 ColorCode)
+{
+	for (size_t ColorIdx = 0; ColorIdx < gColorList.size(); ColorIdx++)
 		if (gColorList[ColorIdx].Code == ColorCode)
-			return ColorIdx;
+			return (int)ColorIdx;
 
 	lcColor Color;
 
 	Color.Code = ColorCode;
 	Color.Translucent = false;
+	Color.Chrome = false;
+	Color.Rubber = false;
 	Color.Edge[0] = 0.2f;
 	Color.Edge[1] = 0.2f;
 	Color.Edge[2] = 0.2f;
@@ -420,8 +391,8 @@ int lcGetColorIndex(lcuint32 ColorCode)
 	if (ColorCode & LC_COLOR_DIRECT)
 	{
 		Color.Value[0] = (float)((ColorCode & 0xff0000) >> 16) / 255.0f;
-		Color.Value[1] = (float)((ColorCode & 0x00ff00) >>  8) / 255.0f;
-		Color.Value[2] = (float)((ColorCode & 0x0000ff) >>  0) / 255.0f;
+		Color.Value[1] = (float)((ColorCode & 0x00ff00) >> 8) / 255.0f;
+		Color.Value[2] = (float)((ColorCode & 0x0000ff) >> 0) / 255.0f;
 		Color.Value[3] = 1.0f;
 		sprintf(Color.Name, "Color %06X", ColorCode & 0xffffff);
 		sprintf(Color.SafeName, "Color_%06X", ColorCode & 0xffffff);
@@ -436,6 +407,6 @@ int lcGetColorIndex(lcuint32 ColorCode)
 		sprintf(Color.SafeName, "Color_%03d", ColorCode);
 	}
 
-	gColorList.Add(Color);
-	return gColorList.GetSize() - 1;
+	gColorList.push_back(Color);
+	return (int)gColorList.size() - 1;
 }

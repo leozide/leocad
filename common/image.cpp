@@ -4,10 +4,10 @@
 
 static void CopyFromQImage(const QImage& Src, Image& Dest)
 {
-	bool Alpha = Src.hasAlphaChannel();
-	Dest.Allocate(Src.width(), Src.height(), Alpha ? LC_PIXEL_FORMAT_R8G8B8A8 : LC_PIXEL_FORMAT_R8G8B8);
+	const bool Alpha = Src.hasAlphaChannel();
+	Dest.Allocate(Src.width(), Src.height(), Alpha ? lcPixelFormat::R8G8B8A8 : lcPixelFormat::R8G8B8);
 
-	lcuint8* Bytes = (lcuint8*)Dest.mData;
+	quint8* Bytes = (quint8*)Dest.mData;
 
 	for (int y = 0; y < Dest.mHeight; y++)
 	{
@@ -30,7 +30,20 @@ Image::Image()
 	mData = nullptr;
 	mWidth = 0;
 	mHeight = 0;
-	mFormat = LC_PIXEL_FORMAT_INVALID;
+	mFormat = lcPixelFormat::Invalid;
+}
+
+Image::Image(Image&& Other)
+{
+	mData = Other.mData;
+	mWidth = Other.mWidth;
+	mHeight = Other.mHeight;
+	mFormat = Other.mFormat;
+
+	Other.mData = nullptr;
+	Other.mWidth = 0;
+	Other.mHeight = 0;
+	Other.mFormat = lcPixelFormat::Invalid;
 }
 
 Image::~Image()
@@ -42,15 +55,15 @@ int Image::GetBPP() const
 {
 	switch (mFormat)
 	{
-	case LC_PIXEL_FORMAT_INVALID:
+	case lcPixelFormat::Invalid:
 		return 0;
-	case LC_PIXEL_FORMAT_A8:
+	case lcPixelFormat::A8:
 		return 1;
-	case LC_PIXEL_FORMAT_L8A8:
+	case lcPixelFormat::L8A8:
 		return 2;
-	case LC_PIXEL_FORMAT_R8G8B8:
+	case lcPixelFormat::R8G8B8:
 		return 3;
-	case LC_PIXEL_FORMAT_R8G8B8A8:
+	case lcPixelFormat::R8G8B8A8:
 		return 4;
 	}
 
@@ -61,15 +74,15 @@ bool Image::HasAlpha() const
 {
 	switch (mFormat)
 	{
-	case LC_PIXEL_FORMAT_INVALID:
+	case lcPixelFormat::Invalid:
 		return false;
-	case LC_PIXEL_FORMAT_A8:
+	case lcPixelFormat::A8:
 		return true;
-	case LC_PIXEL_FORMAT_L8A8:
+	case lcPixelFormat::L8A8:
 		return true;
-	case LC_PIXEL_FORMAT_R8G8B8:
+	case lcPixelFormat::R8G8B8:
 		return false;
-	case LC_PIXEL_FORMAT_R8G8B8A8:
+	case lcPixelFormat::R8G8B8A8:
 		return true;
 	}
 
@@ -82,7 +95,7 @@ void Image::FreeData()
 	mData = nullptr;
 	mWidth = 0;
 	mHeight = 0;
-	mFormat = LC_PIXEL_FORMAT_INVALID;
+	mFormat = lcPixelFormat::Invalid;
 }
 
 void Image::Allocate(int Width, int Height, lcPixelFormat Format)
@@ -120,7 +133,7 @@ void Image::Resize(int width, int height)
 	unsigned char* bits = nullptr;
 
 	components = GetBPP();
-	int BufferSize = width * height * components;
+	const int BufferSize = width * height * components;
 
 	if (BufferSize)
 	{
@@ -155,8 +168,8 @@ bool Image::FileLoad(lcMemFile& File)
 {
 	QImage Image;
 
-	unsigned char* Buffer = File.mBuffer + File.mPosition;
-	size_t BufferLength = File.mFileSize - File.mPosition;
+	const unsigned char* Buffer = File.mBuffer + File.mPosition;
+	const size_t BufferLength = File.mFileSize - File.mPosition;
 
 	if (!Image.loadFromData(Buffer, (int)BufferLength))
 		return false;

@@ -1,66 +1,63 @@
-;LeoCAD Setup Script
-;Written by Leonardo Zide (based on one of the example scripts)
+!include "MUI2.nsh"
 
-;--------------------------------
-;Include Modern UI
+; The name of the installer
+Name "LeoCAD"
 
-  !include "MUI.nsh"
+; The file to write
+;OutFile "leocad-setup.exe"
 
-;--------------------------------
-;General
+; Request application privileges for Windows Vista
+;RequestExecutionLevel admin
 
-  ;Name and file
-  Name "LeoCAD"
-  OutFile "LeoCAD-setup.exe"
+; Build Unicode installer
+Unicode True
 
-  ;Default installation folder
-  InstallDir "$PROGRAMFILES\LeoCAD"
+; The default installation directory
+InstallDir $PROGRAMFILES64\LeoCAD
+
+; Registry key to check for directory (so if you install again, it will 
+; overwrite the old one automatically)
+InstallDirRegKey HKLM "Software\LeoCAD Software\LeoCAD" "InstallFolder"
   
-  ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\BT Software\LeoCAD" "InstallPath"
+;  Icon "setup.ico"
 
-  Icon "setup.ico"
+;  !define MUI_ICON "setup.ico"
+;  !define MUI_UNICON "setup.ico"
 
-  !define MUI_ICON "setup.ico"
-  !define MUI_UNICON "setup.ico"
+SetCompressor /SOLID lzma
 
-  SetCompressor /SOLID lzma
 
-;--------------------------------
 ;Interface Settings
 
-  !define MUI_ABORTWARNING
+!define MUI_HEADERIMAGE
+!define MUI_ABORTWARNING
 
-;--------------------------------
+
 ;Pages
 
-  !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_DIRECTORY
-  !insertmacro MUI_PAGE_INSTFILES
-  !insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN "$INSTDIR\LeoCAD.exe"
+!insertmacro MUI_PAGE_FINISH
   
-  !insertmacro MUI_UNPAGE_WELCOME
-  !insertmacro MUI_UNPAGE_CONFIRM
-  !insertmacro MUI_UNPAGE_INSTFILES
-  !insertmacro MUI_UNPAGE_FINISH
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
   
-;--------------------------------
-;Languages
- 
-  !insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "English"
 
-;--------------------------------
+
 ;Installer Sections
 
-Section "LeoCAD" SecLeoCAD
+Section "Application Files" SecLeoCAD
 
+  SectionIn RO
   SetOutPath "$INSTDIR"
 
-  File "LeoCAD.exe"
-  ;File "LeoCAD.hlp"
-  ;File "LeoCAD.cnt"
-  File "..\..\docs\ReadMe.txt"
-  File "..\..\library.bin"
+  File /r /x library.bin "appdir\*.*"
 
   ;Register file extension
   WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
@@ -69,30 +66,58 @@ Section "LeoCAD" SecLeoCAD
   WriteRegStr HKCR "LeoCAD.Project\DefaultIcon" "" "$INSTDIR\LeoCAD.exe,0"
   WriteRegStr HKCR "LeoCAD.Project\shell" "" "open"
   WriteRegStr HKCR "LeoCAD.Project\shell\open\command" "" '"$INSTDIR\LeoCAD.exe" "%1"'
-  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "print"
-  ;WriteRegStr HKCR "LeoCAD.Project\shell\print\command" "" '"$INSTDIR\LeoCAD.exe" /p "%1"'
-  ;WriteRegStr HKCR "LeoCAD.Project\shell" "" "printto"
-  ;WriteRegStr HKCR "LeoCAD.Project\shell\printto\command" "" '"$INSTDIR\LeoCAD.exe" /pt "%1" "%2" "%3" "%4"'
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
-  
-  ;Store installation folder
-  ;WriteRegStr HKCU "Software\BT Software\LeoCAD" "InstallPath" $INSTDIR
-  
-  ; Overwrite old Pieces Library path.
-  ;WriteRegStr HKCU "Software\BT Software\LeoCAD\Settings" "PiecesLibrary" $INSTDIR
 
+  IfFileExists "$INSTDIR\vc_redist.x64.exe" VcRedist64Exists PastVcRedist64Check
+  VcRedist64Exists:
+    ExecWait '"$INSTDIR\vc_redist.x64.exe"  /quiet /norestart'
+  PastVcRedist64Check:
+
+  ;Store installation folder
+  ;WriteRegStr HKLM "Software\LeoCAD Software\LeoCAD" "InstallFolder" $INSTDIR
+  
   CreateShortCut "$SMPROGRAMS\LeoCAD.lnk" "$INSTDIR\LeoCAD.exe"
 
   ;Create uninstaller
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayName" "LeoCAD"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayVersion" $%VERSION%
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "Publisher" "LeoCAD.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "DisplayIcon" '"$INSTDIR\LeoCAD.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLUpdateInfo" "http://www.leocad.org"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLInfoAbout" "http://www.leocad.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLUpdateInfo" "https://www.leocad.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "URLInfoAbout" "https://www.leocad.org"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "NoRepair" 1
+
+  !include "FileFunc.nsh"
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD" "EstimatedSize" "$0"
+
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
 SectionEnd
+
+Section "Parts Library" SecLibrary
+
+  SetOutPath "$INSTDIR"
+
+  File "appdir\library.bin"
+
+SectionEnd
+
+;--------------------------------
+;Descriptions
+
+  ;Language strings
+  LangString DESC_SecLeoCAD ${LANG_ENGLISH} "Application Files (required)"
+  LangString DESC_SecLibrary ${LANG_ENGLISH} "Library of parts that represent those produced by the LEGO company and created by the LDraw community"
+
+  ;Assign language strings to sections
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLeoCAD} $(DESC_SecLeoCAD)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLibrary} $(DESC_SecLibrary)
+  !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
 ;Uninstaller Section
@@ -107,11 +132,8 @@ Section "Uninstall"
   Delete "$INSTDIR\LeoCAD.cnt"
   Delete "$INSTDIR\readme.txt"
   Delete "$INSTDIR\library.bin"
-  ;Delete "$INSTDIR\pieces.bin"
-  ;Delete "$INSTDIR\pieces.idx"
-  ;Delete "$INSTDIR\textures.bin"
-  ;Delete "$INSTDIR\textures.idx"
-  ;Delete "$INSTDIR\sysfont.txf"
+  Delete "$INSTDIR\povconsole32-sse2.exe"
+  Delete "$INSTDIR\vc_redist.x64.exe"
 
   RMDir "$INSTDIR"
 
@@ -120,7 +142,7 @@ Section "Uninstall"
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD"
-  DeleteRegKey HKCU "Software\BT Software\LeoCAD\InstallPath"
-  DeleteRegKey /ifempty HKCU "Software\BT Software\LeoCAD"
+  DeleteRegKey HKLM "Software\LeoCAD Software\LeoCAD\InstallFolder"
+  DeleteRegKey /ifempty HKCU "Software\LeoCAD Software\LeoCAD"
 
 SectionEnd

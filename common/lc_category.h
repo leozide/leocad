@@ -1,7 +1,4 @@
-#ifndef _LC_CATEGORY_H_
-#define _LC_CATEGORY_H_
-
-#include "lc_array.h"
+#pragma once
 
 struct lcLibraryCategory
 {
@@ -9,18 +6,16 @@ struct lcLibraryCategory
 	QByteArray Keywords;
 };
 
-extern lcArray<lcLibraryCategory> gCategories;
+extern std::vector<lcLibraryCategory> gCategories;
 
 void lcResetDefaultCategories();
 void lcLoadDefaultCategories(bool BuiltInLibrary = false);
 void lcSaveDefaultCategories();
 
-void lcResetCategories(lcArray<lcLibraryCategory>& Categories, bool BuiltInLibrary = false);
-bool lcLoadCategories(const QString& FileName, lcArray<lcLibraryCategory>& Categories);
-bool lcLoadCategories(const QByteArray& Buffer, lcArray<lcLibraryCategory>& Categories);
-bool lcSaveCategories(const QString& FileName, const lcArray<lcLibraryCategory>& Categories);
-bool lcSaveCategories(QTextStream& Stream, const lcArray<lcLibraryCategory>& Categories);
+void lcResetCategories(std::vector<lcLibraryCategory>& Categories, bool BuiltInLibrary = false);
+bool lcLoadCategories(const QString& FileName, std::vector<lcLibraryCategory>& Categories);
+bool lcLoadCategories(const QByteArray& Buffer, std::vector<lcLibraryCategory>& Categories);
+bool lcSaveCategories(const QString& FileName, const std::vector<lcLibraryCategory>& Categories);
+bool lcSaveCategories(QTextStream& Stream, const std::vector<lcLibraryCategory>& Categories);
 
 bool lcMatchCategory(const char* PieceName, const char* Expression);
-
-#endif // _LC_CATEGORY_H_

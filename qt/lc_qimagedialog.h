@@ -1,5 +1,4 @@
-#ifndef LC_QIMAGEDIALOG_H
-#define LC_QIMAGEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -22,11 +21,10 @@ public:
 	int mEnd;
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_fileNameBrowse_clicked();
 
 private:
 	Ui::lcQImageDialog *ui;
 };
 
-#endif // LC_QIMAGEDIALOG_H

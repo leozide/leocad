@@ -1,6 +1,6 @@
 # Maintainer: Peter Bartfai <pbartfai[at]stardust[dot]hu>
 pkgname=leocad
-pkgver=0.83.2
+pkgver=18.02
 pkgrel=1
 pkgdesc="LeoCAD is a CAD program for creating virtual LEGO models."
 url="http://leocad.org"
@@ -9,8 +9,8 @@ license=('GPL')
 #Qt4.x
 depends=('qt4' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
 #Qt5.x
-#depends=('qt5-base' 'qt5-tools' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
-makedepends=('automoc4' 'glu' 'phonon-qt4-gstreamer' 'ca-certificates')
+#depends=('qt5-base' 'qt5-tools' 'qt5-gamepad' 'libpng' 'libjpeg-turbo' 'mesa-libgl')
+makedepends=('glu' 'ca-certificates')
 conflicts=()
 replaces=()
 backup=()
@@ -35,7 +35,7 @@ package() {
   mkdir -p ${pkgdir}/usr/bin
   mkdir -p ${pkgdir}/usr/share/leocad
   install -m 755 build/release/leocad ${pkgdir}/usr/bin
-  install -m 644 docs/README.txt  ${pkgdir}/usr/share/leocad/README.txt
+  install -m 644 docs/README.md  ${pkgdir}/usr/share/leocad/README.md
   install -m 644 docs/CREDITS.txt ${pkgdir}/usr/share/leocad/CREDITS.txt
   install -m 644 docs/COPYING.txt ${pkgdir}/usr/share/leocad/COPYING.txt
   mkdir -p ${pkgdir}/usr/share/mime/packages/

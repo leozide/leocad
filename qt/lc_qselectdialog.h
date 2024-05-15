@@ -1,5 +1,4 @@
-#ifndef _LC_QSELECTDIALOG_H_
-#define _LC_QSELECTDIALOG_H_
+#pragma once
 
 #include <QDialog>
 #include "lc_array.h"
@@ -13,7 +12,7 @@ class lcQSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	lcQSelectDialog(QWidget* Parent);
+	lcQSelectDialog(QWidget* Parent, lcModel* Model);
 	~lcQSelectDialog();
 
 	lcArray<lcObject*> mObjects;
@@ -24,7 +23,7 @@ public:
 	};
 
 public slots:
-	void accept();
+	void accept() override;
 	void on_selectAll_clicked();
 	void on_selectNone_clicked();
 	void on_selectInvert_clicked();
@@ -33,7 +32,6 @@ public slots:
 private:
 	Ui::lcQSelectDialog *ui;
 
-	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
+	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model);
 };
 
-#endif // _LC_QSELECTDIALOG_H_

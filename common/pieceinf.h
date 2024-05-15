@@ -1,29 +1,36 @@
-#ifndef _PIECEINF_H_
-#define _PIECEINF_H_
+#pragma once
 
 #include <stdio.h>
 #include "lc_math.h"
 #include "lc_array.h"
 
-#define LC_PIECE_HAS_DEFAULT        0x01 // Piece has triangles using the default color
-#define LC_PIECE_HAS_SOLID          0x02 // Piece has triangles using a solid color
-#define LC_PIECE_HAS_TRANSLUCENT    0x04 // Piece has triangles using a translucent color
-#define LC_PIECE_HAS_LINES          0x08 // Piece has lines
-#define LC_PIECE_PLACEHOLDER        0x10 // Placeholder for a piece not in the library
-#define LC_PIECE_MODEL              0x20 // Piece is a model
-#define LC_PIECE_PROJECT            0x40 // Piece is a project
-#define LC_PIECE_HAS_TEXTURE        0x80 // Piece has sections using textures
+enum class lcPieceInfoType
+{
+	Part,
+	Placeholder,
+	Model,
+	Project
+};
 
 #define LC_PIECE_NAME_LEN 256
 
-enum lcPieceInfoState
+enum class lcPieceInfoState
 {
-	LC_PIECEINFO_UNLOADED,
-	LC_PIECEINFO_LOADING,
-	LC_PIECEINFO_LOADED
+	Unloaded,
+	Loading,
+	Loaded
+};
+
+struct lcModelPartsEntry
+{
+	lcMatrix44 WorldMatrix;
+	const PieceInfo* Info;
+	lcMesh* Mesh;
+	int ColorIndex;
 };
 
 class lcSynthInfo;
+enum class lcZipFileType;
 
 class PieceInfo
 {
@@ -31,7 +38,10 @@ public:
 	PieceInfo();
 	~PieceInfo();
 
-	QString GetSaveID() const;
+	PieceInfo(const PieceInfo&) = delete;
+	PieceInfo(PieceInfo&&) = delete;
+	PieceInfo& operator=(const PieceInfo&) = delete;
+	PieceInfo& operator=(PieceInfo&&) = delete;
 
 	const lcBoundingBox& GetBoundingBox() const
 	{
@@ -64,6 +74,11 @@ public:
 		return mModel;
 	}
 
+	Project* GetProject() const
+	{
+		return mProject;
+	}
+
 	void SetMesh(lcMesh* Mesh);
 
 	int AddRef()
@@ -85,25 +100,25 @@ public:
 
 	bool IsPlaceholder() const
 	{
-		return (mFlags & LC_PIECE_PLACEHOLDER) != 0;
+		return mType == lcPieceInfoType::Placeholder;
 	}
 
 	bool IsModel() const
 	{
-		return (mFlags & LC_PIECE_MODEL) != 0;
+		return mType == lcPieceInfoType::Model;
 	}
 
 	bool IsProject() const
 	{
-		return (mFlags & LC_PIECE_PROJECT) != 0;
+		return mType == lcPieceInfoType::Project;
 	}
 
 	bool IsTemporary() const
 	{
-		return (mFlags & (LC_PIECE_PLACEHOLDER | LC_PIECE_MODEL | LC_PIECE_PROJECT)) != 0;
+		return mType != lcPieceInfoType::Part;
 	}
 
-	void SetZipFile(int ZipFileType, int ZipFileIndex)
+	void SetZipFile(lcZipFileType ZipFileType, int ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
@@ -111,7 +126,15 @@ public:
 
 	bool IsPatterned() const
 	{
-		const char* Name = m_strName;
+		if (mType != lcPieceInfoType::Part)
+			return false;
+
+		const char* Name = mFileName;
+
+		// Heuristic: Names matching '^[Uu]?[0-9]*[A-Za-z][^.][^.]' are patterned.
+
+		if (*Name == 'U' || *Name == 'u')
+			Name++;
 
 		while (*Name)
 		{
@@ -121,7 +144,10 @@ public:
 			Name++;
 		}
 
-		if (*Name == 'P')
+		if (!*Name || !((*Name >= 'A' && *Name <= 'Z') || (*Name >= 'a' && *Name <= 'z')))
+			return false;
+
+		if (Name[1] && Name[1] != '.' && Name[2] && Name[2] != '.')
 			return true;
 
 		return false;
@@ -132,37 +158,43 @@ public:
 		return (m_strDescription[0] == '~');
 	}
 
-	void ZoomExtents(const lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix, float* EyePos = nullptr) const;
+	bool IsProjectPiece() const;
+	void ZoomExtents(float FoV, float AspectRatio, lcMatrix44& ProjectionMatrix, lcMatrix44& ViewMatrix) const;
 	void AddRenderMesh(lcScene& Scene);
-	void AddRenderMeshes(lcScene& Scene, const lcMatrix44& WorldMatrix, int ColorIndex, bool Focused, bool Selected, bool Highlight) const;
+	void AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 
 	void CreatePlaceholder(const char* Name);
 
 	void SetPlaceholder();
 	void SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder);
-	void SetProject(Project* Project, const char* PieceName);
+	void CreateProject(Project* Project, const char* PieceName);
+	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
-	void GetPartsList(int DefaultColorIndex, lcPartsList& PartsList) const;
-	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcArray<lcModelPartsEntry>& ModelParts) const;
-	void UpdateBoundingBox(lcArray<lcModel*>& UpdatedModels);
+	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
+	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
+	void CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
+	void AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
+	void UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels);
 
 	void Load();
 	void Unload();
 
 public:
-	char m_strName[LC_PIECE_NAME_LEN];
+	char mFileName[LC_PIECE_NAME_LEN];
 	char m_strDescription[128];
-	int mZipFileType;
+	lcZipFileType mZipFileType;
 	int mZipFileIndex;
-	lcuint32 mFlags;
 	lcPieceInfoState mState;
+	int mFolderType;
+	int mFolderIndex;
 
 protected:
 	void ReleaseMesh();
 
 	int mRefCount;
+	lcPieceInfoType mType;
 	lcModel* mModel;
 	Project* mProject;
 	lcMesh* mMesh;
@@ -170,4 +202,3 @@ protected:
 	lcSynthInfo* mSynthInfo;
 };
 
-#endif // _PIECEINF_H_

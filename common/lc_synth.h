@@ -1,30 +1,20 @@
-#ifndef _LC_SYNTH_H_
-#define _LC_SYNTH_H_
+#pragma once
 
 #include "lc_math.h"
 #include "piece.h"
-
-enum class lcSynthType
-{
-	RIBBED_HOSE,
-	FLEXIBLE_AXLE,
-	STRING_BRAIDED,
-	SHOCK_ABSORBER,
-	ACTUATOR
-};
-
-struct lcSynthComponent
-{
-	lcMatrix44 Transform;
-	float Length;
-};
 
 class lcLibraryMeshData;
 
 class lcSynthInfo
 {
 public:
-	lcSynthInfo(lcSynthType Type, float Length, int NumSections, PieceInfo* Info);
+	explicit lcSynthInfo(float Length);
+	virtual ~lcSynthInfo() = default;
+
+	lcSynthInfo(const lcSynthInfo&) = delete;
+	lcSynthInfo(lcSynthInfo&&) = delete;
+	lcSynthInfo& operator=(const lcSynthInfo&) = delete;
+	lcSynthInfo& operator=(lcSynthInfo&&) = delete;
 
 	bool CanAddControlPoints() const
 	{
@@ -36,31 +26,31 @@ public:
 		return mCurve;
 	}
 
-	void GetDefaultControlPoints(lcArray<lcPieceControlPoint>& ControlPoints) const;
-	int InsertControlPoint(lcArray<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
-	lcMesh* CreateMesh(const lcArray<lcPieceControlPoint>& ControlPoints) const;
+	bool IsUnidirectional() const
+	{
+		return mUnidirectional;
+	}
+
+	bool IsNondirectional() const
+	{
+		return mNondirectional;
+	}
+
+	virtual void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const = 0;
+	virtual void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const = 0;
+	int InsertControlPoint(std::vector<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
+	lcMesh* CreateMesh(const std::vector<lcPieceControlPoint>& ControlPoints) const;
 
 protected:
-	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
-	void CalculateCurveSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const;
-	void CalculateLineSections(const lcArray<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, void(*SectionCallback)(const lcVector3& CurvePoint, int SegmentIndex, float t, void* Param), void* CallbackParam) const;
-	void AddRibbedHoseParts(lcMemFile& File, const lcArray<lcMatrix44>& Sections) const;
-	void AddFlexibleAxleParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const;
-	void AddStringBraidedParts(lcMemFile& File, lcLibraryMeshData& MeshData, lcArray<lcMatrix44>& Sections) const;
-	void AddShockAbsorberParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
-	void AddActuatorParts(lcMemFile& File, lcArray<lcMatrix44>& Sections) const;
+	using SectionCallbackFunc = std::function<void(const lcVector3& CurvePoint, quint32 SegmentIndex, float t)>;
+	virtual void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
+	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
 
-	PieceInfo* mPieceInfo;
-	lcSynthType mType;
-	lcSynthComponent mStart;
-	lcSynthComponent mMiddle;
-	lcSynthComponent mEnd;
-	bool mCurve;
+	bool mCurve = false;
+	bool mUnidirectional = false;
+	bool mNondirectional = false;
 	float mLength;
-	int mNumSections;
-	bool mRigidEdges;
 };
 
 void lcSynthInit();
 
-#endif // _LC_SYNTH_H_

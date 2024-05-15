@@ -1,21 +1,32 @@
-#ifndef _LC_MATH_H_
-#define _LC_MATH_H_
+#pragma once
 
 #include <math.h>
 #include <float.h>
 
 #define LC_DTOR (static_cast<float>(M_PI / 180))
 #define LC_RTOD (static_cast<float>(180 / M_PI))
-#define LC_PI   (static_cast<float>(M_PI))
-#define LC_2PI  (static_cast<float>(2*M_PI))
+#define LC_PI (static_cast<float>(M_PI))
+#define LC_2PI (static_cast<float>(2 * M_PI))
+#define LC_RGB_EPSILON (static_cast<float>(0.5f / 255.0f))
 
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
-#define LC_RGBA(r,g,b,a) ((lcuint32)(((lcuint8) (r) | ((lcuint16) (g) << 8)) | (((lcuint32) (lcuint8) (b)) << 16) | (((lcuint32) (lcuint8) (a)) << 24))) 
-#define LC_RGBA_RED(rgba)   ((lcuint8)(((rgba) >>  0) & 0xff))
-#define LC_RGBA_GREEN(rgba) ((lcuint8)(((rgba) >>  8) & 0xff))
-#define LC_RGBA_BLUE(rgba)  ((lcuint8)(((rgba) >> 16) & 0xff))
-#define LC_RGBA_ALPHA(rgba) ((lcuint8)(((rgba) >> 24) & 0xff))
-#define LC_FLOATRGB(f) LC_RGB(f[0]*255, f[1]*255, f[2]*255)
+#define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24)))
+#define LC_RGBA_RED(rgba)   ((quint8)(((rgba) >>  0) & 0xff))
+#define LC_RGBA_GREEN(rgba) ((quint8)(((rgba) >>  8) & 0xff))
+#define LC_RGBA_BLUE(rgba)  ((quint8)(((rgba) >> 16) & 0xff))
+#define LC_RGBA_ALPHA(rgba) ((quint8)(((rgba) >> 24) & 0xff))
+#define LC_SRGB_TO_LINEAR(v) (powf(v, 2.2f))
+#define LC_LINEAR_TO_SRGB(v) (powf(v, 1.0f / 2.2f))
+
+inline quint32 lcRGBAFromQColor(const QColor& Color)
+{
+	return LC_RGBA(Color.red(), Color.green(), Color.blue(), Color.alpha());
+}
+
+inline QColor lcQColorFromRGBA(quint32 RGBA)
+{
+	return QColor::fromRgb(LC_RGBA_RED(RGBA), LC_RGBA_GREEN(RGBA), LC_RGBA_BLUE(RGBA), LC_RGBA_ALPHA(RGBA));
+}
 
 inline float lcCos(float x)
 {
@@ -101,6 +112,31 @@ inline T lcClamp(const T& Value, const T& Min, const T& Max)
 		return Value;
 }
 
+class lcVector2i
+{
+public:
+	lcVector2i()
+	{
+	}
+
+	constexpr lcVector2i(const int _x, const int _y)
+		: x(_x), y(_y)
+	{
+	}
+
+	int x, y;
+};
+
+inline bool operator==(const lcVector2i& a, const lcVector2i& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
+
+inline bool operator!=(const lcVector2i& a, const lcVector2i& b)
+{
+	return a.x != b.x || a.y != b.y;
+}
+
 class lcVector2
 {
 public:
@@ -108,7 +144,7 @@ public:
 	{
 	}
 
-	lcVector2(const float _x, const float _y)
+	constexpr lcVector2(const float _x, const float _y)
 		: x(_x), y(_y)
 	{
 	}
@@ -117,12 +153,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -131,6 +167,11 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y);
 	}
 
 	float x, y;
@@ -143,21 +184,23 @@ public:
 	{
 	}
 
-	lcVector3(const float _x, const float _y, const float _z)
+	constexpr lcVector3(const float _x, const float _y, const float _z)
 		: x(_x), y(_y), z(_z)
 	{
 	}
+
+	explicit lcVector3(const lcVector4& v);
 
 	operator const float*() const
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -166,6 +209,11 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z);
 	}
 
 	void Normalize();
@@ -182,12 +230,12 @@ public:
 	{
 	}
 
-	lcVector4(const float _x, const float _y, const float _z, const float _w)
+	constexpr lcVector4(const float _x, const float _y, const float _z, const float _w)
 		: x(_x), y(_y), z(_z), w(_w)
 	{
 	}
 
-	lcVector4(const lcVector3& _xyz, const float _w)
+	constexpr lcVector4(const lcVector3& _xyz, const float _w)
 		: x(_xyz.x), y(_xyz.y), z(_xyz.z), w(_w)
 	{
 	}
@@ -196,12 +244,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -210,6 +258,11 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	bool IsNan() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w);
 	}
 
 	float x, y, z, w;
@@ -235,12 +288,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const lcVector3& operator[](int i) const
 	{
 		return r[i];
@@ -293,12 +346,12 @@ public:
 	{
 		return (const float*)this;
 	}
-	
+
 	operator float*()
 	{
 		return (float*)this;
 	}
-	
+
 	const lcVector4& operator[](int i) const
 	{
 		return r[i];
@@ -313,6 +366,11 @@ public:
 
 	lcVector4 r[4];
 };
+
+inline lcVector3::lcVector3(const lcVector4& v)
+	: x(v.x), y(v.y), z(v.z)
+{
+}
 
 inline lcVector3 operator+(const lcVector3& a, const lcVector3& b)
 {
@@ -395,6 +453,15 @@ inline lcVector3& operator/=(lcVector3& a, const lcVector3& b)
 	return a;
 }
 
+inline lcVector3& operator+=(lcVector3& a, float b)
+{
+	a.x += b;
+	a.y += b;
+	a.z += b;
+
+	return a;
+}
+
 inline lcVector3& operator*=(lcVector3& a, float b)
 {
 	a.x *= b;
@@ -425,16 +492,70 @@ inline bool operator!=(const lcVector3& a, const lcVector3& b)
 
 #ifndef QT_NO_DEBUG
 
-inline QDebug operator<<(QDebug d, const lcVector3& v)
+inline QDebug operator<<(QDebug Debug, const lcVector2& v)
 {
-	return d << v.x << v.y << v.z;
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ')';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcVector3& v)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ", " << v.z << ')';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcVector4& v)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '(' << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ')';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcMatrix33& m)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '[' << m[0] << ", " << m[1] << ", " << m[2] << ']';
+	return Debug;
+}
+
+inline QDebug operator<<(QDebug Debug, const lcMatrix44& m)
+{
+	QDebugStateSaver Saver(Debug);
+	Debug.nospace() << '[' << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << ']';
+	return Debug;
 }
 
 #endif
 
+inline QDataStream& operator<<(QDataStream& Stream, const lcVector3& v)
+{
+	Stream << v.x << v.y << v.z;
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcVector3& v)
+{
+	Stream >> v.x >> v.y >> v.z;
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcVector4& v)
+{
+	Stream << v.x << v.y << v.z << v.w;
+	return Stream;
+}
+
+inline QDataStream& operator >> (QDataStream& Stream, lcVector4& v)
+{
+	Stream >> v.x >> v.y >> v.z >> v.w;
+	return Stream;
+}
+
 inline void lcVector3::Normalize()
 {
-	float InvLength = 1.0f / Length();
+	const float InvLength = 1.0f / Length();
 
 	x *= InvLength;
 	y *= InvLength;
@@ -466,14 +587,6 @@ inline lcVector3 lcNormalize(const lcVector3& a)
 	lcVector3 Ret(a);
 	Ret.Normalize();
 	return Ret;
-}
-
-inline void lcAlign(lcVector3& t, const lcVector3& a, const lcVector3& b)
-{
-	lcVector3 Vector(b - a);
-	Vector.Normalize();
-	Vector *=  (t - a).Length();
-	t = a + Vector;
 }
 
 inline float lcDot(const lcVector3& a, const lcVector3& b)
@@ -588,7 +701,7 @@ inline lcVector4& operator/=(lcVector4& a, float b)
 	return a;
 }
 
-inline qint32 lcPackNormal(const lcVector3& Normal)
+inline quint32 lcPackNormal(const lcVector3& Normal)
 {
 	quint32 Packed = 0;
 
@@ -599,7 +712,7 @@ inline qint32 lcPackNormal(const lcVector3& Normal)
 	return Packed;
 }
 
-inline lcVector3 lcUnpackNormal(qint32 Packed)
+inline lcVector3 lcUnpackNormal(quint32 Packed)
 {
 	lcVector3 Normal;
 
@@ -615,23 +728,56 @@ inline lcVector3 lcVector3LDrawToLeoCAD(const lcVector3& Vector)
 	return lcVector3(Vector[0], Vector[2], -Vector[1]);
 }
 
-inline lcVector3 lcVector3FromColor(lcuint32 Color)
+inline lcVector3 lcVector3FromColor(quint32 Color)
 {
 	lcVector3 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color));
 	v /= 255.0f;
 	return v;
 }
 
-inline lcVector4 lcVector4FromColor(lcuint32 Color)
+inline lcVector3 lcVector3FromQColor(QColor Color)
+{
+	return lcVector3(Color.redF(), Color.greenF(), Color.blueF());
+}
+
+inline lcVector4 lcVector4FromColor(quint32 Color)
 {
 	lcVector4 v(LC_RGBA_RED(Color), LC_RGBA_GREEN(Color), LC_RGBA_BLUE(Color), LC_RGBA_ALPHA(Color));
 	v /= 255.0f;
 	return v;
 }
 
-inline lcuint32 lcColorFromVector3(const lcVector3& Color)
+inline quint32 lcColorFromVector3(const lcVector3& Color)
 {
-	return LC_RGB(Color[0] * 255, Color[1] * 255, Color[2] * 255);
+	return LC_RGB(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
+}
+
+inline QColor lcQColorFromVector3(const lcVector3& Color)
+{
+	return QColor::fromRgb(roundf(Color[0] * 255), roundf(Color[1] * 255), roundf(Color[2] * 255));
+}
+
+inline float lcLuminescence(const lcVector3& Color)
+{
+	return 0.2126f * Color[0] + 0.7152f * Color[1] + 0.0722f * Color[2];
+}
+
+inline lcVector3 lcSRGBToLinear(const lcVector3& Color)
+{
+	const float r = LC_SRGB_TO_LINEAR(Color[0]);
+	const float g = LC_SRGB_TO_LINEAR(Color[1]);
+	const float b = LC_SRGB_TO_LINEAR(Color[2]);
+
+	return lcVector3(r, g, b);
+}
+
+inline lcVector3 lcLinearToSRGB(const lcVector3& Color)
+{
+	const float r = LC_LINEAR_TO_SRGB(Color[0]);
+	const float g = LC_LINEAR_TO_SRGB(Color[1]);
+	const float b = LC_LINEAR_TO_SRGB(Color[2]);
+
+	return lcVector3(r, g, b);
 }
 
 inline lcVector3 lcMul(const lcVector3& a, const lcMatrix33& b)
@@ -674,13 +820,13 @@ inline lcVector4 lcMul4(const lcVector4& a, const lcMatrix44& b)
 
 inline lcMatrix33 lcMul(const lcMatrix33& a, const lcMatrix33& b)
 {
-	lcVector3 Col0(b.r[0][0], b.r[1][0], b.r[2][0]);
-	lcVector3 Col1(b.r[0][1], b.r[1][1], b.r[2][1]);
-	lcVector3 Col2(b.r[0][2], b.r[1][2], b.r[2][2]);
+	const lcVector3 Col0(b.r[0][0], b.r[1][0], b.r[2][0]);
+	const lcVector3 Col1(b.r[0][1], b.r[1][1], b.r[2][1]);
+	const lcVector3 Col2(b.r[0][2], b.r[1][2], b.r[2][2]);
 
-	lcVector3 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2));
-	lcVector3 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2));
-	lcVector3 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2));
+	const lcVector3 Ret0(lcDot(a.r[0], Col0), lcDot(a.r[0], Col1), lcDot(a.r[0], Col2));
+	const lcVector3 Ret1(lcDot(a.r[1], Col0), lcDot(a.r[1], Col1), lcDot(a.r[1], Col2));
+	const lcVector3 Ret2(lcDot(a.r[2], Col0), lcDot(a.r[2], Col1), lcDot(a.r[2], Col2));
 
 	return lcMatrix33(Ret0, Ret1, Ret2);
 }
@@ -769,10 +915,8 @@ inline lcMatrix33 lcMatrix33RotationY(const float Radians)
 
 inline lcMatrix33 lcMatrix33RotationZ(const float Radians)
 {
-	float s, c;
-
-	s = lcSin(Radians);
-	c = lcCos(Radians);
+	float s = lcSin(Radians);
+	float c = lcCos(Radians);
 
 	lcMatrix33 m;
 
@@ -785,27 +929,25 @@ inline lcMatrix33 lcMatrix33RotationZ(const float Radians)
 
 inline lcMatrix33 lcMatrix33FromAxisAngle(const lcVector3& Axis, const float Radians)
 {
-	float s, c, mag, xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
-
-	s = lcSin(Radians);
-	c = lcCos(Radians);
-	mag = Axis.Length();
+	float s = lcSin(Radians);
+	float c = lcCos(Radians);
+	float mag = Axis.Length();
 
 	if (mag == 0.0f)
 		return lcMatrix33Identity();
 
 	lcVector3 Normal = Axis * (1.0f / mag);
 
-	xx = Normal[0] * Normal[0];
-	yy = Normal[1] * Normal[1];
-	zz = Normal[2] * Normal[2];
-	xy = Normal[0] * Normal[1];
-	yz = Normal[1] * Normal[2];
-	zx = Normal[2] * Normal[0];
-	xs = Normal[0] * s;
-	ys = Normal[1] * s;
-	zs = Normal[2] * s;
-	one_c = 1.0f - c;
+	float xx = Normal[0] * Normal[0];
+	float yy = Normal[1] * Normal[1];
+	float zz = Normal[2] * Normal[2];
+	float xy = Normal[0] * Normal[1];
+	float yz = Normal[1] * Normal[2];
+	float zx = Normal[2] * Normal[0];
+	float xs = Normal[0] * s;
+	float ys = Normal[1] * s;
+	float zs = Normal[2] * s;
+	float one_c = 1.0f - c;
 
 	lcMatrix33 m;
 
@@ -1095,8 +1237,8 @@ inline lcVector4 lcMatrix44ToAxisAngle(const lcMatrix44& m)
 	if (m.Determinant() < 0.0f)
 		Rows[0] *= -1.0f;
 
-	float Trace = Rows[0][0] + Rows[1][1] + Rows[2][2];
-	float Cos = 0.5f * (Trace - 1.0f);
+	const float Trace = Rows[0][0] + Rows[1][1] + Rows[2][2];
+	const float Cos = 0.5f * (Trace - 1.0f);
 	lcVector4 rot;
 
 	rot[3] = acosf(lcClamp(Cos, -1.0f, 1.0f));  // in [0,PI]
@@ -1206,7 +1348,7 @@ inline lcVector3 lcMatrix44ToEulerAngles(const lcMatrix44& RotMat)
 		CosRoll = RotMat.r[2][2] / CosPitch;
 		SinYaw = RotMat.r[0][1] / CosPitch;
 		CosYaw = RotMat.r[0][0] / CosPitch;
-	} 
+	}
 	else
 	{
 		SinRoll = -RotMat.r[2][1];
@@ -1352,13 +1494,13 @@ inline lcMatrix44 lcMatrix44Inverse(const lcMatrix44& m)
 	r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
 	r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-	lcVector4 Row0(r0[4], r1[4], r2[4], r3[4]);
-	lcVector4 Row1(r0[5], r1[5], r2[5], r3[5]);
-	lcVector4 Row2(r0[6], r1[6], r2[6], r3[6]);
-	lcVector4 Row3(r0[7], r1[7], r2[7], r3[7]);
-	
+	const lcVector4 Row0(r0[4], r1[4], r2[4], r3[4]);
+	const lcVector4 Row1(r0[5], r1[5], r2[5], r3[5]);
+	const lcVector4 Row2(r0[6], r1[6], r2[6], r3[6]);
+	const lcVector4 Row3(r0[7], r1[7], r2[7], r3[7]);
+
 	lcMatrix44 out(Row0, Row1, Row2, Row3);
-	
+
 	return out;
 
 #undef MAT
@@ -1406,17 +1548,17 @@ inline lcVector4 lcQuaternionRotationZ(float Radians)
 
 inline lcVector4 lcQuaternionFromAxisAngle(const lcVector4& a)
 {
-	float s = lcSin(a[3] / 2.0f);
-	return lcVector4(a[0] * s, a[1] * s, a[2] * s, lcCos(a[3] / 2.0f));
+	const float s = lcSin(a[3] / 2.0f);
+	return lcVector4(a[0] * s, a[1] * s, a[2] * s, cosf(a[3] / 2.0f));
 }
 
 inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)
 {
-	float Len = lcDot3(a, a);
+	const float Len = lcDot3(a, a);
 
 	if (Len > 0.00001f)
 	{
-		float f = 1.0f / sqrtf(Len);
+		const float f = 1.0f / sqrtf(Len);
 		return lcVector4(a[0] * f, a[1] * f, a[2] * f, acosf(a[3]) * 2.0f);
 	}
 	else
@@ -1427,10 +1569,10 @@ inline lcVector4 lcQuaternionToAxisAngle(const lcVector4& a)
 
 inline lcVector4 lcQuaternionMultiply(const lcVector4& a, const lcVector4& b)
 {
-	float x =  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
-	float y = -a[0] * b[2] + a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
-	float z =  a[0] * b[1] - a[1] * b[0] + a[2] * b[3] + a[3] * b[2];
-	float w = -a[0] * b[0] - a[1] * b[1] - a[2] * b[2] + a[3] * b[3];
+	const float x =  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0];
+	const float y = -a[0] * b[2] + a[1] * b[3] + a[2] * b[0] + a[3] * b[1];
+	const float z =  a[0] * b[1] - a[1] * b[0] + a[2] * b[3] + a[3] * b[2];
+	const float w = -a[0] * b[0] - a[1] * b[1] - a[2] * b[2] + a[3] * b[3];
 
 	return lcVector4(x, y, z, w);
 }
@@ -1438,18 +1580,18 @@ inline lcVector4 lcQuaternionMultiply(const lcVector4& a, const lcVector4& b)
 inline lcVector3 lcQuaternionMul(const lcVector3& a, const lcVector4& b)
 {
 	// Faster to transform to a matrix and multiply.
-	float Tx  = 2.0f*b[0];
-	float Ty  = 2.0f*b[1];
-	float Tz  = 2.0f*b[2];
-	float Twx = Tx*b[3];
-	float Twy = Ty*b[3];
-	float Twz = Tz*b[3];
-	float Txx = Tx*b[0];
-	float Txy = Ty*b[0];
-	float Txz = Tz*b[0];
-	float Tyy = Ty*b[1];
-	float Tyz = Tz*b[1];
-	float Tzz = Tz*b[2];
+	const float Tx  = 2.0f*b[0];
+	const float Ty  = 2.0f*b[1];
+	const float Tz  = 2.0f*b[2];
+	const float Twx = Tx*b[3];
+	const float Twy = Ty*b[3];
+	const float Twz = Tz*b[3];
+	const float Txx = Tx*b[0];
+	const float Txy = Ty*b[0];
+	const float Txz = Tz*b[0];
+	const float Tyy = Ty*b[1];
+	const float Tyz = Tz*b[1];
+	const float Tzz = Tz*b[2];
 
 	lcVector3 Rows[3];
 	Rows[0] = lcVector3(1.0f-(Tyy+Tzz), Txy+Twz, Txz-Twy);
@@ -1477,7 +1619,7 @@ inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelV
 inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
 {
 	// Calculate the screen to model transform.
-	lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
+	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
 
 	lcVector4 Tmp;
 
@@ -1498,7 +1640,7 @@ inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& Mode
 inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
 {
 	// Calculate the screen to model transform.
-	lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
+	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
 
 	for (int i = 0; i < NumPoints; i++)
 	{
@@ -1550,51 +1692,61 @@ inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Pr
 
 	for (int i = 0; i < 6; i++)
 	{
-		lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
-		float Length = Normal.Length();
+		const lcVector3 Normal(Planes[i][0], Planes[i][1], Planes[i][2]);
+		const float Length = Normal.Length();
 		Planes[i] /= -Length;
 	}
 }
 
-inline lcVector3 lcZoomExtents(const lcVector3& Position, const lcMatrix44& WorldView, const lcMatrix44& Projection, const lcVector3* Points, int NumPoints)
+inline std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, const lcMatrix44& WorldView, const lcMatrix44& Projection, const lcVector3* Points, size_t NumPoints)
 {
 	if (!NumPoints)
-		return Position;
+		return std::make_tuple(Position, 2500.0f);
 
 	lcVector4 Planes[6];
 	lcGetFrustumPlanes(WorldView, Projection, Planes);
 
-	lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
+	const lcVector3 Front(WorldView[0][2], WorldView[1][2], WorldView[2][2]);
 
-	// Calculate the position that is as close as possible to the model and has all pieces visible.
 	float SmallestDistance = FLT_MAX;
 
-	for (int p = 0; p < 4; p++)
+	for (int PlaneIdx = 0; PlaneIdx < 4; PlaneIdx++)
 	{
-		lcVector3 Plane(Planes[p][0], Planes[p][1], Planes[p][2]);
-		float ep = lcDot(Position, Plane);
-		float fp = lcDot(Front, Plane);
+		const lcVector3 Plane(Planes[PlaneIdx][0], Planes[PlaneIdx][1], Planes[PlaneIdx][2]);
+		const float ep = lcDot(Position, Plane);
+		const float fp = lcDot(Front, Plane);
 
-		for (int j = 0; j < NumPoints; j++)
+		for (size_t PointIdx = 0; PointIdx < NumPoints; PointIdx++)
 		{
-			// Intersect the camera line with the plane that contains this point, NewEye = Eye + u * (Target - Eye)
-			float u = (ep - lcDot(Points[j], Plane)) / fp;
+			const float u = (ep - lcDot(Points[PointIdx], Plane)) / fp;
 
 			if (u < SmallestDistance)
 				SmallestDistance = u;
 		}
 	}
 
-	return Position - (Front * SmallestDistance);
+	lcVector3 NewPosition = Position - (Front * SmallestDistance);
+
+	float FarDistance = 2500.0f;
+
+	for (size_t PointIdx = 0; PointIdx < NumPoints; PointIdx++)
+	{
+		const float Distance = lcDot(Points[PointIdx], Front);
+
+		if (Distance > FarDistance)
+			FarDistance = Distance;
+	}
+
+	return std::make_tuple(NewPosition, FarDistance + lcDot(NewPosition, Front));
 }
 
 inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3& Line1b, const lcVector3& Line2a, const lcVector3& Line2b, lcVector3* Intersection1, lcVector3* Intersection2)
 {
-	lcVector3 u1 = Line1b - Line1a;
-	lcVector3 u2 = Line2b - Line2a;
-	lcVector3 p21 = Line2a - Line1a;
-	lcVector3 m = lcCross(u2, u1);
-	float m2 = lcDot(m, m);
+	const lcVector3 u1 = Line1b - Line1a;
+	const lcVector3 u2 = Line2b - Line2a;
+	const lcVector3 p21 = Line2a - Line1a;
+	const lcVector3 m = lcCross(u2, u1);
+	const float m2 = lcDot(m, m);
 
 	if (m2 < 0.00001f)
 	{
@@ -1605,35 +1757,33 @@ inline void lcClosestPointsBetweenLines(const lcVector3& Line1a, const lcVector3
 		return;
 	}
 
-	lcVector3 r = lcCross(p21, m / m2);
+	const lcVector3 r = lcCross(p21, m / m2);
 
 	if (Intersection1)
 	{
-		float t1 = lcDot(r, u2);
+		const float t1 = lcDot(r, u2);
 		*Intersection1 = Line1a + t1 * u1;
 	}
 
 	if (Intersection2)
 	{
-		float t2 = lcDot(r, u1);
+		const float t2 = lcDot(r, u1);
 		*Intersection2 = Line2a + t2 * u2;
 	}
 }
 
-// Calculate the intersection of a line segment and a plane and returns false
-// if they are parallel or the intersection is outside the line segment.
-inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
+inline bool lcLineSegmentPlaneIntersection(lcVector3* Intersection, const lcVector3& Start, const lcVector3& End, const lcVector4& Plane)
 {
-	lcVector3 Dir = End - Start;
-	lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
+	const lcVector3 Dir = End - Start;
+	const lcVector3 PlaneNormal(Plane[0], Plane[1], Plane[2]);
 
-	float t1 = lcDot(PlaneNormal, Start) + Plane[3];
-	float t2 = lcDot(PlaneNormal, Dir);
+	const float t1 = lcDot(PlaneNormal, Start) + Plane[3];
+	const float t2 = lcDot(PlaneNormal, Dir);
 
 	if (t2 == 0.0f)
 		return false;
 
-	float t = -t1 / t2;
+	const float t = -t1 / t2;
 
 	*Intersection = Start + t * Dir;
 
@@ -1646,19 +1796,19 @@ inline bool lcLinePlaneIntersection(lcVector3* Intersection, const lcVector3& St
 inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float* MinDist, lcVector3* Intersection)
 {
 	// Calculate the polygon plane.
-	lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
-	float PlaneD = -lcDot(PlaneNormal, p1);
+	const lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
+	const float PlaneD = -lcDot(PlaneNormal, p1);
 
 	// Check if the line is parallel to the plane.
-	lcVector3 Dir = End - Start;
+	const lcVector3 Dir = End - Start;
 
-	float t1 = lcDot(PlaneNormal, Start) + PlaneD;
-	float t2 = lcDot(PlaneNormal, Dir);
+	const float t1 = lcDot(PlaneNormal, Start) + PlaneD;
+	const float t2 = lcDot(PlaneNormal, Dir);
 
 	if (t2 == 0)
 		return false;
 
-	float t = -(t1 / t2);
+	const float t = -(t1 / t2);
 
 	if (t < 0)
 		return false;
@@ -1682,7 +1832,7 @@ inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& 
 	a2 = lcDot(pa2, pa3);
 	a3 = lcDot(pa3, pa1);
 
-	float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
+	const float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
 
 	if (fabs(total - 360) <= 0.001f)
 	{
@@ -1716,7 +1866,7 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 			else
 			{
 				// Outside, inside.
-				lcLinePlaneIntersection(&i, *s, *p, Plane);
+				lcLineSegmentPlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;
@@ -1729,7 +1879,7 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 			if (lcDot3(*s, Plane) + Plane[3] <= 0)
 			{
 				// Inside, outside.
-				lcLinePlaneIntersection(&i, *s, *p, Plane);
+				lcLineSegmentPlaneIntersection(&i, *s, *p, Plane);
 
 				OutPoints[*NumOutPoints] = i;
 				*NumOutPoints = *NumOutPoints + 1;
@@ -1743,15 +1893,15 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 // Return true if a polygon intersects a set of planes.
 inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const float* p3, const lcVector4 Planes[6])
 {
-	const int NumPlanes = 6;
-	const float* Points[3] = { p1, p2, p3 };
+	constexpr int NumPlanes = 6;
+	const float* const Points[3] = { p1, p2, p3 };
 	int Outcodes[3] = { 0, 0, 0 }, i;
-	int NumPoints = 3;
+	constexpr int NumPoints = 3;
 
 	// First do the Cohen-Sutherland out code test for trivial rejects/accepts.
 	for (i = 0; i < NumPoints; i++)
 	{
-		lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
+		const lcVector3 Pt(Points[i][0], Points[i][1], Points[i][2]);
 
 		for (int j = 0; j < NumPlanes; j++)
 		{
@@ -1792,7 +1942,7 @@ inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const f
 }
 
 // Return true if a ray intersects a bounding box, and calculates the distance from the start of the ray (adapted from Graphics Gems).
-inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection)
+inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVector3& Max, const lcVector3& Start, const lcVector3& End, float* Dist, lcVector3* Intersection, lcVector3* Plane)
 {
 	bool MiddleQuadrant[3];
 	bool Inside = true;
@@ -1829,6 +1979,9 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 		if (Intersection)
 			*Intersection = Start;
+
+		if (Plane)
+			*Plane = Start;
 
 		return true;
 	}
@@ -1873,14 +2026,40 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 	if (Intersection)
 		*Intersection = Point;
 
+	if (Plane)
+	{
+		*Plane = lcVector3(0.0f, 0.0f, 0.0f);
+		(*Plane)[WhichPlane] = CandidatePlane[WhichPlane];
+	}
+
+	return true;
+}
+
+inline bool lcSphereRayIntersection(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, lcVector3& Intersection)
+{
+	const lcVector3 RayDirection = lcNormalize(End - Start);
+	const lcVector3 RayCenter = Center - Start;
+	const float RayCenterSquared = lcDot(RayCenter, RayCenter);
+	const float ClosestApproach = lcDot(RayCenter, RayDirection);
+
+	if (ClosestApproach < 0)
+		return false;
+
+	const float HalfCordSquared = (Radius * Radius) - RayCenterSquared + (ClosestApproach * ClosestApproach);
+
+	if (HalfCordSquared < 0)
+		return false;
+
+	Intersection = Start + RayDirection * (ClosestApproach - sqrtf(HalfCordSquared));
+
 	return true;
 }
 
 inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	lcVector3 Dir = Center - Start;
-	float LengthSquaredDir = lcLengthSquared(Dir);
-	float RadiusSquared = Radius * Radius;
+	const lcVector3 Dir = Center - Start;
+	const float LengthSquaredDir = lcLengthSquared(Dir);
+	const float RadiusSquared = Radius * Radius;
 
 	if (LengthSquaredDir < RadiusSquared)
 	{
@@ -1890,14 +2069,14 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 	else
 	{
-		lcVector3 RayDir = End - Start;
+		const lcVector3 RayDir = End - Start;
 		float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 
 		// Ray points away from sphere.
 		if (t < 0)
 			return false;
 
-		float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
+		const float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
 		if (c > 0)
 		{
 			*Dist = t - sqrtf(c);
@@ -1908,15 +2087,139 @@ inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radiu
 	}
 }
 
-inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
+inline bool lcConeRayMinIntersectDistance(const lcVector3& Tip, const lcVector3& Direction, float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	lcVector3 Dir = Point - Start;
-	lcVector3 RayDir = End - Start;
+	const lcVector3 v = End - Start;
+	const lcVector3 h = Direction;
+	const lcVector3 w = Start - Tip;
+	const float vh = lcDot(v, h);
+	const float wh = lcDot(w, h);
+	const float m = (Radius * Radius) / (Height * Height);
+
+	const float a = lcDot(v, v) - m * vh * vh - vh * vh;
+	const float b = 2 * (lcDot(v, w) - m * vh * wh - vh * wh);
+	const float c = lcDot(w, w) - m * wh * wh - wh * wh;
+
+	const float delta = b * b - 4 * a * c;
+
+	if (delta < 0.0f)
+		return false;
+
+	float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
+
+	for (int ti = 0; ti < 2; ti++)
+	{
+		float t = ts[ti];
+		lcVector3 Intersection = Start + v * t;
+
+		float ConeD = lcDot(Intersection - Tip, Direction);
+
+		if (ConeD < 0.0f)
+			continue;
+
+		if (ConeD < Height)
+		{
+			*Dist = lcLength(Intersection - Start);
+
+			return true;
+		}
+
+		lcVector3 Center(Tip + Direction * Height);
+		lcVector4 Plane(Direction, -lcDot(Direction, Center));
+
+		if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
+		{
+			if (lcLengthSquared(Center - Intersection) < Radius * Radius)
+			{
+				*Dist = lcLength(Intersection - Start);
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+inline bool lcCylinderRayMinIntersectDistance(float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
+{
+	lcVector4 BottomPlane(0.0f, 0.0f, 1.0f, 0.0f);
+	lcVector3 Intersection;
+	float MinDistance = FLT_MAX;
+
+	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, BottomPlane))
+	{
+		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
+		{
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	lcVector4 TopPlane(0.0f, 0.0f, 1.0f, -Height);
+
+	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, TopPlane))
+	{
+		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
+		{
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	lcVector3 Direction = End - Start;
+
+	float a = (Direction.x * Direction.x) + (Direction.y * Direction.y);
+	float b = 2 * (Direction.x * Start.x + Direction.y * Start.y);
+	float c = (Start.x * Start.x) + (Start.y * Start.y) - (Radius * Radius);
+
+	float delta = b * b - 4 * (a * c);
+
+	if (delta > 0.0f)
+	{
+		float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
+
+		for (int ti = 0; ti < 2; ti++)
+		{
+			float t = ts[ti];
+			Intersection = Start + Direction * t;
+
+			if (Intersection.z < 0.0f || Intersection.z > Height)
+				continue;
+
+			float Distance = lcLength(Intersection - Start);
+
+			if (Distance < MinDistance)
+				MinDistance = Distance;
+		}
+	}
+
+	if (MinDistance == FLT_MAX)
+		return false;
+
+	*Dist = MinDistance;
+
+	return true;
+}
+
+inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
+{
+	const lcVector3 Dir = Point - Start;
+	const lcVector3 RayDir = End - Start;
 
 	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 	t = lcClamp(t, 0.0f, 1.0f);
 
-	lcVector3 Closest = Start + t * RayDir;
+	return Start + t * RayDir;
+}
+
+inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, const lcVector3& End)
+{
+	const lcVector3 Closest = lcRayPointClosestPoint(Point, Start, End);
 
 	return lcLength(Closest - Point);
 }
@@ -1924,7 +2227,7 @@ inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, 
 // Returns true if the axis aligned box intersects the volume defined by planes.
 inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
 {
-	const int NumPlanes = 6;
+	constexpr int NumPlanes = 6;
 	lcVector3 Points[8] =
 	{
 		Points[0] = lcVector3(Min[0], Min[1], Min[2]),
@@ -1968,7 +2271,7 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 	if (OutcodesOR == 0)
 		return true;
 
-	int Indices[36] = 
+	int Indices[36] =
 	{
 		0, 1, 2,
 		0, 2, 3,
@@ -2024,4 +2327,130 @@ bool SphereIntersectsVolume(const Vector3& Center, float Radius, const Vector4* 
 	return true;
 }*/
 
-#endif // _LC_MATH_H_
+inline lcVector3 lcRGBToHSL(const lcVector3& rgb)
+{
+	int Mi;
+	float M, m, C, h, S, L; // h is H/60
+
+	Mi = (rgb[0] >= rgb[1]) ? 0 : 1;
+	Mi = (rgb[Mi] >= rgb[2]) ? Mi : 2;
+	M = rgb[Mi];
+
+	m = (rgb[0] < rgb[1]) ? rgb[0] : rgb[1];
+	m = (m < rgb[2]) ? m : rgb[2];
+
+	C = M - m;
+	L = (M + m) / 2.0f;
+
+	if (C < LC_RGB_EPSILON) // C == 0.0
+		h = 0.0f;
+	else if (Mi == 0)       // M == R
+		h = 0.0f + (rgb[1] - rgb[2]) / C;
+	else if (Mi == 1)       // M == G
+		h = 2.0f + (rgb[2] - rgb[0]) / C;
+	else                    // M = B
+		h = 4.0f + (rgb[0] - rgb[1]) / C;
+
+	h = (h <  0.0) ? h + 6.0f : h;
+	h = (h >= 6.0) ? h - 6.0f : h;
+
+	S = ((L < (LC_RGB_EPSILON / 2.0f)) || (L > (1.0f -(LC_RGB_EPSILON / 2.0f))))
+		? 0.0f : (2.0f * (M - L)) / (1.0f - fabs((2.0f * L) - 1.0f)) ;
+
+	return lcVector3(h, S, L);
+}
+
+inline lcVector3 lcHSLToRGB(const lcVector3& hSL)
+{
+	lcVector3 rgb;
+	float h, S, L, C, X, m;
+
+	h = hSL[0];
+	S = hSL[1];
+	L = hSL[2];
+
+	C = (1.0f - fabs(2.0f * L - 1.0f)) * S;
+	X = C * (1.0f - fabs(fmodf(h, 2.0f) - 1.0f));
+
+	if (h < 1.0f)
+		rgb = lcVector3(C, X, 0.0f);
+	else if (h < 2.0f)
+		rgb = lcVector3(X, C, 0.0f);
+	else if (h < 3.0f)
+		rgb = lcVector3(0.0f, C, X);
+	else if (h < 4.0f)
+		rgb = lcVector3(0.0f, X, C);
+	else if (h < 5.0f)
+		rgb = lcVector3(X, 0.0f, C);
+	else
+		rgb = lcVector3(C, 0.0f, X);
+
+	m = L - C / 2.0f;
+	rgb += m;
+
+	return rgb;
+}
+
+inline lcVector4 lcAlgorithmicEdgeColor(const lcVector3& Value, const float ValueLum, const float EdgeLum, const float Contrast, const float Saturation)
+{
+	float y1, yt;
+	lcVector3 hSL, rgb1, rgbf;
+
+	// Determine luma target
+	if (EdgeLum < ValueLum)
+	{
+		// Light base color
+		yt = ValueLum - Contrast * ValueLum;
+	}
+	else
+	{
+		// Dark base color
+		yt = ValueLum + Contrast * (1.0f - ValueLum);
+	}
+
+	// Get base color in hSL
+	hSL = lcRGBToHSL(Value);
+
+	// Adjust saturation
+//	sat = 4.0f * sat - 2.0f;
+//	if (sat < 0.0f)
+//	{
+//		sat = -sat;
+//		hSL[0] = (hSL[0] < 3.0f) ? hSL[0] + 3.0f : hSL[0] - 3.0f;
+//	}
+//	sat = (sat > 2.0f) ? 2.0f : sat;
+//	if (sat > 1.0f)
+//	{
+//		// Supersaturate
+//		sat -= 1.0f;
+//		hSL[1] += sat * (1.0f - hSL[1]);
+//	}
+//	else
+//	{
+		// Desaturate
+		hSL[1] *= Saturation;
+//	}
+
+	// Adjusted color to RGB
+	rgb1 = lcHSLToRGB(lcVector3(hSL[0], hSL[1], 0.5f));
+
+	// Fix adjusted color luma to target value
+	y1 = lcLuminescence(rgb1);
+
+	if (yt < y1)
+	{
+		// Make darker via scaling
+		rgbf = (yt/y1) * rgb1;
+	}
+	else
+	{
+		// Make lighter via scaling anti-color
+		rgbf = lcVector3(1.0f, 1.0f, 1.0f) - rgb1;
+		rgbf *= (1.0f - yt) / (1.0f - y1);
+		rgbf = lcVector3(1.0f, 1.0f, 1.0f) - rgbf;
+	}
+
+	return  lcVector4(lcLinearToSRGB(rgbf), 1.0f);
+}
+
+Q_DECLARE_METATYPE(lcVector3);

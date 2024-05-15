@@ -1,228 +1,395 @@
-#ifndef _LIGHT_H_
-#define _LIGHT_H_
+#pragma once
 
 #include "object.h"
 #include "lc_math.h"
 
 #define LC_LIGHT_HIDDEN            0x0001
 #define LC_LIGHT_DISABLED          0x0002
-#define LC_LIGHT_SPOT              0x0004
-#define LC_LIGHT_DIRECTIONAL       0x0008
-#define LC_LIGHT_POSITION_SELECTED 0x0010
-#define LC_LIGHT_POSITION_FOCUSED  0x0020
-#define LC_LIGHT_TARGET_SELECTED   0x0040
-#define LC_LIGHT_TARGET_FOCUSED    0x0080
 
-#define LC_LIGHT_SELECTION_MASK    (LC_LIGHT_POSITION_SELECTED | LC_LIGHT_TARGET_SELECTED)
-#define LC_LIGHT_FOCUS_MASK        (LC_LIGHT_POSITION_FOCUSED | LC_LIGHT_TARGET_FOCUSED)
-
-enum lcLightSection
+enum lcLightSection : quint32
 {
-	LC_LIGHT_SECTION_POSITION,
+	LC_LIGHT_SECTION_INVALID = ~0U,
+	LC_LIGHT_SECTION_POSITION = 0,
 	LC_LIGHT_SECTION_TARGET
+};
+
+enum class lcLightType
+{
+	Point,
+	Spot,
+	Directional,
+	Area,
+	Count
+};
+
+enum class lcLightAreaShape
+{
+	Rectangle,
+	Square,
+	Disk,
+	Ellipse,
+	Count
 };
 
 class lcLight : public lcObject
 {
 public:
-	lcLight(float px, float py, float pz);
-	lcLight(float px, float py, float pz, float tx, float ty, float tz);
-	virtual ~lcLight();
+	lcLight(const lcVector3& Position, lcLightType LightType);
+	virtual ~lcLight() = default;
+
+	lcLight(const lcLight&) = delete;
+	lcLight(lcLight&&) = delete;
+	lcLight& operator=(const lcLight&) = delete;
+	lcLight& operator=(lcLight&&) = delete;
+
+	static QString GetLightTypeString(lcLightType LightType);
+	static QStringList GetLightTypeStrings();
+	static QString GetAreaShapeString(lcLightAreaShape LightAreaShape);
+	static QStringList GetAreaShapeStrings();
 
 	bool IsPointLight() const
 	{
-		return (mState & (LC_LIGHT_SPOT | LC_LIGHT_DIRECTIONAL)) == 0;
+		return mLightType == lcLightType::Point;
 	}
 
 	bool IsSpotLight() const
 	{
-		return (mState & LC_LIGHT_SPOT) != 0;
+		return mLightType == lcLightType::Spot;
 	}
 
 	bool IsDirectionalLight() const
 	{
-		return (mState & LC_LIGHT_DIRECTIONAL) != 0;
+		return mLightType == lcLightType::Directional;
 	}
 
-	virtual bool IsSelected() const override
+	bool IsAreaLight() const
 	{
-		return (mState & LC_LIGHT_SELECTION_MASK) != 0;
+		return mLightType == lcLightType::Area;
 	}
 
-	virtual bool IsSelected(lcuint32 Section) const override
+	lcLightType GetLightType() const
 	{
-		switch (Section)
+		return mLightType;
+	}
+
+	bool SetLightType(lcLightType LightType);
+
+	bool IsSelected() const override
+	{
+		return mSelected;
+	}
+
+	bool IsSelected(quint32 Section) const override
+	{
+		Q_UNUSED(Section);
+
+		return mSelected;
+	}
+
+	void SetSelected(bool Selected) override
+	{
+		mSelected = Selected;
+
+		if (!Selected)
+			mFocusedSection = LC_LIGHT_SECTION_INVALID;
+	}
+
+	void SetSelected(quint32 Section, bool Selected) override
+	{
+		Q_UNUSED(Section);
+
+		mSelected = Selected;
+
+		if (!Selected)
+			mFocusedSection = LC_LIGHT_SECTION_INVALID;
+	}
+
+	bool IsFocused() const override
+	{
+		return mFocusedSection != LC_LIGHT_SECTION_INVALID;
+	}
+
+	bool IsFocused(quint32 Section) const override
+	{
+		return mFocusedSection == Section;
+	}
+
+	void SetFocused(quint32 Section, bool Focused) override
+	{
+		if (Focused)
 		{
-		case LC_LIGHT_SECTION_POSITION:
-			return (mState & LC_LIGHT_POSITION_SELECTED) != 0;
-			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			return (mState & LC_LIGHT_TARGET_SELECTED) != 0;
-			break;
-		}
-		return false;
-	}
-
-	virtual void SetSelected(bool Selected) override
-	{
-		if (Selected)
-		{
-			if (IsPointLight())
-				mState |= LC_LIGHT_POSITION_SELECTED;
-			else
-				mState |= LC_LIGHT_SELECTION_MASK;
+			mFocusedSection = Section;
+			mSelected = true;
 		}
 		else
-			mState &= ~(LC_LIGHT_SELECTION_MASK | LC_LIGHT_FOCUS_MASK);
+			mFocusedSection = LC_LIGHT_SECTION_INVALID;
 	}
 
-	virtual void SetSelected(lcuint32 Section, bool Selected) override
+	quint32 GetFocusSection() const override
 	{
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			if (Selected)
-				mState |= LC_LIGHT_POSITION_SELECTED;
-			else
-				mState &= ~(LC_LIGHT_POSITION_SELECTED | LC_LIGHT_POSITION_FOCUSED);
-			break;
-
-		case LC_LIGHT_SECTION_TARGET:
-			if (Selected)
-			{
-				if (!IsPointLight())
-					mState |= LC_LIGHT_TARGET_SELECTED;
-			}
-			else
-				mState &= ~(LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED);
-			break;
-		}
+		return mFocusedSection;
 	}
 
-	virtual bool IsFocused() const override
+	quint32 GetAllowedTransforms() const override
 	{
-		return (mState & LC_LIGHT_FOCUS_MASK) != 0;
+		if (IsPointLight())
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
+
+		const quint32 Section = GetFocusSection();
+
+		if (Section == LC_LIGHT_SECTION_POSITION || Section == LC_LIGHT_SECTION_INVALID)
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ;
+
+		if (Section == LC_LIGHT_SECTION_TARGET)
+			return LC_OBJECT_TRANSFORM_MOVE_XYZ;
+
+		return 0;
 	}
 
-	virtual bool IsFocused(lcuint32 Section) const override
+	lcMatrix33 GetRelativeRotation() const
 	{
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			return (mState & LC_LIGHT_POSITION_FOCUSED) != 0;
-			break;
+		const quint32 Section = GetFocusSection();
 
-		case LC_LIGHT_SECTION_TARGET:
-			return (mState & LC_LIGHT_TARGET_FOCUSED) != 0;
-			break;
-		}
-		return false;
+		if (Section == LC_LIGHT_SECTION_POSITION)
+			return lcMatrix33(mWorldMatrix);
+		else
+			return lcMatrix33Identity();
 	}
 
-	virtual void SetFocused(lcuint32 Section, bool Focused) override
+	lcVector3 GetSectionPosition(quint32 Section) const override
 	{
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			if (Focused)
-				mState |= LC_LIGHT_POSITION_SELECTED | LC_LIGHT_POSITION_FOCUSED;
-			else
-				mState &= ~(LC_LIGHT_POSITION_SELECTED | LC_LIGHT_POSITION_FOCUSED);
-			break;
+		if (Section == LC_LIGHT_SECTION_POSITION)
+			return mWorldMatrix.GetTranslation();
 
-		case LC_LIGHT_SECTION_TARGET:
-			if (Focused)
-			{
-				if (!IsPointLight())
-					mState |= LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED;
-			}
-			else
-				mState &= ~(LC_LIGHT_TARGET_SELECTED | LC_LIGHT_TARGET_FOCUSED);
-			break;
-		}
-	}
-
-	virtual lcuint32 GetFocusSection() const override
-	{
-		if (mState & LC_LIGHT_POSITION_FOCUSED)
-			return LC_LIGHT_SECTION_POSITION;
-
-		if (!IsPointLight() && (mState & LC_LIGHT_TARGET_FOCUSED))
-			return LC_LIGHT_SECTION_TARGET;
-
-		return ~0;
-	}
-
-	virtual lcuint32 GetAllowedTransforms() const override
-	{
-		return LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z;
-	}
-
-	virtual lcVector3 GetSectionPosition(lcuint32 Section) const override
-	{
-		switch (Section)
-		{
-		case LC_LIGHT_SECTION_POSITION:
-			return mPosition;
-
-		case LC_LIGHT_SECTION_TARGET:
-			return mTargetPosition;
-		}
+		if (Section == LC_LIGHT_SECTION_TARGET)
+			return lcMul31(lcVector3(0.0f, 0.0f, -mTargetDistance), mWorldMatrix);
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
 	}
 
+	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
+	{
+		mPosition.ChangeKey(Position, Step, AddKey);
+	}
+
+	void SetRotation(const lcMatrix33& Rotation, lcStep Step, bool AddKey)
+	{
+		mRotation.ChangeKey(Rotation, Step, AddKey);
+	}
+
+	lcVector3 GetRotationCenter() const
+	{
+		const quint32 Section = GetFocusSection();
+
+		if (Section == LC_LIGHT_SECTION_POSITION || Section == LC_LIGHT_SECTION_INVALID)
+		{
+			return mWorldMatrix.GetTranslation();
+		}
+		else
+		{
+			return lcMul31(lcVector3(0.0f, 0.0f, -mTargetDistance), mWorldMatrix);
+		}
+	}
+
+	lcVector3 GetPosition() const
+	{
+		return mWorldMatrix.GetTranslation();
+	}
+
+	lcVector3 GetDirection() const
+	{
+		return -lcVector3(mWorldMatrix[2]);
+	}
+
+	const lcMatrix44& GetWorldMatrix() const
+	{
+		return mWorldMatrix;
+	}
+
 	void SaveLDraw(QTextStream& Stream) const;
+	bool ParseLDrawLine(QTextStream& Stream);
 
 public:
-	virtual void RayTest(lcObjectRayTest& ObjectRayTest) const override;
-	virtual void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	virtual void DrawInterface(lcContext* Context) const override;
+	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
+	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;
+	bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) override;
+	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
+	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
+	void RemoveKeyFrames() override;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool IsVisible() const
-	{ return (mState & LC_LIGHT_HIDDEN) == 0; }
+	{
+		return (mState & LC_LIGHT_HIDDEN) == 0;
+	}
 
-	const char* GetName() const override
-	{ return m_strName; }
+	bool SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
+
+	lcVector3 GetColor() const
+	{
+		return mColor;
+	}
+
+	bool SetPOVRayFadeDistance(float Distance, lcStep Step, bool AddKey);
+
+	float GetPOVRayFadeDistance() const
+	{
+		return mPOVRayFadeDistance;
+	}
+
+	bool SetPOVRayFadePower(float Power, lcStep Step, bool AddKey);
+
+	float GetPOVRayFadePower() const
+	{
+		return mPOVRayFadePower;
+	}
+
+	bool SetSpotConeAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotConeAngle() const
+	{
+		return mSpotConeAngle;
+	}
+
+	bool SetSpotPenumbraAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotPenumbraAngle() const
+	{
+		return mSpotPenumbraAngle;
+	}
+
+	bool SetSpotPOVRayTightness(float Angle, lcStep Step, bool AddKey);
+
+	float GetSpotPOVRayTightness() const
+	{
+		return mSpotPOVRayTightness;
+	}
+
+	bool SetAreaShape(lcLightAreaShape LightAreaShape);
+
+	lcLightAreaShape GetAreaShape() const
+	{
+		return mAreaShape;
+	}
+
+	bool SetAreaPOVRayGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey);
+
+	lcVector2i GetAreaPOVRayGrid() const
+	{
+		return mAreaPOVRayGrid;
+	}
+
+	bool SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
+
+	float GetPointBlenderRadius() const
+	{
+		return mPointBlenderRadius;
+	}
+
+	bool SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey);
+
+	float GetSpotBlenderRadius() const
+	{
+		return mSpotBlenderRadius;
+	}
+
+	bool SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey);
+
+	float GetDirectionalBlenderAngle() const
+	{
+		return mDirectionalBlenderAngle;
+	}
+
+	bool SetAreaSizeX(float Size, lcStep Step, bool AddKey);
+
+	float GetAreaSizeX() const
+	{
+		return mAreaSizeX;
+	}
+
+	bool SetAreaSizeY(float Size, lcStep Step, bool AddKey);
+
+	float GetAreaSizeY() const
+	{
+		return mAreaSizeY;
+	}
+
+	bool SetBlenderPower(float Power, lcStep Step, bool AddKey);
+
+	float GetBlenderPower() const
+	{
+		return mBlenderPower;
+	}
+
+	bool SetPOVRayPower(float Power, lcStep Step, bool AddKey);
+
+	float GetPOVRayPower() const
+	{
+		return mPOVRayPower;
+	}
+
+	bool SetCastShadow(bool CastShadow);
+
+	bool GetCastShadow() const
+	{
+		return mCastShadow;
+	}
+
+	bool SetName(const QString& Name);
+
+	QString GetName() const override
+	{
+		return mName;
+	}
 
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
-	void UpdatePosition(lcStep Step);
-	void Move(lcStep Step, bool AddKey, const lcVector3& Distance);
-	bool Setup(int LightIndex);
+	void UpdatePosition(lcStep Step) override;
+	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, bool FirstMove);
+	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void CreateName(const lcArray<lcLight*>& Lights);
 
-	// Temporary parameters
-	lcMatrix44 mWorldLight;
-	lcVector3 mPosition;
-	lcVector3 mTargetPosition;
-	lcVector4 mAmbientColor;
-	lcVector4 mDiffuseColor;
-	lcVector4 mSpecularColor;
-	lcVector3 mAttenuation;
-	float mSpotCutoff;
-	float mSpotExponent;
-
 protected:
-	lcArray<lcObjectKey<lcVector3>> mPositionKeys;
-	lcArray<lcObjectKey<lcVector3>> mTargetPositionKeys;
-	lcArray<lcObjectKey<lcVector4>> mAmbientColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mDiffuseColorKeys;
-	lcArray<lcObjectKey<lcVector4>> mSpecularColorKeys;
-	lcArray<lcObjectKey<lcVector3>> mAttenuationKeys;
-	lcArray<lcObjectKey<float>> mSpotCutoffKeys;
-	lcArray<lcObjectKey<float>> mSpotExponentKeys;
-
-	void Initialize(const lcVector3& Position, const lcVector3& TargetPosition);
-
 	void DrawPointLight(lcContext* Context) const;
 	void DrawSpotLight(lcContext* Context) const;
+	void DrawDirectionalLight(lcContext* Context) const;
+	void DrawAreaLight(lcContext* Context) const;
 
-	lcuint32 mState;
-	char m_strName[81];
+	void SetupLightMatrix(lcContext* Context) const;
+	void DrawSphere(lcContext* Context, const lcVector3& Center, float Radius) const;
+	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
+	void DrawTarget(lcContext* Context) const;
+	void DrawCone(lcContext* Context, float TargetDistance) const;
+
+	QString mName;
+	lcLightType mLightType = lcLightType::Point;
+	bool mCastShadow = true;
+	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
+	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
+	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
+	lcObjectProperty<float> mPointBlenderRadius = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mSpotBlenderRadius = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.526f * LC_DTOR);
+	lcObjectProperty<float> mAreaSizeX = lcObjectProperty<float>(250.0f);
+	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
+	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
+	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
+	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mPOVRayFadePower = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);
+	lcObjectProperty<float> mSpotPenumbraAngle = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mSpotPOVRayTightness = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<lcVector2i> mAreaPOVRayGrid = lcObjectProperty<lcVector2i>(lcVector2i(2, 2));
+	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
+
+	quint32 mState = 0;
+	bool mSelected = false;
+	quint32 mFocusedSection = LC_LIGHT_SECTION_INVALID;
+	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
+	lcMatrix44 mWorldMatrix;
+
+	static constexpr float mTargetDistance = 50.0f;
 };
-
-#endif // _LIGHT_H_

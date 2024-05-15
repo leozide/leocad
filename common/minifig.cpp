@@ -1,75 +1,39 @@
 #include "lc_global.h"
-#include "lc_colors.h"
-#include "lc_math.h"
-#include <string.h>
-#include <stdio.h>
 #include "minifig.h"
+#include "lc_colors.h"
 #include "pieceinf.h"
-#include "project.h"
 #include "lc_model.h"
 #include "lc_library.h"
 #include "lc_application.h"
-#include "lc_context.h"
-#include "lc_scene.h"
 #include "lc_file.h"
+#include "lc_profile.h"
+
+const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
+{
+	"HATS",   // LC_MFW_HATS
+	"HATS2",  // LC_MFW_HATS2
+	"HEAD",   // LC_MFW_HEAD
+	"NECK",   // LC_MFW_NECK
+	"BODY",   // LC_MFW_BODY
+	"BODY2",  // LC_MFW_BODY2
+	"BODY3",  // LC_MFW_BODY3
+	"RARM",   // LC_MFW_RARM
+	"LARM",   // LC_MFW_LARM
+	"RHAND",  // LC_MFW_RHAND
+	"LHAND",  // LC_MFW_LHAND
+	"RHANDA", // LC_MFW_RHANDA
+	"LHANDA", // LC_MFW_LHANDA
+	"RLEG",   // LC_MFW_RLEG
+	"LLEG",   // LC_MFW_LLEG
+	"RLEGA",  // LC_MFW_RLEGA
+	"LLEGA",  // LC_MFW_LLEGA
+};
 
 MinifigWizard::MinifigWizard()
+	: mModel(new lcModel(QString(), nullptr, false))
 {
-	lcDiskFile DiskSettings(lcGetPiecesLibrary()->mLibraryDir.absoluteFilePath(QLatin1String("mlcad.ini")));
-
-	if (DiskSettings.Open(QIODevice::ReadOnly))
-		ParseSettings(DiskSettings);
-	else
-	{
-		QResource Resource(":/resources/minifig.ini");
-
-		if (Resource.isValid())
-		{
-			QByteArray Data;
-
-			if (Resource.isCompressed())
-				Data = qUncompress(Resource.data(), Resource.size());
-			else
-				Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-
-			lcMemFile MemSettings;
-			MemSettings.WriteBuffer(Data.constData(), Data.size());
-			ParseSettings(MemSettings);
-		}
-	}
-
-	mRotateX = 75.0f;
-	mRotateZ = 180.0f;
-	mDistance = 10.0f;
-	mAutoZoom = true;
-	mTracking = LC_TRACK_NONE;
-}
-
-void MinifigWizard::OnInitialUpdate()
-{
-	MakeCurrent();
-	mContext->SetDefaultState();
-
-	memset(&mMinifig, 0, sizeof(lcMinifig));
-
-	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
-	const char* Pieces[LC_MFW_NUMITEMS] = { "3624", "None", "3626BP01", "None", "973", "3815", "None", "3819", "3818", "3820", "3820", "None", "None", "3817", "3816", "None", "None" };
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
-	{
-		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
-
-		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
-		if (Info)
-		{
-			mMinifig.Parts[i] = Info;
-			Library->LoadPieceInfo(Info, false, true);
-		}
-	}
-
-	Library->WaitForLoadQueue();
-	Calculate();
+	LoadSettings();
+	LoadTemplates();
 }
 
 MinifigWizard::~MinifigWizard()
@@ -78,48 +42,73 @@ MinifigWizard::~MinifigWizard()
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
-			Library->ReleasePieceInfo(mMinifig.Parts[i]);
+			Library->ReleasePieceInfo(mMinifig.Parts[i]); // todo: don't call ReleasePieceInfo here because it may release textures and they need a GL context current
+
+	SaveTemplates();
+}
+
+void MinifigWizard::LoadSettings()
+{
+	QString CustomSettingsPath = lcGetProfileString(LC_PROFILE_MINIFIG_SETTINGS);
+
+	if (!CustomSettingsPath.isEmpty())
+	{
+		lcDiskFile DiskSettings(CustomSettingsPath);
+
+		if (DiskSettings.Open(QIODevice::ReadOnly))
+		{
+			ParseSettings(DiskSettings);
+			return;
+		}
+	}
+
+	lcDiskFile MinifigFile(":/resources/minifig.ini");
+
+	if (MinifigFile.Open(QIODevice::ReadOnly))
+		ParseSettings(MinifigFile);
+}
+
+void MinifigWizard::LoadDefault()
+{
+	LC_ARRAY_SIZE_CHECK(MinifigWizard::mSectionNames, LC_MFW_NUMITEMS);
+
+	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
+	const char* const Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
+	{
+		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
+        mMinifig.Angles[i] = 0.0f;
+        mMinifig.Matrices[i] = lcMatrix44Identity();
+
+		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
+        mMinifig.Parts[i] = Info;
+        if (Info)
+			Library->LoadPieceInfo(Info, false, true);
+	}
+
+	Library->WaitForLoadQueue();
+	Calculate();
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
 {
-	const char* SectionNames[LC_MFW_NUMITEMS] =
-	{
-		"[HATS]",   // LC_MFW_HATS
-		"[HATS2]",  // LC_MFW_HATS2
-		"[HEAD]",   // LC_MFW_HEAD
-		"[NECK]",   // LC_MFW_NECK
-		"[BODY]",   // LC_MFW_BODY
-		"[BODY2]",  // LC_MFW_BODY2
-		"[BODY3]",  // LC_MFW_BODY3
-		"[RARM]",   // LC_MFW_RARM
-		"[LARM]",   // LC_MFW_LARM
-		"[RHAND]",  // LC_MFW_RHAND
-		"[LHAND]",  // LC_MFW_LHAND
-		"[RHANDA]", // LC_MFW_RHANDA
-		"[LHANDA]", // LC_MFW_LHANDA
-		"[RLEG]",   // LC_MFW_RLEG
-		"[LLEG]",   // LC_MFW_LLEG
-		"[RLEGA]",  // LC_MFW_RLEGA
-		"[LLEGA]",  // LC_MFW_LLEGA
-	};
-
 	for (int SectionIndex = 0; SectionIndex < LC_MFW_NUMITEMS; SectionIndex++)
 	{
-		lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
+		std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[SectionIndex];
 
-		InfoArray.RemoveAll();
+		InfoArray.clear();
 		Settings.Seek(0, SEEK_SET);
 
 		char Line[1024];
 		bool FoundSection = false;
-		const char* SectionName = SectionNames[SectionIndex];
-		size_t SectionNameLength = strlen(SectionName);
+		const char* SectionName = mSectionNames[SectionIndex];
+		const size_t SectionNameLength = strlen(SectionName);
 
-		// Find start of section
 		while (Settings.ReadLine(Line, sizeof(Line)))
 		{
-			if (!strncmp(Line, SectionName, SectionNameLength))
+			if (Line[0] == '[' && !strncmp(Line + 1, SectionName, SectionNameLength) && Line[SectionNameLength + 1] == ']')
 			{
 				FoundSection = true;
 				break;
@@ -135,11 +124,10 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			MinifigInfo.Offset = lcMatrix44Identity();
 			MinifigInfo.Info = nullptr;
 
-			InfoArray.Add(MinifigInfo);
+			InfoArray.emplace_back(std::move(MinifigInfo));
 			continue;
 		}
 
-		// Parse section.
 		while (Settings.ReadLine(Line, sizeof(Line)))
 		{
 			if (Line[0] == '[')
@@ -164,14 +152,6 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 				continue;
 			*NameEnd = 0;
 			NameEnd++;
-
-			strupr(NameStart);
-			char* Ext = strrchr(NameStart, '.');
-			if (Ext != nullptr)
-			{
-				if (!strcmp(Ext, ".DAT"))
-					*Ext = 0;
-			}
 
 			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, nullptr, false, false);
 			if (!Info && *NameStart)
@@ -207,160 +187,101 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			MinifigInfo.Offset = Offset;
 			MinifigInfo.Info = Info;
 
-			InfoArray.Add(MinifigInfo);
+			InfoArray.emplace_back(std::move(MinifigInfo));
 		}
 	}
 }
 
-void MinifigWizard::OnDraw()
+void MinifigWizard::SaveTemplate(const QString& TemplateName, const lcMinifigTemplate& Template)
 {
-	mContext->SetDefaultState();
+	mTemplates[TemplateName] = Template;
+}
 
-	float Aspect = (float)mWidth/(float)mHeight;
-	mContext->SetViewport(0, 0, mWidth, mHeight);
+void MinifigWizard::DeleteTemplate(const QString& TemplateName)
+{
+	mTemplates.erase(TemplateName);
+}
 
-	lcGetActiveModel()->DrawBackground(this);
+void MinifigWizard::AddTemplatesJson(const QByteArray& TemplateData)
+{
+	QJsonDocument Document = QJsonDocument::fromJson(TemplateData);
+	QJsonObject RootObject = Document.object();
 
-	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	int Version = RootObject["Version"].toInt(0);
+	QJsonObject TemplatesObject;
 
-	for (int InfoIdx = 0; InfoIdx < LC_MFW_NUMITEMS; InfoIdx++)
+	if (Version > 0)
+		TemplatesObject = RootObject["Templates"].toObject();
+	else
+		TemplatesObject = RootObject;
+
+	for (QJsonObject::const_iterator ElementIt = TemplatesObject.constBegin(); ElementIt != TemplatesObject.constEnd(); ElementIt++)
 	{
-		PieceInfo* Info = mMinifig.Parts[InfoIdx];
-
-		if (!Info)
+		if (!ElementIt.value().isObject())
 			continue;
 
-		lcVector3 Points[8];
-		lcGetBoxCorners(Info->GetBoundingBox(), Points);
+		QJsonObject TemplateObject = ElementIt.value().toObject();
+		lcMinifigTemplate Template;
 
-		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
+		for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 		{
-			lcVector3 Point = lcMul31(Points[PointIdx], mMinifig.Matrices[InfoIdx]);
+			QJsonObject PartObject = TemplateObject.value(QLatin1String(mSectionNames[PartIdx])).toObject();
 
-			Min = lcMin(Point, Min);
-			Max = lcMax(Point, Max);
+			Template.Parts[PartIdx] = PartObject["Id"].toString();
+			Template.Colors[PartIdx] = PartObject["Color"].toInt();
+			Template.Angles[PartIdx] = PartObject["Angle"].toDouble();
 		}
-	}
 
-	lcVector3 Center = (Min + Max) / 2.0f;
-
-	lcVector3 Eye(0.0f, 0.0f, 1.0f);
-
-	Eye = lcMul30(Eye, lcMatrix44RotationX(-mRotateX * LC_DTOR));
-	Eye = lcMul30(Eye, lcMatrix44RotationZ(-mRotateZ * LC_DTOR));
-
-	lcMatrix44 Projection = lcMatrix44Perspective(30.0f, Aspect, 1.0f, 2500.0f);
-	mContext->SetProjectionMatrix(Projection);
-
-	lcMatrix44 ViewMatrix;
-
-	if (mAutoZoom)
-	{
-		lcVector3 Points[8];
-		lcGetBoxCorners(Min, Max, Points);
-
-		Eye += Center;
-
-		lcMatrix44 ModelView = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
-		Eye = lcZoomExtents(Eye, ModelView, Projection, Points, 8);
-
-		ViewMatrix = lcMatrix44LookAt(Eye, Center, lcVector3(0, 0, 1));
-
-		// Update the new camera distance.
-		lcVector3 d = Eye - Center;
-		mDistance = d.Length();
-	}
-	else
-	{
-		ViewMatrix = lcMatrix44LookAt(Eye * mDistance, Center, lcVector3(0, 0, 1));
-	}
-
-	Calculate();
-
-	lcScene Scene;
-	Scene.Begin(ViewMatrix);
-
-	for (int PieceIdx = 0; PieceIdx < LC_MFW_NUMITEMS; PieceIdx++)
-		if (mMinifig.Parts[PieceIdx])
-			mMinifig.Parts[PieceIdx]->AddRenderMeshes(Scene, mMinifig.Matrices[PieceIdx], mMinifig.Colors[PieceIdx], false, false, false);
-
-	Scene.End();
-
-	Scene.Draw(mContext);
-
-	mContext->ClearResources();
-}
-
-void MinifigWizard::OnLeftButtonDown()
-{
-	if (mTracking == LC_TRACK_NONE)
-	{
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
-		mTracking = LC_TRACK_LEFT;
+		mTemplates.emplace(ElementIt.key(), std::move(Template));
 	}
 }
 
-void MinifigWizard::OnLeftButtonUp()
+QByteArray MinifigWizard::GetTemplatesJson() const
 {
-	if (mTracking == LC_TRACK_LEFT)
-		mTracking = LC_TRACK_NONE;
-}
+	QJsonObject TemplatesObject;
 
-void MinifigWizard::OnLeftButtonDoubleClick()
-{
-	mAutoZoom = true;
-	Redraw();
-}
-
-void MinifigWizard::OnRightButtonDown()
-{
-	if (mTracking == LC_TRACK_NONE)
+	for (const auto& TemplateEntry : mTemplates)
 	{
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
-		mTracking = LC_TRACK_RIGHT;
+		const lcMinifigTemplate& Template = TemplateEntry.second;
+		QJsonObject TemplateObject;
+
+		for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+		{
+			QJsonObject PartObject;
+
+			PartObject["Id"] = Template.Parts[PartIdx];
+			PartObject["Color"] = Template.Colors[PartIdx];
+			PartObject["Angle"] = Template.Angles[PartIdx];
+
+			TemplateObject[QLatin1String(mSectionNames[PartIdx])] = PartObject;
+		}
+
+		TemplatesObject[TemplateEntry.first] = TemplateObject;
 	}
+
+	QJsonObject RootObject;
+	RootObject["Templates"] = TemplatesObject;
+	RootObject["Version"] = 1;
+
+	return QJsonDocument(RootObject).toJson();
 }
 
-void MinifigWizard::OnRightButtonUp()
+void MinifigWizard::LoadTemplates()
 {
-	if (mTracking == LC_TRACK_RIGHT)
-		mTracking = LC_TRACK_NONE;
+	mTemplates.clear();
+
+	QSettings Settings;
+	Settings.beginGroup("Minifig");
+	QByteArray TemplateData = Settings.value("Templates").toByteArray();
+
+	AddTemplatesJson(TemplateData);
 }
 
-void MinifigWizard::OnMouseMove()
+void MinifigWizard::SaveTemplates()
 {
-	if (mTracking == LC_TRACK_LEFT)
-	{
-		// Rotate.
-		mRotateZ += mInputState.x - mDownX;
-		mRotateX += mInputState.y - mDownY;
-
-		if (mRotateX > 179.5f)
-			mRotateX = 179.5f;
-		else if (mRotateX < 0.5f)
-			mRotateX = 0.5f;
-
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
-
-		Redraw();
-	}
-	else if (mTracking == LC_TRACK_RIGHT)
-	{
-		// Zoom.
-		mDistance += (float)(mDownY - mInputState.y) * 0.2f;
-		mAutoZoom = false;
-
-		if (mDistance < 0.5f)
-			mDistance = 0.5f;
-
-		mDownX = mInputState.x;
-		mDownY = mInputState.y;
-
-		Redraw();
-	}
+	QSettings Settings;
+	Settings.beginGroup("Minifig");
+	Settings.setValue("Templates", GetTemplatesJson());
 }
 
 void MinifigWizard::Calculate()
@@ -369,11 +290,11 @@ void MinifigWizard::Calculate()
 	lcMatrix44 Root, Mat, Mat2;
 
 	PieceInfo** Parts = mMinifig.Parts;
-	float* Angles = mMinifig.Angles;
+	const float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
-	bool DroidTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "30375");
-	bool SkeletonTorso = Parts[LC_MFW_BODY] && !strcmp(Parts[LC_MFW_BODY]->m_strName, "6260");
+	const bool DroidTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
+	const bool SkeletonTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
 
 	if (Parts[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));
@@ -417,7 +338,7 @@ void MinifigWizard::Calculate()
 			Mat2 = lcMatrix44Identity();
 		else
 			Mat2 = lcMatrix44RotationY(-LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(15.5f, 0, -8.0f));
+		Mat2.SetTranslation(lcVector3(15.552f, 0, -8.88f));
 
 		Mat = lcMul(mSettings[LC_MFW_RARM][GetSelectionIndex(LC_MFW_RARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
@@ -437,8 +358,9 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_RHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RHANDA]);
-		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
+		Mat.SetTranslation(lcVector3(0, -9.25f, 0));
 		Mat = lcMul(mSettings[LC_MFW_RHANDA][GetSelectionIndex(LC_MFW_RHANDA)].Offset, Mat);
+		Mat = lcMul(Mat, lcMatrix44RotationX(LC_DTOR * 15.0f));
 		Matrices[LC_MFW_RHANDA] = lcMul(Mat, Matrices[LC_MFW_RHAND]);
 	}
 
@@ -450,7 +372,7 @@ void MinifigWizard::Calculate()
 			Mat2 = lcMatrix44Identity();
 		else
 			Mat2 = lcMatrix44RotationY(LC_DTOR * 9.791f);
-		Mat2.SetTranslation(lcVector3(-15.5f, 0.0f, -8.0f));
+		Mat2.SetTranslation(lcVector3(-15.552f, 0.0f, -8.88f));
 
 		Mat = lcMul(mSettings[LC_MFW_LARM][GetSelectionIndex(LC_MFW_LARM)].Offset, Mat);
 		Mat = lcMul(Mat, Mat2);
@@ -470,8 +392,9 @@ void MinifigWizard::Calculate()
 	if (Parts[LC_MFW_LHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LHANDA]);
-		Mat.SetTranslation(lcVector3(0, -10.0f, 0));
+		Mat.SetTranslation(lcVector3(0, -9.25f, 0));
 		Mat = lcMul(mSettings[LC_MFW_LHANDA][GetSelectionIndex(LC_MFW_LHANDA)].Offset, Mat);
+		Mat = lcMul(Mat, lcMatrix44RotationX(LC_DTOR * 15.0f));
 		Matrices[LC_MFW_LHANDA] = lcMul(Mat, Matrices[LC_MFW_LHAND]);
 	}
 
@@ -501,7 +424,7 @@ void MinifigWizard::Calculate()
 
 	if (Parts[LC_MFW_RLEGA])
 	{
-		lcVector3 Center(-10.0f, -1.0f, -28.0f);
+		const lcVector3 Center(-10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RLEGA]);
 		Mat2 = mSettings[LC_MFW_RLEGA][GetSelectionIndex(LC_MFW_RLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
@@ -520,7 +443,7 @@ void MinifigWizard::Calculate()
 
 	if (Parts[LC_MFW_LLEGA])
 	{
-		lcVector3 Center(10.0f, -1.0f, -28.0f);
+		const lcVector3 Center(10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LLEGA]);
 		Mat2 = mSettings[LC_MFW_LLEGA][GetSelectionIndex(LC_MFW_LLEGA)].Offset;
 		Mat2.SetTranslation(lcMul31(-Center, Mat2));
@@ -528,15 +451,17 @@ void MinifigWizard::Calculate()
 		Mat.SetTranslation(lcMul31(Center, Mat2));
 		Matrices[LC_MFW_LLEGA] = lcMul(Mat, Matrices[LC_MFW_LLEG]);
 	}
+
+	mModel->SetMinifig(mMinifig);
 }
 
 int MinifigWizard::GetSelectionIndex(int Type) const
 {
-	const lcArray<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
+	const std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
-	for (int Index = 0; Index < InfoArray.GetSize(); Index++)
+	for (size_t Index = 0; Index < InfoArray.size(); Index++)
 		if (InfoArray[Index].Info == mMinifig.Parts[Type])
-			return Index;
+			return (int)Index;
 
 	return 0;
 }
@@ -544,7 +469,6 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 void MinifigWizard::SetSelectionIndex(int Type, int Index)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	MakeCurrent();
 
 	if (mMinifig.Parts[Type])
 		Library->ReleasePieceInfo(mMinifig.Parts[Type]);
@@ -560,9 +484,13 @@ void MinifigWizard::SetSelectionIndex(int Type, int Index)
 void MinifigWizard::SetColor(int Type, int Color)
 {
 	mMinifig.Colors[Type] = Color;
+
+	Calculate();
 }
 
 void MinifigWizard::SetAngle(int Type, float Angle)
 {
 	mMinifig.Angles[Type] = Angle;
+
+	Calculate();
 }

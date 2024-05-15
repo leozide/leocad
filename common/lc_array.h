@@ -1,12 +1,9 @@
-#ifndef _LC_ARRAY_H_
-#define _LC_ARRAY_H_
+#pragma once
 
 template <class T>
 class lcArray
 {
 public:
-	typedef int (*lcArrayCompareFunc)(const T& a, const T& b);
-
 	lcArray(int Size = 0, int Grow = 16)
 	{
 		mData = nullptr;
@@ -22,6 +19,13 @@ public:
 	{
 		mData = nullptr;
 		*this = Array;
+	}
+
+	lcArray(std::initializer_list<T> Init)
+		: lcArray((int)Init.size())
+	{
+		for (const T& Element : Init)
+			Add(Element);
 	}
 
 	~lcArray()
@@ -44,14 +48,25 @@ public:
 		return *this;
 	}
 
-	lcArray<T>& operator+=(const lcArray<T>& Array)
+	lcArray(lcArray<T>&& Array)
 	{
-		AllocGrow(Array.mLength);
+		mData = nullptr;
+		*this = std::move(Array);
+	}
 
-		for (int i = 0; i < Array.mLength; i++)
-			mData[mLength + i] = Array.mData[i];
+	lcArray<T>& operator=(lcArray<T>&& Array)
+	{
+		delete[] mData;
 
-		mLength += Array.mLength;
+		mData = Array.mData;
+		Array.mData = nullptr;
+		mLength = Array.mLength;
+		Array.mLength = 0;
+		mAlloc = Array.mAlloc;
+		Array.mAlloc = 0;
+		mGrow = Array.mGrow;
+		Array.mGrow = 16;
+
 		return *this;
 	}
 
@@ -107,12 +122,12 @@ public:
 		return mLength;
 	}
 
-	void SetSize(int NewSize)
+	void SetSize(size_t NewSize)
 	{
 		if (NewSize > mAlloc)
 			AllocGrow(NewSize - mLength);
 
-		mLength = NewSize;
+		mLength = (int)NewSize;
 	}
 
 	void SetGrow(int Grow)
@@ -121,11 +136,11 @@ public:
 			mGrow = Grow;
 	}
 
-	void AllocGrow(int Grow)
+	void AllocGrow(size_t Grow)
 	{
 		if ((mLength + Grow) > mAlloc)
 		{
-			int NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
+			const size_t NewSize = ((mLength + Grow + mGrow - 1) / mGrow) * mGrow;
 			T* NewData = new T[NewSize];
 
 			for (int i = 0; i < mLength; i++)
@@ -146,21 +161,8 @@ public:
 	T& Add()
 	{
 		AllocGrow(1);
-		return mData[mLength++];
-	}
-
-	void AddSorted(const T& Obj, lcArrayCompareFunc CompareFunc)
-	{
-		for (int i = 0; i < mLength; i++)
-		{
-			if (CompareFunc(Obj, mData[i]) < 0)
-			{
-				InsertAt(i, Obj);
-				return;
-			}
-		}
-
-		Add(Obj);
+		mData[mLength++] = T();
+		return mData[mLength - 1];
 	}
 
 	T& InsertAt(int Index)
@@ -233,39 +235,10 @@ public:
 		return -1;
 	}
 
-	void Sort(lcArrayCompareFunc CompareFunc)
-	{
-		if (mLength <= 1)
-			return;
-
-		int i = 1;
-		bool Flipped;
-
-		do
-		{
-			Flipped = false;
-
-			for (int j = mLength - 1; j >= i; --j)
-			{
-				T& a = mData[j];
-				T& b = mData[j - 1];
-
-				if (CompareFunc(b, a) > 0)
-				{
-					T Tmp = b;
-					mData[j - 1] = a;
-					mData[j] = Tmp;
-					Flipped = true;
-				}
-			}
-		} while ((++i < mLength) && Flipped);
-	}
-
 protected:
 	T* mData;
 	int mLength;
-	int mAlloc;
+	size_t mAlloc;
 	int mGrow;
 };
 
-#endif // _LC_ARRAY_H_

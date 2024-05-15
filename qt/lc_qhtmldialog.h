@@ -1,8 +1,7 @@
-#ifndef LC_QHTMLDIALOG_H
-#define LC_QHTMLDIALOG_H
+#pragma once
 
 #include <QDialog>
-struct lcHTMLDialogOptions;
+class lcHTMLExportOptions;
 
 namespace Ui {
 class lcQHTMLDialog;
@@ -13,17 +12,15 @@ class lcQHTMLDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQHTMLDialog(QWidget *parent, void *data);
+	explicit lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options);
 	~lcQHTMLDialog();
 
-	lcHTMLDialogOptions *options;
-
 public slots:
-	void accept();
+	void accept() override;
 	void on_outputFolderBrowse_clicked();
 
 private:
+	lcHTMLExportOptions* mOptions;
 	Ui::lcQHTMLDialog *ui;
 };
 
-#endif // LC_QHTMLDIALOG_H

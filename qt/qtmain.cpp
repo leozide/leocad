@@ -1,10 +1,8 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include "lc_qupdatedialog.h"
-#include "lc_mainwindow.h"
-#include "project.h"
-#include "lc_colors.h"
-#include "lc_partselectionwidget.h"
+#include "lc_profile.h"
+#include "pieceinf.h"
 #include <QApplication>
 #include <locale.h>
 
@@ -12,6 +10,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4091)
+#include <windows.h>
 #include <dbghelp.h>
 #include <direct.h>
 #include <shlobj.h>
@@ -25,7 +24,7 @@
 
 #include <tchar.h>
 
-static TCHAR minidumpPath[_MAX_PATH];
+static TCHAR gMinidumpPath[_MAX_PATH];
 
 static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 { 
@@ -37,7 +36,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 	if (dbgHelp == nullptr)
 		return EXCEPTION_EXECUTE_HANDLER;
 
-	HANDLE file = CreateFile(minidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	HANDLE file = CreateFile(gMinidumpPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (file == INVALID_HANDLE_VALUE)
 		return EXCEPTION_EXECUTE_HANDLER;
@@ -62,7 +61,7 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 	{
 		TCHAR message[_MAX_PATH + 256];
 		lstrcpy(message, TEXT("LeoCAD just crashed. Crash information was saved to the file '"));
-		lstrcat(message, minidumpPath);
+		lstrcat(message, gMinidumpPath);
 		lstrcat(message, TEXT("', please send it to the developers for debugging."));
 
 		MessageBox(nullptr, message, TEXT("LeoCAD"), MB_OK);
@@ -73,12 +72,8 @@ static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
 
 static void lcSehInit()
 {
-	if (SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, SHGFP_TYPE_CURRENT, minidumpPath) == S_OK)
-	{
-		lstrcat(minidumpPath, TEXT("\\LeoCAD\\"));
-		_tmkdir(minidumpPath);
-		lstrcat(minidumpPath, TEXT("minidump.dmp"));
-	}
+	if (GetTempPath(LC_ARRAY_COUNT(gMinidumpPath), gMinidumpPath))
+		lstrcat(gMinidumpPath, TEXT("leocad.dmp"));
 
 	SetUnhandledExceptionFilter(lcSehHandler);
 }
@@ -128,78 +123,109 @@ static void lcRegisterShellFileTypes()
 
 #endif
 
+static void lcInitializeSurfaceFormat(int argc, char* argv[])
+{
+	QCoreApplication Application(argc, argv);
+	const lcCommandLineOptions Options = lcApplication::ParseCommandLineOptions();
+
+	if (Options.ParseOK && Options.AASamples > 1)
+	{
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		Format.setSamples(Options.AASamples);
+		QSurfaceFormat::setDefaultFormat(Format);
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	app.setApplicationDisplayName("LeoCAD");
+	QCoreApplication::setOrganizationDomain(QLatin1String("leocad.org"));
+	QCoreApplication::setOrganizationName(QLatin1String("LeoCAD Software"));
+	QCoreApplication::setApplicationName(QLatin1String("LeoCAD"));
+	QCoreApplication::setApplicationVersion(QLatin1String(LC_VERSION_TEXT));
+
+	lcInitializeSurfaceFormat(argc, argv);
+
+	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
+	lcApplication Application(argc, argv);
+
+	QString Language = lcGetProfileString(LC_PROFILE_LANGUAGE);
+	QLocale Locale;
+
+	if (!Language.isEmpty())
+		Locale = QLocale(Language);
+
+	QTranslator QtTranslator;
+	if (QtTranslator.load(Locale, "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+		Application.installTranslator(&QtTranslator);
+#ifdef Q_OS_WIN
+	else if (QtTranslator.load(Locale, "qt", "_", qApp->applicationDirPath() + "/translations"))
+		Application.installTranslator(&QtTranslator);
 #endif
 
-	QCoreApplication::setOrganizationDomain("leocad.org");
-	QCoreApplication::setOrganizationName("LeoCAD Software");
-	QCoreApplication::setApplicationName("LeoCAD");
-	QCoreApplication::setApplicationVersion(LC_VERSION_TEXT);
+	QTranslator QtBaseTranslator;
+	if (QtBaseTranslator.load("qtbase_" + Locale.name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+		Application.installTranslator(&QtBaseTranslator);
+#ifdef Q_OS_WIN
+	else if (QtBaseTranslator.load("qtbase_" + Locale.name(), qApp->applicationDirPath() + "/translations"))
+		Application.installTranslator(&QtBaseTranslator);
+#endif
 
 	QTranslator Translator;
-	Translator.load(QString("leocad_") + QLocale::system().name().section('_', 0, 0) + ".qm", ":/resources");
-	app.installTranslator(&Translator);
+	if (Translator.load("leocad_" + Locale.name(), ":/resources"))
+		Application.installTranslator(&Translator);
 
+	qRegisterMetaType<PieceInfo*>("PieceInfo*");
+	qRegisterMetaType<QList<int> >("QList<int>");
+	qRegisterMetaType<lcVector3>("lcVector3");
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+	QMetaType::registerComparators<lcVector3>();
+#endif
 
-	g_App = new lcApplication();
+	QList<QPair<QString, bool>> LibraryPaths;
 
-#if defined(Q_OS_WIN)
-	char libPath[LC_MAXPATH], *ptr;
-	strcpy(libPath, argv[0]);
-	ptr = strrchr(libPath,'\\');
-	if (ptr)
-		*(++ptr) = 0;
-
+#ifdef Q_OS_WIN
 	lcRegisterShellFileTypes();
 	lcSehInit();
-#elif defined(Q_OS_MAC)
-	QDir bundlePath = QDir(QCoreApplication::applicationDirPath());
-	bundlePath.cdUp();
-	bundlePath.cdUp();
-	bundlePath = QDir::cleanPath(bundlePath.absolutePath() + "/Contents/Resources/");
-	QByteArray pathArray = bundlePath.absolutePath().toLocal8Bit();
-	const char* libPath = pathArray.data();
-#else
-	const char* libPath = LC_INSTALL_PREFIX "/share/leocad/";
+
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/library.bin"), true);
+#endif
+
+#ifdef Q_OS_LINUX
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../share/leocad/library.bin"), true);
+#endif
+
+#ifdef Q_OS_MAC
+	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../../Contents/Resources/library.bin"), true);
 #endif
 
 #ifdef LC_LDRAW_LIBRARY_PATH
-	const char* LDrawPath = LC_LDRAW_LIBRARY_PATH;
-#else
-	const char* LDrawPath = nullptr;
+	LibraryPaths += qMakePair(QString::fromLatin1(LC_LDRAW_LIBRARY_PATH), false);
 #endif
 	
 	setlocale(LC_NUMERIC, "C");
 
-	bool ShowWindow;
-	if (!g_App->Initialize(argc, argv, libPath, LDrawPath, ShowWindow))
+	lcStartupMode StartupMode = Application.Initialize(LibraryPaths);
+
+	if (StartupMode == lcStartupMode::Error)
+	{
+		Application.Shutdown();
 		return 1;
+	}
 
 	int ExecReturn = 0;
 
-	if (ShowWindow)
+	if (StartupMode == lcStartupMode::ShowWindow)
 	{
-		gMainWindow->SetColorIndex(lcGetColorIndex(4));
-		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
-		gMainWindow->UpdateRecentFiles();
-		gMainWindow->show();
-
 #if !LC_DISABLE_UPDATE_CHECK
 		lcDoInitialUpdateCheck();
 #endif
 
-		ExecReturn = app.exec();
+		ExecReturn = Application.exec();
 	}
 
-	delete gMainWindow;
-	gMainWindow = nullptr;
-	delete g_App;
-	g_App = nullptr;
+	Application.Shutdown();
 
 	return ExecReturn;
 }

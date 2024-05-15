@@ -15,7 +15,12 @@
 *.qm
 *.ldr
 *.dat
+*.mpd
 !/resources/*.ldr
+*.dae
+*.3ds
+*.obj
+.vs
 build
 debug
 release
@@ -26,4 +31,10 @@ Debug*
 Makefile
 library.bin
 leocad_plugin_import.cpp
+leocad_resource.*
+povray
 uic_wrapper.bat
+/tools/setup/*.exe
+appdir
+LeoCAD-Windows*.exe
+*.snap

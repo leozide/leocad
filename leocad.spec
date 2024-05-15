@@ -1,4 +1,4 @@
-%define qt5 0
+%define qt5 1
 
 %if 0%{?suse_version}
 %define dist .openSUSE%(echo %{suse_version} | sed 's/0$//')
@@ -28,7 +28,7 @@ Group: Graphics
 %if 0%{?fedora} || 0%{?centos_version}
 Group: Amusements/Graphics
 %endif
-Version: 17.07
+Version: 23.03
 %if 0%{?opensuse_bs}
 Release: <CI_CNT>.<B_CNT>%{?dist}
 %else
@@ -55,7 +55,7 @@ BuildRequires: qt-devel >= 1:4.7.0
 %endif
 %if 0%{?fedora}
 %if 0%{?qt5}
-BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist
+BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist, qt5-qtgamepad-devel
 %else
 BuildRequires: qt-devel
 %endif
@@ -239,7 +239,7 @@ install -d $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/mimetypes
 install -d $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
 install -d $RPM_BUILD_ROOT%{_mandir}/man1
 install -m 755 build/release/leocad $RPM_BUILD_ROOT%{_bindir}/leocad
-install -m 644 docs/README.txt $RPM_BUILD_ROOT%{_datadir}/leocad/README.txt
+install -m 644 docs/README.md $RPM_BUILD_ROOT%{_datadir}/leocad/README.md
 install -m 644 docs/CREDITS.txt $RPM_BUILD_ROOT%{_datadir}/leocad/CREDITS.txt
 install -m 644 docs/COPYING.txt $RPM_BUILD_ROOT%{_datadir}/leocad/COPYING.txt
 install -m 644 docs/leocad.1 $RPM_BUILD_ROOT%{_mandir}/man1/leocad.1
@@ -250,9 +250,9 @@ install -m 644 qt/leocad.xml  \
 				$RPM_BUILD_ROOT%{_datadir}/mime/packages/leocad.xml
 install -m 644 qt/leocad.desktop \
 				$RPM_BUILD_ROOT%{_datadir}/applications/leocad.desktop
-install -m 644 resources/application-vnd.leocad.svg \
+install -m 644 tools/icon/scalable/mimetypes/application-vnd.leocad.svg \
 				$RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/mimetypes/application-vnd.leocad.svg
-install -m 644 resources/leocad.svg \
+install -m 644 tools/icon/scalable/apps/leocad.svg \
 				$RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/leocad.svg
 %if 0%{?suse_version}
 %suse_update_desktop_file leocad Graphics
@@ -264,7 +264,7 @@ install -m 644 resources/leocad.svg \
 %endif
 %{_bindir}/leocad
 %dir %{_datadir}/leocad
-%doc %{_datadir}/leocad/README.txt
+%doc %{_datadir}/leocad/README.md
 %doc %{_datadir}/leocad/CREDITS.txt
 %doc %{_datadir}/leocad/COPYING.txt
 %{_datadir}/mime/packages/leocad.xml
@@ -281,6 +281,14 @@ install -m 644 resources/leocad.svg \
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Jan 30 2022 - sT331h0rs3 (at) gmail.com 0.92
+- Actualize LeoCAD version
+
+* Sat May 08 2021 - sT331h0rs3 (at) gmail.com 0.91
+- Build with Qt5 by default
+- Actualize LeoCAD version
+- Fix paths to SVG files
+
 * Tue Sep 16 2016 - pbartfai (at) stardust.hu 0.90
 - Initial version
 

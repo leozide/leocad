@@ -1,14 +1,16 @@
 #include "lc_global.h"
 #include "lc_timelinewidget.h"
 #include "lc_model.h"
-#include "project.h"
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_mainwindow.h"
+#include "lc_viewwidget.h"
+#include "lc_previewwidget.h"
 
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	: QTreeWidget(Parent)
 {
+	mCurrentStepItem = nullptr;
 	mIgnoreUpdates = false;
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -20,6 +22,7 @@ lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 
 	invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
 
+	connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(CurrentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 	connect(this, SIGNAL(itemSelectionChanged()), SLOT(ItemSelectionChanged()));
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomMenuRequested(QPoint)));
 }
@@ -32,7 +35,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
 	QMenu* Menu = new QMenu(this);
 
-	lcObject* FocusObject = lcGetActiveModel()->GetFocusObject();
+	lcObject* FocusObject = gMainWindow->GetActiveModel()->GetFocusObject();
 
 	if (FocusObject && FocusObject->IsPiece())
 	{
@@ -40,15 +43,23 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 
 		if (Piece->mPieceInfo->IsModel())
 		{
-			Menu->addAction(gMainWindow->mActions[LC_MODEL_EDIT_FOCUS]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
+			Menu->addAction(gMainWindow->mActions[LC_PIECE_INLINE_SELECTED_MODELS]);
 			Menu->addSeparator();
 		}
 	}
 
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_SET_CURRENT]);
-	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_BEFORE]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
+
+	Menu->addSeparator();
+
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_MOVE_SELECTION]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_MOVE_SELECTION_BEFORE]);
+	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_MOVE_SELECTION_AFTER]);
 
 	Menu->addSeparator();
 
@@ -57,7 +68,8 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_SELECTED]);
 	Menu->addAction(gMainWindow->mActions[LC_PIECE_UNHIDE_ALL]);
 
-	Menu->popup(viewport()->mapToGlobal(Pos));
+	Menu->exec(viewport()->mapToGlobal(Pos));
+	delete Menu;
 }
 
 void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
@@ -65,24 +77,30 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	if (mIgnoreUpdates)
 		return;
 
-	lcModel* Model = lcGetActiveModel();
-
-	if (!Model)
-	{
-		mItems.clear();
-		clear();
-		return;
-	}
+	lcModel* Model = gMainWindow->GetActiveModel();
 
 	bool Blocked = blockSignals(true);
 
+	if (!Model)
+	{
+		mCurrentStepItem = nullptr;
+		mItems.clear();
+		clear();
+		blockSignals(Blocked);
+		return;
+	}
+
 	if (Clear)
 	{
+		mCurrentStepItem = nullptr;
 		mItems.clear();
 		clear();
 	}
 
-	lcStep LastStep = lcMax(Model->GetLastStep(), Model->GetCurrentStep());
+	lcStep LastStep = Model->GetLastStep();
+	if (Model->HasPieces())
+		LastStep++;
+	LastStep  = lcMax(LastStep, Model->GetCurrentStep());
 
 	for (int TopLevelItemIdx = LastStep; TopLevelItemIdx < topLevelItemCount(); )
 	{
@@ -95,6 +113,9 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			mItems.remove(Piece);
 			delete PieceItem;
 		}
+
+		if (mCurrentStepItem == StepItem)
+			mCurrentStepItem = nullptr;
 
 		delete StepItem;
 	}
@@ -112,10 +133,8 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 	int PieceItemIndex = 0;
 	lcStep Step = 0;
 
-	for (int PieceIdx = 0; PieceIdx != Pieces.GetSize(); PieceIdx++)
+	for (lcPiece* Piece : Pieces)
 	{
-		lcPiece* Piece = Pieces[PieceIdx];
-
 		while (Step != Piece->GetStepShow())
 		{
 			if (StepItem)
@@ -152,7 +171,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			{
 				PieceItem = new QTreeWidgetItem();
 				PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-				PieceItem->setData(0, Qt::UserRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+				PieceItem->setData(0, Qt::UserRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
 				StepItem->insertChild(PieceItemIndex, PieceItem);
 				mItems[Piece] = PieceItem;
 
@@ -176,7 +195,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		{
 			PieceItem->setText(0, Piece->mPieceInfo->m_strDescription);
 
-			int ColorIndex = Piece->mColorIndex;
+			int ColorIndex = Piece->GetColorIndex();
 			if (!mIcons.contains(ColorIndex))
 			{
 				int Size = rowHeight(indexFromItem(PieceItem));
@@ -195,9 +214,13 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 			PieceItem->setIcon(0, mIcons[ColorIndex]);
 
 			QColor Color = palette().text().color();
-			if (Piece->IsHidden())
+
+			if (Piece->mPieceInfo->IsPlaceholder())
+				Color = QColor(208, 0, 0);
+			else if (Piece->IsHidden())
 				Color.setAlpha(128);
-			PieceItem->setTextColor(0, Color);
+
+			PieceItem->setForeground(0, Color);
 		}
 
 		PieceItem->setSelected(Piece->IsSelected());
@@ -225,8 +248,37 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem = topLevelItem(Step - 1);
 		PieceItemIndex = 0;
 	}
+	
+	UpdateCurrentStepItem();
 
 	blockSignals(Blocked);
+}
+
+void lcTimelineWidget::UpdateCurrentStepItem()
+{
+	lcModel* Model = gMainWindow->GetActiveModel();
+	lcStep CurrentStep = Model->GetCurrentStep();
+	QTreeWidgetItem* CurrentStepItem = topLevelItem(CurrentStep - 1);
+
+	if (CurrentStepItem != mCurrentStepItem)
+	{
+		if (mCurrentStepItem)
+		{
+			QFont Font = mCurrentStepItem->font(0);
+			Font.setBold(false);
+			mCurrentStepItem->setFont(0, Font);
+		}
+
+		if (CurrentStepItem)
+		{
+			QFont Font = CurrentStepItem->font(0);
+			Font.setBold(true);
+			CurrentStepItem->setFont(0, Font);
+			setCurrentItem(CurrentStepItem);
+		}
+
+		mCurrentStepItem = CurrentStepItem;
+	}
 }
 
 void lcTimelineWidget::UpdateSelection()
@@ -260,7 +312,7 @@ void lcTimelineWidget::UpdateSelection()
 	blockSignals(Blocked);
 }
 
-void lcTimelineWidget::InsertStep()
+void lcTimelineWidget::InsertStepBefore()
 {
 	QTreeWidgetItem* CurrentItem = currentItem();
 
@@ -275,7 +327,25 @@ void lcTimelineWidget::InsertStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->InsertStep(Step + 1);
+	gMainWindow->GetActiveModel()->InsertStep(Step + 1);
+}
+
+void lcTimelineWidget::InsertStepAfter()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	gMainWindow->GetActiveModel()->InsertStep(Step + 2);
 }
 
 void lcTimelineWidget::RemoveStep()
@@ -293,7 +363,7 @@ void lcTimelineWidget::RemoveStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->RemoveStep(Step + 1);
+	gMainWindow->GetActiveModel()->RemoveStep(Step + 1);
 }
 
 void lcTimelineWidget::MoveSelection()
@@ -310,10 +380,11 @@ void lcTimelineWidget::MoveSelection()
 
 	if (Step == -1)
 		return;
+	Step++;
 
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
-	foreach(QTreeWidgetItem* PieceItem, SelectedItems)
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
 		QTreeWidgetItem* Parent = PieceItem->parent();
 
@@ -325,6 +396,103 @@ void lcTimelineWidget::MoveSelection()
 	}
 
 	UpdateModel();
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (Step > static_cast<int>(Model->GetCurrentStep()))
+		Model->SetCurrentStep(Step);
+}
+
+void lcTimelineWidget::MoveSelectionBefore()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	Step++;
+
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+
+	gMainWindow->GetActiveModel()->InsertStep(Step);
+
+	CurrentItem = topLevelItem(Step - 1);
+
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
+	{
+		QTreeWidgetItem* Parent = PieceItem->parent();
+
+		if (!Parent)
+			continue;
+
+		int ChildIndex = Parent->indexOfChild(PieceItem);
+		CurrentItem->addChild(Parent->takeChild(ChildIndex));
+	}
+
+	UpdateModel();
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (Step > static_cast<int>(Model->GetCurrentStep()))
+		Model->SetCurrentStep(Step);
+}
+
+void lcTimelineWidget::MoveSelectionAfter()
+{
+	QTreeWidgetItem* CurrentItem = currentItem();
+
+	if (!CurrentItem)
+		return;
+
+	if (CurrentItem->parent())
+		CurrentItem = CurrentItem->parent();
+
+	int Step = indexOfTopLevelItem(CurrentItem);
+
+	if (Step == -1)
+		return;
+
+	Step += 2;
+
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+
+	gMainWindow->GetActiveModel()->InsertStep(Step);
+
+	for (int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < Step; TopLevelItemIdx++)
+	{
+		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
+		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
+		addTopLevelItem(StepItem);
+		StepItem->setExpanded(true);
+	}
+
+	CurrentItem = topLevelItem(Step - 1);
+
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
+	{
+		QTreeWidgetItem* Parent = PieceItem->parent();
+
+		if (!Parent)
+			continue;
+
+		int ChildIndex = Parent->indexOfChild(PieceItem);
+		CurrentItem->addChild(Parent->takeChild(ChildIndex));
+	}
+
+	UpdateModel();
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (Step > static_cast<int>(Model->GetCurrentStep()))
+		Model->SetCurrentStep(Step);
 }
 
 void lcTimelineWidget::SetCurrentStep()
@@ -342,15 +510,24 @@ void lcTimelineWidget::SetCurrentStep()
 	if (Step == -1)
 		return;
 
-	lcGetActiveModel()->SetCurrentStep(Step + 1);
+	gMainWindow->GetActiveModel()->SetCurrentStep(Step + 1);
+}
+
+void lcTimelineWidget::CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous)
+{
+	Q_UNUSED(Previous);
+
+	if (Current && !Current->parent())
+		SetCurrentStep();
 }
 
 void lcTimelineWidget::ItemSelectionChanged()
 {
 	lcArray<lcObject*> Selection;
 	lcStep LastStep = 1;
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
-	foreach (QTreeWidgetItem* PieceItem, selectedItems())
+	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
 		lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
 		if (Piece)
@@ -367,18 +544,54 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
-	lcModel* Model = lcGetActiveModel();
+	lcModel* Model = gMainWindow->GetActiveModel();
 	if (LastStep > Model->GetCurrentStep())
+	{
 		Model->SetCurrentStep(LastStep);
-	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION);
+		UpdateCurrentStepItem();
+	}
+	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
 }
 
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
+	QTreeWidgetItem* DropItem = itemAt(Event->pos());
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	clearSelection();
+
+	if (DropItem)
+	{
+		QTreeWidgetItem* ParentItem = DropItem->parent();
+		lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+
+		if (Step > Model->GetCurrentStep())
+			Model->SetCurrentStep(Step);
+	}
+
+	auto SortItems = [this](QTreeWidgetItem* Item1, QTreeWidgetItem* Item2)
+	{
+		QTreeWidgetItem* StepItem1 = Item1->parent();
+		QTreeWidgetItem* StepItem2 = Item2->parent();
+
+		if (StepItem1 == StepItem2)
+			return StepItem1->indexOfChild(Item1) < StepItem1->indexOfChild(Item2);
+
+		return indexOfTopLevelItem(StepItem1) < indexOfTopLevelItem(StepItem2);
+	};
+
+	std::sort(SelectedItems.begin(), SelectedItems.end(), SortItems);
+
+	for (QTreeWidgetItem* SelectedItem : SelectedItems)
+		SelectedItem->setSelected(true);
+
 	QTreeWidget::dropEvent(Event);
+
 	UpdateModel();
+	Update(false, false);
 }
 
 void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)
@@ -395,6 +608,35 @@ void lcTimelineWidget::mousePressEvent(QMouseEvent* Event)
 	}
 	else
 		QTreeWidget::mousePressEvent(Event);
+}
+
+void lcTimelineWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
+{
+	if (MouseEvent->button() == Qt::LeftButton)
+	{
+		QTreeWidgetItem* CurrentItem = currentItem();
+		PreviewSelection(CurrentItem);
+	}
+
+	QTreeWidget::mouseDoubleClickEvent(MouseEvent);
+}
+
+void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
+{
+	if (!CurrentItem)
+		return;
+
+	lcPiece* Piece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+	if (!Piece)
+		return;
+
+	PieceInfo* Info = Piece->mPieceInfo;
+
+	if (!Info)
+		return;
+
+	gMainWindow->PreviewPiece(Info->mFileName, Piece->GetColorCode(), false);
 }
 
 void lcTimelineWidget::UpdateModel()
@@ -415,6 +657,6 @@ void lcTimelineWidget::UpdateModel()
 	}
 
 	mIgnoreUpdates = true;
-	lcGetActiveModel()->SetPieceSteps(PieceSteps);
+	gMainWindow->GetActiveModel()->SetPieceSteps(PieceSteps);
 	mIgnoreUpdates = false;
 }

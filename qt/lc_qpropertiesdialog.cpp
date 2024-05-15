@@ -2,128 +2,142 @@
 #include "lc_qpropertiesdialog.h"
 #include "ui_lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
-#include "lc_basewindow.h"
 #include "lc_colors.h"
 #include "lc_application.h"
 #include "pieceinf.h"
 
-lcQPropertiesDialog::lcQPropertiesDialog(QWidget *parent, void *data) :
-	QDialog(parent),
-	ui(new Ui::lcQPropertiesDialog)
+class lcPartsTableWidgetItem : public QTableWidgetItem
+{
+public:
+	explicit lcPartsTableWidgetItem(const QString& Text, int Type = QTableWidgetItem::Type)
+		: QTableWidgetItem(Text, Type)
+	{
+		mLast = false;
+	}
+
+	bool operator<(const QTableWidgetItem& Other) const override
+	{
+		if (mLast)
+			return false;
+
+		if (((const lcPartsTableWidgetItem&)Other).mLast)
+			return true;
+
+		if (column() > 0)
+		{
+			int Count = text().toInt();
+			int OtherCount = Other.text().toInt();
+			return Count < OtherCount;
+		}
+
+		return QTableWidgetItem::operator<(Other);
+	}
+
+	bool mLast;
+};
+
+lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options)
+	: QDialog(Parent), mOptions(Options), ui(new Ui::lcQPropertiesDialog)
 {
 	ui->setupUi(this);
 
-	connect(ui->solidColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
-	connect(ui->gradient1ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
-	connect(ui->gradient2ColorButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
+	setWindowTitle(tr("%1 Properties").arg(mOptions->Properties.mFileName));
 
-	options = (lcPropertiesDialogOptions*)data;
+	ui->DescriptionEdit->setText(mOptions->Properties.mDescription);
+	ui->AuthorEdit->setText(mOptions->Properties.mAuthor);
+	ui->CommentsEdit->setText(mOptions->Properties.mComments);
 
-	setWindowTitle(tr("%1 Properties").arg(options->Properties.mName));
+	const lcVector3 Dimensions = Options->BoundingBox.Max - Options->BoundingBox.Min;
+	QString Format = tr("%1 x %2 x %3 cm\n%4 x %5 x %6 inches\n%7 x %8 x %9 LDU");
+	QString Measurements = Format.arg(QString::number(Dimensions.x * 0.04, 'f', 2), QString::number(Dimensions.y * 0.04, 'f', 2), QString::number(Dimensions.z * 0.04, 'f', 2),
+	                                  QString::number(Dimensions.x / 64.0, 'f', 2), QString::number(Dimensions.y / 64.0, 'f', 2), QString::number(Dimensions.z / 64.0, 'f', 2),
+	                                  QString::number(Dimensions.x, 'f', 2), QString::number(Dimensions.y, 'f', 2), QString::number(Dimensions.z, 'f', 2));
 
-	ui->descriptionEdit->setText(options->Properties.mDescription);
-	ui->authorEdit->setText(options->Properties.mAuthor);
-	ui->commentsEdit->setText(options->Properties.mComments);
+	ui->MeasurementsLabel->setText(Measurements);
 
-	if (options->Properties.mBackgroundType == LC_BACKGROUND_IMAGE)
-		ui->imageRadio->setChecked(true);
-	else if (options->Properties.mBackgroundType == LC_BACKGROUND_GRADIENT)
-		ui->gradientRadio->setChecked(true);
-	else
-		ui->solidRadio->setChecked(true);
+	const lcPartsList& PartsList = mOptions->PartsList;
+	QStringList HorizontalLabels;
 
-	ui->imageNameEdit->setText(options->Properties.mBackgroundImage);
-	ui->imageTileCheckBox->setChecked(options->Properties.mBackgroundImageTile);
-
-	QPixmap pix(12, 12);
-
-	pix.fill(QColor(options->Properties.mBackgroundSolidColor[0] * 255, options->Properties.mBackgroundSolidColor[1] * 255, options->Properties.mBackgroundSolidColor[2] * 255));
-	ui->solidColorButton->setIcon(pix);
-	pix.fill(QColor(options->Properties.mBackgroundGradientColor1[0] * 255, options->Properties.mBackgroundGradientColor1[1] * 255, options->Properties.mBackgroundGradientColor1[2] * 255));
-	ui->gradient1ColorButton->setIcon(pix);
-	pix.fill(QColor(options->Properties.mBackgroundGradientColor2[0] * 255, options->Properties.mBackgroundGradientColor2[1] * 255, options->Properties.mBackgroundGradientColor2[2] * 255));
-	ui->gradient2ColorButton->setIcon(pix);
-
-	const lcPartsList& PartsList = options->PartsList;
-	QStringList horizontalLabels;
-
-	QVector<bool> ColorsUsed(gNumUserColors);
+	std::vector<bool> ColorsUsed(gColorList.size());
 
 	for (const auto& PartIt : PartsList)
 		for (const auto& ColorIt : PartIt.second)
 			ColorsUsed[ColorIt.first] = true;
 
-	QVector<int> ColorColumns(gNumUserColors);
-	int NumColors = 0;
+	std::vector<int> ColorColumns(gColorList.size());
+	int ColorCount = 0;
 
-	horizontalLabels.append(tr("Part"));
+	HorizontalLabels.append(tr("Part"));
 
-	for (int colorIdx = 0; colorIdx < gNumUserColors; colorIdx++)
+	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{
-		if (ColorsUsed[colorIdx])
+		if (ColorsUsed[ColorIndex])
 		{
-			ColorColumns[colorIdx] = NumColors++;
-			horizontalLabels.append(gColorList[colorIdx].Name);
+			ColorColumns[ColorIndex] = ColorCount++;
+			HorizontalLabels.append(gColorList[ColorIndex].Name);
 		}
 	}
 
-	horizontalLabels.append(tr("Total"));
+	HorizontalLabels.append(tr("Total"));
 
-	QTableWidget *table = ui->partsTable;
-	table->setColumnCount(NumColors + 2);
-	table->setRowCount(PartsList.size() + 1);
-	table->setHorizontalHeaderLabels(horizontalLabels);
+	QTableWidget* PartsTable = ui->PartsTable;
+	PartsTable->setColumnCount(ColorCount + 2);
+	PartsTable->setRowCount((int)PartsList.size() + 1);
+	PartsTable->setHorizontalHeaderLabels(HorizontalLabels);
+	PartsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-	table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-#else
-	table->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
-#endif
-
-	QVector<int> InfoTotals(PartsList.size());
-	QVector<int> ColorTotals(NumColors);
+	std::vector<int> InfoTotals(PartsList.size());
+	std::vector<int> ColorTotals(ColorCount);
 	int Row = 0, Total = 0;
 
 	for (const auto& PartIt : PartsList)
 	{
-		table->setItem(Row, 0, new QTableWidgetItem(PartIt.first->m_strDescription));
+		PartsTable->setItem(Row, 0, new lcPartsTableWidgetItem(PartIt.first->m_strDescription));
 
 		for (const auto& ColorIt : PartIt.second)
 		{
 			int ColorIndex = ColorIt.first;
 			int Count = ColorIt.second;
 
-			QTableWidgetItem* Item = new QTableWidgetItem(QString::number(Count));
+			lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(QString::number(Count));
 			Item->setTextAlignment(Qt::AlignCenter);
-			table->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
+			PartsTable->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
 
 			InfoTotals[Row] += Count;
 			ColorTotals[ColorColumns[ColorIndex]] += Count;
 			Total += Count;
 		}
 
+		for (int Column = 0; Column <= ColorCount; Column++)
+			if (!PartsTable->item(Row, Column))
+				PartsTable->setItem(Row, Column, new lcPartsTableWidgetItem(QString()));
+
 		Row++;
 	}
 
-	table->setItem(InfoTotals.size(), 0, new QTableWidgetItem(tr("Total")));
+	lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(tr("Total"));
+	Item->mLast = true;
+	PartsTable->setItem((int)InfoTotals.size(), 0, Item);
 
-	for (Row = 0; Row < InfoTotals.size(); Row++)
+	for (Row = 0; Row < (int)InfoTotals.size(); Row++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(InfoTotals[Row]));
-		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(Row, NumColors + 1, item);
+		Item = new lcPartsTableWidgetItem(QString::number(InfoTotals[Row]));
+		Item->setTextAlignment(Qt::AlignCenter);
+		PartsTable->setItem(Row, ColorCount + 1, Item);
 	}
 
-	for (int colorIdx = 0; colorIdx < NumColors; colorIdx++)
+	for (int ColorIndex = 0; ColorIndex < ColorCount; ColorIndex++)
 	{
-		QTableWidgetItem *item = new QTableWidgetItem(QString::number(ColorTotals[colorIdx]));
-		item->setTextAlignment(Qt::AlignCenter);
-		table->setItem(InfoTotals.size(), colorIdx + 1, item);
+		Item = new lcPartsTableWidgetItem(QString::number(ColorTotals[ColorIndex]));
+		Item->mLast = true;
+		Item->setTextAlignment(Qt::AlignCenter);
+		PartsTable->setItem((int)InfoTotals.size(), ColorIndex + 1, Item);
 	}
 
-	QTableWidgetItem *item = new QTableWidgetItem(QString::number(Total));
-	item->setTextAlignment(Qt::AlignCenter);
-	table->setItem(InfoTotals.size(), NumColors + 1, item);
+	Item = new lcPartsTableWidgetItem(QString::number(Total));
+	Item->mLast = true;
+	Item->setTextAlignment(Qt::AlignCenter);
+	PartsTable->setItem((int)InfoTotals.size(), ColorCount + 1, Item);
 }
 
 lcQPropertiesDialog::~lcQPropertiesDialog()
@@ -133,69 +147,9 @@ lcQPropertiesDialog::~lcQPropertiesDialog()
 
 void lcQPropertiesDialog::accept()
 {
-	options->Properties.mDescription = ui->descriptionEdit->text();
-	options->Properties.mAuthor = ui->authorEdit->text();
-	options->Properties.mComments = ui->commentsEdit->toPlainText();
-
-	if (ui->imageRadio->isChecked())
-		 options->Properties.mBackgroundType = LC_BACKGROUND_IMAGE;
-	else if (ui->gradientRadio->isChecked())
-		 options->Properties.mBackgroundType = LC_BACKGROUND_GRADIENT;
-	else
-		 options->Properties.mBackgroundType = LC_BACKGROUND_SOLID;
-
-	options->Properties.mBackgroundImage = ui->imageNameEdit->text();
-	options->Properties.mBackgroundImageTile = ui->imageTileCheckBox->isChecked();
-	options->SetDefault = ui->setDefaultCheckBox->isChecked();
+	mOptions->Properties.mDescription = ui->DescriptionEdit->text();
+	mOptions->Properties.mAuthor = ui->AuthorEdit->text();
+	mOptions->Properties.mComments = ui->CommentsEdit->toPlainText();
 
 	QDialog::accept();
-}
-
-void lcQPropertiesDialog::colorClicked()
-{
-	QObject *button = sender();
-	QString title;
-	float *color = nullptr;
-
-	if (button == ui->solidColorButton)
-	{
-		color = options->Properties.mBackgroundSolidColor;
-		title = tr("Select Background Color");
-	}
-	else if (button == ui->gradient1ColorButton)
-	{
-		color = options->Properties.mBackgroundGradientColor1;
-		title = tr("Select Background Top Color");
-	}
-	else if (button == ui->gradient2ColorButton)
-	{
-		color = options->Properties.mBackgroundGradientColor2;
-		title = tr("Select Background Bottom Color");
-	}
-
-	if (!color)
-		return;
-
-	QColor oldColor = QColor(color[0] * 255, color[1] * 255, color[2] * 255);
-	QColor newColor = QColorDialog::getColor(oldColor, this, title);
-
-	if (newColor == oldColor || !newColor.isValid())
-		return;
-
-	color[0] = (float)newColor.red() / 255.0f;
-	color[1] = (float)newColor.green() / 255.0f;
-	color[2] = (float)newColor.blue() / 255.0f;
-
-	QPixmap pix(12, 12);
-
-	pix.fill(newColor);
-	((QToolButton*)button)->setIcon(pix);
-}
-
-void lcQPropertiesDialog::on_imageNameButton_clicked()
-{
-	QString result = QFileDialog::getOpenFileName(this, tr("Select Background Image"), ui->imageNameEdit->text(), tr("All Image Files (*.png *.jpg *.gif *.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;GIF Files (*.gif);;BMP Files (*.bmp);;All Files (*.*)"));
-
-	if (!result.isEmpty())
-		ui->imageNameEdit->setText(QDir::toNativeSeparators(result));
 }

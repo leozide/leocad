@@ -1,10 +1,16 @@
-#ifndef _LC_QPROPERTIESDIALOG_H_
-#define _LC_QPROPERTIESDIALOG_H_
+#pragma once
 
-#include <QDialog>
-struct lcPropertiesDialogOptions;
+#include "lc_model.h"
 
-namespace Ui {
+struct lcPropertiesDialogOptions
+{
+	lcModelProperties Properties;
+	lcPartsList PartsList;
+	lcBoundingBox BoundingBox;
+};
+
+namespace Ui
+{
 class lcQPropertiesDialog;
 }
 
@@ -13,18 +19,15 @@ class lcQPropertiesDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit lcQPropertiesDialog(QWidget *parent, void *data);
+	lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options);
 	~lcQPropertiesDialog();
 
-	lcPropertiesDialogOptions *options;
+	lcPropertiesDialogOptions* mOptions;
 
 public slots:
-	void accept();
-	void colorClicked();
-	void on_imageNameButton_clicked();
+	void accept() override;
 
 private:
-	Ui::lcQPropertiesDialog *ui;
+	Ui::lcQPropertiesDialog* ui;
 };
 
-#endif // _LC_QPROPERTIESDIALOG_H_

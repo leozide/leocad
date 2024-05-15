@@ -1,5 +1,4 @@
-#ifndef _LC_CONTEXT_H_
-#define _LC_CONTEXT_H_
+#pragma once
 
 #include "lc_array.h"
 #include "lc_math.h"
@@ -9,7 +8,7 @@
 class lcVertexBuffer
 {
 public:
-	lcVertexBuffer()
+	constexpr lcVertexBuffer()
 		: Pointer(nullptr)
 	{
 	}
@@ -29,7 +28,7 @@ public:
 class lcIndexBuffer
 {
 public:
-	lcIndexBuffer()
+	constexpr lcIndexBuffer()
 		: Pointer(nullptr)
 	{
 	}
@@ -46,23 +45,30 @@ public:
 	};
 };
 
-enum lcMaterialType
+enum class lcMaterialType
 {
-	LC_MATERIAL_UNLIT_COLOR,
-	LC_MATERIAL_UNLIT_TEXTURE_MODULATE,
-	LC_MATERIAL_UNLIT_TEXTURE_DECAL,
-	LC_MATERIAL_UNLIT_VERTEX_COLOR,
-	LC_MATERIAL_FAKELIT_COLOR,
-	LC_MATERIAL_FAKELIT_TEXTURE_DECAL,
-	LC_NUM_MATERIALS
+	UnlitColor,
+	UnlitColorConditional,
+	UnlitTextureModulate,
+	UnlitTextureDecal,
+	UnlitVertexColor,
+	UnlitViewSphere,
+	FakeLitColor,
+	FakeLitTextureDecal,
+	Count
 };
 
-enum lcProgramAttrib
+enum class lcProgramAttrib
 {
-	LC_ATTRIB_POSITION,
-	LC_ATTRIB_NORMAL,
-	LC_ATTRIB_TEXCOORD,
-	LC_ATTRIB_COLOR
+	Position,
+	Normal,
+	TexCoord,
+	Color,
+	ControlPoint1 = 0,
+	ControlPoint2,
+	ControlPoint3,
+	ControlPoint4,
+	Count
 };
 
 struct lcProgram
@@ -73,19 +79,61 @@ struct lcProgram
 	GLint MaterialColorLocation;
 	GLint LightPositionLocation;
 	GLint EyePositionLocation;
+	GLint HighlightParamsLocation;
 };
 
-class lcContext
+enum class lcPolygonOffset
+{
+	None,
+	Opaque,
+	Translucent
+};
+
+enum class lcDepthFunction
+{
+	LessEqual,
+	Always
+};
+
+struct lcVertexAttribState
+{
+	GLint Size = 0;
+	GLenum Type = 0;
+	GLboolean Normalized = 0;
+	bool Enabled = 0;
+	GLsizei Stride = 0;
+	const void* Pointer = nullptr;
+	GLuint VertexBufferObject = 0;
+};
+
+class lcContext : protected QOpenGLFunctions
 {
 public:
 	lcContext();
 	~lcContext();
 
-	static void CreateResources();
-	static void DestroyResources();
+	lcContext(const lcContext&) = delete;
+	lcContext(lcContext&&) = delete;
+	lcContext& operator=(const lcContext&) = delete;
+	lcContext& operator=(lcContext&&) = delete;
+
+	static bool InitializeRenderer();
+	static void ShutdownRenderer();
+	static lcContext* GetGlobalOffscreenContext();
+
+	void CreateResources();
+	void DestroyResources();
 
 	void SetDefaultState();
 	void ClearResources();
+
+	void MakeCurrent();
+
+	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
+	void SetOffscreenContext();
+
+	void ClearColorAndDepth(const lcVector4& ClearColor);
+	void ClearDepth();
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
 	{
@@ -114,9 +162,20 @@ public:
 
 	void SetMaterial(lcMaterialType MaterialType);
 	void SetViewport(int x, int y, int Width, int Height);
+	void SetPolygonOffset(lcPolygonOffset PolygonOffset);
+	void SetDepthWrite(bool Enable);
+	void SetDepthFunction(lcDepthFunction DepthFunction);
+	void EnableDepthTest(bool Enable);
+	void EnableColorWrite(bool Enable);
+	void EnableColorBlend(bool Enable);
+	void EnableCullFace(bool Enable);
 	void SetLineWidth(float LineWidth);
-	void SetSmoothShading(bool Smooth);
-	void BindTexture(GLuint Texture);
+
+	void BindTexture2D(const lcTexture* Texture);
+	void BindTextureCubeMap(const lcTexture* Texture);
+	void ClearTexture2D();
+	void ClearTextureCubeMap();
+	void UploadTexture(lcTexture* Texture);
 
 	void SetColor(const lcVector4& Color)
 	{
@@ -124,16 +183,21 @@ public:
 		mColorDirty = true;
 	}
 
+	void SetHighlightParams(const lcVector4& HighlightPosition, const lcVector4& TextColor, const lcVector4& BackgroundColor, const lcVector4& HighlightColor)
+	{
+		mHighlightParams[0] = HighlightPosition;
+		mHighlightParams[1] = TextColor;
+		mHighlightParams[2] = BackgroundColor;
+		mHighlightParams[3] = HighlightColor;
+		mHighlightParamsDirty = true;
+	}
+
 	void SetColor(float Red, float Green, float Blue, float Alpha);
 	void SetColorIndex(int ColorIndex);
-	void SetColorIndexTinted(int ColorIndex, lcInterfaceColor InterfaceColor);
+	void SetColorIndexTinted(int ColorIndex, const lcVector4& Tint, float Weight);
+	void SetColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 	void SetEdgeColorIndex(int ColorIndex);
-	void SetInterfaceColor(lcInterfaceColor InterfaceColor);
-
-	bool BeginRenderToTexture(int Width, int Height);
-	void EndRenderToTexture();
-	QImage GetRenderToTextureImage(int Width, int Height);
-	bool SaveRenderToTextureImage(const QString& FileName, int Width, int Height);
+	void SetEdgeColorIndexTinted(int ColorIndex, const lcVector4& Tint);
 
 	lcVertexBuffer CreateVertexBuffer(int Size, const void* Data);
 	void DestroyVertexBuffer(lcVertexBuffer& VertexBuffer);
@@ -150,27 +214,48 @@ public:
 
 	void SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals);
 	void SetVertexFormatPosition(int PositionSize);
+	void SetVertexFormatConditional(int BufferOffset);
 	void DrawPrimitives(GLenum Mode, GLint First, GLsizei Count);
 	void DrawIndexedPrimitives(GLenum Mode, GLsizei Count, GLenum Type, int Offset);
 
 	void BindMesh(const lcMesh* Mesh);
 
 protected:
-	static void CreateShaderPrograms();
+	static bool CreateOffscreenContext();
+	static void DestroyOffscreenContext();
+
+	void CreateShaderPrograms();
 	void FlushState();
+
+	void SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenum Type, GLboolean Normalized, GLsizei Stride, const void* Pointer);
+	void EnableVertexAttrib(lcProgramAttrib Attrib);
+	void DisableVertexAttrib(lcProgramAttrib Attrib);
+
+	QOpenGLWidget* mWidget = nullptr;
+	QOpenGLContext* mContext = nullptr;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;
-	char* mVertexBufferPointer;
-	char* mIndexBufferPointer;
-	char* mVertexBufferOffset;
+	const char* mVertexBufferPointer;
+	const char* mIndexBufferPointer;
+	const char* mVertexBufferOffset;
 
 	lcMaterialType mMaterialType;
 	bool mNormalEnabled;
 	bool mTexCoordEnabled;
 	bool mColorEnabled;
 
-	GLuint mTexture;
+	lcVertexAttribState mVertexAttribState[static_cast<int>(lcProgramAttrib::Count)];
+
+	GLuint mTexture2D;
+	GLuint mTextureCubeMap;
+	lcPolygonOffset mPolygonOffset;
+	bool mDepthWrite;
+	lcDepthFunction mDepthFunction;
+	bool mDepthTest;
+	bool mColorWrite;
+	bool mColorBlend;
+	bool mCullFace;
 	float mLineWidth;
 	int mMatrixMode;
 	bool mTextureEnabled;
@@ -180,19 +265,20 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
+	lcVector4 mHighlightParams[4];
 	bool mColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;
 	bool mProjectionMatrixDirty;
 	bool mViewProjectionMatrixDirty;
+	bool mHighlightParamsDirty;
 
-	GLuint mFramebufferObject;
-	GLuint mFramebufferTexture;
-	GLuint mDepthRenderbufferObject;
+	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
+	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
+	static std::unique_ptr<lcContext> mGlobalOffscreenContext;
 
-	static lcProgram mPrograms[LC_NUM_MATERIALS];
+	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };
 
-#endif // _LC_CONTEXT_H_

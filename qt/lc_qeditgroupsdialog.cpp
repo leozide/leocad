@@ -2,16 +2,15 @@
 #include "lc_qeditgroupsdialog.h"
 #include "ui_lc_qeditgroupsdialog.h"
 #include "lc_application.h"
-#include "project.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "group.h"
-#include "lc_basewindow.h"
 
-lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents)
+lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents, lcModel* Model)
 	: QDialog(Parent), mPieceParents(PieceParents), mGroupParents(GroupParents)
 {
 	mLastItemClicked = nullptr;
+	mModel = Model;
 	ui = new Ui::lcQEditGroupsDialog;
 
 	ui->setupUi(this);
@@ -40,7 +39,7 @@ void lcQEditGroupsDialog::accept()
 void lcQEditGroupsDialog::reject()
 {
 	for (int GroupIdx = 0; GroupIdx < mNewGroups.size(); GroupIdx++)
-		lcGetActiveModel()->RemoveGroup(mNewGroups[GroupIdx]);
+		mModel->RemoveGroup(mNewGroups[GroupIdx]);
 
 	QDialog::reject();
 }
@@ -57,13 +56,13 @@ void lcQEditGroupsDialog::on_newGroup_clicked()
 
 	lcGroup* ParentGroup = (lcGroup*)CurrentItem->data(0, GroupRole).value<uintptr_t>();
 
-	lcGroup* NewGroup = lcGetActiveModel()->AddGroup(tr("Group #"), ParentGroup);
+	lcGroup* NewGroup = mModel->AddGroup(tr("Group #"), ParentGroup);
 	mGroupParents[NewGroup] = ParentGroup;
 	mNewGroups.append(NewGroup);
 
 	QTreeWidgetItem* GroupItem = new QTreeWidgetItem(CurrentItem, QStringList(NewGroup->mName));
 	GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-	GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)NewGroup));
+	GroupItem->setData(0, GroupRole, QVariant::fromValue<uintptr_t>((uintptr_t)NewGroup));
 }
 
 void lcQEditGroupsDialog::onItemClicked(QTreeWidgetItem *item, int column)
@@ -148,7 +147,7 @@ void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* Pare
 
 		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 		GroupItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEditable);
-		GroupItem->setData(0, GroupRole, qVariantFromValue<uintptr_t>((uintptr_t)Group));
+		GroupItem->setData(0, GroupRole, QVariant::fromValue<uintptr_t>((uintptr_t)Group));
 
 		AddChildren(GroupItem, Group);
 	}
@@ -163,6 +162,6 @@ void lcQEditGroupsDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* Pare
 
 		QTreeWidgetItem* PieceItem = new QTreeWidgetItem(ParentItem, QStringList(Piece->GetName()));
 		PieceItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
-		PieceItem->setData(0, PieceRole, qVariantFromValue<uintptr_t>((uintptr_t)Piece));
+		PieceItem->setData(0, PieceRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
 	}
 }

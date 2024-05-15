@@ -8,78 +8,176 @@
 #include "object.h"
 
 lcScene::lcScene()
-	: mRenderMeshes(0, 1024), mOpaqueMeshes(0, 1024), mTranslucentMeshes(0, 1024), mInterfaceObjects(0, 1024)
 {
+	mActiveSubmodelInstance = nullptr;
+	mDrawInterface = false;
+	mShadingMode = lcShadingMode::DefaultLights;
+	mAllowLOD = true;
+	mMeshLODDistance = 250.0f;
+	mHasFadedParts = false;
+	mPreTranslucentCallback = nullptr;
 }
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mViewMatrix = ViewMatrix;
-	mRenderMeshes.RemoveAll();
-	mOpaqueMeshes.RemoveAll();
-	mTranslucentMeshes.RemoveAll();
-	mInterfaceObjects.RemoveAll();
-	mHasTexture = false;
+	mActiveSubmodelInstance = nullptr;
+	mPreTranslucentCallback = nullptr;
+	mRenderMeshes.clear();
+	mOpaqueMeshes.clear();
+	mTranslucentMeshes.clear();
+	mInterfaceObjects.clear();
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	mHighlightColor = lcVector4FromColor(Preferences.mHighlightNewPartsColor);
+	mFadeColor = lcVector4FromColor(Preferences.mFadeStepsColor);
+	mHasFadedParts = false;
+	mTranslucentFade = mFadeColor.w != 1.0f;
 }
 
 void lcScene::End()
 {
-	auto OpaqueMeshCompare = [this](int Index1, int Index2)
+	const auto OpaqueMeshCompare = [this](int Index1, int Index2)
 	{
-		return mRenderMeshes[Index1].Mesh <  mRenderMeshes[Index2].Mesh;
+		const lcMesh* Mesh1 = mRenderMeshes[Index1].Mesh;
+		const lcMesh* Mesh2 = mRenderMeshes[Index2].Mesh;
+
+		const int Texture1 = Mesh1->mFlags & lcMeshFlag::HasTexture;
+		const int Texture2 = Mesh2->mFlags & lcMeshFlag::HasTexture;
+
+		if (Texture1 == Texture2)
+			return Mesh1 < Mesh2;
+
+		return Texture1 ? false : true;
 	};
 
-	std::sort(&mOpaqueMeshes[0], &mOpaqueMeshes[0] + mOpaqueMeshes.GetSize(), OpaqueMeshCompare);
+	std::sort(mOpaqueMeshes.begin(), mOpaqueMeshes.end(), OpaqueMeshCompare);
 
-	auto TranslucentMeshCompare = [this](int Index1, int Index2)
+	auto TranslucentMeshCompare = [](const lcTranslucentMeshInstance& Mesh1, const lcTranslucentMeshInstance& Mesh2)
 	{
-		return mRenderMeshes[Index1].Distance <  mRenderMeshes[Index2].Distance;
+		return Mesh1.Distance > Mesh2.Distance;
 	};
 
-	std::sort(&mTranslucentMeshes[0], &mTranslucentMeshes[0] + mTranslucentMeshes.GetSize(), TranslucentMeshCompare);
+	std::sort(mTranslucentMeshes.begin(), mTranslucentMeshes.end(), TranslucentMeshCompare);
 }
 
-void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State, int Flags)
+void lcScene::AddMesh(lcMesh* Mesh, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState State)
 {
-	lcRenderMesh& RenderMesh = mRenderMeshes.Add();
+	lcRenderMesh& RenderMesh = mRenderMeshes.emplace_back();
 
 	RenderMesh.WorldMatrix = WorldMatrix;
 	RenderMesh.Mesh = Mesh;
 	RenderMesh.ColorIndex = ColorIndex;
 	RenderMesh.State = State;
-	RenderMesh.Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z);
-	RenderMesh.LodIndex = RenderMesh.Mesh->GetLodIndex(RenderMesh.Distance);
+	const float Distance = fabsf(lcMul31(WorldMatrix[3], mViewMatrix).z) - mMeshLODDistance;
+	RenderMesh.LodIndex = mAllowLOD ? RenderMesh.Mesh->GetLodIndex(Distance) : LC_MESH_LOD_HIGH;
 
-	bool Translucent = lcIsColorTranslucent(ColorIndex);
+	const bool ForceTranslucent = (mTranslucentFade && State == lcRenderMeshState::Faded);
+	const bool Translucent = lcIsColorTranslucent(ColorIndex) || ForceTranslucent;
+	const lcMeshFlags Flags = Mesh->mFlags;
+	mHasFadedParts |= State == lcRenderMeshState::Faded;
 
-	if ((Flags & (LC_PIECE_HAS_SOLID | LC_PIECE_HAS_LINES)) || ((Flags & LC_PIECE_HAS_DEFAULT) && !Translucent))
-		mOpaqueMeshes.Add(mRenderMeshes.GetSize() - 1);
+	if ((Flags & (lcMeshFlag::HasSolid | lcMeshFlag::HasLines)) || ((Flags & lcMeshFlag::HasDefault) && !Translucent))
+		mOpaqueMeshes.emplace_back(static_cast<int>(mRenderMeshes.size()) - 1);
 
-	if ((Flags & LC_PIECE_HAS_TRANSLUCENT) || ((Flags & LC_PIECE_HAS_DEFAULT) && Translucent))
-		mTranslucentMeshes.Add(mRenderMeshes.GetSize() - 1);
+	if ((Flags & lcMeshFlag::HasTranslucent) || ((Flags & lcMeshFlag::HasDefault) && Translucent))
+	{
+		const lcMeshLod& Lod = Mesh->mLods[RenderMesh.LodIndex];
 
-	if (Flags & LC_PIECE_HAS_TEXTURE)
-		mHasTexture = true;
+		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
+		{
+			const lcMeshSection* Section = &Lod.Sections[SectionIdx];
+
+			if ((Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES)) == 0)
+				continue;
+
+			int SectionColorIndex = Section->ColorIndex;
+
+			if (SectionColorIndex == gDefaultColor)
+				SectionColorIndex = RenderMesh.ColorIndex;
+
+			if (!lcIsColorTranslucent(SectionColorIndex) && !ForceTranslucent)
+				continue;
+
+			const lcVector3 Center = (Section->BoundingBox.Min + Section->BoundingBox.Max) / 2;
+			const float InstanceDistance = fabsf(lcMul31(lcMul31(Center, WorldMatrix), mViewMatrix).z);
+
+			lcTranslucentMeshInstance& Instance = mTranslucentMeshes.emplace_back();
+			Instance.Section = Section;
+			Instance.Distance = InstanceDistance;
+			Instance.RenderMeshIndex = static_cast<int>(mRenderMeshes.size()) - 1;
+		}
+	}
 }
 
-void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool EnableNormals, bool DrawTranslucent, bool DrawTextured) const
+void lcScene::DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const
 {
-	const lcArray<int>& Meshes = DrawTranslucent ? mTranslucentMeshes : mOpaqueMeshes;
+	const lcVertex* const VertexBuffer = Mesh->GetVertexData();
+	const lcVertexTextured* const TexturedVertexBuffer = Mesh->GetTexturedVertexData();
+	lcVector3* const Vertices = (lcVector3*)malloc((Mesh->mNumVertices + Mesh->mNumTexturedVertices) * 2 * sizeof(lcVector3));
 
-	for (int MeshIndex : Meshes)
+	for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+	{
+		Vertices[VertexIdx * 2] = VertexBuffer[VertexIdx].Position;
+		Vertices[VertexIdx * 2 + 1] = VertexBuffer[VertexIdx].Position + lcUnpackNormal(VertexBuffer[VertexIdx].Normal);
+	}
+
+	for (int VertexIdx = 0; VertexIdx < Mesh->mNumTexturedVertices; VertexIdx++)
+	{
+		Vertices[(Mesh->mNumVertices + VertexIdx) * 2] = TexturedVertexBuffer[VertexIdx].Position;
+		Vertices[(Mesh->mNumVertices + VertexIdx) * 2 + 1] = TexturedVertexBuffer[VertexIdx].Position + lcUnpackNormal(TexturedVertexBuffer[VertexIdx].Normal);
+	}
+
+	Context->SetVertexBufferPointer(Vertices);
+	Context->SetVertexFormatPosition(3);
+	Context->DrawPrimitives(GL_LINES, 0, (Mesh->mNumVertices + Mesh->mNumTexturedVertices) * 2);
+	free(Vertices);
+}
+
+void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes, bool DrawFaded, bool DrawNonFaded) const
+{
+	if (mOpaqueMeshes.empty())
+		return;
+
+	lcMaterialType FlatMaterial, TexturedMaterial;
+
+	if (DrawLit)
+	{
+		FlatMaterial = lcMaterialType::FakeLitColor;
+		TexturedMaterial = lcMaterialType::FakeLitTextureDecal;
+	}
+	else
+	{
+		FlatMaterial = lcMaterialType::UnlitColor;
+		TexturedMaterial = lcMaterialType::UnlitTextureDecal;
+	}
+
+	Context->SetPolygonOffset(lcPolygonOffset::Opaque);
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);
+	const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
+
+	for (const int MeshIndex : mOpaqueMeshes)
 	{
 		const lcRenderMesh& RenderMesh = mRenderMeshes[MeshIndex];
 		const lcMesh* Mesh = RenderMesh.Mesh;
-		int LodIndex = RenderMesh.LodIndex;
+		const int LodIndex = RenderMesh.LodIndex;
+
+		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
+			continue;
+
+		if (!DrawNonFaded && RenderMesh.State != lcRenderMeshState::Faded)
+			continue;
 
 		Context->BindMesh(Mesh);
 		Context->SetWorldMatrix(RenderMesh.WorldMatrix);
 
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LodIndex].NumSections; SectionIdx++)
 		{
-			lcMeshSection* Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
+			const lcMeshSection* const Section = &Mesh->mLods[LodIndex].Sections[SectionIdx];
 
-			if ((Section->PrimitiveType & PrimitiveTypes) == 0 || (Section->Texture != nullptr) != DrawTextured)
+			if ((Section->PrimitiveType & PrimitiveTypes) == 0)
 				continue;
 
 			int ColorIndex = Section->ColorIndex;
@@ -89,248 +187,339 @@ void lcScene::DrawRenderMeshes(lcContext* Context, int PrimitiveTypes, bool Enab
 				if (ColorIndex == gDefaultColor)
 					ColorIndex = RenderMesh.ColorIndex;
 
-				if (lcIsColorTranslucent(ColorIndex) != DrawTranslucent)
+				if (lcIsColorTranslucent(ColorIndex))
 					continue;
 
 				switch (RenderMesh.State)
 				{
-				case LC_RENDERMESH_NONE:
-				case LC_RENDERMESH_HIGHLIGHT:
+				case lcRenderMeshState::Default:
+				case lcRenderMeshState::Highlighted:
 					Context->SetColorIndex(ColorIndex);
 					break;
 
-				case LC_RENDERMESH_SELECTED:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_SELECTED);
+				case lcRenderMeshState::Selected:
+					Context->SetColorIndexTinted(ColorIndex, SelectedColor, 0.5f);
 					break;
 
-				case LC_RENDERMESH_FOCUSED:
-					Context->SetColorIndexTinted(ColorIndex, LC_COLOR_FOCUSED);
+				case lcRenderMeshState::Focused:
+					Context->SetColorIndexTinted(ColorIndex, FocusedColor, 0.5f);
+					break;
+
+				case lcRenderMeshState::Faded:
+					if (mTranslucentFade)
+						continue;
+					Context->SetColorIndexTinted(ColorIndex, mFadeColor);
 					break;
 				}
 			}
-			else if (Section->PrimitiveType & (LC_MESH_LINES | LC_MESH_TEXTURED_LINES))
+			else if (Section->PrimitiveType & (LC_MESH_LINES | LC_MESH_CONDITIONAL_LINES))
 			{
 				switch (RenderMesh.State)
 				{
-				case LC_RENDERMESH_NONE:
-					if (ColorIndex == gEdgeColor)
-						Context->SetEdgeColorIndex(RenderMesh.ColorIndex);
+				case lcRenderMeshState::Default:
+					if (mShadingMode != lcShadingMode::Wireframe)
+					{
+						if (ColorIndex != gEdgeColor)
+							Context->SetColorIndex(ColorIndex);
+						else
+							Context->SetEdgeColorIndex(RenderMesh.ColorIndex);
+					}
 					else
+					{
+						if (ColorIndex == gEdgeColor)
+							ColorIndex = RenderMesh.ColorIndex;
+
 						Context->SetColorIndex(ColorIndex);
+					}
 					break;
 
-				case LC_RENDERMESH_SELECTED:
-					Context->SetInterfaceColor(LC_COLOR_SELECTED);
+				case lcRenderMeshState::Selected:
+					Context->SetColor(SelectedColor);
 					break;
 
-				case LC_RENDERMESH_FOCUSED:
-					Context->SetInterfaceColor(LC_COLOR_FOCUSED);
+				case lcRenderMeshState::Focused:
+					Context->SetColor(FocusedColor);
 					break;
 
-				case LC_RENDERMESH_HIGHLIGHT:
-					Context->SetInterfaceColor(LC_COLOR_HIGHLIGHT);
+				case lcRenderMeshState::Highlighted:
+					Context->SetColor(mHighlightColor);
 					break;
+
+				case lcRenderMeshState::Faded:
+					Context->SetEdgeColorIndexTinted(ColorIndex, mFadeColor);
+					break;
+				}
+
+				if (Section->PrimitiveType == LC_MESH_CONDITIONAL_LINES)
+				{
+					int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
+					VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured);
+					const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
+
+					Context->SetMaterial(lcMaterialType::UnlitColorConditional);
+					Context->SetVertexFormatConditional(VertexBufferOffset);
+
+					Context->DrawIndexedPrimitives(GL_LINES, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+
+					continue;
 				}
 			}
-			else if (Section->PrimitiveType == LC_MESH_CONDITIONAL_LINES)
-			{
-				lcMatrix44 WorldViewProjectionMatrix = lcMul(RenderMesh.WorldMatrix, lcMul(mViewMatrix, Context->GetProjectionMatrix()));
-				lcVertex* VertexBuffer = (lcVertex*)Mesh->mVertexData;
-				int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-				int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
-
-				if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-				{
-					lcuint16* Indices = (lcuint16*)((char*)Mesh->mIndexData + Section->IndexOffset);
-
-					for (int i = 0; i < Section->NumIndices; i += 4)
-					{
-						lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
-						lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
-						lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
-						lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
-
-						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint16));
-					}
-				}
-				else
-				{
-					lcuint32* Indices = (lcuint32*)((char*)Mesh->mIndexData + Section->IndexOffset);
-
-					for (int i = 0; i < Section->NumIndices; i += 4)
-					{
-						lcVector3 p1 = lcMul31(VertexBuffer[Indices[i + 0]].Position, WorldViewProjectionMatrix);
-						lcVector3 p2 = lcMul31(VertexBuffer[Indices[i + 1]].Position, WorldViewProjectionMatrix);
-						lcVector3 p3 = lcMul31(VertexBuffer[Indices[i + 2]].Position, WorldViewProjectionMatrix);
-						lcVector3 p4 = lcMul31(VertexBuffer[Indices[i + 3]].Position, WorldViewProjectionMatrix);
-
-						if (((p1.y - p2.y) * (p3.x - p1.x) + (p2.x - p1.x) * (p3.y - p1.y)) * ((p1.y - p2.y) * (p4.x - p1.x) + (p2.x - p1.x) * (p4.y - p1.y)) >= 0)
-							Context->DrawIndexedPrimitives(GL_LINES, 2, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset + i * sizeof(lcuint32));
-					}
-				}
-
-				continue;
-			}
-
-			lcTexture* Texture = Section->Texture;
 			int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
-			int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
+			const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 
-			if (!Texture)
+			if (Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 			{
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, EnableNormals);
+				Context->SetMaterial(FlatMaterial);
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, DrawLit);
 			}
 			else
 			{
+				lcTexture* const Texture = Section->Texture;
+
+				if (Texture)
+				{
+					if (Texture->NeedsUpload())
+						Texture->Upload(Context);
+
+					Context->SetMaterial(TexturedMaterial);
+					Context->BindTexture2D(Texture);
+				}
+				else
+				{
+					Context->SetMaterial(FlatMaterial);
+				}
+
 				VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
-				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, EnableNormals);
-				Context->BindTexture(Texture->mTexture);
+				Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, DrawLit);
 			}
 
-			GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+			const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
 			Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
 		}
 
-#ifdef QT_DEBUG
-		const bool DrawNormals = false;
-
-		if (DrawNormals)
-		{
-			lcVertex* VertexBuffer = (lcVertex*)Mesh->mVertexData;
-			lcVector3* Vertices = (lcVector3*)malloc(Mesh->mNumVertices * 2 * sizeof(lcVector3));
-
-			for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
-			{
-				Vertices[VertexIdx * 2] = VertexBuffer[VertexIdx].Position;
-				Vertices[VertexIdx * 2 + 1] = VertexBuffer[VertexIdx].Position + lcUnpackNormal(VertexBuffer[VertexIdx].Normal);
-			}
-
-			Context->SetVertexBufferPointer(Vertices);
-			Context->SetVertexFormatPosition(3);
-			Context->DrawPrimitives(GL_LINES, 0, Mesh->mNumVertices * 2);
-			free(Vertices);
-		}
+#ifdef LC_DEBUG_NORMALS
+		DrawDebugNormals(Context, Mesh);
 #endif
 	}
+
+	Context->ClearTexture2D();
+	Context->SetPolygonOffset(lcPolygonOffset::None);
+}
+
+void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawFadePrepass, bool DrawFaded, bool DrawNonFaded) const
+{
+	if (mTranslucentMeshes.empty())
+		return;
+
+	lcMaterialType FlatMaterial, TexturedMaterial;
+
+	if (DrawLit)
+	{
+		FlatMaterial = lcMaterialType::FakeLitColor;
+		TexturedMaterial = lcMaterialType::FakeLitTextureDecal;
+	}
+	else
+	{
+		FlatMaterial = lcMaterialType::UnlitColor;
+		TexturedMaterial = lcMaterialType::UnlitTextureDecal;
+	}
+
+	if (!DrawFadePrepass)
+	{
+		Context->EnableColorBlend(true);
+		Context->SetDepthWrite(false);
+	}
+	else
+		Context->EnableColorWrite(false);
+
+	Context->SetPolygonOffset(lcPolygonOffset::Translucent);
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);
+	const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
+
+	for (const lcTranslucentMeshInstance& MeshInstance : mTranslucentMeshes)
+	{
+		const lcRenderMesh& RenderMesh = mRenderMeshes[MeshInstance.RenderMeshIndex];
+		const lcMesh* Mesh = RenderMesh.Mesh;
+
+		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
+			continue;
+
+		if (!DrawNonFaded && RenderMesh.State != lcRenderMeshState::Faded)
+			continue;
+
+		Context->BindMesh(Mesh);
+		Context->SetWorldMatrix(RenderMesh.WorldMatrix);
+
+		const lcMeshSection* Section = MeshInstance.Section;
+
+		int ColorIndex = Section->ColorIndex;
+
+		if (ColorIndex == gDefaultColor)
+			ColorIndex = RenderMesh.ColorIndex;
+
+		if (DrawFadePrepass && lcIsColorTranslucent(ColorIndex))
+			continue;
+
+		switch (RenderMesh.State)
+		{
+		case lcRenderMeshState::Default:
+		case lcRenderMeshState::Highlighted:
+			Context->SetColorIndex(ColorIndex);
+			break;
+
+		case lcRenderMeshState::Selected:
+			Context->SetColorIndexTinted(ColorIndex, SelectedColor, 0.5f);
+			break;
+
+		case lcRenderMeshState::Focused:
+			Context->SetColorIndexTinted(ColorIndex, FocusedColor, 0.5f);
+			break;
+
+		case lcRenderMeshState::Faded:
+			Context->SetColorIndexTinted(ColorIndex, mFadeColor);
+			break;
+		}
+
+		lcTexture* const Texture = Section->Texture;
+		int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
+		const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
+
+		if (!Texture)
+		{
+			Context->SetMaterial(FlatMaterial);
+			Context->SetVertexFormat(VertexBufferOffset, 3, 1, 0, 0, DrawLit);
+		}
+		else
+		{
+			if (Texture->NeedsUpload())
+				Texture->Upload(Context);
+			Context->SetMaterial(TexturedMaterial);
+			VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex);
+			Context->SetVertexFormat(VertexBufferOffset, 3, 1, 2, 0, DrawLit);
+			Context->BindTexture2D(Texture);
+		}
+
+		const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
+		Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+
+#ifdef LC_DEBUG_NORMALS
+		DrawDebugNormals(Context, Mesh);
+#endif
+	}
+
+	Context->ClearTexture2D();
+	Context->SetPolygonOffset(lcPolygonOffset::None);
+
+	if (!DrawFadePrepass)
+	{
+		Context->SetDepthWrite(true);
+		Context->EnableColorBlend(false);
+	}
+	else
+		Context->EnableColorWrite(true);
 }
 
 void lcScene::Draw(lcContext* Context) const
 {
-	lcGetPiecesLibrary()->UpdateBuffers(Context); // TODO: find a better place for this update
+	// TODO: find a better place for these updates
+	lcGetPiecesLibrary()->UpdateBuffers(Context);
 
 	Context->SetViewMatrix(mViewMatrix);
 
-	const bool DrawConditional = false;
+	const lcPreferences& Preferences = lcGetPreferences();
+	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth > 0.0f;
+	const bool DrawConditional = Preferences.mDrawConditionalLines && Preferences.mLineWidth > 0.0f;
 
-	if (lcGetPreferences().mLightingMode == LC_LIGHTING_UNLIT)
+//	lcShadingMode ShadingMode = Preferences.mShadingMode;
+//	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
+//		ShadingMode = lcShadingMode::Flat;
+
+	if (mShadingMode == lcShadingMode::Wireframe)
 	{
-		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
-		Context->BindTexture(0);
+		DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, true);
 
-		Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
+		if (DrawConditional)
+			DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
-		int UntexturedPrimitives = LC_MESH_TRIANGLES;
+		if (mPreTranslucentCallback)
+			mPreTranslucentCallback();
+	}
+	else if (mShadingMode == lcShadingMode::Flat)
+	{
+		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES | (DrawLines ? LC_MESH_LINES : 0);
 
-		if (DrawLines)
+		if (mTranslucentFade && mHasFadedParts)
 		{
-			UntexturedPrimitives |= LC_MESH_LINES;
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes, false, true);
 
-			if (DrawConditional)
-				UntexturedPrimitives |= LC_MESH_CONDITIONAL_LINES;
-		}
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
 
-		DrawRenderMeshes(Context, UntexturedPrimitives, false, false, false);
-
-		if (!mTranslucentMeshes.IsEmpty())
-		{
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, false, true, false);
-
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
-
-		if (mHasTexture)
-		{
-			Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
+			DrawTranslucentMeshes(Context, false, true, true, false);
 
 			if (DrawLines)
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES | LC_MESH_TEXTURED_TRIANGLES, false, false, false);
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, false);
 
-			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, false, true);
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, false);
 
-			if (!mTranslucentMeshes.IsEmpty())
-			{
-				glEnable(GL_BLEND); // todo: remove GL calls
-				glDepthMask(GL_FALSE);
+			DrawTranslucentMeshes(Context, false, false, true, true);
+		}
+		else
+		{
+			DrawOpaqueMeshes(Context, false, SolidPrimitiveTypes, true, true);
 
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, false, true, true);
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
-				glDepthMask(GL_TRUE);
-				glDisable(GL_BLEND);
-			}
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
 
-			Context->BindTexture(0);
+			DrawTranslucentMeshes(Context, false, false, true, true);
 		}
 	}
 	else
 	{
-		bool DrawLines = lcGetPreferences().mDrawEdgeLines;
-		Context->BindTexture(0);
-
-		if (DrawLines)
+		if (mTranslucentFade && mHasFadedParts)
 		{
-			int LinePrimitives = LC_MESH_LINES;
+			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, false, true);
+
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, false, true);
 
 			if (DrawConditional)
-				LinePrimitives |= LC_MESH_CONDITIONAL_LINES;
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, false, true);
 
-			Context->SetMaterial(LC_MATERIAL_UNLIT_COLOR);
-			DrawRenderMeshes(Context, LinePrimitives, false, false, false);
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
+
+			DrawTranslucentMeshes(Context, false, true, true, false);
+
+			if (DrawLines)
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, false);
+
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, false);
+
+			DrawTranslucentMeshes(Context, true, false, true, true);
 		}
-
-		Context->SetMaterial(LC_MATERIAL_FAKELIT_COLOR);
-		DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, false, false);
-
-		if (!mTranslucentMeshes.IsEmpty())
-		{
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-
-			DrawRenderMeshes(Context, LC_MESH_TRIANGLES, true, true, false);
-
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
-		}
-
-		if (mHasTexture)
+		else
 		{
 			if (DrawLines)
-			{
-				Context->SetMaterial(LC_MATERIAL_UNLIT_TEXTURE_DECAL);
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_LINES, false, false, true);
-			}
+				DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, true);
 
-			Context->SetMaterial(LC_MATERIAL_FAKELIT_TEXTURE_DECAL);
-			DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, false, true);
+			if (DrawConditional)
+				DrawOpaqueMeshes(Context, false, LC_MESH_CONDITIONAL_LINES, true, true);
 
-			if (!mTranslucentMeshes.IsEmpty())
-			{
-				glEnable(GL_BLEND);
-				glDepthMask(GL_FALSE);
+			DrawOpaqueMeshes(Context, true, LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES, true, true);
 
-				DrawRenderMeshes(Context, LC_MESH_TEXTURED_TRIANGLES, true, true, true);
+			if (mPreTranslucentCallback)
+				mPreTranslucentCallback();
 
-				glDepthMask(GL_TRUE);
-				glDisable(GL_BLEND);
-			}
-
-			Context->BindTexture(0);
+			DrawTranslucentMeshes(Context, true, false, true, true);
 		}
 	}
 }
@@ -338,5 +527,5 @@ void lcScene::Draw(lcContext* Context) const
 void lcScene::DrawInterfaceObjects(lcContext* Context) const
 {
 	for (const lcObject* Object : mInterfaceObjects)
-		Object->DrawInterface(Context);
+		Object->DrawInterface(Context, *this);
 }

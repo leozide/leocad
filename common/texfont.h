@@ -1,26 +1,25 @@
-#ifndef _TEXFONT_H_
-#define _TEXFONT_H_
+#pragma once
 
 class TexFont
 {
 public:
 	TexFont();
-	~TexFont();
 
 	bool IsLoaded() const
 	{
-		return mTexture != 0;
+		return mTexture != nullptr;
 	}
 
-	GLuint GetTexture() const
+	lcTexture* GetTexture() const
 	{
 		return mTexture;
 	}
 
-	bool Load(lcContext* Context);
-	void Release();
+	bool Initialize(lcContext* Context);
+	void Reset();
 
 	void PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const;
+	void GetTriangles(const lcMatrix44& Transform, const char* Text, float* Buffer) const;
 	void GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const;
 	void GetStringDimensions(int* cx, int* cy, const char* Text) const;
 
@@ -31,13 +30,11 @@ protected:
 		float left, right, top, bottom;
 	} mGlyphs[256];
 
-	GLuint mTexture;
+	lcTexture* mTexture = nullptr;
 	int mTextureWidth;
 	int mTextureHeight;
 	int mFontHeight;
-	int mRefCount;
 };
 
 extern TexFont gTexFont;
 
-#endif // _TEXFONT_H_

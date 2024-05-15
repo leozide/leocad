@@ -16,15 +16,10 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 		Data = File.readAll();
 	else
 	{
-		QResource Resource(":/resources/ldraw.xml");
+		QFile DefaultFile(":/resources/ldraw.xml");
 
-		if (Resource.isValid())
-		{
-			if (Resource.isCompressed())
-				Data = qUncompress(Resource.data(), Resource.size());
-			else
-				Data = QByteArray::fromRawData((const char*)Resource.data(), Resource.size());
-		}
+		if (DefaultFile.open(QIODevice::ReadOnly))
+			Data = DefaultFile.readAll();
 	}
 
 	if (Data.isEmpty())
@@ -51,16 +46,14 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 		}
 		else if (ElementName == QLatin1String("Brick"))
 		{
-			QString LDrawID = Element.attribute(QLatin1String("ldraw")).toUpper();
-			LDrawID.chop(4);
+			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
 			int LegoID = Element.attribute(QLatin1String("lego")).toInt();
 
-			BrickTable.emplace(std::make_pair(LegoID, std::move(LDrawID.toStdString())));
+			BrickTable.insert(std::make_pair(LegoID, LDrawID.toStdString()));
 		}
 		else if (ElementName == QLatin1String("Transformation"))
 		{
-			QString LDrawID = Element.attribute(QLatin1String("ldraw")).toUpper();
-			LDrawID.chop(4);
+			QString LDrawID = Element.attribute(QLatin1String("ldraw"));
 
 			lcVector3 Translation;
 			lcVector4 AxisAngle;
@@ -73,14 +66,14 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 			AxisAngle[2] = Element.attribute(QLatin1String("az")).toFloat();
 			AxisAngle[3] = Element.attribute(QLatin1String("angle")).toFloat();
 
-			TransformTable.emplace(std::make_pair(std::move(LDrawID.toStdString()), std::make_pair(Translation, AxisAngle)));
+			TransformTable.insert(std::make_pair(LDrawID.toStdString(), std::make_pair(Translation, AxisAngle)));
 		}
 	}
 
 	return true;
 }
 
-bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArray<lcArray<lcPiece*>>& Groups)
+bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, std::vector<std::vector<lcPiece*>>& Groups)
 {
 	std::map<int, int> MaterialTable;
 	std::map<int, std::string> BrickTable;
@@ -163,14 +156,14 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 				if (BrickIt != BrickTable.end())
 					Info = lcGetPiecesLibrary()->FindPiece(BrickIt->second.c_str(), nullptr, true, false);
 				else
-					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1(), nullptr, true, false);
+					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1() + ".dat", nullptr, true, false);
 
 				const auto ColorIt = MaterialTable.find(Material);
 				int ColorCode = 16;
 				if (ColorIt != MaterialTable.end())
 					ColorCode = ColorIt->second;
 
-				const auto TransformIt = TransformTable.find(BrickIt != BrickTable.end() ? BrickIt->second : LegoID.toStdString());
+				const auto TransformIt = TransformTable.find(BrickIt != BrickTable.end() ? BrickIt->second : (LegoID.toStdString() + ".dat"));
 				if (TransformIt != TransformTable.end())
 				{
 					const lcVector4& AxisAngle = TransformIt->second.second;
@@ -186,19 +179,19 @@ bool lcImportLXFMLFile(const QString& FileData, lcArray<lcPiece*>& Pieces, lcArr
 										 lcVector4(-WorldMatrix[2][0], WorldMatrix[2][1], WorldMatrix[2][2], 0.0f), lcVector4(WorldMatrix[3][0] * 25.0f, -WorldMatrix[3][1] * 25.0f, -WorldMatrix[3][2] * 25.0f, 1.0f));
 
 				lcPiece* Piece = new lcPiece(nullptr);
-				Piece->SetPieceInfo(Info, false);
+				Piece->SetPieceInfo(Info, QString(), false);
 				Piece->Initialize(lcMatrix44LDrawToLeoCAD(WorldMatrix), 1);
 				Piece->SetColorCode(ColorCode);
-				Pieces.Add(Piece);
+				Pieces.push_back(Piece);
 				NumBrickPieces++;
 			}
 		
 			if (NumBrickPieces > 1)
 			{
-				lcArray<lcPiece*> Group;
-				for (int PieceIdx = Pieces.GetSize() - NumBrickPieces; PieceIdx < Pieces.GetSize(); PieceIdx++)
-					Group.Add(Pieces[PieceIdx]);
-				Groups.Add(Group);
+				std::vector<lcPiece*> Group;
+				for (size_t PieceIdx = Pieces.size() - NumBrickPieces; PieceIdx < Pieces.size(); PieceIdx++)
+					Group.push_back(Pieces[PieceIdx]);
+				Groups.push_back(Group);
 			}
 		}
 	}

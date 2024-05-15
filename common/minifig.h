@@ -1,9 +1,6 @@
-#ifndef _MINIFIG_H_
-#define _MINIFIG_H_
+#pragma once
 
-#include "lc_glwidget.h"
 #include "lc_math.h"
-#include "lc_array.h"
 
 enum LC_MFW_TYPES
 {
@@ -42,20 +39,40 @@ struct lcMinifig
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
 };
 
-class MinifigWizard : public lcGLWidget
+struct lcMinifigTemplate
+{
+	QString Parts[LC_MFW_NUMITEMS];
+	int Colors[LC_MFW_NUMITEMS];
+	float Angles[LC_MFW_NUMITEMS];
+};
+
+class MinifigWizard
 {
 public:
 	MinifigWizard();
 	~MinifigWizard();
 
-	void OnDraw();
-	void OnLeftButtonDown();
-	void OnLeftButtonUp();
-	void OnLeftButtonDoubleClick();
-	void OnRightButtonDown();
-	void OnRightButtonUp();
-	void OnMouseMove();
-	void OnInitialUpdate();
+	MinifigWizard(const MinifigWizard&) = delete;
+	MinifigWizard(MinifigWizard&&) = delete;
+	MinifigWizard& operator=(const MinifigWizard&) = delete;
+	MinifigWizard& operator=(MinifigWizard&&) = delete;
+
+	lcModel* GetModel() const
+	{
+		return mModel.get();
+	}
+
+	const std::map<QString, lcMinifigTemplate>& GetTemplates() const
+	{
+		return mTemplates;
+	}
+
+	void SaveTemplate(const QString& TemplateName, const lcMinifigTemplate& Template);
+	void DeleteTemplate(const QString& TemplateName);
+	void AddTemplatesJson(const QByteArray& TemplateData);
+	QByteArray GetTemplatesJson() const;
+
+	void LoadDefault();
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;
@@ -63,20 +80,19 @@ public:
 	void SetColor(int Type, int Color);
 	void SetAngle(int Type, float Angle);
 
-	void ParseSettings(lcFile& Settings);
-
-	lcArray<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
+	std::vector<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];
 
 	lcMinifig mMinifig;
 
-	int mTracking;
-	int mDownX;
-	int mDownY;
+protected:
+	void LoadSettings();
+	void ParseSettings(lcFile& Settings);
 
-	float mDistance;
-	float mRotateX;
-	float mRotateZ;
-	bool mAutoZoom;
+	void LoadTemplates();
+	void SaveTemplates();
+
+	std::unique_ptr<lcModel> mModel;
+	std::map<QString, lcMinifigTemplate> mTemplates;
+	static const char* mSectionNames[LC_MFW_NUMITEMS];
 };
 
-#endif // _MINIFIG_H_

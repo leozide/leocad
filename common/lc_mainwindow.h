@@ -1,33 +1,38 @@
-#ifndef _LC_MAINWINDOW_H_
-#define _LC_MAINWINDOW_H_
+#pragma once
 
-#include "lc_basewindow.h"
+#include "lc_application.h"
+#include "lc_shortcuts.h"
 #include "lc_array.h"
 #include "lc_commands.h"
 #include "lc_model.h"
 
-class View;
 class lcPartSelectionWidget;
+class lcPreviewDockWidget;
 class PiecePreview;
-class lcQGLWidget;
 class lcQPartsTree;
-class lcQColorList;
-class lcQPropertiesTree;
+class lcColorList;
+class lcPropertiesWidget;
 class lcTimelineWidget;
+class lcElidedLabel;
 #ifdef QT_NO_PRINTER
 class QPrinter;
 #endif
 
 #define LC_MAX_RECENT_FILES 4
 
-struct lcSearchOptions
+class lcTabBar : public QTabBar
 {
-	bool MatchInfo;
-	bool MatchColor;
-	bool MatchName;
-	PieceInfo* Info;
-	int ColorIndex;
-	char Name[256];
+public:
+	lcTabBar(QWidget* Parent = nullptr)
+		: QTabBar(Parent), mMousePressTab(-1)
+	{
+	}
+
+protected:
+	void mousePressEvent(QMouseEvent* Event) override;
+	void mouseReleaseEvent(QMouseEvent* Event) override;
+
+	int mMousePressTab;
 };
 
 class lcModelTabWidget : public QWidget
@@ -41,9 +46,6 @@ public:
 		mActiveView = nullptr;
 	}
 
-	void ResetLayout();
-	void Clear();
-
 	QWidget* GetAnyViewWidget()
 	{
 		QWidget* Widget = layout()->itemAt(0)->widget();
@@ -54,27 +56,20 @@ public:
 		return Widget;
 	}
 
-	View* GetActiveView() const
+	lcView* GetActiveView() const
 	{
 		return mActiveView;
 	}
 
-	void SetActiveView(View* ActiveView)
+	void SetActiveView(lcView* ActiveView)
 	{
 		mActiveView = ActiveView;
 	}
 
-	void AddView(View* View)
-	{
-		mViews.Add(View);
-	}
-
-	void RemoveView(View* View)
+	void RemoveView(const lcView* View)
 	{
 		if (View == mActiveView)
 			mActiveView = nullptr;
-
-		mViews.Remove(View);
 	}
 
 	lcModel* GetModel() const
@@ -82,20 +77,9 @@ public:
 		return mModel;
 	}
 
-	void SetModel(lcModel* Model)
-	{
-		mModel = Model;
-	}
-
-	const lcArray<View*>* GetViews() const
-	{
-		return &mViews;
-	}
-
 protected:
 	lcModel* mModel;
-	View* mActiveView;
-	lcArray<View*> mViews;
+	lcView* mActiveView;
 };
 
 class lcMainWindow : public QMainWindow
@@ -135,9 +119,9 @@ public:
 		return mMoveSnapEnabled ? SnapZTable[mMoveZSnapIndex] : 0.0f;
 	}
 
-	int GetAngleSnap() const
+	float GetAngleSnap() const
 	{
-		const int AngleTable[] = { 0, 1, 5, 10, 15, 30, 45, 60, 90, 180 };
+		const float AngleTable[] = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f, 180.0f };
 		return mAngleSnapEnabled ? AngleTable[mAngleSnapIndex] : 0.0f;
 	}
 
@@ -158,24 +142,19 @@ public:
 		return mAngleSnapEnabled ? QString::number(GetAngleSnap()) : tr("None");
 	}
 
-	bool GetLockX() const
-	{
-		return mLockX;
-	}
-
-	bool GetLockY() const
-	{
-		return mLockY;
-	}
-
-	bool GetLockZ() const
-	{
-		return mLockZ;
-	}
-
 	bool GetRelativeTransform() const
 	{
 		return mRelativeTransform;
+	}
+
+	bool GetSeparateTransform() const
+	{
+		return mLocalTransform;
+	}
+
+	lcSelectionMode GetSelectionMode() const
+	{
+		return mSelectionMode;
 	}
 
 	PieceInfo* GetCurrentPieceInfo() const
@@ -183,30 +162,19 @@ public:
 		return mCurrentPieceInfo;
 	}
 
-	View* GetActiveView() const
+	lcView* GetActiveView() const
 	{
-		lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+		const lcModelTabWidget* const CurrentTab = mModelTabWidget ? (lcModelTabWidget*)mModelTabWidget->currentWidget() : nullptr;
 		return CurrentTab ? CurrentTab->GetActiveView() : nullptr;
 	}
 
-	const lcArray<View*>* GetViewsForModel(lcModel* Model) const
+	lcModel* GetActiveModel() const;
+	lcModelTabWidget* GetTabForView(lcView* View) const;
+
+	lcModel* GetCurrentTabModel() const
 	{
-		lcModelTabWidget* TabWidget = GetTabWidgetForModel(Model);
-		return TabWidget ? TabWidget->GetViews() : nullptr;
-	}
-
-	lcModelTabWidget* GetTabForView(View* View) const
-	{
-		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
-		{
-			lcModelTabWidget* TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(TabIdx);
-
-			int ViewIndex = TabWidget->GetViews()->FindIndex(View);
-			if (ViewIndex != -1)
-				return TabWidget;
-		}
-
-		return nullptr;
+		const lcModelTabWidget* const CurrentTab = (lcModelTabWidget*)mModelTabWidget->currentWidget();
+		return CurrentTab ? CurrentTab->GetModel() : nullptr;
 	}
 
 	lcPartSelectionWidget* GetPartSelectionWidget() const
@@ -214,9 +182,14 @@ public:
 		return mPartSelectionWidget;
 	}
 
-	QMenu* GetCameraMenu() const
+	lcPreviewDockWidget* GetPreviewWidget() const
 	{
-		return mCameraMenu;
+		return mPreviewWidget;
+	}
+
+	QMenu* GetToolsMenu() const
+	{
+		return mToolsMenu;
 	}
 
 	QMenu* GetViewpointMenu() const
@@ -224,15 +197,29 @@ public:
 		return mViewpointMenu;
 	}
 
-	bool DoDialog(LC_DIALOG_TYPE Type, void* Data);
+	QMenu* GetCameraMenu() const
+	{
+		return mCameraMenu;
+	}
 
+	QMenu* GetProjectionMenu() const
+	{
+		return mProjectionMenu;
+	}
+
+	QMenu* GetShadingMenu() const
+	{
+		return mShadingMenu;
+	}
+
+	QByteArray GetTabLayout();
+	void RestoreTabLayout(const QByteArray& TabLayout);
 	void RemoveAllModelTabs();
+	void CloseCurrentModelTab();
 	void SetCurrentModelTab(lcModel* Model);
 	void ResetCameras();
-	void AddView(View* View);
-	void RemoveView(View* View);
-	void SetActiveView(View* ActiveView);
-	void UpdateAllViews();
+	void AddView(lcView* View);
+	void RemoveView(lcView* View);
 
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
@@ -242,16 +229,22 @@ public:
 	void SetMoveXYSnapIndex(int Index);
 	void SetMoveZSnapIndex(int Index);
 	void SetAngleSnapIndex(int Index);
-	void SetLockX(bool LockX);
-	void SetLockY(bool LockY);
-	void SetLockZ(bool LockZ);
 	void SetRelativeTransform(bool RelativeTransform);
+	void SetSeparateTransform(bool SelectionTransform);
 	void SetCurrentPieceInfo(PieceInfo* Info);
+	void SetShadingMode(lcShadingMode ShadingMode);
+	void SetSelectionMode(lcSelectionMode SelectionMode);
+	void ToggleViewSphere();
+	void ToggleAxisIcon();
+	void ToggleGrid();
+	void ToggleFadePreviousSteps();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
+	void OpenRecentProject(int RecentFileIndex);
 	void MergeProject();
 	void ImportLDD();
+	void ImportInventory();
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
 	bool SetModelFromFocus();
@@ -278,9 +271,8 @@ public:
 	void UpdateSnap();
 	void UpdateColor();
 	void UpdateUndoRedo(const QString& UndoText, const QString& RedoText);
-	void UpdateCurrentCamera(int CameraIndex);
-	void UpdatePerspective();
-	void UpdateCameraMenu();
+	void UpdateShadingMode();
+	void UpdateSelectionMode();
 	void UpdateModels();
 	void UpdateCategories();
 	void UpdateTitle();
@@ -292,33 +284,55 @@ public:
 
 	QString mRecentFiles[LC_MAX_RECENT_FILES];
 	int mColorIndex;
-	lcSearchOptions mSearchOptions;
 	QAction* mActions[LC_NUM_COMMANDS];
 
+public slots:
+	void ProjectFileChanged(const QString& Path);
+	void PreviewPiece(const QString& PartId, int ColorCode, bool ShowPreview);
+	void TogglePreviewWidget(bool Visible);
+
 protected slots:
+	void CameraMenuAboutToShow();
+	void ProjectionMenuAboutToShow();
+	void ViewFocusReceived();
+	void UpdateDockWidgetActions();
+	void UpdateGamepads();
+	void ModelTabContextMenuRequested(const QPoint& Point);
+	void ModelTabCloseOtherTabs();
 	void ModelTabClosed(int Index);
 	void ModelTabChanged(int Index);
 	void ClipboardChanged();
 	void ActionTriggered();
 	void ColorChanged(int ColorIndex);
+	void ColorButtonClicked();
 	void Print(QPrinter* Printer);
+	void EnableWindowFlags(bool);
 
 protected:
-	void closeEvent(QCloseEvent *event);
-	void dragEnterEvent(QDragEnterEvent* Event);
-	void dropEvent(QDropEvent* Event);
-	QMenu* createPopupMenu();
+	void closeEvent(QCloseEvent *event) override;
+	void dragEnterEvent(QDragEnterEvent* Event) override;
+	void dropEvent(QDropEvent* Event) override;
+	QMenu* createPopupMenu() override;
 
 	void CreateActions();
 	void CreateMenus();
 	void CreateToolBars();
 	void CreateStatusBar();
+	lcView* CreateView(lcModel* Model);
+	void SetActiveView(lcView* ActiveView);
+	void ToggleDockWidget(QWidget* DockWidget);
 	void SplitView(Qt::Orientation Orientation);
 	void ShowUpdatesDialog();
 	void ShowAboutDialog();
+	void ShowHTMLDialog();
+	void ShowRenderDialog(int Command);
+	void ShowInstructionsDialog();
 	void ShowPrintDialog();
+	void CreatePreviewWidget();
 
-	lcModelTabWidget* GetTabWidgetForModel(lcModel* Model) const
+	bool OpenProjectFile(const QString& FileName);
+
+	lcModelTabWidget* GetTabWidgetForModel(const lcModel* Model) const
 	{
 		for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
 		{
@@ -331,6 +345,9 @@ protected:
 		return nullptr;
 	}
 
+	QTimer mGamepadTimer;
+	QDateTime mLastGamepadUpdate;
+
 	bool mAddKeys;
 	lcTool mTool;
 	lcTransformType mTransformType;
@@ -339,11 +356,11 @@ protected:
 	int mMoveXYSnapIndex;
 	int mMoveZSnapIndex;
 	int mAngleSnapIndex;
-	bool mLockX;
-	bool mLockY;
-	bool mLockZ;
 	bool mRelativeTransform;
+	bool mLocalTransform;
 	PieceInfo* mCurrentPieceInfo;
+	lcSelectionMode mSelectionMode;
+	int mModelTabWidgetContextMenuIndex;
 
 	QAction* mActionFileRecentSeparator;
 
@@ -351,28 +368,34 @@ protected:
 	QToolBar* mStandardToolBar;
 	QToolBar* mToolsToolBar;
 	QToolBar* mTimeToolBar;
+	QDockWidget* mPreviewToolBar;
 	QDockWidget* mPartsToolBar;
 	QDockWidget* mColorsToolBar;
 	QDockWidget* mPropertiesToolBar;
 	QDockWidget* mTimelineToolBar;
 
 	lcPartSelectionWidget* mPartSelectionWidget;
-	lcQColorList* mColorList;
-	lcQPropertiesTree* mPropertiesWidget;
+	lcColorList* mColorList;
+	QToolButton* mColorButton;
+	lcPropertiesWidget* mPropertiesWidget;
 	lcTimelineWidget* mTimelineWidget;
 	QLineEdit* mTransformXEdit;
 	QLineEdit* mTransformYEdit;
 	QLineEdit* mTransformZEdit;
+	lcPreviewDockWidget* mPreviewWidget;
 
-	QLabel* mStatusBarLabel;
+	lcElidedLabel* mStatusBarLabel;
 	QLabel* mStatusPositionLabel;
 	QLabel* mStatusSnapLabel;
 	QLabel* mStatusTimeLabel;
 
-	QMenu* mCameraMenu;
+	QMenu* mTransformMenu;
+	QMenu* mToolsMenu;
 	QMenu* mViewpointMenu;
+	QMenu* mCameraMenu;
+	QMenu* mProjectionMenu;
+	QMenu* mShadingMenu;
+	QMenu* mSelectionModeMenu;
 };
 
 extern class lcMainWindow* gMainWindow;
-
-#endif // _LC_MAINWND_H_

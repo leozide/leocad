@@ -2,6 +2,8 @@
 #include <string.h>
 #include "texfont.h"
 #include "lc_context.h"
+#include "lc_texture.h"
+#include "image.h"
 
 static const unsigned char TextureData[2048] =
 {
@@ -93,43 +95,31 @@ TexFont gTexFont;
 
 TexFont::TexFont()
 {
-	mRefCount = 0;
-	mTexture = 0;
 	memset(&mGlyphs, 0, sizeof(mGlyphs));
 }
 
-TexFont::~TexFont()
+bool TexFont::Initialize(lcContext* Context)
 {
-}
-
-bool TexFont::Load(lcContext* Context)
-{
-	mRefCount++;
-
-	if (mRefCount != 1)
+	if (mTexture)
 		return true;
 
 	mFontHeight = 16;
-
-	glGenTextures(1, &mTexture);
-	Context->BindTexture(mTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	unsigned char ExpandedData[sizeof(TextureData) * 8 * 2];
-	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
-	{
-		unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
-		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
-	}
-
 	mTextureWidth = 128;
 	mTextureHeight = 128;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, mTextureWidth, mTextureHeight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, ExpandedData);
+	Image Image;
+	Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
+
+	unsigned char* ExpandedData = Image.mData;
+	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
+	{
+		const unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
+		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
+	}
+
+	mTexture = new lcTexture();
+	mTexture->SetImage(std::move(Image), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_POINT);
+	mTexture->Upload(Context);
 
 	const unsigned char* Ptr = GlyphData;
 
@@ -155,14 +145,9 @@ bool TexFont::Load(lcContext* Context)
 	return true;
 }
 
-void TexFont::Release()
+void TexFont::Reset()
 {
-	mRefCount--;
-	if (mRefCount == 0)
-	{
-		glDeleteTextures(1, &mTexture);
-		mTexture = 0;
-	}
+	mTexture = 0;
 }
 
 void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
@@ -179,7 +164,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 
 void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
-	size_t Length = strlen(Text);
+	const size_t Length = strlen(Text);
 
 	if (!Length)
 		return;
@@ -237,6 +222,76 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	Context->DrawPrimitives(GL_TRIANGLES, 0, 6 * (GLsizei)Length);
 
 	delete[] Verts;
+}
+
+void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float* Buffer) const
+{
+	float Width = 0.0f;
+
+	for (const char* ch = Text; *ch; ch++)
+	{
+		const int Glyph = *ch;
+		Width += mGlyphs[Glyph].width;
+	}
+
+	float Left = -Width / 2.0f;
+	const float Top = mFontHeight / 2.0f;
+	const float Z = 0.0f;
+
+	while (*Text)
+	{
+		int ch = *Text;
+
+		lcVector3 Points[4] =
+		{
+			lcVector3(Left, Top, Z),
+			lcVector3(Left, Top - mFontHeight, Z),
+			lcVector3(Left + mGlyphs[ch].width, Top - mFontHeight, Z),
+			lcVector3(Left + mGlyphs[ch].width, Top, Z),
+		};
+
+		for (int PointIdx = 0; PointIdx < 4; PointIdx++)
+			Points[PointIdx] = lcMul31(Points[PointIdx], Transform);
+
+		*Buffer++ = Points[0].x;
+		*Buffer++ = Points[0].y;
+		*Buffer++ = Points[0].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].top;
+
+		*Buffer++ = Points[1].x;
+		*Buffer++ = Points[1].y;
+		*Buffer++ = Points[1].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[2].x;
+		*Buffer++ = Points[2].y;
+		*Buffer++ = Points[2].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[2].x;
+		*Buffer++ = Points[2].y;
+		*Buffer++ = Points[2].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].bottom;
+
+		*Buffer++ = Points[3].x;
+		*Buffer++ = Points[3].y;
+		*Buffer++ = Points[3].z;
+		*Buffer++ = mGlyphs[ch].right;
+		*Buffer++ = mGlyphs[ch].top;
+
+		*Buffer++ = Points[0].x;
+		*Buffer++ = Points[0].y;
+		*Buffer++ = Points[0].z;
+		*Buffer++ = mGlyphs[ch].left;
+		*Buffer++ = mGlyphs[ch].top;
+
+		Left += mGlyphs[ch].width;
+		Text++;
+	}
 }
 
 void TexFont::GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const

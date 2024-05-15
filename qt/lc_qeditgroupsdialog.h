@@ -1,5 +1,4 @@
-#ifndef LC_QEDITGROUPSDIALOG_H
-#define LC_QEDITGROUPSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -12,7 +11,7 @@ class lcQEditGroupsDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents);
+	lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, lcGroup*>& PieceParents, const QMap<lcGroup*, lcGroup*>& GroupParents, lcModel* Model);
 	~lcQEditGroupsDialog();
 	
 	QMap<lcPiece*, lcGroup*> mPieceParents;
@@ -27,8 +26,8 @@ public:
 	};
 
 public slots:
-	void accept();
-	void reject();
+	void accept() override;
+	void reject() override;
 	void on_newGroup_clicked();
 	void onItemClicked(QTreeWidgetItem* Item, int Column);
 	void onItemDoubleClicked(QTreeWidgetItem* Item, int Column);
@@ -39,11 +38,10 @@ private:
 	void UpdateParents(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup);
 
-	void timerEvent(QTimerEvent* Event);
+	void timerEvent(QTimerEvent* Event) override;
 
+	lcModel* mModel;
 	QTreeWidgetItem* mLastItemClicked;
 	bool mEditableDoubleClicked;
 	QBasicTimer mClickTimer;
 };
-
-#endif // LC_QEDITGROUPSDIALOG_H

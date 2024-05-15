@@ -1,8 +1,9 @@
-#ifndef LC_QUPDATEDIALOG_H
-#define LC_QUPDATEDIALOG_H
+#pragma once
 
 #include <QDialog>
-#include <QNetworkReply>
+
+class lcHttpReply;
+class lcHttpManager;
 
 namespace Ui {
 class lcQUpdateDialog;
@@ -21,18 +22,16 @@ public:
 	void parseUpdate(const char *update);
 
 public slots:
-	void replyFinished(QNetworkReply *reply);
-	void accept();
-	void reject();
+	void DownloadFinished(lcHttpReply* Reply);
+	void accept() override;
+	void reject() override;
 	void finished(int result);
 
 private:
 	Ui::lcQUpdateDialog *ui;
 
-	QNetworkReply *updateReply;
-	QNetworkAccessManager *manager;
+	lcHttpManager* mHttpManager;
 	QByteArray versionData;
 	bool mInitialUpdate;
 };
 
-#endif // LC_QUPDATEDIALOG_H

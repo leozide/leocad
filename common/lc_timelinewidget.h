@@ -1,5 +1,4 @@
-#ifndef _LC_TIMELINEWIDGET_H_
-#define _LC_TIMELINEWIDGET_H_
+#pragma once
 
 class lcTimelineWidget : public QTreeWidget
 {
@@ -7,28 +6,34 @@ class lcTimelineWidget : public QTreeWidget
 
 public:
 	lcTimelineWidget(QWidget* Parent);
-	virtual ~lcTimelineWidget();
+	~lcTimelineWidget();
 
 	void Update(bool Clear, bool UpdateItems);
 	void UpdateSelection();
 
-	void InsertStep();
+	void InsertStepBefore();
+	void InsertStepAfter();
 	void RemoveStep();
 	void MoveSelection();
+	void MoveSelectionBefore();
+	void MoveSelectionAfter();
 	void SetCurrentStep();
 
 public slots:
+	void CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void ItemSelectionChanged();
 	void CustomMenuRequested(QPoint Pos);
+	void PreviewSelection(QTreeWidgetItem* Current);
 
 protected:
-	virtual void dropEvent(QDropEvent* Event);
-	virtual void mousePressEvent(QMouseEvent* Event);
+	void dropEvent(QDropEvent* DropEvent) override;
+	void mousePressEvent(QMouseEvent* MouseEvent) override;
+	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 	void UpdateModel();
+	void UpdateCurrentStepItem();
 
 	QMap<int, QIcon> mIcons;
 	QMap<lcPiece*, QTreeWidgetItem*> mItems;
+	QTreeWidgetItem* mCurrentStepItem;
 	bool mIgnoreUpdates;
 };
-
-#endif // _LC_TIMELINEWIDGET_H_

@@ -1955,7 +1955,7 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 {
 	int Flags = 0;
-	lcArray<lcObject*> Selection;
+	std::vector<lcObject*> Selection;
 	lcObject* Focus = nullptr;
 
 	lcModel* ActiveModel = GetActiveModel();
@@ -2023,16 +2023,16 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 	QString Message;
 
-	if ((Selection.GetSize() == 1) && Focus)
+	if ((Selection.size() == 1) && Focus)
 	{
 		if (Focus->IsPiece())
 			Message = tr("%1 (ID: %2)").arg(Focus->GetName(), ((lcPiece*)Focus)->GetID());
 		else
 			Message = Focus->GetName();
 	}
-	else if (Selection.GetSize() > 0)
+	else if (Selection.size() > 0)
 	{
-		Message = tr("%n Object(s) selected", "", Selection.GetSize());
+		Message = tr("%n Object(s) selected", "", static_cast<int>(Selection.size()));
 
 		if (Focus && Focus->IsPiece())
 		{

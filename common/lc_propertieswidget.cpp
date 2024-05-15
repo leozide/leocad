@@ -201,7 +201,7 @@ void lcPropertiesWidget::BoolChanged()
 		return;
 
 	const bool Value = Widget->isChecked();
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId)
@@ -374,7 +374,7 @@ void lcPropertiesWidget::FloatChanged()
 
 	if (Light)
 	{
-		Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 	}
 }
 
@@ -430,7 +430,7 @@ void lcPropertiesWidget::IntegerChanged()
 		return;
 
 	const int Value = LineEdit->text().toInt();
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId)
@@ -563,7 +563,7 @@ void lcPropertiesWidget::StringChanged()
 		return;
 
 	QString Value = LineEdit->text();
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId)
@@ -627,7 +627,7 @@ void lcPropertiesWidget::StringListChanged(int Value)
 	if (!Model)
 		return;
 
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId)
@@ -710,7 +710,7 @@ void lcPropertiesWidget::ColorButtonClicked()
 		return;
 
 	const lcVector3 FloatColor = lcVector3FromQColor(Color);
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(FloatColor));
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(FloatColor));
 }
 
 void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId)
@@ -777,7 +777,7 @@ void lcPropertiesWidget::PieceColorChanged(int ColorIndex)
 	if (!Model)
 		return;
 
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, ColorIndex);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, ColorIndex);
 }
 
 void lcPropertiesWidget::PieceColorButtonClicked()
@@ -921,7 +921,7 @@ void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
 	if (!Model || !Info)
 		return;
 
-	Model->SetObjectsProperty(mFocusObject ? lcArray<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
 }
 
 void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)
@@ -1123,10 +1123,10 @@ void lcPropertiesWidget::SetEmpty()
 	SetLayoutMode(LayoutMode::Empty);
 
 	mFocusObject = nullptr;
-	mSelection.RemoveAll();
+	mSelection.clear();
 }
 
-void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus)
+void lcPropertiesWidget::SetPiece(const std::vector<lcObject*>& Selection, lcObject* Focus)
 {
 	SetLayoutMode(LayoutMode::Piece);
 
@@ -1168,10 +1168,8 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 	{
 		bool FirstPiece = true;
 
-		for (int ObjectIdx = 0; ObjectIdx < Selection.GetSize(); ObjectIdx++)
+		for (lcObject* Object : Selection)
 		{
-			lcObject* Object = Selection[ObjectIdx];
-
 			if (!Object->IsPiece())
 				continue;
 
@@ -1201,7 +1199,7 @@ void lcPropertiesWidget::SetPiece(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateStepNumber(lcObjectPropertyId::PieceStepHide, StepHide ? StepHide : LC_STEP_MAX, StepShow + 1, LC_STEP_MAX);
 }
 
-void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject* Focus)
+void lcPropertiesWidget::SetCamera(const std::vector<lcObject*>& Selection, lcObject* Focus)
 {
 	SetLayoutMode(LayoutMode::Camera);
 
@@ -1247,7 +1245,7 @@ void lcPropertiesWidget::SetCamera(const lcArray<lcObject*>& Selection, lcObject
 	UpdateFloat(lcObjectPropertyId::CameraUpZ, UpVector[2]);
 }
 
-void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject* Focus)
+void lcPropertiesWidget::SetLight(const std::vector<lcObject*>& Selection, lcObject* Focus)
 {
 	SetLayoutMode(LayoutMode::Light);
 
@@ -1386,10 +1384,10 @@ void lcPropertiesWidget::SetLight(const lcArray<lcObject*>& Selection, lcObject*
 	UpdateFloat(lcObjectPropertyId::ObjectRotationZ, Rotation[2]);
 }
 
-void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* Focus)
+void lcPropertiesWidget::Update(const std::vector<lcObject*>& Selection, lcObject* Focus)
 {
 	mFocusObject = nullptr;
-	mSelection.RemoveAll();
+	mSelection.clear();
 
 	LayoutMode Mode = LayoutMode::Empty;
 
@@ -1412,7 +1410,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 	}
 	else
 	{
-		for (int ObjectIdx = 0; ObjectIdx < Selection.GetSize(); ObjectIdx++)
+		for (size_t ObjectIdx = 0; ObjectIdx < Selection.size(); ObjectIdx++)
 		{
 			switch (Selection[ObjectIdx]->GetType())
 			{
@@ -1422,7 +1420,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 				else if (Mode != LayoutMode::Piece)
 				{
 					Mode = LayoutMode::Multiple;
-					ObjectIdx = Selection.GetSize();
+					ObjectIdx = Selection.size();
 				}
 				break;
 
@@ -1432,7 +1430,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 				else if (Mode != LayoutMode::Camera)
 				{
 					Mode = LayoutMode::Multiple;
-					ObjectIdx = Selection.GetSize();
+					ObjectIdx = Selection.size();
 				}
 				break;
 
@@ -1442,7 +1440,7 @@ void lcPropertiesWidget::Update(const lcArray<lcObject*>& Selection, lcObject* F
 				else if (Mode != LayoutMode::Light)
 				{
 					Mode = LayoutMode::Multiple;
-					ObjectIdx = Selection.GetSize();
+					ObjectIdx = Selection.size();
 				}
 				break;
 			}

@@ -295,7 +295,7 @@ public:
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
-	void GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const;
+	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
 	lcArray<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
@@ -359,12 +359,12 @@ public:
 	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
 	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
-	void SetObjectsKeyFrame(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
+	void SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 
-	void SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
+	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
 
 	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
 	void SetCameraFOV(lcCamera* Camera, float FOV);

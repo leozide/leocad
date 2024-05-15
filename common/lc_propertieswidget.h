@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
 #include "lc_objectproperty.h"
 
 class lcCollapsibleWidgetButton;
@@ -13,7 +12,7 @@ class lcPropertiesWidget : public QWidget
 public:
 	lcPropertiesWidget(QWidget* Parent);
 
-	void Update(const lcArray<lcObject*>& Selection, lcObject* Focus);
+	void Update(const std::vector<lcObject*>& Selection, lcObject* Focus);
 
 protected slots:
 	void CategoryStateChanged(bool Expanded);
@@ -114,9 +113,9 @@ protected:
 	void UpdatePieceId(lcObjectPropertyId PropertyId);
 
 	void SetEmpty();
-	void SetPiece(const lcArray<lcObject*>& Selection, lcObject* Focus);
-	void SetCamera(const lcArray<lcObject*>& Selection, lcObject* Focus);
-	void SetLight(const lcArray<lcObject*>& Selection, lcObject* Focus);
+	void SetPiece(const std::vector<lcObject*>& Selection, lcObject* Focus);
+	void SetCamera(const std::vector<lcObject*>& Selection, lcObject* Focus);
+	void SetLight(const std::vector<lcObject*>& Selection, lcObject* Focus);
 
 	void CreateWidgets();
 	void SetLayoutMode(LayoutMode Mode);
@@ -125,7 +124,7 @@ protected:
 	void SetCategoryVisible(CategoryIndex Index, bool Visible);
 	void SetCategoryWidgetsVisible(CategoryWidgets& Category, bool Visible);
 
-	lcArray<lcObject*> mSelection;
+	std::vector<lcObject*> mSelection;
 	lcObject* mFocusObject = nullptr;
 
 	std::array<PropertyWidgets, static_cast<int>(lcObjectPropertyId::Count)> mPropertyWidgets = {};

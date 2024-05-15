@@ -2831,7 +2831,7 @@ void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool
 	else
 	{
 		int Flags;
-		lcArray<lcObject*> Selection;
+		std::vector<lcObject*> Selection;
 		lcObject* Focus;
 
 		GetSelectionInformation(&Flags, Selection, &Focus);
@@ -2990,7 +2990,7 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	}
 }
 
-void lcModel::SetObjectsKeyFrame(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame)
+void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame)
 {
 	bool Modified = false;
 
@@ -3152,7 +3152,7 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	UpdateAllViews();
 }
 
-void lcModel::SetObjectsProperty(const lcArray<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
+void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
 {
 	bool Modified = false;
 
@@ -3319,7 +3319,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 bool lcModel::CanRotateSelection() const
 {
 	int Flags;
-	lcArray<lcObject*> Selection;
+	std::vector<lcObject*> Selection;
 	lcObject* Focus;
 
 	GetSelectionInformation(&Flags, Selection, &Focus);
@@ -3544,7 +3544,7 @@ void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 }
 
-void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection, lcObject** Focus) const
+void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const
 {
 	*Flags = 0;
 	*Focus = nullptr;
@@ -3560,7 +3560,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 		{
 			if (Piece->IsSelected())
 			{
-				Selection.Add(Piece);
+				Selection.emplace_back(Piece);
 
 				if (Piece->IsFocused())
 					*Focus = Piece;
@@ -3616,7 +3616,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 	{
 		if (Camera->IsSelected())
 		{
-			Selection.Add(Camera);
+			Selection.emplace_back(Camera);
 			*Flags |= LC_SEL_SELECTED | LC_SEL_CAMERA;
 
 			if (Camera->IsFocused())
@@ -3628,7 +3628,7 @@ void lcModel::GetSelectionInformation(int* Flags, lcArray<lcObject*>& Selection,
 	{
 		if (Light->IsSelected())
 		{
-			Selection.Add(Light);
+			Selection.emplace_back(Light);
 			*Flags |= LC_SEL_SELECTED | LC_SEL_LIGHT;
 
 			if (Light->IsFocused())

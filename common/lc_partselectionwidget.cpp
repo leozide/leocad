@@ -130,7 +130,7 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	beginResetModel();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	lcArray<PieceInfo*> SingleParts, GroupedParts;
+	std::vector<PieceInfo*> SingleParts, GroupedParts;
 
 	if (CategoryIndex != -1)
 		Library->GetCategoryEntries(CategoryIndex, false, SingleParts, GroupedParts);
@@ -140,14 +140,14 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 
 		lcModel* ActiveModel = gMainWindow->GetActiveModel();
 
-		for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); )
+		for (size_t PartIndex = 0; PartIndex < SingleParts.size(); )
 		{
-			PieceInfo* Info = SingleParts[PartIdx];
+			PieceInfo* Info = SingleParts[PartIndex];
 
 			if (!Info->IsModel() || !Info->GetModel()->IncludesModel(ActiveModel))
-				PartIdx++;
+				PartIndex++;
 			else
-				SingleParts.RemoveIndex(PartIdx);
+				SingleParts.erase(SingleParts.begin() + PartIndex);
 		}
 	}
 
@@ -158,9 +158,9 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 
 	std::sort(SingleParts.begin(), SingleParts.end(), lcPartSortFunc);
 
-	mParts.resize(SingleParts.GetSize());
+	mParts.resize(SingleParts.size());
 
-	for (int PartIdx = 0; PartIdx < SingleParts.GetSize(); PartIdx++)
+	for (size_t PartIdx = 0; PartIdx < SingleParts.size(); PartIdx++)
 		mParts[PartIdx] = std::pair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
 
 	endResetModel();

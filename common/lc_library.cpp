@@ -1723,16 +1723,16 @@ bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywo
 	return lcMatchCategory(PieceName, CategoryKeywords);
 }
 
-void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
+void lcPiecesLibrary::GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces)
 {
 	if (CategoryIndex >= 0 && CategoryIndex < static_cast<int>(gCategories.size()))
 		GetCategoryEntries(gCategories[CategoryIndex].Keywords.constData(), GroupPieces, SinglePieces, GroupedPieces);
 }
 
-void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces)
+void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces)
 {
-	SinglePieces.RemoveAll();
-	GroupedPieces.RemoveAll();
+	SinglePieces.clear();
+	GroupedPieces.clear();
 
 	for (const auto& PieceIt : mPieces)
 	{
@@ -1743,7 +1743,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 
 		if (!GroupPieces)
 		{
-			SinglePieces.Add(Info);
+			SinglePieces.emplace_back(Info);
 			continue;
 		}
 
@@ -1763,73 +1763,36 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 			if (Parent)
 			{
 				// Check if the parent was added as a single piece.
-				int Index = SinglePieces.FindIndex(Parent);
+				auto ParentIt = std::find(SinglePieces.begin(), SinglePieces.end(), Parent);
 
-				if (Index != -1)
-					SinglePieces.RemoveIndex(Index);
+				if (ParentIt != SinglePieces.end())
+					SinglePieces.erase(ParentIt);
 
-				Index = GroupedPieces.FindIndex(Parent);
-
-				if (Index == -1)
-					GroupedPieces.Add(Parent);
+				if (std::find(GroupedPieces.begin(), GroupedPieces.end(), Parent) == GroupedPieces.end())
+					GroupedPieces.emplace_back(Parent);
 			}
 			else
 			{
 				// Patterned pieces should have a parent but in case they don't just add them anyway.
-				SinglePieces.Add(Info);
+				SinglePieces.emplace_back(Info);
 			}
 		}
 		else
 		{
 			// Check if this piece has already been added to this category by one of its children.
-			const int Index = GroupedPieces.FindIndex(Info);
-
-			if (Index == -1)
-				SinglePieces.Add(Info);
+			if (std::find(GroupedPieces.begin(), GroupedPieces.end(), Info) == GroupedPieces.end())
+				SinglePieces.emplace_back(Info);
 		}
 	}
 }
 
-void lcPiecesLibrary::GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const
+void lcPiecesLibrary::GetParts(std::vector<PieceInfo*>& Parts) const
 {
-	char Name[LC_PIECE_NAME_LEN];
-	strcpy(Name, Parent->mFileName);
-	char* Ext = strchr(Name, '.');
-	if (Ext)
-		*Ext = 0;
-	strcat(Name, "P");
-	strupr(Name);
-
-	Pieces.RemoveAll();
-
-	for (const auto& PieceIt : mPieces)
-		if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
-			Pieces.Add(PieceIt.second);
-
-	// Sometimes pieces with A and B versions don't follow the same convention (for example, 3040Pxx instead of 3040BPxx).
-	if (Pieces.GetSize() == 0)
-	{
-		strcpy(Name, Parent->mFileName);
-		Ext = strchr(Name, '.');
-		if (Ext)
-			*Ext = 0;
-		size_t Len = strlen(Name);
-		if (Name[Len-1] < '0' || Name[Len-1] > '9')
-			Name[Len-1] = 'P';
-
-		for (const auto& PieceIt : mPieces)
-			if (strncmp(Name, PieceIt.first.c_str(), strlen(Name)) == 0)
-				Pieces.Add(PieceIt.second);
-	}
-}
-
-void lcPiecesLibrary::GetParts(lcArray<PieceInfo*>& Parts) const
-{
-	Parts.SetSize(0);
-	Parts.AllocGrow(mPieces.size());
+	Parts.clear();
+	Parts.reserve(mPieces.size());
 
 	for (const auto& PartIt : mPieces)
-		Parts.Add(PartIt.second);
+		Parts.emplace_back(PartIt.second);
 }
 
 std::vector<PieceInfo*> lcPiecesLibrary::GetPartsFromSet(const std::vector<std::string>& PartIds) const

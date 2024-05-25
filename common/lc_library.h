@@ -2,7 +2,6 @@
 
 #include "lc_context.h"
 #include "lc_math.h"
-#include "lc_array.h"
 #include "lc_meshloader.h"
 
 class PieceInfo;
@@ -147,10 +146,9 @@ public:
 	void ReleaseTexture(lcTexture* Texture);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
-	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, lcArray<PieceInfo*>& SinglePieces, lcArray<PieceInfo*>& GroupedPieces);
-	void GetPatternedPieces(PieceInfo* Parent, lcArray<PieceInfo*>& Pieces) const;
-	void GetParts(lcArray<PieceInfo*>& Parts) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
+	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
+	void GetParts(std::vector<PieceInfo*>& Parts) const;
 
 	std::vector<PieceInfo*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
 	std::string GetPartId(const PieceInfo* Info) const;

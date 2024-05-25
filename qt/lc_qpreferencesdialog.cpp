@@ -701,16 +701,14 @@ void lcQPreferencesDialog::updateParts()
 
 	if (categoryIndex != -1)
 	{
-		lcArray<PieceInfo*> singleParts, groupedParts;
+		std::vector<PieceInfo*> SingleParts, GroupedParts;
 
-		Library->GetCategoryEntries(mOptions->Categories[categoryIndex].Keywords.constData(), false, singleParts, groupedParts);
+		Library->GetCategoryEntries(mOptions->Categories[categoryIndex].Keywords.constData(), false, SingleParts, GroupedParts);
 
-		for (int partIndex = 0; partIndex < singleParts.GetSize(); partIndex++)
+		for (PieceInfo* Info : SingleParts)
 		{
-			PieceInfo *info = singleParts[partIndex];
-
-			QStringList rowList(info->m_strDescription);
-			rowList.append(info->mFileName);
+			QStringList rowList(Info->m_strDescription);
+			rowList.append(Info->mFileName);
 
 			new QTreeWidgetItem(tree, rowList);
 		}

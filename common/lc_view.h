@@ -264,7 +264,7 @@ public:
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
 	lcPieceInfoRayTest FindPieceInfoUnderPointer(bool IgnoreSelected) const;
-	lcArray<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
+	std::vector<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const;
 	lcVector3 UnprojectPoint(const lcVector3& Point) const;

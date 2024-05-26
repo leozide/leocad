@@ -393,7 +393,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			if (lcDot3(mWorldMatrix.GetTranslation(), ObjectBoxTest.Planes[PlaneIdx]) + ObjectBoxTest.Planes[PlaneIdx][3] > LC_LIGHT_SPHERE_RADIUS)
 				return;
 
-		ObjectBoxTest.Objects.Add(const_cast<lcLight*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
 		return;
 	}
 	
@@ -410,7 +410,7 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		ObjectBoxTest.Objects.Add(const_cast<lcLight*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
 		return;
 	}
 }

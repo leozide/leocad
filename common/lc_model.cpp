@@ -317,7 +317,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 
 	const lcMesh* Mesh = mPieceInfo->GetMesh();
 
-	if (mPieces.IsEmpty() && !Mesh)
+	if (mPieces.empty() && !Mesh)
 	{
 		mPieceInfo->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
 		return;
@@ -405,7 +405,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 		if (PieceGroup)
 		{
-			if (CurrentGroups.IsEmpty() || (!CurrentGroups.IsEmpty() && PieceGroup != CurrentGroups[CurrentGroups.GetSize() - 1]))
+			if (CurrentGroups.empty() || (!CurrentGroups.empty() && PieceGroup != CurrentGroups[CurrentGroups.size() - 1]))
 			{
 				lcArray<lcGroup*> PieceParents;
 
@@ -414,14 +414,14 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 				int FoundParent = -1;
 
-				while (!CurrentGroups.IsEmpty())
+				while (!CurrentGroups.empty())
 				{
-					lcGroup* Group = CurrentGroups[CurrentGroups.GetSize() - 1];
+					lcGroup* Group = CurrentGroups[CurrentGroups.size() - 1];
 					const int Index = PieceParents.FindIndex(Group);
 
 					if (Index == -1)
 					{
-						CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+						CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
 						Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 					}
 					else
@@ -431,19 +431,19 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 					}
 				}
 
-				for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.GetSize(); ParentIdx++)
+				for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.size(); ParentIdx++)
 				{
 					lcGroup* Group = PieceParents[ParentIdx];
-					CurrentGroups.Add(Group);
+					CurrentGroups.emplace_back(Group);
 					Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->mName << LineEnding;
 				}
 			}
 		}
 		else
 		{
-			while (CurrentGroups.GetSize())
+			while (CurrentGroups.size())
 			{
-				CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+				CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
 				Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 			}
 		}
@@ -495,9 +495,9 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		CurrentLine++;
 	}
 
-	while (CurrentGroups.GetSize())
+	while (CurrentGroups.size())
 	{
-		CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+		CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
 		Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 	}
 
@@ -643,7 +643,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (Camera->ParseLDrawLine(LineStream))
 				{
 					Camera->CreateName(mCameras);
-					mCameras.Add(Camera);
+					mCameras.emplace_back(Camera);
 					Camera = nullptr;
 				}
 			}
@@ -655,7 +655,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (Light->ParseLDrawLine(LineStream))
 				{
 					Light->CreateName(mLights);
-					mLights.Add(Light);
+					mLights.emplace_back(Light);
 					Light = nullptr;
 				}
 			}
@@ -671,16 +671,16 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				{
 					QString Name = LineStream.readAll().trimmed();
 					lcGroup* Group = GetGroup(Name, true);
-					if (!CurrentGroups.IsEmpty())
-						Group->mGroup = CurrentGroups[CurrentGroups.GetSize() - 1];
+					if (!CurrentGroups.empty())
+						Group->mGroup = CurrentGroups[CurrentGroups.size() - 1];
 					else
 						Group->mGroup = nullptr;
-					CurrentGroups.Add(Group);
+					CurrentGroups.emplace_back(Group);
 				}
 				else if (Token == QLatin1String("END"))
 				{
-					if (!CurrentGroups.IsEmpty())
-						CurrentGroups.RemoveIndex(CurrentGroups.GetSize() - 1);
+					if (!CurrentGroups.empty())
+						CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
 				}
 			}
 			else if (Token == QLatin1String("SYNTH"))
@@ -739,8 +739,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!Piece)
 					Piece = new lcPiece(nullptr);
 
-				if (!CurrentGroups.IsEmpty())
-					Piece->SetGroup(CurrentGroups[CurrentGroups.GetSize() - 1]);
+				if (!CurrentGroups.empty())
+					Piece->SetGroup(CurrentGroups[CurrentGroups.size() - 1]);
 
 				PieceInfo* Info = Library->FindPiece(PartId.toLatin1().constData(), Project, true, true);
 
@@ -835,7 +835,7 @@ bool lcModel::LoadBinary(lcFile* file)
 	file->ReadS32(&count, 1);
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	const int FirstNewPiece = mPieces.GetSize();
+	const int FirstNewPiece = mPieces.size();
 
 	while (count--)
 	{
@@ -919,13 +919,13 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	if (fv >= 0.5f)
 	{
-		const int NumGroups = mGroups.GetSize();
+		const int NumGroups = mGroups.size();
 
 		file->ReadS32(&count, 1);
 		for (i = 0; i < count; i++)
-			mGroups.Add(new lcGroup());
+			mGroups.emplace_back(new lcGroup());
 
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
 		{
 			lcGroup* Group = mGroups[GroupIdx];
 
@@ -941,7 +941,7 @@ bool lcModel::LoadBinary(lcFile* file)
 				Group->FileLoad(file);
 		}
 
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.GetSize(); GroupIdx++)
+		for (int GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
 		{
 			lcGroup* Group = mGroups[GroupIdx];
 
@@ -954,7 +954,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			Group->mGroup = mGroups[NumGroups + i];
 		}
 
-		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.GetSize(); PieceIdx++)
+		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.size(); PieceIdx++)
 		{
 			lcPiece* Piece = mPieces[PieceIdx];
 
@@ -1092,7 +1092,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 		}
 	}
 
-	if (mPieces.IsEmpty())
+	if (mPieces.empty())
 		return false;
 
 	Library->WaitForLoadQueue();
@@ -1139,7 +1139,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 
 void lcModel::Merge(lcModel* Other)
 {
-	for (int PieceIdx = 0; PieceIdx < Other->mPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < Other->mPieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = Other->mPieces[PieceIdx];
 		Piece->SetFileLine(-1);
@@ -1148,29 +1148,29 @@ void lcModel::Merge(lcModel* Other)
 
 	Other->mPieces.RemoveAll();
 
-	for (int CameraIdx = 0; CameraIdx < Other->mCameras.GetSize(); CameraIdx++)
+	for (int CameraIdx = 0; CameraIdx < Other->mCameras.size(); CameraIdx++)
 	{
 		lcCamera* Camera = Other->mCameras[CameraIdx];
 		Camera->CreateName(mCameras);
-		mCameras.Add(Camera);
+		mCameras.emplace_back(Camera);
 	}
 
 	Other->mCameras.RemoveAll();
 
-	for (int LightIdx = 0; LightIdx < Other->mLights.GetSize(); LightIdx++)
+	for (int LightIdx = 0; LightIdx < Other->mLights.size(); LightIdx++)
 	{
 		lcLight* Light = Other->mLights[LightIdx];
 		Light->CreateName(mLights);
-		mLights.Add(Light);
+		mLights.emplace_back(Light);
 	}
 
 	Other->mLights.RemoveAll();
 
-	for (int GroupIdx = 0; GroupIdx < Other->mGroups.GetSize(); GroupIdx++)
+	for (int GroupIdx = 0; GroupIdx < Other->mGroups.size(); GroupIdx++)
 	{
 		lcGroup* Group = Other->mGroups[GroupIdx];
 		Group->CreateName(mGroups);
-		mGroups.Add(Group);
+		mGroups.emplace_back(Group);
 	}
 
 	Other->mGroups.RemoveAll();
@@ -1215,8 +1215,8 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	Model->LoadLDraw(Buffer, lcGetActiveProject());
 
 	const lcArray<lcPiece*>& PastedPieces = Model->mPieces;
-	lcArray<lcObject*> SelectedObjects;
-	SelectedObjects.AllocGrow(PastedPieces.GetSize());
+	std::vector<lcObject*> SelectedObjects;
+	SelectedObjects.reserve(PastedPieces.size());
 
 	for (lcPiece* Piece : PastedPieces)
 	{
@@ -1225,19 +1225,19 @@ void lcModel::Paste(bool PasteToCurrentStep)
 		if (PasteToCurrentStep)
 		{
 			Piece->SetStepShow(mCurrentStep);
-			SelectedObjects.Add(Piece);
+			SelectedObjects.emplace_back(Piece);
 		}
 		else
 		{
 			if (Piece->GetStepShow() <= mCurrentStep)
-				SelectedObjects.Add(Piece);
+				SelectedObjects.emplace_back(Piece);
 		}
 	}
 
 	Merge(Model);
 	SaveCheckpoint(tr("Pasting"));
 
-	if (SelectedObjects.GetSize() == 1)
+	if (SelectedObjects.size() == 1)
 		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION, false);
 	else
 		SetSelectionAndFocus(SelectedObjects, nullptr, 0, false);
@@ -1249,7 +1249,7 @@ void lcModel::Paste(bool PasteToCurrentStep)
 
 void lcModel::DuplicateSelectedPieces()
 {
-	lcArray<lcObject*> NewPieces;
+	std::vector<lcObject*> NewPieces;
 	lcPiece* Focus = nullptr;
 	std::map<lcGroup*, lcGroup*> GroupMap;
 
@@ -1281,7 +1281,7 @@ void lcModel::DuplicateSelectedPieces()
 		}
 	};
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -1290,7 +1290,7 @@ void lcModel::DuplicateSelectedPieces()
 
 		lcPiece* NewPiece = new lcPiece(*Piece);
 		NewPiece->UpdatePosition(mCurrentStep);
-		NewPieces.Add(NewPiece);
+		NewPieces.emplace_back(NewPiece);
 
 		if (Piece->IsFocused())
 			Focus = NewPiece;
@@ -1303,7 +1303,7 @@ void lcModel::DuplicateSelectedPieces()
 			Piece->SetGroup(GetNewGroup(Group));
 	}
 
-	if (NewPieces.IsEmpty())
+	if (NewPieces.empty())
 		return;
 
 	gMainWindow->UpdateTimeline(false, false);
@@ -1909,7 +1909,7 @@ void lcModel::RemoveStep(lcStep Step)
 lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)
 {
 	lcGroup* Group = new lcGroup();
-	mGroups.Add(Group);
+	mGroups.emplace_back(Group);
 
 	Group->mName = GetGroupName(Prefix);
 	Group->mGroup = Parent;
@@ -1927,7 +1927,7 @@ lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
 	{
 		lcGroup* Group = new lcGroup();
 		Group->mName = Name;
-		mGroups.Add(Group);
+		mGroups.emplace_back(Group);
 
 		return Group;
 	}
@@ -1984,7 +1984,7 @@ void lcModel::UngroupSelection()
 			if (SelectedGroups.FindIndex(Group) == -1)
 			{
 				mGroups.Remove(Group);
-				SelectedGroups.Add(Group);
+				SelectedGroups.emplace_back(Group);
 			}
 		}
 	}
@@ -2128,7 +2128,7 @@ void lcModel::RemoveEmptyGroups()
 	{
 		Removed = false;
 
-		for (int GroupIdx = 0; GroupIdx < mGroups.GetSize();)
+		for (int GroupIdx = 0; GroupIdx < mGroups.size();)
 		{
 			lcGroup* Group = mGroups[GroupIdx];
 			int Ref = 0;
@@ -2137,7 +2137,7 @@ void lcModel::RemoveEmptyGroups()
 				if (Piece->GetGroup() == Group)
 					Ref++;
 
-			for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+			for (int ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
 				if (mGroups[ParentIdx]->mGroup == Group)
 					Ref++;
 
@@ -2158,7 +2158,7 @@ void lcModel::RemoveEmptyGroups()
 					}
 				}
 
-				for (int ParentIdx = 0; ParentIdx < mGroups.GetSize(); ParentIdx++)
+				for (int ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
 				{
 					if (mGroups[ParentIdx]->mGroup == Group)
 					{
@@ -2265,7 +2265,7 @@ void lcModel::AddPiece()
 	if (!CurPiece)
 		return;
 
-	lcPiece* Last = mPieces.IsEmpty() ? nullptr : mPieces[mPieces.GetSize() - 1];
+	lcPiece* Last = mPieces.empty() ? nullptr : mPieces[mPieces.size() - 1];
 
 	for (lcPiece* Piece : mPieces)
 	{
@@ -2305,7 +2305,7 @@ void lcModel::AddPiece()
 
 void lcModel::AddPiece(lcPiece* Piece)
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
 	{
 		if (mPieces[PieceIdx]->GetStepShow() > Piece->GetStepShow())
 		{
@@ -2314,7 +2314,7 @@ void lcModel::AddPiece(lcPiece* Piece)
 		}
 	}
 
-	InsertPiece(Piece, mPieces.GetSize());
+	InsertPiece(Piece, mPieces.size());
 }
 
 void lcModel::InsertPiece(lcPiece* Piece, int Index)
@@ -2334,7 +2334,7 @@ void lcModel::InsertPiece(lcPiece* Piece, int Index)
 
 void lcModel::DeleteAllCameras()
 {
-	if (mCameras.IsEmpty())
+	if (mCameras.empty())
 		return;
 
 	mCameras.DeleteAll();
@@ -2423,9 +2423,9 @@ void lcModel::RemoveFocusedControlPoint()
 
 void lcModel::ShowSelectedPiecesEarlier()
 {
-	lcArray<lcPiece*> MovedPieces;
+	std::vector<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -2438,7 +2438,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 				Step--;
 				Piece->SetStepShow(Step);
 
-				MovedPieces.Add(Piece);
+				MovedPieces.emplace_back(Piece);
 				mPieces.RemoveIndex(PieceIdx);
 				continue;
 			}
@@ -2447,12 +2447,11 @@ void lcModel::ShowSelectedPiecesEarlier()
 		PieceIdx++;
 	}
 
-	if (MovedPieces.IsEmpty())
+	if (MovedPieces.empty())
 		return;
 
-	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
+	for (lcPiece* Piece : MovedPieces)
 	{
-		lcPiece* Piece = MovedPieces[PieceIdx];
 		Piece->SetFileLine(-1);
 		AddPiece(Piece);
 	}
@@ -2467,7 +2466,7 @@ void lcModel::ShowSelectedPiecesLater()
 {
 	lcArray<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -2483,7 +2482,7 @@ void lcModel::ShowSelectedPiecesLater()
 				if (!Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(false);
 
-				MovedPieces.Add(Piece);
+				MovedPieces.emplace_back(Piece);
 				mPieces.RemoveIndex(PieceIdx);
 				continue;
 			}
@@ -2492,10 +2491,10 @@ void lcModel::ShowSelectedPiecesLater()
 		PieceIdx++;
 	}
 
-	if (MovedPieces.IsEmpty())
+	if (MovedPieces.empty())
 		return;
 
-	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = MovedPieces[PieceIdx];
 		Piece->SetFileLine(-1);
@@ -2510,7 +2509,7 @@ void lcModel::ShowSelectedPiecesLater()
 
 void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 {
-	if (PieceSteps.size() != mPieces.GetSize())
+	if (PieceSteps.size() != mPieces.size())
 		return;
 
 	bool Modified = false;
@@ -2561,7 +2560,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	lcStep FirstStep = LC_STEP_MAX;
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -2570,7 +2569,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 			Piece->CompareBoundingBox(Min, Max);
 			mPieces.RemoveIndex(PieceIdx);
 			Piece->SetGroup(nullptr); // todo: copy groups
-			Pieces.Add(Piece);
+			Pieces.emplace_back(Piece);
 			FirstStep = qMin(FirstStep, Piece->GetStepShow());
 
 			if (!ModelPiece)
@@ -2588,7 +2587,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	lcVector3 ModelCenter = (Min + Max) / 2.0f;
 	ModelCenter.z += (Min.z - Max.z) / 2.0f;
 
-	for (int PieceIdx = 0; PieceIdx < Pieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < Pieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = Pieces[PieceIdx];
 		Piece->SetFileLine(-1);
@@ -2612,9 +2611,9 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 void lcModel::InlineSelectedModels()
 {
-	lcArray<lcObject*> NewPieces;
+	std::vector<lcObject*> NewPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -2644,7 +2643,7 @@ void lcModel::InlineSelectedModels()
 			NewPiece->SetColorIndex(ColorIndex);
 			NewPiece->UpdatePosition(mCurrentStep);
 
-			NewPieces.Add(NewPiece);
+			NewPieces.emplace_back(NewPiece);
 			InsertPiece(NewPiece, PieceIdx);
 			PieceIdx++;
 		}
@@ -2652,7 +2651,7 @@ void lcModel::InlineSelectedModels()
 		delete Piece;
 	}
 
-	if (!NewPieces.GetSize())
+	if (!NewPieces.size())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No models selected."));
 		return;
@@ -2669,7 +2668,7 @@ bool lcModel::RemoveSelectedObjects()
 	bool RemovedCamera = false;
 	bool RemovedLight = false;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -2683,7 +2682,7 @@ bool lcModel::RemoveSelectedObjects()
 			PieceIdx++;
 	}
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.GetSize(); )
+	for (int CameraIdx = 0; CameraIdx < mCameras.size(); )
 	{
 		lcCamera* Camera = mCameras[CameraIdx];
 
@@ -2703,7 +2702,7 @@ bool lcModel::RemoveSelectedObjects()
 			CameraIdx++;
 	}
 
-	for (int LightIdx = 0; LightIdx < mLights.GetSize(); )
+	for (int LightIdx = 0; LightIdx < mLights.size(); )
 	{
 		lcLight* Light = mLights[LightIdx];
 
@@ -3035,7 +3034,7 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	lcArray<lcPiece*> MovedPieces;
 	bool SelectionChanged = false;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); )
+	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
 	{
 		lcPiece* Piece = mPieces[PieceIdx];
 
@@ -3049,7 +3048,7 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 				SelectionChanged = true;
 			}
 
-			MovedPieces.Add(Piece);
+			MovedPieces.emplace_back(Piece);
 			mPieces.RemoveIndex(PieceIdx);
 			continue;
 		}
@@ -3057,10 +3056,10 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 		PieceIdx++;
 	}
 
-	if (MovedPieces.IsEmpty())
+	if (MovedPieces.empty())
 		return;
 
-	for (int PieceIdx = 0; PieceIdx < MovedPieces.GetSize(); PieceIdx++)
+	for (int PieceIdx = 0; PieceIdx < MovedPieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = MovedPieces[PieceIdx];
 		Piece->SetFileLine(-1);
@@ -3241,7 +3240,7 @@ void lcModel::GetSubModels(lcArray<lcModel*>& SubModels) const
 		{
 			lcModel* SubModel = Piece->mPieceInfo->GetModel();
 			if (SubModels.FindIndex(SubModel) == -1)
-				SubModels.Add(SubModel);
+				SubModels.emplace_back(SubModel);
 		}
 	}
 }
@@ -3463,7 +3462,7 @@ lcBoundingBox lcModel::GetAllPiecesBoundingBox() const
 {
 	lcBoundingBox Box;
 
-	if (!mPieces.IsEmpty())
+	if (!mPieces.empty())
 	{
 		Box.Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
 		Box.Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -3549,7 +3548,7 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 	*Flags = 0;
 	*Focus = nullptr;
 
-	if (mPieces.IsEmpty())
+	if (mPieces.empty())
 		*Flags |= LC_SEL_NO_PIECES;
 	else
 	{
@@ -3637,11 +3636,11 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 	}
 }
 
-lcArray<lcObject*> lcModel::GetSelectionModePieces(const lcPiece* SelectedPiece) const
+std::vector<lcObject*> lcModel::GetSelectionModePieces(const lcPiece* SelectedPiece) const
 {
 	const PieceInfo* Info = SelectedPiece->mPieceInfo;
 	const int ColorIndex = SelectedPiece->GetColorIndex();
-	lcArray<lcObject*> Pieces;
+	std::vector<lcObject*> Pieces;
 
 	switch (gMainWindow->GetSelectionMode())
 	{
@@ -3651,19 +3650,19 @@ lcArray<lcObject*> lcModel::GetSelectionModePieces(const lcPiece* SelectedPiece)
 	case lcSelectionMode::Piece:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece != SelectedPiece)
-				Pieces.Add(Piece);
+				Pieces.emplace_back(Piece);
 		break;
 
 	case lcSelectionMode::Color:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
-				Pieces.Add(Piece);
+				Pieces.emplace_back(Piece);
 		break;
 
 	case lcSelectionMode::PieceColor:
 		for (lcPiece* Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
-				Pieces.Add(Piece);
+				Pieces.emplace_back(Piece);
 		break;
 	}
 
@@ -3728,7 +3727,7 @@ void lcModel::FocusOrDeselectObject(const lcObjectSection& ObjectSection)
 				SelectGroup(Piece->GetTopGroup(), IsSelected);
 			else
 			{
-				lcArray<lcObject*> Pieces = GetSelectionModePieces(Piece);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces(Piece);
 				AddToSelection(Pieces, false, false);
 			}
 		}
@@ -3757,7 +3756,7 @@ void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool 
 
 			if (EnableSelectionMode)
 			{
-				lcArray<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
 				AddToSelection(Pieces, false, false);
 			}
 		}
@@ -3772,7 +3771,7 @@ void lcModel::ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bo
 	ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, EnableSelectionMode);
 }
 
-void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode)
+void lcModel::SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode)
 {
 	ClearSelection(false);
 
@@ -3786,7 +3785,7 @@ void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject
 
 			if (EnableSelectionMode)
 			{
-				lcArray<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Focus);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Focus);
 				AddToSelection(Pieces, false, false);
 			}
 		}
@@ -3795,7 +3794,7 @@ void lcModel::SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject
 	AddToSelection(Selection, EnableSelectionMode, true);
 }
 
-void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface)
+void lcModel::AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface)
 {
 	for (lcObject* Object : Objects)
 	{
@@ -3809,7 +3808,7 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelec
 
 			if (EnableSelectionMode)
 			{
-				lcArray<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
 				AddToSelection(Pieces, false, false);
 			}
 		}
@@ -3822,7 +3821,7 @@ void lcModel::AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelec
 	}
 }
 
-void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
+void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects)
 {
 	for (lcObject* SelectedObject : Objects)
 	{
@@ -3837,7 +3836,7 @@ void lcModel::RemoveFromSelection(const lcArray<lcObject*>& Objects)
 				SelectGroup(Piece->GetTopGroup(), false);
 			else
 			{
-				lcArray<lcObject*> Pieces = GetSelectionModePieces(Piece);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces(Piece);
 
 				for (lcObject* Object : Pieces)
 				{
@@ -3878,7 +3877,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 			SelectGroup(Piece->GetTopGroup(), false);
 		else
 		{
-			lcArray<lcObject*> Pieces = GetSelectionModePieces(Piece);
+			std::vector<lcObject*> Pieces = GetSelectionModePieces(Piece);
 
 			for (lcObject* Object : Pieces)
 			{
@@ -4011,7 +4010,7 @@ void lcModel::UnhideAllPieces()
 
 void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 {
-	if (mPieces.IsEmpty())
+	if (mPieces.empty())
 		return;
 
 	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
@@ -4042,7 +4041,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
 	};
 
-	int StartIdx = mPieces.GetSize() - 1;
+	int StartIdx = mPieces.size() - 1;
 	int ReplacedCount = 0;
 
 	if (!FindAll)
@@ -4052,7 +4051,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 		if (FocusedPiece)
 		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.GetSize(); PieceIdx++)
+			for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
 			{
 				if (FocusedPiece == mPieces[PieceIdx])
 				{
@@ -4071,7 +4070,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	int CurrentIdx = StartIdx;
 	lcPiece* Focus = nullptr;
-	lcArray<lcObject*> Selection;
+	std::vector<lcObject*> Selection;
 
 	for (;;)
 	{
@@ -4081,8 +4080,8 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			CurrentIdx--;
 
 		if (CurrentIdx < 0)
-			CurrentIdx = mPieces.GetSize() - 1;
-		else if (CurrentIdx >= mPieces.GetSize())
+			CurrentIdx = mPieces.size() - 1;
+		else if (CurrentIdx >= mPieces.size())
 			CurrentIdx = 0;
 
 		lcPiece* Current = mPieces[CurrentIdx];
@@ -4091,7 +4090,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 		{
 			if (FindAll)
 			{
-				Selection.Add(Current);
+				Selection.emplace_back(Current);
 				if (Replacing)
 				{
 					ReplacePiece(Current);
@@ -4243,7 +4242,7 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 {
 	lcLight* Light = new lcLight(Position, LightType);
 	Light->CreateName(mLights);
-	mLights.Add(Light);
+	mLights.emplace_back(Light);
 
 	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
 
@@ -4274,7 +4273,7 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 {
 	lcCamera* Camera = new lcCamera(Position[0], Position[1], Position[2], Target[0], Target[1], Target[2]);
 	Camera->CreateName(mCameras);
-	mCameras.Add(Camera);
+	mCameras.emplace_back(Camera);
 
 	mMouseToolDistance = Position;
 	mMouseToolFirstMove = false;
@@ -4284,7 +4283,7 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 
 void lcModel::UpdateCameraTool(const lcVector3& Position)
 {
-	lcCamera* Camera = mCameras[mCameras.GetSize() - 1];
+	lcCamera* Camera = mCameras[mCameras.size() - 1];
 
 	Camera->MoveSelected(1, false, Position - mMouseToolDistance);
 	Camera->UpdatePosition(1);
@@ -4541,7 +4540,7 @@ void lcModel::ShowPropertiesDialog()
 
 void lcModel::ShowSelectByNameDialog()
 {
-	if (mPieces.IsEmpty() && mCameras.IsEmpty() && mLights.IsEmpty())
+	if (mPieces.empty() && mCameras.empty() && mLights.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
 		return;
@@ -4576,7 +4575,7 @@ void lcModel::ShowArrayDialog()
 		return;
 	}
 
-	lcArray<lcObject*> NewPieces;
+	std::vector<lcObject*> NewPieces;
 
 	for (int Step1 = 0; Step1 < Dialog.mCounts[0]; Step1++)
 	{
@@ -4611,13 +4610,13 @@ void lcModel::ShowArrayDialog()
 					NewPiece->Initialize(ModelWorld, mCurrentStep);
 					NewPiece->SetColorIndex(Piece->GetColorIndex());
 
-					NewPieces.Add(NewPiece);
+					NewPieces.emplace_back(NewPiece);
 				}
 			}
 		}
 	}
 
-	for (int PieceIdx = 0; PieceIdx < NewPieces.GetSize(); PieceIdx++)
+	for (size_t PieceIdx = 0; PieceIdx < NewPieces.size(); PieceIdx++)
 	{
 		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx];
 		Piece->UpdatePosition(mCurrentStep);
@@ -4639,7 +4638,8 @@ void lcModel::ShowMinifigDialog()
 	gMainWindow->GetActiveView()->MakeCurrent();
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
-	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
+	std::vector<lcObject*> Pieces;
+	Pieces.reserve(LC_MFW_NUMITEMS);
 	lcMinifig& Minifig = Dialog.mMinifigWizard->mMinifig;
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
@@ -4655,7 +4655,7 @@ void lcModel::ShowMinifigDialog()
 		AddPiece(Piece);
 		Piece->UpdatePosition(mCurrentStep);
 
-		Pieces.Add(Piece);
+		Pieces.emplace_back(Piece);
 	}
 
 	SetSelectionAndFocus(Pieces, nullptr, 0, false);
@@ -4667,7 +4667,8 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 {
 	DeleteModel();
 
-	lcArray<lcObject*> Pieces(LC_MFW_NUMITEMS);
+	std::vector<lcObject*> Pieces;
+	Pieces.reserve(LC_MFW_NUMITEMS);
 
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
@@ -4681,7 +4682,7 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 		AddPiece(Piece);
 		Piece->UpdatePosition(1);
 
-		Pieces.Add(Piece);
+		Pieces.emplace_back(Piece);
 	}
 
 	SetSelectionAndFocus(Pieces, nullptr, 0, false);

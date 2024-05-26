@@ -2173,7 +2173,7 @@ void lcMainWindow::CameraMenuAboutToShow()
 		QAction* Action = mActions[ActionIdx];
 		int CameraIdx = ActionIdx - LC_VIEW_CAMERA_FIRST;
 
-		if (CameraIdx < Cameras.GetSize())
+		if (CameraIdx < Cameras.size())
 		{
 			if (CurrentCamera == Cameras[CameraIdx])
 			{
@@ -2242,7 +2242,7 @@ void lcMainWindow::UpdateModels()
 		QAction* Action = mActions[ActionIdx];
 		int ModelIdx = ActionIdx - LC_MODEL_FIRST;
 
-		if (ModelIdx < Models.GetSize())
+		if (ModelIdx < Models.size())
 		{
 			Action->setChecked(CurrentModel == Models[ModelIdx]);
 			Action->setText(QString::fromLatin1("%1%2 %3").arg(ModelIdx < 9 ? QString("&") : QString(), QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mFileName));
@@ -2395,7 +2395,7 @@ void lcMainWindow::MergeProject()
 
 	if (NewProject->Load(LoadFileName, true))
 	{
-		int NumModels = NewProject->GetModels().GetSize();
+		int NumModels = NewProject->GetModels().size();
 
 		lcGetActiveProject()->Merge(NewProject);
 
@@ -2461,7 +2461,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 		if (SaveFileName.isEmpty())
 			SaveFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), Project->GetTitle()).absoluteFilePath();
 
-		QString Filter = (Project->GetModels().GetSize() > 1) ? tr("Supported Files (*.mpd);;All Files (*.*)") : tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)");
+		QString Filter = (Project->GetModels().size() > 1) ? tr("Supported Files (*.mpd);;All Files (*.*)") : tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)");
 
 		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Model"), SaveFileName, Filter);
 

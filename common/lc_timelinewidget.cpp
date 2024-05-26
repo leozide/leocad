@@ -523,7 +523,7 @@ void lcTimelineWidget::CurrentItemChanged(QTreeWidgetItem* Current, QTreeWidgetI
 
 void lcTimelineWidget::ItemSelectionChanged()
 {
-	lcArray<lcObject*> Selection;
+	std::vector<lcObject*> Selection;
 	lcStep LastStep = 1;
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
@@ -533,23 +533,26 @@ void lcTimelineWidget::ItemSelectionChanged()
 		if (Piece)
 		{
 			LastStep = lcMax(LastStep, Piece->GetStepShow());
-			Selection.Add(Piece);
+			Selection.emplace_back(Piece);
 		}
 	}
 
 	lcPiece* CurrentPiece = nullptr;
 	QTreeWidgetItem* CurrentItem = currentItem();
+
 	if (CurrentItem && CurrentItem->isSelected())
 		CurrentPiece = (lcPiece*)CurrentItem->data(0, Qt::UserRole).value<uintptr_t>();
 
 	bool Blocked = blockSignals(true);
 	mIgnoreUpdates = true;
 	lcModel* Model = gMainWindow->GetActiveModel();
+
 	if (LastStep > Model->GetCurrentStep())
 	{
 		Model->SetCurrentStep(LastStep);
 		UpdateCurrentStepItem();
 	}
+
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);

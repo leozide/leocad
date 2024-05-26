@@ -934,7 +934,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcCamera*>(this));
 		return;
 	}
 
@@ -952,7 +952,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcCamera*>(this));
 		return;
 	}
 
@@ -970,7 +970,7 @@ void lcCamera::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
 	{
-		ObjectBoxTest.Objects.Add(const_cast<lcCamera*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcCamera*>(this));
 		return;
 	}
 }

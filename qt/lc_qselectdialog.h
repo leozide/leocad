@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QDialog>
-#include "lc_array.h"
 
 namespace Ui {
 class lcQSelectDialog;
@@ -15,7 +14,7 @@ public:
 	lcQSelectDialog(QWidget* Parent, lcModel* Model);
 	~lcQSelectDialog();
 
-	lcArray<lcObject*> mObjects;
+	std::vector<lcObject*> mObjects;
 
 	enum
 	{

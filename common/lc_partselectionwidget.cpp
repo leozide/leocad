@@ -179,7 +179,7 @@ void lcPartSelectionListModel::SetModelsCategory()
 	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
 	lcModel* ActiveModel = gMainWindow->GetActiveModel();
 
-	for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < Models.size(); ModelIdx++)
 	{
 		lcModel* Model = Models[ModelIdx];
 

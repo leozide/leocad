@@ -58,7 +58,7 @@ public:
 
 	lcModel* GetMainModel() const
 	{
-		return !mModels.IsEmpty() ? mModels[0] : nullptr;
+		return !mModels.empty() ? mModels[0] : nullptr;
 	}
 
 	bool IsModified() const;

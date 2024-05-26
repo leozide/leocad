@@ -586,7 +586,7 @@ lcPieceInfoRayTest lcView::FindPieceInfoUnderPointer(bool IgnoreSelected) const
 	return ObjectRayTest.PieceInfoRayTest;
 }
 
-lcArray<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float y2) const
+std::vector<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, float y2) const
 {
 	float Left, Top, Bottom, Right;
 
@@ -1772,7 +1772,7 @@ void lcView::SetCamera(const QString& CameraName)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
-	for (int CameraIdx = 0; CameraIdx < Cameras.GetSize(); CameraIdx++)
+	for (int CameraIdx = 0; CameraIdx < Cameras.size(); CameraIdx++)
 	{
 		if (CameraName.compare(Cameras[CameraIdx]->GetName(), Qt::CaseInsensitive) == 0)
 		{
@@ -1786,7 +1786,7 @@ void lcView::SetCameraIndex(int Index)
 {
 	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
 
-	if (Index >= Cameras.GetSize())
+	if (Index >= Cameras.size())
 		return;
 
 	lcCamera* Camera = Cameras[Index];
@@ -2334,7 +2334,7 @@ void lcView::StopTracking(bool Accept)
 	case lcTool::Select:
 		if (Accept && mMouseDownX != mMouseX && mMouseDownY != mMouseY)
 		{
-			lcArray<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
+			std::vector<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
 
 			if (mMouseModifiers & Qt::ControlModifier)
 				ActiveModel->AddToSelection(Objects, true, true);

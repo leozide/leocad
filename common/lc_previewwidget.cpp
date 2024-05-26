@@ -57,7 +57,7 @@ void lcPreviewDockWidget::UpdatePreview()
 
 void lcPreviewDockWidget::ClearPreview()
 {
-	if (mPreview->GetModel()->GetPieces().GetSize())
+	if (mPreview->GetModel()->GetPieces().size())
 		mPreview->ClearPreview();
 
 	mLabel->setText(QString());
@@ -67,7 +67,7 @@ void lcPreviewDockWidget::SetPreviewLock()
 {
 	bool Locked = mLockAction->isChecked();
 
-	if (Locked && mPreview->GetModel()->GetPieces().IsEmpty())
+	if (Locked && mPreview->GetModel()->GetPieces().empty())
 	{
 		mLockAction->setChecked(false);
 		return;

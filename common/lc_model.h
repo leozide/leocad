@@ -275,7 +275,7 @@ public:
 
 	bool HasPieces() const
 	{
-		return !mPieces.IsEmpty();
+		return !mPieces.empty();
 	}
 
 	bool AnyPiecesSelected() const;
@@ -296,15 +296,15 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
-	lcArray<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
+	std::vector<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
 
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void ClearSelection(bool UpdateInterface);
 	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode);
 	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode);
-	void SetSelectionAndFocus(const lcArray<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
-	void AddToSelection(const lcArray<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
-	void RemoveFromSelection(const lcArray<lcObject*>& Objects);
+	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
+	void AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
+	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
 	void RemoveFromSelection(const lcObjectSection& ObjectSection);
 	void SelectAllPieces();
 	void InvertSelection();

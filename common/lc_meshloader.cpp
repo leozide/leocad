@@ -168,7 +168,7 @@ quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, bool Optimize
 {
 	if (Optimize)
 	{
-		for (int VertexIdx = mVertices.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		for (int VertexIdx = mVertices.size() - 1; VertexIdx >= 0; VertexIdx--)
 		{
 			const lcMeshLoaderVertex& Vertex = mVertices[VertexIdx];
 
@@ -177,20 +177,20 @@ quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, bool Optimize
 		}
 	}
 
-	lcMeshLoaderVertex& Vertex = mVertices.Add();
+	lcMeshLoaderVertex& Vertex = mVertices.emplace_back();
 
 	Vertex.Position = Position;
 	Vertex.Normal = lcVector3(0.0f, 0.0f, 0.0f);
 	Vertex.NormalWeight = 0.0f;
 
-	return mVertices.GetSize() - 1;
+	return mVertices.size() - 1;
 }
 
 quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, const lcVector3& Normal, float NormalWeight, bool Optimize)
 {
 	if (Optimize)
 	{
-		for (int VertexIdx = mVertices.GetSize() - 1; VertexIdx >= 0; VertexIdx--)
+		for (int VertexIdx = mVertices.size() - 1; VertexIdx >= 0; VertexIdx--)
 		{
 			lcMeshLoaderVertex& Vertex = mVertices[VertexIdx];
 
@@ -212,25 +212,25 @@ quint32 lcMeshLoaderTypeData::AddVertex(const lcVector3& Position, const lcVecto
 		}
 	}
 
-	lcMeshLoaderVertex& Vertex = mVertices.Add();
+	lcMeshLoaderVertex& Vertex = mVertices.emplace_back();
 
 	Vertex.Position = Position;
 	Vertex.Normal = Normal;
 	Vertex.NormalWeight = 1.0f;
 
-	return mVertices.GetSize() - 1;
+	return mVertices.size() - 1;
 }
 
 quint32 lcMeshLoaderTypeData::AddConditionalVertex(const lcVector3(&Position)[4])
 {
-	lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices.Add();
+	lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices.emplace_back();
 
 	Vertex.Position[0] = Position[0];
 	Vertex.Position[1] = Position[1];
 	Vertex.Position[2] = Position[2];
 	Vertex.Position[3] = Position[3];
 
-	return mConditionalVertices.GetSize() - 1;
+	return mConditionalVertices.size() - 1;
 }
 
 void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Material, bool WindingCCW, lcVector3 (&Vertices)[4], bool Optimize)
@@ -277,15 +277,15 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 			{
 				if (WindingCCW)
 				{
-					Section->mIndices.Add(Indices[0]);
-					Section->mIndices.Add(Indices[1]);
-					Section->mIndices.Add(Indices[2]);
+					Section->mIndices.emplace_back(Indices[0]);
+					Section->mIndices.emplace_back(Indices[1]);
+					Section->mIndices.emplace_back(Indices[2]);
 				}
 				else
 				{
-					Section->mIndices.Add(Indices[2]);
-					Section->mIndices.Add(Indices[1]);
-					Section->mIndices.Add(Indices[0]);
+					Section->mIndices.emplace_back(Indices[2]);
+					Section->mIndices.emplace_back(Indices[1]);
+					Section->mIndices.emplace_back(Indices[0]);
 				}
 			}
 		}
@@ -299,8 +299,8 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 
 		if (Indices[0] != Indices[1])
 		{
-			Section->mIndices.Add(Indices[0]);
-			Section->mIndices.Add(Indices[1]);
+			Section->mIndices.emplace_back(Indices[0]);
+			Section->mIndices.emplace_back(Indices[1]);
 		}
 	}
 	else if (LineType == 5)
@@ -308,22 +308,22 @@ void lcMeshLoaderTypeData::ProcessLine(int LineType, lcMeshLoaderMaterial* Mater
 		int Indices[2];
 
 		Indices[0] = AddConditionalVertex(Vertices);
-		Section->mIndices.Add(Indices[0]);
+		Section->mIndices.emplace_back(Indices[0]);
 
 		std::swap(Vertices[0], Vertices[1]);
 
 		Indices[1] = AddConditionalVertex(Vertices);
-		Section->mIndices.Add(Indices[1]);
+		Section->mIndices.emplace_back(Indices[1]);
 	}
 }
 
 void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap)
 {
 	const lcArray<lcMeshLoaderVertex>& DataVertices = Data.mVertices;
-	lcArray<quint32> IndexRemap(DataVertices.GetSize());
+	lcArray<quint32> IndexRemap(DataVertices.size());
 	const lcMatrix33 NormalTransform = lcMatrix33Transpose(lcMatrix33(lcMatrix44Inverse(Transform)));
 
-	mVertices.AllocGrow(DataVertices.GetSize());
+	mVertices.AllocGrow(DataVertices.size());
 
 	for (const lcMeshLoaderVertex& DataVertex : DataVertices)
 	{
@@ -340,11 +340,11 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 			Index = AddVertex(Position, Normal, DataVertex.NormalWeight, true);
 		}
 
-		IndexRemap.Add(Index);
+		IndexRemap.emplace_back(Index);
 	}
 
-	mConditionalVertices.AllocGrow(Data.mConditionalVertices.GetSize());
-	lcArray<quint32> ConditionalRemap(Data.mConditionalVertices.GetSize());
+	mConditionalVertices.AllocGrow(Data.mConditionalVertices.size());
+	lcArray<quint32> ConditionalRemap(Data.mConditionalVertices.size());
 
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
@@ -356,7 +356,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		Position[3] = lcMul31(DataVertex.Position[3], Transform);
 
 		const int Index = AddConditionalVertex(Position);
-		ConditionalRemap.Add(Index);
+		ConditionalRemap.emplace_back(Index);
 	}
 
 	for (const std::unique_ptr<lcMeshLoaderSection>& SrcSection : Data.mSections)
@@ -385,25 +385,25 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 			DstSection = AddSection(PrimitiveType, mMeshData->GetMaterial(ColorCode));
 		}
 
-		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
+		DstSection->mIndices.AllocGrow(SrcSection->mIndices.size());
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)
 		{
 			for (const quint32 Index : SrcSection->mIndices)
-				DstSection->mIndices.Add(ConditionalRemap[Index]);
+				DstSection->mIndices.emplace_back(ConditionalRemap[Index]);
 		}
 		else if (!InvertWinding || (PrimitiveType == LC_MESH_LINES))
 		{
 			for (const quint32 Index : SrcSection->mIndices)
-				DstSection->mIndices.Add(IndexRemap[Index]);
+				DstSection->mIndices.emplace_back(IndexRemap[Index]);
 		}
 		else
 		{
-			for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+			for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx += 3)
 			{
-				DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 2]]);
-				DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 1]]);
-				DstSection->mIndices.Add(IndexRemap[SrcSection->mIndices[IndexIdx + 0]]);
+				DstSection->mIndices.emplace_back(IndexRemap[SrcSection->mIndices[IndexIdx + 2]]);
+				DstSection->mIndices.emplace_back(IndexRemap[SrcSection->mIndices[IndexIdx + 1]]);
+				DstSection->mIndices.emplace_back(IndexRemap[SrcSection->mIndices[IndexIdx + 0]]);
 			}
 		}
 	}
@@ -415,15 +415,15 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 	quint32 BaseIndex;
 	const lcMatrix33 NormalTransform = lcMatrix33Transpose(lcMatrix33(lcMatrix44Inverse(Transform)));
 
-	BaseIndex = mVertices.GetSize();
+	BaseIndex = mVertices.size();
 
-	mVertices.SetGrow(lcMin(mVertices.GetSize(), 8 * 1024 * 1024));
-	mVertices.AllocGrow(DataVertices.GetSize());
+	mVertices.SetGrow(lcMin(mVertices.size(), 8 * 1024 * 1024));
+	mVertices.AllocGrow(DataVertices.size());
 
-	for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.GetSize(); SrcVertexIdx++)
+	for (int SrcVertexIdx = 0; SrcVertexIdx < DataVertices.size(); SrcVertexIdx++)
 	{
 		const lcMeshLoaderVertex& SrcVertex = DataVertices[SrcVertexIdx];
-		lcMeshLoaderVertex& DstVertex = mVertices.Add();
+		lcMeshLoaderVertex& DstVertex = mVertices.emplace_back();
 		DstVertex.Position = lcMul31(SrcVertex.Position, Transform);
 		DstVertex.Normal = lcNormalize(lcMul(SrcVertex.Normal, NormalTransform));
 		if (InvertNormals)
@@ -431,12 +431,12 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 		DstVertex.NormalWeight = SrcVertex.NormalWeight;
 	}
 
-	mConditionalVertices.AllocGrow(Data.mConditionalVertices.GetSize());
-	const quint32 BaseConditional = mConditionalVertices.GetSize();
+	mConditionalVertices.AllocGrow(Data.mConditionalVertices.size());
+	const quint32 BaseConditional = mConditionalVertices.size();
 
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
-		lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices.Add();
+		lcMeshLoaderConditionalVertex& Vertex = mConditionalVertices.emplace_back();
 
 		Vertex.Position[0] = lcMul31(DataVertex.Position[0], Transform);
 		Vertex.Position[1] = lcMul31(DataVertex.Position[1], Transform);
@@ -470,26 +470,26 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 			DstSection = AddSection(PrimitiveType, mMeshData->GetMaterial(ColorCode));
 		}
 
-		DstSection->mIndices.SetGrow(lcMin(DstSection->mIndices.GetSize(), 8 * 1024 * 1024));
-		DstSection->mIndices.AllocGrow(SrcSection->mIndices.GetSize());
+		DstSection->mIndices.SetGrow(lcMin(DstSection->mIndices.size(), 8 * 1024 * 1024));
+		DstSection->mIndices.AllocGrow(SrcSection->mIndices.size());
 
 		if (PrimitiveType == LC_MESH_CONDITIONAL_LINES)
 		{
 			for (const quint32 Index : SrcSection->mIndices)
-				DstSection->mIndices.Add(BaseConditional + Index);
+				DstSection->mIndices.emplace_back(BaseConditional + Index);
 		}
 		else if (!InvertWinding || (PrimitiveType == LC_MESH_LINES))
 		{
 			for (const quint32 Index : SrcSection->mIndices)
-				DstSection->mIndices.Add(BaseIndex + Index);
+				DstSection->mIndices.emplace_back(BaseIndex + Index);
 		}
 		else
 		{
-			for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx += 3)
+			for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx += 3)
 			{
-				DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 2]);
-				DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 1]);
-				DstSection->mIndices.Add(BaseIndex + SrcSection->mIndices[IndexIdx + 0]);
+				DstSection->mIndices.emplace_back(BaseIndex + SrcSection->mIndices[IndexIdx + 2]);
+				DstSection->mIndices.emplace_back(BaseIndex + SrcSection->mIndices[IndexIdx + 1]);
+				DstSection->mIndices.emplace_back(BaseIndex + SrcSection->mIndices[IndexIdx + 0]);
 			}
 		}
 	}
@@ -498,9 +498,9 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer)
 {
 	lcArray<lcMeshLoaderVertex>& Vertices = mData[MeshDataType].mVertices;
-	int CurrentSize = Vertices.GetSize();
+	int CurrentSize = Vertices.size();
 
-	Vertices.SetSize(CurrentSize + VertexCount);
+	Vertices.resize(CurrentSize + VertexCount);
 
 	*BaseVertex = CurrentSize;
 	*VertexBuffer = &Vertices[CurrentSize];
@@ -510,9 +510,9 @@ void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveT
 {
 	lcMeshLoaderSection* Section = mData[MeshDataType].AddSection(PrimitiveType, GetMaterial(ColorCode));
 	lcArray<quint32>& Indices = Section->mIndices;
-	const int CurrentSize = Indices.GetSize();
+	const int CurrentSize = Indices.size();
 
-	Indices.SetSize(CurrentSize + IndexCount);
+	Indices.resize(CurrentSize + IndexCount);
 
 	*IndexBuffer = &Indices[CurrentSize];
 }
@@ -631,7 +631,7 @@ static bool lcMeshLoaderFinalSectionCompare(const lcMeshLoaderFinalSection& a, c
 
 quint32 lcLibraryMeshData::AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoords)
 {
-	for (int VertexIndex = mTexturedVertices.GetSize() - 1; VertexIndex >= 0; VertexIndex--)
+	for (int VertexIndex = mTexturedVertices.size() - 1; VertexIndex >= 0; VertexIndex--)
 	{
 		const lcMeshLoaderTexturedVertex& Vertex = mTexturedVertices[VertexIndex];
 
@@ -639,13 +639,13 @@ quint32 lcLibraryMeshData::AddTexturedVertex(const lcVector3& Position, const lc
 			return VertexIndex;
 	}
 
-	lcMeshLoaderTexturedVertex& Vertex = mTexturedVertices.Add();
+	lcMeshLoaderTexturedVertex& Vertex = mTexturedVertices.emplace_back();
 
 	Vertex.Position = Position;
 	Vertex.Normal = Normal;
 	Vertex.TexCoords = TexCoords;
 
-	return mTexturedVertices.GetSize() - 1;
+	return mTexturedVertices.size() - 1;
 }
 
 void lcLibraryMeshData::GeneratePlanarTexcoords(lcMeshLoaderSection* Section, const lcMeshLoaderTypeData& Data)
@@ -688,7 +688,7 @@ void lcLibraryMeshData::GenerateCylindricalTexcoords(lcMeshLoaderSection* Sectio
 	const lcVector4 Plane2 = lcVector4(Plane2Normal, -lcDot(Plane2Normal, Material->Points[1]));
 	const float Angle = 360.0f / Material->Angles[0];
 
-	for (int TriangleIndex = 0; TriangleIndex < Section->mIndices.GetSize(); TriangleIndex += 3)
+	for (int TriangleIndex = 0; TriangleIndex < Section->mIndices.size(); TriangleIndex += 3)
 	{
 		const lcVector3 Positions[3] =
 		{
@@ -731,7 +731,7 @@ void lcLibraryMeshData::GenerateSphericalTexcoords(lcMeshLoaderSection* Section,
 	const float Angle1 = 360.0f / Material->Angles[0];
 	const float Angle2 = 180.0f / Material->Angles[1];
 
-	for (int TriangleIndex = 0; TriangleIndex < Section->mIndices.GetSize(); TriangleIndex += 3)
+	for (int TriangleIndex = 0; TriangleIndex < Section->mIndices.size(); TriangleIndex += 3)
 	{
 		const lcVector3 Positions[3] =
 		{
@@ -808,9 +808,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	for (int MeshDataIdx = 0; MeshDataIdx < LC_NUM_MESHDATA_TYPES; MeshDataIdx++)
 	{
 		BaseVertices[MeshDataIdx] = NumVertices;
-		NumVertices += mData[MeshDataIdx].mVertices.GetSize();
+		NumVertices += mData[MeshDataIdx].mVertices.size();
 		BaseConditionalVertices[MeshDataIdx] = ConditionalVertexCount;
-		ConditionalVertexCount += mData[MeshDataIdx].mConditionalVertices.GetSize();
+		ConditionalVertexCount += mData[MeshDataIdx].mConditionalVertices.size();
 	}
 
 	if (mHasTextures)
@@ -829,7 +829,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 				if (FinalSection.PrimitiveType == Section->mPrimitiveType && FinalSection.Color == Section->mMaterial->Color && !strcmp(FinalSection.Name, Section->mMaterial->Name))
 					return;
 
-			lcMeshLoaderFinalSection& FinalSection = FinalSections.Add();
+			lcMeshLoaderFinalSection& FinalSection = FinalSections.emplace_back();
 
 			FinalSection.PrimitiveType = Section->mPrimitiveType;
 			FinalSection.Color = Section->mMaterial->Color;
@@ -838,23 +838,23 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
 		{
-			NumIndices += Section->mIndices.GetSize();
+			NumIndices += Section->mIndices.size();
 
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
 
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LodIdx].mSections)
 		{
-			NumIndices += Section->mIndices.GetSize();
+			NumIndices += Section->mIndices.size();
 
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
 
-		NumSections[LodIdx] = FinalSections[LodIdx].GetSize();
+		NumSections[LodIdx] = FinalSections[LodIdx].size();
 		std::sort(FinalSections[LodIdx].begin(), FinalSections[LodIdx].end(), lcMeshLoaderFinalSectionCompare);
 	}
 
-	Mesh->Create(NumSections, NumVertices, mTexturedVertices.GetSize(), ConditionalVertexCount, NumIndices);
+	Mesh->Create(NumSections, NumVertices, mTexturedVertices.size(), ConditionalVertexCount, NumIndices);
 
 	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexData;
 
@@ -918,7 +918,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		for (int SectionIdx = 0; SectionIdx < FinalSections[LodIdx].GetSize(); SectionIdx++)
+		for (int SectionIdx = 0; SectionIdx < FinalSections[LodIdx].size(); SectionIdx++)
 		{
 			const lcMeshLoaderFinalSection& FinalSection = FinalSections[LodIdx][SectionIdx];
 			lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIdx];
@@ -953,7 +953,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 					{
 						const IndexType BaseVertex = BaseVertices[SrcDataType];
 
-						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
 					break;
@@ -962,14 +962,14 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 					{
 						const IndexType BaseVertex = BaseConditionalVertices[SrcDataType];
 
-						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
 					}
 					break;
 
 					case LC_MESH_TEXTURED_TRIANGLES:
 					{
-						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.GetSize(); IndexIdx++)
+						for (int IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
 							*Index++ = SrcSection->mIndices[IndexIdx];
 					}
 					break;
@@ -978,7 +978,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const lcArray<lcMeshLoaderFi
 						break;
 				}
 
-				DstSection.NumIndices += SrcSection->mIndices.GetSize();
+				DstSection.NumIndices += SrcSection->mIndices.size();
 			};
 
 			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)

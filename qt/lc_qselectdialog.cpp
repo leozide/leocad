@@ -26,7 +26,7 @@ lcQSelectDialog::~lcQSelectDialog()
 
 void lcQSelectDialog::accept()
 {
-	mObjects.RemoveAll();
+	mObjects.clear();
 
 	QList<QTreeWidgetItem*> Items;
 	Items.append(ui->treeWidget->invisibleRootItem());
@@ -41,7 +41,7 @@ void lcQSelectDialog::accept()
 			if (Item->checkState(0) == Qt::Checked)
 			{
 				lcObject* Object = (lcObject*)Item->data(0, IndexRole).value<uintptr_t>();
-				mObjects.Add(Object);
+				mObjects.emplace_back(Object);
 			}
 		}
 		else

@@ -25,7 +25,7 @@ public:
 		: lcArray((int)Init.size())
 	{
 		for (const T& Element : Init)
-			Add(Element);
+			emplace_back(Element);
 	}
 
 	~lcArray()
@@ -112,17 +112,17 @@ public:
 		return &mData[0] + mLength;
 	}
 
-	bool IsEmpty() const
+	bool empty() const
 	{
 		return mLength == 0;
 	}
 
-	int GetSize() const
+	int size() const
 	{
 		return mLength;
 	}
 
-	void SetSize(size_t NewSize)
+	void resize(size_t NewSize)
 	{
 		if (NewSize > mAlloc)
 			AllocGrow(NewSize - mLength);
@@ -152,13 +152,13 @@ public:
 		}
 	}
 
-	void Add(const T& NewItem)
+	void emplace_back(const T& NewItem)
 	{
 		AllocGrow(1);
 		mData[mLength++] = NewItem;
 	}
 
-	T& Add()
+	T& emplace_back()
 	{
 		AllocGrow(1);
 		mData[mLength++] = T();

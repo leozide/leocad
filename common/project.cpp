@@ -70,7 +70,7 @@ Project::Project(bool IsPreview)
 	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), this, mIsPreview);
 	mActiveModel->CreatePieceInfo(this);
 	mActiveModel->SetSaved();
-	mModels.Add(mActiveModel);
+	mModels.emplace_back(mActiveModel);
 
 	if (!mIsPreview && gMainWindow)
 		QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
@@ -95,7 +95,7 @@ bool Project::IsModified() const
 	if (mModified)
 		return true;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		if (mModels[ModelIdx]->IsModified())
 			return true;
 
@@ -107,7 +107,7 @@ QString Project::GetTitle() const
 	if (!mFileName.isEmpty())
 		return QFileInfo(mFileName).fileName();
 
-	return mModels.GetSize() == 1 ? tr("New Model.ldr") : tr("New Model.mpd");
+	return mModels.size() == 1 ? tr("New Model.ldr") : tr("New Model.mpd");
 }
 
 QString Project::GetImageFileName(bool AllowCurrentFolder) const
@@ -137,16 +137,16 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 
 void Project::SetActiveModel(int ModelIndex)
 {
-	if (ModelIndex < 0 || ModelIndex >= mModels.GetSize())
+	if (ModelIndex < 0 || ModelIndex >= mModels.size())
 		return;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
 
 	std::vector<lcModel*> UpdatedModels;
-	UpdatedModels.reserve(mModels.GetSize());
+	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mActiveModel = mModels[ModelIndex];
@@ -160,7 +160,7 @@ void Project::SetActiveModel(int ModelIndex)
 
 void Project::SetActiveModel(const QString& FileName)
 {
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 	{
 		if (FileName.compare(mModels[ModelIdx]->GetFileName(), Qt::CaseInsensitive) == 0)
 		{
@@ -241,7 +241,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 {
 	QStringList ModelNames;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		ModelNames.append(mModels[ModelIdx]->GetProperties().mFileName);
 
 	QString Name = GetNewModelName(gMainWindow, tr("New Submodel"), QString(), ModelNames);
@@ -253,11 +253,11 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 	lcModel* Model = new lcModel(Name, this, false);
 	Model->CreatePieceInfo(this);
 	Model->SetSaved();
-	mModels.Add(Model);
+	mModels.emplace_back(Model);
 
 	if (ShowModel)
 	{
-		SetActiveModel(mModels.GetSize() - 1);
+		SetActiveModel(mModels.size() - 1);
 
 		lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
 		if (ActiveView)
@@ -327,10 +327,10 @@ void Project::ShowModelListDialog()
 			mModified = true;
 		}
 
-		NewModels.Add(Model);
+		NewModels.emplace_back(Model);
 	}
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 	{
 		lcModel* Model = mModels[ModelIdx];
 
@@ -415,7 +415,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 				if (std::find_if(Models.begin(), Models.end(), ModelCompare) == Models.end())
 				{
-					mModels.Add(Model);
+					mModels.emplace_back(Model);
 					Models.emplace_back(std::make_pair(Pos, Model));
 					Model->CreatePieceInfo(this);
 				}
@@ -444,7 +444,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 		if (Model->LoadBinary(&MemFile))
 		{
-			mModels.Add(Model);
+			mModels.emplace_back(Model);
 			Model->CreatePieceInfo(this);
 			Model->SetSaved();
 		}
@@ -452,14 +452,14 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			delete Model;
 	}
 
-	if (mModels.IsEmpty())
+	if (mModels.empty())
 	{
 		if (ShowErrors)
 			QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
 	}
 
-	if (mModels.GetSize() == 1)
+	if (mModels.size() == 1)
 	{
 		lcModel* Model = mModels[0];
 
@@ -471,7 +471,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	}
 
 	std::vector<lcModel*> UpdatedModels;
-	UpdatedModels.reserve(mModels.GetSize());
+	UpdatedModels.reserve(mModels.size());
 
 	for (lcModel* Model : mModels)
 	{
@@ -511,7 +511,7 @@ bool Project::Save(const QString& FileName)
 
 bool Project::Save(QTextStream& Stream)
 {
-	bool MPD = mModels.GetSize() > 1;
+	bool MPD = mModels.size() > 1;
 
 	for (lcModel* Model : mModels)
 	{
@@ -538,7 +538,7 @@ void Project::Merge(Project* Other)
 		{
 			bool Duplicate = false;
 
-			for (int SearchIdx = 0; SearchIdx < mModels.GetSize(); SearchIdx++)
+			for (int SearchIdx = 0; SearchIdx < mModels.size(); SearchIdx++)
 			{
 				if (mModels[SearchIdx]->GetProperties().mFileName == FileName)
 				{
@@ -554,7 +554,7 @@ void Project::Merge(Project* Other)
 			Model->SetFileName(FileName);
 		}
 
-		mModels.Add(Model);
+		mModels.emplace_back(Model);
 	}
 
 	Other->mModels.RemoveAll();
@@ -578,7 +578,7 @@ bool Project::ImportLDD(const QString& FileName)
 
 	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
 	{
-		mModels.Add(Model);
+		mModels.emplace_back(Model);
 		Model->SetSaved();
 	}
 	else
@@ -587,13 +587,13 @@ bool Project::ImportLDD(const QString& FileName)
 		return false;
 	}
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
 
 	std::vector<lcModel*> UpdatedModels;
-	UpdatedModels.reserve(mModels.GetSize());
+	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mModified = false;
@@ -611,7 +611,7 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 
 	if (Model->LoadInventory(Inventory))
 	{
-		mModels.Add(Model);
+		mModels.emplace_back(Model);
 		Model->SetSaved();
 	}
 	else
@@ -622,13 +622,13 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 
 	Model->SetDescription(Description);
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->CreatePieceInfo(this);
 
 	std::vector<lcModel*> UpdatedModels;
-	UpdatedModels.reserve(mModels.GetSize());
+	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.GetSize(); ModelIdx++)
+	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
 		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
 
 	mModified = false;
@@ -640,7 +640,7 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 {
 	std::vector<lcModelPartsEntry> ModelParts;
 
-	if (mModels.IsEmpty())
+	if (mModels.empty())
 		return ModelParts;
 
 	for (lcModel* Model : mModels)
@@ -698,7 +698,7 @@ bool Project::ExportCurrentStep(const QString& FileName)
 
 	const lcStep CurrentStep = lcGetActiveModel()->GetCurrentStep();
 
-	bool MPD = mModels.GetSize() > 1;
+	bool MPD = mModels.size() > 1;
 
 	if (MPD)
 	{
@@ -1243,7 +1243,7 @@ void Project::ExportBrickLink()
 {
 	lcPartsList PartsList;
 
-	if (!mModels.IsEmpty())
+	if (!mModels.empty())
 		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
@@ -1536,7 +1536,7 @@ bool Project::ExportCSV(const QString& FileName)
 {
 	lcPartsList PartsList;
 
-	if (!mModels.IsEmpty())
+	if (!mModels.empty())
 		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
@@ -1594,10 +1594,10 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 	lcArray<lcModel*> Models;
 
 	if (Options.CurrentOnly)
-		Models.Add(mActiveModel);
+		Models.emplace_back(mActiveModel);
 	else if (Options.SubModels)
 	{
-		Models.Add(mActiveModel);
+		Models.emplace_back(mActiveModel);
 		mActiveModel->GetSubModels(Models);
 	}
 	else
@@ -1626,7 +1626,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 		lcStep LastStep = Model->GetLastStep();
 		QString PageTitle;
 
-		if (Models.GetSize() > 1)
+		if (Models.size() > 1)
 		{
 			BaseName += '-' + Model->GetProperties().mFileName;
 			PageTitle = Model->GetProperties().mFileName;
@@ -1756,7 +1756,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 		Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
 	}
 
-	if (Models.GetSize() > 1)
+	if (Models.size() > 1)
 	{
 		QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
 		QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-index.html")).absoluteFilePath();
@@ -1772,7 +1772,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle);
 
-		for (int ModelIdx = 0; ModelIdx < Models.GetSize(); ModelIdx++)
+		for (int ModelIdx = 0; ModelIdx < Models.size(); ModelIdx++)
 		{
 			lcModel* Model = Models[ModelIdx];
 			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mFileName;
@@ -2151,7 +2151,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	lcLightType LightType = lcLightType::Area;
 	float Power = 0.0f, FadeDistance = 0.0f, FadePower = 0.0f, SpotRadius = 0.0f, SpotFalloff = 0.0f, SpotTightness = 0.0f;
 
-	if (Lights.IsEmpty())
+	if (Lights.empty())
 	{
 		const lcVector3 LightTarget(0.0f, 0.0f, 0.0f), LightColor(1.0f, 1.0f, 1.0f);
 		lcVector3 Location[4];
@@ -2660,7 +2660,7 @@ void Project::SaveImage()
 
 void Project::UpdatePieceInfo(PieceInfo* Info) const
 {
-	if (!mModels.IsEmpty())
+	if (!mModels.empty())
 	{
 		std::vector<lcModel*> UpdatedModels;
 		mModels[0]->UpdatePieceInfo(UpdatedModels);

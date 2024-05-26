@@ -515,7 +515,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	if (mPieceInfo->BoxTest(mModelWorld, ObjectBoxTest.Planes))
-		ObjectBoxTest.Objects.Add(const_cast<lcPiece*>(this));
+		ObjectBoxTest.Objects.emplace_back(const_cast<lcPiece*>(this));
 }
 
 void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const

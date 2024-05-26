@@ -40,7 +40,7 @@ struct lcObjectBoxTest
 {
 	lcCamera* ViewCamera;
 	lcVector4 Planes[6];
-	lcArray<lcObject*> Objects;
+	std::vector<lcObject*> Objects;
 };
 
 #define LC_OBJECT_TRANSFORM_MOVE_X    0x001

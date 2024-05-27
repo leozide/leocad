@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
 #include "lc_math.h"
 
 #define LC_MAX_COLOR_NAME 64

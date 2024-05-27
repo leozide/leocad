@@ -1,7 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
-
 #define LC_MAX_GROUP_NAME 64
 
 class lcGroup
@@ -15,7 +13,7 @@ public:
 	}
 
 	void FileLoad(lcFile* File);
-	void CreateName(const lcArray<lcGroup*>& Groups);
+	void CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups);
 
 	lcGroup* mGroup;
 	QString mName;

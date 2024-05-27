@@ -285,7 +285,7 @@ void lcModel::DeleteModel()
 	mPieces.DeleteAll();
 	mCameras.DeleteAll();
 	mLights.DeleteAll();
-	mGroups.DeleteAll();
+	mGroups.clear();
 	mFileLines.clear();
 }
 
@@ -349,7 +349,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 	mProperties.SaveLDraw(Stream);
 
-	lcArray<lcGroup*> CurrentGroups;
+	std::vector<lcGroup*> CurrentGroups;
 	lcStep Step = 1;
 	int CurrentLine = 0;
 	int AddedSteps = 0;
@@ -407,33 +407,33 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		{
 			if (CurrentGroups.empty() || (!CurrentGroups.empty() && PieceGroup != CurrentGroups[CurrentGroups.size() - 1]))
 			{
-				lcArray<lcGroup*> PieceParents;
+				std::deque<lcGroup*> PieceParents;
 
 				for (lcGroup* Group = PieceGroup; Group; Group = Group->mGroup)
-					PieceParents.InsertAt(0, Group);
+					PieceParents.push_front(Group);
 
-				int FoundParent = -1;
+				std::deque<lcGroup*>::iterator ParentsToAdd = PieceParents.begin();
 
 				while (!CurrentGroups.empty())
 				{
-					lcGroup* Group = CurrentGroups[CurrentGroups.size() - 1];
-					const int Index = PieceParents.FindIndex(Group);
+					lcGroup* Group = CurrentGroups.back();
+					const std::deque<lcGroup*>::iterator ParentFound = std::find(PieceParents.begin(), PieceParents.end(), Group);
 
-					if (Index == -1)
+					if (ParentFound == PieceParents.end())
 					{
-						CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
+						CurrentGroups.pop_back();
 						Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 					}
 					else
 					{
-						FoundParent = Index;
+						ParentsToAdd = ParentFound + 1;
 						break;
 					}
 				}
 
-				for (int ParentIdx = FoundParent + 1; ParentIdx < PieceParents.size(); ParentIdx++)
+				for (std::deque<lcGroup*>::iterator ParentIt = ParentsToAdd; ParentIt != PieceParents.end(); ParentIt++)
 				{
-					lcGroup* Group = PieceParents[ParentIdx];
+					lcGroup* Group = *ParentIt;
 					CurrentGroups.emplace_back(Group);
 					Stream << QLatin1String("0 !LEOCAD GROUP BEGIN ") << Group->mName << LineEnding;
 				}
@@ -443,7 +443,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		{
 			while (CurrentGroups.size())
 			{
-				CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
+				CurrentGroups.pop_back();
 				Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 			}
 		}
@@ -497,7 +497,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 	while (CurrentGroups.size())
 	{
-		CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
+		CurrentGroups.pop_back();
 		Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 	}
 
@@ -556,7 +556,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	lcPiece* Piece = nullptr;
 	lcCamera* Camera = nullptr;
 	lcLight* Light = nullptr;
-	lcArray<lcGroup*> CurrentGroups;
+	std::vector<lcGroup*> CurrentGroups;
 	std::vector<lcPieceControlPoint> ControlPoints;
 	int CurrentStep = 1;
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -680,7 +680,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				else if (Token == QLatin1String("END"))
 				{
 					if (!CurrentGroups.empty())
-						CurrentGroups.RemoveIndex(CurrentGroups.size() - 1);
+						CurrentGroups.pop_back();
 				}
 			}
 			else if (Token == QLatin1String("SYNTH"))
@@ -919,15 +919,15 @@ bool lcModel::LoadBinary(lcFile* file)
 
 	if (fv >= 0.5f)
 	{
-		const int NumGroups = mGroups.size();
+		const size_t NumGroups = mGroups.size();
 
 		file->ReadS32(&count, 1);
 		for (i = 0; i < count; i++)
 			mGroups.emplace_back(new lcGroup());
 
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
+		for (size_t GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
 		{
-			lcGroup* Group = mGroups[GroupIdx];
+			lcGroup* Group = mGroups[GroupIdx].get();
 
 			if (fv < 1.0f)
 			{
@@ -941,9 +941,9 @@ bool lcModel::LoadBinary(lcFile* file)
 				Group->FileLoad(file);
 		}
 
-		for (int GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
+		for (size_t GroupIdx = NumGroups; GroupIdx < mGroups.size(); GroupIdx++)
 		{
-			lcGroup* Group = mGroups[GroupIdx];
+			lcGroup* Group = mGroups[GroupIdx].get();
 
 			i = (qint32)(quintptr)(Group->mGroup);
 			Group->mGroup = nullptr;
@@ -951,7 +951,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			if (i > 0xFFFF || i == -1)
 				continue;
 
-			Group->mGroup = mGroups[NumGroups + i];
+			Group->mGroup = mGroups[NumGroups + i].get();
 		}
 
 		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.size(); PieceIdx++)
@@ -964,7 +964,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			if (i > 0xFFFF || i == -1)
 				continue;
 
-			Piece->SetGroup(mGroups[NumGroups + i]);
+			Piece->SetGroup(mGroups[NumGroups + i].get());
 		}
 
 		RemoveEmptyGroups();
@@ -1166,14 +1166,14 @@ void lcModel::Merge(lcModel* Other)
 
 	Other->mLights.RemoveAll();
 
-	for (int GroupIdx = 0; GroupIdx < Other->mGroups.size(); GroupIdx++)
+	for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = Other->mGroups.begin(); GroupIt != Other->mGroups.end(); GroupIt++)
 	{
-		lcGroup* Group = Other->mGroups[GroupIdx];
+		std::unique_ptr<lcGroup>& Group = *GroupIt;
 		Group->CreateName(mGroups);
-		mGroups.emplace_back(Group);
+		mGroups.emplace_back(std::move(Group));
 	}
 
-	Other->mGroups.RemoveAll();
+	Other->mGroups.clear();
 
 	delete Other;
 
@@ -1919,9 +1919,9 @@ lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)
 
 lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
 {
-	for (lcGroup* Group : mGroups)
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
 		if (Group->mName == Name)
-			return Group;
+			return Group.get();
 
 	if (CreateIfMissing)
 	{
@@ -1937,8 +1937,14 @@ lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
 
 void lcModel::RemoveGroup(lcGroup* Group)
 {
-	mGroups.Remove(Group);
-	delete Group;
+	for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = mGroups.begin(); GroupIt != mGroups.end(); GroupIt++)
+	{
+		if (GroupIt->get() == Group)
+		{
+			mGroups.erase(GroupIt);
+			break;
+		}
+	}
 }
 
 void lcModel::GroupSelection()
@@ -1973,7 +1979,7 @@ void lcModel::GroupSelection()
 
 void lcModel::UngroupSelection()
 {
-	lcArray<lcGroup*> SelectedGroups;
+	std::set<lcGroup*> SelectedGroups;
 
 	for (lcPiece* Piece : mPieces)
 	{
@@ -1981,10 +1987,17 @@ void lcModel::UngroupSelection()
 		{
 			lcGroup* Group = Piece->GetTopGroup();
 
-			if (SelectedGroups.FindIndex(Group) == -1)
+			if (SelectedGroups.insert(Group).second)
 			{
-				mGroups.Remove(Group);
-				SelectedGroups.emplace_back(Group);
+				for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = mGroups.begin(); GroupIt != mGroups.end(); GroupIt++)
+				{
+					if (GroupIt->get() == Group)
+					{
+						GroupIt->release();
+						mGroups.erase(GroupIt);
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -1993,15 +2006,16 @@ void lcModel::UngroupSelection()
 	{
 		lcGroup* Group = Piece->GetGroup();
 
-		if (SelectedGroups.FindIndex(Group) != -1)
+		if (SelectedGroups.find(Group) != SelectedGroups.end())
 			Piece->SetGroup(nullptr);
 	}
 
-	for (lcGroup* Group : mGroups)
-		if (SelectedGroups.FindIndex(Group->mGroup) != -1)
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
+		if (SelectedGroups.find(Group->mGroup) != SelectedGroups.end())
 			Group->mGroup = nullptr;
 
-	SelectedGroups.DeleteAll();
+	for (lcGroup* Group : SelectedGroups)
+		delete Group;
 
 	RemoveEmptyGroups();
 	SaveCheckpoint(tr("Ungrouping"));
@@ -2060,8 +2074,8 @@ void lcModel::ShowEditGroupsDialog()
 	for (lcPiece* Piece : mPieces)
 		PieceParents[Piece] = Piece->GetGroup();
 
-	for (lcGroup* Group : mGroups)
-		GroupParents[Group] = Group->mGroup;
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
+		GroupParents[Group.get()] = Group->mGroup;
 
 	lcQEditGroupsDialog Dialog(gMainWindow, PieceParents, GroupParents, this);
 
@@ -2081,9 +2095,9 @@ void lcModel::ShowEditGroupsDialog()
 		}
 	}
 
-	for (lcGroup* Group : mGroups)
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
 	{
-		lcGroup* ParentGroup = Dialog.mGroupParents.value(Group);
+		lcGroup* ParentGroup = Dialog.mGroupParents.value(Group.get());
 
 		if (ParentGroup != Group->mGroup)
 		{
@@ -2104,7 +2118,7 @@ QString lcModel::GetGroupName(const QString& Prefix)
 	const int Length = Prefix.length();
 	int Max = 0;
 
-	for (const lcGroup* Group : mGroups)
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
 	{
 		const QString& Name = Group->mName;
 
@@ -2128,22 +2142,22 @@ void lcModel::RemoveEmptyGroups()
 	{
 		Removed = false;
 
-		for (int GroupIdx = 0; GroupIdx < mGroups.size();)
+		for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = mGroups.begin(); GroupIt != mGroups.end();)
 		{
-			lcGroup* Group = mGroups[GroupIdx];
+			lcGroup* Group = GroupIt->get();
 			int Ref = 0;
 
 			for (lcPiece* Piece : mPieces)
 				if (Piece->GetGroup() == Group)
 					Ref++;
 
-			for (int ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
+			for (size_t ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
 				if (mGroups[ParentIdx]->mGroup == Group)
 					Ref++;
 
 			if (Ref > 1)
 			{
-				GroupIdx++;
+				GroupIt++;
 				continue;
 			}
 
@@ -2158,7 +2172,7 @@ void lcModel::RemoveEmptyGroups()
 					}
 				}
 
-				for (int ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
+				for (size_t ParentIdx = 0; ParentIdx < mGroups.size(); ParentIdx++)
 				{
 					if (mGroups[ParentIdx]->mGroup == Group)
 					{
@@ -2168,8 +2182,7 @@ void lcModel::RemoveEmptyGroups()
 				}
 			}
 
-			mGroups.RemoveIndex(GroupIdx);
-			delete Group;
+			GroupIt = mGroups.erase(GroupIt);
 			Removed = true;
 		}
 	}

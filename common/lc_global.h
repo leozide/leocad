@@ -16,6 +16,7 @@
 #include <vector>
 #include <array>
 #include <set>
+#include <deque>
 #include <functional>
 #include <memory>
 

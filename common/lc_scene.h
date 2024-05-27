@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lc_mesh.h"
-#include "lc_array.h"
 
 enum class lcRenderMeshState : int
 {

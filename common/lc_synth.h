@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_math.h"
+#include "lc_array.h"
 #include "piece.h"
 
 class lcLibraryMeshData;

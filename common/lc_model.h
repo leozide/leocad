@@ -150,7 +150,7 @@ public:
 		return mLights;
 	}
 
-	const lcArray<lcGroup*>& GetGroups() const
+	const std::vector<std::unique_ptr<lcGroup>>& GetGroups() const
 	{
 		return mGroups;
 	}
@@ -406,7 +406,7 @@ protected:
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;
 	lcArray<lcLight*> mLights;
-	lcArray<lcGroup*> mGroups;
+	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
 
 	lcModelHistoryEntry* mSavedHistory;

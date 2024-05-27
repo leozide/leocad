@@ -21,12 +21,12 @@ void lcGroup::FileLoad(lcFile* File)
 	mGroup = (lcGroup*)(quintptr)GroupIndex;
 }
 
-void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
+void lcGroup::CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups)
 {
 	if (!mName.isEmpty())
 	{
 		bool Found = false;
-		for (const lcGroup* const Group : Groups)
+		for (const std::unique_ptr<lcGroup>& Group : Groups)
 		{
 			if (Group->mName == mName)
 			{
@@ -43,7 +43,7 @@ void lcGroup::CreateName(const lcArray<lcGroup*>& Groups)
 	QString Prefix = QApplication::tr("Group #");
 	const int Length = Prefix.length();
 
-	for (const lcGroup* const Group : Groups)
+	for (const std::unique_ptr<lcGroup>& Group : Groups)
 	{
 		const QString& Name = Group->mName;
 

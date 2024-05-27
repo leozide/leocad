@@ -171,16 +171,16 @@ void lcQSelectDialog::itemChanged(QTreeWidgetItem *item, int column)
 
 void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model)
 {
-	const lcArray<lcGroup*>& Groups = Model->GetGroups();
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
 
-	for (lcGroup* Group : Groups)
+	for (const std::unique_ptr<lcGroup>& Group : Groups)
 	{
 		if (Group->mGroup != ParentGroup)
 			continue;
 
 		QTreeWidgetItem* GroupItem = new QTreeWidgetItem(ParentItem, QStringList(Group->mName));
 
-		AddChildren(GroupItem, Group, Model);
+		AddChildren(GroupItem, Group.get(), Model);
 	}
 
 	const lcArray<lcPiece*>& Pieces = Model->GetPieces();

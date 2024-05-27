@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include "lc_math.h"
-#include "lc_array.h"
 
 enum class lcPieceInfoType
 {

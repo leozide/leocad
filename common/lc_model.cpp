@@ -2273,9 +2273,9 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 
 void lcModel::AddPiece()
 {
-	PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
+	PieceInfo* PieceInfo = gMainWindow->GetCurrentPieceInfo();
 
-	if (!CurPiece)
+	if (!PieceInfo)
 		return;
 
 	lcPiece* Last = mPieces.empty() ? nullptr : mPieces[mPieces.size() - 1];
@@ -2290,11 +2290,12 @@ void lcModel::AddPiece()
 	}
 
 	lcMatrix44 WorldMatrix;
+	const lcBoundingBox& PieceInfoBoundingBox = PieceInfo->GetBoundingBox();
 
 	if (Last)
 	{
-		const lcBoundingBox& BoundingBox = Last->GetBoundingBox();
-		lcVector3 Dist(0, 0, BoundingBox.Max.z - BoundingBox.Min.z);
+		const lcBoundingBox& LastBoundingBox = Last->GetBoundingBox();
+		lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceInfoBoundingBox.Min.z);
 		Dist = SnapPosition(Dist);
 
 		WorldMatrix = Last->mModelWorld;
@@ -2302,11 +2303,10 @@ void lcModel::AddPiece()
 	}
 	else
 	{
-		const lcBoundingBox& BoundingBox = CurPiece->GetBoundingBox();
-		WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -BoundingBox.Min.z));
+		WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceInfoBoundingBox.Min.z));
 	}
 
-	lcPiece* Piece = new lcPiece(CurPiece);
+	lcPiece* Piece = new lcPiece(PieceInfo);
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	AddPiece(Piece);

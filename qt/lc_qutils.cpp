@@ -174,7 +174,12 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, Q
 	: QWidget(Parent)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
-	Layout->setContentsMargins(0, 0, 0, 0);
+
+	mFilterEdit = new QLineEdit(this);
+	mFilterEdit->setPlaceholderText(tr("Filter"));
+	Layout->addWidget(mFilterEdit);
+
+	connect(mFilterEdit, &QLineEdit::textEdited, this, &lcPieceIdPickerPopup::FilterEdited);
 
 	mListView = new QListView(this);
 	mListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -188,18 +193,15 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, Q
 	lcPieceIdStringModel* StringModel = new lcPieceIdStringModel(Model, mListView);
 	mListView->setModel(StringModel);
 
+	mListView->setMinimumWidth(450);
+	mListView->setTextElideMode(Qt::ElideMiddle);
+
 	if (Current)
 		mListView->setCurrentIndex(StringModel->Index(Current));
 
 	Layout->addWidget(mListView);
 
 	connect(mListView, &QListView::doubleClicked, this, &lcPieceIdPickerPopup::ListViewDoubleClicked);
-
-	mFilterEdit = new QLineEdit(this);
-	mFilterEdit->setPlaceholderText(tr("Filter"));
-	Layout->addWidget(mFilterEdit);
-
-	connect(mFilterEdit, &QLineEdit::textEdited, this, &lcPieceIdPickerPopup::FilterEdited);
 }
 
 bool lcPieceIdPickerPopup::eventFilter(QObject* Object, QEvent* Event)

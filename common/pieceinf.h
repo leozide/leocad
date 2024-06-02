@@ -182,7 +182,7 @@ public:
 
 public:
 	char mFileName[LC_PIECE_NAME_LEN];
-	char m_strDescription[128];
+	char m_strDescription[256];
 	lcZipFileType mZipFileType;
 	int mZipFileIndex;
 	lcPieceInfoState mState;

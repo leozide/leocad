@@ -141,13 +141,13 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 	Stream << QLatin1String("0 !LEOCAD LIGHT TYPE ") << gLightTypes[static_cast<int>(mLightType)] << QLatin1String(" NAME ") << mName << LineEnding;
 }
 
-void lcLight::CreateName(const lcArray<lcLight*>& Lights)
+void lcLight::CreateName(const std::vector<std::unique_ptr<lcLight>>& Lights)
 {
 	if (!mName.isEmpty())
 	{
 		bool Found = false;
 
-		for (const lcLight* Light : Lights)
+		for (const std::unique_ptr<lcLight>& Light : Lights)
 		{
 			if (Light->GetName() == mName)
 			{
@@ -186,7 +186,7 @@ void lcLight::CreateName(const lcArray<lcLight*>& Lights)
 		break;
 	}
 
-	for (const lcLight* Light : Lights)
+	for (const std::unique_ptr<lcLight>& Light : Lights)
 	{
 		QString LightName = Light->GetName();
 

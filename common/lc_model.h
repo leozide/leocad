@@ -145,7 +145,7 @@ public:
 		return mCameras;
 	}
 
-	const lcArray<lcLight*>& GetLights() const
+	const std::vector<std::unique_ptr<lcLight>>& GetLights() const
 	{
 		return mLights;
 	}
@@ -405,7 +405,7 @@ protected:
 
 	lcArray<lcPiece*> mPieces;
 	lcArray<lcCamera*> mCameras;
-	lcArray<lcLight*> mLights;
+	std::vector<std::unique_ptr<lcLight>> mLights;
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
 

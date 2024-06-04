@@ -1865,7 +1865,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> LgeoColorTable(NumColors);
 	std::vector<std::array<char, LC_MAX_COLOR_NAME>> ColorTable(NumColors);
 
-	const lcArray<lcLight*> Lights = gMainWindow->GetActiveModel()->GetLights();
+	const std::vector<std::unique_ptr<lcLight>>& Lights = gMainWindow->GetActiveModel()->GetLights();
 	const lcCamera* Camera = gMainWindow->GetActiveView()->GetCamera();
 	const QString CameraName = QString(Camera->GetName()).replace(" ","_");
 	const lcVector3& Position = Camera->mPosition;
@@ -1922,7 +1922,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		sprintf(FloorLocation, "MaxZ");
 	}
 
-	for (const lcLight* Light : Lights)
+	for (const std::unique_ptr<lcLight>& Light : Lights)
 	{
 		if (Light->GetLightType() == lcLightType::Area)
 		{
@@ -2180,7 +2180,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	}
 	else
 	{
-		for (const lcLight* Light : Lights)
+		for (const std::unique_ptr<lcLight>& Light : Lights)
 		{
 			const lcVector3 LightPosition = Light->GetPosition();
 			const lcVector3 LightTarget = LightPosition + Light->GetDirection();

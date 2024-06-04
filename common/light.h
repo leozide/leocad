@@ -351,7 +351,7 @@ public:
 	void UpdatePosition(lcStep Step) override;
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, bool FirstMove);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
-	void CreateName(const lcArray<lcLight*>& Lights);
+	void CreateName(const std::vector<std::unique_ptr<lcLight>>& Lights);
 
 protected:
 	void DrawPointLight(lcContext* Context) const;

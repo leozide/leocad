@@ -210,15 +210,15 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 			cameraItem->setCheckState(0, Camera->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 
-		const lcArray<lcLight*>& Lights = Model->GetLights();
+		const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 
-		for (lcLight* Light : Lights)
+		for (const std::unique_ptr<lcLight>& Light : Lights)
 		{
 			if (!Light->IsVisible())
 				continue;
 
 			QTreeWidgetItem *lightItem = new QTreeWidgetItem(ParentItem, QStringList(Light->GetName()));
-			lightItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Light));
+			lightItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Light.get()));
 			lightItem->setCheckState(0, Light->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 	}

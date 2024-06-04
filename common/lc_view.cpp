@@ -1770,26 +1770,26 @@ void lcView::SetCamera(lcCamera* Camera, bool ForceCopy)
 
 void lcView::SetCamera(const QString& CameraName)
 {
-	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = mModel->GetCameras();
 
-	for (int CameraIdx = 0; CameraIdx < Cameras.size(); CameraIdx++)
+	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
 	{
-		if (CameraName.compare(Cameras[CameraIdx]->GetName(), Qt::CaseInsensitive) == 0)
+		if (CameraName.compare(Cameras[CameraIndex]->GetName(), Qt::CaseInsensitive) == 0)
 		{
-			SetCameraIndex(CameraIdx);
+			SetCameraIndex(CameraIndex);
 			return;
 		}
 	}
 }
 
-void lcView::SetCameraIndex(int Index)
+void lcView::SetCameraIndex(size_t CameraIndex)
 {
-	const lcArray<lcCamera*>& Cameras = mModel->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = mModel->GetCameras();
 
-	if (Index >= Cameras.size())
+	if (CameraIndex >= Cameras.size())
 		return;
 
-	lcCamera* Camera = Cameras[Index];
+	lcCamera* Camera = Cameras[CameraIndex].get();
 	SetCamera(Camera, false);
 
 	Redraw();

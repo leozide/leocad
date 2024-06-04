@@ -275,15 +275,24 @@ void lcModel::DeleteModel()
 		// TODO: this is only needed to avoid a dangling pointer during undo/redo if a camera is set to a view but we should find a better solution instead
 		for (lcView* View : Views)
 		{
-			lcCamera* Camera = View->GetCamera();
+			lcCamera* ViewCamera = View->GetCamera();
 
-			if (!Camera->IsSimple() && mCameras.FindIndex(Camera) != -1)
-				View->SetCamera(Camera, true);
+			if (!ViewCamera->IsSimple())
+			{
+				for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+				{
+					if (Camera.get() == ViewCamera)
+					{
+						View->SetCamera(ViewCamera, true);
+						break;
+					}
+				}
+			}
 		}
 	}
 
 	mPieces.DeleteAll();
-	mCameras.DeleteAll();
+	mCameras.clear();
 	mLights.clear();
 	mGroups.clear();
 	mFileLines.clear();
@@ -501,7 +510,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		Stream << QLatin1String("0 !LEOCAD GROUP END\r\n");
 	}
 
-	for (const lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (!SelectedOnly || Camera->IsSelected())
 			Camera->SaveLDraw(Stream);
 
@@ -1148,14 +1157,13 @@ void lcModel::Merge(lcModel* Other)
 
 	Other->mPieces.RemoveAll();
 
-	for (int CameraIdx = 0; CameraIdx < Other->mCameras.size(); CameraIdx++)
+	for (std::unique_ptr<lcCamera>& Camera : Other->mCameras)
 	{
-		lcCamera* Camera = Other->mCameras[CameraIdx];
 		Camera->CreateName(mCameras);
-		mCameras.emplace_back(Camera);
+		mCameras.emplace_back(std::move(Camera));
 	}
 
-	Other->mCameras.RemoveAll();
+	Other->mCameras.clear();
 
 	for (std::unique_ptr<lcLight>& Light : Other->mLights)
 	{
@@ -1331,9 +1339,9 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 	if (Scene->GetDrawInterface() && !Scene->GetActiveSubmodelInstance())
 	{
-		for (const lcCamera* Camera : mCameras)
-			if (Camera != ViewCamera && Camera->IsVisible())
-				Scene->AddInterfaceObject(Camera);
+		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+			if (Camera.get() != ViewCamera && Camera->IsVisible())
+				Scene->AddInterfaceObject(Camera.get());
 
 		for (const std::unique_ptr<lcLight>& Light : mLights)
 			if (Light->IsVisible())
@@ -1642,8 +1650,8 @@ void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 	if (ObjectRayTest.PiecesOnly)
 		return;
 
-	for (const lcCamera* Camera : mCameras)
-		if (Camera != ObjectRayTest.ViewCamera && Camera->IsVisible() && (!ObjectRayTest.IgnoreSelected || !Camera->IsSelected()))
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+		if (Camera.get() != ObjectRayTest.ViewCamera && Camera->IsVisible() && (!ObjectRayTest.IgnoreSelected || !Camera->IsSelected()))
 			Camera->RayTest(ObjectRayTest);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -1657,8 +1665,8 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
 
-	for (const lcCamera* Camera : mCameras)
-		if (Camera != ObjectBoxTest.ViewCamera && Camera->IsVisible())
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+		if (Camera.get() != ObjectBoxTest.ViewCamera && Camera->IsVisible())
 			Camera->BoxTest(ObjectBoxTest);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -1805,7 +1813,7 @@ void lcModel::CalculateStep(lcStep Step)
 		}
 	}
 
-	for (lcCamera* Camera : mCameras)
+	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->UpdatePosition(Step);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -1876,7 +1884,7 @@ void lcModel::InsertStep(lcStep Step)
 			Piece->SetSelected(false);
 	}
 
-	for (lcCamera* Camera : mCameras)
+	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->InsertTime(Step, 1);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -1895,7 +1903,7 @@ void lcModel::RemoveStep(lcStep Step)
 			Piece->SetSelected(false);
 	}
 
-	for (lcCamera* Camera : mCameras)
+	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->RemoveTime(Step, 1);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -2349,7 +2357,7 @@ void lcModel::DeleteAllCameras()
 	if (mCameras.empty())
 		return;
 
-	mCameras.DeleteAll();
+	mCameras.clear();
 
 	gMainWindow->UpdateSelectedObjects(true);
 	UpdateAllViews();
@@ -2384,7 +2392,7 @@ void lcModel::RemoveSelectedPiecesKeyFrames()
 		if (Piece->IsSelected())
 			Piece->RemoveKeyFrames();
 
-	for (lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera->IsSelected())
 			Camera->RemoveKeyFrames();
 
@@ -2694,9 +2702,9 @@ bool lcModel::RemoveSelectedObjects()
 			PieceIdx++;
 	}
 
-	for (int CameraIdx = 0; CameraIdx < mCameras.size(); )
+	for (std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin(); CameraIt != mCameras.end(); )
 	{
-		lcCamera* Camera = mCameras[CameraIdx];
+		lcCamera* Camera = CameraIt->get();
 
 		if (Camera->IsSelected())
 		{
@@ -2707,16 +2715,15 @@ bool lcModel::RemoveSelectedObjects()
 					View->SetCamera(Camera, true);
 
 			RemovedCamera = true;
-			mCameras.RemoveIndex(CameraIdx);
-			delete Camera;
+			CameraIt = mCameras.erase(CameraIt);
 		}
 		else
-			CameraIdx++;
+			CameraIt++;
 	}
 
 	for (std::vector<std::unique_ptr<lcLight>>::iterator LightIt = mLights.begin(); LightIt != mLights.end(); )
 	{
-		std::unique_ptr<lcLight>& Light = *LightIt;
+		lcLight* Light = LightIt->get();
 
 		if (Light->IsSelected())
 		{
@@ -2779,7 +2786,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	{
 		const lcVector3 TransformedObjectDistance = lcMul(ObjectDistance, RelativeRotation);
 
-		for (lcCamera* Camera : mCameras)
+		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		{
 			if (Camera->IsSelected())
 			{
@@ -3206,7 +3213,7 @@ bool lcModel::AnyObjectsSelected() const
 		if (Piece->IsSelected())
 			return true;
 
-	for (const lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera->IsSelected())
 			return true;
 
@@ -3223,9 +3230,9 @@ lcObject* lcModel::GetFocusObject() const
 		if (Piece->IsFocused())
 			return Piece;
 
-	for (lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera->IsFocused())
-			return Camera;
+			return Camera.get();
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		if (Light->IsFocused())
@@ -3280,7 +3287,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 		NumSelected++;
 	}
 
-	for (const lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 	{
 		if (!Camera->IsSelected())
 			continue;
@@ -3439,7 +3446,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 		}
 	}
 
-	for (lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 	{
 		if (Camera->IsSelected())
 		{
@@ -3622,15 +3629,15 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 		}
 	}
 
-	for (lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 	{
 		if (Camera->IsSelected())
 		{
-			Selection.emplace_back(Camera);
+			Selection.emplace_back(Camera.get());
 			*Flags |= LC_SEL_SELECTED | LC_SEL_CAMERA;
 
 			if (Camera->IsFocused())
-				*Focus = Camera;
+				*Focus = Camera.get();
 		}
 	}
 
@@ -3685,7 +3692,7 @@ void lcModel::ClearSelection(bool UpdateInterface)
 	for (lcPiece* Piece : mPieces)
 		Piece->SetSelected(false);
 
-	for (lcCamera* Camera : mCameras)
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->SetSelected(false);
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
@@ -4294,7 +4301,10 @@ void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target
 
 void lcModel::UpdateCameraTool(const lcVector3& Position)
 {
-	lcCamera* Camera = mCameras[mCameras.size() - 1];
+	if (mCameras.empty())
+		return;
+
+	std::unique_ptr<lcCamera>& Camera = mCameras.back();
 
 	Camera->MoveSelected(1, false, Position - mMouseToolDistance);
 	Camera->UpdatePosition(1);
@@ -4365,9 +4375,15 @@ void lcModel::EraserToolClicked(lcObject* Object)
 					View->SetCamera(Camera, true);
 			}
 
-			mCameras.Remove((lcCamera*)Object);
+			for (std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin(); CameraIt != mCameras.end(); CameraIt++)
+			{
+				if (CameraIt->get() == Object)
+				{
+					mCameras.erase(CameraIt);
+					break;
+				}
+			}
 		}
-		delete Object;
 		break;
 
 	case lcObjectType::Light:

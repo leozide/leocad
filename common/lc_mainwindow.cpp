@@ -2163,25 +2163,25 @@ void lcMainWindow::ViewFocusReceived()
 
 void lcMainWindow::CameraMenuAboutToShow()
 {
-	const lcArray<lcCamera*>& Cameras = lcGetActiveModel()->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = lcGetActiveModel()->GetCameras();
 	lcView* ActiveView = GetActiveView();
 	const lcCamera* CurrentCamera = ActiveView ? ActiveView->GetCamera() : nullptr;
 	bool CurrentSet = false;
 
-	for (int ActionIdx = LC_VIEW_CAMERA_FIRST; ActionIdx <= LC_VIEW_CAMERA_LAST; ActionIdx++)
+	for (size_t ActionIndex = LC_VIEW_CAMERA_FIRST; ActionIndex <= LC_VIEW_CAMERA_LAST; ActionIndex++)
 	{
-		QAction* Action = mActions[ActionIdx];
-		int CameraIdx = ActionIdx - LC_VIEW_CAMERA_FIRST;
+		QAction* Action = mActions[ActionIndex];
+		size_t CameraIndex = ActionIndex - LC_VIEW_CAMERA_FIRST;
 
-		if (CameraIdx < Cameras.size())
+		if (CameraIndex < Cameras.size())
 		{
-			if (CurrentCamera == Cameras[CameraIdx])
+			if (CurrentCamera == Cameras[CameraIndex].get())
 			{
 				Action->setChecked(true);
 				CurrentSet = true;
 			}
 
-			Action->setText(Cameras[CameraIdx]->GetName());
+			Action->setText(Cameras[CameraIndex]->GetName());
 			Action->setVisible(true);
 		}
 		else

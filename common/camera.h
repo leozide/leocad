@@ -2,7 +2,6 @@
 
 #include "object.h"
 #include "lc_math.h"
-#include "lc_array.h"
 
 #define LC_CAMERA_HIDDEN            0x0001
 #define LC_CAMERA_SIMPLE            0x0002
@@ -65,7 +64,7 @@ public:
 	}
 
 	bool SetName(const QString& Name);
-	void CreateName(const lcArray<lcCamera*>& Cameras);
+	void CreateName(const std::vector<std::unique_ptr<lcCamera>>& Cameras);
 
 	bool IsSimple() const
 	{

@@ -140,7 +140,7 @@ public:
 		return mPieces;
 	}
 
-	const lcArray<lcCamera*>& GetCameras() const
+	const std::vector<std::unique_ptr<lcCamera>>& GetCameras() const
 	{
 		return mCameras;
 	}
@@ -404,7 +404,7 @@ protected:
 	bool mMouseToolFirstMove;
 
 	lcArray<lcPiece*> mPieces;
-	lcArray<lcCamera*> mCameras;
+	std::vector<std::unique_ptr<lcCamera>> mCameras;
 	std::vector<std::unique_ptr<lcLight>> mLights;
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;

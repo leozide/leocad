@@ -125,13 +125,13 @@ bool lcCamera::SetName(const QString& Name)
 	return true;
 }
 
-void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
+void lcCamera::CreateName(const std::vector<std::unique_ptr<lcCamera>>& Cameras)
 {
 	if (!mName.isEmpty())
 	{
 		bool Found = false;
 
-		for (const lcCamera* Camera : Cameras)
+		for (const std::unique_ptr<lcCamera>& Camera : Cameras)
 		{
 			if (Camera->GetName() == mName)
 			{
@@ -147,7 +147,7 @@ void lcCamera::CreateName(const lcArray<lcCamera*>& Cameras)
 	int MaxCameraNumber = 0;
 	const QLatin1String Prefix("Camera ");
 
-	for (const lcCamera* Camera : Cameras)
+	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
 	{
 		QString CameraName = Camera->GetName();
 

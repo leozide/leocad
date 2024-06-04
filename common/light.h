@@ -2,7 +2,6 @@
 
 #include "object.h"
 #include "lc_math.h"
-#include "lc_array.h"
 
 #define LC_LIGHT_HIDDEN            0x0001
 #define LC_LIGHT_DISABLED          0x0002

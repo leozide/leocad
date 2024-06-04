@@ -244,7 +244,7 @@ public:
 	void SetDefaultCamera();
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetCamera(const QString& CameraName);
-	void SetCameraIndex(int Index);
+	void SetCameraIndex(size_t CameraIndex);
 
 	void SetProjection(bool Ortho);
 	void LookAt();

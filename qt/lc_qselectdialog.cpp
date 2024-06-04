@@ -198,15 +198,15 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 
 	if (!ParentGroup)
 	{
-		const lcArray<lcCamera*>& Cameras = Model->GetCameras();
+		const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 
-		for (lcCamera* Camera : Cameras)
+		for (const std::unique_ptr<lcCamera>& Camera : Cameras)
 		{
 			if (!Camera->IsVisible())
 				continue;
 
 			QTreeWidgetItem *cameraItem = new QTreeWidgetItem(ParentItem, QStringList(Camera->GetName()));
-			cameraItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Camera));
+			cameraItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Camera.get()));
 			cameraItem->setCheckState(0, Camera->IsSelected() ? Qt::Checked : Qt::Unchecked);
 		}
 

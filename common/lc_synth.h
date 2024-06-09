@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lc_math.h"
-#include "lc_array.h"
 #include "piece.h"
 
 class lcLibraryMeshData;
@@ -44,8 +43,8 @@ public:
 
 protected:
 	using SectionCallbackFunc = std::function<void(const lcVector3& CurvePoint, quint32 SegmentIndex, float t)>;
-	virtual void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, lcArray<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
-	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const lcArray<lcMatrix44>& Sections) const = 0;
+	virtual void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
+	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const = 0;
 
 	bool mCurve = false;
 	bool mUnidirectional = false;

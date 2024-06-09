@@ -495,7 +495,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 	}
 }
 
-void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer)
+void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, size_t VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer)
 {
 	lcArray<lcMeshLoaderVertex>& Vertices = mData[MeshDataType].mVertices;
 	int CurrentSize = Vertices.size();
@@ -506,7 +506,7 @@ void lcLibraryMeshData::AddVertices(lcMeshDataType MeshDataType, int VertexCount
 	*VertexBuffer = &Vertices[CurrentSize];
 }
 
-void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, int IndexCount, quint32** IndexBuffer)
+void lcLibraryMeshData::AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, size_t IndexCount, quint32** IndexBuffer)
 {
 	lcMeshLoaderSection* Section = mData[MeshDataType].AddSection(PrimitiveType, GetMaterial(ColorCode));
 	lcArray<quint32>& Indices = Section->mIndices;

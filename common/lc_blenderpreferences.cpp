@@ -106,12 +106,13 @@ lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mDefaultPaths [NUM_PAT
 	/*                             Key:                  MM Key:               Value:             Label:                                   Tooltip (Description):*/
 	/* 0   PATH_BLENDER        */ {"blenderpath",        "blenderpath",        "",    QObject::tr("Blender Path"),             QObject::tr("Full file path to Blender application executable")},
 	/* 1   PATH_BLENDFILE      */ {"blendfile",          "blendfile",          "",    QObject::tr("Blendfile Path"),           QObject::tr("Full file path to a supplement .blend file - specify to append additional settings")},
-	/* 2.  PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QObject::tr("Environment Texture Path"), QObject::tr("Full file path to .exr environment texture file - specify if not using default bundled in addon")},
+	/* 2   PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QObject::tr("Environment Texture Path"), QObject::tr("Full file path to .exr environment texture file - specify if not using default bundled in addon")},
 	/* 3   PATH_LDCONFIG       */ {"customldconfigfile", "customldconfigfile", "",    QObject::tr("Custom LDConfig Path"),     QObject::tr("Full file path to custom LDConfig file - specify if not %1 alternate LDConfig file").arg(LC_PRODUCTNAME_STR)},
 	/* 4   PATH_LDRAW          */ {"ldrawdirectory",     "ldrawpath",          "",    QObject::tr("LDraw Directory"),          QObject::tr("Full directory path to the LDraw parts library (download from https://library.ldraw.org)")},
 	/* 5   PATH_LSYNTH         */ {"lsynthdirectory",    "",                   "",    QObject::tr("LSynth Directory"),         QObject::tr("Full directory path to LSynth primitives - specify if not using default bundled in addon")},
 	/* 6   PATH_STUD_LOGO      */ {"studlogodirectory",  "",                   "",    QObject::tr("Stud Logo Directory"),      QObject::tr("Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial parts not used or not using default bundled in addon")},
-	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QObject::tr("Stud.io LDraw Path"),       QObject::tr("Full filepath to the Stud.io LDraw Parts Library (download from https://www.bricklink.com/v3/studio/download.page)")}
+	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QObject::tr("Stud.io LDraw Path"),       QObject::tr("Full filepath to the Stud.io LDraw Parts Library (download from https://www.bricklink.com/v3/studio/download.page)")},
+	/* 8   PATH_STUDIO_CUSTOM_PARTS */ {"",              "studiocustompartspath", "", QObject::tr("Stud.io Custom Parts Path"),QObject::tr("Full filepath to the Stud.io LDraw Custom Parts")}
 };
 
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mBlenderSettings [NUM_SETTINGS];
@@ -2419,14 +2420,15 @@ void lcBlenderPreferences::LoadSettings()
 		const QString DefaultBlendFile = QString("%1/Blender/config/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_BLEND_FILE);
 
 		QStringList const AddonPaths = QStringList()
-		/* PATH_BLENDER      */        << lcGetProfileString(LC_PROFILE_BLENDER_PATH)
-		/* PATH_BLENDFILE    */        << (QFileInfo(DefaultBlendFile).exists() ? DefaultBlendFile : QString())
-		/* PATH_ENVIRONMENT  */        << QString()
-		/* PATH_LDCONFIG     */        << lcGetProfileString(LC_PROFILE_COLOR_CONFIG)
-		/* PATH_LDRAW        */        << QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath()
-		/* PATH_LSYNTH       */        << QString()
-		/* PATH_STUD_LOGO    */        << QString()
-		/* PATH_STUDIO_LDRAW */        << QString();
+		/* 0  PATH_BLENDER      */        << lcGetProfileString(LC_PROFILE_BLENDER_PATH)
+		/* 1  PATH_BLENDFILE    */        << (QFileInfo(DefaultBlendFile).exists() ? DefaultBlendFile : QString())
+		/* 2  PATH_ENVIRONMENT  */        << QString()
+		/* 3  PATH_LDCONFIG     */        << lcGetProfileString(LC_PROFILE_COLOR_CONFIG)
+		/* 4  PATH_LDRAW        */        << QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath()
+		/* 5  PATH_LSYNTH       */        << QString()
+		/* 6  PATH_STUD_LOGO    */        << QString()
+		/* 7  PATH_STUDIO_LDRAW */        << QString()
+		/* 8  PATH_STUDIO_CUSTOM_PARTS */ << QString();
 		for (int LblIdx = 0; LblIdx < NumPaths(DEFAULT_SETTINGS); LblIdx++)
 		{
 			mBlenderPaths[LblIdx] =
@@ -2478,7 +2480,7 @@ void lcBlenderPreferences::LoadSettings()
 
 		for (int LblIdx = 1/*skip blender executable*/; LblIdx < NumPaths(); LblIdx++)
 		{
-			if (LblIdx == PATH_STUDIO_LDRAW)
+			if (LblIdx >= PATH_STUDIO_LDRAW)
 				continue;
 			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderPaths[LblIdx].key);
 			const QString& Value = Settings.value(Key, QString()).toString();
@@ -2614,7 +2616,7 @@ void lcBlenderPreferences::SaveSettings()
 
 	for (int LblIdx = 1/*skip blender executable*/; LblIdx < NumPaths(); LblIdx++)
 	{
-		if (LblIdx == PATH_STUDIO_LDRAW)
+		if (LblIdx >= PATH_STUDIO_LDRAW)
 			continue;
 		Key = mBlenderPaths[LblIdx].key;
 		Value = QDir::toNativeSeparators(mBlenderPaths[LblIdx].value);

@@ -1070,7 +1070,7 @@ void lcMainWindow::ModelTabChanged(int Index)
 	Project* Project = lcGetActiveProject();
 	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->widget(Index);
 
-	Project->SetActiveModel(Project->GetModels().FindIndex(CurrentTab ? CurrentTab->GetModel() : nullptr));
+	Project->SetActiveModel(CurrentTab ? CurrentTab->GetModel() : nullptr);
 }
 
 void lcMainWindow::ClipboardChanged()
@@ -2234,23 +2234,28 @@ void lcMainWindow::UpdateSelectionMode()
 
 void lcMainWindow::UpdateModels()
 {
-	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
+	const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
 	lcModel* CurrentModel = lcGetActiveModel();
 
-	for (int ActionIdx = LC_MODEL_FIRST; ActionIdx <= LC_MODEL_LAST; ActionIdx++)
+	for (size_t ActionIndex = LC_MODEL_FIRST; ActionIndex <= LC_MODEL_LAST; ActionIndex++)
 	{
-		QAction* Action = mActions[ActionIdx];
-		int ModelIdx = ActionIdx - LC_MODEL_FIRST;
+		QAction* Action = mActions[ActionIndex];
+		size_t ModelIndex = ActionIndex - LC_MODEL_FIRST;
 
-		if (ModelIdx < Models.size())
+		if (ModelIndex < Models.size())
 		{
-			Action->setChecked(CurrentModel == Models[ModelIdx]);
-			Action->setText(QString::fromLatin1("%1%2 %3").arg(ModelIdx < 9 ? QString("&") : QString(), QString::number(ModelIdx + 1), Models[ModelIdx]->GetProperties().mFileName));
+			Action->setChecked(CurrentModel == Models[ModelIndex].get());
+			Action->setText(QString::fromLatin1("%1%2 %3").arg(ModelIndex < 9 ? QString("&") : QString(), QString::number(ModelIndex + 1), Models[ModelIndex]->GetProperties().mFileName));
 			Action->setVisible(true);
 		}
 		else
 			Action->setVisible(false);
 	}
+
+	auto HasModel = [&Models](lcModel* Model)
+	{
+		return std::find_if(Models.begin(), Models.end(), [Model](const std::unique_ptr<lcModel>& CheckModel) { return CheckModel.get() == Model; }) != Models.end();
+	};
 
 	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); )
 	{
@@ -2259,7 +2264,7 @@ void lcMainWindow::UpdateModels()
 
 		if (!Model)
 			TabIdx++;
-		else if (Models.FindIndex(Model) != -1)
+		else if (HasModel(Model))
 		{
 			mModelTabWidget->setTabText(TabIdx, Model->GetProperties().mFileName);
 			TabIdx++;
@@ -2271,7 +2276,7 @@ void lcMainWindow::UpdateModels()
 	mPartSelectionWidget->UpdateModels();
 
 	if (mCurrentPieceInfo && mCurrentPieceInfo->IsModel())
-		if (Models.FindIndex(mCurrentPieceInfo->GetModel()) == -1)
+		if (!HasModel(mCurrentPieceInfo->GetModel()))
 			SetCurrentPieceInfo(nullptr);
 }
 
@@ -2395,14 +2400,14 @@ void lcMainWindow::MergeProject()
 
 	if (NewProject->Load(LoadFileName, true))
 	{
-		int NumModels = NewProject->GetModels().size();
+		size_t ModelCount = NewProject->GetModels().size();
 
 		lcGetActiveProject()->Merge(NewProject);
 
-		if (NumModels == 1)
+		if (ModelCount == 1)
 			QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 submodel."));
 		else
-			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(NumModels));
+			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(ModelCount));
 
 		UpdateModels();
 	}
@@ -2522,7 +2527,7 @@ bool lcMainWindow::SetModelFromFocus()
 	if (Model)
 	{
 		Project* Project = lcGetActiveProject();
-		Project->SetActiveModel(Project->GetModels().FindIndex(Model));
+		Project->SetActiveModel(Model);
 		return true;
 	}
 
@@ -2539,7 +2544,7 @@ void lcMainWindow::SetModelFromSelection()
 	if (Model)
 	{
 		Project* Project = lcGetActiveProject();
-		Project->SetActiveModel(Project->GetModels().FindIndex(Model));
+		Project->SetActiveModel(Model);
 	}
 }
 

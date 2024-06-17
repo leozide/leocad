@@ -78,14 +78,13 @@ Project::Project(bool IsPreview)
 
 Project::~Project()
 {
-	mModels.DeleteAll();
 }
 
 lcModel* Project::GetModel(const QString& FileName) const
 {
-	for (lcModel* Model : mModels)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 		if (Model->GetProperties().mFileName == FileName)
-			return Model;
+			return Model.get();
 
 	return nullptr;
 }
@@ -95,8 +94,8 @@ bool Project::IsModified() const
 	if (mModified)
 		return true;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		if (mModels[ModelIdx]->IsModified())
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		if (Model->IsModified())
 			return true;
 
 	return false;
@@ -135,21 +134,21 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 	return QDir::toNativeSeparators(FileName) + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 }
 
-void Project::SetActiveModel(int ModelIndex)
+void Project::SetActiveModel(lcModel* ActiveModel)
 {
-	if (ModelIndex < 0 || ModelIndex >= mModels.size())
+	if (!ActiveModel)
 		return;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->SetActive(ModelIdx == ModelIndex);
+	for (const std::unique_ptr<lcModel> &Model : mModels)
+		Model->SetActive(Model.get() == ActiveModel);
 
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+	for (const std::unique_ptr<lcModel> &Model : mModels)
+		Model->UpdatePieceInfo(UpdatedModels);
 
-	mActiveModel = mModels[ModelIndex];
+	mActiveModel = ActiveModel;
 
 	if (!mIsPreview && gMainWindow)
 	{
@@ -158,13 +157,21 @@ void Project::SetActiveModel(int ModelIndex)
 	}
 }
 
+void Project::SetActiveModel(int ModelIndex)
+{
+	if (ModelIndex < 0 || ModelIndex >= static_cast<int>(mModels.size()))
+		return;
+
+	SetActiveModel(mModels[ModelIndex].get());
+}
+
 void Project::SetActiveModel(const QString& FileName)
 {
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		if (FileName.compare(mModels[ModelIdx]->GetFileName(), Qt::CaseInsensitive) == 0)
+		if (FileName.compare(Model->GetFileName(), Qt::CaseInsensitive) == 0)
 		{
-			SetActiveModel(ModelIdx);
+			SetActiveModel(Model.get());
 			return;
 		}
 	}
@@ -241,8 +248,8 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 {
 	QStringList ModelNames;
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		ModelNames.append(mModels[ModelIdx]->GetProperties().mFileName);
+	for (const std::unique_ptr<lcModel> &Model : mModels)
+		ModelNames.append(Model->GetProperties().mFileName);
 
 	QString Name = GetNewModelName(gMainWindow, tr("New Submodel"), QString(), ModelNames);
 
@@ -257,7 +264,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 	if (ShowModel)
 	{
-		SetActiveModel(mModels.size() - 1);
+		SetActiveModel(mModels.back().get());
 
 		lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
 		if (ActiveView)
@@ -266,7 +273,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 		gMainWindow->UpdateTitle();
 	}
 	else
-		SetActiveModel(mModels.FindIndex(mActiveModel));
+		SetActiveModel(mActiveModel);
 
 	return Model;
 }
@@ -278,7 +285,7 @@ void Project::ShowModelListDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	lcArray<lcModel*> NewModels;
+	std::vector<std::unique_ptr<lcModel>> NewModels;
 	std::vector<lcModelListDialogEntry> Results = Dialog.GetResults();
 
 	for (const lcModelListDialogEntry& Entry : Results)
@@ -321,7 +328,7 @@ void Project::ShowModelListDialog()
 			Model->SetFileName(Entry.Name);
 			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData());
 
-			for (lcModel* CheckModel : mModels)
+			for (const std::unique_ptr<lcModel> &CheckModel : mModels)
 				CheckModel->RenamePiece(Model->GetPieceInfo());
 
 			mModified = true;
@@ -330,18 +337,15 @@ void Project::ShowModelListDialog()
 		NewModels.emplace_back(Model);
 	}
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
+	for (std::unique_ptr<lcModel>& Model : mModels)
 	{
-		lcModel* Model = mModels[ModelIdx];
-
-		if (NewModels.FindIndex(Model) == -1)
-		{
-			delete Model;
+		if (std::find(NewModels.begin(), NewModels.end(), Model) != NewModels.end())
+			Model.release();
+		else
 			mModified = true;
-		}
 	}
 
-	mModels = NewModels;
+	mModels = std::move(NewModels);
 
 	gMainWindow->UpdateTitle();
 	gMainWindow->UpdateModels();
@@ -380,7 +384,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 		return false;
 	}
 
-	mModels.DeleteAll();
+	mModels.clear();
 	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
@@ -461,7 +465,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 	if (mModels.size() == 1)
 	{
-		lcModel* Model = mModels[0];
+		lcModel* Model = mModels.front().get();
 
 		if (Model->GetProperties().mFileName.isEmpty())
 		{
@@ -473,7 +477,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
-	for (lcModel* Model : mModels)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
 		Model->UpdateMesh();
 		Model->UpdatePieceInfo(UpdatedModels);
@@ -513,7 +517,7 @@ bool Project::Save(QTextStream& Stream)
 {
 	bool MPD = mModels.size() > 1;
 
-	for (lcModel* Model : mModels)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
 		if (MPD)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
@@ -530,7 +534,7 @@ bool Project::Save(QTextStream& Stream)
 
 void Project::Merge(Project* Other)
 {
-	for (lcModel* Model : Other->mModels)
+	for (std::unique_ptr<lcModel>& Model : Other->mModels)
 	{
 		QString FileName = Model->GetProperties().mFileName;
 
@@ -538,9 +542,9 @@ void Project::Merge(Project* Other)
 		{
 			bool Duplicate = false;
 
-			for (int SearchIdx = 0; SearchIdx < mModels.size(); SearchIdx++)
+			for (const std::unique_ptr<lcModel>& ExistingModel : mModels)
 			{
-				if (mModels[SearchIdx]->GetProperties().mFileName == FileName)
+				if (ExistingModel->GetProperties().mFileName == FileName)
 				{
 					Duplicate = true;
 					break;
@@ -554,10 +558,10 @@ void Project::Merge(Project* Other)
 			Model->SetFileName(FileName);
 		}
 
-		mModels.emplace_back(Model);
+		mModels.emplace_back(std::move(Model));
 	}
 
-	Other->mModels.RemoveAll();
+	Other->mModels.clear();
 	mModified = true;
 }
 
@@ -572,29 +576,25 @@ bool Project::ImportLDD(const QString& FileName)
 	if (!ZipFile.ExtractFile("IMAGE100.LXFML", XMLFile))
 		return false;
 
-	mModels.DeleteAll();
 	QString ModelName = QFileInfo(FileName).completeBaseName();
-	lcModel* Model = new lcModel(ModelName, this, false);
+	std::unique_ptr<lcModel> NewModel(new lcModel(ModelName, this, false));
 
-	if (Model->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
-	{
-		mModels.emplace_back(Model);
-		Model->SetSaved();
-	}
-	else
-	{
-		delete Model;
+	if (!NewModel->LoadLDD(QString::fromUtf8((const char*)XMLFile.mBuffer)))
 		return false;
-	}
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->CreatePieceInfo(this);
+	NewModel->SetSaved();
+
+	mModels.clear();
+	mModels.emplace_back(std::move(NewModel));
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->CreatePieceInfo(this);
 
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->UpdatePieceInfo(UpdatedModels);
 
 	mModified = false;
 
@@ -606,30 +606,25 @@ bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, 
 	if (Inventory.isEmpty())
 		return false;
 
-	mModels.DeleteAll();
-	lcModel* Model = new lcModel(Name, this, false);
+	std::unique_ptr<lcModel> NewModel(new lcModel(Name, this, false));
 
-	if (Model->LoadInventory(Inventory))
-	{
-		mModels.emplace_back(Model);
-		Model->SetSaved();
-	}
-	else
-	{
-		delete Model;
+	if (!NewModel->LoadInventory(Inventory))
 		return false;
-	}
 
-	Model->SetDescription(Description);
+	NewModel->SetSaved();
+	NewModel->SetDescription(Description);
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->CreatePieceInfo(this);
+	mModels.clear();
+	mModels.emplace_back(std::move(NewModel));
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->CreatePieceInfo(this);
 
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
-	for (int ModelIdx = 0; ModelIdx < mModels.size(); ModelIdx++)
-		mModels[ModelIdx]->UpdatePieceInfo(UpdatedModels);
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->UpdatePieceInfo(UpdatedModels);
 
 	mModified = false;
 
@@ -643,12 +638,12 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	if (mModels.empty())
 		return ModelParts;
 
-	for (lcModel* Model : mModels)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 		Model->CalculateStep(LC_STEP_MAX);
 
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
 
-	SetActiveModel(mModels.FindIndex(mActiveModel));
+	SetActiveModel(mActiveModel);
 
 	return ModelParts;
 }
@@ -671,7 +666,7 @@ bool Project::ExportCurrentStep(const QString& FileName)
 	{
 		Models.append(ModelName);
 
-		for (lcModel* Model : mModels)
+		for (const std::unique_ptr<lcModel>& Model : mModels)
 		{
 			if (Model->GetProperties().mFileName == ModelName)
 			{
@@ -724,7 +719,7 @@ bool Project::ExportCurrentStep(const QString& FileName)
 
 	QTextStream Stream(&File);
 
-	for (lcModel* Model : mModels)
+	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
 		if (!Models.contains(Model->GetProperties().mFileName))
 			continue;
@@ -1591,17 +1586,20 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
 
-	lcArray<lcModel*> Models;
+	std::set<lcModel*> Models;
 
 	if (Options.CurrentOnly)
-		Models.emplace_back(mActiveModel);
+		Models.insert(mActiveModel);
 	else if (Options.SubModels)
 	{
-		Models.emplace_back(mActiveModel);
+		Models.insert(mActiveModel);
 		mActiveModel->GetSubModels(Models);
 	}
 	else
-		Models = mModels;
+	{
+		for (const std::unique_ptr<lcModel>& Model : mModels)
+			Models.insert(Model.get());
+	}
 
 	QString ProjectTitle = GetTitle();
 
@@ -1772,9 +1770,8 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle);
 
-		for (int ModelIdx = 0; ModelIdx < Models.size(); ModelIdx++)
+		for (const lcModel* Model : Models)
 		{
-			lcModel* Model = Models[ModelIdx];
 			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mFileName;
 			BaseName.replace('#', '_');
 

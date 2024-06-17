@@ -176,16 +176,12 @@ void lcPartSelectionListModel::SetModelsCategory()
 
 	mParts.clear();
 
-	const lcArray<lcModel*>& Models = lcGetActiveProject()->GetModels();
+	const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
 	lcModel* ActiveModel = gMainWindow->GetActiveModel();
 
-	for (int ModelIdx = 0; ModelIdx < Models.size(); ModelIdx++)
-	{
-		lcModel* Model = Models[ModelIdx];
-
+	for (const std::unique_ptr<lcModel>& Model : Models)
 		if (!Model->IncludesModel(ActiveModel))
 			mParts.emplace_back(std::pair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
-	}
 
 	auto lcPartSortFunc = [](const std::pair<PieceInfo*, QPixmap>& a, const std::pair<PieceInfo*, QPixmap>& b)
 	{

@@ -164,8 +164,15 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 	if (PieceIt != mPieces.end())
 	{
 		PieceInfo* Info = PieceIt->second;
+		bool HasModel = false;
 
-		if ((!CurrentProject || !Info->IsModel() || CurrentProject->GetModels().FindIndex(Info->GetModel()) != -1) && (!ProjectPath.isEmpty() || !Info->IsProject() || Info->IsProjectPiece()))
+		if (lcGetActiveProject())
+		{
+			const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
+			HasModel = std::find_if(Models.begin(), Models.end(), [Model = Info->GetModel()](const std::unique_ptr<lcModel>& CheckModel) { return CheckModel.get() == Model; }) != Models.end();
+		}
+
+		if ((!CurrentProject || !Info->IsModel() || HasModel) && (!ProjectPath.isEmpty() || !Info->IsProject() || Info->IsProjectPiece()))
 			return Info;
 	}
 

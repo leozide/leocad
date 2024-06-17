@@ -3250,15 +3250,15 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 	return nullptr;
 }
 
-void lcModel::GetSubModels(lcArray<lcModel*>& SubModels) const
+void lcModel::GetSubModels(std::set<lcModel*>& SubModels) const
 {
 	for (const lcPiece* Piece : mPieces)
 	{
 		if (Piece->mPieceInfo->IsModel())
 		{
 			lcModel* SubModel = Piece->mPieceInfo->GetModel();
-			if (SubModels.FindIndex(SubModel) == -1)
-				SubModels.emplace_back(SubModel);
+
+			SubModels.insert(SubModel);
 		}
 	}
 }

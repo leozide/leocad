@@ -39,7 +39,7 @@ public:
 	Project& operator=(const Project&) = delete;
 	Project& operator=(Project&&) = delete;
 
-	const lcArray<lcModel*>& GetModels() const
+	const std::vector<std::unique_ptr<lcModel>>& GetModels() const
 	{
 		return mModels;
 	}
@@ -51,14 +51,9 @@ public:
 		return mActiveModel;
 	}
 
-	int GetActiveModelIndex() const
-	{
-		return mModels.FindIndex(mActiveModel);
-	}
-
 	lcModel* GetMainModel() const
 	{
-		return !mModels.empty() ? mModels[0] : nullptr;
+		return !mModels.empty() ? mModels[0].get() : nullptr;
 	}
 
 	bool IsModified() const;
@@ -74,6 +69,7 @@ public:
 
 	lcInstructions* GetInstructions();
 
+	void SetActiveModel(lcModel* Model);
 	void SetActiveModel(int ModelIndex);
 	void SetActiveModel(const QString& FileName);
 
@@ -112,7 +108,7 @@ protected:
 	QString mFileName;
 	QFileSystemWatcher mFileWatcher;
 
-	lcArray<lcModel*> mModels;
+	std::vector<std::unique_ptr<lcModel>> mModels;
 	lcModel* mActiveModel;
 	std::unique_ptr<lcInstructions> mInstructions;
 

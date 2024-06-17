@@ -19,7 +19,7 @@ class lcModelListDialog : public QDialog
 	Q_OBJECT
 
 public:
-	lcModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models);
+	lcModelListDialog(QWidget* Parent, const std::vector<std::unique_ptr<lcModel>>& Models);
 	~lcModelListDialog();
 
 	int GetActiveModelIndex() const;

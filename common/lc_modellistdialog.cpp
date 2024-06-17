@@ -11,21 +11,28 @@ enum class lcModelListRole
 	DuplicateModel
 };
 
-lcModelListDialog::lcModelListDialog(QWidget* Parent, const lcArray<lcModel*> Models)
+lcModelListDialog::lcModelListDialog(QWidget* Parent, const std::vector<std::unique_ptr<lcModel>>& Models)
 	: QDialog(Parent), ui(new Ui::lcModelListDialog)
 {
 	mActiveModelItem = nullptr;
 
 	ui->setupUi(this);
 
-	for (const lcModel* Model : Models)
+	lcModel* ActiveModel = lcGetActiveProject()->GetActiveModel();
+	int ActiveModelIndex = -1;
+
+	for (const std::unique_ptr<lcModel>& Model : Models)
 	{
 		QListWidgetItem* Item = new QListWidgetItem(Model->GetProperties().mFileName);
-		Item->setData(static_cast<int>(lcModelListRole::ExistingModel), QVariant::fromValue<uintptr_t>((uintptr_t)Model));
+		Item->setData(static_cast<int>(lcModelListRole::ExistingModel), QVariant::fromValue<uintptr_t>((uintptr_t)Model.get()));
 		ui->ModelList->addItem(Item);
+
+		if (Model.get() == ActiveModel )
+			ActiveModelIndex = ui->ModelList->count() - 1;
 	}
 
-	ui->ModelList->setCurrentRow(lcGetActiveProject()->GetActiveModelIndex());
+	if (ActiveModelIndex != -1)
+		ui->ModelList->setCurrentRow(ActiveModelIndex);
 
 	QSettings Settings;
 	ui->SetActiveModel->setChecked(Settings.value("Settings/ModelListSetActive", true).toBool());

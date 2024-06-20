@@ -1,6 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
 #include "lc_application.h"
 
 #define LC_HTML_SINGLEPAGE    0x01

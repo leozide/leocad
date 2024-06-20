@@ -693,9 +693,9 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 		SegmentControlPoints[2] = lcMul31(lcVector3(0.0f, -ControlPoints[ControlPointIndex + 1].Scale, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
-		const int NumCurvePoints = 8192;
-		lcArray<lcVector3> CurvePoints;
-		CurvePoints.AllocGrow(NumCurvePoints);
+		const int NumCurvePoints = 4096;
+		std::vector<lcVector3> CurvePoints;
+		CurvePoints.reserve(NumCurvePoints);
 
 		for (int PointIdx = 0; PointIdx < NumCurvePoints; PointIdx++)
 		{
@@ -709,12 +709,12 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 		float CurrentSegmentLength = 0.0f;
 		float TotalSegmentLength = 0.0f;
 
-		for (int PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
+		for (size_t PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
 			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
 
 		lcVector3 StartUp = lcMul30(lcVector3(1.0f, 0.0f, 0.0f), StartTransform);
 		float Twist = GetSectionTwist(StartTransform, EndTransform);
-		int CurrentPointIndex = 0;
+		size_t CurrentPointIndex = 0;
 
 		while (CurrentPointIndex < CurvePoints.size() - 1)
 		{
@@ -818,9 +818,9 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 		SegmentControlPoints[2] = lcMul31(lcVector3(-ControlPoints[ControlPointIndex + 1].Scale, 0.0f, 0.0f), EndTransform);
 		SegmentControlPoints[3] = EndTransform.GetTranslation();
 
-		const int NumCurvePoints = 8192;
-		lcArray<lcVector3> CurvePoints;
-		CurvePoints.AllocGrow(NumCurvePoints);
+		const int NumCurvePoints = 4096;
+		std::vector<lcVector3> CurvePoints;
+		CurvePoints.reserve(NumCurvePoints);
 
 		for (int PointIdx = 0; PointIdx < NumCurvePoints; PointIdx++)
 		{
@@ -834,12 +834,12 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 		float CurrentSegmentLength = 0.0f;
 		float TotalSegmentLength = 0.0f;
 
-		for (int PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
+		for (size_t PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
 			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
 
 		lcVector3 StartUp = lcMul30(lcVector3(0.0f, 1.0f, 0.0f), StartTransform);
 		float Twist = GetSectionTwist(StartTransform, EndTransform);
-		int CurrentPointIndex = 0;
+		size_t CurrentPointIndex = 0;
 
 		while (CurrentPointIndex < CurvePoints.size() - 1)
 		{

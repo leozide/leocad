@@ -1,7 +1,5 @@
 #pragma once
 
-#include "lc_array.h"
-
 namespace Ui
 {
 	class lcModelListDialog;

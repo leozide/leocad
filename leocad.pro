@@ -245,7 +245,6 @@ HEADERS += \
 	common/light.h \
 	common/lc_aboutdialog.h \
 	common/lc_application.h \
-	common/lc_array.h \
 	common/lc_arraydialog.h \
 	common/lc_blenderpreferences.h \
 	common/lc_bricklink.h \

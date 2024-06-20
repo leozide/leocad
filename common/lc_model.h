@@ -2,7 +2,6 @@
 
 #include "lc_math.h"
 #include "lc_commands.h"
-#include "lc_array.h"
 
 enum class lcObjectPropertyId;
 

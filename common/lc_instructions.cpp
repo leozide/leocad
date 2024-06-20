@@ -180,7 +180,7 @@ void lcInstructions::AddDefaultPages(lcModel* Model, std::vector<const lcModel*>
 	{
 		std::set<lcModel*> StepSubModels;
 
-		for (lcPiece* Piece : Model->GetPieces())
+		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 		{
 			if (!Piece->IsHidden() && Piece->GetStepShow() == Step && Piece->mPieceInfo->IsModel())
 			{

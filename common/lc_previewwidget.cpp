@@ -97,7 +97,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 	if (Info)
 	{
-		for (lcPiece* ModelPiece : mModel->GetPieces())
+		for (const std::unique_ptr<lcPiece>& ModelPiece : mModel->GetPieces())
 		{
 			if (Info == ModelPiece->mPieceInfo)
 			{
@@ -156,7 +156,7 @@ void lcPreview::UpdatePreview()
 	QString PartType;
 	int ColorCode = -1;
 
-	for (lcPiece* ModelPiece : mModel->GetPieces())
+	for (const std::unique_ptr<lcPiece>& ModelPiece : mModel->GetPieces())
 	{
 		if (ModelPiece->mPieceInfo)
 		{

@@ -219,9 +219,9 @@ lcModel::~lcModel()
 
 bool lcModel::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const
 {
-	for (const lcPiece* ModelPiece : mPieces)
+	for (const std::unique_ptr<lcPiece>& ModelPiece : mPieces)
 	{
-		if (ModelPiece == Piece)
+		if (ModelPiece.get() == Piece)
 		{
 			ParentWorldMatrix = lcMul(ModelPiece->mModelWorld, ParentWorldMatrix);
 			return true;
@@ -249,7 +249,7 @@ bool lcModel::IncludesModel(const lcModel* Model) const
 	if (Model == this)
 		return true;
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->mPieceInfo->IncludesModel(Model))
 			return true;
 
@@ -291,7 +291,7 @@ void lcModel::DeleteModel()
 		}
 	}
 
-	mPieces.DeleteAll();
+	mPieces.clear();
 	mCameras.clear();
 	mLights.clear();
 	mGroups.clear();
@@ -334,7 +334,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsVisibleInSubModel())
 		{
@@ -364,7 +364,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 	int AddedSteps = 0;
 	bool SavedStep = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (SelectedOnly && !Piece->IsSelected())
 			continue;
@@ -844,7 +844,7 @@ bool lcModel::LoadBinary(lcFile* file)
 	file->ReadS32(&count, 1);
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	const int FirstNewPiece = mPieces.size();
+	const size_t FirstNewPiece = mPieces.size();
 
 	while (count--)
 	{
@@ -963,9 +963,9 @@ bool lcModel::LoadBinary(lcFile* file)
 			Group->mGroup = mGroups[NumGroups + i].get();
 		}
 
-		for (int PieceIdx = FirstNewPiece; PieceIdx < mPieces.size(); PieceIdx++)
+		for (size_t PieceIndex = FirstNewPiece; PieceIndex < mPieces.size(); PieceIndex++)
 		{
-			lcPiece* Piece = mPieces[PieceIdx];
+			lcPiece* Piece = mPieces[PieceIndex].get();
 
 			i = (qint32)(quintptr)(Piece->GetGroup());
 			Piece->SetGroup(nullptr);
@@ -1118,7 +1118,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 	float CurrentY = 0.0f;
 	float ColumnWidth = 0.0f;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		lcBoundingBox BoundingBox = Piece->mPieceInfo->GetBoundingBox();
 		RoundBounds(BoundingBox.Min.x);
@@ -1148,14 +1148,13 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 
 void lcModel::Merge(lcModel* Other)
 {
-	for (int PieceIdx = 0; PieceIdx < Other->mPieces.size(); PieceIdx++)
+	for (std::unique_ptr<lcPiece>& Piece : Other->mPieces)
 	{
-		lcPiece* Piece = Other->mPieces[PieceIdx];
 		Piece->SetFileLine(-1);
-		AddPiece(Piece);
+		AddPiece(Piece.release());
 	}
 
-	Other->mPieces.RemoveAll();
+	Other->mPieces.clear();
 
 	for (std::unique_ptr<lcCamera>& Camera : Other->mCameras)
 	{
@@ -1221,23 +1220,23 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	Buffer.open(QIODevice::ReadOnly);
 	Model->LoadLDraw(Buffer, lcGetActiveProject());
 
-	const lcArray<lcPiece*>& PastedPieces = Model->mPieces;
+	const std::vector<std::unique_ptr<lcPiece>>& PastedPieces = Model->mPieces;
 	std::vector<lcObject*> SelectedObjects;
 	SelectedObjects.reserve(PastedPieces.size());
 
-	for (lcPiece* Piece : PastedPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : PastedPieces)
 	{
 		Piece->SetFileLine(-1);
 
 		if (PasteToCurrentStep)
 		{
 			Piece->SetStepShow(mCurrentStep);
-			SelectedObjects.emplace_back(Piece);
+			SelectedObjects.emplace_back(Piece.get());
 		}
 		else
 		{
 			if (Piece->GetStepShow() <= mCurrentStep)
-				SelectedObjects.emplace_back(Piece);
+				SelectedObjects.emplace_back(Piece.get());
 		}
 	}
 
@@ -1288,9 +1287,9 @@ void lcModel::DuplicateSelectedPieces()
 		}
 	};
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
+	for (size_t PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = mPieces[PieceIdx].get();
 
 		if (!Piece->IsSelected())
 			continue;
@@ -1328,7 +1327,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 	if (mPieceInfo)
 		mPieceInfo->AddRenderMesh(*Scene);
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsVisible(mCurrentStep))
 		{
@@ -1351,7 +1350,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 }
@@ -1643,7 +1642,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
 			Piece->RayTest(ObjectRayTest);
 
@@ -1661,7 +1660,7 @@ void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
 
@@ -1678,7 +1677,7 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 {
 	bool MinIntersect = false;
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(Piece->mModelWorld);
 		const lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
@@ -1699,7 +1698,7 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 
 bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel() && Piece->mPieceInfo->BoxTest(Piece->mModelWorld, Planes))
 			return true;
 
@@ -1708,14 +1707,14 @@ bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 
 void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
 }
 
 void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
 }
@@ -1746,7 +1745,7 @@ void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint)
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::vector<PieceInfo*> LoadedInfos;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		PieceInfo* Info = Piece->mPieceInfo;
 		Library->LoadPieceInfo(Info, true, true);
@@ -1800,7 +1799,7 @@ void lcModel::SetActive(bool Active)
 
 void lcModel::CalculateStep(lcStep Step)
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		Piece->UpdatePosition(Step);
 
@@ -1869,7 +1868,7 @@ lcStep lcModel::GetLastStep() const
 {
 	lcStep Step = 1;
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Step = lcMax(Step, Piece->GetStepShow());
 
 	return Step;
@@ -1877,7 +1876,7 @@ lcStep lcModel::GetLastStep() const
 
 void lcModel::InsertStep(lcStep Step)
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		Piece->InsertTime(Step, 1);
 		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
@@ -1896,7 +1895,7 @@ void lcModel::InsertStep(lcStep Step)
 
 void lcModel::RemoveStep(lcStep Step)
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		Piece->RemoveTime(Step, 1);
 		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
@@ -1968,7 +1967,7 @@ void lcModel::GroupSelection()
 
 	lcGroup* NewGroup = GetGroup(Dialog.mName, true);
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
 		{
@@ -1988,7 +1987,7 @@ void lcModel::UngroupSelection()
 {
 	std::set<lcGroup*> SelectedGroups;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
 		{
@@ -2009,7 +2008,7 @@ void lcModel::UngroupSelection()
 		}
 	}
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		lcGroup* Group = Piece->GetGroup();
 
@@ -2032,7 +2031,7 @@ void lcModel::AddSelectedPiecesToGroup()
 {
 	lcGroup* Group = nullptr;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
 		{
@@ -2044,7 +2043,7 @@ void lcModel::AddSelectedPiecesToGroup()
 
 	if (Group)
 	{
-		for (lcPiece* Piece : mPieces)
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
 			if (Piece->IsFocused())
 			{
@@ -2060,7 +2059,7 @@ void lcModel::AddSelectedPiecesToGroup()
 
 void lcModel::RemoveFocusPieceFromGroup()
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsFocused())
 		{
@@ -2078,8 +2077,8 @@ void lcModel::ShowEditGroupsDialog()
 	QMap<lcPiece*, lcGroup*> PieceParents;
 	QMap<lcGroup*, lcGroup*> GroupParents;
 
-	for (lcPiece* Piece : mPieces)
-		PieceParents[Piece] = Piece->GetGroup();
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		PieceParents[Piece.get()] = Piece->GetGroup();
 
 	for (const std::unique_ptr<lcGroup>& Group : mGroups)
 		GroupParents[Group.get()] = Group->mGroup;
@@ -2091,9 +2090,9 @@ void lcModel::ShowEditGroupsDialog()
 
 	bool Modified = Dialog.mNewGroups.isEmpty();
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		lcGroup* ParentGroup = Dialog.mPieceParents.value(Piece);
+		lcGroup* ParentGroup = Dialog.mPieceParents.value(Piece.get());
 
 		if (ParentGroup != Piece->GetGroup())
 		{
@@ -2154,7 +2153,7 @@ void lcModel::RemoveEmptyGroups()
 			lcGroup* Group = GroupIt->get();
 			int Ref = 0;
 
-			for (lcPiece* Piece : mPieces)
+			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 				if (Piece->GetGroup() == Group)
 					Ref++;
 
@@ -2170,7 +2169,7 @@ void lcModel::RemoveEmptyGroups()
 
 			if (Ref != 0)
 			{
-				for (lcPiece* Piece : mPieces)
+				for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 				{
 					if (Piece->GetGroup() == Group)
 					{
@@ -2285,13 +2284,13 @@ void lcModel::AddPiece()
 	if (!PieceInfo)
 		return;
 
-	lcPiece* Last = mPieces.empty() ? nullptr : mPieces[mPieces.size() - 1];
+	lcPiece* Last = mPieces.empty() ? nullptr : mPieces.back().get();
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsFocused())
 		{
-			Last = Piece;
+			Last = Piece.get();
 			break;
 		}
 	}
@@ -2325,11 +2324,11 @@ void lcModel::AddPiece()
 
 void lcModel::AddPiece(lcPiece* Piece)
 {
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
+	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
 	{
-		if (mPieces[PieceIdx]->GetStepShow() > Piece->GetStepShow())
+		if (mPieces[PieceIndex]->GetStepShow() > Piece->GetStepShow())
 		{
-			InsertPiece(Piece, PieceIdx);
+			InsertPiece(Piece, PieceIndex);
 			return;
 		}
 	}
@@ -2337,7 +2336,7 @@ void lcModel::AddPiece(lcPiece* Piece)
 	InsertPiece(Piece, mPieces.size());
 }
 
-void lcModel::InsertPiece(lcPiece* Piece, int Index)
+void lcModel::InsertPiece(lcPiece* Piece, size_t Index)
 {
 	const PieceInfo* Info = Piece->mPieceInfo;
 
@@ -2349,7 +2348,7 @@ void lcModel::InsertPiece(lcPiece* Piece, int Index)
 			lcGetPiecesLibrary()->mBuffersDirty = true;
 	}
 
-	mPieces.InsertAt(Index, Piece);
+	mPieces.insert(mPieces.begin() + Index, std::unique_ptr<lcPiece>(Piece));
 }
 
 void lcModel::DeleteAllCameras()
@@ -2379,7 +2378,7 @@ void lcModel::DeleteSelectedObjects()
 
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 
@@ -2388,7 +2387,7 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 
 void lcModel::RemoveSelectedPiecesKeyFrames()
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->RemoveKeyFrames();
 
@@ -2445,9 +2444,9 @@ void lcModel::ShowSelectedPiecesEarlier()
 {
 	std::vector<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = PieceIt->get();
 
 		if (Piece->IsSelected())
 		{
@@ -2458,13 +2457,13 @@ void lcModel::ShowSelectedPiecesEarlier()
 				Step--;
 				Piece->SetStepShow(Step);
 
-				MovedPieces.emplace_back(Piece);
-				mPieces.RemoveIndex(PieceIdx);
+				MovedPieces.emplace_back(PieceIt->release());
+				PieceIt = mPieces.erase(PieceIt);
 				continue;
 			}
 		}
 
-		PieceIdx++;
+		PieceIt++;
 	}
 
 	if (MovedPieces.empty())
@@ -2484,11 +2483,11 @@ void lcModel::ShowSelectedPiecesEarlier()
 
 void lcModel::ShowSelectedPiecesLater()
 {
-	lcArray<lcPiece*> MovedPieces;
+	std::vector<lcPiece*> MovedPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = PieceIt->get();
 
 		if (Piece->IsSelected())
 		{
@@ -2502,21 +2501,20 @@ void lcModel::ShowSelectedPiecesLater()
 				if (!Piece->IsVisible(mCurrentStep))
 					Piece->SetSelected(false);
 
-				MovedPieces.emplace_back(Piece);
-				mPieces.RemoveIndex(PieceIdx);
+				MovedPieces.emplace_back(PieceIt->release());
+				PieceIt = mPieces.erase(PieceIt);
 				continue;
 			}
 		}
 
-		PieceIdx++;
+		PieceIt++;
 	}
 
 	if (MovedPieces.empty())
 		return;
 
-	for (int PieceIdx = 0; PieceIdx < MovedPieces.size(); PieceIdx++)
+	for (lcPiece* Piece : MovedPieces)
 	{
-		lcPiece* Piece = MovedPieces[PieceIdx];
 		Piece->SetFileLine(-1);
 		AddPiece(Piece);
 	}
@@ -2527,24 +2525,25 @@ void lcModel::ShowSelectedPiecesLater()
 	UpdateAllViews();
 }
 
-void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
+void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps)
 {
 	if (PieceSteps.size() != mPieces.size())
 		return;
 
 	bool Modified = false;
 
-	for (int PieceIdx = 0; PieceIdx < PieceSteps.size(); PieceIdx++)
+	for (size_t PieceIdx = 0; PieceIdx < PieceSteps.size(); PieceIdx++)
 	{
-		const QPair<lcPiece*, lcStep>& PieceStep = PieceSteps[PieceIdx];
-		lcPiece* Piece = mPieces[PieceIdx];
+		const std::pair<lcPiece*, lcStep>& PieceStep = PieceSteps[PieceIdx];
+		lcPiece* Piece = mPieces[PieceIdx].get();
 
 		if (Piece != PieceStep.first || Piece->GetStepShow() != PieceStep.second)
 		{
 			Piece = PieceStep.first;
 			const lcStep Step = PieceStep.second;
 
-			mPieces[PieceIdx] = Piece;
+			mPieces[PieceIdx].release();
+			mPieces[PieceIdx] = std::unique_ptr<lcPiece>(Piece);
 			Piece->SetStepShow(Step);
 
 			if (!Piece->IsVisible(mCurrentStep))
@@ -2565,7 +2564,7 @@ void lcModel::SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps)
 
 void lcModel::RenamePiece(PieceInfo* Info)
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->mPieceInfo == Info)
 			Piece->UpdateID();
 }
@@ -2575,19 +2574,20 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	if (!Model)
 		return;
 
-	lcArray<lcPiece*> Pieces;
+	std::vector<lcPiece*> Pieces;
 	lcPiece* ModelPiece = nullptr;
 	lcStep FirstStep = LC_STEP_MAX;
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = mPieces[PieceIndex].get();
 
 		if (Piece->IsSelected())
 		{
 			Piece->CompareBoundingBox(Min, Max);
-			mPieces.RemoveIndex(PieceIdx);
+			mPieces[PieceIndex].release();
+			mPieces.erase(mPieces.begin() + PieceIndex);
 			Piece->SetGroup(nullptr); // todo: copy groups
 			Pieces.emplace_back(Piece);
 			FirstStep = qMin(FirstStep, Piece->GetStepShow());
@@ -2596,20 +2596,19 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 			{
 				ModelPiece = new lcPiece(Model->mPieceInfo);
 				ModelPiece->SetColorIndex(gDefaultColor);
-				InsertPiece(ModelPiece, PieceIdx);
-				PieceIdx++;
+				InsertPiece(ModelPiece, PieceIndex);
+				PieceIndex++;
 			}
 		}
 		else
-			PieceIdx++;
+			PieceIndex++;
 	}
 
 	lcVector3 ModelCenter = (Min + Max) / 2.0f;
 	ModelCenter.z += (Min.z - Max.z) / 2.0f;
 
-	for (int PieceIdx = 0; PieceIdx < Pieces.size(); PieceIdx++)
+	for (lcPiece* Piece : Pieces)
 	{
-		lcPiece* Piece = Pieces[PieceIdx];
 		Piece->SetFileLine(-1);
 		Piece->SetStepShow(Piece->GetStepShow() - FirstStep + 1);
 		Piece->MoveSelected(Piece->GetStepShow(), false, -ModelCenter);
@@ -2633,21 +2632,22 @@ void lcModel::InlineSelectedModels()
 {
 	std::vector<lcObject*> NewPieces;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = mPieces[PieceIndex].get();
 
 		if (!Piece->IsSelected() || !Piece->mPieceInfo->IsModel())
 		{
-			PieceIdx++;
+			PieceIndex++;
 			continue;
 		}
 
-		mPieces.RemoveIndex(PieceIdx);
+		mPieces[PieceIndex].release();
+		mPieces.erase(mPieces.begin() + PieceIndex);
 
 		lcModel* Model = Piece->mPieceInfo->GetModel();
 
-		for (const lcPiece* ModelPiece : Model->mPieces)
+		for (const std::unique_ptr<lcPiece>& ModelPiece : Model->mPieces)
 		{
 			lcPiece* NewPiece = new lcPiece(nullptr);
 
@@ -2664,8 +2664,8 @@ void lcModel::InlineSelectedModels()
 			NewPiece->UpdatePosition(mCurrentStep);
 
 			NewPieces.emplace_back(NewPiece);
-			InsertPiece(NewPiece, PieceIdx);
-			PieceIdx++;
+			InsertPiece(NewPiece, PieceIndex);
+			PieceIndex++;
 		}
 
 		delete Piece;
@@ -2688,18 +2688,17 @@ bool lcModel::RemoveSelectedObjects()
 	bool RemovedCamera = false;
 	bool RemovedLight = false;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = PieceIt->get();
 
 		if (Piece->IsSelected())
 		{
 			RemovedPiece = true;
-			mPieces.Remove(Piece);
-			delete Piece;
+			PieceIt = mPieces.erase(PieceIt);
 		}
 		else
-			PieceIdx++;
+			PieceIt++;
 	}
 
 	for (std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin(); CameraIt != mCameras.end(); )
@@ -2755,7 +2754,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 
 		if (AlternateButtonDrag)
 		{
-			for (lcPiece* Piece : mPieces)
+			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 			{
 				if (Piece->IsFocused())
 				{
@@ -2767,7 +2766,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 		}
 		else
 		{
-			for (lcPiece* Piece : mPieces)
+			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 			{
 				if (Piece->IsSelected())
 				{
@@ -3029,7 +3028,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
 	bool Modified = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected() && Piece->GetColorIndex() != ColorIndex)
 		{
@@ -3049,12 +3048,12 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
-	lcArray<lcPiece*> MovedPieces;
+	std::vector<lcPiece*> MovedPieces;
 	bool SelectionChanged = false;
 
-	for (int PieceIdx = 0; PieceIdx < mPieces.size(); )
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
-		lcPiece* Piece = mPieces[PieceIdx];
+		lcPiece* Piece = PieceIt->get();
 
 		if (Piece->IsSelected() && Piece->GetStepShow() != Step)
 		{
@@ -3066,20 +3065,19 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 				SelectionChanged = true;
 			}
 
-			MovedPieces.emplace_back(Piece);
-			mPieces.RemoveIndex(PieceIdx);
+			MovedPieces.emplace_back(PieceIt->release());
+			PieceIt = mPieces.erase(PieceIt);
 			continue;
 		}
 
-		PieceIdx++;
+		PieceIt++;
 	}
 
 	if (MovedPieces.empty())
 		return;
 
-	for (int PieceIdx = 0; PieceIdx < MovedPieces.size(); PieceIdx++)
+	for (lcPiece* Piece : MovedPieces)
 	{
-		lcPiece* Piece = MovedPieces[PieceIdx];
 		Piece->SetFileLine(-1);
 		AddPiece(Piece);
 	}
@@ -3095,7 +3093,7 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	bool Modified = false;
 	bool SelectionChanged = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected() && Piece->GetStepHide() != Step)
 		{
@@ -3200,7 +3198,7 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 
 bool lcModel::AnyPiecesSelected() const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			return true;
 
@@ -3209,7 +3207,7 @@ bool lcModel::AnyPiecesSelected() const
 
 bool lcModel::AnyObjectsSelected() const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			return true;
 
@@ -3226,9 +3224,9 @@ bool lcModel::AnyObjectsSelected() const
 
 lcObject* lcModel::GetFocusObject() const
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsFocused())
-			return Piece;
+			return Piece.get();
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera->IsFocused())
@@ -3243,7 +3241,7 @@ lcObject* lcModel::GetFocusObject() const
 
 lcModel* lcModel::GetFirstSelectedSubmodel() const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected() && Piece->mPieceInfo->IsModel())
 			return Piece->mPieceInfo->GetModel();
 
@@ -3252,7 +3250,7 @@ lcModel* lcModel::GetFirstSelectedSubmodel() const
 
 void lcModel::GetSubModels(std::set<lcModel*>& SubModels) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->mPieceInfo->IsModel())
 		{
@@ -3271,7 +3269,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 	Center = lcVector3(0.0f, 0.0f, 0.0f);
 	RelativeRotation = lcMatrix33Identity();
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (!Piece->IsSelected())
 			continue;
@@ -3366,7 +3364,7 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 	lcPiece* Selected = nullptr;
 	int NumSelected = 0;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsFocused())
 		{
@@ -3377,7 +3375,7 @@ bool lcModel::GetPieceFocusOrSelectionCenter(lcVector3& Center) const
 		if (Piece->IsSelected())
 		{
 			Piece->CompareBoundingBox(Min, Max);
-			Selected = Piece;
+			Selected = Piece.get();
 			NumSelected++;
 		}
 	}
@@ -3432,7 +3430,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 	bool SinglePieceSelected = true;
 	bool Selected = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
 		{
@@ -3440,7 +3438,7 @@ bool lcModel::GetSelectionCenter(lcVector3& Center) const
 			Selected = true;
 
 			if (!SelectedPiece)
-				SelectedPiece = Piece;
+				SelectedPiece = Piece.get();
 			else
 				SinglePieceSelected = false;
 		}
@@ -3485,7 +3483,7 @@ lcBoundingBox lcModel::GetAllPiecesBoundingBox() const
 		Box.Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
 		Box.Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-		for (const lcPiece* Piece : mPieces)
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 			Piece->CompareBoundingBox(Box.Min, Box.Max);
 	}
 	else
@@ -3500,7 +3498,7 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	Min = lcVector3(FLT_MAX, FLT_MAX, FLT_MAX);
 	Max = lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsVisible(mCurrentStep))
 		{
@@ -3516,7 +3514,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
 {
 	std::vector<lcVector3> Points;
 
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points);
 
@@ -3525,7 +3523,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
 
 void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (!Piece->IsVisibleInSubModel())
 			continue;
@@ -3541,7 +3539,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSu
 
 void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Cumulative ? Piece->GetStepShow() > Step : Piece->GetStepShow() != Step || Piece->IsHidden())
 			continue;
@@ -3557,7 +3555,7 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 
 void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
-	for (const lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 }
 
@@ -3573,14 +3571,14 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 		lcGroup* Group = nullptr;
 		bool First = true;
 
-		for (lcPiece* Piece : mPieces)
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
 			if (Piece->IsSelected())
 			{
-				Selection.emplace_back(Piece);
+				Selection.emplace_back(Piece.get());
 
 				if (Piece->IsFocused())
-					*Focus = Piece;
+					*Focus = Piece.get();
 
 				if (Piece->mPieceInfo->IsModel())
 					*Flags |= LC_SEL_MODEL_SELECTED;
@@ -3666,21 +3664,21 @@ std::vector<lcObject*> lcModel::GetSelectionModePieces(const lcPiece* SelectedPi
 		break;
 
 	case lcSelectionMode::Piece:
-		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece != SelectedPiece)
-				Pieces.emplace_back(Piece);
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
 		break;
 
 	case lcSelectionMode::Color:
-		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
-				Pieces.emplace_back(Piece);
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
 		break;
 
 	case lcSelectionMode::PieceColor:
-		for (lcPiece* Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece != SelectedPiece)
-				Pieces.emplace_back(Piece);
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
 		break;
 	}
 
@@ -3689,7 +3687,7 @@ std::vector<lcObject*> lcModel::GetSelectionModePieces(const lcPiece* SelectedPi
 
 void lcModel::ClearSelection(bool UpdateInterface)
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->SetSelected(false);
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
@@ -3710,7 +3708,7 @@ void lcModel::SelectGroup(lcGroup* TopGroup, bool Select)
 	if (!TopGroup)
 		return;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (!Piece->IsSelected() && Piece->IsVisible(mCurrentStep) && (Piece->GetTopGroup() == TopGroup))
 			Piece->SetSelected(Select);
 }
@@ -3914,7 +3912,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 
 void lcModel::SelectAllPieces()
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(true);
 
@@ -3925,7 +3923,7 @@ void lcModel::SelectAllPieces()
 
 void lcModel::InvertSelection()
 {
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisible(mCurrentStep))
 			Piece->SetSelected(!Piece->IsSelected());
 
@@ -3937,7 +3935,7 @@ void lcModel::HideSelectedPieces()
 {
 	bool Modified = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
 		{
@@ -3961,7 +3959,7 @@ void lcModel::HideUnselectedPieces()
 {
 	bool Modified = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (!Piece->IsSelected())
 		{
@@ -3984,7 +3982,7 @@ void lcModel::UnhideSelectedPieces()
 {
 	bool Modified = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected() && Piece->IsHidden())
 		{
@@ -4007,7 +4005,7 @@ void lcModel::UnhideAllPieces()
 {
 	bool Modified = false;
 
-	for (lcPiece* Piece : mPieces)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsHidden())
 		{
@@ -4059,7 +4057,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
 	};
 
-	int StartIdx = mPieces.size() - 1;
+	size_t StartIndex = mPieces.size() - 1;
 	int ReplacedCount = 0;
 
 	if (!FindAll)
@@ -4069,11 +4067,11 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 		if (FocusedPiece)
 		{
-			for (int PieceIdx = 0; PieceIdx < mPieces.size(); PieceIdx++)
+			for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
 			{
-				if (FocusedPiece == mPieces[PieceIdx])
+				if (FocusedPiece == mPieces[PieceIndex].get())
 				{
-					StartIdx = PieceIdx;
+					StartIndex = PieceIndex;
 					break;
 				}
 			}
@@ -4086,23 +4084,28 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 		}
 	}
 
-	int CurrentIdx = StartIdx;
+	size_t CurrentIndex = StartIndex;
 	lcPiece* Focus = nullptr;
 	std::vector<lcObject*> Selection;
 
 	for (;;)
 	{
 		if (SearchForward)
-			CurrentIdx++;
+		{
+			CurrentIndex++;
+
+			if (CurrentIndex >= mPieces.size())
+				CurrentIndex = 0;
+		}
 		else
-			CurrentIdx--;
+		{
+			if (CurrentIndex == 0)
+				CurrentIndex = mPieces.size();
 
-		if (CurrentIdx < 0)
-			CurrentIdx = mPieces.size() - 1;
-		else if (CurrentIdx >= mPieces.size())
-			CurrentIdx = 0;
+			CurrentIndex--;
+		}
 
-		lcPiece* Current = mPieces[CurrentIdx];
+		lcPiece* Current = mPieces[CurrentIndex].get();
 
 		if (Current->IsVisible(mCurrentStep) && PieceMatches(Current))
 		{
@@ -4122,7 +4125,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			}
 		}
 
-		if (CurrentIdx == StartIdx)
+		if (CurrentIndex == StartIndex)
 			break;
 	}
 
@@ -4358,9 +4361,11 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	switch (Object->GetType())
 	{
 	case lcObjectType::Piece:
-		mPieces.Remove((lcPiece*)Object);
-		RemoveEmptyGroups();
-		delete Object;
+		if (auto PieceIt = std::find_if(mPieces.begin(), mPieces.end(), [Object](const std::unique_ptr<lcPiece>& CheckPiece) { return CheckPiece.get() == Object; }); PieceIt != mPieces.end())
+		{
+			mPieces.erase(PieceIt);
+			RemoveEmptyGroups();
+		}
 		break;
 
 	case lcObjectType::Camera:
@@ -4624,7 +4629,7 @@ void lcModel::ShowArrayDialog()
 				lcVector3 RotationAngles = Dialog.mRotations[0] * Step1 + Dialog.mRotations[1] * Step2 + Dialog.mRotations[2] * Step3;
 				const lcVector3 Offset = Dialog.mOffsets[0] * Step1 + Dialog.mOffsets[1] * Step2 + Dialog.mOffsets[2] * Step3;
 
-				for (lcPiece* Piece : mPieces)
+				for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 				{
 					if (!Piece->IsSelected())
 						continue;

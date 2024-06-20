@@ -183,16 +183,16 @@ void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGr
 		AddChildren(GroupItem, Group.get(), Model);
 	}
 
-	const lcArray<lcPiece*>& Pieces = Model->GetPieces();
+	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
 	lcStep currentStep = Model->GetCurrentStep();
 
-	for (lcPiece* Piece : Pieces)
+	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
 	{
 		if (Piece->GetGroup() != ParentGroup || !Piece->IsVisible(currentStep))
 			continue;
 
 		QTreeWidgetItem* PieceItem = new QTreeWidgetItem(ParentItem, QStringList(Piece->GetName()));
-		PieceItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece));
+		PieceItem->setData(0, IndexRole, QVariant::fromValue<uintptr_t>((uintptr_t)Piece.get()));
 		PieceItem->setCheckState(0, Piece->IsSelected() ? Qt::Checked : Qt::Unchecked);
 	}
 

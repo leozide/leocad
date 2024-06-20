@@ -135,7 +135,7 @@ public:
 		return mPieceInfo;
 	}
 
-	const lcArray<lcPiece*>& GetPieces() const
+	const std::vector<std::unique_ptr<lcPiece>>& GetPieces() const
 	{
 		return mPieces;
 	}
@@ -219,7 +219,7 @@ public:
 	void RemoveFocusedControlPoint();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
-	void SetPieceSteps(const QList<QPair<lcPiece*, lcStep>>& PieceSteps);
+	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);
 	void RenamePiece(PieceInfo* Info);
 
 	void MoveSelectionToModel(lcModel* Model);
@@ -390,7 +390,7 @@ protected:
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);
-	void InsertPiece(lcPiece* Piece, int Index);
+	void InsertPiece(lcPiece* Piece, size_t Index);
 
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
@@ -403,7 +403,7 @@ protected:
 	lcVector3 mMouseToolDistance;
 	bool mMouseToolFirstMove;
 
-	lcArray<lcPiece*> mPieces;
+	std::vector<std::unique_ptr<lcPiece>> mPieces;
 	std::vector<std::unique_ptr<lcCamera>> mCameras;
 	std::vector<std::unique_ptr<lcLight>> mLights;
 	std::vector<std::unique_ptr<lcGroup>> mGroups;

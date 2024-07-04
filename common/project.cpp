@@ -2206,7 +2206,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 				AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
 				AreaX = lcVector3(Light->GetWorldMatrix()[0]) * Light->GetAreaSizeX();
 				AreaY = lcVector3(Light->GetWorldMatrix()[1]) * Light->GetAreaSizeY();
-				AreaGrid = Light->GetAreaPOVRayGrid();
+				AreaGrid = lcVector2i(Light->GetAreaPOVRayGridX(), Light->GetAreaPOVRayGridY());
 				break;
 
 			case lcLightType::Count:

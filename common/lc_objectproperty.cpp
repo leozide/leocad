@@ -13,6 +13,7 @@
 	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName);
 
 LC_OBJECT_PROPERTY(float)
+LC_OBJECT_PROPERTY(int)
 LC_OBJECT_PROPERTY(lcVector2i)
 LC_OBJECT_PROPERTY(lcVector2)
 LC_OBJECT_PROPERTY(lcVector3)
@@ -26,6 +27,15 @@ static void lcObjectPropertySaveValue(QTextStream& Stream, const T& Value)
 
 	for (int ValueIndex = 0; ValueIndex < Count; ValueIndex++)
 		Stream << ((const float*)&Value)[ValueIndex] << ' ';
+}
+
+template<>
+void lcObjectPropertySaveValue(QTextStream& Stream, const int& Value)
+{
+	constexpr int Count = sizeof(int) / sizeof(int);
+
+	for (int ValueIndex = 0; ValueIndex < Count; ValueIndex++)
+		Stream << ((const int*)&Value)[ValueIndex] << ' ';
 }
 
 template<>
@@ -44,6 +54,15 @@ static void lcObjectPropertyLoadValue(QTextStream& Stream, T& Value)
 
 	for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
 		Stream >> ((float*)&Value)[ValueIdx];
+}
+
+template<>
+void lcObjectPropertyLoadValue(QTextStream& Stream, int& Value)
+{
+	constexpr int Count = sizeof(int) / sizeof(int);
+
+	for (int ValueIdx = 0; ValueIdx < Count; ValueIdx++)
+		Stream >> ((int*)&Value)[ValueIdx];
 }
 
 template<>

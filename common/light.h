@@ -276,11 +276,18 @@ public:
 		return mAreaShape;
 	}
 
-	bool SetAreaPOVRayGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey);
+	bool SetAreaPOVRayGridX(int AreaGrid, lcStep Step, bool AddKey);
 
-	lcVector2i GetAreaPOVRayGrid() const
+	int GetAreaPOVRayGridX() const
 	{
-		return mAreaPOVRayGrid;
+		return mAreaPOVRayGridX;
+	}
+
+	bool SetAreaPOVRayGridY(int AreaGrid, lcStep Step, bool AddKey);
+
+	int GetAreaPOVRayGridY() const
+	{
+		return mAreaPOVRayGridY;
 	}
 
 	bool SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
@@ -382,7 +389,8 @@ protected:
 	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);
 	lcObjectProperty<float> mSpotPenumbraAngle = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotPOVRayTightness = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<lcVector2i> mAreaPOVRayGrid = lcObjectProperty<lcVector2i>(lcVector2i(2, 2));
+	lcObjectProperty<int> mAreaPOVRayGridX = lcObjectProperty<int>(2);
+	lcObjectProperty<int> mAreaPOVRayGridY = lcObjectProperty<int>(2);
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
 
 	quint32 mState = 0;

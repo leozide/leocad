@@ -134,7 +134,8 @@ void lcLight::SaveLDraw(QTextStream& Stream) const
 
 	case lcLightType::Area:
 		Stream << QLatin1String("0 !LEOCAD LIGHT AREA_SHAPE ") << gLightAreaShapes[static_cast<int>(mAreaShape)] << LineEnding;
-		mAreaPOVRayGrid.Save(Stream, "LIGHT", "POVRAY_AREA_GRID", true);
+		mAreaPOVRayGridX.Save(Stream, "LIGHT", "POVRAY_AREA_GRID_X", true);
+		mAreaPOVRayGridY.Save(Stream, "LIGHT", "POVRAY_AREA_GRID_Y", true);
 		break;
 	}
 
@@ -240,7 +241,9 @@ bool lcLight::ParseLDrawLine(QTextStream& Stream)
 			continue;
 		else if (mSpotPOVRayTightness.Load(Stream, Token, "POVRAY_SPOT_TIGHTNESS"))
 			continue;
-		else if (mAreaPOVRayGrid.Load(Stream, Token, "POVRAY_AREA_GRID"))
+		else if (mAreaPOVRayGridX.Load(Stream, Token, "POVRAY_AREA_GRID_X"))
+			continue;
+		else if (mAreaPOVRayGridY.Load(Stream, Token, "POVRAY_AREA_GRID_Y"))
 			continue;
 		else if (Token == QLatin1String("AREA_SHAPE"))
 		{
@@ -541,9 +544,16 @@ bool lcLight::SetAreaShape(lcLightAreaShape AreaShape)
 	return false;
 }
 
-bool lcLight::SetAreaPOVRayGrid(lcVector2i AreaGrid, lcStep Step, bool AddKey)
+bool lcLight::SetAreaPOVRayGridX(int AreaGrid, lcStep Step, bool AddKey)
 {
-	mAreaPOVRayGrid.ChangeKey(AreaGrid, Step, AddKey);
+	mAreaPOVRayGridX.ChangeKey(AreaGrid, Step, AddKey);
+
+	return true;
+}
+
+bool lcLight::SetAreaPOVRayGridY(int AreaGrid, lcStep Step, bool AddKey)
+{
+	mAreaPOVRayGridY.ChangeKey(AreaGrid, Step, AddKey);
 
 	return true;
 }
@@ -602,7 +612,8 @@ void lcLight::InsertTime(lcStep Start, lcStep Time)
 	mSpotConeAngle.InsertTime(Start, Time);
 	mSpotPenumbraAngle.InsertTime(Start, Time);
 	mSpotPOVRayTightness.InsertTime(Start, Time);
-	mAreaPOVRayGrid.InsertTime(Start, Time);
+	mAreaPOVRayGridX.InsertTime(Start, Time);
+	mAreaPOVRayGridY.InsertTime(Start, Time);
 	mPointBlenderRadius.InsertTime(Start, Time);
 	mSpotBlenderRadius.InsertTime(Start, Time);
 	mDirectionalBlenderAngle.InsertTime(Start, Time);
@@ -622,7 +633,8 @@ void lcLight::RemoveTime(lcStep Start, lcStep Time)
 	mSpotConeAngle.RemoveTime(Start, Time);
 	mSpotPenumbraAngle.RemoveTime(Start, Time);
 	mSpotPOVRayTightness.RemoveTime(Start, Time);
-	mAreaPOVRayGrid.RemoveTime(Start, Time);
+	mAreaPOVRayGridX.RemoveTime(Start, Time);
+	mAreaPOVRayGridY.RemoveTime(Start, Time);
 	mPointBlenderRadius.RemoveTime(Start, Time);
 	mSpotBlenderRadius.RemoveTime(Start, Time);
 	mDirectionalBlenderAngle.RemoveTime(Start, Time);
@@ -642,7 +654,8 @@ void lcLight::UpdatePosition(lcStep Step)
 	mSpotConeAngle.Update(Step);
 	mSpotPenumbraAngle.Update(Step);
 	mSpotPOVRayTightness.Update(Step);
-	mAreaPOVRayGrid.Update(Step);
+	mAreaPOVRayGridX.Update(Step);
+	mAreaPOVRayGridY.Update(Step);
 	mPointBlenderRadius.Update(Step);
 	mSpotBlenderRadius.Update(Step);
 	mDirectionalBlenderAngle.Update(Step);
@@ -1149,10 +1162,10 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 		return static_cast<int>(GetAreaShape());
 
 	case lcObjectPropertyId::LightAreaPOVRayGridX:
-		return GetAreaPOVRayGrid().x;
+		return GetAreaPOVRayGridX();
 
 	case lcObjectPropertyId::LightAreaPOVRayGridY:
-		return GetAreaPOVRayGrid().y;
+		return GetAreaPOVRayGridY();
 
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
@@ -1243,10 +1256,10 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 		return SetAreaShape(static_cast<lcLightAreaShape>(Value.toInt()));
 
 	case lcObjectPropertyId::LightAreaPOVRayGridX:
-		return SetAreaPOVRayGrid(lcVector2i(Value.toInt(), GetAreaPOVRayGrid().y), Step, AddKey);
+		return SetAreaPOVRayGridX(Value.toInt(), Step, AddKey);
 
 	case lcObjectPropertyId::LightAreaPOVRayGridY:
-		return SetAreaPOVRayGrid(lcVector2i(GetAreaPOVRayGrid().x, Value.toInt()), Step, AddKey);
+		return SetAreaPOVRayGridY(Value.toInt(), Step, AddKey);
 
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
@@ -1333,8 +1346,10 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 		return false;
 
 	case lcObjectPropertyId::LightAreaPOVRayGridX:
+		return mAreaPOVRayGridX.HasKeyFrame(Time);
+
 	case lcObjectPropertyId::LightAreaPOVRayGridY:
-		return mAreaPOVRayGrid.HasKeyFrame(Time);
+		return mAreaPOVRayGridY.HasKeyFrame(Time);
 
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
@@ -1425,8 +1440,10 @@ bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 		return false;
 
 	case lcObjectPropertyId::LightAreaPOVRayGridX:
+		return mAreaPOVRayGridX.SetKeyFrame(Time, KeyFrame);
+
 	case lcObjectPropertyId::LightAreaPOVRayGridY:
-		return mAreaPOVRayGrid.SetKeyFrame(Time, KeyFrame);
+		return mAreaPOVRayGridY.SetKeyFrame(Time, KeyFrame);
 
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
@@ -1453,7 +1470,8 @@ void lcLight::RemoveKeyFrames()
 	mSpotConeAngle.RemoveAllKeys();
 	mSpotPenumbraAngle.RemoveAllKeys();
 	mSpotPOVRayTightness.RemoveAllKeys();
-	mAreaPOVRayGrid.RemoveAllKeys();
+	mAreaPOVRayGridX.RemoveAllKeys();
+	mAreaPOVRayGridY.RemoveAllKeys();
 	mPointBlenderRadius.RemoveAllKeys();
 	mSpotBlenderRadius.RemoveAllKeys();
 	mDirectionalBlenderAngle.RemoveAllKeys();

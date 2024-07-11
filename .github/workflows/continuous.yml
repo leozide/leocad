@@ -60,6 +60,6 @@ jobs:
       uses: SimenB/github-actions-cpu-cores@v1
       id: cpu-cores
     - name: Generate Makefile
-      run: qmake PREFIX=/usr
+      run: qmake -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib PREFIX=/usr
     - name: Build
       run: make -j ${{ steps.cpu-cores.outputs.count }}

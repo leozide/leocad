@@ -5,12 +5,9 @@
 #include "lc_application.h"
 #include "lc_mainwindow.h"
 #include "lc_library.h"
-#include "lc_model.h"
+#include "lc_thumbnailmanager.h"
 #include "project.h"
 #include "pieceinf.h"
-#include "camera.h"
-#include "lc_scene.h"
-#include "lc_view.h"
 #include "lc_glextensions.h"
 #include "lc_category.h"
 
@@ -18,7 +15,7 @@ Q_DECLARE_METATYPE(QList<int>)
 
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
-	mListModel->RequestPreview(Index.row());
+	mListModel->RequestThumbnail(Index.row());
 	QStyledItemDelegate::paint(Painter, Option, Index);
 }
 
@@ -60,38 +57,19 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 		mColorLocked = true;
 	}
 
-	connect(lcGetPiecesLibrary(), &lcPiecesLibrary::PartLoaded, this, &lcPartSelectionListModel::PartLoaded);
+	connect(lcGetPiecesLibrary()->GetThumbnailManager(), &lcThumbnailManager::ThumbnailReady, this, &lcPartSelectionListModel::ThumbnailReady);
 }
 
 lcPartSelectionListModel::~lcPartSelectionListModel()
 {
-	ClearRequests();
-
-	mView.reset();
-	mModel.reset();
+	ReleaseThumbnails();
 }
 
-void lcPartSelectionListModel::ClearRequests()
+void lcPartSelectionListModel::UpdateThumbnails()
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	for (int RequestIdx : mRequestedPreviews)
-	{
-		PieceInfo* Info = mParts[RequestIdx].first;
-		Library->ReleasePieceInfo(Info);
-	}
-
-	mRequestedPreviews.clear();
-}
-
-void lcPartSelectionListModel::Redraw()
-{
-	ClearRequests();
-
 	beginResetModel();
 
-	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
-		mParts[PartIdx].second = QPixmap();
+	ReleaseThumbnails();
 
 	endResetModel();
 
@@ -103,8 +81,9 @@ void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
 	if (mColorLocked || ColorIndex == mColorIndex)
 		return;
 
+	UpdateThumbnails();
+
 	mColorIndex = ColorIndex;
-	Redraw();
 }
 
 void lcPartSelectionListModel::ToggleColorLocked()
@@ -125,9 +104,9 @@ void lcPartSelectionListModel::ToggleListMode()
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 {
-	ClearRequests();
-
 	beginResetModel();
+
+	ReleaseThumbnails();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::vector<PieceInfo*> SingleParts, GroupedParts;
@@ -160,8 +139,8 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 
 	mParts.resize(SingleParts.size());
 
-	for (size_t PartIdx = 0; PartIdx < SingleParts.size(); PartIdx++)
-		mParts[PartIdx] = std::pair<PieceInfo*, QPixmap>(SingleParts[PartIdx], QPixmap());
+	for (size_t PartIndex = 0; PartIndex < SingleParts.size(); PartIndex++)
+		mParts[PartIndex].Info = SingleParts[PartIndex];
 
 	endResetModel();
 
@@ -170,10 +149,9 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 
 void lcPartSelectionListModel::SetModelsCategory()
 {
-	ClearRequests();
-
 	beginResetModel();
 
+	ReleaseThumbnails();
 	mParts.clear();
 
 	const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
@@ -181,11 +159,11 @@ void lcPartSelectionListModel::SetModelsCategory()
 
 	for (const std::unique_ptr<lcModel>& Model : Models)
 		if (!Model->IncludesModel(ActiveModel))
-			mParts.emplace_back(std::pair<PieceInfo*, QPixmap>(Model->GetPieceInfo(), QPixmap()));
+			mParts.emplace_back().Info = Model->GetPieceInfo();
 
-	auto lcPartSortFunc = [](const std::pair<PieceInfo*, QPixmap>& a, const std::pair<PieceInfo*, QPixmap>& b)
+	auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
 	{
-		return strcmp(a.first->m_strDescription, b.first->m_strDescription) < 0;
+		return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
 	};
 
 	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
@@ -197,10 +175,9 @@ void lcPartSelectionListModel::SetModelsCategory()
 
 void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 {
-	ClearRequests();
-
 	beginResetModel();
 
+	ReleaseThumbnails();
 	mParts.clear();
 
 	lcPartSelectionWidget* PartSelectionWidget = mListView->GetPartSelectionWidget();
@@ -216,8 +193,8 @@ void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 
 	mParts.reserve(PartsList.size());
 
-	for (PieceInfo* Favorite : PartsList)
-		mParts.emplace_back(std::pair<PieceInfo*, QPixmap>(Favorite, QPixmap()));
+	for (PieceInfo* Info : PartsList)
+		mParts.emplace_back().Info = Info;
 
 	endResetModel();
 
@@ -226,10 +203,9 @@ void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 
 void lcPartSelectionListModel::SetCurrentModelCategory()
 {
-	ClearRequests();
-
 	beginResetModel();
 
+	ReleaseThumbnails();
 	mParts.clear();
 
 	lcModel* ActiveModel = gMainWindow->GetActiveModel();
@@ -239,11 +215,11 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 		ActiveModel->GetPartsList(gDefaultColor, true, true, PartsList);
 
 	for (const auto& PartIt : PartsList)
-		mParts.emplace_back(std::pair<PieceInfo*, QPixmap>((PieceInfo*)PartIt.first, QPixmap()));
+		mParts.emplace_back().Info = (PieceInfo*)PartIt.first;
 
-	auto lcPartSortFunc = [](const std::pair<PieceInfo*, QPixmap>& a, const std::pair<PieceInfo*, QPixmap>& b)
+	auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
 	{
-		return strcmp(a.first->m_strDescription, b.first->m_strDescription) < 0;
+		return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
 	};
 
 	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
@@ -259,7 +235,7 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 
 	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
 	{
-		PieceInfo* Info = mParts[PartIdx].first;
+		PieceInfo* Info = mParts[PartIdx].Info;
 		bool Visible;
 
 		if (!mShowDecoratedParts && Info->IsPatterned() && !Info->IsProjectPiece())
@@ -307,7 +283,7 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 
 	if (Index.isValid() && InfoIndex < mParts.size())
 	{
-		PieceInfo* Info = mParts[InfoIndex].first;
+		PieceInfo* Info = mParts[InfoIndex].Info;
 
 		switch (Role)
 		{
@@ -320,8 +296,8 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->mFileName)));
 
 		case Qt::DecorationRole:
-			if (!mParts[InfoIndex].second.isNull() && mIconSize)
-				return QVariant(mParts[InfoIndex].second);
+			if (mIconSize && !mParts[InfoIndex].Pixmap.isNull())
+				return QVariant(mParts[InfoIndex].Pixmap);
 			else
 				return QVariant(QColor(0, 0, 0, 0));
 
@@ -351,117 +327,49 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 		return DefaultFlags;
 }
 
-void lcPartSelectionListModel::RequestPreview(int InfoIndex)
+void lcPartSelectionListModel::ReleaseThumbnails()
 {
-	if (!mIconSize || !mParts[InfoIndex].second.isNull())
-		return;
+	lcThumbnailManager* ThumbnailManager = lcGetPiecesLibrary()->GetThumbnailManager();
 
-	if (std::find(mRequestedPreviews.begin(), mRequestedPreviews.end(), InfoIndex) != mRequestedPreviews.end())
-		return;
-
-	PieceInfo* Info = mParts[InfoIndex].first;
-	lcGetPiecesLibrary()->LoadPieceInfo(Info, false, false);
-
-	if (Info->mState == lcPieceInfoState::Loaded)
-		DrawPreview(InfoIndex);
-	else
-		mRequestedPreviews.push_back(InfoIndex);
+	for (lcPartSelectionListModelEntry& Part : mParts)
+	{
+		ThumbnailManager->ReleaseThumbnail(Part.ThumbnailId);
+		Part.ThumbnailId = lcPartThumbnailId::Invalid;
+		Part.Pixmap = QPixmap();
+	}
 }
 
-void lcPartSelectionListModel::PartLoaded(PieceInfo* Info)
+void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 {
-	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
+	if (!mIconSize || !mParts[PartIndex].Pixmap.isNull() || mParts[PartIndex].ThumbnailId != lcPartThumbnailId::Invalid)
+		return;
+
+	PieceInfo* Info = mParts[PartIndex].Info;
+	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, mColorIndex, mIconSize);
+
+	mParts[PartIndex].ThumbnailId = ThumbnailId;
+
+	if (!Thumbnail.isNull())
 	{
-		if (mParts[PartIdx].first == Info)
+		mParts[PartIndex].Pixmap = Thumbnail;
+
+		emit dataChanged(index(PartIndex, 0), index(PartIndex, 0), { Qt::DecorationRole });
+	}
+}
+
+void lcPartSelectionListModel::ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap)
+{
+	for (int PartIndex = 0; PartIndex < static_cast<int>(mParts.size()); PartIndex++)
+	{
+		if (mParts[PartIndex].ThumbnailId == ThumbnailId)
 		{
-			auto PreviewIt = std::find(mRequestedPreviews.begin(), mRequestedPreviews.end(), static_cast<int>(PartIdx));
-			if (PreviewIt != mRequestedPreviews.end())
-			{
-				mRequestedPreviews.erase(PreviewIt);
-				DrawPreview((int)PartIdx);
-			}
+			mParts[PartIndex].Pixmap = Pixmap;
+
+			emit dataChanged(index(PartIndex, 0), index(PartIndex, 0), { Qt::DecorationRole });
+
 			break;
 		}
 	}
-}
-
-void lcPartSelectionListModel::DrawPreview(int InfoIndex)
-{
-	const int Width = mIconSize * 2;
-	const int Height = mIconSize * 2;
-
-	if (mView && (mView->GetWidth() != Width || mView->GetHeight() != Height))
-		mView.reset();
-
-	if (!mView)
-	{
-		if (!mModel)
-			mModel = std::unique_ptr<lcModel>(new lcModel(QString(), nullptr, true));
-		mView = std::unique_ptr<lcView>(new lcView(lcViewType::PartsList, mModel.get()));
-
-		mView->SetOffscreenContext();
-		mView->MakeCurrent();
-		mView->SetSize(Width, Height);
-
-		if (!mView->BeginRenderToImage(Width, Height))
-		{
-			mView.reset();
-			return;
-		}
-	}
-
-	mView->MakeCurrent();
-	mView->BindRenderFramebuffer();
-
-	const uint BackgroundColor = mListView->palette().color(QPalette::Base).rgba();
-	mView->SetBackgroundColorOverride(LC_RGBA(qRed(BackgroundColor), qGreen(BackgroundColor), qBlue(BackgroundColor), 0));
-
-	PieceInfo* Info = mParts[InfoIndex].first;
-	mModel->SetPreviewPieceInfo(Info, mColorIndex);
-
-	const lcVector3 Center = (Info->GetBoundingBox().Min + Info->GetBoundingBox().Max) / 2.0f;
-	const lcVector3 Position = Center + lcVector3(100.0f, -100.0f, 75.0f);
-
-	mView->GetCamera()->SetViewpoint(Position, Center, lcVector3(0, 0, 1));
-	mView->GetCamera()->m_fovy = 20.0f;
-	mView->ZoomExtents();
-
-	mView->OnDraw();
-
-	mView->UnbindRenderFramebuffer();
-
-	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
-
-	if (Info->GetSynthInfo())
-	{
-		QPainter Painter(&Image);
-		QImage Icon = QImage(":/resources/flexible.png");
-		uchar* ImageBits = Icon.bits();
-		QRgb TextColor = mListView->palette().color(QPalette::WindowText).rgba();
-		int Red = qRed(TextColor);
-		int Green = qGreen(TextColor);
-		int Blue = qBlue(TextColor);
-
-		for (int y = 0; y < Icon.height(); y++)
-		{
-			for (int x = 0; x < Icon.width(); x++)
-			{
-				QRgb& Pixel = ((QRgb*)ImageBits)[x];
-				Pixel = qRgba(Red, Green, Blue, qAlpha(Pixel));
-			}
-
-			ImageBits += Icon.bytesPerLine();
-		}
-
-		Painter.drawImage(QPoint(0, 0), Icon);
-		Painter.end();
-	}
-
-	mParts[InfoIndex].second = QPixmap::fromImage(Image).scaled(mIconSize, mIconSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-	lcGetPiecesLibrary()->ReleasePieceInfo(Info);
-
-	emit dataChanged(index(InfoIndex, 0), index(InfoIndex, 0), QVector<int>() << Qt::DecorationRole);
 }
 
 void lcPartSelectionListModel::SetShowDecoratedParts(bool Show)
@@ -493,8 +401,7 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 
 	beginResetModel();
 
-	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
-		mParts[PartIdx].second = QPixmap();
+	ReleaseThumbnails();
 
 	endResetModel();
 
@@ -1036,9 +943,9 @@ void lcPartSelectionWidget::EditPartPalettes()
 	UpdateCategories();
 }
 
-void lcPartSelectionWidget::Redraw()
+void lcPartSelectionWidget::UpdateThumbnails()
 {
-	mPartsWidget->GetListModel()->Redraw();
+	mPartsWidget->GetListModel()->UpdateThumbnails();
 }
 
 void lcPartSelectionWidget::SetDefaultPart()

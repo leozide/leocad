@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_library.h"
+#include "lc_thumbnailmanager.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
 #include "pieceinf.h"
@@ -33,6 +34,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	: mLoadMutex(QMutex::Recursive)
 #endif
 {
+	mThumbnailManager = std::unique_ptr<lcThumbnailManager>(new lcThumbnailManager(this));
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 	mCachePath = cachePathList.first();
 
@@ -49,6 +51,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 
 lcPiecesLibrary::~lcPiecesLibrary()
 {
+	mThumbnailManager.reset();
 	mLoadMutex.lock();
 	mLoadQueue.clear();
 	mLoadMutex.unlock();

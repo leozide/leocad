@@ -7,6 +7,7 @@
 class PieceInfo;
 class lcZipFile;
 class lcLibraryMeshData;
+class lcThumbnailManager;
 
 enum class lcStudStyle
 {
@@ -126,6 +127,11 @@ public:
 	lcPiecesLibrary& operator=(const lcPiecesLibrary&) = delete;
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
+	lcThumbnailManager* GetThumbnailManager() const
+	{
+		return mThumbnailManager.get();
+	}
+
 	bool Load(const QString& LibraryPath, bool ShowProgress);
 	void LoadColors();
 	void Unload();
@@ -234,6 +240,7 @@ protected:
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;
 
+	std::unique_ptr<lcThumbnailManager> mThumbnailManager;
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lc_context.h"
+#include "lc_thumbnailmanager.h"
 
 class lcPartSelectionListModel;
 class lcPartSelectionListView;
@@ -45,6 +45,13 @@ protected:
 	lcPartSelectionListModel* mListModel;
 };
 
+struct lcPartSelectionListModelEntry
+{
+	PieceInfo* Info = nullptr;
+	QPixmap Pixmap;
+	lcPartThumbnailId ThumbnailId = lcPartThumbnailId::Invalid;
+};
+
 class lcPartSelectionListModel : public QAbstractListModel
 {
 	Q_OBJECT
@@ -60,12 +67,12 @@ public:
 
 	PieceInfo* GetPieceInfo(const QModelIndex& Index) const
 	{
-		return Index.isValid() ? mParts[Index.row()].first : nullptr;
+		return Index.isValid() ? mParts[Index.row()].Info : nullptr;
 	}
 
 	PieceInfo* GetPieceInfo(int Row) const
 	{
-		return mParts[Row].first;
+		return mParts[Row].Info;
 	}
 
 	bool GetShowDecoratedParts() const
@@ -103,7 +110,7 @@ public:
 		return mListMode;
 	}
 
-	void Redraw();
+	void UpdateThumbnails();
 	void SetColorIndex(int ColorIndex);
 	void ToggleColorLocked();
 	void ToggleListMode();
@@ -112,22 +119,20 @@ public:
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
 	void SetFilter(const QString& Filter);
-	void RequestPreview(int InfoIndex);
+	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
 	void SetShowPartAliases(bool Show);
 	void SetIconSize(int Size);
 	void SetShowPartNames(bool Show);
 
 protected slots:
-	void PartLoaded(PieceInfo* Info);
+	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);
 
 protected:
-	void ClearRequests();
-	void DrawPreview(int InfoIndex);
+	void ReleaseThumbnails();
 
 	lcPartSelectionListView* mListView;
-	std::vector<std::pair<PieceInfo*, QPixmap>> mParts;
-	std::vector<int> mRequestedPreviews;
+	std::vector<lcPartSelectionListModelEntry> mParts;
 	int mIconSize;
 	bool mColorLocked;
 	int mColorIndex;
@@ -136,8 +141,6 @@ protected:
 	bool mShowDecoratedParts;
 	bool mShowPartAliases;
 	QByteArray mFilter;
-	std::unique_ptr<lcView> mView;
-	std::unique_ptr<lcModel> mModel;
 };
 
 class lcPartSelectionListView : public QListView
@@ -205,7 +208,7 @@ class lcPartSelectionWidget : public QWidget
 public:
 	lcPartSelectionWidget(QWidget* Parent);
 
-	void Redraw();
+	void UpdateThumbnails();
 	void SetDefaultPart();
 	void UpdateModels();
 	void UpdateCategories();

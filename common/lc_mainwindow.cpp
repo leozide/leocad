@@ -1341,7 +1341,7 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 	lcView::UpdateAllViews();
 
 	if (mPartSelectionWidget)
-		mPartSelectionWidget->Redraw();
+		mPartSelectionWidget->UpdateThumbnails();
 }
 
 void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)

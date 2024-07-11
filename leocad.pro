@@ -165,13 +165,16 @@ macx {
 }
 
 SOURCES += \
-	common/texfont.cpp \
-	common/project.cpp \
-	common/pieceinf.cpp \
-	common/piece.cpp \
-	common/object.cpp \
-	common/minifig.cpp \
+	common/camera.cpp \
+	common/group.cpp \
+	common/image.cpp \
 	common/light.cpp \
+	common/minifig.cpp \
+	common/object.cpp \
+	common/piece.cpp \
+	common/pieceinf.cpp \
+	common/project.cpp \
+	common/texfont.cpp \
 	common/lc_aboutdialog.cpp \
 	common/lc_application.cpp \
 	common/lc_arraydialog.cpp \
@@ -204,6 +207,7 @@ SOURCES += \
 	common/lc_modellistdialog.cpp \
 	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
+	common/lc_partpalettedialog.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
@@ -213,15 +217,13 @@ SOURCES += \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
+	common/lc_thumbnailmanager.cpp \
 	common/lc_timelinewidget.cpp \
 	common/lc_view.cpp \
 	common/lc_viewmanipulator.cpp \
 	common/lc_viewsphere.cpp \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
-	common/image.cpp \
-	common/group.cpp \
-	common/camera.cpp \
 	qt/system.cpp \
 	qt/qtmain.cpp \
 	qt/lc_qeditgroupsdialog.cpp \
@@ -233,16 +235,18 @@ SOURCES += \
 	qt/lc_qupdatedialog.cpp \
 	qt/lc_qutils.cpp \
 	qt/lc_renderdialog.cpp \
-	qt/lc_setsdatabasedialog.cpp \
-	common/lc_partpalettedialog.cpp
+	qt/lc_setsdatabasedialog.cpp
 HEADERS += \
-	common/texfont.h \
-	common/project.h \
-	common/pieceinf.h \
-	common/piece.h \
-	common/object.h \
-	common/minifig.h \
+	common/camera.h \
+	common/group.h \
+	common/image.h \
 	common/light.h \
+	common/minifig.h \
+	common/object.h \
+	common/piece.h \
+	common/pieceinf.h \
+	common/project.h \
+	common/texfont.h \
 	common/lc_aboutdialog.h \
 	common/lc_application.h \
 	common/lc_arraydialog.h \
@@ -277,6 +281,7 @@ HEADERS += \
 	common/lc_modellistdialog.h \
 	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \
+	common/lc_partselectionwidget.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_propertieswidget.h \
@@ -285,16 +290,13 @@ HEADERS += \
 	common/lc_stringcache.h \
 	common/lc_synth.h \
 	common/lc_texture.h \
+	common/lc_thumbnailmanager.h \
+	common/lc_timelinewidget.h \
 	common/lc_view.h \
 	common/lc_viewmanipulator.h \
 	common/lc_viewsphere.h \
 	common/lc_viewwidget.h \
 	common/lc_zipfile.h \
-	common/lc_partselectionwidget.h \
-	common/lc_timelinewidget.h \
-	common/image.h \
-	common/group.h \
-	common/camera.h \
 	qt/lc_qeditgroupsdialog.h \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \

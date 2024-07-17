@@ -169,9 +169,9 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		PieceInfo* Info = PieceIt->second;
 		bool HasModel = false;
 
-		if (lcGetActiveProject())
+		if (CurrentProject)
 		{
-			const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
+			const std::vector<std::unique_ptr<lcModel>>& Models = CurrentProject->GetModels();
 			HasModel = std::find_if(Models.begin(), Models.end(), [Model = Info->GetModel()](const std::unique_ptr<lcModel>& CheckModel) { return CheckModel.get() == Model; }) != Models.end();
 		}
 

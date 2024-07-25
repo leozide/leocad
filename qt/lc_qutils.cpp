@@ -4,6 +4,7 @@
 #include "lc_library.h"
 #include "lc_model.h"
 #include "pieceinf.h"
+#include "lc_partselectionwidget.h"
 
 QString lcFormatValue(float Value, int Precision)
 {
@@ -170,82 +171,58 @@ QVariant lcPieceIdStringModel::data(const QModelIndex& Index, int Role) const
 	return QVariant();
 }
 
-lcPieceIdPickerPopup::lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, QWidget* Parent)
-	: QWidget(Parent)
+lcPieceIdPickerPopup::lcPieceIdPickerPopup(PieceInfo* Current, QWidget* Parent)
+	: QWidget(Parent), mInitialPart(Current)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
 
-	mFilterEdit = new QLineEdit(this);
-	mFilterEdit->setPlaceholderText(tr("Filter"));
-	Layout->addWidget(mFilterEdit);
+	mPartSelectionWidget = new lcPartSelectionWidget(this);
+	Layout->addWidget(mPartSelectionWidget);
 
-	connect(mFilterEdit, &QLineEdit::textEdited, this, &lcPieceIdPickerPopup::FilterEdited);
+	mPartSelectionWidget->setMinimumWidth(450);
 
-	mListView = new QListView(this);
-	mListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	mListView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	mListView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	mListView->setSelectionMode(QAbstractItemView::SingleSelection);
-	mListView->setUniformItemSizes(true);
+	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartDoubleClicked, this, &lcPieceIdPickerPopup::PartDoubleClicked);
 
-	mListView->installEventFilter(this);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	Layout->addWidget(ButtonBox);
 
-	lcPieceIdStringModel* StringModel = new lcPieceIdStringModel(Model, mListView);
-	mListView->setModel(StringModel);
-
-	mListView->setMinimumWidth(450);
-	mListView->setTextElideMode(Qt::ElideMiddle);
-
-	if (Current)
-		mListView->setCurrentIndex(StringModel->Index(Current));
-
-	Layout->addWidget(mListView);
-
-	connect(mListView, &QListView::doubleClicked, this, &lcPieceIdPickerPopup::ListViewDoubleClicked);
+	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcPieceIdPickerPopup::Accept);
+	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcPieceIdPickerPopup::Reject);
 }
 
-bool lcPieceIdPickerPopup::eventFilter(QObject* Object, QEvent* Event)
+void lcPieceIdPickerPopup::showEvent(QShowEvent* ShowEvent)
 {
-	if (Object == mListView && Event->type() == QEvent::KeyPress)
-	{
-		EmitSelectedEvent(mListView->currentIndex());
-		return true;
-	}
+	QWidget::showEvent(ShowEvent);
 
-	return QWidget::eventFilter(Object, Event);
+	mPartSelectionWidget->SetOrientation(Qt::Horizontal);
+	mPartSelectionWidget->SetCurrentPart(mInitialPart);
 }
 
-void lcPieceIdPickerPopup::EmitSelectedEvent(const QModelIndex& Index)
+void lcPieceIdPickerPopup::Accept()
 {
-	if (!Index.isValid())
-		return;
+	PieceInfo* Info = mPartSelectionWidget->GetCurrentPart();
 
-	lcPieceIdStringModel* StringModel = qobject_cast<lcPieceIdStringModel*>(mListView->model());
-	QVariant Variant = StringModel->data(Index, Qt::UserRole);
+	emit PieceIdSelected(Info);
 
-	if (Variant.isValid())
-	{
-		emit PieceIdSelected(static_cast<PieceInfo*>(Variant.value<void*>()));
-	}
+	Close();
+}
 
+void lcPieceIdPickerPopup::Reject()
+{
+	Close();
+}
+
+void lcPieceIdPickerPopup::PartDoubleClicked(PieceInfo* Info)
+{
+	emit PieceIdSelected(Info);
+
+	Close();
+}
+
+void lcPieceIdPickerPopup::Close()
+{
 	QMenu* Menu = qobject_cast<QMenu*>(parent());
-	Menu->close();
-}
 
-void lcPieceIdPickerPopup::ListViewDoubleClicked(const QModelIndex& Index)
-{
-	EmitSelectedEvent(Index);
-}
-
-void lcPieceIdPickerPopup::FilterEdited(const QString& Text)
-{
-	lcPieceIdStringModel* StringModel = qobject_cast<lcPieceIdStringModel*>(mListView->model());
-	std::vector<bool> FilteredRows = StringModel->GetFilteredRows(Text);
-
-	mListView->setUpdatesEnabled(false);
-
-	for (int Row = 0; Row < static_cast<int>(FilteredRows.size()); Row++)
-		mListView->setRowHidden(Row, !FilteredRows[Row]);
-
-	mListView->setUpdatesEnabled(true);
+	if (Menu)
+		Menu->close();
 }

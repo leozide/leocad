@@ -327,6 +327,18 @@ Qt::ItemFlags lcPartSelectionListModel::flags(const QModelIndex& Index) const
 		return DefaultFlags;
 }
 
+QModelIndex lcPartSelectionListModel::GetPieceInfoIndex(PieceInfo* Info) const
+{
+	if (Info)
+	{
+		for (int PartIndex = 0; PartIndex < static_cast<int>(mParts.size()); PartIndex++)
+			if (mParts[PartIndex].Info == Info)
+				return index(PartIndex, 0);
+	}
+
+	return QModelIndex();
+}
+
 void lcPartSelectionListModel::ReleaseThumbnails()
 {
 	lcThumbnailManager* ThumbnailManager = lcGetPiecesLibrary()->GetThumbnailManager();
@@ -502,6 +514,17 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	setCurrentIndex(mListModel->index(0, 0));
 }
 
+void lcPartSelectionListView::SetCurrentPart(PieceInfo* Info)
+{
+	QModelIndex Index = mListModel->GetPieceInfoIndex(Info);
+
+	if (Index.isValid())
+	{
+		setCurrentIndex(Index);
+		scrollTo(Index, QAbstractItemView::EnsureVisible);
+	}	
+}
+
 void lcPartSelectionListView::SetNoIcons()
 {
 	SetIconSize(0);
@@ -603,26 +626,6 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->exec(Qt::CopyAction);
 }
 
-void lcPartSelectionListView::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
-{
-	if (MouseEvent->button() == Qt::LeftButton )
-		PreviewSelection(currentIndex().row());
-
-	QListView::mouseDoubleClickEvent(MouseEvent);
-}
-
-void lcPartSelectionListView::PreviewSelection(int InfoIndex)
-{
-	PieceInfo* Info = mListModel->GetPieceInfo(InfoIndex);
-
-	if (!Info)
-		return;
-
-	quint32 ColorCode = lcGetColorCode(mListModel->GetColorIndex());
-
-	gMainWindow->PreviewPiece(Info->mFileName, ColorCode, true);
-}
-
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	: QWidget(Parent), mFilterAction(nullptr)
 {
@@ -698,18 +701,17 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	Layout->addWidget(mSplitter);
 	setLayout(Layout);
 
-	connect(mPartsWidget->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(PartChanged(const QModelIndex&, const QModelIndex&)));
-	connect(mFilterWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterChanged(const QString&)));
-	connect(mCategoriesWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(CategoryChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-	connect(mFilterCategoriesWidget, SIGNAL(textChanged(const QString&)), this, SLOT(FilterCategoriesChanged(const QString&)));
+	connect(mPartsWidget, &QListView::doubleClicked, this, &lcPartSelectionWidget::PartViewDoubleClicked);
+	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartViewSelectionChanged);
+	connect(mFilterWidget, &QLineEdit::textChanged, this, &lcPartSelectionWidget::FilterChanged);
+	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);
+	connect(mFilterCategoriesWidget, &QLineEdit::textChanged, this, &lcPartSelectionWidget::FilterCategoriesChanged);
 
 	LoadPartPalettes();
 	UpdateCategories();
 
 	mSplitter->setStretchFactor(0, 0);
 	mSplitter->setStretchFactor(1, 1);
-
-	connect(Parent, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)), this, SLOT(DockLocationChanged(Qt::DockWidgetArea)));
 }
 
 bool lcPartSelectionWidget::event(QEvent* Event)
@@ -750,7 +752,7 @@ void lcPartSelectionWidget::LoadState(QSettings& Settings)
 	if (Sizes.size() != 2)
 	{
 		int Length = mSplitter->orientation() == Qt::Horizontal ? mSplitter->width() : mSplitter->height();
-		Sizes << Length / 3 << 2 * Length / 3;
+		Sizes = { Length / 3, 2 * Length / 3 };
 	}
 
 	mSplitter->setSizes(Sizes);
@@ -767,6 +769,22 @@ void lcPartSelectionWidget::DisableIconMode()
 	mPartsWidget->SetNoIcons();
 }
 
+void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)
+{
+	mCategoriesWidget->setCurrentItem(mAllPartsCategoryItem);
+	mPartsWidget->SetCurrentPart(Info);
+}
+
+void lcPartSelectionWidget::SetOrientation(Qt::Orientation Orientation)
+{
+	mSplitter->setOrientation(Orientation);
+
+	int Length = mSplitter->orientation() == Qt::Horizontal ? mSplitter->width() : mSplitter->height();
+	QList<int> Sizes = { Length / 3, 2 * Length / 3 };
+
+	mSplitter->setSizes(Sizes);
+}
+
 void lcPartSelectionWidget::DockLocationChanged(Qt::DockWidgetArea Area)
 {
 	if (Area == Qt::LeftDockWidgetArea || Area == Qt::RightDockWidgetArea)
@@ -777,7 +795,9 @@ void lcPartSelectionWidget::DockLocationChanged(Qt::DockWidgetArea Area)
 
 void lcPartSelectionWidget::resizeEvent(QResizeEvent* Event)
 {
-	if (((QDockWidget*)parent())->isFloating())
+	QDockWidget* DockWidget = qobject_cast<QDockWidget*>(parent());
+
+	if (DockWidget && DockWidget->isFloating())
 	{
 		if (Event->size().width() > Event->size().height())
 			mSplitter->setOrientation(Qt::Horizontal);
@@ -855,12 +875,20 @@ void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidge
 	mPartsWidget->SetCategory(static_cast<lcPartCategoryType>(Type), Index);
 }
 
-void lcPartSelectionWidget::PartChanged(const QModelIndex& Current, const QModelIndex& Previous)
+void lcPartSelectionWidget::PartViewSelectionChanged(const QModelIndex& Current, const QModelIndex& Previous)
 {
 	Q_UNUSED(Current);
 	Q_UNUSED(Previous);
 
-	gMainWindow->SetCurrentPieceInfo(mPartsWidget->GetCurrentPart());
+	emit PartChanged(mPartsWidget->GetCurrentPart());
+}
+
+void lcPartSelectionWidget::PartViewDoubleClicked(const QModelIndex& Index)
+{
+	PieceInfo* Info = mPartsWidget->GetListModel()->GetPieceInfo(Index.row());
+
+	if (Info)
+		emit PartDoubleClicked(Info);
 }
 
 void lcPartSelectionWidget::OptionsMenuAboutToShow()
@@ -1084,11 +1112,11 @@ void lcPartSelectionWidget::UpdateCategories()
 
 	mCategoriesWidget->clear();
 
-	QTreeWidgetItem* AllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Parts")));
-	AllPartsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::AllParts));
+	mAllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Parts")));
+	mAllPartsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::AllParts));
 
 	if (CurrentType == lcPartCategoryType::AllParts && CurrentIndex == 0)
-		CurrentItem = AllPartsCategoryItem;
+		CurrentItem = mAllPartsCategoryItem;
 
 	QTreeWidgetItem* CurrentModelCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("In Use")));
 	CurrentModelCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::PartsInUse));

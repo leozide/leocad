@@ -65,6 +65,8 @@ public:
 	QVariant headerData(int Section, Qt::Orientation Orientation, int Role = Qt::DisplayRole) const override;
 	Qt::ItemFlags flags(const QModelIndex& Index) const override;
 
+	QModelIndex GetPieceInfoIndex(PieceInfo* Info) const;
+
 	PieceInfo* GetPieceInfo(const QModelIndex& Index) const
 	{
 		return Index.isValid() ? mParts[Index.row()].Info : nullptr;
@@ -153,6 +155,7 @@ public:
 	void startDrag(Qt::DropActions SupportedActions) override;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
+	void SetCurrentPart(PieceInfo* Info);
 
 	PieceInfo* GetCurrentPart() const
 	{
@@ -191,8 +194,6 @@ public slots:
 
 protected:
 	void SetIconSize(int Size);
-	void PreviewSelection(int InfoIndex);
-	void mouseDoubleClickEvent(QMouseEvent* MouseEvent) override;
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionWidget* mPartSelectionWidget;
@@ -215,6 +216,13 @@ public:
 	void LoadState(QSettings& Settings);
 	void SaveState(QSettings& Settings);
 	void DisableIconMode();
+	void SetOrientation(Qt::Orientation Orientation);
+	void SetCurrentPart(PieceInfo* Info);
+
+	int GetColorIndex() const
+	{
+		return mPartsWidget->GetListModel()->GetColorIndex();
+	}
 
 	void SetColorIndex(int ColorIndex)
 	{
@@ -226,19 +234,29 @@ public:
 		return mPartPalettes;
 	}
 
+	PieceInfo* GetCurrentPart() const
+	{
+		return mPartsWidget->GetCurrentPart();
+	}
+
+signals:
+	void PartDoubleClicked(PieceInfo* Info);
+	void PartChanged(PieceInfo* Info);
+
 public slots:
 	void AddToPalette();
 	void RemoveFromPalette();
+	void DockLocationChanged(Qt::DockWidgetArea Area);
 
 protected slots:
-	void DockLocationChanged(Qt::DockWidgetArea Area);
 	void FilterChanged(const QString& Text);
 	void FilterCategoriesChanged(const QString& Text);
 	void FilterTriggered();
 	void FilterCaseTriggered();
 	void FilterCategoriesTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
-	void PartChanged(const QModelIndex& Current, const QModelIndex& Previous);
+	void PartViewSelectionChanged(const QModelIndex& Current, const QModelIndex& Previous);
+	void PartViewDoubleClicked(const QModelIndex& Index);
 	void OptionsMenuAboutToShow();
 	void EditPartPalettes();
 
@@ -257,5 +275,6 @@ protected:
 	QAction* mFilterAction;
 	lcPartSelectionListView* mPartsWidget;
 	QSplitter* mSplitter;
+	QTreeWidgetItem* mAllPartsCategoryItem;
 	std::vector<lcPartPalette> mPartPalettes;
 };

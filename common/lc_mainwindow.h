@@ -230,7 +230,6 @@ public:
 	void SetAngleSnapIndex(int Index);
 	void SetRelativeTransform(bool RelativeTransform);
 	void SetSeparateTransform(bool SelectionTransform);
-	void SetCurrentPieceInfo(PieceInfo* Info);
 	void SetShadingMode(lcShadingMode ShadingMode);
 	void SetSelectionMode(lcSelectionMode SelectionMode);
 	void ToggleViewSphere();
@@ -289,6 +288,7 @@ public slots:
 	void ProjectFileChanged(const QString& Path);
 	void PreviewPiece(const QString& PartId, int ColorCode, bool ShowPreview);
 	void TogglePreviewWidget(bool Visible);
+	void SetCurrentPieceInfo(PieceInfo* Info);
 
 protected slots:
 	void CameraMenuAboutToShow();
@@ -303,6 +303,7 @@ protected slots:
 	void ClipboardChanged();
 	void ActionTriggered();
 	void ColorChanged(int ColorIndex);
+	void PartListDoubleClicked(PieceInfo* Info);
 	void ColorButtonClicked();
 	void Print(QPrinter* Printer);
 	void EnableWindowFlags(bool);

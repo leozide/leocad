@@ -4739,7 +4739,9 @@ void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
 	AddPiece(Piece);
 	Piece->UpdatePosition(1);
 
-	SetCurrentStep(LC_STEP_MAX);
+	mCurrentStep = LC_STEP_MAX;
+	CalculateStep(LC_STEP_MAX);
+
 	SaveCheckpoint(QString());
 }
 

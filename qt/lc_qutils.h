@@ -2,6 +2,8 @@
 
 #include <QObject>
 
+class lcPartSelectionWidget;
+
 QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
 float lcParseValueLocalized(const QString& Value);
@@ -170,20 +172,20 @@ class lcPieceIdPickerPopup : public QWidget
 	Q_OBJECT
 
 public:
-	lcPieceIdPickerPopup(lcModel* Model, PieceInfo* Current, QWidget* Parent);
-
-	bool eventFilter(QObject* Object, QEvent* Event) override;
+	lcPieceIdPickerPopup(PieceInfo* Current, QWidget* Parent);
 
 signals:
 	void PieceIdSelected(PieceInfo* Info);
 
 protected slots:
-	void ListViewDoubleClicked(const QModelIndex& Index);
-	void FilterEdited(const QString& Text);
+	void Accept();
+	void Reject();
+	void PartDoubleClicked(PieceInfo* Info);
 
 protected:
-	void EmitSelectedEvent(const QModelIndex& Index);
+	void showEvent(QShowEvent* ShowEvent) override;
+	void Close();
 
-	QListView* mListView = nullptr;
-	QLineEdit* mFilterEdit = nullptr;
+	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
+	PieceInfo* mInitialPart = nullptr;
 };

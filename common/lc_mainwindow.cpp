@@ -706,6 +706,10 @@ void lcMainWindow::CreateToolBars()
 	mPartsToolBar->setWidget(mPartSelectionWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
 
+	connect(mPartsToolBar, &QDockWidget::dockLocationChanged, mPartSelectionWidget, &lcPartSelectionWidget::DockLocationChanged);
+	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartDoubleClicked, this, &lcMainWindow::PartListDoubleClicked);
+	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartChanged, this, &lcMainWindow::SetCurrentPieceInfo);
+
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
 	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
@@ -1102,6 +1106,16 @@ void lcMainWindow::ActionTriggered()
 void lcMainWindow::ColorChanged(int ColorIndex)
 {
 	SetColorIndex(ColorIndex);
+}
+
+void lcMainWindow::PartListDoubleClicked(PieceInfo* Info)
+{
+	if (!Info)
+		return;
+
+	quint32 ColorCode = lcGetColorCode(mPartSelectionWidget->GetColorIndex());
+
+	gMainWindow->PreviewPiece(Info->mFileName, ColorCode, true);
 }
 
 void lcMainWindow::ColorButtonClicked()

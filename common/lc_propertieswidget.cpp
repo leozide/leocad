@@ -898,7 +898,7 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 	QMenu* Menu = new QMenu(PieceIdButton);
 
 	QWidgetAction* Action = new QWidgetAction(Menu);
-	lcPieceIdPickerPopup* Popup = new lcPieceIdPickerPopup(gMainWindow->GetActiveModel(), Partial ? nullptr : Info, Menu);
+	lcPieceIdPickerPopup* Popup = new lcPieceIdPickerPopup(Partial ? nullptr : Info, Menu);
 	Action->setDefaultWidget(Popup);
 	Menu->addAction(Action);
 

@@ -180,7 +180,7 @@ signals:
 protected slots:
 	void Accept();
 	void Reject();
-	void PartDoubleClicked(PieceInfo* Info);
+	void PartPicked(PieceInfo* Info);
 
 protected:
 	void showEvent(QShowEvent* ShowEvent) override;

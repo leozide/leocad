@@ -240,8 +240,8 @@ public:
 	}
 
 signals:
-	void PartDoubleClicked(PieceInfo* Info);
-	void PartChanged(PieceInfo* Info);
+	void PartPicked(PieceInfo* Info);
+	void CurrentPartChanged(PieceInfo* Info);
 
 public slots:
 	void AddToPalette();
@@ -267,14 +267,14 @@ protected:
 	void resizeEvent(QResizeEvent* Event) override;
 	bool event(QEvent* Event) override;
 
-	QTreeWidget* mCategoriesWidget;
-	QLineEdit* mFilterCategoriesWidget;
-	QAction* mFilterCategoriesAction;
-	QAction* mFilterCaseAction;
-	QLineEdit* mFilterWidget;
-	QAction* mFilterAction;
-	lcPartSelectionListView* mPartsWidget;
-	QSplitter* mSplitter;
-	QTreeWidgetItem* mAllPartsCategoryItem;
+	QTreeWidget* mCategoriesWidget = nullptr;
+	QLineEdit* mFilterCategoriesWidget = nullptr;
+	QAction* mFilterCategoriesAction = nullptr;
+	QAction* mFilterCaseAction = nullptr;
+	QLineEdit* mFilterWidget = nullptr;
+	QAction* mFilterAction = nullptr;
+	lcPartSelectionListView* mPartsWidget = nullptr;
+	QSplitter* mSplitter = nullptr;
+	QTreeWidgetItem* mAllPartsCategoryItem = nullptr;
 	std::vector<lcPartPalette> mPartPalettes;
 };

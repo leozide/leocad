@@ -773,6 +773,7 @@ void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)
 {
 	mCategoriesWidget->setCurrentItem(mAllPartsCategoryItem);
 	mPartsWidget->SetCurrentPart(Info);
+	mPartsWidget->setFocus();
 }
 
 void lcPartSelectionWidget::SetOrientation(Qt::Orientation Orientation)
@@ -880,7 +881,7 @@ void lcPartSelectionWidget::PartViewSelectionChanged(const QModelIndex& Current,
 	Q_UNUSED(Current);
 	Q_UNUSED(Previous);
 
-	emit PartChanged(mPartsWidget->GetCurrentPart());
+	emit CurrentPartChanged(mPartsWidget->GetCurrentPart());
 }
 
 void lcPartSelectionWidget::PartViewDoubleClicked(const QModelIndex& Index)
@@ -888,7 +889,7 @@ void lcPartSelectionWidget::PartViewDoubleClicked(const QModelIndex& Index)
 	PieceInfo* Info = mPartsWidget->GetListModel()->GetPieceInfo(Index.row());
 
 	if (Info)
-		emit PartDoubleClicked(Info);
+		emit PartPicked(Info);
 }
 
 void lcPartSelectionWidget::OptionsMenuAboutToShow()
@@ -954,7 +955,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 		ListMode->setCheckable(true);
 		ListMode->setChecked(ListModel->IsListMode());
 
-		QAction* FixedColor = Menu->addAction(tr("Lock Preview Color"), mPartsWidget, SLOT(ToggleFixedColor()));
+		QAction* FixedColor = Menu->addAction(tr("Lock Color"), mPartsWidget, SLOT(ToggleFixedColor()));
 		FixedColor->setCheckable(true);
 		FixedColor->setChecked(ListModel->IsColorLocked());
 	}

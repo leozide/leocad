@@ -181,7 +181,7 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(PieceInfo* Current, QWidget* Parent)
 
 	mPartSelectionWidget->setMinimumWidth(450);
 
-	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartDoubleClicked, this, &lcPieceIdPickerPopup::PartDoubleClicked);
+	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartPicked, this, &lcPieceIdPickerPopup::PartPicked);
 
 	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
 	Layout->addWidget(ButtonBox);
@@ -212,7 +212,7 @@ void lcPieceIdPickerPopup::Reject()
 	Close();
 }
 
-void lcPieceIdPickerPopup::PartDoubleClicked(PieceInfo* Info)
+void lcPieceIdPickerPopup::PartPicked(PieceInfo* Info)
 {
 	emit PieceIdSelected(Info);
 

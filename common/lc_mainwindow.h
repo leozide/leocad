@@ -303,7 +303,7 @@ protected slots:
 	void ClipboardChanged();
 	void ActionTriggered();
 	void ColorChanged(int ColorIndex);
-	void PartListDoubleClicked(PieceInfo* Info);
+	void PartListPicked(PieceInfo* Info);
 	void ColorButtonClicked();
 	void Print(QPrinter* Printer);
 	void EnableWindowFlags(bool);

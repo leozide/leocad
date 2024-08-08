@@ -1121,25 +1121,18 @@ void lcCamera::Pan(const lcVector3& Distance, lcStep Step, bool AddKey)
 
 void lcCamera::Orbit(float DistanceX, float DistanceY, const lcVector3& CenterPosition, lcStep Step, bool AddKey)
 {
-	lcVector3 FrontVector(mPosition - mTargetPosition);
-	lcVector3 UpVector = mUpVector;
+	const lcMatrix44 Inverse = lcMatrix44AffineInverse(mWorldView);
+	const lcMatrix44 TransformY = lcMatrix44FromAxisAngle(lcVector3(Inverse[0]), DistanceY);
 
-	lcVector3 Z(lcNormalize(lcVector3(FrontVector[0], FrontVector[1], 0)));
-	if (qIsNaN(Z[0]) || qIsNaN(Z[1]))
-		Z = lcNormalize(lcVector3(UpVector[0], UpVector[1], 0));
+	lcVector3 Position = lcMul31(mPosition - CenterPosition, TransformY) + CenterPosition;
+	lcVector3 TargetPosition = lcMul31(mTargetPosition - CenterPosition, TransformY) + CenterPosition;
+	lcVector3 UpVector = lcMul31(mUpVector, TransformY);
 
-	if (UpVector[2] < 0)
-	{
-		Z[0] = -Z[0];
-		Z[1] = -Z[1];
-	}
- 
-	const lcMatrix44 YRot(lcVector4(Z[0], Z[1], 0.0f, 0.0f), lcVector4(-Z[1], Z[0], 0.0f, 0.0f), lcVector4(0.0f, 0.0f, 1.0f, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
-	const lcMatrix44 Transform = lcMul(lcMul(lcMul(lcMatrix44AffineInverse(YRot), lcMatrix44RotationY(DistanceY)), YRot), lcMatrix44RotationZ(-DistanceX));
+	const lcMatrix44 TransformX = lcMatrix44RotationZ(-DistanceX);
 
-	lcVector3 Position = lcMul31(mPosition - CenterPosition, Transform) + CenterPosition;
-	lcVector3 TargetPosition = lcMul31(mTargetPosition - CenterPosition, Transform) + CenterPosition;
-	UpVector = lcMul31(mUpVector, Transform);
+	Position = lcMul31(Position - CenterPosition, TransformX) + CenterPosition;
+	TargetPosition = lcMul31(TargetPosition - CenterPosition, TransformX) + CenterPosition;
+	UpVector = lcMul31(UpVector, TransformX);
 
 	if (IsSimple())
 		AddKey = false;

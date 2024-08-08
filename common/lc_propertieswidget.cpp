@@ -699,7 +699,26 @@ void lcPropertiesWidget::ColorButtonClicked()
 
 	QColor InitialColor = Partial ? QColor(128, 128, 128) : lcQColorFromVector3(Value.value<lcVector3>());
 
-	QColor Color = QColorDialog::getColor(InitialColor, this, tr("Select Light Color"));
+	QMenu* Menu = new QMenu(ColorButton);
+
+	QWidgetAction* Action = new QWidgetAction(Menu);
+	lcColorDialogPopup *Popup = new lcColorDialogPopup(InitialColor, Menu);
+	Action->setDefaultWidget(Popup);
+	Menu->addAction(Action);
+
+	connect(Popup, &lcColorDialogPopup::ColorSelected, this, &lcPropertiesWidget::ColorChanged);
+
+	Menu->exec(ColorButton->mapToGlobal(ColorButton->rect().bottomLeft()));
+
+	delete Menu;
+}
+
+void lcPropertiesWidget::ColorChanged(QColor Color)
+{
+	lcColorDialogPopup* Popup = qobject_cast<lcColorDialogPopup*>(sender());
+	QMenu* Menu = qobject_cast<QMenu*>(Popup->parent());
+	QToolButton* ColorButton = qobject_cast<QToolButton*>(Menu->parent());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(ColorButton);
 
 	if (!Color.isValid())
 		return;

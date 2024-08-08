@@ -189,3 +189,23 @@ protected:
 	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
 	PieceInfo* mInitialPart = nullptr;
 };
+
+class lcColorDialogPopup : public QWidget
+{
+	Q_OBJECT
+
+public:
+	lcColorDialogPopup(const QColor& InitialColor, QWidget* Parent);
+
+signals:
+	void ColorSelected(QColor Color);
+
+protected slots:
+	void Accept();
+	void Reject();
+
+protected:
+	void Close();
+
+	QColorDialog* mColorDialog = nullptr;
+};

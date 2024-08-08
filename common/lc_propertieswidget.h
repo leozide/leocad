@@ -24,6 +24,7 @@ protected slots:
 	void StringChanged();
 	void StringListChanged(int Index);
 	void ColorButtonClicked();
+	void ColorChanged(QColor Color);
 	void PieceColorButtonClicked();
 	void PieceColorChanged(int ColorIndex);
 	void PieceIdButtonClicked();

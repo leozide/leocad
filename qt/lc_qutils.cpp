@@ -226,3 +226,44 @@ void lcPieceIdPickerPopup::Close()
 	if (Menu)
 		Menu->close();
 }
+
+lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Parent)
+	: QWidget(Parent)
+{
+	QVBoxLayout* Layout = new QVBoxLayout(this);
+	Layout->setContentsMargins(0, 0, 0, 0);
+
+	mColorDialog = new QColorDialog(InitialColor, this);
+    mColorDialog->setWindowFlags(Qt::Widget);
+    mColorDialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
+
+	Layout->addWidget(mColorDialog);
+
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	Layout->addWidget(ButtonBox);
+
+	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcColorDialogPopup::Accept);
+	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcColorDialogPopup::Reject);
+}
+
+void lcColorDialogPopup::Accept()
+{
+	QColor Color = mColorDialog->currentColor();
+
+	emit ColorSelected(Color);
+
+	Close();
+}
+
+void lcColorDialogPopup::Reject()
+{
+	Close();
+}
+
+void lcColorDialogPopup::Close()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(parent());
+
+	if (Menu)
+		Menu->close();
+}

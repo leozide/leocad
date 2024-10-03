@@ -2188,30 +2188,13 @@ bool Project::ExportPOVRay(const QString& FileName)
 			Power = Light->GetPOVRayPower();
 			FadeDistance = Light->GetPOVRayFadeDistance();
 			FadePower = Light->GetPOVRayFadePower();
-
-			switch (LightType)
-			{
-			case lcLightType::Point:
-				break;
-
-			case lcLightType::Spot:
-				SpotFalloff = Light->GetSpotConeAngle() / 2.0f;
-				SpotRadius = SpotFalloff - Light->GetSpotPenumbraAngle();
-				break;
-
-			case lcLightType::Directional:
-				break;
-
-			case lcLightType::Area:
-				AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
-				AreaX = lcVector3(Light->GetWorldMatrix()[0]) * Light->GetAreaSizeX();
-				AreaY = lcVector3(Light->GetWorldMatrix()[1]) * Light->GetAreaSizeY();
-				AreaGrid = lcVector2i(Light->GetAreaPOVRayGridX(), Light->GetAreaPOVRayGridY());
-				break;
-
-			case lcLightType::Count:
-				break;
-			}
+			SpotFalloff = Light->GetSpotConeAngle() / 2.0f;
+			SpotRadius = SpotFalloff - Light->GetSpotPenumbraAngle();
+			SpotTightness = Light->GetSpotPOVRayTightness();
+			AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
+			AreaX = lcVector3(Light->GetWorldMatrix()[0]) * Light->GetAreaSizeX();
+			AreaY = lcVector3(Light->GetWorldMatrix()[1]) * Light->GetAreaSizeY();
+			AreaGrid = lcVector2i(Light->GetAreaPOVRayGridX(), Light->GetAreaPOVRayGridY());
 
 			sprintf(Line,"#ifndef (Skip%s)\n  WriteLight(%i, %i, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, %g, %g, %g, %g, %g, %g, %i, <%g, %g, %g>, <%g, %g, %g>, %i, %i)\n#end\n\n",
 					LightName.toLatin1().constData(),

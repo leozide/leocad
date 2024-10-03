@@ -266,99 +266,100 @@ void lcPropertiesWidget::FloatChanged()
 
 	// todo: mouse drag
 
-	if (Piece || Light)
+	if (PropertyId == lcObjectPropertyId::ObjectPositionX || PropertyId == lcObjectPropertyId::ObjectPositionY || PropertyId == lcObjectPropertyId::ObjectPositionZ)
 	{
-		if (PropertyId == lcObjectPropertyId::ObjectPositionX || PropertyId == lcObjectPropertyId::ObjectPositionY || PropertyId == lcObjectPropertyId::ObjectPositionZ)
-		{
-			lcVector3 Center;
-			lcMatrix33 RelativeRotation;
-			Model->GetMoveRotateTransform(Center, RelativeRotation);
-			lcVector3 Position = Center;
+		lcVector3 Center;
+		lcMatrix33 RelativeRotation;
+		Model->GetMoveRotateTransform(Center, RelativeRotation);
+		lcVector3 Position = Center;
 
-			if (PropertyId == lcObjectPropertyId::ObjectPositionX)
-				Position[0] = Value;
-			else if (PropertyId == lcObjectPropertyId::ObjectPositionY)
-				Position[1] = Value;
-			else if (PropertyId == lcObjectPropertyId::ObjectPositionZ)
-				Position[2] = Value;
+		if (PropertyId == lcObjectPropertyId::ObjectPositionX)
+			Position[0] = Value;
+		else if (PropertyId == lcObjectPropertyId::ObjectPositionY)
+			Position[1] = Value;
+		else if (PropertyId == lcObjectPropertyId::ObjectPositionZ)
+			Position[2] = Value;
 
-			lcVector3 Distance = Position - Center;
+		lcVector3 Distance = Position - Center;
 
-			Model->MoveSelectedObjects(Distance, Distance, false, true, true, true);
-		}
-		else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
-		{
-			lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
+		Model->MoveSelectedObjects(Distance, Distance, false, true, true, true);
+	}
+	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
+	{
+		lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
 
-			if (Piece)
-				InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
-			else if (Light)
-				InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
+		if (Piece)
+			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
+		else if (Light)
+			InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
 
-			lcVector3 Rotation = InitialRotation;
+		lcVector3 Rotation = InitialRotation;
 
-			if (PropertyId == lcObjectPropertyId::ObjectRotationX)
-				Rotation[0] = Value;
-			else if (PropertyId == lcObjectPropertyId::ObjectRotationY)
-				Rotation[1] = Value;
-			else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
-				Rotation[2] = Value;
+		if (PropertyId == lcObjectPropertyId::ObjectRotationX)
+			Rotation[0] = Value;
+		else if (PropertyId == lcObjectPropertyId::ObjectRotationY)
+			Rotation[1] = Value;
+		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
+			Rotation[2] = Value;
 
-			Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
-		}
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
+	}
+	else if ( Piece || Light )
+	{
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 	}
 
-	if (Camera)
+	if (PropertyId == lcObjectPropertyId::CameraPositionX || PropertyId == lcObjectPropertyId::CameraPositionY || PropertyId == lcObjectPropertyId::CameraPositionZ)
 	{
-		if (PropertyId == lcObjectPropertyId::CameraPositionX || PropertyId == lcObjectPropertyId::CameraPositionY || PropertyId == lcObjectPropertyId::CameraPositionZ)
-		{
-			lcVector3 Center = Camera->mPosition;
-			lcVector3 Position = Center;
+		lcVector3 Center = Camera->mPosition;
+		lcVector3 Position = Center;
 
-			if (PropertyId == lcObjectPropertyId::CameraPositionX)
-				Position[0] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraPositionY)
-				Position[1] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraPositionZ)
-				Position[2] = Value;
+		if (PropertyId == lcObjectPropertyId::CameraPositionX)
+			Position[0] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraPositionY)
+			Position[1] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraPositionZ)
+			Position[2] = Value;
 
-			lcVector3 Distance = Position - Center;
+		lcVector3 Distance = Position - Center;
 
-			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraTargetX || PropertyId == lcObjectPropertyId::CameraTargetY || PropertyId == lcObjectPropertyId::CameraTargetZ)
-		{
-			lcVector3 Center = Camera->mTargetPosition;
-			lcVector3 Position = Center;
+		Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+	}
+	else if (PropertyId == lcObjectPropertyId::CameraTargetX || PropertyId == lcObjectPropertyId::CameraTargetY || PropertyId == lcObjectPropertyId::CameraTargetZ)
+	{
+		lcVector3 Center = Camera->mTargetPosition;
+		lcVector3 Position = Center;
 
-			if (PropertyId == lcObjectPropertyId::CameraTargetX)
-				Position[0] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraTargetY)
-				Position[1] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraTargetZ)
-				Position[2] = Value;
+		if (PropertyId == lcObjectPropertyId::CameraTargetX)
+			Position[0] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraTargetY)
+			Position[1] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraTargetZ)
+			Position[2] = Value;
 
-			lcVector3 Distance = Position - Center;
+		lcVector3 Distance = Position - Center;
 
-			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraUpX || PropertyId == lcObjectPropertyId::CameraUpY || PropertyId == lcObjectPropertyId::CameraUpZ)
-		{
-			lcVector3 Center = Camera->mUpVector;
-			lcVector3 Position = Center;
+		Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+	}
+	else if (PropertyId == lcObjectPropertyId::CameraUpX || PropertyId == lcObjectPropertyId::CameraUpY || PropertyId == lcObjectPropertyId::CameraUpZ)
+	{
+		lcVector3 Center = Camera->mUpVector;
+		lcVector3 Position = Center;
 
-			if (PropertyId == lcObjectPropertyId::CameraUpX)
-				Position[0] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraUpY)
-				Position[1] = Value;
-			else if (PropertyId == lcObjectPropertyId::CameraUpZ)
-				Position[2] = Value;
+		if (PropertyId == lcObjectPropertyId::CameraUpX)
+			Position[0] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraUpY)
+			Position[1] = Value;
+		else if (PropertyId == lcObjectPropertyId::CameraUpZ)
+			Position[2] = Value;
 
-			lcVector3 Distance = Position - Center;
+		lcVector3 Distance = Position - Center;
 
-			Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraFOV)
+		Model->MoveSelectedObjects(Distance, Distance, false, false, true, true);
+	}
+	else if (Camera)
+	{
+		if (PropertyId == lcObjectPropertyId::CameraFOV)
 		{
 			Model->SetCameraFOV(Camera, Value);
 		}
@@ -370,11 +371,6 @@ void lcPropertiesWidget::FloatChanged()
 		{
 			Model->SetCameraZFar(Camera, Value);
 		}
-	}
-
-	if (Light)
-	{
-		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 	}
 }
 

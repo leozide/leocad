@@ -107,18 +107,6 @@ void lcModelProperties::ParseLDrawLine(QTextStream& Stream)
 	}
 }
 
-lcPOVRayOptions::lcPOVRayOptions() :
-	UseLGEO(false),
-	ExcludeFloor(false),
-	ExcludeBackground(false),
-	NoReflection(false),
-	NoShadow(false),
-	FloorAxis(1),
-	FloorAmbient(0.4f),
-	FloorDiffuse(0.4f),
-	FloorColor(0.8f,0.8f,0.8f)
-{}
-
 void lcPOVRayOptions::ParseLDrawLine(QTextStream& LineStream)
 {
 	QString Token;

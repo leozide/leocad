@@ -995,10 +995,11 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	}
 
 	const lcPreferences& Preferences = lcGetPreferences();
+	float Alpha = mContext->IsOffscreen() ? 0.0f : 1.0f;
 
 	if (!Preferences.mBackgroundGradient)
 	{
-		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), 0.0f);
+		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), Alpha);
 		mContext->ClearColorAndDepth(BackgroundColor);
 		return;
 	}
@@ -1027,28 +1028,23 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	double TopRed = LC_RGBA_RED(ColorTop);
 	double TopGreen = LC_RGBA_GREEN(ColorTop);
 	double TopBlue = LC_RGBA_BLUE(ColorTop);
-	double TopAlpha = LC_RGBA_ALPHA(ColorTop);
 	double BottomRed = LC_RGBA_RED(ColorBottom);
 	double BottomGreen = LC_RGBA_GREEN(ColorBottom);
 	double BottomBlue = LC_RGBA_BLUE(ColorBottom);
-	double BottomAlpha = LC_RGBA_ALPHA(ColorBottom);
 	const double DeltaRed = BottomRed - TopRed;
 	const double DeltaGreen = BottomGreen - TopGreen;
 	const double DeltaBlue = BottomBlue - TopBlue;
-	const double DeltaAlpha = BottomAlpha - TopAlpha;
 
 	BottomRed = TopRed + DeltaRed * t2;
 	BottomGreen = TopGreen + DeltaGreen * t2;
 	BottomBlue = TopBlue + DeltaBlue * t2;
-	BottomAlpha = TopAlpha + DeltaAlpha * t2;
 
 	TopRed = TopRed + DeltaRed * t1;
 	TopGreen = TopGreen + DeltaGreen * t1;
 	TopBlue = TopBlue + DeltaBlue * t1;
-	TopAlpha = TopAlpha + DeltaAlpha * t1;
 
-	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, TopAlpha);
-	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, BottomAlpha);
+	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, Alpha);
+	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, Alpha);
 
 	struct lcBackgroundVertex
 	{

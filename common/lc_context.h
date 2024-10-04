@@ -131,6 +131,11 @@ public:
 	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
 	void SetOffscreenContext();
 
+	bool IsOffscreen() const
+	{
+		return mWidget != nullptr;
+	}
+
 	void ClearColorAndDepth(const lcVector4& ClearColor);
 	void ClearDepth();
 

@@ -382,30 +382,32 @@ void lcRenderDialog::on_RenderButton_clicked()
 			}
 		}
 
-		mProcess = new lcRenderProcess(this);
+		lcRenderProcess* Process = new lcRenderProcess(this);
 #ifdef Q_OS_LINUX
-		connect(mProcess, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
+		connect(Process, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
 #endif
 		QStringList POVEnv = QProcess::systemEnvironment();
 		POVEnv.prepend("POV_IGNORE_SYSCONF_MSG=1");
-		mProcess->setEnvironment(POVEnv);
-		mProcess->setStandardErrorFile(GetStdErrFileName());
-		mProcess->start(POVRayPath, Arguments);
+		Process->setEnvironment(POVEnv);
+		Process->setStandardErrorFile(GetStdErrFileName());
+		Process->start(POVRayPath, Arguments);
 
 		mImage = QImage(ui->WidthEdit->text().toInt(), ui->HeightEdit->text().toInt(), QImage::Format_ARGB32);
 		mImage.fill(QColor(255, 255, 255));
 		ui->preview->SetImage(mImage);
 
-		if (mProcess->waitForStarted())
+		if (Process->waitForStarted())
 		{
+			mProcess = Process;
 			ui->RenderButton->setText(tr("Cancel"));
 			ui->RenderProgress->setValue(ui->RenderProgress->minimum());
 			mStdErrList.clear();
 		}
 		else
 		{
+			delete Process;
 			gMainWindow->mActions[LC_FILE_RENDER_POVRAY]->setEnabled(true);
-			QMessageBox::warning(this, tr("Error"), tr("Error starting POV-Ray."));
+			QMessageBox::information(this, tr("Render"), tr("Error starting POV-Ray."));
 			CloseProcess();
 		}
 	}
@@ -490,7 +492,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		const QLatin1String LineEnding("\r\n");
 
 		QFile Script(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
-		if(Script.open(QIODevice::WriteOnly | QIODevice::Text))
+		if (Script.open(QIODevice::WriteOnly | QIODevice::Text))
 		{
 			QTextStream Stream(&Script);
 #ifdef Q_OS_WIN
@@ -793,7 +795,6 @@ void lcRenderDialog::ShowResult()
 	bool Error;
 
 	const QString StdErrLog = ReadStdErr(Error);
-
 	const QString RenderLabel = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
 
 	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0 || Error)
@@ -803,7 +804,7 @@ void lcRenderDialog::ShowResult()
 		ui->RenderProgress->setValue(0);
 
 		const QString Title = mCommand == BLENDER_RENDER ? tr("Blender Render") : tr("POV-Ray Render");
-		const QString Body  = tr ("An error occurred while rendering. See Show Details...");
+		const QString Body  = tr("An error occurred while rendering.");
 		lcBlenderPreferences::ShowMessage(Body, Title, QString(), StdErrLog, 0, QMessageBox::Warning);
 		return;
 	}
@@ -892,7 +893,7 @@ void lcRenderDialog::on_RenderOutputButton_clicked()
 
 lcRenderProcess::~lcRenderProcess()
 {
-	if(state() == QProcess::Running || state() == QProcess::Starting)
+	if (state() == QProcess::Running || state() == QProcess::Starting)
 	{
 		terminate();
 		waitForFinished();

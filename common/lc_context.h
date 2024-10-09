@@ -133,7 +133,7 @@ public:
 
 	bool IsOffscreen() const
 	{
-		return mWidget != nullptr;
+		return mWidget == nullptr;
 	}
 
 	void ClearColorAndDepth(const lcVector4& ClearColor);

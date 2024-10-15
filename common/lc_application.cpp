@@ -614,18 +614,29 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if ((Options.SetCameraPosition = ParseFloatArray(9, Options.CameraPosition[0], true)))
 			{
-				lcVector3 Front = Options.CameraPosition[1] - Options.CameraPosition[0];
-
-				if (Front.LengthSquared() < 1.0f || Options.CameraPosition[2].LengthSquared() < 1.0f || fabsf(lcDot(lcNormalize(Front), lcNormalize(Options.CameraPosition[2]))) > 0.99f)
-				{
-					Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option.\n").arg(Option);
-					Options.ParseOK = false;
-				}
-				else if (Option == QLatin1String("--camera-position-ldraw"))
+				if (Option == QLatin1String("--camera-position-ldraw"))
 				{
 					Options.CameraPosition[0] = lcVector3LDrawToLeoCAD(Options.CameraPosition[0]);
 					Options.CameraPosition[1] = lcVector3LDrawToLeoCAD(Options.CameraPosition[1]);
 					Options.CameraPosition[2] = lcVector3LDrawToLeoCAD(Options.CameraPosition[2]);
+				}
+
+				lcVector3 Front = Options.CameraPosition[1] - Options.CameraPosition[0];
+
+				if (Front.LengthSquared() < 0.1f)
+				{
+					Options.StdErr += tr("The camera position is too close to the camera target of the '%1' option.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+				else if (Options.CameraPosition[2].LengthSquared() < 0.1f)
+				{
+					Options.StdErr += tr("Invalid up vector length specified for the '%1' option.\n").arg(Option);
+					Options.ParseOK = false;
+				}
+				else if (fabsf(lcDot(lcNormalize(Front), lcNormalize(Options.CameraPosition[2]))) > 0.99f)
+				{
+					Options.StdErr += tr("The up vector is parallel to the front vector specified for the '%1' option.\n").arg(Option);
+					Options.ParseOK = false;
 				}
 			}
 		}

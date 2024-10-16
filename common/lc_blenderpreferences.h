@@ -76,7 +76,7 @@ protected:
 	static int NumPaths(bool DefaultSettings = false);
 	static int NumSettings(bool DefaultSettings = false);
 	static int NumSettingsMM(bool DefaultSettings = false);
-	static bool GetBlenderAddon(const QString& BlenderDir);
+	static int GetBlenderAddon(const QString& BlenderDir);
 	static bool ExtractBlenderAddon(const QString& BlenderDir);
 	static void LoadDefaultParameters(QByteArray& Buffer, int Which);
 	static bool OverwriteFile(const QString& File);

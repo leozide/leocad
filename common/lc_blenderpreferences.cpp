@@ -259,6 +259,15 @@ lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO
 
 lcBlenderPreferences* gAddonPreferences;
 
+enum AddonEnc
+{
+	ADDON_EXTRACT,
+	ADDON_DOWNLOAD,
+	ADDON_NO_ACTION,
+	ADDON_CANCELED,
+	ADDON_FAIL
+};
+
 lcBlenderPreferencesDialog::lcBlenderPreferencesDialog(int Width, int Height, double Scale, QWidget* Parent)
 	: QDialog(Parent)
 {
@@ -1058,6 +1067,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			mProgressBar->setValue(1);
 
 			TestBlender |= sender() == mPathLineEditList[PATH_BLENDER];
+			mAddonVersionLabel->setText(tr("Installing..."));
 			if (TestBlender)
 			{
 				mExeGridLayout->replaceWidget(mBlenderVersionEdit, mProgressBar);
@@ -1158,6 +1168,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				mProgressBar->setMinimum(0);
 				mProgressBar->setValue(1);
 				mAddonGridLayout->replaceWidget(mAddonVersionEdit, mProgressBar);
+				mAddonVersionLabel->setText(tr("Downloading..."));
 				mProgressBar->show();
 			}
 
@@ -1179,7 +1190,8 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 					mAddonUpdateButton->setEnabled(mConfigured);
 					if (mProgressBar)
 					{
-						mExeGridLayout->replaceWidget(mProgressBar, mAddonVersionEdit);
+						mAddonGridLayout->replaceWidget(mProgressBar, mAddonVersionEdit);
+						mAddonVersionLabel->setText(tr("Blender Addon"));
 						mProgressBar->close();
 					}
 				}
@@ -1189,11 +1201,11 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			if (!QFileInfo(BlenderInstallFile).exists())
 			{
 				ShowMessage(tr ("Could not find addon install file: %1").arg(BlenderInstallFile));
-				StatusUpdate(true, true, tr("Addon file not found."));
+				StatusUpdate(true, true, tr("Not found."));
 				return;
 			}
 
-			StatusUpdate(true, false, tr("Install addon..."));
+			StatusUpdate(true, false, tr("Installing..."));
 
 			QDir ConfigDir(BlenderConfigDir);
 			if(!QDir(ConfigDir).exists())
@@ -1273,7 +1285,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 		Result = ProcessCommand(PR_INSTALL);
 
 		if (Result != PR_OK)
-			StatusUpdate(true, true, tr("Addon install failed."));
+			StatusUpdate(true, true, tr("Install failed."));
 	}
 	else
 		ShowMessage(tr("Blender executable not found at [%1]").arg(BlenderExe), tr("Addon install failed."));
@@ -1281,57 +1293,41 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 {
-	bool Proceed = true;
+	bool Extracted = false;
 
 	QDir Dir(BlenderDir);
 	if (!Dir.exists())
 		Dir.mkdir(BlenderDir);
 
-	if (GetBlenderAddon(BlenderDir))
+	AddonEnc AddonAction = AddonEnc(GetBlenderAddon(BlenderDir));
+	if (AddonAction == ADDON_EXTRACT)
 	{
-		gAddonPreferences->StatusUpdate(true, false, tr("Extract addon..."));
+		gAddonPreferences->StatusUpdate(true, false, tr("Extracting..."));
 		const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
 
 		QString Result;
-		bool Success = gAddonPreferences->ExtractAddon(BlenderAddonFile, Result);
+		Extracted = gAddonPreferences->ExtractAddon(BlenderAddonFile, Result);
 
-		if (!Success)
+		if (!Extracted)
 		{
 			QString Message = tr("Failed to extract %1 to %2").arg(LC_BLENDER_ADDON_FILE).arg(BlenderDir);
 			if (Result.size())
 				Message.append(" "+Result);
 
 			ShowMessage(Message, tr("Extract addon"));
-
-			Proceed = false;
 		}
 	}
 
-	if (!Proceed)
-		gAddonPreferences->StatusUpdate(true, true,tr("Extract addon failed."));
-
-	return Proceed;
+	return Extracted;
 }
 
-bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
+int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 {
-	enum AddonEnc
-	{
-		ADDON_FAIL = -1,
-		ADDON_NOT_FOUND,
-		ADDON_DOWNLOAD = ADDON_NOT_FOUND,
-		ADDON_ARCHIVE,
-		ADDON_EXTRACTED,
-		ADDON_RELOAD,
-		ADDON_CANCEL
-	};
-
 	const QString BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
 	const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
 	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_FOLDER_STR));
 	bool ExtractedAddon = QFileInfo(AddonVersionFile).isReadable();
 	bool BlenderAddonValidated = ExtractedAddon || QFileInfo(BlenderAddonFile).isReadable();
-	QString AddonStatus = tr("Installing Blender addon...");
 	AddonEnc AddonAction = ADDON_DOWNLOAD;
 	QString LocalVersion, OnlineVersion;
 
@@ -1448,7 +1444,7 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 	{
 		if (GetBlenderAddonVersionMatch())
 		{
-			AddonAction = ADDON_RELOAD;
+			AddonAction = ADDON_NO_ACTION;
 		}
 		else if (gMainWindow)
 		{
@@ -1462,30 +1458,18 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 				if (Exec == QMessageBox::Cancel)
 				{
-					AddonStatus = tr("Blender addon setup cancelled");
-					AddonAction = ADDON_CANCEL;
+					AddonAction = ADDON_CANCELED;
+					gAddonPreferences->mDialogCancelled = true;
 				}
 				else if (Exec == QMessageBox::No)
-				{
-					AddonAction = ADDON_RELOAD;
-				}
+					AddonAction = ADDON_NO_ACTION;
 			}
 			else
-			{
-				AddonAction = ADDON_RELOAD;
-			}
+				AddonAction = ADDON_NO_ACTION;
 		}
 
-		if (AddonAction == ADDON_DOWNLOAD)
-			AddonStatus = tr("Download addon...");
-
-		gAddonPreferences->StatusUpdate(true, false, AddonStatus);
-
-		if (AddonAction == ADDON_CANCEL)
-		{
-			gAddonPreferences->mDialogCancelled = true;
-			return false;
-		}
+		if (AddonAction != ADDON_DOWNLOAD)
+			return AddonAction;
 	}
 
 	auto RemoveOldBlenderAddon = [&] (const QString& OldBlenderAddonFile)
@@ -1511,100 +1495,99 @@ bool lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		}
 	};
 
-	if (AddonAction == ADDON_DOWNLOAD)
+	BlenderAddonValidated = false;
+	lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
+	connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
+	gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_URL));
+	while (gAddonPreferences->mHttpReply)
+		QApplication::processEvents();
+	if (!gAddonPreferences->mData.isEmpty())
 	{
-		BlenderAddonValidated = false;
-		lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
-		connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
-		gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_URL));
-		while (gAddonPreferences->mHttpReply)
-			QApplication::processEvents();
-		if (!gAddonPreferences->mData.isEmpty())
+		const QString OldBlenderAddonFile = QString("%1.hold").arg(BlenderAddonFile);
+		if (QFileInfo(BlenderAddonFile).exists())
 		{
-			const QString OldBlenderAddonFile = QString("%1.hold").arg(BlenderAddonFile);
-			if (QFileInfo(BlenderAddonFile).exists())
-			{
-				if (!QFile::rename(BlenderAddonFile, OldBlenderAddonFile))
-					ShowMessage(tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
-			}
+			if (!QFile::rename(BlenderAddonFile, OldBlenderAddonFile))
+				ShowMessage(tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
+		}
 
-			QString ArchiveFileName, OldArchiveFileName = QFileInfo(OldBlenderAddonFile).fileName();
-			QFile File(BlenderAddonFile);
-			if (File.open(QIODevice::WriteOnly))
+		QString ArchiveFileName, OldArchiveFileName = QFileInfo(OldBlenderAddonFile).fileName();
+		QFile File(BlenderAddonFile);
+		if (File.open(QIODevice::WriteOnly))
+		{
+			File.write(gAddonPreferences->mData);
+			File.close();
+			if (File.open(QIODevice::ReadOnly))
 			{
-				File.write(gAddonPreferences->mData);
-				File.close();
-				if (File.open(QIODevice::ReadOnly))
+				QCryptographicHash Sha256Hash(QCryptographicHash::Sha256);
+				qint64 DataSize = File.size();
+				const qint64 BufferSize = Q_INT64_C(1000);
+				char Buf[BufferSize];
+				int BytesRead;
+				int ReadSize = qMin(DataSize, BufferSize);
+				while (ReadSize > 0 && (BytesRead = File.read(Buf, ReadSize)) > 0)
 				{
-					QCryptographicHash Sha256Hash(QCryptographicHash::Sha256);
-					qint64 DataSize = File.size();
-					const qint64 BufferSize = Q_INT64_C(1000);
-					char Buf[BufferSize];
-					int BytesRead;
-					int ReadSize = qMin(DataSize, BufferSize);
-					while (ReadSize > 0 && (BytesRead = File.read(Buf, ReadSize)) > 0)
-					{
-						DataSize -= BytesRead;
-						Sha256Hash.addData(Buf, BytesRead);
-						ReadSize = qMin(DataSize, BufferSize);
-					}
-					File.close();
-					const QString HexCalculated = Sha256Hash.result().toHex();
+					DataSize -= BytesRead;
+					Sha256Hash.addData(Buf, BytesRead);
+					ReadSize = qMin(DataSize, BufferSize);
+				}
+				File.close();
+				const QString ShaCalculated = Sha256Hash.result().toHex();
 
-					gAddonPreferences->mData.clear();
-					gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_SHA_HASH_URL));
-					while (gAddonPreferences->mHttpReply)
-						QApplication::processEvents();
-					if (!gAddonPreferences->mData.isEmpty())
+				gAddonPreferences->mData.clear();
+				gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_SHA_HASH_URL));
+				while (gAddonPreferences->mHttpReply)
+					QApplication::processEvents();
+				if (!gAddonPreferences->mData.isEmpty())
+				{
+					const QStringList ShaReceived = QString(gAddonPreferences->mData).trimmed().split(" ", SkipEmptyParts);
+					if (ShaReceived.first() == ShaCalculated)
 					{
-						const QStringList HexReceived = QString(gAddonPreferences->mData).trimmed().split(" ", SkipEmptyParts);
-						if (HexReceived.first() == HexCalculated)
+						ArchiveFileName = QFileInfo(BlenderAddonFile).fileName();
+						if (ArchiveFileName == ShaReceived.last())
 						{
-							ArchiveFileName = QFileInfo(BlenderAddonFile).fileName();
-							if (ArchiveFileName == HexReceived.last())
-							{
-								RemoveOldBlenderAddon(OldBlenderAddonFile);
-								BlenderAddonValidated = true;
-							}
-							else
-								ShowMessage(tr("Failed to validate Blender addon file name<br>Downloaded:%1<br>Received:%2").arg(ArchiveFileName, HexReceived.last()));
+							RemoveOldBlenderAddon(OldBlenderAddonFile);
+							BlenderAddonValidated = true;
 						}
 						else
-							ShowMessage(tr("Failed to validate Blender addon SHA hash <br>Calculated:%1<br>Received:%2").arg(HexCalculated, HexReceived.first()));
-						gAddonPreferences->mData.clear();
+							ShowMessage(tr("Failed to validate Blender addon file name<br>Downloaded:%1<br>Received:%2").arg(ArchiveFileName, ShaReceived.last()));
 					}
 					else
-						ShowMessage(tr("Failed to receive SHA hash for Blender addon %1.sha256").arg(LC_BLENDER_ADDON_FILE));
+						ShowMessage(tr("Failed to validate Blender addon SHA hash <br>Calculated:%1<br>Received:%2").arg(ShaCalculated, ShaReceived.first()));
+					gAddonPreferences->mData.clear();
 				}
 				else
-					ShowMessage(tr("Failed to read Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
+					ShowMessage(tr("Failed to receive SHA hash for Blender addon %1.sha256").arg(LC_BLENDER_ADDON_FILE));
 			}
 			else
-				ShowMessage(tr("Failed to write Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
-
-			if (!BlenderAddonValidated)
-			{
-				if (QFileInfo(BlenderAddonFile).exists())
-					if (!QFile::remove(BlenderAddonFile))
-						ShowMessage(tr("Failed to remove invalid Blender addon archive:<br>%1").arg(BlenderAddonFile));
-				if (QFileInfo(OldBlenderAddonFile).exists())
-					if (!QFile::rename(OldBlenderAddonFile, BlenderAddonFile))
-						ShowMessage(tr("Failed to restore Blender addon archive:<br>%1 from %2").arg(ArchiveFileName, OldArchiveFileName));
-			}
+				ShowMessage(tr("Failed to read Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
 		}
 		else
-			ShowMessage(tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
+			ShowMessage(tr("Failed to write Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
 
 		if (!BlenderAddonValidated)
 		{
-			AddonStatus = tr("Download addon failed.");
-			gAddonPreferences->StatusUpdate(true, true, AddonStatus);
+			if (QFileInfo(BlenderAddonFile).exists())
+				if (!QFile::remove(BlenderAddonFile))
+					ShowMessage(tr("Failed to remove invalid Blender addon archive:<br>%1").arg(BlenderAddonFile));
+			if (QFileInfo(OldBlenderAddonFile).exists())
+				if (!QFile::rename(OldBlenderAddonFile, BlenderAddonFile))
+					ShowMessage(tr("Failed to restore Blender addon archive:<br>%1 from %2").arg(ArchiveFileName, OldArchiveFileName));
+			AddonAction = ADDON_FAIL;
 		}
 	}
-	else if (!BlenderAddonValidated)
-		ShowMessage(tr("Blender addon archive %1 was not found").arg(BlenderAddonFile));
+	else
+	{
+		ShowMessage(tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
+		AddonAction = ADDON_FAIL;
+	}
 
-	return BlenderAddonValidated;
+	if (!BlenderAddonValidated)
+		gAddonPreferences->StatusUpdate(true, true, tr("Download failed."));
+
+	if (!QDir(BlenderAddonDir).exists() && QFileInfo(BlenderAddonFile).exists())
+		AddonAction = ADDON_EXTRACT;
+
+	return AddonAction;
 }
 
 void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& Message)
@@ -1622,6 +1605,8 @@ void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& M
 			mExeGridLayout->replaceWidget(mProgressBar, mBlenderVersionEdit);
 			mProgressBar->hide();
 		}
+
+		mAddonVersionLabel->setText(Which);
 	}
 	if (Error)
 	{
@@ -1633,10 +1618,11 @@ void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& M
 		const lcPreferences& Preferences = lcGetPreferences();
 		Label  = ! Message.isEmpty() ? Message : tr("%1 not configured").arg(Which);
 		Colour = Message.startsWith("Error:", Qt::CaseInsensitive)
-					 ? QLatin1String("red")
-					 : Preferences.mColorTheme == lcColorTheme::Dark
-						   ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT)
-						   : QLatin1String("blue");
+						? QLatin1String("red")
+						: Preferences.mColorTheme == lcColorTheme::Dark
+							? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT)
+							: QLatin1String("blue");
+
 		mDialogCancelled = true;
 	}
 	else
@@ -1674,7 +1660,7 @@ void lcBlenderPreferences::ShowResult()
 	{
 		const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
 		Message = tr("Addon install failed. See %1/stderr-blender-addon-install for details.").arg(BlenderDir);
-		StatusUpdate(true, true,tr("%1: Addon install failed.").arg("Error"));
+		StatusUpdate(true, true,tr("Error: Install failed."));
 		mConfigured = false;
 
 		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);

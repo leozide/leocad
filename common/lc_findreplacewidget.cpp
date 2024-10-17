@@ -84,7 +84,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	QToolButton* CloseButton = new QToolButton(this);
 	CloseButton->setAutoRaise(true);
-	CloseButton->setIcon(QIcon(":/stylesheet/close.png"));
+	CloseButton->setIcon(QIcon(":/stylesheet/close.svg"));
 	CloseButton->setToolTip(tr("Close"));
 	Layout->addWidget(CloseButton, 0, 5);
 

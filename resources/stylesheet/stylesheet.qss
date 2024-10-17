@@ -48,7 +48,7 @@ QTreeView::branch:open:has-children:!has-siblings {
 }
 
 QDockWidget {
-    titlebar-close-icon: url(:/stylesheet/close.png);
+    titlebar-close-icon: url(:/stylesheet/close.svg);
     titlebar-normal-icon: url(:/stylesheet/undock.png);
 }
 
@@ -85,7 +85,7 @@ QDockWidget::float-button:pressed {
 }
 
 QTabBar::close-button {
-    background-image: url(:/stylesheet/close.png);
+    background-image: url(:/stylesheet/close.svg);
     background-position: center center;
     background-repeat: none;
 }

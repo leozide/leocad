@@ -627,7 +627,7 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
-	: QWidget(Parent), mFilterAction(nullptr)
+	: QWidget(Parent)
 {
 	mSplitter = new QSplitter(this);
 	mSplitter->setOrientation(Qt::Vertical);
@@ -645,8 +645,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 	mFilterCategoriesWidget = new QLineEdit(CategoriesGroupWidget);
 	mFilterCategoriesWidget->setPlaceholderText(tr("Filter Categories"));
-	mFilterCategoriesAction = mFilterCategoriesWidget->addAction(QIcon(":/resources/filter.png"), QLineEdit::TrailingPosition);
-	connect(mFilterCategoriesAction, SIGNAL(triggered()), this, SLOT(FilterCategoriesTriggered()));
 	FilterCategoriesLayout->addWidget(mFilterCategoriesWidget);
 
 	mFilterCaseAction = new QAction();
@@ -679,8 +677,6 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Search Parts"));
-	mFilterAction = mFilterWidget->addAction(QIcon(":/resources/parts_search.png"), QLineEdit::TrailingPosition);
-	connect(mFilterAction, SIGNAL(triggered()), this, SLOT(FilterTriggered()));
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();
@@ -814,9 +810,18 @@ void lcPartSelectionWidget::FilterCategoriesChanged(const QString& Text)
 	if (mFilterCategoriesAction)
 	{
 		if (Text.isEmpty())
-			mFilterCategoriesAction->setIcon(QIcon(":/resources/filter.png"));
-		else
-			mFilterCategoriesAction->setIcon(QIcon(":/resources/parts_cancel.png"));
+		{
+			delete mFilterCategoriesAction;
+			mFilterCategoriesAction = nullptr;
+		}
+	}
+	else
+	{
+		if (!Text.isEmpty())
+		{
+			mFilterCategoriesAction = mFilterCategoriesWidget->addAction(QIcon(":/stylesheet/close.svg"), QLineEdit::TrailingPosition);
+			connect(mFilterCategoriesAction, &QAction::triggered, this, &lcPartSelectionWidget::FilterCategoriesTriggered);
+		}
 	}
 
 	bool Hide = true;
@@ -839,9 +844,18 @@ void lcPartSelectionWidget::FilterChanged(const QString& Text)
 	if (mFilterAction)
 	{
 		if (Text.isEmpty())
-			mFilterAction->setIcon(QIcon(":/resources/parts_search.png"));
-		else
-			mFilterAction->setIcon(QIcon(":/resources/parts_cancel.png"));
+		{
+			delete mFilterAction;
+			mFilterAction = nullptr;
+		}
+	}
+	else
+	{
+		if (!Text.isEmpty())
+		{
+			mFilterAction = mFilterWidget->addAction(QIcon(":/stylesheet/close.svg"), QLineEdit::TrailingPosition);
+			connect(mFilterAction, &QAction::triggered, this, &lcPartSelectionWidget::FilterTriggered);
+		}
 	}
 
 	mPartsWidget->GetListModel()->SetFilter(Text);

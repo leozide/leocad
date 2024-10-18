@@ -76,7 +76,7 @@ protected:
 	static int NumPaths(bool DefaultSettings = false);
 	static int NumSettings(bool DefaultSettings = false);
 	static int NumSettingsMM(bool DefaultSettings = false);
-	static bool GetBlenderAddon(const QString& BlenderDir);
+	static int GetBlenderAddon(const QString& BlenderDir);
 	static bool ExtractBlenderAddon(const QString& BlenderDir);
 	static void LoadDefaultParameters(QByteArray& Buffer, int Which);
 	static bool OverwriteFile(const QString& File);
@@ -121,14 +121,15 @@ private slots:
 private:
 	enum BlenderPathType
 	{
-		PATH_BLENDER,       //  0 QLineEdit/QPushButton
-		PATH_BLENDFILE,     //  1 QLineEdit/QPushButton
-		PATH_ENVIRONMENT,   //  2 QLineEdit/QPushButton
-		PATH_LDCONFIG,      //  3 QLineEdit/QPushButton
-		PATH_LDRAW,         //  4 QLineEdit/QPushButton
-		PATH_LSYNTH,        //  5 QLineEdit/QPushButton
-		PATH_STUD_LOGO,     //  6 QLineEdit/QPushButton
-		PATH_STUDIO_LDRAW,  //  7 QLineEdit/QPushButton
+		PATH_BLENDER,             //  0 QLineEdit/QPushButton
+		PATH_BLENDFILE,           //  1 QLineEdit/QPushButton
+		PATH_ENVIRONMENT,         //  2 QLineEdit/QPushButton
+		PATH_LDCONFIG,            //  3 QLineEdit/QPushButton
+		PATH_LDRAW,               //  4 QLineEdit/QPushButton
+		PATH_LSYNTH,              //  5 QLineEdit/QPushButton
+		PATH_STUD_LOGO,           //  6 QLineEdit/QPushButton
+		PATH_STUDIO_LDRAW,        //  7 QLineEdit/QPushButton
+		PATH_STUDIO_CUSTOM_PARTS, //  8 QLineEdit/QPushButton
 
 		NUM_PATHS
 	};
@@ -239,10 +240,10 @@ private:
 		LBL_BLEND_FILE_TRUSTED_MM,                 //  2 QCheckBox
 		LBL_CASE_SENSITIVE_FILESYSTEM,             //  3 QCheckBox
 		LBL_CROP_IMAGE_MM,                         //  4 QCheckBox
-		LBL_DISPLAY_LOGO,                          //  5 QCheckBox
+		NUM_COMBO_ITEMS_MM,                        //  5
+		LBL_DISPLAY_LOGO = NUM_COMBO_ITEMS_MM,     //  5 QCheckBox
 		LBL_IMPORT_CAMERAS_MM,                     //  6 QCheckBox
-		NUM_COMBO_ITEMS_MM,                        //  7
-		LBL_IMPORT_EDGES = NUM_COMBO_ITEMS_MM,     //  7 QCheckBox
+		LBL_IMPORT_EDGES,                          //  7 QCheckBox
 		LBL_IMPORT_LIGHTS_MM,                      //  8 QCheckBox
 		LBL_KEEP_ASPECT_RATIO_MM,                  //  9 QCheckBox
 		LBL_MAKE_GAPS,                             // 10 QCheckBox
@@ -291,8 +292,8 @@ private:
 
 		LBL_CHOSEN_LOGO,                           // 52/ 0 QComboBox
 		LBL_COLOUR_SCHEME_MM,                      // 53/ 1 QComboBox
-		LBL_COLOUR_STRATEGY,                       // 54/ 2 QComboBox
-		LBL_RESOLUTION_MM,                         // 55/ 3 QComboBox
+		LBL_RESOLUTION_MM,                         // 54/ 2 QComboBox
+		LBL_SCALE_STRATEGY,                        // 55/ 3 QComboBox
 		LBL_SMOOTH_TYPE,                           // 56/ 4 QComboBox
 
 		NUM_SETTINGS_MM
@@ -309,10 +310,10 @@ private:
 		CTL_COLOUR_SCHEME_COMBO_MM        = CTL_BEVEL_EDGES_BOX_MM,       //  1
 		CTL_BLEND_FILE_TRUSTED_BOX_MM,                                    //  2
 		CTL_BEVEL_WIDTH_EDIT_MM           = CTL_BLEND_FILE_TRUSTED_BOX_MM,//  2
-		CTL_COLOUR_STRATEGY_COMBO         = CTL_BLEND_FILE_TRUSTED_BOX_MM,//  2
 		CTL_CASE_SENSITIVE_FILESYSTEM_BOX,                                //  3
 		CTL_CAMERA_BORDER_PERCENT_EDIT_MM = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
 		CTL_RESOLUTION_COMBO_MM           = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
+		CTL_SCALE_STRATEGY_COMBO          = CTL_CASE_SENSITIVE_FILESYSTEM_BOX,// 3
 		CTL_CROP_IMAGE_BOX_MM,                                            //  4
 		CTL_FRAMES_PER_STEP_EDIT          = CTL_CROP_IMAGE_BOX_MM,        //  4
 		CTL_SMOOTH_TYPE_COMBO             = CTL_CROP_IMAGE_BOX_MM,        //  4

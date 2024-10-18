@@ -146,7 +146,6 @@
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>
         <file>resources/shaders/unlit_view_sphere_vs.glsl</file>
         <file>resources/case.png</file>
-        <file>resources/filter.png</file>
         <file>resources/flexible.png</file>
         <file>resources/gear_in.png</file>
     </qresource>

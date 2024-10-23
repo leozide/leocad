@@ -557,6 +557,7 @@ void lcMainWindow::CreateMenus()
 	PieceMenu->addAction(mActions[LC_PIECE_PAINT_SELECTED]);
 	PieceMenu->addAction(mActions[LC_PIECE_ARRAY]);
 	PieceMenu->addAction(mActions[LC_PIECE_MINIFIG_WIZARD]);
+    PieceMenu->addAction(mActions[LC_PIECE_TRAIN_TRACK_WIZARD]);
 	PieceMenu->addAction(mActions[LC_PIECE_RESET_PIVOT_POINT]);
 	PieceMenu->addAction(mActions[LC_PIECE_REMOVE_KEY_FRAMES]);
 	PieceMenu->addSeparator();
@@ -2979,6 +2980,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_PIECE_MINIFIG_WIZARD:
 		if (ActiveModel)
 			ActiveModel->ShowMinifigDialog();
+		break;
+
+	case LC_PIECE_TRAIN_TRACK_WIZARD:
+		if (ActiveModel)
+			ActiveModel->ShowTrainTrackSystemDialog();
 		break;
 
 	case LC_PIECE_ARRAY:

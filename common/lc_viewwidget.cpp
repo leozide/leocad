@@ -11,6 +11,8 @@
 #include "lc_mesh.h"
 #include "lc_profile.h"
 #include "lc_previewwidget.h"
+#include "pieceinf.h"
+#include "object.h"
 
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 	: QOpenGLWidget(Parent), mView(View)
@@ -128,10 +130,24 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 
 	switch (MouseEvent->button())
 	{
-	case Qt::LeftButton:
-		mView->OnLeftButtonDown();
-		break;
+	case Qt::LeftButton: {
+		
+		//Emit piece, if the button is pressed on a piece
+		lcObjectSection ObjectSection = mView->FindObjectUnderPointer(false, false);
+		lcObject* Object = ObjectSection.Object;
 
+		if (Object)
+		{
+			if (Object->IsPiece())
+			{
+				lcPiece* Piece = (lcPiece*)Object;
+				emit mousePressOnPiece(Piece);
+			}
+		}
+        
+        mView->OnLeftButtonDown();
+		break;
+    }
 	case Qt::MiddleButton:
 		mView->OnMiddleButtonDown();
 		break;
@@ -155,7 +171,9 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 
 void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
-	float DeviceScale = GetDeviceScale();
+	emit mouseRelease();
+
+    float DeviceScale = GetDeviceScale();
 
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
 	mView->SetMouseModifiers(MouseEvent->modifiers());

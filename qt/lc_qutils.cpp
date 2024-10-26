@@ -196,6 +196,8 @@ void lcPieceIdPickerPopup::showEvent(QShowEvent* ShowEvent)
 
 	mPartSelectionWidget->SetOrientation(Qt::Horizontal);
 	mPartSelectionWidget->SetCurrentPart(mInitialPart);
+
+	mPartSelectionWidget->FocusPartFilterWidget();
 }
 
 void lcPieceIdPickerPopup::Accept()

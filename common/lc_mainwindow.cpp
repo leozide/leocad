@@ -1906,9 +1906,12 @@ void lcMainWindow::ResetViews()
 void lcMainWindow::ToggleDockWidget(QWidget* DockWidget)
 {
 	if (DockWidget->isHidden())
+	{
 		DockWidget->show();
+		DockWidget->raise();
+	}
 	else
-		DockWidget->hide();
+		DockWidget->close();
 }
 
 void lcMainWindow::TogglePrintPreview()
@@ -2812,6 +2815,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_TOOLBAR_PARTS:
 		ToggleDockWidget(mPartsToolBar);
+		if (mPartsToolBar->isVisible())
+			mPartSelectionWidget->FocusPartFilterWidget();
 		break;
 
 	case LC_VIEW_TOOLBAR_COLORS:

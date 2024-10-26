@@ -676,7 +676,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	PartsLayout->addLayout(SearchLayout);
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
-	mFilterWidget->setPlaceholderText(tr("Search Parts"));
+	mFilterWidget->setPlaceholderText(tr("Filter Parts"));
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();

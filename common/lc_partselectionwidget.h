@@ -239,6 +239,12 @@ public:
 		return mPartsWidget->GetCurrentPart();
 	}
 
+	void FocusPartFilterWidget() const
+	{
+		mFilterWidget->setFocus();
+		mFilterWidget->selectAll();
+	}
+
 signals:
 	void PartPicked(PieceInfo* Info);
 	void CurrentPartChanged(PieceInfo* Info);

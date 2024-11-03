@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "pieceinf.h"
 #include "lc_synth.h"
+#include "lc_traintrack.h"
 #include "lc_mainwindow.h"
 #include "texfont.h"
 
@@ -358,9 +359,47 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 2, 18);
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 20, 18);
 		}
+		else if (Piece->mPieceInfo->GetTrainTrackInfo())
+		{
+			DrawTrainTrack(Piece, Context, OverlayScale);
+		}
 	}
 
 	Context->EnableDepthTest(true);
+}
+
+void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale)
+{
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+
+	for (const lcTrainTrackConnection& TrainTrackConnection : TrainTrackInfo->GetConnections())
+	{
+		lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count) * 2];
+		int NumVerts = 0;
+
+		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcVector3(TrainTrackConnection.Transform[0]) * 100) / OverlayScale;
+
+		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / OverlayScale;
+
+		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / OverlayScale;
+
+		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / OverlayScale;
+
+		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / OverlayScale;
+
+		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		Context->SetVertexBufferPointer(Verts);
+		Context->ClearIndexBuffer();
+		Context->SetVertexFormatPosition(3);
+
+		Context->DrawPrimitives(GL_LINES, 0, NumVerts);
+	}
 }
 
 void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool)
@@ -740,7 +779,7 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 	return false;
 }
 
-lcTrackTool lcViewManipulator::UpdateSelectMove()
+std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 {
 	lcModel* ActiveModel = mView->GetActiveModel();
 	const float OverlayScale = mView->GetOverlayScale();
@@ -753,12 +792,13 @@ lcTrackTool lcViewManipulator::UpdateSelectMove()
 
 	lcTool CurrentTool = gMainWindow->GetTool();
 	lcTrackTool NewTrackTool = (CurrentTool == lcTool::Move) ? lcTrackTool::MoveXYZ : lcTrackTool::Select;
+	quint32 NewTrackSection = ~0U;
 
 	lcVector3 OverlayCenter;
 	lcMatrix33 RelativeRotation;
 
 	if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
-		return NewTrackTool;
+		return { NewTrackTool, NewTrackSection };
 
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
@@ -786,6 +826,7 @@ lcTrackTool lcViewManipulator::UpdateSelectMove()
 
 	lcObject* Focus = ActiveModel->GetFocusObject();
 	int ControlPointIndex = -1;
+
 	if (Focus && Focus->IsPiece())
 	{
 		lcPiece* Piece = (lcPiece*)Focus;
@@ -908,7 +949,46 @@ lcTrackTool lcViewManipulator::UpdateSelectMove()
 		}
 	}
 
-	return NewTrackTool;
+	if (Focus && Focus->IsPiece())
+	{
+		const lcPiece* Piece = (lcPiece*)Focus;
+		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+
+		if (TrainTrackInfo)
+		{
+			for (quint32 Section = 0; Section < TrainTrackInfo->GetConnections().size(); Section++)
+			{
+				const lcTrainTrackConnection& TrainTrackConnection = TrainTrackInfo->GetConnections()[Section];
+				lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count)];
+				int NumVerts = 0;
+
+				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcVector3(TrainTrackConnection.Transform[0]) * 100) / 1;
+				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / 1;
+				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / 1;
+				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / 1;
+				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / 1;
+
+				for (int VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++)
+				{
+					Verts[VertexIndex] = lcMul31(Verts[VertexIndex], WorldMatrix);
+
+					float IntersectionDistance = lcRayPointDistance(Verts[VertexIndex], Start, End);
+
+					if (IntersectionDistance < 40)
+					{
+						if (IntersectionDistance > ClosestIntersectionDistance)
+							continue;
+
+						NewTrackTool = lcTrackTool::Insert;
+						ClosestIntersectionDistance = IntersectionDistance;
+						NewTrackSection = Section | (VertexIndex << 8);
+					}
+				}
+			}
+		}
+	}
+
+	return { NewTrackTool, NewTrackSection };
 }
 
 lcTrackTool lcViewManipulator::UpdateRotate()

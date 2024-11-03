@@ -4233,9 +4233,9 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	}
 }
 
-void lcModel::InsertPieceToolClicked(const lcMatrix44& WorldMatrix)
+void lcModel::InsertPieceToolClicked(PieceInfo* Info, const lcMatrix44& WorldMatrix)
 {
-	lcPiece* Piece = new lcPiece(gMainWindow->GetCurrentPieceInfo());
+	lcPiece* Piece = new lcPiece(Info);
 	Piece->Initialize(WorldMatrix, mCurrentStep);
 	Piece->SetColorIndex(gMainWindow->mColorIndex);
 	Piece->UpdatePosition(mCurrentStep);

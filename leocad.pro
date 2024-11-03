@@ -219,6 +219,7 @@ SOURCES += \
 	common/lc_texture.cpp \
 	common/lc_thumbnailmanager.cpp \
 	common/lc_timelinewidget.cpp \
+	common/lc_traintrack.cpp \
 	common/lc_view.cpp \
 	common/lc_viewmanipulator.cpp \
 	common/lc_viewsphere.cpp \
@@ -292,6 +293,7 @@ HEADERS += \
 	common/lc_texture.h \
 	common/lc_thumbnailmanager.h \
 	common/lc_timelinewidget.h \
+	common/lc_traintrack.h \
 	common/lc_view.h \
 	common/lc_viewmanipulator.h \
 	common/lc_viewsphere.h \

@@ -259,6 +259,7 @@ public:
 
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
+	void UpdatePiecePreview();
 	lcMatrix44 GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
@@ -327,6 +328,7 @@ protected:
 
 	lcDragState mDragState;
 	bool mTrackToolFromOverlay;
+	quint32 mTrackToolSection = ~0U;
 	lcVector3 mMouseDownPosition;
 	PieceInfo* mMouseDownPiece;
 	int mPanX = 0;
@@ -346,6 +348,9 @@ protected:
 	lcMatrix44 mActiveSubmodelTransform;
 
 	lcCamera* mCamera = nullptr;
+
+	PieceInfo* mPiecePreviewInfo = nullptr;
+	lcMatrix44 mPiecePreviewTransform;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

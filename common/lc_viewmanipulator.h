@@ -10,13 +10,15 @@ public:
 	void DrawSelectMove(lcTrackButton TrackButton, lcTrackTool TrackTool);
 	void DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool);
 
-	lcTrackTool UpdateSelectMove();
+	std::pair<lcTrackTool, quint32> UpdateSelectMove();
 	lcTrackTool UpdateRotate();
 
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);
 
 protected:
+	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale);
+
 	static bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms);
 
 	lcView* mView = nullptr;

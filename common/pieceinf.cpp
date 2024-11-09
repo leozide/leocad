@@ -11,6 +11,7 @@
 #include "project.h"
 #include "lc_scene.h"
 #include "lc_synth.h"
+#include "lc_traintrack.h"
 #include "lc_file.h"
 #include <locale.h>
 
@@ -21,12 +22,6 @@ PieceInfo::PieceInfo()
 	mFolderType = -1;
 	mFolderIndex = -1;
 	mState = lcPieceInfoState::Unloaded;
-	mRefCount = 0;
-	mType = lcPieceInfoType::Part;
-	mMesh = nullptr;
-	mModel = nullptr;
-	mProject = nullptr;
-	mSynthInfo = nullptr;
 	mFileName[0] = 0;
 	m_strDescription[0] = 0;
 }
@@ -34,6 +29,7 @@ PieceInfo::PieceInfo()
 PieceInfo::~PieceInfo()
 {
 	delete mSynthInfo;
+	delete mTrainTrackInfo;
 
 	if (mState == lcPieceInfoState::Loaded)
 		Unload();

@@ -10,11 +10,13 @@
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_synth.h"
+#include "lc_traintrack.h"
 #include "lc_scene.h"
 #include "lc_context.h"
 #include "lc_viewmanipulator.h"
 #include "lc_viewsphere.h"
 #include "lc_findreplacewidget.h"
+#include "lc_library.h"
 
 lcFindReplaceParams lcView::mFindReplaceParams;
 QPointer<lcFindReplaceWidget> lcView::mFindWidget;
@@ -48,6 +50,13 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 lcView::~lcView()
 {
+	if (mPiecePreviewInfo)
+	{
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		Library->ReleasePieceInfo(mPiecePreviewInfo);
+		mPiecePreviewInfo = nullptr;
+	}
+
 	mContext->DestroyVertexBuffer(mGridBuffer);
 
 	if (gMainWindow && mViewType == lcViewType::View)
@@ -408,6 +417,55 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 	}
 
 	return axis;
+}
+
+void lcView::UpdatePiecePreview()
+{
+	lcModel* ActiveModel = GetActiveModel();
+	lcObject* Focus = ActiveModel->GetFocusObject();
+	PieceInfo* PreviewInfo = nullptr;
+	lcMatrix44 PreviewTransform;
+
+	if (Focus && Focus->IsPiece())
+	{
+		lcPiece* Piece = (lcPiece*)Focus;
+
+		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+
+		if (TrainTrackInfo)
+		{
+			quint32 ConnectionIndex = mTrackToolSection & 0xff;
+			lcTrainTrackType TrainTrackType = static_cast<lcTrainTrackType>((mTrackToolSection >> 8) & 0xff);
+
+			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertPosition(Piece, ConnectionIndex, TrainTrackType);
+		}
+	}
+
+	if (!PreviewInfo)
+	{
+		PreviewInfo = gMainWindow->GetCurrentPieceInfo();
+
+		if (PreviewInfo)
+		{
+			mPiecePreviewTransform = GetPieceInsertPosition(false, PreviewInfo);
+
+			if (GetActiveModel() != mModel)
+				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
+		}
+	}
+
+	if (PreviewInfo != mPiecePreviewInfo)
+	{
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+		if (mPiecePreviewInfo)
+			Library->ReleasePieceInfo(mPiecePreviewInfo);
+
+		mPiecePreviewInfo = PreviewInfo;
+
+		if (mPiecePreviewInfo)
+			Library->LoadPieceInfo(mPiecePreviewInfo, true, true);
+	}
 }
 
 lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
@@ -812,16 +870,11 @@ void lcView::OnDraw()
 
 	if (DrawInterface && mTrackTool == lcTrackTool::Insert)
 	{
-		PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
+		UpdatePiecePreview();
 
-		if (Info)
+		if (mPiecePreviewInfo)
 		{
-			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, Info);
-
-			if (GetActiveModel() != mModel)
-				WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
-
-			Info->AddRenderMeshes(mScene.get(), WorldMatrix, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
+			mPiecePreviewInfo->AddRenderMeshes(mScene.get(), mPiecePreviewTransform, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
 		}
 	}
 
@@ -1389,18 +1442,14 @@ void lcView::DrawGrid()
 
 	if (mTrackTool == lcTrackTool::Insert)
 	{
-		PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
-
-		if (CurPiece)
+		if (mPiecePreviewInfo)
 		{
 			lcVector3 Points[8];
-			lcGetBoxCorners(CurPiece->GetBoundingBox(), Points);
-
-			lcMatrix44 WorldMatrix = GetPieceInsertPosition(false, CurPiece);
+			lcGetBoxCorners(mPiecePreviewInfo->GetBoundingBox(), Points);
 
 			for (int i = 0; i < 8; i++)
 			{
-				lcVector3 Point = lcMul31(Points[i], WorldMatrix);
+				lcVector3 Point = lcMul31(Points[i], mPiecePreviewTransform);
 
 				Min = lcMin(Point, Min);
 				Max = lcMax(Point, Max);
@@ -1654,8 +1703,9 @@ void lcView::EndDrag(bool Accept)
 		case lcDragState::Piece:
 			{
 				PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
+
 				if (Info)
-					ActiveModel->InsertPieceToolClicked(GetPieceInsertPosition(false, Info));
+					ActiveModel->InsertPieceToolClicked(Info, GetPieceInsertPosition(false, Info));
 			} break;
 
 		case lcDragState::Color:
@@ -2012,6 +2062,7 @@ void lcView::UpdateTrackTool()
 
 	lcTool CurrentTool = gMainWindow->GetTool();
 	lcTrackTool NewTrackTool = mTrackTool;
+	quint32 NewTrackSection = ~0U;
 	int x = mMouseX;
 	int y = mMouseY;
 	bool Redraw = false;
@@ -2048,9 +2099,10 @@ void lcView::UpdateTrackTool()
 	case lcTool::Move:
 		{
 			mMouseDownPiece = nullptr;
-			NewTrackTool = mViewManipulator->UpdateSelectMove();
+			std::tie(NewTrackTool, NewTrackSection) = mViewManipulator->UpdateSelectMove();
 			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::MoveXYZ && NewTrackTool != lcTrackTool::Select;
-			Redraw = NewTrackTool != mTrackTool;
+			Redraw = NewTrackTool != mTrackTool || NewTrackSection != mTrackToolSection;
+			mTrackToolSection = NewTrackSection;
 
 			if (CurrentTool == lcTool::Select && NewTrackTool == lcTrackTool::Select && mMouseModifiers == Qt::NoModifier)
 			{
@@ -2433,12 +2485,12 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 
 	case lcTrackTool::Insert:
 		{
-			PieceInfo* CurPiece = gMainWindow->GetCurrentPieceInfo();
+			UpdatePiecePreview();
 
-			if (!CurPiece)
+			if (!mPiecePreviewInfo)
 				break;
 
-			ActiveModel->InsertPieceToolClicked(GetPieceInsertPosition(false, gMainWindow->GetCurrentPieceInfo()));
+			ActiveModel->InsertPieceToolClicked(mPiecePreviewInfo, mPiecePreviewTransform);
 
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);

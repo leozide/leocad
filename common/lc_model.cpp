@@ -15,11 +15,9 @@
 #include "pieceinf.h"
 #include "lc_view.h"
 #include "minifig.h"
-#include "traintracksystem.h"
 #include "lc_arraydialog.h"
 #include "lc_qselectdialog.h"
 #include "lc_minifigdialog.h"
-#include "lc_traintracksystemdialog.h"
 #include "lc_groupdialog.h"
 #include "lc_qeditgroupsdialog.h"
 #include "lc_qpropertiesdialog.h"
@@ -4716,44 +4714,6 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 	}
 
 	SetSelectionAndFocus(Pieces, nullptr, 0, false);
-}
-
-void lcModel::ShowTrainTrackSystemDialog()
-{
-	lcTrainTrackSystemDialog Dialog(gMainWindow);
-
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
-
-	gMainWindow->GetActiveView()->MakeCurrent();
-
-	lcGroup* Group = AddGroup(tr("TrainTrackSystem #"), nullptr);
-
-	std::vector<lcPiece* > trackSystemPieces = Dialog.mTrainTrackSystem->GetPieces();
-	for (lcPiece* Piece : trackSystemPieces)
-	{
-		Piece->SetGroup(Group);
-		AddPiece(Piece);
-		Piece->UpdatePosition(mCurrentStep);
-	}
-
-	gMainWindow->UpdateTimeline(false, false);
-	SaveCheckpoint(tr("Train track system"));
-}
-
-void lcModel::SetTrainTrackSystem(const std::vector<lcPiece*>& Pieces)
-{
-	DeleteModel();
-
-	std::vector<lcObject*> mPieces;
-	mPieces.reserve(Pieces.size());
-
-	for (lcPiece* Piece : Pieces)
-	{
-        AddPiece(Piece);
-		Piece->UpdatePosition(1);
-		mPieces.emplace_back(Piece);
-	}
 }
 
 void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)

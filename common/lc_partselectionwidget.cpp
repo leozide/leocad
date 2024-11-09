@@ -147,23 +147,6 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 	SetFilter(mFilter);
 }
 
-void lcPartSelectionListModel::SetParts(std::vector<PieceInfo*> partsList)
-{
-	beginResetModel();
-
-	ReleaseThumbnails();
-	mParts.clear();
-
-	mParts.resize(partsList.size());
-	for (unsigned long PartIdx = 0; PartIdx < partsList.size(); PartIdx++) {
-        mParts[PartIdx].Info = partsList[PartIdx];
-    }
-
-	endResetModel();
-
-	SetFilter(mFilter);
-}
-
 void lcPartSelectionListModel::SetModelsCategory()
 {
 	beginResetModel();
@@ -529,14 +512,6 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	}
 
 	setCurrentIndex(mListModel->index(0, 0));
-}
-
-void lcPartSelectionListView::SetParts(std::vector<PieceInfo*> partsList)
-{
-	mListModel->SetParts(partsList);
-
-	if(mListModel->rowCount()>0)
-		setCurrentIndex(mListModel->index(0, 0));
 }
 
 void lcPartSelectionListView::SetCurrentPart(PieceInfo* Info)

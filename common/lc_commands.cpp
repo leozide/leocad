@@ -1369,13 +1369,6 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Add a new minifig to the model"),
 		""
 	},
-	// LC_PIECE_TRAIN_TRACK_WIZARD
-	{
-		QT_TRANSLATE_NOOP("Action", "Piece.TrainTrackSystemWizard"),
-		QT_TRANSLATE_NOOP("Menu", "Train track network wizard..."),
-		QT_TRANSLATE_NOOP("Status", "Add a new train track network to the model"),
-		"Ctrl+T"
-	},
 	// LC_PIECE_ARRAY
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Array"),

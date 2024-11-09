@@ -170,7 +170,6 @@ SOURCES += \
 	common/image.cpp \
 	common/light.cpp \
 	common/minifig.cpp \
-    common/traintracksystem.cpp \
 	common/object.cpp \
 	common/piece.cpp \
 	common/pieceinf.cpp \
@@ -204,7 +203,6 @@ SOURCES += \
 	common/lc_mesh.cpp \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
-    common/lc_traintracksystemdialog.cpp \
 	common/lc_model.cpp \
 	common/lc_modellistdialog.cpp \
 	common/lc_objectproperty.cpp \
@@ -245,7 +243,6 @@ HEADERS += \
 	common/image.h \
 	common/light.h \
 	common/minifig.h \
-    common/traintracksystem.h \
 	common/object.h \
 	common/piece.h \
 	common/pieceinf.h \
@@ -281,7 +278,6 @@ HEADERS += \
 	common/lc_mesh.h \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
-    common/lc_traintracksystemdialog.h \
 	common/lc_model.h \
 	common/lc_modellistdialog.h \
 	common/lc_objectproperty.h \
@@ -329,7 +325,6 @@ FORMS += \
 	common/lc_categorydialog.ui \
 	common/lc_groupdialog.ui \
 	common/lc_minifigdialog.ui \
-    common/lc_traintracksystemdialog.ui \
 	common/lc_modellistdialog.ui \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui

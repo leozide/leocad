@@ -13,10 +13,6 @@ public:
 
 	QSize sizeHint() const override;
 
-signals:
-	void mousePressOnPiece(lcPiece* piece);
-	void mouseRelease();
-
 protected:
 	float GetDeviceScale() const
 	{

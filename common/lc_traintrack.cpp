@@ -13,41 +13,38 @@
 // move config to json
 // add other track types
 
-std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
+std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, quint32 fromConnectionIdx, lcTrainTrackType TrainTrackType, quint32 toConnectionIdx) const
 {
-	if (ConnectionIndex >= mConnections.size())
+    const char* TrainTrackPieceNames[] =
+    {
+        "74746.dat",
+        "2861c04.dat",
+        "2859c04.dat",
+        "74747.dat",
+        "32087.dat"
+    };
+
+	if (fromConnectionIdx >= mConnections.size())
 		return { nullptr, lcMatrix44Identity() };
 
-	const char* PieceNames[] =
-	{
-		"74746.dat",
-		"74747.dat",
-		"74747.dat",
-		"2861c04.dat",
-		"2859c04.dat"
-	};
-
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(TrainTrackPieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
 
 	if (!Info)
 		return { nullptr, lcMatrix44Identity() };
 
 	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
 
+    toConnectionIdx = toConnectionIdx % TrainTrackInfo->mConnections.size();
+
 	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
 		return { nullptr, lcMatrix44Identity() };
 
 	lcMatrix44 Transform;
 
-	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = TrainTrackInfo->mConnections[0].Transform;
-	else
-	{
-		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
-		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
-	}
+    Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[toConnectionIdx].Transform);
+    Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
 
-	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
+	Transform = lcMul(Transform, mConnections[fromConnectionIdx].Transform);
 	Transform = lcMul(Transform, Piece->mModelWorld);
 
 	return { Info, Transform };
@@ -107,6 +104,20 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
+
+		Info->SetTrainTrackInfo(TrainTrackInfo);
+	}
+
+    Info = Library->FindPiece("32087.dat", nullptr, false, false);
+
+	if (Info)
+	{
+		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(0.0f * LC_DTOR), lcVector3(160.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(90.0f * LC_DTOR), lcVector3(0.0f, 160.0f, 0.0f))});
+        TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(180.0f * LC_DTOR), lcVector3(-160.0f, 0.0f, 0.0f))});
+        TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-90.0f * LC_DTOR), lcVector3(0.0f, -160.0f, 0.0f))});
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}

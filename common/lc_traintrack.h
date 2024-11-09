@@ -13,10 +13,10 @@ struct lcTrainTrackConnection
 enum class lcTrainTrackType
 {
 	Straight,
+    BranchLeft,
+    BranchRight,
 	Left,
-	Right,
-	BranchLeft,
-	BranchRight,
+    Cross,
 	Count
 };
 
@@ -25,7 +25,7 @@ class lcTrainTrackInfo
 public:
 	lcTrainTrackInfo() = default;
 
-	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const;
+    std::pair<PieceInfo*, lcMatrix44> GetPieceInsertPosition(lcPiece* Piece, quint32 fromConnectionIdx, lcTrainTrackType TrainTrackType, quint32 toConnectionIdx) const;
 
 	void AddConnection(const lcTrainTrackConnection& TrainTrackConnection)
 	{

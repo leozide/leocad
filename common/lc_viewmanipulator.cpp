@@ -772,6 +772,9 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 		case lcTrackTool::ZoomRegion:
 			return true;
 
+        case lcTrackTool::RotateTrack:
+            return true;
+
 		case lcTrackTool::Count:
 			return false;
 	}
@@ -979,7 +982,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 						if (IntersectionDistance > ClosestIntersectionDistance)
 							continue;
 
-						NewTrackTool = lcTrackTool::Insert;
+						NewTrackTool = lcTrackTool::RotateTrack;
 						ClosestIntersectionDistance = IntersectionDistance;
 						NewTrackSection = Section | (VertexIndex << 8);
 					}

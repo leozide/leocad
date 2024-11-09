@@ -82,6 +82,7 @@ enum class lcTrackTool
 	OrbitXY,
 	Roll,
 	ZoomRegion,
+    RotateTrack,
 	Count
 };
 

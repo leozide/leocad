@@ -436,8 +436,9 @@ void lcView::UpdatePiecePreview()
 		{
 			quint32 ConnectionIndex = mTrackToolSection & 0xff;
 			lcTrainTrackType TrainTrackType = static_cast<lcTrainTrackType>((mTrackToolSection >> 8) & 0xff);
+            int toConnectionIdx = (mTrackToolSection >> 16) & 0xFF;
 
-			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertPosition(Piece, ConnectionIndex, TrainTrackType);
+            std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertPosition(Piece, ConnectionIndex, TrainTrackType, toConnectionIdx);
 		}
 	}
 
@@ -868,7 +869,7 @@ void lcView::OnDraw()
 
 	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
-	if (DrawInterface && mTrackTool == lcTrackTool::Insert)
+    if (DrawInterface && mTrackTool == lcTrackTool::RotateTrack)
 	{
 		UpdatePiecePreview();
 
@@ -1931,7 +1932,8 @@ lcCursor lcView::GetCursor() const
 		lcCursor::RotateY,          // lcTrackTool::OrbitY
 		lcCursor::RotateView,       // lcTrackTool::OrbitXY
 		lcCursor::Roll,             // lcTrackTool::Roll
-		lcCursor::ZoomRegion        // lcTrackTool::ZoomRegion
+		lcCursor::ZoomRegion,       // lcTrackTool::ZoomRegion
+        lcCursor::Rotate            // lcTrackTool::RotateTrack
 	};
 
 	LC_ARRAY_SIZE_CHECK(CursorFromTrackTool, lcTrackTool::Count);
@@ -2040,7 +2042,8 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::RotateView,       // lcTrackTool::OrbitY
 		lcTool::RotateView,       // lcTrackTool::OrbitXY
 		lcTool::Roll,             // lcTrackTool::Roll
-		lcTool::ZoomRegion        // lcTrackTool::ZoomRegion
+		lcTool::ZoomRegion,       // lcTrackTool::ZoomRegion
+        lcTool::Rotate            // lcTrackTool::RotateTrack
 	};
 
 	LC_ARRAY_SIZE_CHECK(ToolFromTrackTool, lcTrackTool::Count);
@@ -2395,6 +2398,24 @@ void lcView::StopTracking(bool Accept)
 
 	case lcTool::Move:
 	case lcTool::Rotate:
+
+        if(mTrackTool == lcTrackTool::RotateTrack) {
+
+            UpdatePiecePreview();
+
+			if (!mPiecePreviewInfo)
+				break;
+
+			ActiveModel->InsertPieceToolClicked(mPiecePreviewInfo, mPiecePreviewTransform);
+
+			if ((mMouseModifiers & Qt::ControlModifier) == 0)
+				gMainWindow->SetTool(lcTool::Select);
+
+			mToolClicked = true;
+			UpdateTrackTool();
+
+        }
+
 		ActiveModel->EndMouseTool(Tool, Accept);
 		break;
 
@@ -2585,6 +2606,14 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 	case lcTrackTool::ZoomRegion:
 		StartTracking(TrackButton);
 		break;
+
+    case lcTrackTool::RotateTrack:
+        {
+            lcObject* Focus = ActiveModel->GetFocusObject();
+            if (Focus && Focus->IsPiece() && ((lcPiece*)Focus)->mPieceInfo->GetTrainTrackInfo())
+                StartTracking(TrackButton);
+        }
+        break;
 
 	case lcTrackTool::Count:
 		break;
@@ -3019,6 +3048,17 @@ void lcView::OnMouseMove()
 	case lcTrackTool::ZoomRegion:
 		Redraw();
 		break;
+
+    case lcTrackTool::RotateTrack:
+        {
+            int trackRotation = (float)(mMouseX - mMouseDownX) * MouseSensitivity;;
+            trackRotation = abs(trackRotation);
+            mTrackToolSection &= 0xFF00FFFF;
+            mTrackToolSection += (trackRotation << 16);
+
+            Redraw();
+        }
+        break;
 
 	case lcTrackTool::Count:
 		break;

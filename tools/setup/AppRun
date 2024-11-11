@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-this_dir="\$(readlink -f "\$(dirname "\$0")")"
-unset QTDIR; unset QT_PLUGIN_PATH
+HERE="$(dirname "$(readlink -f "${0}")")"
 
 # Find the system certificates location
 # https://gitlab.com/probono/platformissues/blob/master/README.md#certificates
@@ -24,4 +23,4 @@ for location in "\${possible_locations[@]}"; do
     fi
 done
 
-exec "\${this_dir}/usr/bin/leocad" "\$@"
+exec "${HERE}/usr/bin/leocad" "$@"

@@ -22,6 +22,14 @@ enum class lcPartCategoryRole
 	Index
 };
 
+enum class lcPartFilterType
+{
+	FixedString,
+	Wildcard,
+	RegularExpression,
+	Count
+};
+
 struct lcPartPalette
 {
 	QString Name;
@@ -87,6 +95,26 @@ public:
 		return mShowPartAliases;
 	}
 
+	lcPartFilterType GetPartFilterType() const
+	{
+		return mPartFilterType;
+	}
+
+	bool GetCaseSensitiveFilter() const
+	{
+		return mCaseSensitiveFilter;
+	}
+
+	bool GetFileNameFilter() const
+	{
+		return mFileNameFilter;
+	}
+
+	bool GetPartDescriptionFilter() const
+	{
+		return mPartDescriptionFilter;
+	}
+
 	int GetIconSize() const
 	{
 		return mIconSize;
@@ -124,6 +152,10 @@ public:
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
 	void SetShowPartAliases(bool Show);
+	void SetPartFilterType(lcPartFilterType Option);
+	void SetCaseSensitiveFilter(bool Option);
+	void SetFileNameFilter(bool Option);
+	void SetPartDescriptionFilter(bool Option);
 	void SetIconSize(int Size);
 	void SetShowPartNames(bool Show);
 
@@ -135,6 +167,7 @@ protected:
 
 	lcPartSelectionListView* mListView;
 	std::vector<lcPartSelectionListModelEntry> mParts;
+	lcPartFilterType mPartFilterType;
 	int mIconSize;
 	bool mColorLocked;
 	int mColorIndex;
@@ -142,6 +175,9 @@ protected:
 	bool mListMode;
 	bool mShowDecoratedParts;
 	bool mShowPartAliases;
+	bool mCaseSensitiveFilter;
+	bool mFileNameFilter;
+	bool mPartDescriptionFilter;
 	QByteArray mFilter;
 };
 
@@ -186,14 +222,21 @@ public slots:
 	void SetMediumIcons();
 	void SetLargeIcons();
 	void SetExtraLargeIcons();
+	void SetFixedStringFilter();
+	void SetWildcardFilter();
+	void SetRegularExpressionFilter();
 	void TogglePartNames();
 	void ToggleDecoratedParts();
 	void TogglePartAliases();
+	void ToggleCaseSensitiveFilter();
+	void ToggleFileNameFilter();
+	void TogglePartDescriptionFilter();
 	void ToggleListMode();
 	void ToggleFixedColor();
 
 protected:
 	void SetIconSize(int Size);
+	void SetPartFilterType(lcPartFilterType Option);
 
 	lcPartSelectionListModel* mListModel;
 	lcPartSelectionWidget* mPartSelectionWidget;

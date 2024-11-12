@@ -1121,10 +1121,12 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QAction* FileNameFilter = Menu->addAction(tr("Part Name"), mPartsWidget, SLOT(ToggleFileNameFilter()));
 	FileNameFilter->setCheckable(true);
 	FileNameFilter->setChecked(ListModel->GetFileNameFilter());
+	FileNameFilter->setEnabled(ListModel->GetPartDescriptionFilter());
 
 	QAction* PartDescriptionFilter = Menu->addAction(tr("Part Description"), mPartsWidget, SLOT(TogglePartDescriptionFilter()));
 	PartDescriptionFilter->setCheckable(true);
 	PartDescriptionFilter->setChecked(ListModel->GetPartDescriptionFilter());
+	PartDescriptionFilter->setEnabled(ListModel->GetFileNameFilter());
 }
 
 void lcPartSelectionWidget::EditPartPalettes()

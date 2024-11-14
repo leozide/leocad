@@ -1880,8 +1880,13 @@ void lcView::Zoom(float Amount)
 void lcView::ZoomExtents()
 {
 	lcModel* ActiveModel = GetActiveModel();
+
 	if (ActiveModel)
-		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight);
+	{
+		const lcMatrix44 WorldMatrix = mActiveSubmodelInstance ? mActiveSubmodelTransform : lcMatrix44Identity();
+
+		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix);
+	}
 }
 
 lcCursor lcView::GetCursor() const

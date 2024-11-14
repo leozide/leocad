@@ -345,7 +345,7 @@ public:
 	void ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
-	void ZoomExtents(lcCamera* Camera, float Aspect);
+	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
 	void Zoom(lcCamera* Camera, float Amount);
 
 	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)

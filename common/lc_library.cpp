@@ -1273,7 +1273,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		if (mZipFiles[static_cast<int>(Info->mZipFileType)]->ExtractFile(Info->mZipFileIndex, PieceFile))
 			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
-		SaveCache = Loaded && (Info->mZipFileType == lcZipFileType::Official);
+		SaveCache = Loaded;
 	}
 	else
 	{

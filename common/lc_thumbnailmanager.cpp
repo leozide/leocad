@@ -114,11 +114,17 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	mView->UnbindRenderFramebuffer();
 
 	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
+	const char* IconName = nullptr;
 
 	if (Info->GetSynthInfo())
+		IconName = ":/resources/part_flexible.png";
+	else if (Info->GetTrainTrackInfo())
+		IconName = ":/resources/part_traintrack.png";
+	
+	if (IconName)
 	{
 		QPainter Painter(&Image);
-		QImage Icon = QImage(":/resources/flexible.png");
+		QImage Icon = QImage(IconName);
 		uchar* ImageBits = Icon.bits();
 		QRgb TextColor = QApplication::palette().color(QPalette::WindowText).rgba();
 		int Red = qRed(TextColor);

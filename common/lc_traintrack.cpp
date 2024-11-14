@@ -7,7 +7,6 @@
 
 // todo:
 // add cross 32087.dat and auto replace when going over a straight section
-// draw icon on thumbnails
 // detect existing connections
 // new gizmo mesh
 // move config to json

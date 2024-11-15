@@ -2355,9 +2355,12 @@ void lcModel::DeleteSelectedObjects()
 {
 	if (RemoveSelectedObjects())
 	{
-		if (!mIsPreview) {
+		if (!mIsPreview)
+		{
 			gMainWindow->UpdateTimeline(false, false);
 			gMainWindow->UpdateSelectedObjects(true);
+			gMainWindow->UpdateInUseCategory();
+
 			UpdateAllViews();
 			SaveCheckpoint(tr("Deleting"));
 		}
@@ -3181,6 +3184,12 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	if (PropertyId == lcObjectPropertyId::PieceId || PropertyId == lcObjectPropertyId::PieceColor)
 	{
 		gMainWindow->UpdateTimeline(false, true);
+	}
+
+	// todo: fix hacky category update
+	if (PropertyId == lcObjectPropertyId::PieceId)
+	{
+		gMainWindow->UpdateInUseCategory();
 	}
 }
 

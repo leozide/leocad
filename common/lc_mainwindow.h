@@ -272,6 +272,7 @@ public:
 	void UpdateShadingMode();
 	void UpdateSelectionMode();
 	void UpdateModels();
+	void UpdateInUseCategory();
 	void UpdateCategories();
 	void UpdateTitle();
 	void UpdateModified(bool Modified);

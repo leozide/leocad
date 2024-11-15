@@ -581,6 +581,12 @@ void lcPartSelectionListView::ToggleFixedColor()
 	mListModel->ToggleColorLocked();
 }
 
+void lcPartSelectionListView::UpdateInUseCategory()
+{
+	if (mCategoryType == lcPartCategoryType::PartsInUse)
+		mListModel->SetCurrentModelCategory();
+}
+
 void lcPartSelectionListView::UpdateViewMode()
 {
 	setViewMode(mListModel->GetIconSize() && !mListModel->IsListMode() ? QListView::IconMode : QListView::ListMode);
@@ -1110,6 +1116,11 @@ void lcPartSelectionWidget::RemoveFromPalette()
 		mPartsWidget->SetCategory(lcPartCategoryType::Palette, SetIndex);
 		SavePartPalettes();
 	}
+}
+
+void lcPartSelectionWidget::UpdateInUseCategory()
+{
+	mPartsWidget->UpdateInUseCategory();
 }
 
 void lcPartSelectionWidget::UpdateCategories()

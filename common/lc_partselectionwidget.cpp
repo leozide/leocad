@@ -1037,99 +1037,104 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	Menu->clear();
 
 	Menu->addAction(tr("Edit Palettes..."), this, SLOT(EditPartPalettes()));
+
 	Menu->addSeparator();
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
-	if (gSupportsFramebufferObject)
-	{
-		QActionGroup* IconGroup = new QActionGroup(Menu);
-
-		QAction* NoIcons = Menu->addAction(tr("No Icons"), mPartsWidget, SLOT(SetNoIcons()));
-		NoIcons->setCheckable(true);
-		NoIcons->setChecked(ListModel->GetIconSize() == 0);
-		IconGroup->addAction(NoIcons);
-
-		QAction* SmallIcons = Menu->addAction(tr("Small Icons"), mPartsWidget, SLOT(SetSmallIcons()));
-		SmallIcons->setCheckable(true);
-		SmallIcons->setChecked(ListModel->GetIconSize() == 32);
-		IconGroup->addAction(SmallIcons);
-
-		QAction* MediumIcons = Menu->addAction(tr("Medium Icons"), mPartsWidget, SLOT(SetMediumIcons()));
-		MediumIcons->setCheckable(true);
-		MediumIcons->setChecked(ListModel->GetIconSize() == 64);
-		IconGroup->addAction(MediumIcons);
-
-		QAction* LargeIcons = Menu->addAction(tr("Large Icons"), mPartsWidget, SLOT(SetLargeIcons()));
-		LargeIcons->setCheckable(true);
-		LargeIcons->setChecked(ListModel->GetIconSize() == 96);
-		IconGroup->addAction(LargeIcons);
-
-		QAction* ExtraLargeIcons = Menu->addAction(tr("Extra Large Icons"), mPartsWidget, SLOT(SetExtraLargeIcons()));
-		ExtraLargeIcons->setCheckable(true);
-		ExtraLargeIcons->setChecked(ListModel->GetIconSize() == 192);
-		IconGroup->addAction(ExtraLargeIcons);
-
-		Menu->addSeparator();
-	}
-
 	if (ListModel->GetIconSize() != 0 && !ListModel->IsListMode())
 	{
-		QAction* PartNames = Menu->addAction(tr("Show Part Names"), mPartsWidget, SLOT(TogglePartNames()));
+		QAction* PartNames = Menu->addAction(tr("Show Part Names"), mPartsWidget, &lcPartSelectionListView::TogglePartNames);
 		PartNames->setCheckable(true);
 		PartNames->setChecked(ListModel->GetShowPartNames());
 	}
 
-	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), mPartsWidget, SLOT(ToggleDecoratedParts()));
+	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), mPartsWidget, &lcPartSelectionListView::ToggleDecoratedParts);
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(ListModel->GetShowDecoratedParts());
 
-	QAction* PartAliases = Menu->addAction(tr("Show Part Aliases"), mPartsWidget, SLOT(TogglePartAliases()));
+	QAction* PartAliases = Menu->addAction(tr("Show Part Aliases"), mPartsWidget, &lcPartSelectionListView::TogglePartAliases);
 	PartAliases->setCheckable(true);
 	PartAliases->setChecked(ListModel->GetShowPartAliases());
 
-	if (ListModel->GetIconSize() != 0)
-	{
-		QAction* ListMode = Menu->addAction(tr("List Mode"), mPartsWidget, SLOT(ToggleListMode()));
-		ListMode->setCheckable(true);
-		ListMode->setChecked(ListModel->IsListMode());
+	Menu->addSeparator();
 
-		QAction* FixedColor = Menu->addAction(tr("Lock Color"), mPartsWidget, SLOT(ToggleFixedColor()));
-		FixedColor->setCheckable(true);
-		FixedColor->setChecked(ListModel->IsColorLocked());
+	if (gSupportsFramebufferObject)
+	{
+		QMenu* IconMenu = Menu->addMenu(tr("Icons"));
+
+		QActionGroup* IconGroup = new QActionGroup(Menu);
+
+		QAction* NoIcons = IconMenu->addAction(tr("No Icons"), mPartsWidget, &lcPartSelectionListView::SetNoIcons);
+		NoIcons->setCheckable(true);
+		NoIcons->setChecked(ListModel->GetIconSize() == 0);
+		IconGroup->addAction(NoIcons);
+
+		QAction* SmallIcons = IconMenu->addAction(tr("Small Icons"), mPartsWidget, &lcPartSelectionListView::SetSmallIcons);
+		SmallIcons->setCheckable(true);
+		SmallIcons->setChecked(ListModel->GetIconSize() == 32);
+		IconGroup->addAction(SmallIcons);
+
+		QAction* MediumIcons = IconMenu->addAction(tr("Medium Icons"), mPartsWidget, &lcPartSelectionListView::SetMediumIcons);
+		MediumIcons->setCheckable(true);
+		MediumIcons->setChecked(ListModel->GetIconSize() == 64);
+		IconGroup->addAction(MediumIcons);
+
+		QAction* LargeIcons = IconMenu->addAction(tr("Large Icons"), mPartsWidget, &lcPartSelectionListView::SetLargeIcons);
+		LargeIcons->setCheckable(true);
+		LargeIcons->setChecked(ListModel->GetIconSize() == 96);
+		IconGroup->addAction(LargeIcons);
+
+		QAction* ExtraLargeIcons = IconMenu->addAction(tr("Extra Large Icons"), mPartsWidget, &lcPartSelectionListView::SetExtraLargeIcons);
+		ExtraLargeIcons->setCheckable(true);
+		ExtraLargeIcons->setChecked(ListModel->GetIconSize() == 192);
+		IconGroup->addAction(ExtraLargeIcons);
+
+		if (ListModel->GetIconSize() != 0)
+		{
+			IconMenu->addSeparator();
+
+			QAction* ListMode = IconMenu->addAction(tr("List Mode"), mPartsWidget, &lcPartSelectionListView::ToggleListMode);
+			ListMode->setCheckable(true);
+			ListMode->setChecked(ListModel->IsListMode());
+
+			QAction* FixedColor = IconMenu->addAction(tr("Lock Color"), mPartsWidget, &lcPartSelectionListView::ToggleFixedColor);
+			FixedColor->setCheckable(true);
+			FixedColor->setChecked(ListModel->IsColorLocked());
+		}
 	}
 
-	Menu->addSeparator();
+	QMenu* FilterMenu = Menu->addMenu(tr("Filter"));
 
 	QActionGroup* FilterGroup = new QActionGroup(Menu);
 
-	QAction* PartFilterType = Menu->addAction(tr("Fixed String"), mPartsWidget, SLOT(SetFixedStringFilter()));
+	QAction* PartFilterType = FilterMenu->addAction(tr("Fixed String"), mPartsWidget, &lcPartSelectionListView::SetFixedStringFilter);
 	PartFilterType->setCheckable(true);
 	PartFilterType->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::FixedString);
 	FilterGroup->addAction(PartFilterType);
 
-	QAction* WildcardFilter = Menu->addAction(tr("Wildcard"), mPartsWidget, SLOT(SetWildcardFilter()));
+	QAction* WildcardFilter = FilterMenu->addAction(tr("Wildcard"), mPartsWidget, &lcPartSelectionListView::SetWildcardFilter);
 	WildcardFilter->setCheckable(true);
 	WildcardFilter->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::Wildcard);
 	FilterGroup->addAction(WildcardFilter);
 
-	QAction* RegularExpressionFilter = Menu->addAction(tr("Regular Expression"), mPartsWidget, SLOT(SetRegularExpressionFilter()));
+	QAction* RegularExpressionFilter = FilterMenu->addAction(tr("Regular Expression"), mPartsWidget, &lcPartSelectionListView::SetRegularExpressionFilter);
 	RegularExpressionFilter->setCheckable(true);
 	RegularExpressionFilter->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::RegularExpression);
 	FilterGroup->addAction(RegularExpressionFilter);
 
-	QAction* CaseSensitiveFilter = Menu->addAction(tr("Match Case"), mPartsWidget, SLOT(ToggleCaseSensitiveFilter()));
+	FilterMenu->addSeparator();
+
+	QAction* CaseSensitiveFilter = FilterMenu->addAction(tr("Match Case"), mPartsWidget, &lcPartSelectionListView::ToggleCaseSensitiveFilter);
 	CaseSensitiveFilter->setCheckable(true);
 	CaseSensitiveFilter->setChecked(ListModel->GetCaseSensitiveFilter());
 
-	Menu->addSeparator();
-
-	QAction* FileNameFilter = Menu->addAction(tr("Part Name"), mPartsWidget, SLOT(ToggleFileNameFilter()));
+	QAction* FileNameFilter = FilterMenu->addAction(tr("Part ID"), mPartsWidget, &lcPartSelectionListView::ToggleFileNameFilter);
 	FileNameFilter->setCheckable(true);
 	FileNameFilter->setChecked(ListModel->GetFileNameFilter());
 	FileNameFilter->setEnabled(ListModel->GetPartDescriptionFilter());
 
-	QAction* PartDescriptionFilter = Menu->addAction(tr("Part Description"), mPartsWidget, SLOT(TogglePartDescriptionFilter()));
+	QAction* PartDescriptionFilter = FilterMenu->addAction(tr("Part Description"), mPartsWidget, &lcPartSelectionListView::TogglePartDescriptionFilter);
 	PartDescriptionFilter->setCheckable(true);
 	PartDescriptionFilter->setChecked(ListModel->GetPartDescriptionFilter());
 	PartDescriptionFilter->setEnabled(ListModel->GetFileNameFilter());

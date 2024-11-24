@@ -12,46 +12,6 @@
 // move config to json
 // add other track types
 
-std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
-{
-	if (ConnectionIndex >= mConnections.size())
-		return { nullptr, lcMatrix44Identity() };
-
-	const char* PieceNames[] =
-	{
-		"74746.dat",
-		"74747.dat",
-		"74747.dat",
-		"2861c04.dat",
-		"2859c04.dat"
-	};
-
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
-
-	if (!Info)
-		return { nullptr, lcMatrix44Identity() };
-
-	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
-
-	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
-		return { nullptr, lcMatrix44Identity() };
-
-	lcMatrix44 Transform;
-
-	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = TrainTrackInfo->mConnections[0].Transform;
-	else
-	{
-		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
-		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
-	}
-
-	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
-	Transform = lcMul(Transform, Piece->mModelWorld);
-
-	return { Info, Transform };
-}
-
 void lcTrainTrackInit(lcPiecesLibrary* Library)
 {
 	PieceInfo* Info = Library->FindPiece("74746.dat", nullptr, false, false);
@@ -109,4 +69,78 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
+}
+
+std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
+{
+	if (ConnectionIndex >= mConnections.size())
+		return { nullptr, lcMatrix44Identity() };
+
+	const char* PieceNames[] =
+	{
+		"74746.dat",
+		"74747.dat",
+		"74747.dat",
+		"2861c04.dat",
+		"2859c04.dat"
+	};
+
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
+
+	if (!Info)
+		return { nullptr, lcMatrix44Identity() };
+
+	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
+		return { nullptr, lcMatrix44Identity() };
+
+	lcMatrix44 Transform;
+
+	if (TrainTrackType != lcTrainTrackType::Left)
+		Transform = TrainTrackInfo->mConnections[0].Transform;
+	else
+	{
+		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
+		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
+	}
+
+	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
+	Transform = lcMul(Transform, Piece->mModelWorld);
+
+	return { Info, Transform };
+}
+
+std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, PieceInfo* Info) const
+{
+	quint32 FocusSection = Piece->GetFocusSection();
+	quint32 ConnectionIndex = 0;
+
+	if (FocusSection > LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	{
+		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+
+		if (ConnectionIndex >= mConnections.size())
+			ConnectionIndex = 0;
+	}
+
+	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
+		return std::nullopt;
+
+	lcMatrix44 Transform;
+
+//	if (TrainTrackType != lcTrainTrackType::Left)
+		Transform = TrainTrackInfo->mConnections[0].Transform;
+//	else
+//	{
+//		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
+//		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
+//	}
+
+	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
+	Transform = lcMul(Transform, Piece->mModelWorld);
+
+	return Transform;
 }

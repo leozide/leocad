@@ -19,6 +19,7 @@
 #include <deque>
 #include <functional>
 #include <memory>
+#include <optional>
 
 #if _MSC_VER
 #pragma warning(default : 4062) // enumerator 'identifier' in switch of enum 'enumeration' is not handled

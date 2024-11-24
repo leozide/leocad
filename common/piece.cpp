@@ -14,6 +14,7 @@
 #include "lc_scene.h"
 #include "lc_qutils.h"
 #include "lc_synth.h"
+#include "lc_traintrack.h"
 
 constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 
@@ -487,7 +488,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 		}
 	}
 
-	if (AreControlPointsVisible())
+	if (mPieceInfo->GetSynthInfo() && AreControlPointsVisible())
 	{
 		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
 		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
@@ -505,6 +506,31 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			{
 				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex;
+				ObjectRayTest.Distance = Distance;
+				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+			}
+		}
+	}
+
+	if (mPieceInfo->GetTrainTrackInfo() && AreTrainTrackConnectionsVisible())
+	{
+		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+		const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+
+		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
+		{
+			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(Connections[ConnectionIndex].Transform);
+			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
+			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
+
+			float Distance;
+			lcVector3 Plane;
+
+			if (lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr, &Plane))
+			{
+				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
 				ObjectRayTest.Distance = Distance;
 				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
 			}
@@ -608,54 +634,115 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 0);
 	}
 
-	if (!mControlPoints.empty() && AreControlPointsVisible())
+	if (mPieceInfo->GetSynthInfo())
+		DrawSynthInterface(Context, WorldMatrix);
+	else if (mPieceInfo->GetTrainTrackInfo())
+		DrawTrainTrackInterface(Context, WorldMatrix);
+}
+
+void lcPiece::DrawSynthInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const
+{
+	if (mControlPoints.empty() || !AreControlPointsVisible())
+		return;
+
+	float Verts[8 * 3];
+	float* CurVert = Verts;
+
+	lcVector3 CubeMin(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+	lcVector3 CubeMax(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+
+	const GLushort Indices[36] =
 	{
-		float Verts[8 * 3];
-		float* CurVert = Verts;
+		0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
+		7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
+	};
 
-		lcVector3 CubeMin(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-		lcVector3 CubeMax(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+	Context->EnableColorBlend(true);
+	Context->EnableCullFace(true);
 
-		*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
-		*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
-		*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
-		*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
-		*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
-		*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
-		*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
-		*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcVector4 ControlPointColor = lcVector4FromColor(Preferences.mControlPointColor);
+	const lcVector4 ControlPointFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
 
-		const GLushort Indices[36] =
-		{
-			0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
-			7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
-		};
+	for (quint32 ControlPointIndex = 0; ControlPointIndex < mControlPoints.size(); ControlPointIndex++)
+	{
+		Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIndex].Transform, WorldMatrix));
 
-		Context->EnableColorBlend(true);
-		Context->EnableCullFace(true);
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormatPosition(3);
+		Context->SetIndexBufferPointer(Indices);
 
-		const lcVector4 ControlPointColor = lcVector4FromColor(Preferences.mControlPointColor);
-		const lcVector4 ControlPointFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
+		if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex))
+			Context->SetColor(ControlPointFocusedColor);
+		else
+			Context->SetColor(ControlPointColor);
 
-		for (quint32 ControlPointIndex = 0; ControlPointIndex < mControlPoints.size(); ControlPointIndex++)
-		{
-			Context->SetWorldMatrix(lcMul(mControlPoints[ControlPointIndex].Transform, WorldMatrix));
-
-			Context->SetVertexBufferPointer(Verts);
-			Context->SetVertexFormatPosition(3);
-			Context->SetIndexBufferPointer(Indices);
-
-			if (IsFocused(LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex))
-				Context->SetColor(ControlPointFocusedColor);
-			else
-				Context->SetColor(ControlPointColor);
-
-			Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
-		}
-
-		Context->EnableCullFace(false);
-		Context->EnableColorBlend(false);
+		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	}
+
+	Context->EnableCullFace(false);
+	Context->EnableColorBlend(false);
+}
+
+void lcPiece::DrawTrainTrackInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const
+{
+	if (!AreTrainTrackConnectionsVisible())
+		return;
+
+	float Verts[8 * 3];
+	float* CurVert = Verts;
+
+	lcVector3 CubeMin(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
+	lcVector3 CubeMax(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
+
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+
+	const GLushort Indices[36] =
+	{
+		0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
+		7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
+	};
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcVector4 ConnectionColor = lcVector4FromColor(Preferences.mControlPointColor);
+	const lcVector4 ConnectionFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
+
+	const lcTrainTrackInfo* TrainTrackInfo = mPieceInfo->GetTrainTrackInfo();
+	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
+	{
+		Context->SetWorldMatrix(lcMul(Connections[ConnectionIndex].Transform, WorldMatrix));
+
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormatPosition(3);
+		Context->SetIndexBufferPointer(Indices);
+
+		if (IsFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex))
+			Context->SetColor(ConnectionFocusedColor);
+		else
+			Context->SetColor(ConnectionColor);
+
+		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+	}
+
+	mPieceInfo->GetTrainTrackInfo()->GetConnections();
 }
 
 QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
@@ -1092,6 +1179,48 @@ quint32 lcPiece::GetAllowedTransforms() const
 	}
 
 	return 0;
+}
+
+lcVector3 lcPiece::GetSectionPosition(quint32 Section) const
+{
+	if (Section == LC_PIECE_SECTION_POSITION)
+	{
+		if (mPivotPointValid)
+			return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
+		else
+			return mModelWorld.GetTranslation();
+	}
+
+	if (mPieceInfo->GetSynthInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
+		{
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+
+			if (ControlPointIndex < mControlPoints.size())
+			{
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMul(Transform, mModelWorld).GetTranslation();
+			}
+		}
+	}
+
+	if (mPieceInfo->GetTrainTrackInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		{
+			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+
+			if (ConnectionIndex < Connections.size())
+			{
+				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
+				return lcMul(Transform, mModelWorld).GetTranslation();
+			}
+		}
+	}
+
+	return lcVector3(0.0f, 0.0f, 0.0f);
 }
 
 bool lcPiece::CanAddControlPoint() const

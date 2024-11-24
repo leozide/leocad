@@ -11,6 +11,7 @@
 #include "lc_scene.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
+#include "lc_traintrack.h"
 #include "lc_file.h"
 #include "pieceinf.h"
 #include "lc_view.h"
@@ -2288,12 +2289,23 @@ void lcModel::AddPiece()
 
 	if (Last)
 	{
-		const lcBoundingBox& LastBoundingBox = Last->GetBoundingBox();
-		lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceInfoBoundingBox.Min.z);
-		Dist = SnapPosition(Dist);
+		if (!PieceInfo->GetTrainTrackInfo() || !Last->mPieceInfo->GetTrainTrackInfo())
+		{
+			const lcBoundingBox& LastBoundingBox = Last->GetBoundingBox();
+			lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceInfoBoundingBox.Min.z);
+			Dist = SnapPosition(Dist);
 
-		WorldMatrix = Last->mModelWorld;
-		WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
+			WorldMatrix = Last->mModelWorld;
+			WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
+		}
+		else
+		{
+			lcTrainTrackInfo* CurrentTrackInfo = Last->mPieceInfo->GetTrainTrackInfo();
+			std::optional<lcMatrix44> TrainTrackTransform = CurrentTrackInfo->GetPieceInsertPosition(Last, PieceInfo);
+
+			if (TrainTrackTransform)
+				WorldMatrix = TrainTrackTransform.value();
+		}
 	}
 	else
 	{

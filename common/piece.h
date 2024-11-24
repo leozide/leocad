@@ -14,6 +14,7 @@ enum lcPieceSection : quint32
 	LC_PIECE_SECTION_POSITION = 0,
 	LC_PIECE_SECTION_CONTROL_POINT_FIRST,
 	LC_PIECE_SECTION_CONTROL_POINT_LAST = LC_PIECE_SECTION_CONTROL_POINT_FIRST + LC_MAX_CONTROL_POINTS - 1,
+	LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST = 1
 };
 
 struct lcPieceControlPoint
@@ -90,29 +91,7 @@ public:
 	}
 
 	quint32 GetAllowedTransforms() const override;
-
-	lcVector3 GetSectionPosition(quint32 Section) const override
-	{
-		if (Section == LC_PIECE_SECTION_POSITION)
-		{
-			if (mPivotPointValid)
-				return lcMul(mPivotMatrix, mModelWorld).GetTranslation();
-			else
-				return mModelWorld.GetTranslation();
-		}
-		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
-		{
-			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
-
-			if (ControlPointIndex < mControlPoints.size())
-			{
-				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
-				return lcMul(Transform, mModelWorld).GetTranslation();
-			}
-		}
-
-		return lcVector3(0.0f, 0.0f, 0.0f);
-	}
+	lcVector3 GetSectionPosition(quint32 Section) const override;
 
 	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawLine(QTextStream& Stream);
@@ -359,6 +338,15 @@ protected:
 	{
 		return IsSelected();
 	}
+
+	void DrawSynthInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const;
+
+	bool AreTrainTrackConnectionsVisible() const
+	{
+		return IsSelected();
+	}
+
+	void DrawTrainTrackInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const;
 
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());

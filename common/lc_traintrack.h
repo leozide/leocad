@@ -25,8 +25,8 @@ class lcTrainTrackInfo
 public:
 	lcTrainTrackInfo() = default;
 
-	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const;
-	std::optional<lcMatrix44> GetPieceInsertPosition(lcPiece* Piece, PieceInfo* Info) const;
+	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const;
+	static std::optional<lcMatrix44> GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info);
 
 	void AddConnection(const lcTrainTrackConnection& TrainTrackConnection)
 	{

@@ -71,7 +71,7 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	}
 }
 
-std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
+std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
 {
 	if (ConnectionIndex >= mConnections.size())
 		return { nullptr, lcMatrix44Identity() };
@@ -111,36 +111,51 @@ std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPie
 	return { Info, Transform };
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertPosition(lcPiece* Piece, PieceInfo* Info) const
+std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info)
 {
-	quint32 FocusSection = Piece->GetFocusSection();
+	if (!CurrentPiece || !Info)
+		return std::nullopt;
+
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
+		return std::nullopt;
+
+	const quint32 FocusSection = CurrentPiece->GetFocusSection();
 	quint32 ConnectionIndex = 0;
 
-	if (FocusSection > LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	if (FocusSection == LC_PIECE_SECTION_POSITION || FocusSection == LC_PIECE_SECTION_INVALID)
 	{
+		// todo: search model for open connection
+	}
+	else
+	{
+		if (FocusSection < LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+			return std::nullopt;
+
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 
-		if (ConnectionIndex >= mConnections.size())
-			ConnectionIndex = 0;
+		if (ConnectionIndex >= CurrentTrackInfo->GetConnections().size())
+			return std::nullopt;
 	}
 
-	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
+	lcTrainTrackInfo* NewTrackInfo = Info->GetTrainTrackInfo();
 
-	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
+	if (!NewTrackInfo || NewTrackInfo->mConnections.empty())
 		return std::nullopt;
 
 	lcMatrix44 Transform;
 
 //	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = TrainTrackInfo->mConnections[0].Transform;
+		Transform = NewTrackInfo->mConnections[0].Transform;
 //	else
 //	{
 //		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
 //		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
 //	}
 
-	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
-	Transform = lcMul(Transform, Piece->mModelWorld);
+	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[ConnectionIndex].Transform);
+	Transform = lcMul(Transform, CurrentPiece->mModelWorld);
 
 	return Transform;
 }

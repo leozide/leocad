@@ -2289,7 +2289,20 @@ void lcModel::AddPiece()
 
 	if (Last)
 	{
-		if (!PieceInfo->GetTrainTrackInfo() || !Last->mPieceInfo->GetTrainTrackInfo())
+		bool TransformValid = false;
+
+		if (PieceInfo->GetTrainTrackInfo() && Last->mPieceInfo->GetTrainTrackInfo())
+		{
+			std::optional<lcMatrix44> TrainTrackTransform = lcTrainTrackInfo::GetPieceInsertTransform(Last, PieceInfo);
+
+			if (TrainTrackTransform)
+			{
+				TransformValid = true;
+				WorldMatrix = TrainTrackTransform.value();
+			}
+		}
+
+		if (!TransformValid)
 		{
 			const lcBoundingBox& LastBoundingBox = Last->GetBoundingBox();
 			lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceInfoBoundingBox.Min.z);
@@ -2297,14 +2310,6 @@ void lcModel::AddPiece()
 
 			WorldMatrix = Last->mModelWorld;
 			WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
-		}
-		else
-		{
-			lcTrainTrackInfo* CurrentTrackInfo = Last->mPieceInfo->GetTrainTrackInfo();
-			std::optional<lcMatrix44> TrainTrackTransform = CurrentTrackInfo->GetPieceInsertPosition(Last, PieceInfo);
-
-			if (TrainTrackTransform)
-				WorldMatrix = TrainTrackTransform.value();
 		}
 	}
 	else

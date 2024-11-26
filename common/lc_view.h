@@ -260,7 +260,7 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
-	lcMatrix44 GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const;
+	lcMatrix44 GetPieceInsertTransform(bool IgnoreSelected, PieceInfo* Info) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;

@@ -437,7 +437,7 @@ void lcView::UpdatePiecePreview()
 			quint32 ConnectionIndex = mTrackToolSection & 0xff;
 			lcTrainTrackType TrainTrackType = static_cast<lcTrainTrackType>((mTrackToolSection >> 8) & 0xff);
 
-			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertPosition(Piece, ConnectionIndex, TrainTrackType);
+			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertTransform(Piece, ConnectionIndex, TrainTrackType);
 		}
 	}
 
@@ -447,7 +447,7 @@ void lcView::UpdatePiecePreview()
 
 		if (PreviewInfo)
 		{
-			mPiecePreviewTransform = GetPieceInsertPosition(false, PreviewInfo);
+			mPiecePreviewTransform = GetPieceInsertTransform(false, PreviewInfo);
 
 			if (GetActiveModel() != mModel)
 				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
@@ -468,7 +468,7 @@ void lcView::UpdatePiecePreview()
 	}
 }
 
-lcMatrix44 lcView::GetPieceInsertPosition(bool IgnoreSelected, PieceInfo* Info) const
+lcMatrix44 lcView::GetPieceInsertTransform(bool IgnoreSelected, PieceInfo* Info) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -1705,7 +1705,7 @@ void lcView::EndDrag(bool Accept)
 				PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
 
 				if (Info)
-					ActiveModel->InsertPieceToolClicked(Info, GetPieceInsertPosition(false, Info));
+					ActiveModel->InsertPieceToolClicked(Info, GetPieceInsertTransform(false, Info));
 			} break;
 
 		case lcDragState::Color:
@@ -2855,7 +2855,7 @@ void lcView::OnMouseMove()
 			}
 			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
-				lcMatrix44 NewPosition = GetPieceInsertPosition(true, mMouseDownPiece);
+				lcMatrix44 NewPosition = GetPieceInsertTransform(true, mMouseDownPiece);
 				lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;
 				ActiveModel->UpdateMoveTool(Distance, false, mTrackButton != lcTrackButton::Left);
 			}

@@ -6,9 +6,11 @@
 #include "lc_application.h"
 
 // todo:
-// add cross 32087.dat and auto replace when going over a straight section
-// detect existing connections
-// new gizmo mesh
+// auto replace cross when going over a straight section
+// redo gizmo
+// add cross to gizmo
+// rotate around connections
+// shortcuts for changing active connection
 // move config to json
 // add other track types
 
@@ -66,6 +68,20 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
+
+		Info->SetTrainTrackInfo(TrainTrackInfo);
+	}
+
+    Info = Library->FindPiece("32087.dat", nullptr, false, false);
+
+	if (Info)
+	{
+		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+
+		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(0.0f, 160.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2.0f), lcVector3(0.0f, -160.0f, 0.0f))});
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}

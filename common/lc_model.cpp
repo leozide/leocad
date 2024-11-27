@@ -1316,10 +1316,15 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 	if (mPieceInfo)
 		mPieceInfo->AddRenderMesh(*Scene);
 
+	lcPiece* FocusPiece = nullptr;
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsVisible(mCurrentStep))
 		{
+			if (Piece->IsFocused())
+				FocusPiece = Piece.get();
+
 			const lcStep StepShow = Piece->GetStepShow();
 			Piece->AddMainModelRenderMeshes(Scene, AllowHighlight && StepShow == mCurrentStep, AllowFade && StepShow < mCurrentStep);
 		}
@@ -1327,6 +1332,9 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 	if (Scene->GetDrawInterface() && !Scene->GetActiveSubmodelInstance())
 	{
+		if (FocusPiece)
+			UpdateTrainTrackConnections(FocusPiece);
+
 		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 			if (Camera.get() != ViewCamera && Camera->IsVisible())
 				Scene->AddInterfaceObject(Camera.get());
@@ -2354,6 +2362,32 @@ void lcModel::InsertPiece(lcPiece* Piece, size_t Index)
 	}
 
 	mPieces.insert(mPieces.begin() + Index, std::unique_ptr<lcPiece>(Piece));
+}
+
+void lcModel::UpdateTrainTrackConnections(lcPiece* FocusPiece) const
+{
+	if (!FocusPiece || !FocusPiece->IsFocused())
+		return;
+
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo)
+		return;
+
+	const int ConnectionCount = static_cast<int>(TrainTrackInfo->GetConnections().size());
+	std::vector<bool> Connections(ConnectionCount, false);
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (Piece.get() == FocusPiece || !Piece->mPieceInfo->GetTrainTrackInfo())
+			continue;
+
+		for (int ConnectionIndex = 0; ConnectionIndex < ConnectionCount; ConnectionIndex++)
+			if (!Connections[ConnectionIndex] && lcTrainTrackInfo::ArePiecesConnected(FocusPiece, ConnectionIndex, Piece.get()))
+				Connections[ConnectionIndex] = true;
+	}
+
+	FocusPiece->SetTrainTrackConnections(std::move(Connections));
 }
 
 void lcModel::DeleteAllCameras()
@@ -3782,11 +3816,13 @@ void lcModel::ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool 
 
 		if (Object->IsPiece())
 		{
-			SelectGroup(((lcPiece*)Object)->GetTopGroup(), true);
+			lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
+
+			SelectGroup(Piece->GetTopGroup(), true);
 
 			if (EnableSelectionMode)
 			{
-				std::vector<lcObject*> Pieces = GetSelectionModePieces((lcPiece*)Object);
+				std::vector<lcObject*> Pieces = GetSelectionModePieces(Piece);
 				AddToSelection(Pieces, false, false);
 			}
 		}

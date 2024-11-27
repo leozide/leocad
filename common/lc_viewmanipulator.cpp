@@ -371,26 +371,32 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale)
 {
 	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
-	for (const lcTrainTrackConnection& TrainTrackConnection : TrainTrackInfo->GetConnections())
+	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 	{
+		if (!Piece->IsTrainTrackConnectionVisible(ConnectionIndex))
+			continue;
+
+		const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
+
 		lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count) * 2];
 		int NumVerts = 0;
 
-		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcVector3(TrainTrackConnection.Transform[0]) * 100) / OverlayScale;
+		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / OverlayScale;
 
-		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / OverlayScale;
 
-		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / OverlayScale;
 
-		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / OverlayScale;
 
-		Verts[NumVerts++] = TrainTrackConnection.Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
+		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / OverlayScale;
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -956,17 +962,22 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 		if (TrainTrackInfo)
 		{
-			for (quint32 Section = 0; Section < TrainTrackInfo->GetConnections().size(); Section++)
+			const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+			for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 			{
-				const lcTrainTrackConnection& TrainTrackConnection = TrainTrackInfo->GetConnections()[Section];
+				if (!Piece->IsTrainTrackConnectionVisible(ConnectionIndex))
+					continue;
+
+				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
 				lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count)];
 				int NumVerts = 0;
 
-				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcVector3(TrainTrackConnection.Transform[0]) * 100) / 1;
-				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / 1;
-				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / 1;
-				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / 1;
-				Verts[NumVerts++] = (TrainTrackConnection.Transform.GetTranslation() + lcMul31(lcVector3(TrainTrackConnection.Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / 1;
+				Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / 1;
+				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / 1;
+				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / 1;
+				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / 1;
+				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / 1;
 
 				for (int VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++)
 				{
@@ -981,7 +992,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 						NewTrackTool = lcTrackTool::Insert;
 						ClosestIntersectionDistance = IntersectionDistance;
-						NewTrackSection = Section | (VertexIndex << 8);
+						NewTrackSection = ConnectionIndex | (VertexIndex << 8);
 					}
 				}
 			}

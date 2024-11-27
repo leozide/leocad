@@ -111,6 +111,29 @@ std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPi
 	return { Info, Transform };
 }
 
+bool lcTrainTrackInfo::ArePiecesConnected(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2)
+{
+	const lcTrainTrackInfo* TrainTrackInfo1 = Piece1->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo2 = Piece2->mPieceInfo->GetTrainTrackInfo();
+
+	lcMatrix44 Transform1 = lcMul(TrainTrackInfo1->GetConnections()[ConnectionIndex1].Transform, Piece1->mModelWorld);
+
+	for (const lcTrainTrackConnection& Connection2 : TrainTrackInfo2->GetConnections())
+	{
+		lcMatrix44 Transform2 = lcMul(Connection2.Transform, Piece2->mModelWorld);
+
+		if (lcLengthSquared(Transform1.GetTranslation() - Transform2.GetTranslation()) > 0.1f)
+			continue;
+
+		float Dot = lcDot3(Transform1[0], Transform2[0]);
+
+		if (Dot < -0.99f && Dot > -1.01f)
+			return true;
+	}
+
+	return false;
+}
+
 std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info)
 {
 	if (!CurrentPiece || !Info)
@@ -126,7 +149,9 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 
 	if (FocusSection == LC_PIECE_SECTION_POSITION || FocusSection == LC_PIECE_SECTION_INVALID)
 	{
-		// todo: search model for open connection
+		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
+			if (CurrentPiece->IsTrainTrackConnectionVisible(ConnectionIndex))
+				break;
 	}
 	else
 	{
@@ -134,10 +159,10 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 			return std::nullopt;
 
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-
-		if (ConnectionIndex >= CurrentTrackInfo->GetConnections().size())
-			return std::nullopt;
 	}
+
+	if (ConnectionIndex >= CurrentTrackInfo->GetConnections().size())
+		return std::nullopt;
 
 	lcTrainTrackInfo* NewTrackInfo = Info->GetTrainTrackInfo();
 

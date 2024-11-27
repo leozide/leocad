@@ -150,6 +150,16 @@ public:
 		UpdateMesh();
 	}
 
+	bool IsTrainTrackConnectionVisible(int ConnectionIndex) const
+	{
+		return !mTrainTrackConnections[ConnectionIndex];
+	}
+
+	void SetTrainTrackConnections(std::vector<bool>&& Connections)
+	{
+		mTrainTrackConnections = std::move(Connections);
+	}
+
 	const QString& GetID() const
 	{
 		return mID;
@@ -367,5 +377,6 @@ protected:
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_PIECE_SECTION_INVALID;
 	std::vector<lcPieceControlPoint> mControlPoints;
+	std::vector<bool> mTrainTrackConnections;
 	lcMesh* mMesh = nullptr;
 };

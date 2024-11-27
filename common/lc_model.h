@@ -390,6 +390,8 @@ protected:
 	void AddPiece(lcPiece* Piece);
 	void InsertPiece(lcPiece* Piece, size_t Index);
 
+	void UpdateTrainTrackConnections(lcPiece* FocusPiece) const;
+
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
 	Project* const mProject;

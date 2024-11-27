@@ -81,7 +81,10 @@ lcHttpManager::lcHttpManager(QObject* Owner)
 
 lcHttpReply* lcHttpManager::lcHttpManager::DownloadFile(const QString& Url)
 {
-	return (lcHttpReply*)get(QNetworkRequest(QUrl(Url)));
+    QNetworkRequest req = QNetworkRequest(QUrl(Url));
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+	return (lcHttpReply*)get(req);
 }
 
 void lcHttpManager::Finished(QNetworkReply* Reply)

@@ -438,6 +438,9 @@ void lcView::UpdatePiecePreview()
 			lcTrainTrackType TrainTrackType = static_cast<lcTrainTrackType>((mTrackToolSection >> 8) & 0xff);
 
 			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertTransform(Piece, ConnectionIndex, TrainTrackType);
+
+			if (GetActiveModel() != mModel)
+				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
 		}
 	}
 
@@ -2496,6 +2499,9 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 
 			if (!mPiecePreviewInfo)
 				break;
+
+			if (GetActiveModel() != mModel)
+				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, lcMatrix44AffineInverse(mActiveSubmodelTransform));
 
 			ActiveModel->InsertPieceToolClicked(mPiecePreviewInfo, mPiecePreviewTransform);
 

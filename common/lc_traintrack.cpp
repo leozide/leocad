@@ -13,7 +13,6 @@
 // shortcuts for changing active connection
 // move config to json
 // add other track types
-// crash when focusing a track during in place submodel editing because GetScene doesn't have the focus piece
 // macros to encode/decode mTrackToolSection
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)

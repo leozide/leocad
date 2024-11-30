@@ -1348,8 +1348,15 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
 		if (Piece->IsVisibleInSubModel())
+		{
+			if (Piece->IsFocused())
+				UpdateTrainTrackConnections(Piece.get());
+
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
+		}
+	}
 }
 
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)

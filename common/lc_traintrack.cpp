@@ -13,6 +13,8 @@
 // shortcuts for changing active connection
 // move config to json
 // add other track types
+// crash when focusing a track during in place submodel editing because GetScene doesn't have the focus piece
+// macros to encode/decode mTrackToolSection
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
 {
@@ -127,16 +129,18 @@ std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPi
 	return { Info, Transform };
 }
 
-bool lcTrainTrackInfo::ArePiecesConnected(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2)
+int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2)
 {
 	const lcTrainTrackInfo* TrainTrackInfo1 = Piece1->mPieceInfo->GetTrainTrackInfo();
 	const lcTrainTrackInfo* TrainTrackInfo2 = Piece2->mPieceInfo->GetTrainTrackInfo();
 
+	const std::vector<lcTrainTrackConnection>& Connections2 = TrainTrackInfo2->GetConnections();
 	lcMatrix44 Transform1 = lcMul(TrainTrackInfo1->GetConnections()[ConnectionIndex1].Transform, Piece1->mModelWorld);
 
-	for (const lcTrainTrackConnection& Connection2 : TrainTrackInfo2->GetConnections())
+	for (int ConnectionIndex2 = 0; ConnectionIndex2 < static_cast<int>(Connections2.size()); ConnectionIndex2++)
 	{
-		lcMatrix44 Transform2 = lcMul(Connection2.Transform, Piece2->mModelWorld);
+		const lcTrainTrackConnection& Connection2 = Connections2[ConnectionIndex2];
+		const lcMatrix44 Transform2 = lcMul(Connection2.Transform, Piece2->mModelWorld);
 
 		if (lcLengthSquared(Transform1.GetTranslation() - Transform2.GetTranslation()) > 0.1f)
 			continue;
@@ -144,17 +148,14 @@ bool lcTrainTrackInfo::ArePiecesConnected(const lcPiece* Piece1, int ConnectionI
 		float Dot = lcDot3(Transform1[0], Transform2[0]);
 
 		if (Dot < -0.99f && Dot > -1.01f)
-			return true;
+			return ConnectionIndex2;
 	}
 
-	return false;
+	return -1;
 }
 
 std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info)
 {
-	if (!CurrentPiece || !Info)
-		return std::nullopt;
-
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
@@ -177,25 +178,38 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	}
 
-	if (ConnectionIndex >= CurrentTrackInfo->GetConnections().size())
+	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, 0);
+}
+
+std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)
+{
+	if (!CurrentPiece || !Info)
+		return std::nullopt;
+
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
+		return std::nullopt;
+
+	if (CurrentConnectionIndex >= CurrentTrackInfo->GetConnections().size())
 		return std::nullopt;
 
 	lcTrainTrackInfo* NewTrackInfo = Info->GetTrainTrackInfo();
 
-	if (!NewTrackInfo || NewTrackInfo->mConnections.empty())
+	if (!NewTrackInfo || NewConnectionIndex >= NewTrackInfo->mConnections.size())
 		return std::nullopt;
 
 	lcMatrix44 Transform;
 
 //	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = NewTrackInfo->mConnections[0].Transform;
+//		Transform = NewTrackInfo->mConnections[NewConnectionIndex].Transform;
 //	else
 //	{
-//		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
-//		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
+		Transform = lcMatrix44AffineInverse(NewTrackInfo->mConnections[NewConnectionIndex].Transform);
+		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
 //	}
 
-	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[ConnectionIndex].Transform);
+	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[CurrentConnectionIndex].Transform);
 	Transform = lcMul(Transform, CurrentPiece->mModelWorld);
 
 	return Transform;

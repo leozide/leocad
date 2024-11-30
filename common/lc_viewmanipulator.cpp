@@ -762,6 +762,9 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 		case lcTrackTool::RotateXYZ:
 			return (AllowedTransforms & (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z)) == (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z);
 
+		case lcTrackTool::RotateTrainTrack:
+			return true;
+
 		case lcTrackTool::ScalePlus:
 		case lcTrackTool::ScaleMinus:
 			return AllowedTransforms & (LC_OBJECT_TRANSFORM_SCALE_X | LC_OBJECT_TRANSFORM_SCALE_Y | LC_OBJECT_TRANSFORM_SCALE_Z);
@@ -995,6 +998,23 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 						NewTrackSection = ConnectionIndex | (VertexIndex << 8);
 					}
 				}
+			}
+
+			lcObjectRayTest ObjectRayTest;
+
+			ObjectRayTest.PiecesOnly = true;
+			ObjectRayTest.IgnoreSelected = false;
+			ObjectRayTest.ViewCamera = mView->GetCamera();
+			ObjectRayTest.Start = StartEnd[0];
+			ObjectRayTest.End = StartEnd[1];
+
+			Piece->RayTestConnectedTrainTracks(ObjectRayTest);
+
+			if (ObjectRayTest.Distance < ClosestIntersectionDistance && ObjectRayTest.ObjectSection.Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+			{
+				NewTrackTool = lcTrackTool::RotateTrainTrack;
+				ClosestIntersectionDistance = ObjectRayTest.Distance;
+				NewTrackSection = ObjectRayTest.ObjectSection.Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 			}
 		}
 	}

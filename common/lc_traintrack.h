@@ -27,7 +27,8 @@ public:
 
 	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const;
 	static std::optional<lcMatrix44> GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info);
-	static bool ArePiecesConnected(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
+	static std::optional<lcMatrix44> GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
+	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
 
 	void AddConnection(const lcTrainTrackConnection& TrainTrackConnection)
 	{

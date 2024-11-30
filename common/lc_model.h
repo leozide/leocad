@@ -334,6 +334,7 @@ public:
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
+	void RotateTrainTrackToolClicked(quint32 ConnectionIndex);
 	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);

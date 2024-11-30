@@ -70,6 +70,7 @@ enum class lcTrackTool
 	RotateZ,
 	RotateXY,
 	RotateXYZ,
+	RotateTrainTrack,
 	ScalePlus,
 	ScaleMinus,
 	Eraser,

@@ -1925,6 +1925,7 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Rotate,           // lcTrackTool::RotateZ
 		lcCursor::Rotate,           // lcTrackTool::RotateXY
 		lcCursor::Rotate,           // lcTrackTool::RotateXYZ
+		lcCursor::Rotate,           // lcTrackTool::RotateTrainTrack
 		lcCursor::Move,             // lcTrackTool::ScalePlus
 		lcCursor::Move,             // lcTrackTool::ScaleMinus
 		lcCursor::Delete,           // lcTrackTool::Eraser
@@ -2034,6 +2035,7 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::Rotate,           // lcTrackTool::RotateZ
 		lcTool::Rotate,           // lcTrackTool::RotateXY
 		lcTool::Rotate,           // lcTrackTool::RotateXYZ
+		lcTool::Rotate,           // lcTrackTool::RotateTrainTrack
 		lcTool::Move,             // lcTrackTool::ScalePlus
 		lcTool::Move,             // lcTrackTool::ScaleMinus
 		lcTool::Eraser,           // lcTrackTool::Eraser
@@ -2560,6 +2562,18 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			StartTracking(TrackButton);
 		break;
 
+	case lcTrackTool::RotateTrainTrack:
+		{
+			quint32 ConnectionIndex = mTrackToolSection & 0xff;
+
+			ActiveModel->RotateTrainTrackToolClicked(ConnectionIndex);
+
+			mToolClicked = true;
+			UpdateTrackTool();
+		}
+		break;
+
+
 	case lcTrackTool::ScalePlus:
 	case lcTrackTool::ScaleMinus:
 		if (ActiveModel->AnyPiecesSelected())
@@ -2992,6 +3006,7 @@ void lcView::OnMouseMove()
 		}
 		break;
 
+	case lcTrackTool::RotateTrainTrack:
 	case lcTrackTool::Eraser:
 	case lcTrackTool::Paint:
 	case lcTrackTool::ColorPicker:

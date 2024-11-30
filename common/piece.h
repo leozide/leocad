@@ -107,6 +107,7 @@ public:
 	}
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
+	void RayTestConnectedTrainTracks(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;

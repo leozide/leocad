@@ -375,7 +375,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
 
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 	{
-		if (!Piece->IsTrainTrackConnectionVisible(ConnectionIndex))
+		if (Piece->IsTrainTrackConnected(ConnectionIndex))
 			continue;
 
 		const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
@@ -966,7 +966,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 			for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 			{
-				if (!Piece->IsTrainTrackConnectionVisible(ConnectionIndex))
+				if (Piece->IsTrainTrackConnected(ConnectionIndex))
 					continue;
 
 				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;

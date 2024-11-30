@@ -166,7 +166,7 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 	if (FocusSection == LC_PIECE_SECTION_POSITION || FocusSection == LC_PIECE_SECTION_INVALID)
 	{
 		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
-			if (CurrentPiece->IsTrainTrackConnectionVisible(ConnectionIndex))
+			if (!CurrentPiece->IsTrainTrackConnected(ConnectionIndex))
 				break;
 	}
 	else

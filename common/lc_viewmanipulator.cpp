@@ -960,11 +960,13 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 	if (Focus && Focus->IsPiece())
 	{
-		const lcPiece* Piece = (lcPiece*)Focus;
+		lcPiece* Piece = (lcPiece*)Focus;
 		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
 
 		if (TrainTrackInfo)
 		{
+			ActiveModel->UpdateTrainTrackConnections(Piece);
+
 			const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
 			for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)

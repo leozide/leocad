@@ -14,6 +14,8 @@
 // move config to json
 // add other track types
 // macros to encode/decode mTrackToolSection
+// better transform and connection selection when adding with the keyboard, keep the same curve direction and use straight for branches
+// set focus connection after adding
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
 {
@@ -163,13 +165,13 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 	const quint32 FocusSection = CurrentPiece->GetFocusSection();
 	quint32 ConnectionIndex = 0;
 
-	if (FocusSection == LC_PIECE_SECTION_POSITION || FocusSection == LC_PIECE_SECTION_INVALID)
+	if (FocusSection == LC_PIECE_SECTION_POSITION)
 	{
 		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
 			if (!CurrentPiece->IsTrainTrackConnected(ConnectionIndex))
 				break;
 	}
-	else
+	else if (FocusSection != LC_PIECE_SECTION_INVALID)
 	{
 		if (FocusSection < LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 			return std::nullopt;

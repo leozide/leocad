@@ -435,9 +435,9 @@ void lcView::UpdatePiecePreview()
 		if (TrainTrackInfo)
 		{
 			quint32 ConnectionIndex = mTrackToolSection & 0xff;
-			lcTrainTrackType TrainTrackType = static_cast<lcTrainTrackType>((mTrackToolSection >> 8) & 0xff);
+			int relatedPieceIdx = (mTrackToolSection >> 8) & 0xff;
 
-			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertTransform(Piece, ConnectionIndex, TrainTrackType);
+			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertTransform(Piece, ConnectionIndex, relatedPieceIdx);
 
 			if (GetActiveModel() != mModel)
 				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);

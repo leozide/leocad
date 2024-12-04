@@ -4,28 +4,51 @@
 
 class lcPiece;
 class lcPiecesLibrary;
+class lcTrainTrackInfo;
+class lcRelatedPiecesGroup;
 
 struct lcTrainTrackConnection
 {
 	lcMatrix44 Transform;
+    lcRelatedPiecesGroup *relatedPiecesGroup;
 };
 
-enum class lcTrainTrackType
+
+class lcRelatedPiecesGroup
 {
-	Straight,
-	Left,
-	Right,
-	BranchLeft,
-	BranchRight,
-	Count
+public:
+
+    void AddRelatedPieceName(PieceInfo* info)
+    {
+        relatedPieces.push_back(info);
+    }
+
+    PieceInfo* GetIndex(int index)
+    {
+        return relatedPieces[index];
+    }
+
+    int Size()
+    {
+        return relatedPieces.size();
+    }
+
+protected:
+    std::vector<PieceInfo*> relatedPieces;
 };
+
 
 class lcTrainTrackInfo
 {
 public:
 	lcTrainTrackInfo() = default;
 
-	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const;
+    lcTrainTrackInfo(PieceInfo* pieceInfo)
+    {
+        mPieceInfo = pieceInfo;
+    }
+
+	std::pair<PieceInfo*, lcMatrix44> GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, int relatedPieceIdx) const;
 	static std::optional<lcMatrix44> GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info);
 	static std::optional<lcMatrix44> GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
@@ -40,7 +63,13 @@ public:
 		return mConnections;
 	}
 
+    PieceInfo* GetPieceInfo() {
+        return mPieceInfo;
+    }
+
 protected:
+
+    PieceInfo* mPieceInfo = nullptr;
 	std::vector<lcTrainTrackConnection> mConnections;
 };
 

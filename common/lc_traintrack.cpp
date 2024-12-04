@@ -5,6 +5,7 @@
 #include "piece.h"
 #include "lc_application.h"
 
+#include <iostream>
 // todo:
 // auto replace cross when going over a straight section
 // redo gizmo
@@ -17,92 +18,126 @@
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
 {
-	PieceInfo* Info = Library->FindPiece("74746.dat", nullptr, false, false);
+    QFile loadFile(":/resources/train_track_editor.json");
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+    if (!loadFile.open(QIODevice::ReadOnly))
+        return;
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f))});
+    QByteArray trainTrackEditorConfig = loadFile.readAll();
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
+    QJsonDocument loadDoc(QJsonDocument::fromJson(trainTrackEditorConfig));
 
-	Info = Library->FindPiece("74747.dat", nullptr, false, false);
+    if (!loadDoc.object().contains("pieces") || !loadDoc["pieces"].isArray())
+        return;
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+    if (!loadDoc.object().contains("releated_pieces_groups") || !loadDoc["releated_pieces_groups"].isArray())
+        return;
 
-		const float CurveX = sinf(LC_DTOR * 11.25f) * 800.0f;
-		const float CurveY = (cosf(LC_DTOR * 11.25f) * 800.0f) - 800.0f;
+    QJsonArray piecesGroupJson = loadDoc["releated_pieces_groups"].toArray();
 
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-11.25f * LC_DTOR), lcVector3(CurveX, CurveY, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-168.75f * LC_DTOR), lcVector3(-CurveX, CurveY, 0.0f))});
+    std::map<QString, lcRelatedPiecesGroup*> mapRelatedPiecesGroup;
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
+    lcRelatedPiecesGroup* trainTrackGroupEmpty = new lcRelatedPiecesGroup();
 
-	const float BranchX = 320.0f + 320.0f + (-(sinf(LC_DTOR * 22.5f) * 800.0f));
-	const float BranchY = 320.0f + ((cosf(LC_DTOR * 22.5f) * 800.0f) - 800.0f);
+    for (int groupIdx = 0; groupIdx < piecesGroupJson.size(); ++groupIdx) {
 
-	Info = Library->FindPiece("2861c04.dat", nullptr, false, false);
+        QJsonObject groupObject = piecesGroupJson[groupIdx].toObject();
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+        QString groupName;
+        QString pieceName;
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f))});	
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
+        if (groupObject.contains("name") || groupObject["name"].isString()) {
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
+            groupName = groupObject["name"].toString();
 
-	Info = Library->FindPiece("2859c04.dat", nullptr, false, false);
+            lcRelatedPiecesGroup* trainTrackGroup = new lcRelatedPiecesGroup();
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+            mapRelatedPiecesGroup.insert(std::pair<QString, lcRelatedPiecesGroup*>(groupName, trainTrackGroup));
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
+            if (groupObject.contains("filenames") || groupObject["filenames"].isArray()) 
+            {
+                QJsonArray filenamesObject = groupObject["filenames"].toArray();
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
+                for (int pieceIdx = 0; pieceIdx < filenamesObject.size(); ++pieceIdx) 
+                {
+                    if(filenamesObject[pieceIdx].isString()) 
+                    {
+                        PieceInfo* Info = Library->FindPiece(filenamesObject[pieceIdx].toString().toStdString().c_str(), nullptr, false, false);
+                        trainTrackGroup->AddRelatedPieceName(Info);
+                    }
+                }
+            }
+        }
+    }
 
-    Info = Library->FindPiece("32087.dat", nullptr, false, false);
+    QJsonArray tracksectionsJson = loadDoc["pieces"].toArray();
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+    std::map<QString, lcRelatedPiecesGroup*>::iterator mapRelatedPiecesGroupItr;
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(0.0f, 160.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2.0f), lcVector3(0.0f, -160.0f, 0.0f))});
+    for (int sectionIdx = 0; sectionIdx < tracksectionsJson.size(); ++sectionIdx) {
+        QJsonObject sectionObject = tracksectionsJson[sectionIdx].toObject();
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
+        if (sectionObject.contains("filename") || sectionObject["filename"].isString()) 
+        {
+
+            QString mFilename = sectionObject["filename"].toString();
+
+            PieceInfo* Info = Library->FindPiece(mFilename.toStdString().c_str(), nullptr, false, false);
+
+            if (Info)
+            {
+                if (sectionObject.contains("connections") || sectionObject["connections"].isArray()) 
+                {
+                    QJsonArray connectionsJson = sectionObject["connections"].toArray();
+
+                    lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo(Info);
+
+                    for (int connIdx = 0; connIdx < connectionsJson.size(); ++connIdx) 
+                    {
+                            QJsonObject connObject = connectionsJson[connIdx].toObject();
+
+                            double transX = 0, transY = 0, transZ = 0, rotateZ = 0;
+                            QString connectGroup;
+
+                            if (!sectionObject.contains("transform_x") || !sectionObject["transform_x"].isDouble())
+                                transX = connObject["transform_x"].toDouble();
+
+                            if (!sectionObject.contains("transform_y") || !sectionObject["transform_y"].isDouble())
+                                transY = connObject["transform_y"].toDouble();
+
+                            if (!sectionObject.contains("transform_z") || !sectionObject["transform_z"].isDouble())
+                                transZ = connObject["transform_z"].toDouble();
+
+                            if (!sectionObject.contains("rotate_z") || !sectionObject["rotate_z"].isDouble())
+                                rotateZ = connObject["rotate_z"].toDouble();
+
+                            if (!sectionObject.contains("connect_group") || !sectionObject["connect_group"].isString())
+                                connectGroup = connObject["connect_group"].toString();
+
+                            lcRelatedPiecesGroup* relatedPieces = nullptr;
+                            mapRelatedPiecesGroupItr = mapRelatedPiecesGroup.find(connectGroup);
+
+                            if(mapRelatedPiecesGroupItr != mapRelatedPiecesGroup.end()) 
+                            {
+                                relatedPieces = mapRelatedPiecesGroupItr->second;
+                                TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(rotateZ * LC_DTOR), lcVector3(transX, transY, transZ)),relatedPieces});
+                            } else {
+                                TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(rotateZ * LC_DTOR), lcVector3(transX, transY, transZ)),trainTrackGroupEmpty});
+                            }
+                    }
+                    Info->SetTrainTrackInfo(TrainTrackInfo);
+                }
+            }
+        }
+    }
 }
 
-std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
+std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, int relatedPieceIdx) const
 {
 	if (ConnectionIndex >= mConnections.size())
 		return { nullptr, lcMatrix44Identity() };
 
-	const char* PieceNames[] =
-	{
-		"74746.dat",
-		"74747.dat",
-		"74747.dat",
-		"2861c04.dat",
-		"2859c04.dat"
-	};
-
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
+    PieceInfo* Info = mConnections[ConnectionIndex].relatedPiecesGroup->GetIndex(relatedPieceIdx);
 
 	if (!Info)
 		return { nullptr, lcMatrix44Identity() };
@@ -114,13 +149,8 @@ std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPi
 
 	lcMatrix44 Transform;
 
-	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = TrainTrackInfo->mConnections[0].Transform;
-	else
-	{
-		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
-		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
-	}
+    Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
+	Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
 
 	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
 	Transform = lcMul(Transform, Piece->mModelWorld);
@@ -200,13 +230,8 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* Curr
 
 	lcMatrix44 Transform;
 
-//	if (TrainTrackType != lcTrainTrackType::Left)
-//		Transform = NewTrackInfo->mConnections[NewConnectionIndex].Transform;
-//	else
-//	{
-		Transform = lcMatrix44AffineInverse(NewTrackInfo->mConnections[NewConnectionIndex].Transform);
-		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
-//	}
+    Transform = lcMatrix44AffineInverse(NewTrackInfo->mConnections[NewConnectionIndex].Transform);
+    Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
 
 	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[CurrentConnectionIndex].Transform);
 	Transform = lcMul(Transform, CurrentPiece->mModelWorld);

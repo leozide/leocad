@@ -370,7 +370,8 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 
 void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale)
 {
-	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+    lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+
 	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
@@ -380,27 +381,29 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
 
 		const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
 
-		lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count) * 2];
-		int NumVerts = 0;
+        lcRelatedPiecesGroup* releatedPieces = Connections[ConnectionIndex].relatedPiecesGroup;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / OverlayScale;
+        int noOfPieces = releatedPieces->Size();
+        int NumVerts = noOfPieces * 2;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / OverlayScale;
+        std::vector<lcVector3> Verts;
+        Verts.resize(NumVerts);
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / OverlayScale;
+        int degreeStep = 0;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / OverlayScale;
+        if(noOfPieces > 1) {
+            degreeStep = 120 / (noOfPieces - 1);
+        }
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / OverlayScale;
+        int VertsIdx = 0;
+        for(int pieceNo = 0; pieceNo < noOfPieces; pieceNo++) {
+		    Verts[VertsIdx++] = Transform.GetTranslation() / OverlayScale;
+		    Verts[VertsIdx++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * pieceNo) ))) * 100) / OverlayScale;
+        }
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexBufferPointer(Verts.data());
 		Context->ClearIndexBuffer();
 		Context->SetVertexFormatPosition(3);
 
@@ -961,7 +964,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 	if (Focus && Focus->IsPiece())
 	{
 		lcPiece* Piece = (lcPiece*)Focus;
-		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+        lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
 
 		if (TrainTrackInfo)
 		{
@@ -975,14 +978,24 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 					continue;
 
 				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
-				lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count)];
-				int NumVerts = 0;
 
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / 1;
+                lcRelatedPiecesGroup* releatedPieces = Connections[ConnectionIndex].relatedPiecesGroup;
+
+                int noOfPieces = releatedPieces->Size();
+				int NumVerts = noOfPieces;
+
+                std::vector<lcVector3> Verts;
+                Verts.resize(NumVerts);
+
+                int degreeStep = 0;
+
+                if(noOfPieces > 1) {
+                    degreeStep = 120 / (noOfPieces - 1);
+                }
+
+                for(int VertexIndex = 0; VertexIndex < noOfPieces; VertexIndex++) {
+                    Verts[VertexIndex] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * VertexIndex) ))) * 100) / 1;
+                }
 
 				for (int VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++)
 				{

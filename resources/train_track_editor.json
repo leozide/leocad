@@ -1,0 +1,365 @@
+{
+    "releated_pieces_groups": [
+        {
+            "name": "TrainTrackSections9v",
+            "filenames": [
+                "2861c04.dat",
+                "32087.dat",
+                "74746.dat",
+                "74747.dat",
+                "2859c04.dat"
+            ]
+        },
+        {
+            "name": "TrainTrackSections12v",
+            "filenames": [
+                "73697ac03.dat",                
+                "3241ac01.dat",
+                "73698.dat",
+                "3240bc02.dat",
+                "73696ac04.dat"                
+            ]
+        },
+        {
+            "name": "TrainTrackSections12vSleeper",
+            "filenames": [
+                "4166a.dat"
+            ]
+        }
+    ],
+
+    "pieces": [
+        {
+            "filename": "2861c04.dat",
+            "connections": [
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {
+                    "transform_x": 333.85324096679688,
+                    "transform_y": 259.10357666015625,
+                    "rotate_z": 22.5,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections9v"
+                }
+            ]
+        },
+        {
+            "filename": "32087.dat",
+            "connections": [
+                {                    
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": 160,
+                    "rotate_z": 90,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {                    
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": -160,
+                    "rotate_z": -90,
+                    "connect_group": "TrainTrackSections9v"
+                }
+            ]
+        },
+        {
+            "filename": "74746.dat",
+            "connections": [
+                {                    
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "rotate_z": -180,
+                    "connect_group": "TrainTrackSections9v"
+                }
+            ]
+        },
+        {
+            "filename": "74747.dat",
+            "connections": [
+                {                    
+                    "transform_x": 156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -11.25,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {
+                    "transform_x": -156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -168.75,
+                    "connect_group": "TrainTrackSections9v"
+                }
+            ]
+        },            
+        {
+            "filename": "2859c04.dat",
+            "connections": [
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {
+                    "transform_x": 333.85324096679688,
+                    "transform_y": -259.10357666015625,
+                    "rotate_z": -22.5,
+                    "connect_group": "TrainTrackSections9v"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections9v"
+                }
+            ]
+        },
+        {
+            "filename": "3241ac01.dat",
+            "connections": [
+                {                    
+                    "transform_x": 156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -11.25,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {
+                    "transform_x": -156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -168.75,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -11.25,
+                    "transform_z": -8,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {
+                    "transform_x": -156.072265625,
+                    "transform_y": -15.371826171875,
+                    "rotate_z": -168.75,
+                    "transform_z": -8,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                }
+
+            ]
+        },
+        {
+            "filename": "3240bc02.dat",
+            "connections": [
+                {                    
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "rotate_z": -180,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                }
+
+            ]
+        },
+        {
+            "filename": "73697ac03.dat",
+            "connections": [
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 160,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 160,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                }
+            ]
+        },
+        {
+            "filename": "73696ac04.dat",
+            "connections": [
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": -160,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": 320,
+                    "transform_y": -160,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": -320,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                }
+            ]
+        }, 
+        {
+            "filename": "73698.dat",
+            "connections": [
+                {                    
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": 160,
+                    "rotate_z": 90,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": -160,
+                    "rotate_z": -90,
+                    "connect_group": "TrainTrackSections12v"
+                },
+                {                    
+                    "transform_x": 160,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 0,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": 160,
+                    "transform_z": -8,
+                    "rotate_z": 90,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": -160,
+                    "transform_y": 0,
+                    "transform_z": -8,
+                    "rotate_z": 180,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                },
+                {                    
+                    "transform_x": 0,
+                    "transform_y": -160,
+                    "transform_z": -8,
+                    "rotate_z": -90,
+                    "connect_group": "TrainTrackSections12vSleeper"
+                }
+
+            ]
+        },
+        {
+            "filename": "4166a.dat",
+            "connections": [
+                {                    
+                    "transform_x": 0,
+                    "transform_y": 0,
+                    "transform_z": 8,
+                    "rotate_z": 90
+                    
+                }
+            ]
+        }
+    ]
+    
+}

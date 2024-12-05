@@ -149,5 +149,6 @@
         <file>resources/part_flexible.png</file>
         <file>resources/part_traintrack.png</file>
         <file>resources/gear_in.png</file>
+        <file>resources/train_track_editor.json</file>
     </qresource>
 </RCC>

@@ -28,7 +28,7 @@ public:
         return relatedPieces[index];
     }
 
-    int Size()
+    size_t Size()
     {
         return relatedPieces.size();
     }

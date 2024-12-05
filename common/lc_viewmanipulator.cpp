@@ -384,9 +384,10 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
         lcRelatedPiecesGroup* releatedPieces = Connections[ConnectionIndex].relatedPiecesGroup;
 
         int noOfPieces = releatedPieces->Size();
-        lcVector3 Verts[noOfPieces * 2];
+        int NumVerts = noOfPieces * 2;
 
-		int NumVerts = 0;
+        std::vector<lcVector3> Verts;
+        Verts.resize(NumVerts);
 
         int degreeStep = 0;
 
@@ -394,14 +395,15 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
             degreeStep = 120 / (noOfPieces - 1);
         }
 
+        int VertsIdx = 0;
         for(int pieceNo = 0; pieceNo < noOfPieces; pieceNo++) {
-		    Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		    Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * pieceNo) ))) * 100) / OverlayScale;
+		    Verts[VertsIdx++] = Transform.GetTranslation() / OverlayScale;
+		    Verts[VertsIdx++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * pieceNo) ))) * 100) / OverlayScale;
         }
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexBufferPointer(Verts.data());
 		Context->ClearIndexBuffer();
 		Context->SetVertexFormatPosition(3);
 
@@ -978,11 +980,12 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
 
                 lcRelatedPiecesGroup* releatedPieces = Connections[ConnectionIndex].relatedPiecesGroup;
+
                 int noOfPieces = releatedPieces->Size();
+				int NumVerts = noOfPieces;
 
-                lcVector3 Verts[noOfPieces];
-
-				int NumVerts = 0;
+                std::vector<lcVector3> Verts;
+                Verts.resize(NumVerts);
 
                 int degreeStep = 0;
 
@@ -990,8 +993,8 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
                     degreeStep = 120 / (noOfPieces - 1);
                 }
 
-                for(int pieceNo = 0; pieceNo < noOfPieces; pieceNo++) {
-                    Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * pieceNo) ))) * 100) / 1;
+                for(int VertexIndex = 0; VertexIndex < noOfPieces; VertexIndex++) {
+                    Verts[VertexIndex] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * (-60 + (degreeStep * VertexIndex) ))) * 100) / 1;
                 }
 
 				for (int VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++)

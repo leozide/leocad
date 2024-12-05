@@ -5,7 +5,6 @@
 #include "piece.h"
 #include "lc_application.h"
 
-#include <iostream>
 // todo:
 // auto replace cross when going over a straight section
 // redo gizmo

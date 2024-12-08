@@ -2005,6 +2005,9 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_PIECE_ARRAY]->setEnabled(Flags & LC_SEL_PIECE);
 		mActions[LC_PIECE_CONTROL_POINT_INSERT]->setEnabled(Flags & LC_SEL_CAN_ADD_CONTROL_POINT);
 		mActions[LC_PIECE_CONTROL_POINT_REMOVE]->setEnabled(Flags & LC_SEL_CAN_REMOVE_CONTROL_POINT);
+		mActions[LC_PIECE_TRAIN_TRACK_FOCUS_NEXT]->setEnabled(Flags & LC_SEL_TRAIN_TRACK_VISIBLE);
+		mActions[LC_PIECE_TRAIN_TRACK_FOCUS_PREVIOUS]->setEnabled(Flags & LC_SEL_TRAIN_TRACK_VISIBLE);
+		mActions[LC_PIECE_TRAIN_TRACK_ROTATE]->setEnabled(Flags & LC_SEL_TRAIN_TRACK_VISIBLE);
 		mActions[LC_PIECE_HIDE_SELECTED]->setEnabled(Flags & LC_SEL_VISIBLE_SELECTED);
 		mActions[LC_PIECE_HIDE_UNSELECTED]->setEnabled(Flags & LC_SEL_UNSELECTED);
 		mActions[LC_PIECE_UNHIDE_SELECTED]->setEnabled(Flags & LC_SEL_HIDDEN_SELECTED);
@@ -2924,6 +2927,21 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_PIECE_CONTROL_POINT_REMOVE:
 		if (ActiveModel)
 			ActiveModel->RemoveFocusedControlPoint();
+		break;
+
+	case LC_PIECE_TRAIN_TRACK_FOCUS_NEXT:
+		if (ActiveModel)
+			ActiveModel->FocusNextTrainTrack();
+		break;
+
+	case LC_PIECE_TRAIN_TRACK_FOCUS_PREVIOUS:
+		if (ActiveModel)
+			ActiveModel->FocusPreviousTrainTrack();
+		break;
+
+	case LC_PIECE_TRAIN_TRACK_ROTATE:
+		if (ActiveModel)
+			ActiveModel->RotateFocusedTrainTrack();
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:

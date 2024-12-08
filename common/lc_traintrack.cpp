@@ -55,9 +55,9 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f))});	
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -68,9 +68,9 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -170,6 +170,9 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
 			if (!CurrentPiece->IsTrainTrackConnected(ConnectionIndex))
 				break;
+
+		if (ConnectionIndex == CurrentTrackInfo->GetConnections().size())
+			return std::nullopt;
 	}
 	else if (FocusSection != LC_PIECE_SECTION_INVALID)
 	{
@@ -179,7 +182,7 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	}
 
-	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, 0);
+	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, ConnectionIndex ? 0 : 1);
 }
 
 std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)
@@ -212,6 +215,31 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* Curr
 
 	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[CurrentConnectionIndex].Transform);
 	Transform = lcMul(Transform, CurrentPiece->mModelWorld);
+
+	return Transform;
+}
+
+std::optional<lcMatrix44> lcTrainTrackInfo::CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex)
+{
+	lcTrainTrackInfo* TrackInfo = Info->GetTrainTrackInfo();
+
+	if (!TrackInfo || ConnectionIndex >= TrackInfo->mConnections.size())
+		return std::nullopt;
+
+	lcMatrix44 Transform;
+
+//	if (TrainTrackType != lcTrainTrackType::Left)
+//		Transform = NewTrackInfo->mConnections[NewConnectionIndex].Transform;
+//	else
+//	{
+		Transform = lcMatrix44AffineInverse(TrackInfo->mConnections[ConnectionIndex].Transform);
+//		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
+//	}
+
+	Transform = lcMul(Transform, ConnectionTransform);
+
+//	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[CurrentConnectionIndex].Transform);
+//	Transform = lcMul(Transform, CurrentPiece->mModelWorld);
 
 	return Transform;
 }

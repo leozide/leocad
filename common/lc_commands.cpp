@@ -1278,6 +1278,27 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Remove the selected control point"),
 		""
 	},
+	// LC_PIECE_TRAIN_TRACK_FOCUS_NEXT
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.TrainTrack.FocusNext"),
+		QT_TRANSLATE_NOOP("Menu", "Focus Next Connection"),
+		QT_TRANSLATE_NOOP("Status", "Focus the next connection of the currently selected track"),
+		""
+	},
+	// LC_PIECE_TRAIN_TRACK_FOCUS_PREVIOUS
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.TrainTrack.FocusPrevious"),
+		QT_TRANSLATE_NOOP("Menu", "Focus Previous Connection"),
+		QT_TRANSLATE_NOOP("Status", "Focus the previous connection of the currently selected track"),
+		""
+	},
+	// LC_PIECE_TRAIN_TRACK_ROTATE
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.TrainTrack.Rotate"),
+		QT_TRANSLATE_NOOP("Menu", "Rotate Train Track"),
+		QT_TRANSLATE_NOOP("Status", "Rotate the focused train track arount its last connection"),
+		""
+	},
 	// LC_PIECE_MOVE_PLUSX
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Move.PlusX"),

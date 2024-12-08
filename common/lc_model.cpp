@@ -2371,6 +2371,126 @@ void lcModel::InsertPiece(lcPiece* Piece, size_t Index)
 	mPieces.insert(mPieces.begin() + Index, std::unique_ptr<lcPiece>(Piece));
 }
 
+void lcModel::FocusNextTrainTrack()
+{
+	const lcObject* Focus = GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* FocusPiece = (lcPiece*)Focus;
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo)
+		return;
+
+	quint32 FocusSection = FocusPiece->GetFocusSection();
+	std::optional<lcMatrix44> Transform;
+	int ConnectionIndex = 0;
+
+	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION)
+	{
+		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+		ConnectionIndex = (ConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
+	}
+
+	FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, true);
+
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
+}
+
+void lcModel::FocusPreviousTrainTrack()
+{
+	const lcObject* Focus = GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* FocusPiece = (lcPiece*)Focus;
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo)
+		return;
+
+	quint32 FocusSection = FocusPiece->GetFocusSection();
+	std::optional<lcMatrix44> Transform;
+	int ConnectionIndex = 0;
+
+	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION)
+	{
+		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+		ConnectionIndex = (ConnectionIndex + static_cast<int>(TrainTrackInfo->GetConnections().size()) - 1) % TrainTrackInfo->GetConnections().size();
+	}
+
+	FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, true);
+
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
+}
+
+void lcModel::RotateFocusedTrainTrack()
+{
+	const lcObject* Focus = GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* FocusPiece = (lcPiece*)Focus;
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo)
+		return;
+
+	quint32 FocusSection = FocusPiece->GetFocusSection();
+	std::optional<lcMatrix44> Transform;
+	int FirstConnectionIndex = 0, RotateConnectionIndex = 0, TracksConnected = 0;
+
+	for (int ConnectionIndex = 0; ConnectionIndex < static_cast<int>(TrainTrackInfo->GetConnections().size()); ConnectionIndex++)
+	{
+		if (FocusPiece->IsTrainTrackConnected(ConnectionIndex))
+		{
+			if (!TracksConnected)
+				FirstConnectionIndex = ConnectionIndex;
+
+			TracksConnected++;
+		}
+	}
+
+	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION)
+	{
+		RotateConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+	}
+	else
+	{
+		RotateConnectionIndex = FirstConnectionIndex;
+
+		if (TracksConnected > 1)
+		{
+			// todo: find most recent connection
+		}
+	}
+
+	lcMatrix44 ConnectionTransform = lcMul(TrainTrackInfo->GetConnections()[RotateConnectionIndex].Transform, FocusPiece->mModelWorld);
+	int NewConnectionIndex = (RotateConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
+
+	Transform = lcTrainTrackInfo::CalculateTransformToConnection(ConnectionTransform, FocusPiece->mPieceInfo, NewConnectionIndex);
+
+	if (!Transform)
+		return;
+
+	if ((FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION) || !TracksConnected)
+		FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + NewConnectionIndex, true);
+
+	FocusPiece->SetPosition(Transform.value().GetTranslation(), mCurrentStep, gMainWindow->GetAddKeys());
+	FocusPiece->SetRotation(lcMatrix33(Transform.value()), mCurrentStep, gMainWindow->GetAddKeys());
+	FocusPiece->UpdatePosition(mCurrentStep);
+
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
+	SaveCheckpoint(tr("Rotating"));
+}
+
 void lcModel::UpdateTrainTrackConnections(lcPiece* FocusPiece) const
 {
 	if (!FocusPiece || !FocusPiece->IsFocused())
@@ -3644,6 +3764,9 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 					*Flags |= LC_SEL_VISIBLE_SELECTED;
 
 				*Flags |= LC_SEL_PIECE | LC_SEL_SELECTED;
+
+				if (Piece->AreTrainTrackConnectionsVisible())
+					*Flags |= LC_SEL_TRAIN_TRACK_VISIBLE;
 
 				if (Piece->CanAddControlPoint())
 					*Flags |= LC_SEL_CAN_ADD_CONTROL_POINT;

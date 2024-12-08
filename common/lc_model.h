@@ -20,6 +20,7 @@ enum class lcObjectPropertyId;
 #define LC_SEL_MODEL_SELECTED           0x1000 // At least one model reference is selected
 #define LC_SEL_CAN_ADD_CONTROL_POINT    0x2000 // Can add control points to focused piece
 #define LC_SEL_CAN_REMOVE_CONTROL_POINT 0x4000 // Can remove control points from focused piece
+#define LC_SEL_TRAIN_TRACK_VISIBLE      0x8000 // Focused piece has train track connections
 
 enum class lcSelectionMode
 {
@@ -215,6 +216,9 @@ public:
 	void RemoveSelectedPiecesKeyFrames();
 	void InsertControlPoint();
 	void RemoveFocusedControlPoint();
+	void FocusNextTrainTrack();
+	void FocusPreviousTrainTrack();
+	void RotateFocusedTrainTrack();
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);

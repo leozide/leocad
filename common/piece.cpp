@@ -1268,6 +1268,88 @@ lcVector3 lcPiece::GetSectionPosition(quint32 Section) const
 	return lcVector3(0.0f, 0.0f, 0.0f);
 }
 
+lcVector3 lcPiece::GetRotationCenter() const
+{
+	const quint32 Section = GetFocusSection();
+
+	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+	{
+		if (mPivotPointValid)
+			return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
+	}
+	else if (mPieceInfo->GetSynthInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
+		{
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+
+			if (ControlPointIndex < mControlPoints.size())
+			{
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMul31(Transform.GetTranslation(), mModelWorld);
+			}
+		}
+	}
+	else if (mPieceInfo->GetTrainTrackInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		{
+			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+
+			if (ConnectionIndex < Connections.size())
+			{
+				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
+				return lcMul(Transform, mModelWorld).GetTranslation();
+			}
+		}
+	}
+
+	return mModelWorld.GetTranslation();
+}
+
+lcMatrix33 lcPiece::GetRelativeRotation() const
+{
+	const quint32 Section = GetFocusSection();
+
+	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
+	{
+		if (mPivotPointValid)
+			return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
+		else
+			return lcMatrix33(mModelWorld);
+	}
+	else if (mPieceInfo->GetSynthInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
+		{
+			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
+
+			if (ControlPointIndex < mControlPoints.size())
+			{
+				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
+				return lcMatrix33(lcMul(Transform, mModelWorld));
+			}
+		}
+	}
+	else if (mPieceInfo->GetTrainTrackInfo())
+	{
+		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		{
+			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+
+			if (ConnectionIndex < Connections.size())
+			{
+				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
+				return lcMatrix33(lcMul(Transform, mModelWorld));
+			}
+		}
+	}
+
+	return lcMatrix33Identity();
+}
+
 bool lcPiece::CanAddControlPoint() const
 {
 	if (mControlPoints.size() >= LC_MAX_CONTROL_POINTS)

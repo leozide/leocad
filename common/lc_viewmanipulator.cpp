@@ -379,24 +379,37 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
 			continue;
 
 		const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
+		lcVector3 Start = Transform.GetTranslation();
+		lcVector3 Direction = lcVector3(Transform[0]) * 100;
+
+		if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		{
+			quint32 FocusIndex = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+
+			if (FocusIndex != ConnectionIndex)
+				continue;
+
+			Start = lcVector3(0.0f, 0.0f, 0.0f);
+			Direction = lcVector3(100.0f, 0.0f, 0.0f);
+		}
 
 		lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count) * 2];
 		int NumVerts = 0;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / OverlayScale;
+		Verts[NumVerts++] = Start / OverlayScale;
+		Verts[NumVerts++] = (Start + Direction) / OverlayScale;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Verts[0];
+		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * 60))) / OverlayScale;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Verts[0];
+		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * -60))) / OverlayScale;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Verts[0];
+		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * 30))) / OverlayScale;
 
-		Verts[NumVerts++] = Transform.GetTranslation() / OverlayScale;
-		Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / OverlayScale;
+		Verts[NumVerts++] = Verts[0];
+		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * -30))) / OverlayScale;
 
 		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 

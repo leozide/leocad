@@ -283,53 +283,8 @@ public:
 		mRotation.ChangeKey(Rotation, Step, AddKey);
 	}
 
-	lcVector3 GetRotationCenter() const
-	{
-		const quint32 Section = GetFocusSection();
-
-		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
-		{
-			if (mPivotPointValid)
-				return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
-		}
-		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
-		{
-			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
-
-			if (ControlPointIndex < mControlPoints.size())
-			{
-				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
-				return lcMul31(Transform.GetTranslation(), mModelWorld);
-			}
-		}
-
-		return mModelWorld.GetTranslation();
-	}
-
-	lcMatrix33 GetRelativeRotation() const
-	{
-		const quint32 Section = GetFocusSection();
-
-		if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
-		{
-			if (mPivotPointValid)
-				return lcMatrix33(lcMul(mModelWorld, mPivotMatrix));
-			else
-				return lcMatrix33(mModelWorld);
-		}
-		else if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
-		{
-			const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
-
-			if (ControlPointIndex < mControlPoints.size())
-			{
-				const lcMatrix44& Transform = mControlPoints[ControlPointIndex].Transform;
-				return lcMatrix33(lcMul(Transform, mModelWorld));
-			}
-		}
-
-		return lcMatrix33Identity();
-	}
+	lcVector3 GetRotationCenter() const;
+	lcMatrix33 GetRelativeRotation() const;
 
 	void ResetPivotPoint()
 	{

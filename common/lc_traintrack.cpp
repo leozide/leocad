@@ -9,12 +9,11 @@
 // auto replace cross when going over a straight section
 // redo gizmo
 // add cross to gizmo
+// new rotate connection gizmo
 // rotate around connections shortcut
 // shortcuts for changing active connection
 // move config to json
 // add other track types
-// macros to encode/decode mTrackToolSection
-// better transform and connection selection when adding with the keyboard, keep the same curve direction and use straight for branches
 // set focus connection after adding
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
@@ -55,8 +54,8 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f))});	
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
@@ -68,8 +67,8 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
 		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);

@@ -1010,7 +1010,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 						NewTrackTool = lcTrackTool::Insert;
 						ClosestIntersectionDistance = IntersectionDistance;
-						NewTrackSection = ConnectionIndex | (VertexIndex << 8);
+						NewTrackSection = lcTrainTrackInfo::EncodeTrackToolSection(ConnectionIndex, static_cast<lcTrainTrackType>(VertexIndex));
 					}
 				}
 			}

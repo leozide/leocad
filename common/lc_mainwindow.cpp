@@ -2941,7 +2941,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_TRAIN_TRACK_ROTATE:
 		if (ActiveModel)
-			ActiveModel->RotateFocusedTrainTrack();
+			ActiveModel->RotateFocusedTrainTrack(1);
 		break;
 
 	case LC_PIECE_MOVE_PLUSX:

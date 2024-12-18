@@ -9,9 +9,6 @@
 // auto replace cross when going over a straight section
 // redo gizmo
 // add cross to gizmo
-// new rotate connection gizmo
-// rotate around connections shortcut
-// shortcuts for changing active connection
 // move config to json
 // add other track types
 // set focus connection after adding

@@ -463,41 +463,6 @@ void lcPiece::RemoveTime(lcStep Start, lcStep Time)
 	mRotation.RemoveTime(Start, Time);
 }
 
-void lcPiece::RayTestConnectedTrainTracks(lcObjectRayTest& ObjectRayTest) const
-{
-	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
-	const lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
-	const lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
-
-	if (mPieceInfo->GetTrainTrackInfo() && AreTrainTrackConnectionsVisible())
-	{
-		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
-		const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
-
-		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-		{
-			if (!mTrainTrackConnections[ConnectionIndex])
-				continue;
-
-			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(Connections[ConnectionIndex].Transform);
-			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
-			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
-
-			float Distance;
-			lcVector3 Plane;
-
-			if (lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr, &Plane))
-			{
-				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
-				ObjectRayTest.Distance = Distance;
-				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
-			}
-		}
-	}
-}
-
 void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mModelWorld);
@@ -555,9 +520,6 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 		{
-			if (mTrainTrackConnections[ConnectionIndex])
-				continue;
-
 			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(Connections[ConnectionIndex].Transform);
 			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
 			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
@@ -772,17 +734,10 @@ void lcPiece::DrawTrainTrackInterface(lcContext* Context, const lcMatrix44& Worl
 		Context->SetVertexFormatPosition(3);
 		Context->SetIndexBufferPointer(Indices);
 
-		if (mTrainTrackConnections[ConnectionIndex])
-		{
-			Context->SetColor(lcVector4(1.0f, 0.0f, 0.0f, 1.0f));
-		}
+		if (IsFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex))
+			Context->SetColor(ConnectionFocusedColor);
 		else
-		{
-			if (IsFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex))
-				Context->SetColor(ConnectionFocusedColor);
-			else
-				Context->SetColor(ConnectionColor);
-		}
+			Context->SetColor(ConnectionColor);
 
 		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	}

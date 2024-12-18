@@ -21,36 +21,36 @@ lcViewManipulator::lcViewManipulator(lcView* View)
 
 void lcViewManipulator::CreateResources(lcContext* Context)
 {
-	float Verts[(51 + 138 + 10) * 3];
+	float Verts[(51 + 138 + 10 + 74) * 3];
 	float* CurVert = Verts;
 
 	const float OverlayMovePlaneSize = 0.5f;
 	const float OverlayMoveArrowSize = 1.5f;
 	const float OverlayMoveArrowCapSize = 0.9f;
-	const float OverlayMoveArrowCapRadius = 0.1f;
+	const float OverlayArrowCapRadius = 0.1f;
 	const float OverlayMoveArrowBodySize = 1.2f;
-	const float OverlayMoveArrowBodyRadius = 0.05f;
+	const float OverlayArrowBodyRadius = 0.05f;
 	const float OverlayRotateArrowStart = 1.0f;
 	const float OverlayRotateArrowEnd = 1.5f;
 	const float OverlayRotateArrowCenter = 1.2f;
 
 	*CurVert++ = OverlayMoveArrowSize; *CurVert++ = 0.0f; *CurVert++ = 0.0f;
 
-	for (int EdgeIdx = 0; EdgeIdx < 8; EdgeIdx++)
+	for (int EdgeIndex = 0; EdgeIndex < 8; EdgeIndex++)
 	{
 		*CurVert++ = OverlayMoveArrowCapSize;
-		*CurVert++ = cosf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius;
-		*CurVert++ = sinf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius;
+		*CurVert++ = cosf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius;
+		*CurVert++ = sinf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius;
 	}
 
-	*CurVert++ = 0.0f; *CurVert++ = -OverlayMoveArrowBodyRadius; *CurVert++ = 0.0f;
-	*CurVert++ = 0.0f; *CurVert++ = OverlayMoveArrowBodyRadius; *CurVert++ = 0.0f;
-	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -OverlayMoveArrowBodyRadius;
-	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = OverlayMoveArrowBodyRadius;
-	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = -OverlayMoveArrowBodyRadius; *CurVert++ = 0.0f;
-	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = OverlayMoveArrowBodyRadius; *CurVert++ = 0.0f;
-	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = 0.0f; *CurVert++ = -OverlayMoveArrowBodyRadius;
-	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = 0.0f; *CurVert++ = OverlayMoveArrowBodyRadius;
+	*CurVert++ = 0.0f; *CurVert++ = -OverlayArrowBodyRadius; *CurVert++ = 0.0f;
+	*CurVert++ = 0.0f; *CurVert++ = OverlayArrowBodyRadius; *CurVert++ = 0.0f;
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -OverlayArrowBodyRadius;
+	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = OverlayArrowBodyRadius;
+	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = -OverlayArrowBodyRadius; *CurVert++ = 0.0f;
+	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = OverlayArrowBodyRadius; *CurVert++ = 0.0f;
+	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = 0.0f; *CurVert++ = -OverlayArrowBodyRadius;
+	*CurVert++ = OverlayMoveArrowBodySize; *CurVert++ = 0.0f; *CurVert++ = OverlayArrowBodyRadius;
 
 	for (int VertIdx = 0; VertIdx < 17; VertIdx++)
 	{
@@ -66,30 +66,31 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		*CurVert = *(CurVert - 104); CurVert++;
 	}
 
-	*CurVert++ = 0.0f; *CurVert++ = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius; *CurVert++ = OverlayRotateArrowStart;
+	// Rotate X
+	*CurVert++ = 0.0f; *CurVert++ = OverlayRotateArrowEnd - OverlayArrowCapRadius; *CurVert++ = OverlayRotateArrowStart;
 
-	for (int EdgeIdx = 0; EdgeIdx < 8; EdgeIdx++)
+	for (int EdgeIndex = 0; EdgeIndex < 8; EdgeIndex++)
 	{
-		*CurVert++ = cosf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius;
-		*CurVert++ = sinf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius + OverlayRotateArrowEnd - OverlayMoveArrowCapRadius;
+		*CurVert++ = cosf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius;
+		*CurVert++ = sinf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius + OverlayRotateArrowEnd - OverlayArrowCapRadius;
 		*CurVert++ = OverlayRotateArrowCenter;
 	}
 
-	*CurVert++ = 0.0f; *CurVert++ = OverlayRotateArrowStart; *CurVert++ = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius;
+	*CurVert++ = 0.0f; *CurVert++ = OverlayRotateArrowStart; *CurVert++ = OverlayRotateArrowEnd - OverlayArrowCapRadius;
 
-	for (int EdgeIdx = 0; EdgeIdx < 8; EdgeIdx++)
+	for (int EdgeIndex = 0; EdgeIndex < 8; EdgeIndex++)
 	{
-		*CurVert++ = cosf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius;
+		*CurVert++ = cosf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius;
 		*CurVert++ = OverlayRotateArrowCenter;
-		*CurVert++ = sinf(LC_2PI * EdgeIdx / 8) * OverlayMoveArrowCapRadius + OverlayRotateArrowEnd - OverlayMoveArrowCapRadius;
+		*CurVert++ = sinf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius + OverlayRotateArrowEnd - OverlayArrowCapRadius;
 	}
 
-	for (int EdgeIdx = 0; EdgeIdx < 7; EdgeIdx++)
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
 	{
-		const float Radius1 = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter - OverlayMoveArrowBodyRadius;
-		const float Radius2 = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter + OverlayMoveArrowBodyRadius;
-		float x = cosf(LC_2PI / 4 * EdgeIdx / 6);
-		float y = sinf(LC_2PI / 4 * EdgeIdx / 6);
+		const float Radius1 = OverlayRotateArrowEnd - OverlayArrowCapRadius - OverlayRotateArrowCenter - OverlayArrowBodyRadius;
+		const float Radius2 = OverlayRotateArrowEnd - OverlayArrowCapRadius - OverlayRotateArrowCenter + OverlayArrowBodyRadius;
+		float x = cosf(LC_2PI / 4 * EdgeIndex / 6);
+		float y = sinf(LC_2PI / 4 * EdgeIndex / 6);
 
 		*CurVert++ = 0.0f;
 		*CurVert++ = OverlayRotateArrowCenter + x * Radius1;
@@ -99,20 +100,21 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		*CurVert++ = OverlayRotateArrowCenter + y * Radius2;
 	}
 
-	for (int EdgeIdx = 0; EdgeIdx < 7; EdgeIdx++)
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
 	{
-		const float Radius = OverlayRotateArrowEnd - OverlayMoveArrowCapRadius - OverlayRotateArrowCenter;
-		float x = cosf(LC_2PI / 4 * EdgeIdx / 6);
-		float y = sinf(LC_2PI / 4 * EdgeIdx / 6);
+		const float Radius = OverlayRotateArrowEnd - OverlayArrowCapRadius - OverlayRotateArrowCenter;
+		float x = cosf(LC_2PI / 4 * EdgeIndex / 6);
+		float y = sinf(LC_2PI / 4 * EdgeIndex / 6);
 
-		*CurVert++ = -OverlayMoveArrowBodyRadius;
+		*CurVert++ = -OverlayArrowBodyRadius;
 		*CurVert++ = OverlayRotateArrowCenter + x * Radius;
 		*CurVert++ = OverlayRotateArrowCenter + y * Radius;
-		*CurVert++ = OverlayMoveArrowBodyRadius;
+		*CurVert++ = OverlayArrowBodyRadius;
 		*CurVert++ = OverlayRotateArrowCenter + x * Radius;
 		*CurVert++ = OverlayRotateArrowCenter + y * Radius;
 	}
 
+	// Rotate Y
 	for (int VertIdx = 0; VertIdx < 46; VertIdx++)
 	{
 		*CurVert = *(CurVert - 137); CurVert++;
@@ -120,6 +122,7 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		*CurVert = *(CurVert - 138); CurVert++;
 	}
 
+	// Rotate Z
 	for (int VertIdx = 0; VertIdx < 46; VertIdx++)
 	{
 		*CurVert = *(CurVert - 274); CurVert++;
@@ -127,6 +130,7 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		*CurVert = *(CurVert - 278); CurVert++;
 	}
 
+	// Move Planes
 	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = 0.0f;
 	*CurVert++ = 0.0f; *CurVert++ = OverlayMovePlaneSize; *CurVert++ = 0.0f;
 	*CurVert++ = 0.0f; *CurVert++ = OverlayMovePlaneSize; *CurVert++ = OverlayMovePlaneSize;
@@ -138,27 +142,94 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 	*CurVert++ = OverlayMovePlaneSize; *CurVert++ = OverlayMovePlaneSize; *CurVert++ = 0.0f;
 	*CurVert++ = OverlayMovePlaneSize; *CurVert++ = 0.0f; *CurVert++ = 0.0f;
 
-	const GLushort Indices[108 + 360 + 12] =
+	const float OverlayTrainTrackStart = 0.0f;
+	const float OverlayTrainTrackEnd = 0.5f;
+	const float OverlayTrainTrackCenter = 0.2f;
+	const float OverlayTrainTrackDistance = 0.5f;
+
+	// Train Track Rotate Right
+	*CurVert++ = OverlayTrainTrackStart; *CurVert++ = OverlayTrainTrackEnd + OverlayTrainTrackDistance - OverlayArrowCapRadius; *CurVert++ = 0.0f;
+
+	for (int EdgeIndex = 0; EdgeIndex < 8; EdgeIndex++)
 	{
+		*CurVert++ = OverlayTrainTrackCenter;
+		*CurVert++ = sinf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius + OverlayTrainTrackEnd + OverlayTrainTrackDistance - OverlayArrowCapRadius;
+		*CurVert++ = cosf(LC_2PI * EdgeIndex / 8) * OverlayArrowCapRadius;
+	}
+
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
+	{
+		const float Radius1 = OverlayTrainTrackEnd - OverlayArrowCapRadius - OverlayTrainTrackCenter - OverlayArrowBodyRadius;
+		const float Radius2 = OverlayTrainTrackEnd - OverlayArrowCapRadius - OverlayTrainTrackCenter + OverlayArrowBodyRadius;
+		float x = cosf(LC_2PI / 4 * EdgeIndex / 6);
+		float y = sinf(LC_2PI / 4 * EdgeIndex / 6);
+
+		*CurVert++ = OverlayTrainTrackCenter + y * Radius1;
+		*CurVert++ = OverlayTrainTrackCenter + OverlayTrainTrackDistance + x * Radius1;
+		*CurVert++ = 0.0f;
+		*CurVert++ = OverlayTrainTrackCenter + y * Radius2;
+		*CurVert++ = OverlayTrainTrackCenter + OverlayTrainTrackDistance + x * Radius2;
+		*CurVert++ = 0.0f;
+	}
+
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
+	{
+		const float Radius = OverlayTrainTrackEnd - OverlayArrowCapRadius - OverlayTrainTrackCenter;
+		float x = cosf(LC_2PI / 4 * EdgeIndex / 6);
+		float y = sinf(LC_2PI / 4 * EdgeIndex / 6);
+
+		*CurVert++ = OverlayTrainTrackCenter + y * Radius;
+		*CurVert++ = OverlayTrainTrackCenter + OverlayTrainTrackDistance + x * Radius;
+		*CurVert++ = -OverlayArrowBodyRadius;
+		*CurVert++ = OverlayTrainTrackCenter + y * Radius;
+		*CurVert++ = OverlayTrainTrackCenter + OverlayTrainTrackDistance + x * Radius;
+		*CurVert++ = OverlayArrowBodyRadius;
+	}
+
+	// Train Track Rotate Left
+	for (int VertIdx = 0; VertIdx < 37; VertIdx++)
+	{
+		*CurVert = *(CurVert - 111); CurVert++;
+		*CurVert = -*(CurVert - 111); CurVert++;
+		*CurVert = *(CurVert - 111); CurVert++;
+	}
+
+	const GLushort Indices[108 + 360 + 12 + 192] =
+	{
+		// Move X
 		0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 7, 0, 7, 8, 0, 8, 1,
 		9, 10, 14, 14, 13, 9, 11, 12, 15, 15, 16, 12,
+		// Move Y
 		17, 18, 19, 17, 19, 20, 17, 20, 21, 17, 21, 22, 17, 22, 23, 17, 23, 24, 17, 24, 25, 17, 25, 18,
 		26, 27, 31, 31, 30, 26, 28, 29, 32, 32, 33, 29,
+		// Move Z
 		34, 35, 36, 34, 36, 37, 34, 37, 38, 34, 38, 39, 34, 39, 40, 34, 40, 41, 34, 41, 42, 34, 42, 35,
 		43, 44, 48, 48, 47, 43, 45, 46, 49, 49, 50, 46,
+		// Rotate X
 		51, 52, 53, 51, 53, 54, 51, 54, 55, 51, 55, 56, 51, 56, 57, 51, 57, 58, 51, 58, 59, 51, 59, 52,
 		60, 61, 62, 60, 62, 63, 60, 63, 64, 60, 64, 65, 60, 65, 66, 60, 66, 67, 60, 67, 68, 60, 68, 61,
 		69, 70, 71, 71, 72, 70, 71, 72, 73, 73, 74, 72, 73, 74, 75, 75, 76, 74, 75, 76, 77, 77, 78, 76, 77, 78, 79, 79, 80, 78, 79, 80, 81, 81, 82, 80,
 		83, 84, 85, 85, 86, 84, 85, 86, 87, 87, 88, 86, 87, 88, 89, 89, 90, 88, 89, 90, 91, 91, 92, 90, 91, 92, 93, 93, 94, 92, 93, 94, 95, 95, 96, 94,
+		// Rotate Y
 		97, 98, 99, 97, 99, 100, 97, 100, 101, 97, 101, 102, 97, 102, 103, 97, 103, 104, 97, 104, 105, 97, 105, 98,
 		106, 107, 108, 106, 108, 109, 106, 109, 110, 106, 110, 111, 106, 111, 112, 106, 112, 113, 106, 113, 114, 106, 114, 107,
 		115, 116, 117, 117, 118, 116, 117, 118, 119, 119, 120, 118, 119, 120, 121, 121, 122, 120, 121, 122, 123, 123, 124, 122, 123, 124, 125, 125, 126, 124, 125, 126, 127, 127, 128, 126,
 		129, 130, 131, 131, 132, 130, 131, 132, 133, 133, 134, 132, 133, 134, 135, 135, 136, 134, 135, 136, 137, 137, 138, 136, 137, 138, 139, 139, 140, 138, 139, 140, 141, 141, 142, 140,
+		// Rotate Z
 		143, 144, 145, 143, 145, 146, 143, 146, 147, 143, 147, 148, 143, 148, 149, 143, 149, 150, 143, 150, 151, 143, 151, 144,
 		152, 153, 154, 152, 154, 155, 152, 155, 156, 152, 156, 157, 152, 157, 158, 152, 158, 159, 152, 159, 160, 152, 160, 153,
 		161, 162, 163, 163, 164, 162, 163, 164, 165, 165, 166, 164, 165, 166, 167, 167, 168, 166, 167, 168, 169, 169, 170, 168, 169, 170, 171, 171, 172, 170, 171, 172, 173, 173, 174, 172,
 		175, 176, 177, 177, 178, 176, 177, 178, 179, 179, 180, 178, 179, 180, 181, 181, 182, 180, 181, 182, 183, 183, 184, 182, 183, 184, 185, 185, 186, 184, 185, 186, 187, 187, 188, 186,
-		189, 190, 191, 192, 189, 193, 194, 195, 189, 196, 197, 198
+		// Move Planes
+		189, 190, 191, 192, 189, 193, 194, 195, 189, 196, 197, 198,
+		// Train Track Rotate Right
+		199, 200, 201, 199, 201, 202, 199, 202, 203, 199, 203, 204, 199, 204, 205, 199, 205, 206, 199, 206, 207, 199, 207, 200,
+		208, 209, 210, 210, 211, 209, 210, 211, 212, 212, 213, 211, 212, 213, 214, 214, 215, 213, 214, 215, 216, 216, 217, 215, 216, 217, 218, 218, 219, 217, 218, 219, 220, 220, 221, 219,
+		222, 223, 224, 224, 225, 223, 224, 225, 226, 226, 227, 225, 226, 227, 228, 228, 229, 227, 228, 229, 230, 230, 231, 229, 230, 231, 232, 232, 233, 231, 232, 233, 234, 234, 235, 233,
+		// Train Track Rotate Left
+		236, 237, 238, 236, 238, 239, 236, 239, 240, 236, 240, 241, 236, 241, 242, 236, 242, 243, 236, 243, 244, 236, 244, 237,
+		245, 246, 247, 247, 248, 246, 247, 248, 249, 249, 250, 248, 249, 250, 251, 251, 252, 250, 251, 252, 253, 253, 254, 252, 253, 254, 255, 255, 256, 254, 255, 256, 257, 257, 258, 256,
+		259, 260, 261, 261, 262, 260, 261, 262, 263, 263, 264, 262, 263, 264, 265, 265, 266, 264, 265, 266, 267, 267, 268, 266, 267, 268, 269, 269, 270, 268, 269, 270, 271, 271, 272, 270
 	};
 
 	mRotateMoveVertexBuffer = Context->CreateVertexBuffer(sizeof(Verts), Verts);
@@ -361,17 +432,44 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		}
 		else if (Piece->mPieceInfo->GetTrainTrackInfo())
 		{
-			DrawTrainTrack(Piece, Context, OverlayScale);
+			DrawTrainTrack(Piece, Context, OverlayScale, TrackTool);
 		}
 	}
 
 	Context->EnableDepthTest(true);
 }
 
-void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale)
+void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale, lcTrackTool TrackTool)
 {
 	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
 	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+	if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	{
+		const lcPreferences& Preferences = lcGetPreferences();
+		const lcVector4 ControlPointColor = lcVector4FromColor(Preferences.mControlPointColor);
+
+		Context->SetColor(ControlPointColor);
+
+		if (TrackTool == lcTrackTool::RotateTrainTrackRight)
+		{
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
+
+			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+		}
+		else if (TrackTool == lcTrackTool::RotateTrainTrackLeft)
+		{
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+
+			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
+		}
+		else
+		{
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+		}
+	}
 
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 	{
@@ -775,7 +873,8 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 		case lcTrackTool::RotateXYZ:
 			return (AllowedTransforms & (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z)) == (LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z);
 
-		case lcTrackTool::RotateTrainTrack:
+		case lcTrackTool::RotateTrainTrackRight:
+		case lcTrackTool::RotateTrainTrackLeft:
 			return true;
 
 		case lcTrackTool::ScalePlus:
@@ -810,6 +909,9 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 	const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
 	const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 	const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
+	const float OverlayTrainTrackStart = 0.0f * OverlayScale;
+	const float OverlayTrainTrackEnd = 0.5f * OverlayScale;
+	const float OverlayTrainTrackDistance = 0.5f * OverlayScale;
 	const float OverlayScaleRadius = 0.125f;
 
 	lcTool CurrentTool = gMainWindow->GetTool();
@@ -978,6 +1080,42 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 
 		if (TrainTrackInfo)
 		{
+			if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST && CurrentTool == lcTool::Select)
+			{
+				for (int AxisIndex = 2; AxisIndex < 3; AxisIndex++)
+				{
+					lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], OverlayCenter));
+					lcVector3 Intersection;
+
+					if (!lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
+						continue;
+
+					float IntersectionDistance = lcLengthSquared(Intersection - Start);
+
+					if (IntersectionDistance > ClosestIntersectionDistance)
+						continue;
+
+					lcVector3 Dir(Intersection - OverlayCenter);
+
+					float Proj1 = lcDot(Dir, PlaneNormals[(AxisIndex + 1) % 3]);
+					float Proj2 = lcDot(Dir, PlaneNormals[(AxisIndex + 2) % 3]);
+
+					if (Proj1 > OverlayTrainTrackStart && Proj1 < OverlayTrainTrackEnd && Proj2 > OverlayTrainTrackDistance + OverlayTrainTrackStart && Proj2 < OverlayTrainTrackDistance + OverlayTrainTrackEnd)
+					{
+						NewTrackTool = lcTrackTool::RotateTrainTrackRight;
+						ClosestIntersectionDistance = IntersectionDistance;
+						NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+					}
+
+					if (Proj1 > OverlayTrainTrackStart && Proj1 < OverlayTrainTrackEnd && -Proj2 > OverlayTrainTrackDistance + OverlayTrainTrackStart && -Proj2 < OverlayTrainTrackDistance + OverlayTrainTrackEnd)
+					{
+						NewTrackTool = lcTrackTool::RotateTrainTrackLeft;
+						ClosestIntersectionDistance = IntersectionDistance;
+						NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+					}
+				}
+			}
+
 			ActiveModel->UpdateTrainTrackConnections(Piece);
 
 			const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
@@ -1013,23 +1151,6 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 						NewTrackSection = lcTrainTrackInfo::EncodeTrackToolSection(ConnectionIndex, static_cast<lcTrainTrackType>(VertexIndex));
 					}
 				}
-			}
-
-			lcObjectRayTest ObjectRayTest;
-
-			ObjectRayTest.PiecesOnly = true;
-			ObjectRayTest.IgnoreSelected = false;
-			ObjectRayTest.ViewCamera = mView->GetCamera();
-			ObjectRayTest.Start = StartEnd[0];
-			ObjectRayTest.End = StartEnd[1];
-
-			Piece->RayTestConnectedTrainTracks(ObjectRayTest);
-
-			if (ObjectRayTest.Distance < ClosestIntersectionDistance && ObjectRayTest.ObjectSection.Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-			{
-				NewTrackTool = lcTrackTool::RotateTrainTrack;
-				ClosestIntersectionDistance = ObjectRayTest.Distance;
-				NewTrackSection = ObjectRayTest.ObjectSection.Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 			}
 		}
 	}

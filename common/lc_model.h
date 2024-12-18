@@ -218,7 +218,7 @@ public:
 	void RemoveFocusedControlPoint();
 	void FocusNextTrainTrack();
 	void FocusPreviousTrainTrack();
-	void RotateFocusedTrainTrack();
+	void RotateFocusedTrainTrack(int Direction);
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
 	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);
@@ -339,7 +339,6 @@ public:
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
-	void RotateTrainTrackToolClicked(quint32 ConnectionIndex);
 	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);
 	void PaintToolClicked(lcObject* Object);

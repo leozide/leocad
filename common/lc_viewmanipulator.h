@@ -17,7 +17,7 @@ public:
 	static void DestroyResources(lcContext* Context);
 
 protected:
-	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale);
+	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale, lcTrackTool TrackTool);
 
 	static bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms);
 

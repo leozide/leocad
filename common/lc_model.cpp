@@ -2429,7 +2429,7 @@ void lcModel::FocusPreviousTrainTrack()
 	UpdateAllViews();
 }
 
-void lcModel::RotateFocusedTrainTrack()
+void lcModel::RotateFocusedTrainTrack(int Direction)
 {
 	const lcObject* Focus = GetFocusObject();
 
@@ -2472,7 +2472,7 @@ void lcModel::RotateFocusedTrainTrack()
 	}
 
 	lcMatrix44 ConnectionTransform = lcMul(TrainTrackInfo->GetConnections()[RotateConnectionIndex].Transform, FocusPiece->mModelWorld);
-	int NewConnectionIndex = (RotateConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
+	int NewConnectionIndex = (RotateConnectionIndex + Direction + static_cast<int>(TrainTrackInfo->GetConnections().size())) % TrainTrackInfo->GetConnections().size();
 
 	Transform = lcTrainTrackInfo::CalculateTransformToConnection(ConnectionTransform, FocusPiece->mPieceInfo, NewConnectionIndex);
 
@@ -4523,54 +4523,6 @@ void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
-}
-
-void lcModel::RotateTrainTrackToolClicked(quint32 ConnectionIndex)
-{
-	const lcObject* Focus = GetFocusObject();
-
-	if (!Focus || !Focus->IsPiece())
-		return;
-
-	lcPiece* FocusPiece = (lcPiece*)Focus;
-	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
-
-	if (!TrainTrackInfo)
-		return;
-
-	lcPiece* ConnectedPiece = nullptr;
-	int ConnectedPieceConnectionIndex = -1;
-
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
-		if (Piece.get() == FocusPiece || !Piece->mPieceInfo->GetTrainTrackInfo())
-			continue;
-
-		ConnectedPieceConnectionIndex = lcTrainTrackInfo::GetPieceConnectionIndex(FocusPiece, ConnectionIndex, Piece.get());
-
-		if (ConnectedPieceConnectionIndex != -1)
-		{
-			ConnectedPiece = Piece.get();
-			break;
-		}
-	}
-
-	if (!ConnectedPiece)
-		return;
-
-	quint32 NewConnectionIndex = (ConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
-	std::optional<lcMatrix44> Transform = lcTrainTrackInfo::GetConnectionTransform(ConnectedPiece, ConnectedPieceConnectionIndex, FocusPiece->mPieceInfo, NewConnectionIndex);
-
-	if (!Transform)
-		return;
-
-	FocusPiece->SetPosition(Transform.value().GetTranslation(), mCurrentStep, gMainWindow->GetAddKeys());
-	FocusPiece->SetRotation(lcMatrix33(Transform.value()), mCurrentStep, gMainWindow->GetAddKeys());
-	FocusPiece->UpdatePosition(mCurrentStep);
-
-	gMainWindow->UpdateSelectedObjects(true);
-	UpdateAllViews();
-	SaveCheckpoint(tr("Rotating"));
 }
 
 void lcModel::UpdateScaleTool(const float Scale)

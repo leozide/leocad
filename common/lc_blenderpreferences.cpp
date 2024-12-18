@@ -1317,6 +1317,8 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 			ShowMessage(Message, tr("Extract addon"));
 		}
 	}
+	else if (AddonAction == ADDON_NO_ACTION)
+		return true;
 
 	return Extracted;
 }
@@ -1444,7 +1446,10 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 	{
 		if (GetBlenderAddonVersionMatch())
 		{
-			AddonAction = ADDON_NO_ACTION;
+			if (ExtractedAddon)
+				AddonAction = ADDON_NO_ACTION;
+			else
+				AddonAction = ADDON_EXTRACT;
 		}
 		else if (gMainWindow)
 		{

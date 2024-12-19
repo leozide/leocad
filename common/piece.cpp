@@ -1347,7 +1347,7 @@ bool lcPiece::RemoveFocusedControlPoint()
 {
 	quint32 Section = GetFocusSection();
 
-	if( Section < LC_PIECE_SECTION_CONTROL_POINT_FIRST )
+	if (Section < LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		return false;
 
 	const quint32 ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;

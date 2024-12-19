@@ -5,7 +5,7 @@
 #include "lc_math.h"
 
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (quint32)((quint32)(quint8)(ch0) | ((quint32)(quint8)(ch1) << 8) | \
-												((quint32)(quint8)(ch2) << 16) | ((quint32)(quint8)(ch3) << 24 ))
+												((quint32)(quint8)(ch2) << 16) | ((quint32)(quint8)(ch3) << 24))
 
 class lcFile
 {

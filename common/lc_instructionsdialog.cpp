@@ -323,7 +323,7 @@ void lcInstructionsPropertiesWidget::AddBoolProperty(lcInstructionsPropertyType 
 	connect(CheckBox, &QToolButton::toggled, [this, Type](bool Checked)
 	{
 		mInstructions->SetDefaultBool(Type, Checked);
-	} );
+	});
 }
 
 void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType Type)

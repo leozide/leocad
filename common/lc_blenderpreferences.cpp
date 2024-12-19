@@ -524,7 +524,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	{
 		mAddonVersionEdit->setText(mAddonVersion);
 		mRenderActBox->setChecked(true);
-		mImportActBox->setChecked(  lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN"));
+		mImportActBox->setChecked(lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("TN"));
 		mImportMMActBox->setChecked(lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("MM"));
 	}
 
@@ -593,7 +593,7 @@ void lcBlenderPreferences::ClearGroupBox(QGroupBox* GroupBox)
 
 	if(Row == -1 || ItemRole != QFormLayout::SpanningRole) return;
 
-	QLayoutItem* GroupBoxIitem = mForm->itemAt ( Row, ItemRole );
+	QLayoutItem* GroupBoxIitem = mForm->itemAt(Row, ItemRole);
 
 	mForm->removeItem(GroupBoxIitem);
 
@@ -1257,7 +1257,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 						{
 							bool FoundModule = false;
 							QTextStream In(&File);
-							while ( ! In.atEnd())
+							while (!In.atEnd())
 							{
 								if (QString(In.readLine(0)).startsWith("bl_info"))
 								{
@@ -1966,13 +1966,13 @@ QString lcBlenderPreferences::ReadStdErr(bool& Error) const
 
 	const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
 	QFile File(QString("%1/stderr-blender-addon-install").arg(BlenderDir));
-	if ( ! File.open(QFile::ReadOnly | QFile::Text))
+	if (!File.open(QFile::ReadOnly | QFile::Text))
 	{
 		const QString Message = tr("Failed to open log file: %1:\n%2").arg(File.fileName()).arg(File.errorString());
 		return Message;
 	}
 	QTextStream In(&File);
-	while ( ! In.atEnd())
+	while (!In.atEnd())
 	{
 		const QString& Line = In.readLine(0);
 		ReturnLines << CleanLine(Line);

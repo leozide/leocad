@@ -27,7 +27,7 @@ lcModelListDialog::lcModelListDialog(QWidget* Parent, const std::vector<std::uni
 		Item->setData(static_cast<int>(lcModelListRole::ExistingModel), QVariant::fromValue<uintptr_t>((uintptr_t)Model.get()));
 		ui->ModelList->addItem(Item);
 
-		if (Model.get() == ActiveModel )
+		if (Model.get() == ActiveModel)
 			ActiveModelIndex = ui->ModelList->count() - 1;
 	}
 

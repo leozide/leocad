@@ -247,6 +247,7 @@ protected:
 	PieceInfo* mContextInfo = nullptr;
 	lcPartCategoryType mCategoryType = lcPartCategoryType::AllParts;
 	int mCategoryIndex = 0;
+	std::map<std::pair<lcPartCategoryType, int>, int> mLastCategoryRow;
 };
 
 class lcPartSelectionWidget : public QWidget

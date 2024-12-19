@@ -540,6 +540,7 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 	setWordWrap(false);
 	setDragEnabled(true);
 	setContextMenuPolicy(Qt::CustomContextMenu);
+	setAutoScroll(false);
 
 	mListModel = new lcPartSelectionListModel(this);
 	setModel(mListModel);
@@ -585,6 +586,11 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 
 void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 {
+	QModelIndex CurrentIndex = currentIndex();
+
+	if (CurrentIndex.isValid())
+		mLastCategoryRow[{mCategoryType, mCategoryIndex}] = CurrentIndex.row();
+
 	mCategoryType = Type;
 	mCategoryIndex = Index;
 
@@ -610,7 +616,26 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 		break;
 	}
 
-	setCurrentIndex(mListModel->index(0, 0));
+	auto CurrentIt = mLastCategoryRow.find({mCategoryType, mCategoryIndex});
+	bool ScrollToTop = true;
+
+	if (CurrentIt != mLastCategoryRow.end())
+	{
+		CurrentIndex = mListModel->index(CurrentIt->second, 0);
+
+		if (!isRowHidden(CurrentIndex.row()))
+		{
+			scrollTo(CurrentIndex);
+			setCurrentIndex(CurrentIndex);
+			ScrollToTop = false;
+		}
+	}
+
+	if (ScrollToTop)
+	{
+		scrollToTop();
+		setCurrentIndex(indexAt(QPoint(0, 0)));
+	}
 }
 
 void lcPartSelectionListView::SetCustomParts(const std::vector<PieceInfo*>& Parts)

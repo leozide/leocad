@@ -233,6 +233,28 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 	SetFilter(mFilter);
 }
 
+void lcPartSelectionListModel::SetCustomParts(const std::vector<PieceInfo*>& Parts)
+{
+	beginResetModel();
+
+	ReleaseThumbnails();
+	mParts.clear();
+
+	for (PieceInfo* Part : Parts)
+		mParts.emplace_back().Info = Part;
+
+	auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
+	{
+		return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
+	};
+
+	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
+
+	endResetModel();
+
+	SetFilter(mFilter);
+}
+
 void lcPartSelectionListModel::SetFilter(const QString& Filter)
 {
 	mFilter = Filter.toLatin1();
@@ -511,12 +533,8 @@ void lcPartSelectionListModel::SetShowPartNames(bool Show)
 }
 
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget)
-	: QListView(Parent)
+	: QListView(Parent), mPartSelectionWidget(PartSelectionWidget)
 {
-	mPartSelectionWidget = PartSelectionWidget;
-	mCategoryType = lcPartCategoryType::AllParts;
-	mCategoryIndex = 0;
-
 	setUniformItemSizes(true);
 	setResizeMode(QListView::Adjust);
 	setWordWrap(false);
@@ -535,6 +553,9 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 
 void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 {
+	if (!mPartSelectionWidget)
+		return;
+
 	QMenu* Menu = new QMenu(this);
 
 	QModelIndex Index = indexAt(Pos);
@@ -584,9 +605,19 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Category:
 		mListModel->SetCategory(Index);
 		break;
+	case lcPartCategoryType::Custom:
 	case lcPartCategoryType::Count:
 		break;
 	}
+
+	setCurrentIndex(mListModel->index(0, 0));
+}
+
+void lcPartSelectionListView::SetCustomParts(const std::vector<PieceInfo*>& Parts)
+{
+	mCategoryType = lcPartCategoryType::Custom;
+
+	mListModel->SetCustomParts(Parts);
 
 	setCurrentIndex(mListModel->index(0, 0));
 }

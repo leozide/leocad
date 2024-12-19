@@ -86,46 +86,6 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	}
 }
 
-std::pair<PieceInfo*, lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Piece, quint32 ConnectionIndex, lcTrainTrackType TrainTrackType) const
-{
-	if (ConnectionIndex >= mConnections.size())
-		return { nullptr, lcMatrix44Identity() };
-
-	const char* PieceNames[] =
-	{
-		"74746.dat",
-		"74747.dat",
-		"74747.dat",
-		"2861c04.dat",
-		"2859c04.dat"
-	};
-
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(PieceNames[static_cast<int>(TrainTrackType)], nullptr, false, false);
-
-	if (!Info)
-		return { nullptr, lcMatrix44Identity() };
-
-	lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
-
-	if (!TrainTrackInfo || TrainTrackInfo->mConnections.empty())
-		return { nullptr, lcMatrix44Identity() };
-
-	lcMatrix44 Transform;
-
-	if (TrainTrackType != lcTrainTrackType::Left)
-		Transform = TrainTrackInfo->mConnections[0].Transform;
-	else
-	{
-		Transform = lcMatrix44AffineInverse(TrainTrackInfo->mConnections[0].Transform);
-		Transform = lcMul(Transform, lcMatrix44RotationZ(LC_PI));
-	}
-
-	Transform = lcMul(Transform, mConnections[ConnectionIndex].Transform);
-	Transform = lcMul(Transform, Piece->mModelWorld);
-
-	return { Info, Transform };
-}
-
 int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2)
 {
 	const lcTrainTrackInfo* TrainTrackInfo1 = Piece1->mPieceInfo->GetTrainTrackInfo();

@@ -17,6 +17,7 @@
 #include "lc_viewsphere.h"
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
+#include "lc_partselectionwidget.h"
 
 lcFindReplaceParams lcView::mFindReplaceParams;
 QPointer<lcFindReplaceWidget> lcView::mFindWidget;
@@ -304,6 +305,45 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
 }
 
+void lcView::ShowTrainTrackPopup()
+{
+	if (mViewType != lcViewType::View)
+		return;
+
+	lcModel* ActiveModel = GetActiveModel();
+	lcObject* Focus = ActiveModel->GetFocusObject();
+
+	if (!Focus || !Focus->IsPiece())
+		return;
+
+	lcPiece* Piece = (lcPiece*)Focus;
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+
+	if (!TrainTrackInfo)
+		return;
+
+	QMenu* Menu = new QMenu(mWidget);
+
+	QWidgetAction* Action = new QWidgetAction(Menu);
+	lcPartSelectionListView* ListView = new lcPartSelectionListView(mWidget, nullptr);
+	Action->setDefaultWidget(ListView);
+	Menu->addAction(Action);
+
+	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(TrainTrackInfo);
+
+	ListView->SetCustomParts(Parts);
+
+	connect(ListView, &QListView::doubleClicked, [Menu, ListView, ActiveModel]()
+		{
+			ActiveModel->AddPiece(ListView->GetCurrentPart());
+			Menu->close();
+		});
+
+	Menu->exec(QCursor::pos());
+
+	delete Menu;
+}
+
 void lcView::ShowContextMenu() const
 {
 	if (mViewType != lcViewType::View)
@@ -421,39 +461,14 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 
 void lcView::UpdatePiecePreview()
 {
-	lcModel* ActiveModel = GetActiveModel();
-	lcObject* Focus = ActiveModel->GetFocusObject();
-	PieceInfo* PreviewInfo = nullptr;
-	lcMatrix44 PreviewTransform;
+	PieceInfo* PreviewInfo = gMainWindow->GetCurrentPieceInfo();
 
-	if (Focus && Focus->IsPiece())
+	if (PreviewInfo)
 	{
-		lcPiece* Piece = (lcPiece*)Focus;
+		mPiecePreviewTransform = GetPieceInsertTransform(false, PreviewInfo);
 
-		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
-
-		if (TrainTrackInfo)
-		{
-			auto [ConnectionIndex, TrainTrackType] = lcTrainTrackInfo::DecodeTrackToolSection(mTrackToolSection);
-
-			std::tie(PreviewInfo, mPiecePreviewTransform) = TrainTrackInfo->GetPieceInsertTransform(Piece, ConnectionIndex, TrainTrackType);
-
-			if (GetActiveModel() != mModel)
-				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
-		}
-	}
-
-	if (!PreviewInfo)
-	{
-		PreviewInfo = gMainWindow->GetCurrentPieceInfo();
-
-		if (PreviewInfo)
-		{
-			mPiecePreviewTransform = GetPieceInsertTransform(false, PreviewInfo);
-
-			if (GetActiveModel() != mModel)
-				mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
-		}
+		if (GetActiveModel() != mModel)
+			mPiecePreviewTransform = lcMul(mPiecePreviewTransform, mActiveSubmodelTransform);
 	}
 
 	if (PreviewInfo != mPiecePreviewInfo)
@@ -1927,8 +1942,9 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Rotate,           // lcTrackTool::RotateZ
 		lcCursor::Rotate,           // lcTrackTool::RotateXY
 		lcCursor::Rotate,           // lcTrackTool::RotateXYZ
-		lcCursor::Rotate,           // lcTrackTool::RotateTrainTrackRight
-		lcCursor::Rotate,           // lcTrackTool::RotateTrainTrackLeft
+		lcCursor::Select,           // lcTrackTool::RotateTrainTrackRight
+		lcCursor::Select,           // lcTrackTool::RotateTrainTrackLeft
+		lcCursor::Select,           // lcTrackTool::InsertTrainTrack
 		lcCursor::Move,             // lcTrackTool::ScalePlus
 		lcCursor::Move,             // lcTrackTool::ScaleMinus
 		lcCursor::Delete,           // lcTrackTool::Eraser
@@ -2040,6 +2056,7 @@ lcTool lcView::GetCurrentTool() const
 		lcTool::Rotate,           // lcTrackTool::RotateXYZ
 		lcTool::Rotate,           // lcTrackTool::RotateTrainTrackRight
 		lcTool::Rotate,           // lcTrackTool::RotateTrainTrackLeft
+		lcTool::Insert,           // lcTrackTool::InsertTrainTrack
 		lcTool::Move,             // lcTrackTool::ScalePlus
 		lcTool::Move,             // lcTrackTool::ScaleMinus
 		lcTool::Eraser,           // lcTrackTool::Eraser
@@ -2579,6 +2596,15 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		}
 		break;
 
+	case lcTrackTool::InsertTrainTrack:
+		{
+			ShowTrainTrackPopup();
+
+			mToolClicked = true;
+			UpdateTrackTool();
+		}
+		break;
+
 	case lcTrackTool::ScalePlus:
 	case lcTrackTool::ScaleMinus:
 		if (ActiveModel->AnyPiecesSelected())
@@ -3024,6 +3050,7 @@ void lcView::OnMouseMove()
 
 	case lcTrackTool::RotateTrainTrackRight:
 	case lcTrackTool::RotateTrainTrackLeft:
+	case lcTrackTool::InsertTrainTrack:
 	case lcTrackTool::Eraser:
 	case lcTrackTool::Paint:
 	case lcTrackTool::ColorPicker:

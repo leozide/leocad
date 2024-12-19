@@ -13,6 +13,7 @@ enum class lcPartCategoryType
 	Submodels,
 	Palette,
 	Category,
+	Custom,
 	Count
 };
 
@@ -148,6 +149,7 @@ public:
 	void SetModelsCategory();
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
+	void SetCustomParts(const std::vector<PieceInfo*>& Parts);
 	void SetFilter(const QString& Filter);
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
@@ -191,6 +193,7 @@ public:
 	void startDrag(Qt::DropActions SupportedActions) override;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
+	void SetCustomParts(const std::vector<PieceInfo*>& Parts);
 	void SetCurrentPart(PieceInfo* Info);
 
 	PieceInfo* GetCurrentPart() const
@@ -239,11 +242,11 @@ protected:
 	void SetIconSize(int Size);
 	void SetPartFilterType(lcPartFilterType Option);
 
-	lcPartSelectionListModel* mListModel;
-	lcPartSelectionWidget* mPartSelectionWidget;
-	PieceInfo* mContextInfo;
-	lcPartCategoryType mCategoryType;
-	int mCategoryIndex;
+	lcPartSelectionListModel* mListModel = nullptr;
+	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
+	PieceInfo* mContextInfo = nullptr;
+	lcPartCategoryType mCategoryType = lcPartCategoryType::AllParts;
+	int mCategoryIndex = 0;
 };
 
 class lcPartSelectionWidget : public QWidget

@@ -21,7 +21,7 @@ lcViewManipulator::lcViewManipulator(lcView* View)
 
 void lcViewManipulator::CreateResources(lcContext* Context)
 {
-	float Verts[(51 + 138 + 10 + 74) * 3];
+	float Verts[(51 + 138 + 10 + 74 + 28) * 3];
 	float* CurVert = Verts;
 
 	const float OverlayMovePlaneSize = 0.5f;
@@ -146,6 +146,7 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 	const float OverlayTrainTrackEnd = 0.5f;
 	const float OverlayTrainTrackCenter = 0.2f;
 	const float OverlayTrainTrackDistance = 0.5f;
+	const float OverlayTrainTrackInsert = 0.3f;
 
 	// Train Track Rotate Right
 	*CurVert++ = OverlayTrainTrackStart; *CurVert++ = OverlayTrainTrackEnd + OverlayTrainTrackDistance - OverlayArrowCapRadius; *CurVert++ = 0.0f;
@@ -194,7 +195,38 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		*CurVert = *(CurVert - 111); CurVert++;
 	}
 
-	const GLushort Indices[108 + 360 + 12 + 192] =
+	// Train Track Insert
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
+	{
+		const float Radius = OverlayArrowBodyRadius;
+		float x = cosf(LC_2PI * EdgeIndex / 6);
+		float y = sinf(LC_2PI * EdgeIndex / 6);
+
+		*CurVert++ = x * Radius + OverlayTrainTrackEnd - OverlayArrowBodyRadius;
+		*CurVert++ = OverlayTrainTrackInsert;
+		*CurVert++ = y * Radius;
+
+		*CurVert++ = x * Radius + OverlayTrainTrackEnd - OverlayArrowBodyRadius;
+		*CurVert++ = -OverlayTrainTrackInsert;
+		*CurVert++ = y * Radius;
+	}
+
+	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
+	{
+		const float Radius = OverlayArrowBodyRadius;
+		float x = cosf(LC_2PI * EdgeIndex / 6);
+		float y = sinf(LC_2PI * EdgeIndex / 6);
+
+		*CurVert++ = OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius;
+		*CurVert++ = x * Radius;
+		*CurVert++ = y * Radius;
+
+		*CurVert++ = -OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius;
+		*CurVert++ = x * Radius;
+		*CurVert++ = y * Radius;
+	}
+
+	const GLushort Indices[108 + 360 + 12 + 192 + 72] =
 	{
 		// Move X
 		0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 7, 0, 7, 8, 0, 8, 1,
@@ -229,7 +261,10 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 		// Train Track Rotate Left
 		236, 237, 238, 236, 238, 239, 236, 239, 240, 236, 240, 241, 236, 241, 242, 236, 242, 243, 236, 243, 244, 236, 244, 237,
 		245, 246, 247, 247, 248, 246, 247, 248, 249, 249, 250, 248, 249, 250, 251, 251, 252, 250, 251, 252, 253, 253, 254, 252, 253, 254, 255, 255, 256, 254, 255, 256, 257, 257, 258, 256,
-		259, 260, 261, 261, 262, 260, 261, 262, 263, 263, 264, 262, 263, 264, 265, 265, 266, 264, 265, 266, 267, 267, 268, 266, 267, 268, 269, 269, 270, 268, 269, 270, 271, 271, 272, 270
+		259, 260, 261, 261, 262, 260, 261, 262, 263, 263, 264, 262, 263, 264, 265, 265, 266, 264, 265, 266, 267, 267, 268, 266, 267, 268, 269, 269, 270, 268, 269, 270, 271, 271, 272, 270,
+		// Train Track Insert
+		273, 274, 275, 275, 276, 274, 275, 276, 277, 277, 278, 276, 277, 278, 279, 279, 280, 278, 279, 280, 281, 281, 282, 280, 281, 282, 283, 283, 284, 282, 283, 284, 285, 285, 286, 284,
+		287, 288, 289, 289, 290, 288, 289, 290, 291, 291, 292, 290, 291, 292, 293, 293, 294, 292, 293, 294, 295, 295, 296, 294, 295, 296, 297, 297, 298, 296, 297, 298, 299, 299, 300, 298
 	};
 
 	mRotateMoveVertexBuffer = Context->CreateVertexBuffer(sizeof(Verts), Verts);
@@ -432,18 +467,15 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		}
 		else if (Piece->mPieceInfo->GetTrainTrackInfo())
 		{
-			DrawTrainTrack(Piece, Context, OverlayScale, TrackTool);
+			DrawTrainTrack(Piece, Context, TrackTool);
 		}
 	}
 
 	Context->EnableDepthTest(true);
 }
 
-void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float OverlayScale, lcTrackTool TrackTool)
+void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTrackTool TrackTool)
 {
-	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
-	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
-
 	if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 	{
 		const lcPreferences& Preferences = lcGetPreferences();
@@ -454,6 +486,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
 		if (TrackTool == lcTrackTool::RotateTrainTrackRight)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 
 			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
@@ -461,61 +494,22 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, float
 		else if (TrackTool == lcTrackTool::RotateTrainTrackLeft)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 
 			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
 		}
-		else
+		else if (TrackTool == lcTrackTool::InsertTrainTrack)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+
+			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 		}
-	}
-
-	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-	{
-		if (Piece->IsTrainTrackConnected(ConnectionIndex))
-			continue;
-
-		const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
-		lcVector3 Start = Transform.GetTranslation();
-		lcVector3 Direction = lcVector3(Transform[0]) * 100;
-
-		if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		else
 		{
-			quint32 FocusIndex = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-
-			if (FocusIndex != ConnectionIndex)
-				continue;
-
-			Start = lcVector3(0.0f, 0.0f, 0.0f);
-			Direction = lcVector3(100.0f, 0.0f, 0.0f);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192 + 72, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
 		}
-
-		lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count) * 2];
-		int NumVerts = 0;
-
-		Verts[NumVerts++] = Start / OverlayScale;
-		Verts[NumVerts++] = (Start + Direction) / OverlayScale;
-
-		Verts[NumVerts++] = Verts[0];
-		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * 60))) / OverlayScale;
-
-		Verts[NumVerts++] = Verts[0];
-		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * -60))) / OverlayScale;
-
-		Verts[NumVerts++] = Verts[0];
-		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * 30))) / OverlayScale;
-
-		Verts[NumVerts++] = Verts[0];
-		Verts[NumVerts++] = (Start + lcMul31(Direction, lcMatrix44RotationZ(LC_DTOR * -30))) / OverlayScale;
-
-		Context->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		Context->SetVertexBufferPointer(Verts);
-		Context->ClearIndexBuffer();
-		Context->SetVertexFormatPosition(3);
-
-		Context->DrawPrimitives(GL_LINES, 0, NumVerts);
 	}
 }
 
@@ -875,6 +869,7 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 
 		case lcTrackTool::RotateTrainTrackRight:
 		case lcTrackTool::RotateTrainTrackLeft:
+		case lcTrackTool::InsertTrainTrack:
 			return true;
 
 		case lcTrackTool::ScalePlus:
@@ -907,11 +902,13 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 	const float OverlayMovePlaneSize = 0.5f * OverlayScale;
 	const float OverlayMoveArrowSize = 1.5f * OverlayScale;
 	const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
+	const float OverlayArrowBodyRadius = 0.05f * OverlayScale;
 	const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 	const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 	const float OverlayTrainTrackStart = 0.0f * OverlayScale;
 	const float OverlayTrainTrackEnd = 0.5f * OverlayScale;
 	const float OverlayTrainTrackDistance = 0.5f * OverlayScale;
+	const float OverlayTrainTrackInsert = 0.3f * OverlayScale;
 	const float OverlayScaleRadius = 0.125f;
 
 	lcTool CurrentTool = gMainWindow->GetTool();
@@ -1113,43 +1110,14 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 						ClosestIntersectionDistance = IntersectionDistance;
 						NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 					}
-				}
-			}
 
-			ActiveModel->UpdateTrainTrackConnections(Piece);
-
-			const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
-
-			for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-			{
-				if (Piece->IsTrainTrackConnected(ConnectionIndex))
-					continue;
-
-				const lcMatrix44& Transform = Connections[ConnectionIndex].Transform;
-				lcVector3 Verts[static_cast<int>(lcTrainTrackType::Count)];
-				int NumVerts = 0;
-
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcVector3(Transform[0]) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 60)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -60)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * 30)) * 100) / 1;
-				Verts[NumVerts++] = (Transform.GetTranslation() + lcMul31(lcVector3(Transform[0]), lcMatrix44RotationZ(LC_DTOR * -30)) * 100) / 1;
-
-				for (int VertexIndex = 0; VertexIndex < NumVerts; VertexIndex++)
-				{
-					Verts[VertexIndex] = lcMul31(Verts[VertexIndex], WorldMatrix);
-
-					float IntersectionDistance = lcRayPointDistance(Verts[VertexIndex], Start, End);
-
-					if (IntersectionDistance < 40)
+					if (Proj1 > -OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj1 < OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj2 > -OverlayTrainTrackInsert && Proj2 < OverlayTrainTrackInsert)
 					{
-						if (IntersectionDistance > ClosestIntersectionDistance)
-							continue;
-
-						NewTrackTool = lcTrackTool::Insert;
+						NewTrackTool = lcTrackTool::InsertTrainTrack;
 						ClosestIntersectionDistance = IntersectionDistance;
-						NewTrackSection = lcTrainTrackInfo::EncodeTrackToolSection(ConnectionIndex, static_cast<lcTrainTrackType>(VertexIndex));
+						NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 					}
+
 				}
 			}
 		}

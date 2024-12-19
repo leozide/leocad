@@ -2281,9 +2281,10 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 	return lcMatrix33Identity();
 }
 
-void lcModel::AddPiece()
+void lcModel::AddPiece(PieceInfo* PieceInfo)
 {
-	PieceInfo* PieceInfo = gMainWindow->GetCurrentPieceInfo();
+	if (!PieceInfo)
+		PieceInfo = gMainWindow->GetCurrentPieceInfo();
 
 	if (!PieceInfo)
 		return;

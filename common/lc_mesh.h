@@ -45,8 +45,8 @@ struct lcMeshSection
 
 struct lcMeshLod
 {
-	lcMeshSection* Sections;
-	int NumSections;
+	lcMeshSection* Sections = nullptr;
+	int NumSections = 0;
 };
 
 enum
@@ -121,20 +121,18 @@ public:
 
 	lcMeshLod mLods[LC_NUM_MESH_LODS];
 	lcBoundingBox mBoundingBox;
-	float mRadius;
+	float mRadius = 0.0f;
 	lcMeshFlags mFlags;
 
-	void* mVertexData;
-	int mVertexDataSize;
-	void* mIndexData;
-	int mIndexDataSize;
-	int mVertexCacheOffset;
-	int mIndexCacheOffset;
+	void* mVertexData = nullptr;
+	int mVertexDataSize = 0;
+	void* mIndexData = nullptr;
+	int mIndexDataSize = 0;
+	int mVertexCacheOffset = -1;
+	int mIndexCacheOffset = -1;
 
-	int mNumVertices;
-	int mNumTexturedVertices;
-	int mConditionalVertexCount;
-	int mIndexType;
+	int mNumVertices = 0;
+	int mNumTexturedVertices = 0;
+	int mConditionalVertexCount = 0;
+	int mIndexType = 0;
 };
-
-

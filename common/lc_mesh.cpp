@@ -14,21 +14,6 @@ lcMesh* gPlaceholderMesh;
 
 lcMesh::lcMesh()
 {
-	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
-	{
-		mLods[LodIdx].Sections = nullptr;
-		mLods[LodIdx].NumSections = 0;
-	}
-
-	mNumVertices = 0;
-	mNumTexturedVertices = 0;
-	mIndexType = 0;
-	mVertexData = nullptr;
-	mVertexDataSize = 0;
-	mIndexData = nullptr;
-	mIndexDataSize = 0;
-	mVertexCacheOffset = -1;
-	mIndexCacheOffset = -1;
 }
 
 lcMesh::~lcMesh()
@@ -164,7 +149,6 @@ void lcMesh::CreateBox()
 	*Indices++ = 23; *Indices++ = 22; *Indices++ = 21;
 	*Indices++ = 23; *Indices++ = 21; *Indices++ = 20;
 
-
 	Section = &mLods[LC_MESH_LOD_HIGH].Sections[1];
 	Section->ColorIndex = gEdgeColor;
 	Section->IndexOffset = 36 * 2;
@@ -193,27 +177,42 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr, &IntersectionPlane) || (Distance >= MinDistance))
 		return false;
 
-	const lcVertex* const Verts = (lcVertex*)mVertexData;
 	bool Hit = false;
 	lcVector3 Intersection;
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+		const lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-		if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
-			continue;
-
-		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
-
-		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
-			const lcVector3& v1 = Verts[Indices[Idx]].Position;
-			const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
-			const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
+			const lcVertex* Verts = GetVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
-			if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
-				Hit = true;
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			{
+				const lcVector3& v1 = Verts[Indices[Idx]].Position;
+				const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
+				const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
+
+				if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
+					Hit = true;
+			}
+		}
+		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+		{
+			const lcVertexTextured* Verts = GetTexturedVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			{
+				const lcVector3& v1 = Verts[Indices[Idx]].Position;
+				const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
+				const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
+
+				if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
+					Hit = true;
+			}
 		}
 	}
 
@@ -234,20 +233,28 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 template<typename IndexType>
 bool lcMesh::IntersectsPlanes(const lcVector4 (&Planes)[6])
 {
-	lcVertex* Verts = (lcVertex*)mVertexData;
-
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
-		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+		const lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-		if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
-			continue;
+		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
+		{
+			const lcVertex* Verts = GetVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
-		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
+					return true;
+		}
+		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+		{
+			const lcVertexTextured* Verts = GetTexturedVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
-		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
-			if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
-				return true;
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
+					return true;
+		}
 	}
 
 	return false;
@@ -282,33 +289,56 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 		sprintf(Line, "#declare lc_%s = mesh {\n", MeshName);
 	File.WriteLine(Line);
 
-	const lcVertex* const Verts = (lcVertex*)mVertexData;
-
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 	{
 		lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
 
-		if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
-			continue;
-
-		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
-
-		if (NumSections > 1)
-			File.WriteLine(" mesh {\n");
-
-		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
-			const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
-			const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
-			const lcVector3 v3 = Verts[Indices[Idx + 2]].Position / 25.0f;
-			const lcVector3 n1 = lcUnpackNormal(Verts[Indices[Idx]].Normal);
-			const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
-			const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
+			const lcVertex* Verts = GetVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+		
+			if (NumSections > 1)
+				File.WriteLine(" mesh {\n");
 
-			sprintf(Line, "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
-			        -v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
-			File.WriteLine(Line);
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			{
+				const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
+				const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
+				const lcVector3 v3 = Verts[Indices[Idx + 2]].Position / 25.0f;
+				const lcVector3 n1 = lcUnpackNormal(Verts[Indices[Idx]].Normal);
+				const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
+				const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
+
+				sprintf(Line, "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
+						-v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
+				File.WriteLine(Line);
+			}
 		}
+		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+		{
+			const lcVertexTextured* Verts = GetTexturedVertexData();
+			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+
+			if (NumSections > 1)
+				File.WriteLine(" mesh {\n");
+
+			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			{
+				const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
+				const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
+				const lcVector3 v3 = Verts[Indices[Idx + 2]].Position / 25.0f;
+				const lcVector3 n1 = lcUnpackNormal(Verts[Indices[Idx]].Normal);
+				const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
+				const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
+
+				sprintf(Line, "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
+						-v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
+				File.WriteLine(Line);
+			}
+		}
+		else
+			continue;
 
 		if (Section->ColorIndex != gDefaultColor)
 		{

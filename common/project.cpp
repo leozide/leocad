@@ -2033,7 +2033,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			"    #elseif (Type = AreaLight)\n"
 			"      area_light AreaWidth, AreaHeight, AreaRows, AreaColumns\n"
 			"      jitter\n"
-			"      #if (AreaCircle > 0 & AreaWidth > 2 & AreaHeight > 2 & AreaRows > 1 & AreaColumns > 1)\n"
+			"      #if (AreaCircle > 0 & AreaRows > 1 & AreaColumns > 1)\n"
 			"        circular \n"
 			"        #if (AreaWidth = AreaHeight & AreaRows = AreaColumns)\n"
 			"          orient\n"

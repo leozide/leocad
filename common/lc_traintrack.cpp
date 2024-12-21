@@ -111,7 +111,7 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info)
+std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section)
 {
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
@@ -121,7 +121,15 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 	const quint32 FocusSection = CurrentPiece->GetFocusSection();
 	quint32 ConnectionIndex = 0;
 
-	if (FocusSection == LC_PIECE_SECTION_POSITION)
+	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	{
+		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+	}
+	else if (Section != LC_PIECE_SECTION_INVALID && Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	{
+		ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+	}
+	else
 	{
 		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
 			if (!CurrentPiece->IsTrainTrackConnected(ConnectionIndex))
@@ -129,13 +137,6 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 
 		if (ConnectionIndex == CurrentTrackInfo->GetConnections().size())
 			return std::nullopt;
-	}
-	else if (FocusSection != LC_PIECE_SECTION_INVALID)
-	{
-		if (FocusSection < LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-			return std::nullopt;
-
-		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	}
 
 	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, ConnectionIndex ? 0 : 1);

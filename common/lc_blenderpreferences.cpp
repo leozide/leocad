@@ -348,8 +348,11 @@ void lcBlenderPreferencesDialog::ShowPathsGroup()
 
 void lcBlenderPreferencesDialog::EnableButton(bool Change)
 {
-	mApplyButton->setEnabled(Change);
-	mResetButton->setEnabled(Change);
+	if (Change)
+	{
+		mApplyButton->setEnabled(true);
+		mResetButton->setEnabled(true);
+	}
 	mPathsButton->setText(tr("Hide Paths"));
 	mPathsButton->setToolTip(tr("Hide addon path preferences dialog"));
 }
@@ -362,13 +365,9 @@ void lcBlenderPreferencesDialog::ResetSettings()
 
 void lcBlenderPreferencesDialog::accept()
 {
-	if (mPreferences->SettingsModified())
-	{
-		mApplyButton->setEnabled(false);
-		mPreferences->SaveSettings();
-		QDialog::accept();
-	} else
-		QDialog::reject();
+	mApplyButton->setEnabled(false);
+	mPreferences->Apply(QDialog::Accepted);
+	QDialog::accept();
 }
 
 void lcBlenderPreferencesDialog::reject()
@@ -517,7 +516,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	if (mAddonVersion.isEmpty())
 	{
 		mModulesBox->setEnabled(false);
-		mAddonUpdateButton->setEnabled(false);
+		mAddonUpdateButton->setEnabled(true);
 		mImportActBox->setChecked(true); // default addon module
 	}
 	else
@@ -1207,9 +1206,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			StatusUpdate(true, false, tr("Installing..."));
 
-			QDir ConfigDir(BlenderConfigDir);
-			if(!QDir(ConfigDir).exists())
-				ConfigDir.mkpath(".");
+			emit SettingChangedSig(true);
 		}
 
 		SaveSettings();

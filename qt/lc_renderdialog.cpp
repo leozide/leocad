@@ -425,7 +425,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		QApplication::processEvents();
 
 		mBlendProgValue = 0;
-		mBlendProgMax   = 0;
+		mBlendProgMax = 0;
 
 		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 		mDataPath = DataPathList.first();
@@ -582,6 +582,8 @@ void lcRenderDialog::on_RenderButton_clicked()
 		}
 		else
 		{
+			ui->RenderProgress->setRange(mBlendProgValue, mBlendProgMax);
+			ui->RenderProgress->setValue(1);
 #ifdef Q_OS_WIN
 			mProcess->start(ShellProgram, QStringList() << "/C" << Script.fileName());
 #else
@@ -622,9 +624,10 @@ void lcRenderDialog::ReadStdOut()
 	QRegExp RxRenderProgress;
 	RxRenderProgress.setCaseSensitivity(Qt::CaseInsensitive);
 #endif
-	bool BlenderVersion3 = lcGetProfileString(LC_PROFILE_BLENDER_VERSION).startsWith("v3");
+	int BlenderVersionNum = QString(lcGetProfileString(LC_PROFILE_BLENDER_VERSION).at(1)).toInt();
+	bool BlenderVersion3OrGreater = BlenderVersionNum > 2;
 
-	if (BlenderVersion3)
+	if (BlenderVersion3OrGreater)
 		RxRenderProgress.setPattern("Sample (\\d+)\\/(\\d+)");
 	else
 		RxRenderProgress.setPattern("(\\d+)\\/(\\d+) Tiles");

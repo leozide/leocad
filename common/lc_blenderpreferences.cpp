@@ -241,7 +241,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 51/11 LBL_STARTING_STEP_FRAME              */ {"startingstepframe",             "1",          QObject::tr("Starting Step Frame"),      QObject::tr("Frame to add the first STEP meta command")},
 
 	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QObject::tr("Chosen Logo"),              QObject::tr("Which logo to display. logo and logo2 aren't used and are only included for completeness")},
-	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "lgeo",       QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
 	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
 	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QObject::tr("How To Scale Parts"),       QObject::tr("Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for part editing")},
 	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}

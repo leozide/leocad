@@ -447,12 +447,11 @@ void lcRenderDialog::on_RenderButton_clicked()
 										   "'EXEC_DEFAULT', "
 										   "resolution_width=%1, resolution_height=%2, "
 										   "render_percentage=%3, model_file=r'%4', "
-										   "image_file=r'%5', preferences_file=r'%6'")
+										   "image_file=r'%5'")
 										   .arg(mWidth).arg(mHeight)
 										   .arg(mScale * 100)
 										   .arg(QDir::toNativeSeparators(ModelFileName).replace("\\","\\\\"))
-										   .arg(QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"))
-										   .arg(QDir::toNativeSeparators(BlenderLDrawConfigFile).replace("\\","\\\\"));
+										   .arg(QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"));
 		if (BlenderImportModule == QLatin1String("MM"))
 			PythonExpression.append(", use_ldraw_import_mm=True");
 		if (SearchCustomDir)

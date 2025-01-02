@@ -1058,7 +1058,8 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 		connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 		mUpdateTimer.start(500);
 
-		if (!ModuleChange)
+		QDir ConfigDir(BlenderConfigDir);
+		if (!ModuleChange || !ConfigDir.exists())
 		{
 			mProgressBar = new QProgressBar(mContent);
 			mProgressBar->setMaximum(0);
@@ -3382,6 +3383,9 @@ bool lcBlenderPreferences::ExportParameterFile()
 {
 	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER);
 	const QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
+	QDir ConfigDir(BlenderConfigDir);
+	if(!ConfigDir.exists())
+		ConfigDir.mkpath(".");
 	QFile File(ParameterFile);
 
 	if (!OverwriteFile(File.fileName()))

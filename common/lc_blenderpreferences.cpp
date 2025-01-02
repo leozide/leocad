@@ -42,7 +42,7 @@ const QLatin1String LineEnding("\r\n");
 #define LC_BLENDER_ADDON_FILE              "LDrawBlenderRenderAddons.zip"
 #define LC_BLENDER_ADDON_INSTALL_FILE      "install_blender_ldraw_addons.py"
 #define LC_BLENDER_ADDON_CONFIG_FILE       "LDrawRendererPreferences.ini"
-#define LC_BLENDER_ADDON_PARAMS_FILE       "BlenderLDrawParameters.lst"
+#define LC_BLENDER_ADDON_PARAMS_FILE       "LDrawParameters.lst"
 
 #define LC_BLENDER_ADDON_REPO_STR          "https://github.com/trevorsandy"
 #define LC_BLENDER_ADDON_REPO_API_STR      "https://api.github.com/repos/trevorsandy"
@@ -1324,7 +1324,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 {
 	const QString BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
 	const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
-	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_FOLDER_STR));
+	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER));
 	bool ExtractedAddon = QFileInfo(AddonVersionFile).isReadable();
 	bool BlenderAddonValidated = ExtractedAddon || QFileInfo(BlenderAddonFile).isReadable();
 	AddonEnc AddonAction = ADDON_DOWNLOAD;
@@ -1380,7 +1380,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		QByteArray Ba;
 		if (!ExtractedAddon)
 		{
-			const char* VersionFile = "addons/" LC_BLENDER_ADDON_FOLDER_STR "/__version__.py";
+			const char* VersionFile = "addons/" LC_BLENDER_ADDON_RENDER_FOLDER "/__version__.py";
 
 			lcZipFile ZipFile;
 
@@ -2461,7 +2461,7 @@ void lcBlenderPreferences::LoadSettings()
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 	}
 
-	if (!QDir(QString("%1/Blender/addons/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_FOLDER_STR)).isReadable())
+	if (!QDir(QString("%1/Blender/addons/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 
 	if (!NumPaths())
@@ -2521,9 +2521,7 @@ void lcBlenderPreferences::LoadSettings()
 
 	QFileInfo BlenderConfigFileInfo(lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH));
 
-	bool ConfigFileExists = BlenderConfigFileInfo.exists();
-
-	if (ConfigFileExists)
+	if (BlenderConfigFileInfo.exists())
 	{
 		QSettings Settings(BlenderConfigFileInfo.absoluteFilePath(), QSettings::IniFormat);
 
@@ -2623,8 +2621,6 @@ void lcBlenderPreferences::SaveSettings()
 	if (!NumSettings() || !NumSettingsMM())
 		LoadSettings();
 
-	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
-
 	QString Key, Value = mBlenderPaths[PATH_BLENDER].value;
 	if (Value.isEmpty())
 		Value = gAddonPreferences->mPathLineEditList[PATH_BLENDER]->text();
@@ -2643,8 +2639,14 @@ void lcBlenderPreferences::SaveSettings()
 
 	lcSetProfileString(LC_PROFILE_BLENDER_VERSION, Value);
 
-	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH).isEmpty() ? QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE) : lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
-	lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
+	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER);
+	
+	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
+	if (!Value.contains(LC_BLENDER_ADDON_RENDER_FOLDER))
+	{
+		Value = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE);
+		lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
+	}
 
 	QString searchDirectoriesKey;
 	QString parameterFileKey = QLatin1String("ParameterFile");
@@ -3378,7 +3380,7 @@ void lcBlenderPreferences::LoadDefaultParameters(QByteArray& Buffer, int Which)
 
 bool lcBlenderPreferences::ExportParameterFile()
 {
-	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
+	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER);
 	const QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
 	QFile File(ParameterFile);
 

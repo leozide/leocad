@@ -106,7 +106,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
 
 		QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
-		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_FOLDER_STR)).isReadable())
+		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
 		{
 			BlenderConfigured = false;
 			lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());

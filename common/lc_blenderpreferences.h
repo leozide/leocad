@@ -8,7 +8,7 @@
 #define LC_WINDOWS_SHELL               "cmd.exe"
 #define LC_BLENDER_ADDON_BLEND_FILE    "leocad.blend"
 #define LC_BLENDER_ADDON_IMPORT_MODULE "TN"
-#define LC_BLENDER_ADDON_FOLDER_STR    "io_scene_render_ldraw"
+#define LC_BLENDER_ADDON_RENDER_FOLDER "io_scene_render_ldraw"
 
 class QFormLayout;
 class QGridLayout;

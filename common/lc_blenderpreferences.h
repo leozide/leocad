@@ -158,7 +158,7 @@ private:
 		LBL_POSITION_CAMERA,                    // 17   QCheckBox
 		LBL_REMOVE_DOUBLES,                     // 18   QCheckBox
 		LBL_RENDER_WINDOW,                      // 19   QCheckBox
-		LBL_USE_ARCHIVE_LIBS,                   // 20   QChekcBox
+		LBL_USE_ARCHIVE_LIBRARY,                // 20   QChekcBox
 		LBL_SEARCH_ADDL_PATHS,                  // 21   QCheckBox
 		LBL_SMOOTH_SHADING,                     // 22   QCheckBox
 		LBL_TRANSPARENT_BACKGROUND,             // 23   QCheckBox

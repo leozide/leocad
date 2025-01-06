@@ -2475,7 +2475,7 @@ void lcBlenderPreferences::LoadSettings()
 			LDrawDir = FileInfo.absolutePath();
 
 		const QString Suffix = FileInfo.suffix().toLower();
-		const QFileInfo PartInfo(QString("%1/parts/1.dat").arg(LDrawDir));
+		const QFileInfo PartInfo(QString("%1/p/1-4cyli.dat").arg(LDrawDir));
 		const QFileInfo LDConfigInfo(QString("%1/LDConfig.ldr").arg(LDrawDir));
 
 		UseArchiveLibrary = (Suffix == "zip" || Suffix == "bin") && !(PartInfo.exists() && LDConfigInfo.exists());
@@ -2623,7 +2623,8 @@ void lcBlenderPreferences::LoadSettings()
 			}
 			else
 			{
-				ShowMessage(tr("Failed to open log file: %1:\n%2")
+				ShowMessage(tr("Blender config file was not found. "
+							   "Install log check failed:<br>%1:<br>%2")
 								.arg(File.fileName())
 								.arg(File.errorString()));
 			}

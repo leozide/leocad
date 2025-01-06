@@ -2675,7 +2675,7 @@ void lcBlenderPreferences::SaveSettings()
 		lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
 	}
 
-	QString searchDirectoriesKey;
+	QString searchDirectoriesKey = QLatin1String("additionalSearchPaths");
 	QString parameterFileKey = QLatin1String("ParameterFile");
 	QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
 
@@ -2685,7 +2685,7 @@ void lcBlenderPreferences::SaveSettings()
 	{
 		if (!QFileInfo(ParameterFile).exists())
 			ExportParameterFile();
-		Value = QDir::toNativeSeparators(QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath());
+		Value = QDir::toNativeSeparators(QFileInfo(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)).absolutePath());
 		Settings.setValue(searchDirectoriesKey, QVariant(Value));
 		Settings.endGroup();
 	};
@@ -2729,8 +2729,6 @@ void lcBlenderPreferences::SaveSettings()
 
 	Settings.setValue(parameterFileKey, QVariant(QDir::toNativeSeparators(ParameterFile)));
 
-	searchDirectoriesKey = QLatin1String("additionalSearchDirectories");
-
 	concludeSettingsGroup();
 
 	Settings.beginGroup(LC_BLENDER_ADDON_MM);
@@ -2766,8 +2764,6 @@ void lcBlenderPreferences::SaveSettings()
 		if (!Key.isEmpty())
 			Settings.setValue(Key, QVariant(Value));
 	}
-
-	searchDirectoriesKey = QLatin1String("additionalSearchPaths");
 
 	concludeSettingsGroup();
 

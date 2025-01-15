@@ -480,12 +480,17 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 
 	if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 	{
+		quint32 ConnectionIndex = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+		bool CanAdd = !Piece->IsTrainTrackConnected(ConnectionIndex);
+
 		Context->SetColor(TrainTrackColor);
 
 		if (TrackTool == lcTrackTool::RotateTrainTrackRight)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
-			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
+
+			if (CanAdd)
+				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 
 			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
@@ -493,7 +498,9 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 		else if (TrackTool == lcTrackTool::RotateTrainTrackLeft)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
-			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
+	
+			if (CanAdd)
+				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 
 			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 96) * 2);
@@ -502,12 +509,18 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
 
-			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
+			if (CanAdd)
+			{
+				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
+			}
 		}
 		else
 		{
-			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192 + 72, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+			Context->DrawIndexedPrimitives(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
+
+			if (CanAdd)
+				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 		}
 	}
 	else
@@ -930,7 +943,6 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 	const float OverlayMovePlaneSize = 0.5f * OverlayScale;
 	const float OverlayMoveArrowSize = 1.5f * OverlayScale;
 	const float OverlayMoveArrowCapRadius = 0.1f * OverlayScale;
-	const float OverlayArrowBodyRadius = 0.05f * OverlayScale;
 	const float OverlayRotateArrowStart = 1.0f * OverlayScale;
 	const float OverlayRotateArrowEnd = 1.5f * OverlayScale;
 	const float OverlayScaleRadius = 0.125f;
@@ -1131,6 +1143,9 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 
 	if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 	{
+		quint32 ConnectionIndex = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+		bool CanAdd = !Piece->IsTrainTrackConnected(ConnectionIndex);
+
 		for (int AxisIndex = 2; AxisIndex < 3; AxisIndex++)
 		{
 			lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], OverlayCenter));
@@ -1163,7 +1178,7 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 				ClosestIntersectionDistance = IntersectionDistance;
 			}
 
-			if (Proj1 > -OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj1 < OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj2 > -OverlayTrainTrackInsert && Proj2 < OverlayTrainTrackInsert)
+			if (CanAdd && Proj1 > -OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj1 < OverlayTrainTrackInsert + OverlayTrainTrackEnd - OverlayArrowBodyRadius && Proj2 > -OverlayTrainTrackInsert && Proj2 < OverlayTrainTrackInsert)
 			{
 				NewTrackTool = lcTrackTool::InsertTrainTrack;
 				NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;

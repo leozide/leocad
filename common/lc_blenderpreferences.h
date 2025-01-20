@@ -8,7 +8,7 @@
 #define LC_WINDOWS_SHELL               "cmd.exe"
 #define LC_BLENDER_ADDON_BLEND_FILE    "leocad.blend"
 #define LC_BLENDER_ADDON_IMPORT_MODULE "TN"
-#define LC_BLENDER_ADDON_FOLDER_STR    "io_scene_render_ldraw"
+#define LC_BLENDER_ADDON_RENDER_FOLDER "io_scene_render_ldraw"
 
 class QFormLayout;
 class QGridLayout;
@@ -158,7 +158,7 @@ private:
 		LBL_POSITION_CAMERA,                    // 17   QCheckBox
 		LBL_REMOVE_DOUBLES,                     // 18   QCheckBox
 		LBL_RENDER_WINDOW,                      // 19   QCheckBox
-		LBL_USE_ARCHIVE_LIBS,                   // 20   QChekcBox
+		LBL_USE_ARCHIVE_LIBRARY,                // 20   QChekcBox
 		LBL_SEARCH_ADDL_PATHS,                  // 21   QCheckBox
 		LBL_SMOOTH_SHADING,                     // 22   QCheckBox
 		LBL_TRANSPARENT_BACKGROUND,             // 23   QCheckBox

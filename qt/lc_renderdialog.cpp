@@ -106,7 +106,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, int Command)
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
 
 		QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
-		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_FOLDER_STR)).isReadable())
+		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
 		{
 			BlenderConfigured = false;
 			lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
@@ -425,7 +425,7 @@ void lcRenderDialog::on_RenderButton_clicked()
 		QApplication::processEvents();
 
 		mBlendProgValue = 0;
-		mBlendProgMax   = 0;
+		mBlendProgMax = 0;
 
 		const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 		mDataPath = DataPathList.first();
@@ -447,12 +447,11 @@ void lcRenderDialog::on_RenderButton_clicked()
 										   "'EXEC_DEFAULT', "
 										   "resolution_width=%1, resolution_height=%2, "
 										   "render_percentage=%3, model_file=r'%4', "
-										   "image_file=r'%5', preferences_file=r'%6'")
+										   "image_file=r'%5'")
 										   .arg(mWidth).arg(mHeight)
 										   .arg(mScale * 100)
 										   .arg(QDir::toNativeSeparators(ModelFileName).replace("\\","\\\\"))
-										   .arg(QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"))
-										   .arg(QDir::toNativeSeparators(BlenderLDrawConfigFile).replace("\\","\\\\"));
+										   .arg(QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"));
 		if (BlenderImportModule == QLatin1String("MM"))
 			PythonExpression.append(", use_ldraw_import_mm=True");
 		if (SearchCustomDir)
@@ -583,6 +582,8 @@ void lcRenderDialog::on_RenderButton_clicked()
 		}
 		else
 		{
+			ui->RenderProgress->setRange(mBlendProgValue, mBlendProgMax);
+			ui->RenderProgress->setValue(1);
 #ifdef Q_OS_WIN
 			mProcess->start(ShellProgram, QStringList() << "/C" << Script.fileName());
 #else
@@ -623,9 +624,10 @@ void lcRenderDialog::ReadStdOut()
 	QRegExp RxRenderProgress;
 	RxRenderProgress.setCaseSensitivity(Qt::CaseInsensitive);
 #endif
-	bool BlenderVersion3 = lcGetProfileString(LC_PROFILE_BLENDER_VERSION).startsWith("v3");
+	int BlenderVersionNum = QString(lcGetProfileString(LC_PROFILE_BLENDER_VERSION).at(1)).toInt();
+	bool BlenderVersion3OrGreater = BlenderVersionNum > 2;
 
-	if (BlenderVersion3)
+	if (BlenderVersion3OrGreater)
 		RxRenderProgress.setPattern("Sample (\\d+)\\/(\\d+)");
 	else
 		RxRenderProgress.setPattern("(\\d+)\\/(\\d+) Tiles");

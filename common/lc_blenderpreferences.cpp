@@ -42,7 +42,7 @@ const QLatin1String LineEnding("\r\n");
 #define LC_BLENDER_ADDON_FILE              "LDrawBlenderRenderAddons.zip"
 #define LC_BLENDER_ADDON_INSTALL_FILE      "install_blender_ldraw_addons.py"
 #define LC_BLENDER_ADDON_CONFIG_FILE       "LDrawRendererPreferences.ini"
-#define LC_BLENDER_ADDON_PARAMS_FILE       "BlenderLDrawParameters.lst"
+#define LC_BLENDER_ADDON_PARAMS_FILE       "LDrawParameters.lst"
 
 #define LC_BLENDER_ADDON_REPO_STR          "https://github.com/trevorsandy"
 #define LC_BLENDER_ADDON_REPO_API_STR      "https://api.github.com/repos/trevorsandy"
@@ -140,7 +140,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettings [N
 	/*17   LBL_POSITION_CAMERA       */ {"positioncamera",                 "1",        QObject::tr("Position Camera"),        QObject::tr("Position the camera to show the whole model")},
 	/*18   LBL_REMOVE_DOUBLES        */ {"removedoubles",                  "1",        QObject::tr("No Duplicate Vertices"),  QObject::tr("Remove duplicate vertices (recommended)")},
 	/*19   LBL_RENDER_WINDOW         */ {"renderwindow",                   "1",        QObject::tr("Display Render Window"),  QObject::tr("Specify whether to display the render window during Blender user interface image file render")},
-	/*10   LBL_USE_ARCHIVE_LIBS      */ {"usearchivelibrary",              "0",        QObject::tr("Use Archive Libraries"),  QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list")},
+	/*10   LBL_USE_ARCHIVE_LIBRARY   */ {"usearchivelibrary",              "0",        QObject::tr("Use Archive Libraries"),  QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
 	/*21   LBL_SEARCH_ADDL_PATHS     */ {"searchadditionalpaths",          "0",        QObject::tr("Search Additional Paths"),QObject::tr("Specify whether to search additional LDraw paths")},
 	/*22   LBL_SMOOTH_SHADING        */ {"smoothshading",                  "1",        QObject::tr("Smooth Shading"),         QObject::tr("Smooth faces and add an edge-split modifier (recommended)")},
 	/*23   LBL_TRANSPARENT_BACKGROUND*/ {"transparentbackground",          "0",        QObject::tr("Transparent Background"), QObject::tr("Specify whether to render a background (affects 'Photo-realistic look only)")},
@@ -214,7 +214,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 25 LBL_PREFER_UNOFFICIAL                   */ {"preferunofficial",              "0",          QObject::tr("Prefer Unofficial Parts"),  QObject::tr("Search for unofficial parts first")},
 	/* 26 LBL_PROFILE                             */ {"profile",                       "0",          QObject::tr("Profile"),                  QObject::tr("Profile import performance")},
 	/* 27 LBL_RECALCULATE_NORMALS                 */ {"recalculatenormals",            "0",          QObject::tr("Recalculate Normals"),      QObject::tr("Recalculate normals. Not recommended if BFC processing is active")},
-	/* 28 LBL_REMOVE_DOUBLES_MM                   */ {"removedoubles",                 "0",          QObject::tr("No Duplicate Vertices"),    QObject::tr("Merge vertices that are within a certain distance.")},
+	/* 28 LBL_REMOVE_DOUBLES_MM                   */ {"removedoubles",                 "1",          QObject::tr("No Duplicate Vertices"),    QObject::tr("Merge vertices that are within a certain distance.")},
 	/* 29 LBL_RENDER_WINDOW_MM                    */ {"renderwindow",                  "1",          QObject::tr("Display Render Window"),    QObject::tr("Specify whether to display the render window during Blender user interface image file render")},
 	/* 30 LBL_SEARCH_ADDL_PATHS_MM                */ {"searchadditionalpaths",         "0",          QObject::tr("Search Additional Paths"),  QObject::tr("Specify whether to search additional LDraw paths")},
 	/* 31 LBL_SETEND_FRAME                        */ {"setendframe",                   "1",          QObject::tr("Set Step End Frame"),       QObject::tr("Set the end frame to the last step")},
@@ -223,12 +223,12 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 34 LBL_TRANSPARENT_BACKGROUND_MM           */ {"transparentbackground",         "0",          QObject::tr("Transparent Background"),   QObject::tr("Specify whether to render a background")},
 	/* 35 LBL_TREAT_SHORTCUT_AS_MODEL             */ {"treatshortcutasmodel",          "0",          QObject::tr("Treat Shortcuts As Models"),QObject::tr("Split shortcut parts into their constituent pieces as if they were models")},
 	/* 36 LBL_TRIANGULATE                         */ {"triangulate",                   "0",          QObject::tr("Triangulate Faces"),        QObject::tr("Triangulate all faces")},
-	/* 37 LBL_USE_ARCHIVE_LIBRARY_MM              */ {"usearchivelibrary",             "0",          QObject::tr("Use Archive Libraries"),    QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list")},
+	/* 37 LBL_USE_ARCHIVE_LIBRARY_MM              */ {"usearchivelibrary",             "0",          QObject::tr("Use Archive Libraries"),    QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
 	/* 38 LBL_USE_FREESTYLE_EDGES                 */ {"usefreestyleedges",             "0",          QObject::tr("Use Freestyle Edges"),      QObject::tr("Render LDraw edges using freestyle")},
 	/* 39 LBL_VERBOSE_MM                          */ {"verbose",                       "1",          QObject::tr("Verbose output"),           QObject::tr("Output all messages while working, else only show warnings and errors")},
 
 	/* 40/00 LBL_BEVEL_SEGMENTS                   */ {"bevelsegments",                 "4",          QObject::tr("Bevel Segments"),           QObject::tr("Bevel segments")},
-	/* 41/01 LBL_BEVEL_WEIGHT                     */ {"bevelweight",                   "0.3",        QObject::tr("Bevel Weight"),             QObject::tr("Bevel weight")},
+	/* 41/01 LBL_BEVEL_WEIGHT                     */ {"bevelweight",                   "0.03",       QObject::tr("Bevel Weight"),             QObject::tr("Bevel weight")},
 	/* 42/02 LBL_BEVEL_WIDTH_MM                   */ {"bevelwidth",                    "0.3",        QObject::tr("Bevel Width"),              QObject::tr("Width of the bevelled edges")},
 	/* 43/03 LBL_CAMERA_BORDER_PERCENT_MM         */ {"cameraborderpercent",           "5",          QObject::tr("Camera Border Percent"),    QObject::tr("When positioning the camera, include a (percentage) border around the model in the render")},
 	/* 44/04 LBL_FRAMES_PER_STEP                  */ {"framesperstep",                 "3",          QObject::tr("Frames Per Step"),          QObject::tr("Frames per step")},
@@ -241,7 +241,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 51/11 LBL_STARTING_STEP_FRAME              */ {"startingstepframe",             "1",          QObject::tr("Starting Step Frame"),      QObject::tr("Frame to add the first STEP meta command")},
 
 	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QObject::tr("Chosen Logo"),              QObject::tr("Which logo to display. logo and logo2 aren't used and are only included for completeness")},
-	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "lgeo",       QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
 	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
 	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QObject::tr("How To Scale Parts"),       QObject::tr("Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for part editing")},
 	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
@@ -348,8 +348,11 @@ void lcBlenderPreferencesDialog::ShowPathsGroup()
 
 void lcBlenderPreferencesDialog::EnableButton(bool Change)
 {
-	mApplyButton->setEnabled(Change);
-	mResetButton->setEnabled(Change);
+	if (Change)
+	{
+		mApplyButton->setEnabled(true);
+		mResetButton->setEnabled(true);
+	}
 	mPathsButton->setText(tr("Hide Paths"));
 	mPathsButton->setToolTip(tr("Hide addon path preferences dialog"));
 }
@@ -362,13 +365,9 @@ void lcBlenderPreferencesDialog::ResetSettings()
 
 void lcBlenderPreferencesDialog::accept()
 {
-	if (mPreferences->SettingsModified())
-	{
-		mApplyButton->setEnabled(false);
-		mPreferences->SaveSettings();
-		QDialog::accept();
-	} else
-		QDialog::reject();
+	mApplyButton->setEnabled(false);
+	mPreferences->Apply(QDialog::Accepted);
+	QDialog::accept();
 }
 
 void lcBlenderPreferencesDialog::reject()
@@ -517,7 +516,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	if (mAddonVersion.isEmpty())
 	{
 		mModulesBox->setEnabled(false);
-		mAddonUpdateButton->setEnabled(false);
+		mAddonUpdateButton->setEnabled(true);
 		mImportActBox->setChecked(true); // default addon module
 	}
 	else
@@ -1059,7 +1058,8 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 		connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
 		mUpdateTimer.start(500);
 
-		if (!ModuleChange)
+		QDir ConfigDir(BlenderConfigDir);
+		if (!ModuleChange || !ConfigDir.exists())
 		{
 			mProgressBar = new QProgressBar(mContent);
 			mProgressBar->setMaximum(0);
@@ -1207,9 +1207,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			StatusUpdate(true, false, tr("Installing..."));
 
-			QDir ConfigDir(BlenderConfigDir);
-			if(!QDir(ConfigDir).exists())
-				ConfigDir.mkpath(".");
+			emit SettingChangedSig(true);
 		}
 
 		SaveSettings();
@@ -1317,6 +1315,8 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 			ShowMessage(Message, tr("Extract addon"));
 		}
 	}
+	else if (AddonAction == ADDON_NO_ACTION)
+		return true;
 
 	return Extracted;
 }
@@ -1325,7 +1325,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 {
 	const QString BlenderAddonDir = QDir::toNativeSeparators(QString("%1/addons").arg(BlenderDir));
 	const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir).arg(LC_BLENDER_ADDON_FILE));
-	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_FOLDER_STR));
+	const QString AddonVersionFile = QDir::toNativeSeparators(QString("%1/%2/__version__.py").arg(BlenderAddonDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER));
 	bool ExtractedAddon = QFileInfo(AddonVersionFile).isReadable();
 	bool BlenderAddonValidated = ExtractedAddon || QFileInfo(BlenderAddonFile).isReadable();
 	AddonEnc AddonAction = ADDON_DOWNLOAD;
@@ -1381,7 +1381,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		QByteArray Ba;
 		if (!ExtractedAddon)
 		{
-			const char* VersionFile = "addons/" LC_BLENDER_ADDON_FOLDER_STR "/__version__.py";
+			const char* VersionFile = "addons/" LC_BLENDER_ADDON_RENDER_FOLDER "/__version__.py";
 
 			lcZipFile ZipFile;
 
@@ -1444,7 +1444,10 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 	{
 		if (GetBlenderAddonVersionMatch())
 		{
-			AddonAction = ADDON_NO_ACTION;
+			if (ExtractedAddon)
+				AddonAction = ADDON_NO_ACTION;
+			else
+				AddonAction = ADDON_EXTRACT;
 		}
 		else if (gMainWindow)
 		{
@@ -2459,8 +2462,26 @@ void lcBlenderPreferences::LoadSettings()
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 	}
 
-	if (!QDir(QString("%1/Blender/addons/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_FOLDER_STR)).isReadable())
+	if (!QDir(QString("%1/Blender/addons/%2").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
+
+	bool UseArchiveLibrary = false;
+	auto LDrawPartsLibrary = [&] (QString const& LDrawPath)
+	{
+		QString LDrawDir = LDrawPath;
+
+		const QFileInfo FileInfo(LDrawDir);
+		if (FileInfo.isFile())
+			LDrawDir = FileInfo.absolutePath();
+
+		const QString Suffix = FileInfo.suffix().toLower();
+		const QFileInfo PartInfo(QString("%1/p/1-4cyli.dat").arg(LDrawDir));
+		const QFileInfo LDConfigInfo(QString("%1/LDConfig.ldr").arg(LDrawDir));
+
+		UseArchiveLibrary = (Suffix == "zip" || Suffix == "bin") && !(PartInfo.exists() && LDConfigInfo.exists());
+
+		return QDir::toNativeSeparators(LDrawDir);
+	};
 
 	if (!NumPaths())
 	{
@@ -2471,7 +2492,7 @@ void lcBlenderPreferences::LoadSettings()
 		/* 1  PATH_BLENDFILE    */        << (QFileInfo(DefaultBlendFile).exists() ? DefaultBlendFile : QString())
 		/* 2  PATH_ENVIRONMENT  */        << QString()
 		/* 3  PATH_LDCONFIG     */        << lcGetProfileString(LC_PROFILE_COLOR_CONFIG)
-		/* 4  PATH_LDRAW        */        << QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath()
+		/* 4  PATH_LDRAW        */        << LDrawPartsLibrary(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY))
 		/* 5  PATH_LSYNTH       */        << QString()
 		/* 6  PATH_STUD_LOGO    */        << QString()
 		/* 7  PATH_STUDIO_LDRAW */        << QString()
@@ -2500,6 +2521,8 @@ void lcBlenderPreferences::LoadSettings()
 					mDefaultSettings[LblIdx].label,
 					mDefaultSettings[LblIdx].tooltip
 				};
+			if (LblIdx == LBL_USE_ARCHIVE_LIBRARY)
+				mBlenderSettings[LblIdx].value = QString::number(UseArchiveLibrary);
 		}
 	}
 
@@ -2514,14 +2537,14 @@ void lcBlenderPreferences::LoadSettings()
 					mDefaultSettingsMM[LblIdx].label,
 					mDefaultSettingsMM[LblIdx].tooltip
 				};
+			if (LblIdx == LBL_USE_ARCHIVE_LIBRARY_MM)
+				mBlenderSettingsMM[LblIdx].value = QString::number(UseArchiveLibrary);
 		}
 	}
 
 	QFileInfo BlenderConfigFileInfo(lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH));
 
-	bool ConfigFileExists = BlenderConfigFileInfo.exists();
-
-	if (ConfigFileExists)
+	if (BlenderConfigFileInfo.exists())
 	{
 		QSettings Settings(BlenderConfigFileInfo.absoluteFilePath(), QSettings::IniFormat);
 
@@ -2532,9 +2555,7 @@ void lcBlenderPreferences::LoadSettings()
 			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON, mBlenderPaths[LblIdx].key);
 			const QString& Value = Settings.value(Key, QString()).toString();
 			if (QFileInfo(Value).exists())
-			{
 				mBlenderPaths[LblIdx].value = QDir::toNativeSeparators(Value);
-			}
 		}
 
 		for (int LblIdx = 1/*skip blender executable*/; LblIdx < NumPaths(); LblIdx++)
@@ -2544,9 +2565,7 @@ void lcBlenderPreferences::LoadSettings()
 			const QString& Key = QString("%1/%2").arg(LC_BLENDER_ADDON_MM, mBlenderPaths[LblIdx].key_mm);
 			const QString& Value = Settings.value(Key, QString()).toString();
 			if (QFileInfo(Value).exists())
-			{
 				mBlenderPaths[LblIdx].value = QDir::toNativeSeparators(Value);
-			}
 		}
 
 		for (int LblIdx = 0; LblIdx < NumSettings(); LblIdx++)
@@ -2555,7 +2574,10 @@ void lcBlenderPreferences::LoadSettings()
 			const QString& Value = Settings.value(Key, QString()).toString();
 			if (!Value.isEmpty())
 			{
-				mBlenderSettings[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
+				if (LblIdx == LBL_USE_ARCHIVE_LIBRARY && Value == "False")
+					mBlenderSettings[LblIdx].value = QString::number(UseArchiveLibrary);
+				else
+					mBlenderSettings[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
 			}
 			if (LblIdx == LBL_IMAGE_WIDTH || LblIdx == LBL_IMAGE_HEIGHT || LblIdx == LBL_RENDER_PERCENTAGE)
 			{
@@ -2570,7 +2592,10 @@ void lcBlenderPreferences::LoadSettings()
 			const QString& Value = Settings.value(Key, QString()).toString();
 			if (!Value.isEmpty())
 			{
-				mBlenderSettingsMM[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
+				if (LblIdx == LBL_USE_ARCHIVE_LIBRARY_MM && Value == "False")
+					mDefaultSettingsMM[LblIdx].value = QString::number(UseArchiveLibrary);
+				else
+					mDefaultSettingsMM[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
 			}
 			if (LblIdx == LBL_RENDER_PERCENTAGE_MM || LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{
@@ -2586,17 +2611,20 @@ void lcBlenderPreferences::LoadSettings()
 		{
 			QFile File(LogFile);
 			if (File.open(QFile::ReadOnly | QFile::Text))
-
 			{
 				QByteArray Ba = File.readAll();
 				File.close();
 				QString Errors;
 				gAddonPreferences->mProgressBar = nullptr;
 				gAddonPreferences->ReadStdOut(QString(Ba), Errors);
+
+				if (!Errors.isEmpty())
+					ShowMessage(Errors);
 			}
 			else
 			{
-				ShowMessage(tr("Failed to open log file: %1:\n%2")
+				ShowMessage(tr("Blender config file was not found. "
+							   "Install log check failed:<br>%1:<br>%2")
 								.arg(File.fileName())
 								.arg(File.errorString()));
 			}
@@ -2621,8 +2649,6 @@ void lcBlenderPreferences::SaveSettings()
 	if (!NumSettings() || !NumSettingsMM())
 		LoadSettings();
 
-	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
-
 	QString Key, Value = mBlenderPaths[PATH_BLENDER].value;
 	if (Value.isEmpty())
 		Value = gAddonPreferences->mPathLineEditList[PATH_BLENDER]->text();
@@ -2641,10 +2667,16 @@ void lcBlenderPreferences::SaveSettings()
 
 	lcSetProfileString(LC_PROFILE_BLENDER_VERSION, Value);
 
-	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH).isEmpty() ? QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE) : lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
-	lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
+	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER);
+	
+	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
+	if (!Value.contains(LC_BLENDER_ADDON_RENDER_FOLDER))
+	{
+		Value = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_CONFIG_FILE);
+		lcSetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH, QDir::toNativeSeparators(Value));
+	}
 
-	QString searchDirectoriesKey;
+	QString searchDirectoriesKey = QLatin1String("additionalSearchPaths");
 	QString parameterFileKey = QLatin1String("ParameterFile");
 	QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
 
@@ -2654,7 +2686,7 @@ void lcBlenderPreferences::SaveSettings()
 	{
 		if (!QFileInfo(ParameterFile).exists())
 			ExportParameterFile();
-		Value = QDir::toNativeSeparators(QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath());
+		Value = QDir::toNativeSeparators(QFileInfo(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)).absolutePath());
 		Settings.setValue(searchDirectoriesKey, QVariant(Value));
 		Settings.endGroup();
 	};
@@ -2698,8 +2730,6 @@ void lcBlenderPreferences::SaveSettings()
 
 	Settings.setValue(parameterFileKey, QVariant(QDir::toNativeSeparators(ParameterFile)));
 
-	searchDirectoriesKey = QLatin1String("additionalSearchDirectories");
-
 	concludeSettingsGroup();
 
 	Settings.beginGroup(LC_BLENDER_ADDON_MM);
@@ -2735,8 +2765,6 @@ void lcBlenderPreferences::SaveSettings()
 		if (!Key.isEmpty())
 			Settings.setValue(Key, QVariant(Value));
 	}
-
-	searchDirectoriesKey = QLatin1String("additionalSearchPaths");
 
 	concludeSettingsGroup();
 
@@ -3376,8 +3404,11 @@ void lcBlenderPreferences::LoadDefaultParameters(QByteArray& Buffer, int Which)
 
 bool lcBlenderPreferences::ExportParameterFile()
 {
-	const QString BlenderConfigDir = QString("%1/Blender/setup/addon_setup/config").arg(gAddonPreferences->mDataDir);
+	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir).arg(LC_BLENDER_ADDON_RENDER_FOLDER);
 	const QString ParameterFile = QString("%1/%2").arg(BlenderConfigDir).arg(LC_BLENDER_ADDON_PARAMS_FILE);
+	QDir ConfigDir(BlenderConfigDir);
+	if(!ConfigDir.exists())
+		ConfigDir.mkpath(".");
 	QFile File(ParameterFile);
 
 	if (!OverwriteFile(File.fileName()))

@@ -17,7 +17,7 @@
 #include "lc_viewsphere.h"
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
-#include "lc_partselectionwidget.h"
+#include "lc_qutils.h"
 
 lcFindReplaceParams lcView::mFindReplaceParams;
 QPointer<lcFindReplaceWidget> lcView::mFindWidget;
@@ -322,29 +322,15 @@ void lcView::ShowTrainTrackPopup()
 	if (!TrainTrackInfo)
 		return;
 
-	QMenu* Menu = new QMenu(mWidget);
+	PieceInfo* Info = lcShowTrainTrackPopup(mWidget, TrainTrackInfo);
 
-	QWidgetAction* Action = new QWidgetAction(Menu);
-	lcPartSelectionListView* ListView = new lcPartSelectionListView(mWidget, nullptr);
-	Action->setDefaultWidget(ListView);
-	Menu->addAction(Action);
-
-	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(TrainTrackInfo);
-
-	ListView->SetCustomParts(Parts);
-
-	connect(ListView, &QListView::doubleClicked, [this, Menu, ListView, ActiveModel]()
+	if (Info)
 	{
-		ActiveModel->AddPiece(ListView->GetCurrentPart(), mTrackToolSection);
-		lcObject* Focus = ActiveModel->GetFocusObject();
-		if (Focus && Focus->IsPiece())
-			ActiveModel->UpdateTrainTrackConnections((lcPiece*)Focus);
-		Menu->close();
-	});
+		Piece = ActiveModel->AddPiece(Info, mTrackToolSection);
 
-	Menu->exec(QCursor::pos());
-
-	delete Menu;
+		if (Piece)
+			ActiveModel->UpdateTrainTrackConnections(Piece);
+	}
 }
 
 void lcView::ShowContextMenu() const

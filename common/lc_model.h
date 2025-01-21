@@ -209,7 +209,7 @@ public:
 	void InsertStep(lcStep Step);
 	void RemoveStep(lcStep Step);
 
-	void AddPiece(PieceInfo* Info, quint32 Section);
+	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void DeleteAllCameras();
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();

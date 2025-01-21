@@ -229,6 +229,71 @@ void lcPieceIdPickerPopup::Close()
 		Menu->close();
 }
 
+lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo)
+	: QWidget(Parent)
+{
+	QVBoxLayout* Layout = new QVBoxLayout(this);
+
+	mPartSelectionListView = new lcPartSelectionListView(this, nullptr);
+	Layout->addWidget(mPartSelectionListView);
+
+	mPartSelectionListView->setMinimumWidth(450);
+	mPartSelectionListView->setDragEnabled(false);
+
+	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(TrainTrackInfo);
+
+	mPartSelectionListView->SetCustomParts(Parts);
+
+	connect(mPartSelectionListView, &lcPartSelectionListView::PartPicked, this, &lcTrainTrackPickerPopup::Accept);
+
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	Layout->addWidget(ButtonBox);
+
+	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcTrainTrackPickerPopup::Accept);
+	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcTrainTrackPickerPopup::Reject);
+}
+
+void lcTrainTrackPickerPopup::showEvent(QShowEvent* ShowEvent)
+{
+	QWidget::showEvent(ShowEvent);
+
+	mPartSelectionListView->setFocus();
+}
+
+void lcTrainTrackPickerPopup::Accept()
+{
+	mPickedTrainTrack = mPartSelectionListView->GetCurrentPart();
+
+	Close();
+}
+
+void lcTrainTrackPickerPopup::Reject()
+{
+	Close();
+}
+
+void lcTrainTrackPickerPopup::Close()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(parent());
+
+	if (Menu)
+		Menu->close();
+}
+
+PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo)
+{
+	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
+	QWidgetAction* Action = new QWidgetAction(Menu.get());
+	lcTrainTrackPickerPopup* Popup = new lcTrainTrackPickerPopup(Menu.get(), TrainTrackInfo);
+
+	Action->setDefaultWidget(Popup);
+	Menu->addAction(Action);
+
+	Menu->exec(QCursor::pos());
+
+	return Popup->GetPickedTrainTrack();
+}
+
 lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Parent)
 	: QWidget(Parent)
 {

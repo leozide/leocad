@@ -219,6 +219,9 @@ public:
 	void UpdateInUseCategory();
 	void UpdateViewMode();
 
+signals:
+	void PartPicked(PieceInfo* Info);
+
 public slots:
 	void CustomContextMenuRequested(QPoint Pos);
 	void SetNoIcons();
@@ -238,9 +241,13 @@ public slots:
 	void ToggleListMode();
 	void ToggleFixedColor();
 
+protected slots:
+	void DoubleClicked(const QModelIndex& Index);
+
 protected:
 	void SetIconSize(int Size);
 	void SetPartFilterType(lcPartFilterType Option);
+	void keyPressEvent(QKeyEvent* KeyEvent) override;
 
 	lcPartSelectionListModel* mListModel = nullptr;
 	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
@@ -311,7 +318,7 @@ protected slots:
 	void FilterCategoriesTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartViewSelectionChanged(const QModelIndex& Current, const QModelIndex& Previous);
-	void PartViewDoubleClicked(const QModelIndex& Index);
+	void PartViewPartPicked(PieceInfo* Info);
 	void OptionsMenuAboutToShow();
 	void EditPartPalettes();
 

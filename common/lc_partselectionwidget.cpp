@@ -547,9 +547,32 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 	lcPartSelectionItemDelegate* ItemDelegate = new lcPartSelectionItemDelegate(this, mListModel);
 	setItemDelegate(ItemDelegate);
 
-	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomContextMenuRequested(QPoint)));
+	connect(this, &QListView::doubleClicked, this, &lcPartSelectionListView::DoubleClicked);
+	connect(this, &QListView::customContextMenuRequested, this, &lcPartSelectionListView::CustomContextMenuRequested);
 
 	SetIconSize(lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS));
+}
+
+void lcPartSelectionListView::keyPressEvent(QKeyEvent* KeyEvent)
+{
+	if (KeyEvent->key() == Qt::Key_Enter)
+	{
+		PieceInfo* Info = GetCurrentPart();
+
+		emit PartPicked(Info);
+
+		return;
+	}
+
+	return QListView::keyPressEvent(KeyEvent);
+}
+
+void lcPartSelectionListView::DoubleClicked(const QModelIndex& Index)
+{
+	PieceInfo* Info = GetListModel()->GetPieceInfo(Index.row());
+
+	if (Info)
+		emit PartPicked(Info);
 }
 
 void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
@@ -878,7 +901,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	Layout->addWidget(mSplitter);
 	setLayout(Layout);
 
-	connect(mPartsWidget, &QListView::doubleClicked, this, &lcPartSelectionWidget::PartViewDoubleClicked);
+	connect(mPartsWidget, &lcPartSelectionListView::PartPicked, this, &lcPartSelectionWidget::PartViewPartPicked);
 	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartViewSelectionChanged);
 	connect(mFilterWidget, &QLineEdit::textChanged, this, &lcPartSelectionWidget::FilterChanged);
 	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);
@@ -1079,10 +1102,8 @@ void lcPartSelectionWidget::PartViewSelectionChanged(const QModelIndex& Current,
 	emit CurrentPartChanged(mPartsWidget->GetCurrentPart());
 }
 
-void lcPartSelectionWidget::PartViewDoubleClicked(const QModelIndex& Index)
+void lcPartSelectionWidget::PartViewPartPicked(PieceInfo* Info)
 {
-	PieceInfo* Info = mPartsWidget->GetListModel()->GetPieceInfo(Index.row());
-
 	if (Info)
 		emit PartPicked(Info);
 }

@@ -2281,13 +2281,13 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 	return lcMatrix33Identity();
 }
 
-void lcModel::AddPiece(PieceInfo* PieceInfo, quint32 Section)
+lcPiece* lcModel::AddPiece(PieceInfo* PieceInfo, quint32 Section)
 {
 	if (!PieceInfo)
 		PieceInfo = gMainWindow->GetCurrentPieceInfo();
 
 	if (!PieceInfo)
-		return;
+		return nullptr;
 
 	lcPiece* Last = mPieces.empty() ? nullptr : mPieces.back().get();
 
@@ -2341,6 +2341,8 @@ void lcModel::AddPiece(PieceInfo* PieceInfo, quint32 Section)
 	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION, false);
 
 	SaveCheckpoint(tr("Adding Piece"));
+
+	return Piece;
 }
 
 void lcModel::AddPiece(lcPiece* Piece)

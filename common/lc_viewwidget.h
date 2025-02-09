@@ -11,6 +11,8 @@ public:
 	lcView* GetView() const;
 	void SetView(lcView* View);
 
+	void UpdateMousePosition();
+
 	QSize sizeHint() const override;
 
 protected:

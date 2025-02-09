@@ -337,6 +337,8 @@ void lcView::ShowTrainTrackPopup()
 		if (Piece)
 			ActiveModel->UpdateTrainTrackConnections(Piece);
 	}
+
+	mWidget->UpdateMousePosition();
 }
 
 void lcView::ShowContextMenu() const

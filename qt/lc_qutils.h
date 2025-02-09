@@ -4,7 +4,6 @@
 
 class lcPartSelectionWidget;
 class lcPartSelectionListView;
-class lcTrainTrackInfo;
 
 QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
@@ -197,7 +196,7 @@ class lcTrainTrackPickerPopup : public QWidget
 	Q_OBJECT
 
 public:
-	lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo);
+	lcTrainTrackPickerPopup(QWidget* Parent, quint32 ConnectionType);
 
 	PieceInfo* GetPickedTrainTrack() const
 	{
@@ -216,7 +215,7 @@ protected:
 	PieceInfo* mPickedTrainTrack = nullptr;
 };
 
-PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo);
+PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, quint32 ConnectionType);
 
 class lcColorDialogPopup : public QWidget
 {

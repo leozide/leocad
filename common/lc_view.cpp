@@ -322,7 +322,13 @@ void lcView::ShowTrainTrackPopup()
 	if (!TrainTrackInfo)
 		return;
 
-	PieceInfo* Info = lcShowTrainTrackPopup(mWidget, TrainTrackInfo);
+	if (mTrackToolSection < LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		return;
+
+	int ConnectionIndex = mTrackToolSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+	quint32 ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
+
+	PieceInfo* Info = lcShowTrainTrackPopup(mWidget, ConnectionType);
 
 	if (Info)
 	{

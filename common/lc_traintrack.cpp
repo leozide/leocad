@@ -7,8 +7,6 @@
 
 // todo:
 // auto replace cross when going over a straight section
-// redo gizmo
-// add cross to gizmo
 // move config to json
 // add other track types
 // set focus connection after adding
@@ -21,8 +19,8 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f))});
+		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f)), 0);
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -36,8 +34,8 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 		const float CurveX = sinf(LC_DTOR * 11.25f) * 800.0f;
 		const float CurveY = (cosf(LC_DTOR * 11.25f) * 800.0f) - 800.0f;
 
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-11.25f * LC_DTOR), lcVector3(CurveX, CurveY, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-168.75f * LC_DTOR), lcVector3(-CurveX, CurveY, 0.0f))});
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-11.25f * LC_DTOR), lcVector3(CurveX, CurveY, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-168.75f * LC_DTOR), lcVector3(-CurveX, CurveY, 0.0f)), 0);
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -51,9 +49,9 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f))});	
+		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f)), 0);
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -64,9 +62,9 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f))});	
+		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f)), 0);
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}
@@ -77,10 +75,10 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 	{
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection({lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(0.0f, 160.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f))});
-		TrainTrackInfo->AddConnection({lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2.0f), lcVector3(0.0f, -160.0f, 0.0f))});
+		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(0.0f, 160.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f)), 0);
+		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2.0f), lcVector3(0.0f, -160.0f, 0.0f)), 0);
 
 		Info->SetTrainTrackInfo(TrainTrackInfo);
 	}

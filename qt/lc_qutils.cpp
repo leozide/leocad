@@ -229,7 +229,7 @@ void lcPieceIdPickerPopup::Close()
 		Menu->close();
 }
 
-lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo)
+lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, quint32 ConnectionType)
 	: QWidget(Parent)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
@@ -240,7 +240,7 @@ lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainT
 	mPartSelectionListView->setMinimumWidth(450);
 	mPartSelectionListView->setDragEnabled(false);
 
-	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(TrainTrackInfo);
+	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(ConnectionType);
 
 	mPartSelectionListView->SetCustomParts(Parts);
 
@@ -280,11 +280,11 @@ void lcTrainTrackPickerPopup::Close()
 		Menu->close();
 }
 
-PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackInfo* TrainTrackInfo)
+PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, quint32 ConnectionType)
 {
 	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
 	QWidgetAction* Action = new QWidgetAction(Menu.get());
-	lcTrainTrackPickerPopup* Popup = new lcTrainTrackPickerPopup(Menu.get(), TrainTrackInfo);
+	lcTrainTrackPickerPopup* Popup = new lcTrainTrackPickerPopup(Menu.get(), ConnectionType);
 
 	Action->setDefaultWidget(Popup);
 	Menu->addAction(Action);

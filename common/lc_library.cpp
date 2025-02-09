@@ -1808,13 +1808,17 @@ void lcPiecesLibrary::GetParts(std::vector<PieceInfo*>& Parts) const
 		Parts.emplace_back(PartIt.second);
 }
 
-std::vector<PieceInfo*> lcPiecesLibrary::GetTrainTrackParts(const lcTrainTrackInfo* TrainTrackInfo) const
+std::vector<PieceInfo*> lcPiecesLibrary::GetTrainTrackParts(quint32 ConnectionType) const
 {
 	std::vector<PieceInfo*> Parts;
 
 	for (const auto& [Name, Info] : mPieces)
-		if (Info->GetTrainTrackInfo())
+	{
+		lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo();
+
+		if (TrainTrackInfo && TrainTrackInfo->CanConnectTo(ConnectionType))
 			Parts.emplace_back(Info);
+	}
 
 	return Parts;
 }

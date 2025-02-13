@@ -224,6 +224,61 @@ void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 	mView->OnMouseMove();
 }
 
+bool lcViewWidget::event(QEvent *event)
+{
+	qDebug() << "event: " << event;
+	QNativeGestureEvent *nativeGesture;
+	QWheelEvent *wheelEvent;
+	QPoint point;
+	switch (event->type())
+	{
+		case QEvent::NativeGesture:
+			nativeGesture = static_cast<QNativeGestureEvent *>(event);
+			switch (nativeGesture->gestureType()) {
+				case Qt::BeginNativeGesture:
+					mNativeGestureAccumulator = 0.0f;
+					break;
+				case Qt::ZoomNativeGesture:
+					mView->OnZoomNativeGesture(nativeGesture->value() * 8);
+					break;
+				case Qt::RotateNativeGesture:
+					qDebug() << "nativeGesture: " << nativeGesture;
+					mNativeGestureAccumulator += nativeGesture->value();
+					mView->OnRotateNativeGesture(mNativeGestureAccumulator);
+					break;
+				case Qt::SwipeNativeGesture:
+				case Qt::PanNativeGesture:
+				case Qt::EndNativeGesture:
+				case Qt::SmartZoomNativeGesture:
+					break;
+			}
+			return true;
+		case QEvent::Wheel:
+			wheelEvent = static_cast<QWheelEvent *>(event);
+			switch (wheelEvent->phase())
+			{
+				case Qt::ScrollBegin:
+					mx0 = 0;
+					my0 = 0;
+					break;
+				case Qt::ScrollUpdate:
+				case Qt::ScrollMomentum:
+					point = wheelEvent->pixelDelta();
+					mx0 += point.x();
+					my0 += point.y();
+					mView->OnWheel(mx0, my0);
+					break;
+				case Qt::ScrollEnd:
+				case Qt::NoScrollPhase:
+					break;
+			}
+			return true;
+
+		default:
+			return QWidget::event(event);
+	}
+}
+
 void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 {
 	if (WheelEvent->source() == Qt::MouseEventSynthesizedBySystem)

@@ -1,0 +1,106 @@
+{
+	"Version": 1,
+	"Pieces":
+	{
+		"2859c04.dat":
+		{
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0,
+					"Type": "9V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "9V"
+				},
+				{
+					"Position": [ 333.85324096679688, -259.10357666015625, 0.0 ],
+					"Rotation": -22.5,
+					"Type": "9V"
+				}
+			]
+		},
+		"2861c04.dat":
+		{
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0,
+					"Type": "9V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "9V"
+				},
+				{
+					"Position": [ 333.85324096679688, 259.10357666015625, 0.0 ],
+					"Rotation": 22.5,
+					"Type": "9V"
+				}
+			]
+		},
+		"32087.dat":
+		{
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0,
+					"Type": "9V"
+				},
+				{
+					"Position": [ 0.0, 160.0, 0.0 ],
+					"Rotation": 90,
+					"Type": "9V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "9V"
+				},
+				{
+					"Position": [ 0.0, -160.0, 0.0 ],
+					"Rotation": -90,
+					"Type": "9V"
+				}
+			]
+		},
+		"74746.dat":
+		{
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "9V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": 180.0,
+					"Type": "9V"
+				}
+			]
+		},
+		"74747.dat":
+		{
+			"Connections":
+			[
+				{
+					"Position": [ 156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -11.25,
+					"Type": "9V"
+				},
+				{
+					"Position": [ -156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -168.75,
+					"Type": "9V"
+				}
+			]
+		}
+	}
+}

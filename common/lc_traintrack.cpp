@@ -7,80 +7,50 @@
 
 // todo:
 // auto replace cross when going over a straight section
-// move config to json
 // add other track types
 // set focus connection after adding
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
 {
-	PieceInfo* Info = Library->FindPiece("74746.dat", nullptr, false, false);
+	QFile ConfigFile(QLatin1String(":/resources/traintrack.json"));
 
-	if (Info)
+	if (!ConfigFile.open(QIODevice::ReadOnly))
+		return;
+
+	QJsonDocument Document = QJsonDocument::fromJson(ConfigFile.readAll());
+	QJsonObject Root = Document.object();
+
+	if (Root["Version"].toInt() != 1)
+		return;
+
+	QJsonObject JsonPieces = Root["Pieces"].toObject();
+
+	for (QJsonObject::const_iterator PiecesIt = JsonPieces.constBegin(); PiecesIt != JsonPieces.constEnd(); ++PiecesIt)
 	{
+		PieceInfo* Info = Library->FindPiece(PiecesIt.key().toLatin1(), nullptr, false, false);
+
+		if (!Info)
+			continue;
+
 		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f)), 0);
-
 		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
 
-	Info = Library->FindPiece("74747.dat", nullptr, false, false);
+		QJsonObject JsonPiece = PiecesIt->toObject();
+		QJsonArray JsonConnections = JsonPiece["Connections"].toArray();
 
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+		for (QJsonArray::const_iterator ConnectionIt = JsonConnections.constBegin(); ConnectionIt != JsonConnections.constEnd(); ++ConnectionIt)
+		{
+			QJsonObject JsonConnection = ConnectionIt->toObject();
 
-		const float CurveX = sinf(LC_DTOR * 11.25f) * 800.0f;
-		const float CurveY = (cosf(LC_DTOR * 11.25f) * 800.0f) - 800.0f;
+			QJsonArray JsonPosition = JsonConnection["Position"].toArray();
+			lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
 
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-11.25f * LC_DTOR), lcVector3(CurveX, CurveY, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-168.75f * LC_DTOR), lcVector3(-CurveX, CurveY, 0.0f)), 0);
+			float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
+			quint32 Type = qHash(JsonConnection["Type"].toString());
 
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
-
-	const float BranchX = 320.0f + 320.0f + (-(sinf(LC_DTOR * 22.5f) * 800.0f));
-	const float BranchY = 320.0f + ((cosf(LC_DTOR * 22.5f) * 800.0f) - 800.0f);
-
-	Info = Library->FindPiece("2861c04.dat", nullptr, false, false);
-
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
-
-		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(22.5f * LC_DTOR), lcVector3(BranchX, BranchY, 0.0f)), 0);
-
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
-
-	Info = Library->FindPiece("2859c04.dat", nullptr, false, false);
-
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
-
-		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(320.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-320.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-22.5f * LC_DTOR), lcVector3(BranchX, -BranchY, 0.0f)), 0);
-
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-	}
-
-    Info = Library->FindPiece("32087.dat", nullptr, false, false);
-
-	if (Info)
-	{
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
-
-		TrainTrackInfo->AddConnection(lcMatrix44Translation(lcVector3(160.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(0.0f, 160.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160.0f, 0.0f, 0.0f)), 0);
-		TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2.0f), lcVector3(0.0f, -160.0f, 0.0f)), 0);
-
-		Info->SetTrainTrackInfo(TrainTrackInfo);
+			TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), Type);
+		}
 	}
 }
 

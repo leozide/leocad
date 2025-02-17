@@ -5,20 +5,16 @@
 class lcPiece;
 class lcPiecesLibrary;
 
+struct lcTrainTrackConnectionType
+{
+	quint32 Group;
+	int Format;
+};
+
 struct lcTrainTrackConnection
 {
 	lcMatrix44 Transform;
-	quint32 Type;
-};
-
-enum class lcTrainTrackType
-{
-	Straight,
-	Left,
-	Right,
-	BranchLeft,
-	BranchRight,
-	Count
+	lcTrainTrackConnectionType Type;
 };
 
 class lcTrainTrackInfo
@@ -31,7 +27,7 @@ public:
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
 
-	void AddConnection(const lcMatrix44 &Transform, quint32 Type)
+	void AddConnection(const lcMatrix44 &Transform, const lcTrainTrackConnectionType& Type)
 	{
 		mConnections.emplace_back(lcTrainTrackConnection{Transform, Type});
 	}
@@ -41,10 +37,10 @@ public:
 		return mConnections;
 	}
 
-	bool CanConnectTo(quint32 ConnectionType) const
+	bool CanConnectTo(lcTrainTrackConnectionType ConnectionType) const
 	{
 		for (const lcTrainTrackConnection& Connection : mConnections)
-			if (Connection.Type == ConnectionType)
+			if (Connection.Type.Group == ConnectionType.Group && Connection.Type.Format + ConnectionType.Format == 0)
 				return true;
 
 		return false;

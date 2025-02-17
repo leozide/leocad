@@ -1808,7 +1808,7 @@ void lcPiecesLibrary::GetParts(std::vector<PieceInfo*>& Parts) const
 		Parts.emplace_back(PartIt.second);
 }
 
-std::vector<PieceInfo*> lcPiecesLibrary::GetTrainTrackParts(quint32 ConnectionType) const
+std::vector<PieceInfo*> lcPiecesLibrary::GetTrainTrackParts(const lcTrainTrackConnectionType& ConnectionType) const
 {
 	std::vector<PieceInfo*> Parts;
 

@@ -4,6 +4,7 @@
 	{
 		"2859c04.dat":
 		{
+			"Description": "Train Track  9V Point Right Branching (Complete)",
 			"Connections":
 			[
 				{
@@ -25,6 +26,7 @@
 		},
 		"2861c04.dat":
 		{
+			"Description": "Train Track  9V Point Left Branching (Complete)",
 			"Connections":
 			[
 				{
@@ -46,6 +48,7 @@
 		},
 		"32087.dat":
 		{
+			"Description": "Train Track  9V Crossing",
 			"Connections":
 			[
 				{
@@ -72,6 +75,7 @@
 		},
 		"74746.dat":
 		{
+			"Description": "Train Track  9V Straight",
 			"Connections":
 			[
 				{
@@ -88,6 +92,7 @@
 		},
 		"74747.dat":
 		{
+			"Description": "Train Track  9V Curved",
 			"Connections":
 			[
 				{
@@ -99,6 +104,128 @@
 					"Position": [ -156.072265625, -15.371826171875, 0.0 ],
 					"Rotation": -168.75,
 					"Type": "9V"
+				}
+			]
+		},
+		"3241ac01.dat":
+		{
+			"Description": "Train Track 12V Slotted Curved (Complete 1 Segment)",
+			"Connections":
+			[
+				{
+					"Position": [ 156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -11.25,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -168.75,
+					"Type": "+12V"
+				}
+			]
+		},
+		"4166a.dat":
+		{
+			"Description": "Train Track Sleeper Plate  2 x  8 without Cable Grooves",
+			"Connections":
+			[
+				{
+					"Position": [ 0.0, 0.0, 16.0 ],
+					"Rotation": 90.0,
+					"Type": "-12V"
+				},
+				{
+					"Position": [ 0.0, 0.0, 16.0 ],
+					"Rotation": -90.0,
+					"Type": "-12V"
+				}
+			]
+		},
+		"3240bc02.dat": 
+		{
+			"Description": "Train Track 12V Slotted Straight with Conductive Centre Rail with Sockets (Complete without End Sleepers)",
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "+12V"
+				}
+			]
+		},
+		"73697ac03.dat": 
+		{
+			"Description": "Train Track 12V Slotted Point Left Electric (Straight)",
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ 320.0, 160.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180.0,
+					"Type": "+12V"
+				}
+			]
+		},
+		"73696ac04.dat":
+		{
+			"Description": "Train Track 12V Slotted Point Right Electric (Branching)",
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ 320.0, -160, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "+12V"
+				}
+			]
+		},
+		"73698.dat":
+		{
+			"Description": "Train Track 12V Slotted Crossing",
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ 0.0, 160.0, 0.0 ],
+					"Rotation": 90.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": 180.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ 0.0, -160.0, 0.0 ],
+					"Rotation": -90.0,
+					"Type": "+12V"
 				}
 			]
 		}

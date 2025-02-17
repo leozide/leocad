@@ -229,7 +229,7 @@ void lcPieceIdPickerPopup::Close()
 		Menu->close();
 }
 
-lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, quint32 ConnectionType)
+lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType)
 	: QWidget(Parent)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
@@ -280,7 +280,7 @@ void lcTrainTrackPickerPopup::Close()
 		Menu->close();
 }
 
-PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, quint32 ConnectionType)
+PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType)
 {
 	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
 	QWidgetAction* Action = new QWidgetAction(Menu.get());

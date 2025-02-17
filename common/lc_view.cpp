@@ -326,7 +326,7 @@ void lcView::ShowTrainTrackPopup()
 		return;
 
 	int ConnectionIndex = mTrackToolSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-	quint32 ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
+	const lcTrainTrackConnectionType& ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
 
 	PieceInfo* Info = lcShowTrainTrackPopup(mWidget, ConnectionType);
 

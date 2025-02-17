@@ -6,6 +6,7 @@
 
 class PieceInfo;
 class lcTrainTrackInfo;
+struct lcTrainTrackConnectionType;
 class lcZipFile;
 class lcLibraryMeshData;
 class lcThumbnailManager;
@@ -156,7 +157,7 @@ public:
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
 	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
 	void GetParts(std::vector<PieceInfo*>& Parts) const;
-	std::vector<PieceInfo*> GetTrainTrackParts(quint32 ConnectionType) const;
+	std::vector<PieceInfo*> GetTrainTrackParts(const lcTrainTrackConnectionType& ConnectionType) const;
 
 	std::vector<PieceInfo*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
 	std::string GetPartId(const PieceInfo* Info) const;

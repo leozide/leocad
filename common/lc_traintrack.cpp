@@ -6,8 +6,9 @@
 #include "lc_application.h"
 
 // todo:
+// add the rest of the 9v and 12v tracks, look into 4.5v
+// better insert gizmo mouse detection
 // auto replace cross when going over a straight section
-// add other track types
 // set focus connection after adding
 
 void lcTrainTrackInit(lcPiecesLibrary* Library)
@@ -47,9 +48,21 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 			lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
 
 			float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
-			quint32 Type = qHash(JsonConnection["Type"].toString());
+			QString ConnectionGroup = JsonConnection["Type"].toString();
+			int ConnectionDirection = 0;
 
-			TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), Type);
+			if (ConnectionGroup.startsWith('+'))
+			{
+				ConnectionDirection = 1;
+				ConnectionGroup = ConnectionGroup.mid(1);
+			}
+			else if (ConnectionGroup.startsWith('-'))
+			{
+				ConnectionDirection = -1;
+				ConnectionGroup = ConnectionGroup.mid(1);
+			}
+
+			TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionDirection } );
 		}
 	}
 }

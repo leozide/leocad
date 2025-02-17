@@ -37,16 +37,21 @@ public:
 		return mConnections;
 	}
 
-	bool CanConnectTo(lcTrainTrackConnectionType ConnectionType) const
+	bool CanConnectTo(const lcTrainTrackConnectionType& ConnectionType) const
 	{
 		for (const lcTrainTrackConnection& Connection : mConnections)
-			if (Connection.Type.Group == ConnectionType.Group && Connection.Type.Format + ConnectionType.Format == 0)
+			if (AreConnectionsCompatible(Connection.Type, ConnectionType))
 				return true;
 
 		return false;
 	}
 
 protected:
+	static bool AreConnectionsCompatible(const lcTrainTrackConnectionType& a, const lcTrainTrackConnectionType& b)
+	{
+		return a.Group == b.Group && a.Format + b.Format == 0;
+	}
+
 	std::vector<lcTrainTrackConnection> mConnections;
 };
 

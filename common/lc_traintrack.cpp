@@ -28,41 +28,46 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 
 	for (QJsonObject::const_iterator PiecesIt = JsonPieces.constBegin(); PiecesIt != JsonPieces.constEnd(); ++PiecesIt)
 	{
-		PieceInfo* Info = Library->FindPiece(PiecesIt.key().toLatin1(), nullptr, false, false);
-
-		if (!Info)
-			continue;
-
-		lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
-
-		Info->SetTrainTrackInfo(TrainTrackInfo);
-
 		QJsonObject JsonPiece = PiecesIt->toObject();
-		QJsonArray JsonConnections = JsonPiece["Connections"].toArray();
+		QJsonArray JsonParts = JsonPiece["Parts"].toArray();
 
-		for (QJsonArray::const_iterator ConnectionIt = JsonConnections.constBegin(); ConnectionIt != JsonConnections.constEnd(); ++ConnectionIt)
+		for (QJsonArray::const_iterator PartsIt = JsonParts.constBegin(); PartsIt != JsonParts.constEnd(); ++PartsIt)
 		{
-			QJsonObject JsonConnection = ConnectionIt->toObject();
+			PieceInfo* Info = Library->FindPiece(PartsIt->toString().toLatin1(), nullptr, false, false);
 
-			QJsonArray JsonPosition = JsonConnection["Position"].toArray();
-			lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
+			if (!Info)
+				continue;
 
-			float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
-			QString ConnectionGroup = JsonConnection["Type"].toString();
-			int ConnectionDirection = 0;
+			lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
 
-			if (ConnectionGroup.startsWith('+'))
+			Info->SetTrainTrackInfo(TrainTrackInfo);
+
+			QJsonArray JsonConnections = JsonPiece["Connections"].toArray();
+
+			for (QJsonArray::const_iterator ConnectionIt = JsonConnections.constBegin(); ConnectionIt != JsonConnections.constEnd(); ++ConnectionIt)
 			{
-				ConnectionDirection = 1;
-				ConnectionGroup = ConnectionGroup.mid(1);
-			}
-			else if (ConnectionGroup.startsWith('-'))
-			{
-				ConnectionDirection = -1;
-				ConnectionGroup = ConnectionGroup.mid(1);
-			}
+				QJsonObject JsonConnection = ConnectionIt->toObject();
 
-			TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionDirection } );
+				QJsonArray JsonPosition = JsonConnection["Position"].toArray();
+				lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
+
+				float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
+				QString ConnectionGroup = JsonConnection["Type"].toString();
+				int ConnectionDirection = 0;
+
+				if (ConnectionGroup.startsWith('+'))
+				{
+					ConnectionDirection = 1;
+					ConnectionGroup = ConnectionGroup.mid(1);
+				}
+				else if (ConnectionGroup.startsWith('-'))
+				{
+					ConnectionDirection = -1;
+					ConnectionGroup = ConnectionGroup.mid(1);
+				}
+
+				TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionDirection } );
+			}
 		}
 	}
 }
@@ -120,7 +125,18 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 			return std::nullopt;
 	}
 
-	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, ConnectionIndex ? 0 : 1);
+	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
+	const std::vector<lcTrainTrackConnection>& NewConnections = Info->GetTrainTrackInfo()->GetConnections();
+	quint32 NewConnectionIndex;// = ConnectionIndex ? 0 : 1;
+
+	for (NewConnectionIndex = 0; NewConnectionIndex < NewConnections.size(); NewConnectionIndex++)
+		if (AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type))
+			break;
+
+	if (NewConnectionIndex == NewConnections.size())
+		return std::nullopt;
+
+	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, NewConnectionIndex);
 }
 
 std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)

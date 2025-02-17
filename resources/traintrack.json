@@ -2,9 +2,9 @@
 	"Version": 1,
 	"Pieces":
 	{
-		"2859c04.dat":
+		"Train Track  9V Point Right":
 		{
-			"Description": "Train Track  9V Point Right Branching (Complete)",
+			"Parts": [ "2859c03.dat", "2859c04.dat" ],
 			"Connections":
 			[
 				{
@@ -24,9 +24,9 @@
 				}
 			]
 		},
-		"2861c04.dat":
+		"Train Track  9V Point Left":
 		{
-			"Description": "Train Track  9V Point Left Branching (Complete)",
+			"Parts": [ "2861c03.dat", "2861c04.dat" ],
 			"Connections":
 			[
 				{
@@ -46,9 +46,9 @@
 				}
 			]
 		},
-		"32087.dat":
+		"Train Track  9V Crossing":
 		{
-			"Description": "Train Track  9V Crossing",
+			"Parts": [ "32087.dat" ],
 			"Connections":
 			[
 				{
@@ -73,9 +73,9 @@
 				}
 			]
 		},
-		"74746.dat":
+		"Train Track  9V Straight":
 		{
-			"Description": "Train Track  9V Straight",
+			"Parts": [ "74746.dat" ],
 			"Connections":
 			[
 				{
@@ -90,9 +90,9 @@
 				}
 			]
 		},
-		"74747.dat":
+		"Train Track  9V Curved":
 		{
-			"Description": "Train Track  9V Curved",
+			"Parts": [ "74747.dat" ],
 			"Connections":
 			[
 				{
@@ -107,9 +107,9 @@
 				}
 			]
 		},
-		"3241ac01.dat":
+		"Train Track 12V Slotted Curved":
 		{
-			"Description": "Train Track 12V Slotted Curved (Complete 1 Segment)",
+			"Parts": [ "3241ac01.dat" ],
 			"Connections":
 			[
 				{
@@ -124,9 +124,9 @@
 				}
 			]
 		},
-		"4166a.dat":
+		"Train Track Sleeper Plate  2 x  8":
 		{
-			"Description": "Train Track Sleeper Plate  2 x  8 without Cable Grooves",
+			"Parts": [ "4166a.dat" ],
 			"Connections":
 			[
 				{
@@ -141,9 +141,26 @@
 				}
 			]
 		},
-		"3240bc02.dat": 
+		"Train Track 12V Slotted Straight With End Sleepers": 
 		{
-			"Description": "Train Track 12V Slotted Straight with Conductive Centre Rail with Sockets (Complete without End Sleepers)",
+			"Parts": [ "3240ac01.dat", "3240bc01.dat" ],
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "-12V"
+				}
+			]
+		},
+		"Train Track 12V Slotted Straight Without End Sleepers": 
+		{
+			"Parts": [ "3240ac02.dat", "3240bc02.dat" ],
 			"Connections":
 			[
 				{
@@ -158,9 +175,43 @@
 				}
 			]
 		},
-		"73697ac03.dat": 
+		"Train Track 12V Slotted Straight With Signal": 
 		{
-			"Description": "Train Track 12V Slotted Point Left Electric (Straight)",
+			"Parts": [ "862ac02.dat" ],
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "+12V"
+				}
+			]
+		},
+		"Train Track 12V Slotted Decoupler": 
+		{
+			"Parts": [ "u9230c01.dat", "u9230c02.dat" ],
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+12V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "+12V"
+				}
+			]
+		},
+		"Train Track 12V Slotted Point Left": 
+		{
+			"Parts": [ "73697ac01.dat", "73697ac02.dat", "73697ac03.dat", "73697ac04.dat" ],
 			"Connections":
 			[
 				{
@@ -180,9 +231,9 @@
 				}
 			]
 		},
-		"73696ac04.dat":
+		"Train Track 12V Slotted Point Right":
 		{
-			"Description": "Train Track 12V Slotted Point Right Electric (Branching)",
+			"Parts": [ "73696ac01.dat", "73696ac02.dat", "73696ac03.dat", "73696ac04.dat" ],
 			"Connections":
 			[
 				{
@@ -202,9 +253,9 @@
 				}
 			]
 		},
-		"73698.dat":
+		"Train Track 12V Slotted Crossing":
 		{
-			"Description": "Train Track 12V Slotted Crossing",
+			"Parts": [ "73698.dat" ],
 			"Connections":
 			[
 				{

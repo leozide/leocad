@@ -7,6 +7,9 @@
 
 // todo:
 // add the rest of the 9v and 12v tracks, look into 4.5v
+// see if we should remove some of the 12v tracks to avoid bloat
+// data driven sleepers
+// lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
 // auto replace cross when going over a straight section
 // set focus connection after adding
@@ -53,20 +56,20 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 
 				float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
 				QString ConnectionGroup = JsonConnection["Type"].toString();
-				int ConnectionDirection = 0;
+				lcTrainTrackConnectionSleeper ConnectionSleeper = lcTrainTrackConnectionSleeper::None;
 
 				if (ConnectionGroup.startsWith('+'))
 				{
-					ConnectionDirection = 1;
+					ConnectionSleeper = lcTrainTrackConnectionSleeper::NeedsSleeper;
 					ConnectionGroup = ConnectionGroup.mid(1);
 				}
 				else if (ConnectionGroup.startsWith('-'))
 				{
-					ConnectionDirection = -1;
+					ConnectionSleeper = lcTrainTrackConnectionSleeper::HasSleeper;
 					ConnectionGroup = ConnectionGroup.mid(1);
 				}
 
-				TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionDirection } );
+				TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionSleeper } );
 			}
 		}
 	}
@@ -97,21 +100,17 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section)
+std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section)
 {
+	std::vector<lcTrainTrackInsert> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
-		return std::nullopt;
+		return Pieces;
 
-	const quint32 FocusSection = CurrentPiece->GetFocusSection();
 	quint32 ConnectionIndex = 0;
 
-	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-	{
-		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-	}
-	else if (Section != LC_PIECE_SECTION_INVALID && Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+	if (Section != LC_PIECE_SECTION_INVALID && Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 	{
 		ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	}
@@ -122,7 +121,7 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 				break;
 
 		if (ConnectionIndex == CurrentTrackInfo->GetConnections().size())
-			return std::nullopt;
+			return Pieces;
 	}
 
 	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
@@ -134,17 +133,45 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetPieceInsertTransform(lcPiece* Cur
 			break;
 
 	if (NewConnectionIndex == NewConnections.size())
-		return std::nullopt;
+		return Pieces;
 
-	return GetConnectionTransform(CurrentPiece, ConnectionIndex, Info, NewConnectionIndex);
+	if (CurrentConnectionType.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper && NewConnections[NewConnectionIndex].Type.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper)
+	{
+		PieceInfo* SleeperInfo = lcGetPiecesLibrary()->FindPiece("4166a.dat", nullptr, false, false); // todo: data driven
+
+		if (!SleeperInfo)
+			return Pieces;
+
+		std::optional<lcMatrix44> SleeperTransform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, SleeperInfo, 0);
+
+		if (!SleeperTransform)
+			return Pieces;
+
+		std::optional<lcMatrix44> Transform = GetConnectionTransform(SleeperInfo, SleeperTransform.value(), 1, Info, NewConnectionIndex);
+
+		if (Transform)
+		{
+			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value(), 8 });
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), 16 });
+		}
+	}
+	else
+	{
+		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
+
+		if (Transform)
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), 16 });
+	}
+
+	return Pieces;
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)
+std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)
 {
-	if (!CurrentPiece || !Info)
+	if (!CurrentInfo || !Info)
 		return std::nullopt;
 
-	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentInfo->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
 		return std::nullopt;
@@ -168,7 +195,7 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPiece* Curr
 //	}
 
 	Transform = lcMul(Transform, CurrentTrackInfo->GetConnections()[CurrentConnectionIndex].Transform);
-	Transform = lcMul(Transform, CurrentPiece->mModelWorld);
+	Transform = lcMul(Transform, CurrentTransform);
 
 	return Transform;
 }

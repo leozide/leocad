@@ -4,11 +4,19 @@
 
 class lcPiece;
 class lcPiecesLibrary;
+class PieceInfo;
+
+enum class lcTrainTrackConnectionSleeper
+{
+	None,
+	HasSleeper,
+	NeedsSleeper
+};
 
 struct lcTrainTrackConnectionType
 {
 	quint32 Group;
-	int Format;
+	lcTrainTrackConnectionSleeper Sleeper;
 };
 
 struct lcTrainTrackConnection
@@ -17,13 +25,20 @@ struct lcTrainTrackConnection
 	lcTrainTrackConnectionType Type;
 };
 
+struct lcTrainTrackInsert
+{
+	PieceInfo* Info;
+	lcMatrix44 Transform;
+	int ColorCode;
+};
+
 class lcTrainTrackInfo
 {
 public:
 	lcTrainTrackInfo() = default;
 
-	static std::optional<lcMatrix44> GetPieceInsertTransform(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section);
-	static std::optional<lcMatrix44> GetConnectionTransform(lcPiece* CurrentPiece, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
+	static std::vector<lcTrainTrackInsert> GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section);
+	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
 
@@ -49,7 +64,22 @@ public:
 protected:
 	static bool AreConnectionsCompatible(const lcTrainTrackConnectionType& a, const lcTrainTrackConnectionType& b)
 	{
-		return a.Group == b.Group && a.Format + b.Format == 0;
+		if (a.Group != b.Group)
+			return false;
+
+		switch (a.Sleeper)
+		{
+		case lcTrainTrackConnectionSleeper::None:
+			return b.Sleeper == lcTrainTrackConnectionSleeper::None;
+
+		case lcTrainTrackConnectionSleeper::HasSleeper:
+			return b.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper;
+
+		case lcTrainTrackConnectionSleeper::NeedsSleeper:
+			return b.Sleeper == lcTrainTrackConnectionSleeper::HasSleeper || b.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper;
+		}
+
+		return false;
 	}
 
 	std::vector<lcTrainTrackConnection> mConnections;

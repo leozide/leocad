@@ -126,7 +126,7 @@
 		},
 		"Train Track Sleeper Plate  2 x  8":
 		{
-			"Parts": [ "4166a.dat" ],
+			"Parts": [ "4166a.dat", "4166b.dat" ],
 			"Connections":
 			[
 				{
@@ -277,6 +277,23 @@
 					"Position": [ 0.0, -160.0, 0.0 ],
 					"Rotation": -90.0,
 					"Type": "+12V"
+				}
+			]
+		},
+		"Train Track 4.5V Slotted Straight Without End Sleepers": 
+		{
+			"Parts": [ "3228bc02.dat" ],
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "+4.5V"
 				}
 			]
 		}

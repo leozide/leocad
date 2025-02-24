@@ -8,13 +8,14 @@
 // todo:
 // add the rest of the 9v and 12v tracks, look into 4.5v
 // see if we should remove some of the 12v tracks to avoid bloat
-// data driven sleepers
 // lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
 // auto replace cross when going over a straight section
 // set focus connection after adding
 
-void lcTrainTrackInit(lcPiecesLibrary* Library)
+std::map<quint32, PieceInfo*> lcTrainTrackInfo::mSleepers;
+
+void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 {
 	QFile ConfigFile(QLatin1String(":/resources/traintrack.json"));
 
@@ -72,6 +73,21 @@ void lcTrainTrackInit(lcPiecesLibrary* Library)
 				TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionSleeper } );
 			}
 		}
+	}
+
+	QJsonObject JsonSleepers = Root["Sleepers"].toObject();
+
+	mSleepers.clear();
+
+	for (QJsonObject::const_iterator SleepersIt = JsonSleepers.constBegin(); SleepersIt != JsonSleepers.constEnd(); ++SleepersIt)
+	{
+		quint32 Group = qHash(SleepersIt.key());
+		QString PartId = SleepersIt->toString();
+
+		PieceInfo* SleeperInfo = Library->FindPiece(PartId.toLatin1(), nullptr, false, false);
+
+		if (SleeperInfo)
+			mSleepers[Group] = SleeperInfo;
 	}
 }
 
@@ -137,7 +153,12 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 
 	if (CurrentConnectionType.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper && NewConnections[NewConnectionIndex].Type.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper)
 	{
-		PieceInfo* SleeperInfo = lcGetPiecesLibrary()->FindPiece("4166a.dat", nullptr, false, false); // todo: data driven
+		std::map<quint32, PieceInfo*>::const_iterator SleeperIt = mSleepers.find(CurrentConnectionType.Group);
+
+		if (SleeperIt == mSleepers.end())
+			return Pieces;
+
+		PieceInfo* SleeperInfo = SleeperIt->second;
 
 		if (!SleeperInfo)
 			return Pieces;

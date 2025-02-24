@@ -279,7 +279,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
 	UpdateStudStyleSource();
 	lcLoadDefaultCategories();
 	lcSynthInit();
-	lcTrainTrackInit(this);
+	lcTrainTrackInfo::Initialize(this);
 
 	return true;
 }
@@ -1888,7 +1888,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	lcLoadDefaultColors(lcStudStyle::Plain);
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
-	lcTrainTrackInit(this);
+	lcTrainTrackInfo::Initialize(this);
 
 	return true;
 }

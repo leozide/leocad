@@ -37,6 +37,7 @@ class lcTrainTrackInfo
 public:
 	lcTrainTrackInfo() = default;
 
+	static void Initialize(lcPiecesLibrary* Library);
 	static std::vector<lcTrainTrackInsert> GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section);
 	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
@@ -83,6 +84,5 @@ protected:
 	}
 
 	std::vector<lcTrainTrackConnection> mConnections;
+	static std::map<quint32, PieceInfo*> mSleepers;
 };
-
-void lcTrainTrackInit(lcPiecesLibrary* Library);

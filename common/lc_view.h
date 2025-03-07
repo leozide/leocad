@@ -358,7 +358,7 @@ protected:
 	lcMatrix44 mPiecePreviewTransform;
 
 	lcVertexBuffer mGridBuffer;
-	int mGridSettings[7];
+	int mGridSettings[8];
 
 	static QPointer<lcFindReplaceWidget> mFindWidget;
 	static lcFindReplaceParams mFindReplaceParams;

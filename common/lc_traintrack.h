@@ -35,18 +35,21 @@ struct lcTrainTrackInsert
 class lcTrainTrackInfo
 {
 public:
-	lcTrainTrackInfo() = default;
+	lcTrainTrackInfo(const std::vector<lcTrainTrackConnection> &Connections, bool Visible)
+		: mConnections(Connections), mVisible(Visible)
+	{
+	}
+
+	bool IsVisible() const
+	{
+		return mVisible;
+	}
 
 	static void Initialize(lcPiecesLibrary* Library);
 	static std::vector<lcTrainTrackInsert> GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section);
 	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
-
-	void AddConnection(const lcMatrix44 &Transform, const lcTrainTrackConnectionType& Type)
-	{
-		mConnections.emplace_back(lcTrainTrackConnection{Transform, Type});
-	}
 
 	const std::vector<lcTrainTrackConnection>& GetConnections() const
 	{
@@ -84,5 +87,7 @@ protected:
 	}
 
 	std::vector<lcTrainTrackConnection> mConnections;
+	bool mVisible = false;
+
 	static std::map<quint32, PieceInfo*> mSleepers;
 };

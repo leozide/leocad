@@ -240,7 +240,7 @@ lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainT
 	mPartSelectionListView->setMinimumWidth(450);
 	mPartSelectionListView->setDragEnabled(false);
 
-	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetTrainTrackParts(ConnectionType);
+	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
 
 	mPartSelectionListView->SetCustomParts(Parts);
 

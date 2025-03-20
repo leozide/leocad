@@ -6,8 +6,8 @@
 #include "lc_application.h"
 
 // todo:
-// add the rest of the 9v and 12v tracks, look into 4.5v
-// see if we should remove some of the 12v tracks to avoid bloat
+// add the rest of the 12v tracks, look into 4.5v
+// hide some of the 12v tracks to avoid bloat
 // lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
 // auto replace cross when going over a straight section
@@ -22,56 +22,71 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 	if (!ConfigFile.open(QIODevice::ReadOnly))
 		return;
 
-	QJsonDocument Document = QJsonDocument::fromJson(ConfigFile.readAll());
+	QJsonParseError Error;
+	QJsonDocument Document = QJsonDocument::fromJson(ConfigFile.readAll(), &Error);
+
+	if (Error.error != QJsonParseError::NoError)
+	{
+		qDebug() << Error.errorString();
+	}
+
 	QJsonObject Root = Document.object();
 
 	if (Root["Version"].toInt() != 1)
 		return;
 
-	QJsonObject JsonPieces = Root["Pieces"].toObject();
+	QJsonArray JsonPieces = Root["Pieces"].toArray();
 
-	for (QJsonObject::const_iterator PiecesIt = JsonPieces.constBegin(); PiecesIt != JsonPieces.constEnd(); ++PiecesIt)
+	for (QJsonArray::const_iterator PiecesIt = JsonPieces.constBegin(); PiecesIt != JsonPieces.constEnd(); ++PiecesIt)
 	{
 		QJsonObject JsonPiece = PiecesIt->toObject();
-		QJsonArray JsonParts = JsonPiece["Parts"].toArray();
 
-		for (QJsonArray::const_iterator PartsIt = JsonParts.constBegin(); PartsIt != JsonParts.constEnd(); ++PartsIt)
+		QJsonArray JsonConnections = JsonPiece["Connections"].toArray();
+		std::vector<lcTrainTrackConnection> Connections;
+
+		for (QJsonArray::const_iterator ConnectionIt = JsonConnections.constBegin(); ConnectionIt != JsonConnections.constEnd(); ++ConnectionIt)
 		{
-			PieceInfo* Info = Library->FindPiece(PartsIt->toString().toLatin1(), nullptr, false, false);
+			QJsonObject JsonConnection = ConnectionIt->toObject();
 
-			if (!Info)
-				continue;
+			QJsonArray JsonPosition = JsonConnection["Position"].toArray();
+			lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
 
-			lcTrainTrackInfo* TrainTrackInfo = new lcTrainTrackInfo();
+			float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
+			QString ConnectionGroup = JsonConnection["Type"].toString();
+			lcTrainTrackConnectionSleeper ConnectionSleeper = lcTrainTrackConnectionSleeper::None;
 
-			Info->SetTrainTrackInfo(TrainTrackInfo);
-
-			QJsonArray JsonConnections = JsonPiece["Connections"].toArray();
-
-			for (QJsonArray::const_iterator ConnectionIt = JsonConnections.constBegin(); ConnectionIt != JsonConnections.constEnd(); ++ConnectionIt)
+			if (ConnectionGroup.startsWith('+'))
 			{
-				QJsonObject JsonConnection = ConnectionIt->toObject();
-
-				QJsonArray JsonPosition = JsonConnection["Position"].toArray();
-				lcVector3 Position(JsonPosition[0].toDouble(), JsonPosition[1].toDouble(), JsonPosition[2].toDouble());
-
-				float Rotation = JsonConnection["Rotation"].toDouble() * LC_DTOR;
-				QString ConnectionGroup = JsonConnection["Type"].toString();
-				lcTrainTrackConnectionSleeper ConnectionSleeper = lcTrainTrackConnectionSleeper::None;
-
-				if (ConnectionGroup.startsWith('+'))
-				{
-					ConnectionSleeper = lcTrainTrackConnectionSleeper::NeedsSleeper;
-					ConnectionGroup = ConnectionGroup.mid(1);
-				}
-				else if (ConnectionGroup.startsWith('-'))
-				{
-					ConnectionSleeper = lcTrainTrackConnectionSleeper::HasSleeper;
-					ConnectionGroup = ConnectionGroup.mid(1);
-				}
-
-				TrainTrackInfo->AddConnection(lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionSleeper } );
+				ConnectionSleeper = lcTrainTrackConnectionSleeper::NeedsSleeper;
+				ConnectionGroup = ConnectionGroup.mid(1);
 			}
+			else if (ConnectionGroup.startsWith('-'))
+			{
+				ConnectionSleeper = lcTrainTrackConnectionSleeper::HasSleeper;
+				ConnectionGroup = ConnectionGroup.mid(1);
+			}
+
+			Connections.emplace_back(lcTrainTrackConnection{ lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionSleeper } });
+		}
+
+		QJsonArray JsonIDs = JsonPiece["IDs"].toArray();
+
+		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
+		{
+			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
+
+			if (Info)
+				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, true));
+		}
+
+		JsonIDs = JsonPiece["HiddenIDs"].toArray();
+
+		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
+		{
+			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
+
+			if (Info)
+				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, false));
 		}
 	}
 

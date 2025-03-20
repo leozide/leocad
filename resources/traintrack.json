@@ -1,10 +1,11 @@
 {
 	"Version": 1,
 	"Pieces":
-	{
-		"Train Track  9V Point Right":
+	[
 		{
-			"Parts": [ "2859c03.dat", "2859c04.dat" ],
+			"Description": "Train Track  9V Point Right",
+			"IDs": [ "2859c03.dat", "2859c04.dat" ],
+			"HiddenIDs": [ "2859c01.dat", "2859c02.dat" ],
 			"Connections":
 			[
 				{
@@ -24,9 +25,10 @@
 				}
 			]
 		},
-		"Train Track  9V Point Left":
 		{
-			"Parts": [ "2861c03.dat", "2861c04.dat" ],
+			"Description": "Train Track  9V Point Left",
+			"IDs": [ "2861c03.dat", "2861c04.dat" ],
+			"HiddenIDs": [ "2861c01.dat", "2861c02.dat" ],
 			"Connections":
 			[
 				{
@@ -46,9 +48,9 @@
 				}
 			]
 		},
-		"Train Track  9V Crossing":
 		{
-			"Parts": [ "32087.dat" ],
+			"Description": "Train Track  9V Crossing",
+			"IDs": [ "32087.dat" ],
 			"Connections":
 			[
 				{
@@ -73,9 +75,9 @@
 				}
 			]
 		},
-		"Train Track  9V Straight":
 		{
-			"Parts": [ "74746.dat" ],
+			"Description": "Train Track  9V Straight",
+			"IDs": [ "74746.dat" ],
 			"Connections":
 			[
 				{
@@ -90,9 +92,9 @@
 				}
 			]
 		},
-		"Train Track  9V Curved":
 		{
-			"Parts": [ "74747.dat" ],
+			"Description": "Train Track  9V Curved",
+			"IDs": [ "74747.dat" ],
 			"Connections":
 			[
 				{
@@ -107,9 +109,26 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Curved":
 		{
-			"Parts": [ "3241ac01.dat" ],
+			"Description": "Train Track  9V Curved (4 Segments)",
+			"HiddenIDs": [ "74747c04.dat" ],
+			"Connections":
+			[
+				{
+					"Position": [ 0.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "9V"
+				},
+				{
+					"Position": [ 800, -800, 0.0 ],
+					"Rotation": -90,
+					"Type": "9V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track 12V Slotted Curved",
+			"IDs": [ "3241ac01.dat" ],
 			"Connections":
 			[
 				{
@@ -124,9 +143,9 @@
 				}
 			]
 		},
-		"Train Track Sleeper Plate  2 x  8":
 		{
-			"Parts": [ "4166a.dat", "4166b.dat" ],
+			"Description": "Train Track Sleeper Plate  2 x  8",
+			"IDs": [ "4166a.dat", "4166b.dat" ],
 			"Connections":
 			[
 				{
@@ -141,9 +160,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Straight With End Sleepers": 
 		{
-			"Parts": [ "3240ac01.dat", "3240bc01.dat" ],
+			"Description": "Train Track 12V Slotted Straight With End Sleepers",
+			"IDs": [ "3240ac01.dat", "3240bc01.dat" ],
 			"Connections":
 			[
 				{
@@ -158,9 +177,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Straight Without End Sleepers": 
 		{
-			"Parts": [ "3240ac02.dat", "3240bc02.dat" ],
+			"Description": "Train Track 12V Slotted Straight Without End Sleepers",
+			"IDs": [ "3240ac02.dat", "3240bc02.dat", "862ac01.dat" ],
 			"Connections":
 			[
 				{
@@ -175,9 +194,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Straight With Signal": 
 		{
-			"Parts": [ "862ac02.dat" ],
+			"Description": "Train Track 12V Slotted Straight With Signal",
+			"IDs": [ "862ac02.dat" ],
 			"Connections":
 			[
 				{
@@ -192,9 +211,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Decoupler": 
 		{
-			"Parts": [ "u9230c01.dat", "u9230c02.dat" ],
+			"Description": "Train Track 12V Slotted Decoupler",
+			"IDs": [ "u9230c01.dat", "u9230c02.dat" ],
 			"Connections":
 			[
 				{
@@ -209,9 +228,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Point Left": 
 		{
-			"Parts": [ "73697ac01.dat", "73697ac02.dat", "73697ac03.dat", "73697ac04.dat" ],
+			"Description": "Train Track 12V Slotted Point Left",
+			"IDs": [ "73697ac01.dat", "73697ac02.dat", "73697ac03.dat", "73697ac04.dat" ],
 			"Connections":
 			[
 				{
@@ -231,9 +250,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Point Right":
 		{
-			"Parts": [ "73696ac01.dat", "73696ac02.dat", "73696ac03.dat", "73696ac04.dat" ],
+			"Description": "Train Track 12V Slotted Point Right",
+			"IDs": [ "73696ac01.dat", "73696ac02.dat", "73696ac03.dat", "73696ac04.dat" ],
 			"Connections":
 			[
 				{
@@ -253,9 +272,9 @@
 				}
 			]
 		},
-		"Train Track 12V Slotted Crossing":
 		{
-			"Parts": [ "73698.dat" ],
+			"Description": "Train Track 12V Slotted Crossing",
+			"IDs": [ "73698.dat" ],
 			"Connections":
 			[
 				{
@@ -280,9 +299,9 @@
 				}
 			]
 		},
-		"Train Track 4.5V Slotted Straight Without End Sleepers": 
 		{
-			"Parts": [ "3228bc02.dat" ],
+			"Description": "Train Track 4.5V Slotted Straight Without End Sleepers",
+			"IDs": [ "3228bc02.dat" ],
 			"Connections":
 			[
 				{
@@ -297,7 +316,7 @@
 				}
 			]
 		}
-	},
+	],
 	"Sleepers":
 	{
 		"12V": "4166a.dat"

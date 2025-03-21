@@ -29,20 +29,19 @@ struct lcTrainTrackInsert
 {
 	PieceInfo* Info;
 	lcMatrix44 Transform;
-	int ColorCode;
 };
 
 class lcTrainTrackInfo
 {
 public:
 	lcTrainTrackInfo(const std::vector<lcTrainTrackConnection> &Connections, int Color, bool Visible)
-		: mConnections(Connections), mColor(Color), mVisible(Visible)
+		: mConnections(Connections), mColorCode(Color), mVisible(Visible)
 	{
 	}
 
-	int GetColor() const
+	int GetColorCode() const
 	{
-		return mColor;
+		return mColorCode;
 	}
 
 	bool IsVisible() const
@@ -92,7 +91,7 @@ protected:
 	}
 
 	std::vector<lcTrainTrackConnection> mConnections;
-	int mColor = 16;
+	int mColorCode = 16;
 	bool mVisible = false;
 
 	static std::map<quint32, PieceInfo*> mSleepers;

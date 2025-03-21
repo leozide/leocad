@@ -2326,7 +2326,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 
 			for (const lcTrainTrackInsert& TrainTrack : TrainTracks)
 			{
-				int ColorIndex = TrainTrack.ColorCode == 16 ? gMainWindow->mColorIndex : lcGetColorIndex(TrainTrack.ColorCode);
+				int ColorIndex = lcGetColorIndex(TrainTrack.Info->GetTrainTrackInfo()->GetColorCode());
 
 				CreatePiece(TrainTrack.Info, TrainTrack.Transform, ColorIndex);
 			}

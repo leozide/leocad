@@ -10,6 +10,7 @@
 // hide some of the 12v tracks to avoid bloat
 // lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
+// part picker preview should use the json colors
 // auto replace cross when going over a straight section
 // set focus connection after adding
 
@@ -188,8 +189,8 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 
 		if (Transform)
 		{
-			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value(), SleeperInfo->GetTrainTrackInfo()->GetColor() });
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), Info->GetTrainTrackInfo()->GetColor() });
+			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value() });
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value() });
 		}
 	}
 	else
@@ -197,7 +198,7 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
 
 		if (Transform)
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), Info->GetTrainTrackInfo()->GetColor() });
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value() });
 	}
 
 	return Pieces;

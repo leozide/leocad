@@ -6,7 +6,7 @@
 #include "lc_application.h"
 
 // todo:
-// add the rest of the 12v tracks, look into 4.5v
+// add 4.5v tracks
 // hide some of the 12v tracks to avoid bloat
 // lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
@@ -69,6 +69,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 			Connections.emplace_back(lcTrainTrackConnection{ lcMatrix44(lcMatrix33RotationZ(Rotation), Position), { qHash(ConnectionGroup), ConnectionSleeper } });
 		}
 
+		int Color = JsonPiece["Color"].toInt(16);
 		QJsonArray JsonIDs = JsonPiece["IDs"].toArray();
 
 		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
@@ -76,7 +77,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
 
 			if (Info)
-				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, true));
+				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, true));
 		}
 
 		JsonIDs = JsonPiece["HiddenIDs"].toArray();
@@ -86,7 +87,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
 
 			if (Info)
-				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, false));
+				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, false));
 		}
 	}
 
@@ -187,8 +188,8 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 
 		if (Transform)
 		{
-			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value(), 8 });
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), 16 });
+			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value(), SleeperInfo->GetTrainTrackInfo()->GetColor() });
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), Info->GetTrainTrackInfo()->GetColor() });
 		}
 	}
 	else
@@ -196,7 +197,7 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
 
 		if (Transform)
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), 16 });
+			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value(), Info->GetTrainTrackInfo()->GetColor() });
 	}
 
 	return Pieces;

@@ -40,6 +40,12 @@ enum class lcTransformType
 	Count
 };
 
+struct lcPieceInfoTransform
+{
+	PieceInfo* Info;
+	lcMatrix44 Transform;
+};
+
 class lcModelProperties
 {
 public:
@@ -261,7 +267,7 @@ public:
 	void Paste(bool PasteToCurrentStep);
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
-	void UpdateTrainTrackConnections(lcPiece* FocusPiece) const;
+	void UpdateTrainTrackConnections(lcPiece* TrackPiece) const;
 
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
@@ -333,7 +339,7 @@ public:
 
 	void BeginMouseTool();
 	void EndMouseTool(lcTool Tool, bool Accept);
-	void InsertPieceToolClicked(PieceInfo* Info, const lcMatrix44& WorldMatrix);
+	void InsertPieceToolClicked(const std::vector<lcPieceInfoTransform>& PieceInfoTransforms);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);

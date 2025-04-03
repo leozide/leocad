@@ -3,12 +3,12 @@
 #include "lc_library.h"
 #include "pieceinf.h"
 #include "piece.h"
+#include "lc_model.h"
 #include "lc_application.h"
 
 // todo:
 // add 4.5v tracks
 // hide some of the 12v tracks to avoid bloat
-// lcView::GetPieceInsertTransform should use track connections when dragging a new track over an existing one
 // better insert gizmo mouse detection
 // part picker preview should use the json colors
 // auto replace cross when going over a straight section
@@ -133,9 +133,9 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section)
+std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 PreferredSection)
 {
-	std::vector<lcTrainTrackInsert> Pieces;
+	std::vector<lcPieceInfoTransform> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
@@ -143,19 +143,19 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 
 	quint32 ConnectionIndex = 0;
 
-	if (Section != LC_PIECE_SECTION_INVALID && Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-	{
-		ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-	}
-	else
-	{
-		for (ConnectionIndex = 0; ConnectionIndex < CurrentTrackInfo->GetConnections().size(); ConnectionIndex++)
-			if (!CurrentPiece->IsTrainTrackConnected(ConnectionIndex))
-				break;
+	if (PreferredSection != LC_PIECE_SECTION_INVALID && PreferredSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		ConnectionIndex = PreferredSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 
-		if (ConnectionIndex == CurrentTrackInfo->GetConnections().size())
-			return Pieces;
-	}
+	quint32 CheckIndex;
+
+	for (CheckIndex = 0; CheckIndex < CurrentTrackInfo->GetConnections().size(); CheckIndex++)
+		if (!CurrentPiece->IsTrainTrackConnected((ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size()))
+			break;
+
+	if (CheckIndex == CurrentTrackInfo->GetConnections().size())
+		return Pieces;
+
+	ConnectionIndex = (ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size();
 
 	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
 	const std::vector<lcTrainTrackConnection>& NewConnections = Info->GetTrainTrackInfo()->GetConnections();
@@ -189,8 +189,8 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 
 		if (Transform)
 		{
-			Pieces.emplace_back(lcTrainTrackInsert{ SleeperInfo, SleeperTransform.value() });
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value() });
+			Pieces.emplace_back(lcPieceInfoTransform{ SleeperInfo, SleeperTransform.value() });
+			Pieces.emplace_back(lcPieceInfoTransform{ Info, Transform.value() });
 		}
 	}
 	else
@@ -198,7 +198,7 @@ std::vector<lcTrainTrackInsert> lcTrainTrackInfo::GetPieceInsertTransforms(lcPie
 		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
 
 		if (Transform)
-			Pieces.emplace_back(lcTrainTrackInsert{ Info, Transform.value() });
+			Pieces.emplace_back(lcPieceInfoTransform{ Info, Transform.value() });
 	}
 
 	return Pieces;

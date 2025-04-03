@@ -5,6 +5,7 @@
 class lcPiece;
 class lcPiecesLibrary;
 class PieceInfo;
+struct lcPieceInfoTransform;
 
 enum class lcTrainTrackConnectionSleeper
 {
@@ -23,12 +24,6 @@ struct lcTrainTrackConnection
 {
 	lcMatrix44 Transform;
 	lcTrainTrackConnectionType Type;
-};
-
-struct lcTrainTrackInsert
-{
-	PieceInfo* Info;
-	lcMatrix44 Transform;
 };
 
 class lcTrainTrackInfo
@@ -50,7 +45,7 @@ public:
 	}
 
 	static void Initialize(lcPiecesLibrary* Library);
-	static std::vector<lcTrainTrackInsert> GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 Section);
+	static std::vector<lcPieceInfoTransform> GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 PreferredSection);
 	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);

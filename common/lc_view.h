@@ -4,6 +4,8 @@
 #include "lc_math.h"
 #include "lc_commands.h"
 
+struct lcPieceInfoTransform;
+
 enum class lcDragState
 {
 	None,
@@ -263,11 +265,11 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
-	lcMatrix44 GetPieceInsertTransform(bool IgnoreSelected, PieceInfo* Info) const;
+	std::vector<lcPieceInfoTransform> GetPieceInsertTransform(bool IgnoreSelected, PieceInfo* Info) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
+	lcObjectRayTest RayTest(bool PiecesOnly, bool IgnoreSelected) const;
 	lcObjectSection FindObjectUnderPointer(bool PiecesOnly, bool IgnoreSelected) const;
-	lcPieceInfoRayTest FindPieceInfoUnderPointer(bool IgnoreSelected) const;
 	std::vector<lcObject*> FindObjectsInBox(float x1, float y1, float x2, float y2) const;
 
 	lcVector3 ProjectPoint(const lcVector3& Point) const;
@@ -354,8 +356,7 @@ protected:
 
 	lcCamera* mCamera = nullptr;
 
-	PieceInfo* mPiecePreviewInfo = nullptr;
-	lcMatrix44 mPiecePreviewTransform;
+	std::vector<lcPieceInfoTransform> mPreviewPieceInfoTransforms;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

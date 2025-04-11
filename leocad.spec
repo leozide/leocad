@@ -18,7 +18,7 @@
 
 Summary: CAD program for creating virtual LEGO models
 Name: leocad
-URL: http://leocad.org
+URL: https://leocad.org
 %if 0%{?suse_version} || 0%{?sles_version}
 Group: Productivity/Graphics/Viewers
 %endif
@@ -35,10 +35,10 @@ Release: <CI_CNT>.<B_CNT>%{?dist}
 Release: 1%{?dist}
 %endif
 %if 0%{?mdkversion} || 0%{?rhel_version} || 0%{?fedora} || 0%{?centos_version} || 0%{?scientificlinux_version} || 0%{?mageia}
-License: GPLv2+
+License: GPLv2
 %endif
 %if 0%{?suse_version} || 0%{?sles_version}
-License: GPL-2.0+
+License: GPL-2.0
 BuildRequires: fdupes
 %endif
 Packager: Peter Bartfai <pbartfai@stardust.hu>

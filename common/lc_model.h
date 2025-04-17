@@ -267,7 +267,7 @@ public:
 	void Paste(bool PasteToCurrentStep);
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
-	void UpdateTrainTrackConnections(lcPiece* TrackPiece) const;
+	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
 
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;

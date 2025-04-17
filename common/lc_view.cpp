@@ -338,7 +338,7 @@ void lcView::ShowTrainTrackPopup()
 		Piece = ActiveModel->AddPiece(Info, mTrackToolSection);
 
 		if (Piece)
-			ActiveModel->UpdateTrainTrackConnections(Piece);
+			ActiveModel->UpdateTrainTrackConnections(Piece, false);
 	}
 
 	mWidget->UpdateMousePosition();
@@ -500,7 +500,7 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 
 		if (RayTrackInfo && InfoTrackInfo)
 		{
-			ActiveModel->UpdateTrainTrackConnections(MousePiece);
+			ActiveModel->UpdateTrainTrackConnections(MousePiece, IgnoreSelected);
 
 			quint32 FocusSection = MousePiece->GetFocusSection();
 			std::vector<lcPieceInfoTransform> TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(MousePiece, Info, FocusSection);

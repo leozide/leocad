@@ -7,7 +7,7 @@
 #include "lc_application.h"
 
 // todo:
-// add 4.5v tracks
+// when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate curves
 // hide some of the 12v tracks to avoid bloat
 // better insert gizmo mouse detection
 // part picker preview should use the json colors

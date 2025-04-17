@@ -169,9 +169,8 @@
 			]
 		},
 		{
-			"Description": "Train Track Sleeper Plate  2 x  8",
+			"Description": "Train Track Sleeper Plate  2 x  8 with Cable Grooves",
 			"IDs": [ "4166b.dat" ],
-			"HiddenIDs": [ "4166a.dat" ],
 			"Color": 8,
 			"Connections":
 			[
@@ -334,6 +333,78 @@
 			]
 		},
 		{
+			"Description": "Train Track 4.5V Slotted Curved",
+			"IDs": [ "3229bc01.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -11.25,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -156.072265625, -15.371826171875, 0.0 ],
+					"Rotation": -168.75,
+					"Type": "+4.5V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track  4.5V Slotted Curved (4 Segments)",
+			"HiddenIDs": [ "3229bc04.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 0.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ 800, -800, 0.0 ],
+					"Rotation": -90,
+					"Type": "+4.5V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track Sleeper Plate  2 x  8 without Cable Grooves",
+			"IDs": [ "4166a.dat" ],
+			"Color": 8,
+			"Connections":
+			[
+				{
+					"Position": [ 0.0, 0.0, 16.0 ],
+					"Rotation": 90.0,
+					"Type": "-4.5V"
+				},
+				{
+					"Position": [ 0.0, 0.0, 16.0 ],
+					"Rotation": -90.0,
+					"Type": "-4.5V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track 4.5V Slotted Straight With End Sleepers",
+			"IDs": [ "3228bc01.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": -180.0,
+					"Type": "+4.5V"
+				}
+			]
+		},
+		{
 			"Description": "Train Track 4.5V Slotted Straight Without End Sleepers",
 			"IDs": [ "3228bc02.dat" ],
 			"Color": 7,
@@ -350,10 +421,85 @@
 					"Type": "+4.5V"
 				}
 			]
+		},
+		{
+			"Description": "Train Track 4.5V Slotted Point Left",
+			"IDs": [ "948cc01.dat", "948cc02.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ 320.0, 160.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180.0,
+					"Type": "+4.5V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track 4.5V Slotted Point Right",
+			"IDs": [ "949cc01.dat", "949cc02.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 320.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ 320.0, -160, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -320.0, 0.0, 0.0 ],
+					"Rotation": 180,
+					"Type": "+4.5V"
+				}
+			]
+		},
+		{
+			"Description": "Train Track 4.5V Slotted Crossing",
+			"IDs": [ "3231b.dat" ],
+			"Color": 7,
+			"Connections":
+			[
+				{
+					"Position": [ 160.0, 0.0, 0.0 ],
+					"Rotation": 0.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ 0.0, 160.0, 0.0 ],
+					"Rotation": 90.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ -160.0, 0.0, 0.0 ],
+					"Rotation": 180.0,
+					"Type": "+4.5V"
+				},
+				{
+					"Position": [ 0.0, -160.0, 0.0 ],
+					"Rotation": -90.0,
+					"Type": "+4.5V"
+				}
+			]
 		}
 	],
 	"Sleepers":
 	{
-		"12V": "4166b.dat"
+		"12V": "4166b.dat",
+		"4.5V": "4166a.dat"
 	}
 }

@@ -567,14 +567,14 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 	clearSelection();
 
-	if (DropItem)
-	{
-		QTreeWidgetItem* ParentItem = DropItem->parent();
-		lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+	if (!DropItem)
+		return;
 
-		if (Step > Model->GetCurrentStep())
-			Model->SetCurrentStep(Step);
-	}
+	QTreeWidgetItem* ParentItem = DropItem->parent();
+	lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+
+	if (Step > Model->GetCurrentStep())
+		Model->SetCurrentStep(Step);
 
 	auto SortItems = [this](QTreeWidgetItem* Item1, QTreeWidgetItem* Item2)
 	{

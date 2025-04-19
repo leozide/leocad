@@ -10,6 +10,7 @@
 #include "pieceinf.h"
 #include "lc_glextensions.h"
 #include "lc_category.h"
+#include "lc_traintrack.h"
 
 Q_DECLARE_METATYPE(QList<int>)
 
@@ -241,7 +242,14 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<PieceInfo*>& Par
 	mParts.clear();
 
 	for (PieceInfo* Part : Parts)
-		mParts.emplace_back().Info = Part;
+	{
+		lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
+		
+		Entry.Info = Part;
+
+		if (lcTrainTrackInfo* TrainTrackInfo = Part->GetTrainTrackInfo())
+			Entry.ColorIndex = lcGetColorIndex(TrainTrackInfo->GetColorCode());
+	}
 
 	auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
 	{
@@ -416,7 +424,9 @@ void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 		return;
 
 	PieceInfo* Info = mParts[PartIndex].Info;
-	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, mColorIndex, mIconSize);
+	int ColorIndex = mParts[PartIndex].ColorIndex == -1 ? mColorIndex : mParts[PartIndex].ColorIndex;
+
+	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize);
 
 	mParts[PartIndex].ThumbnailId = ThumbnailId;
 

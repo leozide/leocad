@@ -57,6 +57,7 @@ protected:
 struct lcPartSelectionListModelEntry
 {
 	PieceInfo* Info = nullptr;
+	int ColorIndex = -1;
 	QPixmap Pixmap;
 	lcPartThumbnailId ThumbnailId = lcPartThumbnailId::Invalid;
 };

@@ -511,31 +511,6 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 			}
 		}
 	}
-
-	if (mPieceInfo->GetTrainTrackInfo() && AreTrainTrackConnectionsVisible())
-	{
-		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
-		const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
-
-		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-		{
-			const lcMatrix44 InverseTransform = lcMatrix44AffineInverse(Connections[ConnectionIndex].Transform);
-			const lcVector3 PointStart = lcMul31(Start, InverseTransform);
-			const lcVector3 PointEnd = lcMul31(End, InverseTransform);
-
-			float Distance;
-			lcVector3 Plane;
-
-			if (lcBoundingBoxRayIntersectDistance(Min, Max, PointStart, PointEnd, &Distance, nullptr, &Plane))
-			{
-				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
-				ObjectRayTest.Distance = Distance;
-				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
-			}
-		}
-	}
 }
 
 void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
@@ -636,8 +611,6 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 	if (mPieceInfo->GetSynthInfo())
 		DrawSynthInterface(Context, WorldMatrix);
-	else if (mPieceInfo->GetTrainTrackInfo())
-		DrawTrainTrackInterface(Context, WorldMatrix);
 }
 
 void lcPiece::DrawSynthInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const
@@ -691,58 +664,6 @@ void lcPiece::DrawSynthInterface(lcContext* Context, const lcMatrix44& WorldMatr
 
 	Context->EnableCullFace(false);
 	Context->EnableColorBlend(false);
-}
-
-void lcPiece::DrawTrainTrackInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const
-{
-	if (!AreTrainTrackConnectionsVisible())
-		return;
-
-	float Verts[8 * 3];
-	float* CurVert = Verts;
-
-	lcVector3 CubeMin(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
-	lcVector3 CubeMax(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
-
-	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
-	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
-	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
-	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
-	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
-	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
-	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
-	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
-
-	const GLushort Indices[36] =
-	{
-		0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
-		7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
-	};
-
-	const lcPreferences& Preferences = lcGetPreferences();
-	const lcVector4 ConnectionColor = lcVector4FromColor(Preferences.mControlPointColor);
-	const lcVector4 ConnectionFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
-
-	const lcTrainTrackInfo* TrainTrackInfo = mPieceInfo->GetTrainTrackInfo();
-	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
-
-	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-	{
-		Context->SetWorldMatrix(lcMul(Connections[ConnectionIndex].Transform, WorldMatrix));
-
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-		Context->SetIndexBufferPointer(Indices);
-
-		if (IsFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex))
-			Context->SetColor(ConnectionFocusedColor);
-		else
-			Context->SetColor(ConnectionColor);
-
-		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
-	}
-
-	mPieceInfo->GetTrainTrackInfo()->GetConnections();
 }
 
 QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const

@@ -312,8 +312,6 @@ protected:
 
 	void DrawSynthInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const;
 
-	void DrawTrainTrackInterface(lcContext* Context, const lcMatrix44& WorldMatrix) const;
-
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
 

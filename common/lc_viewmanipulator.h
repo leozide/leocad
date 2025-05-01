@@ -10,7 +10,7 @@ public:
 	void DrawSelectMove(lcTrackButton TrackButton, lcTrackTool TrackTool, quint32 TrackToolSection);
 	void DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool);
 
-	std::pair<lcTrackTool, quint32> UpdateSelectMove();
+	std::pair<lcTrackTool, quint32> UpdateSelectMove(lcTrackButton TrackButton);
 	lcTrackTool UpdateRotate();
 
 	static void CreateResources(lcContext* Context);

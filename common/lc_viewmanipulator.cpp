@@ -464,7 +464,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 2, 18);
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 20, 18);
 		}
-		else if (Piece->mPieceInfo->GetTrainTrackInfo())
+		else if (Piece->mPieceInfo->GetTrainTrackInfo() && TrackButton == lcTrackButton::None)
 		{
 			DrawTrainTrack(Piece, Context, TrackTool, TrackToolSection);
 		}
@@ -544,13 +544,68 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 
 			Context->SetWorldMatrix(WorldMatrix);
 
-			if (TrackToolSection == LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex)
+			if (TrackToolSection == LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex && TrackTool != lcTrackTool::SelectTrainTrack)
 				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 			else
 				Context->SetColor(TrainTrackColor);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 		}
+	}
+
+	float Verts[8 * 3];
+	float* CurVert = Verts;
+
+	constexpr float TrainTrackBoxSize = 0.15f;
+	lcVector3 CubeMin(-TrainTrackBoxSize, -TrainTrackBoxSize, -TrainTrackBoxSize);
+	lcVector3 CubeMax(TrainTrackBoxSize, TrainTrackBoxSize, TrainTrackBoxSize);
+
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMin[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMin[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMax[1]; *CurVert++ = CubeMax[2];
+	*CurVert++ = CubeMax[0]; *CurVert++ = CubeMin[1]; *CurVert++ = CubeMax[2];
+
+	const GLushort Indices[36] =
+	{
+		0, 1, 2, 0, 2, 3, 7, 6, 5, 7, 5, 4, 5, 1, 0, 4, 5, 0,
+		7, 3, 2, 6, 7, 2, 0, 3, 7, 0, 7, 4, 6, 2, 1, 5, 6, 1
+	};
+
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormatPosition(3);
+	Context->SetIndexBufferPointer(Indices);
+
+	const lcVector4 ConnectionColor = lcVector4FromColor(Preferences.mControlPointColor);
+	const lcVector4 ConnectionFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
+
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
+	{
+		lcMatrix44 WorldMatrix = lcMul(Connections[ConnectionIndex].Transform, Piece->mModelWorld);
+		lcModel* ActiveModel = mView->GetActiveModel();
+
+		if (ActiveModel != mView->GetModel())
+			WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
+
+		const float OverlayScale = mView->GetOverlayScale();
+		WorldMatrix = lcMul(lcMatrix44Scale(lcVector3(OverlayScale, OverlayScale, OverlayScale)), WorldMatrix);
+
+		Context->SetWorldMatrix(WorldMatrix);
+
+		if (Piece->IsFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex))
+			Context->SetColor(ConnectionFocusedColor);
+		else if (TrackToolSection == LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex && TrackTool == lcTrackTool::SelectTrainTrack)
+			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+		else
+			Context->SetColor(ConnectionColor);
+
+		Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	}
 }
 
@@ -911,6 +966,7 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 		case lcTrackTool::RotateTrainTrackRight:
 		case lcTrackTool::RotateTrainTrackLeft:
 		case lcTrackTool::InsertTrainTrack:
+		case lcTrackTool::SelectTrainTrack:
 			return true;
 
 		case lcTrackTool::ScalePlus:
@@ -936,7 +992,7 @@ bool lcViewManipulator::IsTrackToolAllowed(lcTrackTool TrackTool, quint32 Allowe
 	return false;
 }
 
-std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
+std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButton TrackButton)
 {
 	lcModel* ActiveModel = mView->GetActiveModel();
 	const float OverlayScale = mView->GetOverlayScale();
@@ -1110,7 +1166,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove()
 		}
 	}
 
-	if (CurrentTool == lcTool::Select && Focus && Focus->IsPiece())
+	if (CurrentTool == lcTool::Select && Focus && Focus->IsPiece() && TrackButton == lcTrackButton::None)
 	{
 		auto [TrainTrackTool, TrainTrackSection, TrainDistance] = UpdateSelectMoveTrainTrack((lcPiece*)Focus, OverlayCenter, OverlayScale, Start, End, PlaneNormals);
 
@@ -1229,6 +1285,39 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 			{
 				NewTrackTool = lcTrackTool::InsertTrainTrack;
 				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
+			}
+		}
+	}
+
+	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
+	{
+		lcMatrix44 WorldMatrix = lcMul(Connections[ConnectionIndex].Transform, Piece->mModelWorld);
+		lcModel* ActiveModel = mView->GetActiveModel();
+
+		if (ActiveModel != mView->GetModel())
+			WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
+
+		lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
+		InverseWorldMatrix = lcMul(InverseWorldMatrix, lcMatrix44Scale(lcVector3(1.0f / OverlayScale, 1.0f / OverlayScale, 1.0f / OverlayScale)));
+
+		lcVector3 LocalStart = lcMul31(Start, InverseWorldMatrix);
+		lcVector3 LocalEnd = lcMul31(End, InverseWorldMatrix);
+
+		constexpr float TrainTrackBoxSize = 0.15f;
+		lcVector3 CubeMin(-TrainTrackBoxSize, -TrainTrackBoxSize, -TrainTrackBoxSize);
+		lcVector3 CubeMax(TrainTrackBoxSize, TrainTrackBoxSize, TrainTrackBoxSize);
+
+		float Distance;
+
+		if (lcBoundingBoxRayIntersectDistance(CubeMin, CubeMax, LocalStart, LocalEnd, &Distance, nullptr, nullptr))
+		{
+			if (Distance < ClosestIntersectionDistance)
+			{
+				NewTrackTool = lcTrackTool::SelectTrainTrack;
+				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
+				ClosestIntersectionDistance = Distance;
 			}
 		}
 	}

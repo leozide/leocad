@@ -7,10 +7,10 @@
 #include "lc_application.h"
 
 // todo:
-// when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate curves
+// when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate pieces
+// detect the closest connection when dragging over pieces
 // hide some of the 12v tracks to avoid bloat
 // better insert gizmo mouse detection
-// part picker preview should use the json colors
 // auto replace cross when going over a straight section
 // set focus connection after adding
 

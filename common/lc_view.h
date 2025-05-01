@@ -75,6 +75,7 @@ enum class lcTrackTool
 	RotateTrainTrackRight,
 	RotateTrainTrackLeft,
 	InsertTrainTrack,
+	SelectTrainTrack,
 	ScalePlus,
 	ScaleMinus,
 	Eraser,

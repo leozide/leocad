@@ -2322,7 +2322,10 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 			if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 				Section = FocusSection;
 
-			TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(Last, Info, Section);
+			if (!Last->IsFocused())
+				UpdateTrainTrackConnections(Last, false);
+
+			TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(Last, Info, Section, std::nullopt);
 
 			for (const lcPieceInfoTransform& TrainTrack : TrainTracks)
 			{

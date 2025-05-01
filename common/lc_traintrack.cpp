@@ -8,7 +8,6 @@
 
 // todo:
 // when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate pieces
-// detect the closest connection when dragging over pieces
 // hide some of the 12v tracks to avoid bloat
 // better insert gizmo mouse detection
 // auto replace cross when going over a straight section
@@ -133,7 +132,7 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 PreferredSection)
+std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 PreferredSection, std::optional<lcVector3> ClosestPoint)
 {
 	std::vector<lcPieceInfoTransform> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
@@ -143,19 +142,45 @@ std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcP
 
 	quint32 ConnectionIndex = 0;
 
-	if (PreferredSection != LC_PIECE_SECTION_INVALID && PreferredSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-		ConnectionIndex = PreferredSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+	if (ClosestPoint)
+	{
+		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(CurrentPiece->mModelWorld);
+		lcVector3 LocalClosestPoint = lcMul31(ClosestPoint.value(), InverseMatrix);
+		float BestDistance = FLT_MAX;
 
-	quint32 CheckIndex;
+		for (quint32 CheckIndex = 0; CheckIndex < CurrentTrackInfo->GetConnections().size(); CheckIndex++)
+		{
+			if (CurrentPiece->IsTrainTrackConnected(CheckIndex))
+				continue;
 
-	for (CheckIndex = 0; CheckIndex < CurrentTrackInfo->GetConnections().size(); CheckIndex++)
-		if (!CurrentPiece->IsTrainTrackConnected((ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size()))
-			break;
+			float Distance = (CurrentTrackInfo->GetConnections()[CheckIndex].Transform.GetTranslation() - LocalClosestPoint).LengthSquared();
 
-	if (CheckIndex == CurrentTrackInfo->GetConnections().size())
-		return Pieces;
+			if (Distance < BestDistance)
+			{
+				ConnectionIndex = CheckIndex;
+				BestDistance = Distance;
+			}
+		}
 
-	ConnectionIndex = (ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size();
+		if (BestDistance == FLT_MAX)
+			return Pieces;
+	}
+	else
+	{
+		if (PreferredSection != LC_PIECE_SECTION_INVALID && PreferredSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+			ConnectionIndex = PreferredSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
+
+		quint32 CheckIndex;
+
+		for (CheckIndex = 0; CheckIndex < CurrentTrackInfo->GetConnections().size(); CheckIndex++)
+			if (!CurrentPiece->IsTrainTrackConnected((ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size()))
+				break;
+
+		if (CheckIndex == CurrentTrackInfo->GetConnections().size())
+			return Pieces;
+
+		ConnectionIndex = (ConnectionIndex + CheckIndex) % CurrentTrackInfo->GetConnections().size();
+	}
 
 	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
 	const std::vector<lcTrainTrackConnection>& NewConnections = Info->GetTrainTrackInfo()->GetConnections();

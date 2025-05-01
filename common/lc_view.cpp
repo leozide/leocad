@@ -502,8 +502,10 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 		{
 			ActiveModel->UpdateTrainTrackConnections(MousePiece, IgnoreSelected);
 
+			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
-			std::vector<lcPieceInfoTransform> TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(MousePiece, Info, FocusSection);
+
+			std::vector<lcPieceInfoTransform> TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(MousePiece, Info, FocusSection, ClosestPoint);
 
 			if (!TrainTracks.empty())
 				return TrainTracks;

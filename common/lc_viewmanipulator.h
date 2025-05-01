@@ -37,7 +37,9 @@ protected:
 	static constexpr int mTrainTrackRotateIndexCount = 96;
 	static constexpr int mTrainTrackInsertIndexStart = mTrainTrackRotateIndexStart + mTrainTrackRotateIndexCount * 2;
 	static constexpr int mTrainTrackInsertIndexCount = 72;
-	static constexpr int mIndexCount = mTrainTrackInsertIndexStart + mTrainTrackInsertIndexCount;
+	static constexpr int mTrainTrackConnectionIndexStart = mTrainTrackInsertIndexStart + mTrainTrackInsertIndexCount;
+	static constexpr int mTrainTrackConnectionIndexCount = 36;
+	static constexpr int mIndexCount = mTrainTrackConnectionIndexStart + mTrainTrackConnectionIndexCount;
 	static const GLushort mRotateMoveIndices[mIndexCount];
-	static lcVector3 mRotateMoveVertices[51 + 138 + 10 + 74 + 28];
+	static lcVector3 mRotateMoveVertices[51 + 138 + 10 + 74 + 28 + 24];
 };

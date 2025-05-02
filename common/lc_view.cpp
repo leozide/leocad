@@ -51,14 +51,14 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 lcView::~lcView()
 {
-	if (!mPreviewPieceInfoTransforms.empty())
+	if (!mPreviewInsertPieceInfo.empty())
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-		for (lcPieceInfoTransform &PreviewPieceInfoTransform : mPreviewPieceInfoTransforms)
+		for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 			Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
 
-		mPreviewPieceInfoTransforms.clear();
+		mPreviewInsertPieceInfo.clear();
 	}
 
 	mContext->DestroyVertexBuffer(mGridBuffer);
@@ -462,31 +462,31 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 void lcView::UpdatePiecePreview()
 {
 	PieceInfo* PreviewInfo = gMainWindow->GetCurrentPieceInfo();
-	std::vector<lcPieceInfoTransform> NewInfoTransform;
+	std::vector<lcInsertPieceInfo> InsertPieceInfo;
 
 	if (PreviewInfo)
 	{
-		 NewInfoTransform = GetPieceInsertTransform(false, PreviewInfo);
+		InsertPieceInfo = GetMouseInsertPieceInfo(false, PreviewInfo);
 
 		if (GetActiveModel() != mModel)
 		{
-			for (lcPieceInfoTransform &InfoTransform : NewInfoTransform)
+			for (lcInsertPieceInfo& InfoTransform : InsertPieceInfo)
 				InfoTransform.Transform = lcMul(InfoTransform.Transform, mActiveSubmodelTransform);
 		}
 	}
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	for (lcPieceInfoTransform &InfoTransform : NewInfoTransform)
+	for (lcInsertPieceInfo& InfoTransform : InsertPieceInfo)
 		Library->LoadPieceInfo(InfoTransform.Info, true, true);
 
-	for (lcPieceInfoTransform &PreviewPieceInfoTransform : mPreviewPieceInfoTransforms)
+	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
 
-	mPreviewPieceInfoTransforms = std::move(NewInfoTransform);
+	mPreviewInsertPieceInfo = std::move(InsertPieceInfo);
 }
 
-std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSelected, PieceInfo* Info) const
+std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, PieceInfo* Info) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -505,7 +505,7 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
-			std::vector<lcPieceInfoTransform> TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(MousePiece, Info, FocusSection, ClosestPoint);
+			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, Info, gMainWindow->mColorIndex, FocusSection, ClosestPoint);
 
 			if (!TrainTracks.empty())
 				return TrainTracks;
@@ -534,7 +534,7 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 		lcMatrix44 WorldMatrix = ObjectRayTest.PieceInfoRayTest.Transform;
 		WorldMatrix.SetTranslation(Position);
 
-		return { { Info, WorldMatrix } };
+		return { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } };
 	}
 
 	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
@@ -554,7 +554,7 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { Info, lcMatrix44Translation(Intersection) } };
+		return { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } };
 	}
 
 	lcVector3 Position;
@@ -567,10 +567,10 @@ std::vector<lcPieceInfoTransform> lcView::GetPieceInsertTransform(bool IgnoreSel
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { Info, lcMatrix44Translation(Intersection) } };
+		return { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } };
 	}
 
-	return { { Info, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))) } };
+	return { lcInsertPieceInfo{ Info, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const
@@ -879,8 +879,8 @@ void lcView::OnDraw()
 	{
 		UpdatePiecePreview();
 
-		for (const lcPieceInfoTransform &PreviewPieceInfoTransform : mPreviewPieceInfoTransforms)
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(mScene.get(), PreviewPieceInfoTransform.Transform, gMainWindow->mColorIndex, lcRenderMeshState::Focused, false);
+		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+			PreviewPieceInfoTransform.Info->AddRenderMeshes(mScene.get(), PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
 	}
 
 	if (DrawInterface)
@@ -1447,14 +1447,14 @@ void lcView::DrawGrid()
 
 	if (mTrackTool == lcTrackTool::Insert)
 	{
-		for (const lcPieceInfoTransform &PreviewPieceInfoTransform : mPreviewPieceInfoTransforms)
+		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : mPreviewInsertPieceInfo)
 		{
 			lcVector3 Points[8];
-			lcGetBoxCorners(PreviewPieceInfoTransform.Info->GetBoundingBox(), Points);
+			lcGetBoxCorners(PreviewInsertPieceInfo.Info->GetBoundingBox(), Points);
 
 			for (int i = 0; i < 8; i++)
 			{
-				lcVector3 Point = lcMul31(Points[i], PreviewPieceInfoTransform.Transform);
+				lcVector3 Point = lcMul31(Points[i], PreviewInsertPieceInfo.Transform);
 
 				Min = lcMin(Point, Min);
 				Max = lcMax(Point, Max);
@@ -1707,10 +1707,8 @@ void lcView::EndDrag(bool Accept)
 
 		case lcDragState::Piece:
 			{
-				PieceInfo* Info = gMainWindow->GetCurrentPieceInfo();
-
-				if (Info)
-					ActiveModel->InsertPieceToolClicked(GetPieceInsertTransform(false, Info));
+				if (!mPreviewInsertPieceInfo.empty())
+					ActiveModel->InsertPieceToolClicked(mPreviewInsertPieceInfo);
 			} break;
 
 		case lcDragState::Color:
@@ -2506,14 +2504,14 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		{
 			UpdatePiecePreview();
 
-			if (mPreviewPieceInfoTransforms.empty())
+			if (mPreviewInsertPieceInfo.empty())
 				break;
 
 			if (GetActiveModel() != mModel)
-				for (lcPieceInfoTransform& PreviewPieceInfoTransform : mPreviewPieceInfoTransforms)
+				for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 					PreviewPieceInfoTransform.Transform = lcMul(PreviewPieceInfoTransform.Transform, lcMatrix44AffineInverse(mActiveSubmodelTransform));
 
-			ActiveModel->InsertPieceToolClicked(mPreviewPieceInfoTransforms);
+			ActiveModel->InsertPieceToolClicked(mPreviewInsertPieceInfo);
 
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
@@ -2928,7 +2926,7 @@ void lcView::OnMouseMove()
 			}
 			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
-				std::vector<lcPieceInfoTransform> PieceInfoTransforms = GetPieceInsertTransform(true, mMouseDownPiece);
+				std::vector<lcInsertPieceInfo> PieceInfoTransforms = GetMouseInsertPieceInfo(true, mMouseDownPiece);
 
 				if (!PieceInfoTransforms.empty())
 				{

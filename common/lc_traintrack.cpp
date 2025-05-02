@@ -9,7 +9,6 @@
 // todo:
 // when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate pieces
 // hide some of the 12v tracks to avoid bloat
-// better insert gizmo mouse detection
 // auto replace cross when going over a straight section
 // set focus connection after adding
 
@@ -132,9 +131,9 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcPiece* CurrentPiece, PieceInfo* Info, quint32 PreferredSection, std::optional<lcVector3> ClosestPoint)
+std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, int ColorIndex, quint32 PreferredSection, std::optional<lcVector3> ClosestPoint)
 {
-	std::vector<lcPieceInfoTransform> Pieces;
+	std::vector<lcInsertPieceInfo> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
@@ -214,8 +213,8 @@ std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcP
 
 		if (Transform)
 		{
-			Pieces.emplace_back(lcPieceInfoTransform{ SleeperInfo, SleeperTransform.value() });
-			Pieces.emplace_back(lcPieceInfoTransform{ Info, Transform.value() });
+			Pieces.emplace_back(lcInsertPieceInfo{ SleeperInfo, SleeperTransform.value(), lcGetColorIndex(SleeperInfo->GetTrainTrackInfo()->GetColorCode()) });
+			Pieces.emplace_back(lcInsertPieceInfo{ Info, Transform.value(), ColorIndex });
 		}
 	}
 	else
@@ -223,7 +222,7 @@ std::vector<lcPieceInfoTransform> lcTrainTrackInfo::GetPieceInsertTransforms(lcP
 		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
 
 		if (Transform)
-			Pieces.emplace_back(lcPieceInfoTransform{ Info, Transform.value() });
+			Pieces.emplace_back(lcInsertPieceInfo{ Info, Transform.value(), ColorIndex });
 	}
 
 	return Pieces;

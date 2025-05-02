@@ -2313,7 +2313,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 
 	if (Last)
 	{
-		std::vector<lcPieceInfoTransform> TrainTracks;
+		std::vector<lcInsertPieceInfo> TrainTracks;
 
 		if (Info->GetTrainTrackInfo() && Last->mPieceInfo->GetTrainTrackInfo())
 		{
@@ -2325,14 +2325,10 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 			if (!Last->IsFocused())
 				UpdateTrainTrackConnections(Last, false);
 
-			TrainTracks = lcTrainTrackInfo::GetPieceInsertTransforms(Last, Info, Section, std::nullopt);
+			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, Info, gMainWindow->mColorIndex, Section, std::nullopt);
 
-			for (const lcPieceInfoTransform& TrainTrack : TrainTracks)
-			{
-				int ColorIndex = lcGetColorIndex(TrainTrack.Info->GetTrainTrackInfo()->GetColorCode());
-
-				CreatePiece(TrainTrack.Info, TrainTrack.Transform, ColorIndex);
-			}
+			for (const lcInsertPieceInfo& TrainTrack : TrainTracks)
+				CreatePiece(TrainTrack.Info, TrainTrack.Transform, TrainTrack.ColorIndex);
 		}
 
 		if (TrainTracks.empty())
@@ -4445,15 +4441,15 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	}
 }
 
-void lcModel::InsertPieceToolClicked(const std::vector<lcPieceInfoTransform>& PieceInfoTransforms)
+void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms)
 {
 	lcPiece* Piece = nullptr;
 
-	for (const lcPieceInfoTransform& PieceInfoTransform : PieceInfoTransforms)
+	for (const lcInsertPieceInfo& PieceInfoTransform : PieceInfoTransforms)
 	{
 		Piece = new lcPiece(PieceInfoTransform.Info);
 		Piece->Initialize(PieceInfoTransform.Transform, mCurrentStep);
-		Piece->SetColorIndex(gMainWindow->mColorIndex);
+		Piece->SetColorIndex(PieceInfoTransform.ColorIndex);
 		Piece->UpdatePosition(mCurrentStep);
 		AddPiece(Piece);
 	}

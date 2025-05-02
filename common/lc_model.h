@@ -40,10 +40,11 @@ enum class lcTransformType
 	Count
 };
 
-struct lcPieceInfoTransform
+struct lcInsertPieceInfo
 {
 	PieceInfo* Info;
 	lcMatrix44 Transform;
+	int ColorIndex;
 };
 
 class lcModelProperties
@@ -339,7 +340,7 @@ public:
 
 	void BeginMouseTool();
 	void EndMouseTool(lcTool Tool, bool Accept);
-	void InsertPieceToolClicked(const std::vector<lcPieceInfoTransform>& PieceInfoTransforms);
+	void InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);

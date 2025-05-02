@@ -18,7 +18,7 @@ public:
 
 protected:
 	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTrackTool TrackTool, quint32 TrackToolSection);
-	std::tuple<lcTrackTool, quint32, float> UpdateSelectMoveTrainTrack(lcPiece* Piece, const lcVector3& OverlayCenter, float OverlayScale, const lcVector3& Start, const lcVector3& End, const lcVector3 (&PlaneNormals)[3]) const;
+	std::tuple<lcTrackTool, quint32, float> UpdateSelectMoveTrainTrack(lcPiece* Piece, float OverlayScale, const lcVector3& Start, const lcVector3& End) const;
 
 	static bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms);
 

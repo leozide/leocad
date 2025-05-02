@@ -239,11 +239,12 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 
 	const float OverlayTrainTrackInsertDistance = OverlayTrainTrackEnd + 0.1f;
 	const float OverlayTrainTrackInsertLength = 0.3f;
+	const float OverlayTrainTrackInsertWidth = 0.07f;
 
 	// Train Track Insert
 	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
 	{
-		const float Radius = OverlayArrowBodyRadius;
+		const float Radius = OverlayTrainTrackInsertWidth;
 		float x = cosf(LC_2PI * EdgeIndex / 6);
 		float y = sinf(LC_2PI * EdgeIndex / 6);
 
@@ -258,7 +259,7 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 
 	for (int EdgeIndex = 0; EdgeIndex < 7; EdgeIndex++)
 	{
-		const float Radius = OverlayArrowBodyRadius;
+		const float Radius = OverlayTrainTrackInsertWidth;
 		float x = cosf(LC_2PI * EdgeIndex / 6);
 		float y = sinf(LC_2PI * EdgeIndex / 6);
 
@@ -1158,7 +1159,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButto
 
 	if (CurrentTool == lcTool::Select && Focus && Focus->IsPiece() && TrackButton == lcTrackButton::None)
 	{
-		auto [TrainTrackTool, TrainTrackSection, TrainDistance] = UpdateSelectMoveTrainTrack((lcPiece*)Focus, OverlayCenter, OverlayScale, Start, End, PlaneNormals);
+		auto [TrainTrackTool, TrainTrackSection, TrainDistance] = UpdateSelectMoveTrainTrack((lcPiece*)Focus, OverlayScale, Start, End);
 
 		if (TrainDistance < ClosestIntersectionDistance)
 		{
@@ -1171,13 +1172,8 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButto
 	return { NewTrackTool, NewTrackSection };
 }
 
-std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrainTrack(lcPiece* Piece, const lcVector3& OverlayCenter, float OverlayScale, const lcVector3& Start, const lcVector3& End, const lcVector3 (&PlaneNormals)[3]) const
+std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrainTrack(lcPiece* Piece, float OverlayScale, const lcVector3& Start, const lcVector3& End) const
 {
-	const float OverlayArrowBodyRadius = 0.05f * OverlayScale;
-	const float OverlayTrainTrackStart = 0.0f * OverlayScale;
-	const float OverlayTrainTrackEnd = 0.5f * OverlayScale;
-	const float OverlayTrainTrackDistance = 0.5f * OverlayScale;
-	const float OverlayTrainTrackInsert = 0.3f * OverlayScale;
 	lcTrackTool NewTrackTool = lcTrackTool::Select;
 	quint32 NewTrackSection = ~0U;
 	float ClosestIntersectionDistance = FLT_MAX;
@@ -1187,106 +1183,25 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 	if (!TrainTrackInfo)
 		return { NewTrackTool, NewTrackSection, ClosestIntersectionDistance };
 
-	if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
-	{
-		quint32 ConnectionIndex = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-		bool CanAdd = !Piece->IsTrainTrackConnected(ConnectionIndex);
-
-		for (int AxisIndex = 2; AxisIndex < 3; AxisIndex++)
-		{
-			lcVector4 Plane(PlaneNormals[AxisIndex], -lcDot(PlaneNormals[AxisIndex], OverlayCenter));
-			lcVector3 Intersection;
-
-			if (!lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
-				continue;
-
-			float IntersectionDistance = lcLengthSquared(Intersection - Start);
-
-			if (IntersectionDistance > ClosestIntersectionDistance)
-				continue;
-
-			lcVector3 Dir(Intersection - OverlayCenter);
-
-			float Proj1 = lcDot(Dir, PlaneNormals[(AxisIndex + 1) % 3]);
-			float Proj2 = lcDot(Dir, PlaneNormals[(AxisIndex + 2) % 3]);
-
-			if (Proj1 > OverlayTrainTrackStart && Proj1 < OverlayTrainTrackEnd && Proj2 > OverlayTrainTrackDistance + OverlayTrainTrackStart && Proj2 < OverlayTrainTrackDistance + OverlayTrainTrackEnd)
-			{
-				NewTrackTool = lcTrackTool::RotateTrainTrackRight;
-				NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-
-			if (Proj1 > OverlayTrainTrackStart && Proj1 < OverlayTrainTrackEnd && -Proj2 > OverlayTrainTrackDistance + OverlayTrainTrackStart && -Proj2 < OverlayTrainTrackDistance + OverlayTrainTrackEnd)
-			{
-				NewTrackTool = lcTrackTool::RotateTrainTrackLeft;
-				NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-				ClosestIntersectionDistance = IntersectionDistance;
-			}
-
-			const float OverlayTrainTrackInsertDistance = OverlayTrainTrackEnd + 0.1f * OverlayScale;
-			const float OverlayTrainTrackInsertLength = 0.3f * OverlayScale;
-
-			if (CanAdd)
-			{
-				if ((Proj1 > OverlayTrainTrackInsertDistance - OverlayTrainTrackInsertLength && Proj1 < OverlayTrainTrackInsertDistance + OverlayTrainTrackInsertLength && Proj2 > -OverlayArrowBodyRadius && Proj2 < OverlayArrowBodyRadius) ||
-					(Proj1 > OverlayTrainTrackInsertDistance - OverlayArrowBodyRadius && Proj1 < OverlayTrainTrackInsertDistance + OverlayArrowBodyRadius && Proj2 > -OverlayTrainTrackInsertLength && Proj2 < OverlayTrainTrackInsertLength))
-				{
-					NewTrackTool = lcTrackTool::InsertTrainTrack;
-					NewTrackSection = Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-					ClosestIntersectionDistance = IntersectionDistance;
-				}
-			}
-		}
-	}
-	else
-	{
-		const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
-
-		auto MinIntersectDist=[&ClosestIntersectionDistance](int FirstIndex, int IndexCount, const lcVector3& LocalStart, const lcVector3& LocalEnd)
-		{
-			lcVector3 Intersection;
-			bool Hit = false;
-
-			for (int Index = FirstIndex; Index < FirstIndex + IndexCount; Index += 3)
-			{
-				const lcVector3& v1 = mRotateMoveVertices[mRotateMoveIndices[Index]];
-				const lcVector3& v2 = mRotateMoveVertices[mRotateMoveIndices[Index + 1]];
-				const lcVector3& v3 = mRotateMoveVertices[mRotateMoveIndices[Index + 2]];
-
-				if (lcLineTriangleMinIntersection(v1, v2, v3, LocalStart, LocalEnd, &ClosestIntersectionDistance, &Intersection))
-					Hit = true;
-			}
-
-			return Hit;
-		};
-
-		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
-		{
-			if (Piece->IsTrainTrackConnected(ConnectionIndex))
-				continue;
-
-			lcMatrix44 WorldMatrix = lcMul(Connections[ConnectionIndex].Transform, Piece->mModelWorld);
-			lcModel* ActiveModel = mView->GetActiveModel();
-
-			if (ActiveModel != mView->GetModel())
-				WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
-
-			lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
-			InverseWorldMatrix = lcMul(InverseWorldMatrix, lcMatrix44Scale(lcVector3(1.0f / OverlayScale, 1.0f / OverlayScale, 1.0f / OverlayScale)));
-
-			lcVector3 LocalStart = lcMul31(Start, InverseWorldMatrix);
-			lcVector3 LocalEnd = lcMul31(End, InverseWorldMatrix);
-
-			if (MinIntersectDist(mTrainTrackInsertIndexStart, mTrainTrackInsertIndexCount, LocalStart, LocalEnd))
-			{
-				NewTrackTool = lcTrackTool::InsertTrainTrack;
-				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
-			}
-		}
-	}
-
 	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
+
+	auto MinIntersectDist=[&ClosestIntersectionDistance](int FirstIndex, int IndexCount, const lcVector3& LocalStart, const lcVector3& LocalEnd)
+	{
+		lcVector3 Intersection;
+		bool Hit = false;
+
+		for (int Index = FirstIndex; Index < FirstIndex + IndexCount; Index += 3)
+		{
+			const lcVector3& v1 = mRotateMoveVertices[mRotateMoveIndices[Index]];
+			const lcVector3& v2 = mRotateMoveVertices[mRotateMoveIndices[Index + 1]];
+			const lcVector3& v3 = mRotateMoveVertices[mRotateMoveIndices[Index + 2]];
+
+			if (lcLineTriangleMinIntersection(v1, v2, v3, LocalStart, LocalEnd, &ClosestIntersectionDistance, &Intersection))
+				Hit = true;
+		}
+
+		return Hit;
+	};
 
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 	{
@@ -1302,20 +1217,34 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 		lcVector3 LocalStart = lcMul31(Start, InverseWorldMatrix);
 		lcVector3 LocalEnd = lcMul31(End, InverseWorldMatrix);
 
-		constexpr float TrainTrackBoxSize = 0.15f;
-		lcVector3 CubeMin(-TrainTrackBoxSize, -TrainTrackBoxSize, -TrainTrackBoxSize);
-		lcVector3 CubeMax(TrainTrackBoxSize, TrainTrackBoxSize, TrainTrackBoxSize);
-
-		float Distance;
-
-		if (lcBoundingBoxRayIntersectDistance(CubeMin, CubeMax, LocalStart, LocalEnd, &Distance, nullptr, nullptr))
+		if (!Piece->IsTrainTrackConnected(ConnectionIndex))
 		{
-			if (Distance < ClosestIntersectionDistance)
+			if (MinIntersectDist(mTrainTrackInsertIndexStart, mTrainTrackInsertIndexCount, LocalStart, LocalEnd))
 			{
-				NewTrackTool = lcTrackTool::SelectTrainTrack;
+				NewTrackTool = lcTrackTool::InsertTrainTrack;
 				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
-				ClosestIntersectionDistance = Distance;
 			}
+		}
+
+		if (Piece->GetFocusSection() >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST && ConnectionIndex == Piece->GetFocusSection() - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+		{
+			if (MinIntersectDist(mTrainTrackRotateIndexStart, mTrainTrackRotateIndexCount, LocalStart, LocalEnd))
+			{
+				NewTrackTool = lcTrackTool::RotateTrainTrackRight;
+				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
+			}
+
+			if (MinIntersectDist(mTrainTrackRotateIndexStart + mTrainTrackRotateIndexCount, mTrainTrackRotateIndexCount, LocalStart, LocalEnd))
+			{
+				NewTrackTool = lcTrackTool::RotateTrainTrackLeft;
+				NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
+			}
+		}
+
+		if (MinIntersectDist(mTrainTrackConnectionIndexStart, mTrainTrackConnectionIndexCount, LocalStart, LocalEnd))
+		{
+			NewTrackTool = lcTrackTool::SelectTrainTrack;
+			NewTrackSection = LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex;
 		}
 	}
 

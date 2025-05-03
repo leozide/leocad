@@ -128,9 +128,18 @@ bool lcKeyboardShortcuts::Load(QTextStream& Stream)
 	return true;
 }
 
+void lcMouseShortcuts::Clear() {
+	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++) {
+		mShortcuts[ToolIdx].Modifiers1 = Qt::NoModifier;
+		mShortcuts[ToolIdx].Button1 = Qt::NoButton;
+		mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
+		mShortcuts[ToolIdx].Button2 = Qt::NoButton;
+	}
+}
+
 void lcMouseShortcuts::Reset()
 {
-	memset(mShortcuts, 0, sizeof(mShortcuts));
+	Clear();
 
 	lcToolShortcut& RotateViewShortcut = mShortcuts[static_cast<int>(lcTool::RotateView)];
 	RotateViewShortcut.Modifiers1 = Qt::AltModifier;
@@ -216,7 +225,7 @@ bool lcMouseShortcuts::Load(const QString& FileName)
 
 bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 {
-	memset(mShortcuts, 0, sizeof(mShortcuts));
+	Clear();
 
 	for (const QString& FullShortcut : FullShortcuts)
 	{

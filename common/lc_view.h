@@ -360,7 +360,7 @@ protected:
 	std::vector<lcInsertPieceInfo> mPreviewInsertPieceInfo;
 
 	lcVertexBuffer mGridBuffer;
-	int mGridSettings[7];
+	int mGridSettings[8];
 
 	static QPointer<lcFindReplaceWidget> mFindWidget;
 	static lcFindReplaceParams mFindReplaceParams;

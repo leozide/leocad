@@ -233,6 +233,9 @@ public:
 	void OnForwardButtonUp();
 	void OnMouseMove();
 	void OnMouseWheel(float Direction);
+	void OnZoomNativeGesture(float Value);
+	void OnRotateNativeGesture(float Value);
+	void OnWheel(int x, int y);
 	void BeginDrag(lcDragState DragState);
 	void EndDrag(bool Accept);
 

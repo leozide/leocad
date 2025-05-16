@@ -2325,7 +2325,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 			if (!Last->IsFocused())
 				UpdateTrainTrackConnections(Last, false);
 
-			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, Info, gMainWindow->mColorIndex, Section, std::nullopt);
+			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, Info, nullptr, gMainWindow->mColorIndex, Section, true, std::nullopt);
 
 			for (const lcInsertPieceInfo& TrainTrack : TrainTracks)
 				CreatePiece(TrainTrack.Info, TrainTrack.Transform, TrainTrack.ColorIndex);
@@ -2531,6 +2531,34 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	}
 
 	TrackPiece->SetTrainTrackConnections(std::move(Connections));
+}
+
+void lcModel::UpdateSelectedPiecesTrainTrackConnections()
+{
+	std::vector<lcPiece *> TrackPieces;
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		if (Piece->mPieceInfo->GetTrainTrackInfo() && Piece->IsSelected())
+			TrackPieces.push_back(Piece.get());
+
+	for (lcPiece* TrackPiece : TrackPieces)
+	{
+		const lcTrainTrackInfo* TrainTrackInfo = TrackPiece->mPieceInfo->GetTrainTrackInfo();
+		const int ConnectionCount = static_cast<int>(TrainTrackInfo->GetConnections().size());
+		std::vector<bool> Connections(ConnectionCount, false);
+
+		for (const lcPiece* CheckPiece : TrackPieces)
+		{
+			if (CheckPiece == TrackPiece)
+				continue;
+
+			for (int ConnectionIndex = 0; ConnectionIndex < ConnectionCount; ConnectionIndex++)
+				if (!Connections[ConnectionIndex] && lcTrainTrackInfo::GetPieceConnectionIndex(TrackPiece, ConnectionIndex, CheckPiece) != -1)
+					Connections[ConnectionIndex] = true;
+		}
+
+		TrackPiece->SetTrainTrackConnections(std::move(Connections));
+	}
 }
 
 void lcModel::DeleteAllCameras()
@@ -4537,6 +4565,72 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
+}
+
+void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag)
+{
+	lcMatrix33 NewRotation = IsConnection ? lcMatrix33(NewTransform) : lcMatrix33(StartTransform);
+	lcMatrix33 CurrentRotation = lcMatrix33(MousePiece->mModelWorld);
+
+	if (!lcMatrix33Similar(CurrentRotation, NewRotation))
+	{
+		const lcVector3 PieceDistance = NewTransform.GetTranslation() - MousePiece->mModelWorld.GetTranslation();
+		const lcVector3 ObjectDistance = PieceDistance;
+
+		lcMatrix33 RotationMatrix = lcMul(lcMatrix33AffineInverse(CurrentRotation), NewRotation);
+
+		const lcVector3& Center = NewTransform.GetTranslation();
+		lcMatrix33 RelativeRotation = MousePiece->GetRelativeRotation();
+
+		lcMatrix33 WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
+		RotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+
+		int Flags;
+		std::vector<lcObject*> Selection;
+		lcObject* Focus;
+
+		GetSelectionInformation(&Flags, Selection, &Focus);
+
+		for (lcObject* Object : Selection)
+		{
+			if (Object->IsPiece())
+			{
+				lcPiece* Piece = (lcPiece*)Object;
+
+				Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), PieceDistance);
+				Piece->UpdatePosition(mCurrentStep);
+
+				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+				Piece->UpdatePosition(mCurrentStep);
+			}
+				else if (Object->IsCamera())
+				{
+					//move
+					//rotate
+				}
+				else if (Object->IsLight())
+				{
+					lcLight* Light = (lcLight*)Object;
+
+					//move
+
+//					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Light->UpdatePosition(mCurrentStep);
+				}
+		}
+
+		mMouseToolDistance = NewTransform.GetTranslation() - StartTransform.GetTranslation();
+		mMouseToolFirstMove = false;
+
+		gMainWindow->UpdateSelectedObjects(false);
+		UpdateAllViews();
+	}
+	else
+	{
+		lcVector3 Distance = NewTransform.GetTranslation() - StartTransform.GetTranslation();
+
+		UpdateMoveTool(Distance, false, AlternateButtonDrag);
+	}
 }
 
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)

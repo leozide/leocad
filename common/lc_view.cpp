@@ -463,10 +463,11 @@ void lcView::UpdatePiecePreview()
 {
 	PieceInfo* PreviewInfo = gMainWindow->GetCurrentPieceInfo();
 	std::vector<lcInsertPieceInfo> InsertPieceInfo;
+	bool IsConnection;
 
 	if (PreviewInfo)
 	{
-		InsertPieceInfo = GetMouseInsertPieceInfo(false, PreviewInfo);
+		std::tie(InsertPieceInfo, IsConnection) = GetMouseInsertPieceInfo(false, true, PreviewInfo, nullptr);
 
 		if (GetActiveModel() != mModel)
 		{
@@ -486,7 +487,7 @@ void lcView::UpdatePiecePreview()
 	mPreviewInsertPieceInfo = std::move(InsertPieceInfo);
 }
 
-std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, PieceInfo* Info) const
+std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, PieceInfo* Info, lcPiece* MovingPiece) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -505,10 +506,10 @@ std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelect
 			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
-			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, Info, gMainWindow->mColorIndex, FocusSection, ClosestPoint);
+			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, Info, MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
 
 			if (!TrainTracks.empty())
-				return TrainTracks;
+				return { TrainTracks, true };
 		}
 
 		lcVector3 Position = ObjectRayTest.PieceInfoRayTest.Plane;
@@ -534,7 +535,7 @@ std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelect
 		lcMatrix44 WorldMatrix = ObjectRayTest.PieceInfoRayTest.Transform;
 		WorldMatrix.SetTranslation(Position);
 
-		return { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } };
+		return { { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } }, false };
 	}
 
 	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
@@ -554,7 +555,7 @@ std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelect
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } };
+		return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
 	lcVector3 Position;
@@ -567,10 +568,10 @@ std::vector<lcInsertPieceInfo> lcView::GetMouseInsertPieceInfo(bool IgnoreSelect
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } };
+		return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
-	return { lcInsertPieceInfo{ Info, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } };
+	return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } }, false };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const
@@ -2082,6 +2083,7 @@ void lcView::UpdateTrackTool()
 	int x = mMouseX;
 	int y = mMouseY;
 	bool Redraw = false;
+	mMouseDownPiece = nullptr;
 	mTrackToolFromOverlay = false;
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -2114,7 +2116,6 @@ void lcView::UpdateTrackTool()
 	case lcTool::Select:
 	case lcTool::Move:
 		{
-			mMouseDownPiece = nullptr;
 			std::tie(NewTrackTool, NewTrackSection) = mViewManipulator->UpdateSelectMove(mTrackButton);
 			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::MoveXYZ && NewTrackTool != lcTrackTool::Select;
 			Redraw = NewTrackTool != mTrackTool || NewTrackSection != mTrackToolSection;
@@ -2127,8 +2128,8 @@ void lcView::UpdateTrackTool()
 				if (Object && Object->IsPiece() && ObjectSection.Section == LC_PIECE_SECTION_POSITION && Object->IsSelected())
 				{
 					lcPiece* Piece = (lcPiece*)Object;
-					mMouseDownPosition = Piece->mModelWorld.GetTranslation();
-					mMouseDownPiece = Piece->mPieceInfo;
+					mMouseDownTransform = Piece->mModelWorld;
+					mMouseDownPiece = Piece;
 					NewTrackTool = lcTrackTool::MoveXYZ;
 				}
 			}
@@ -2926,13 +2927,14 @@ void lcView::OnMouseMove()
 			}
 			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
-				std::vector<lcInsertPieceInfo> PieceInfoTransforms = GetMouseInsertPieceInfo(true, mMouseDownPiece);
+				if (mMouseDownPiece->mPieceInfo->GetTrainTrackInfo())
+					ActiveModel->UpdateSelectedPiecesTrainTrackConnections();
+
+				auto [PieceInfoTransforms, IsConnection] = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceInfo, mMouseDownPiece);
 
 				if (!PieceInfoTransforms.empty())
 				{
-					lcMatrix44 NewPosition = PieceInfoTransforms.back().Transform;
-					lcVector3 Distance = NewPosition.GetTranslation() - mMouseDownPosition;
-					ActiveModel->UpdateMoveTool(Distance, false, mTrackButton != lcTrackButton::Left);
+					ActiveModel->UpdateFreeMoveTool(mMouseDownPiece, mMouseDownTransform, PieceInfoTransforms.back().Transform, IsConnection, mTrackButton != lcTrackButton::Left);
 				}
 			}
 			else if (mTrackTool == lcTrackTool::ScalePlus || mTrackTool == lcTrackTool::ScaleMinus)

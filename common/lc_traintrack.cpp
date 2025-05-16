@@ -7,7 +7,10 @@
 #include "lc_application.h"
 
 // todo:
-// when moving existing pieces, lcView::OnMouseMove calls UpdateMoveTool which only takes a position and can't rotate pieces
+// when moving existing pieces:
+//   need to check for parts intersecting instead of mouse intersection because it's hard to connect tracks
+//   look into the snapping that happens when there are no available connections
+//   fix comments in UpdateFreeMoveTool
 // hide some of the 12v tracks to avoid bloat
 // auto replace cross when going over a straight section
 // set focus connection after adding
@@ -131,12 +134,12 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, int ColorIndex, quint32 PreferredSection, std::optional<lcVector3> ClosestPoint)
+std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint)
 {
 	std::vector<lcInsertPieceInfo> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
 
-	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
+	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty() || (MovingPiece && Info != MovingPiece->mPieceInfo))
 		return Pieces;
 
 	quint32 ConnectionIndex = 0;
@@ -151,6 +154,29 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 		{
 			if (CurrentPiece->IsTrainTrackConnected(CheckIndex))
 				continue;
+
+			if (MovingPiece)
+			{
+				const std::vector<lcTrainTrackConnection>& MovingConnections = Info->GetTrainTrackInfo()->GetConnections();
+				bool CanConnect = false;
+
+				for (quint32 MovingConnectionIndex = 0; MovingConnectionIndex < MovingConnections.size(); MovingConnectionIndex++)
+				{
+					if (!MovingPiece->IsTrainTrackConnected(MovingConnectionIndex) && AreConnectionsCompatible(CurrentTrackInfo->GetConnections()[CheckIndex].Type, MovingConnections[MovingConnectionIndex].Type, AllowNewPieces))
+					{
+						CanConnect = true;
+						break;
+					}
+				}
+
+				if (!CanConnect)
+					continue;
+			}
+			else
+			{
+				if (!Info->GetTrainTrackInfo()->CanConnectTo(CurrentTrackInfo->GetConnections()[CheckIndex].Type, AllowNewPieces))
+					continue;
+			}
 
 			float Distance = (CurrentTrackInfo->GetConnections()[CheckIndex].Transform.GetTranslation() - LocalClosestPoint).LengthSquared();
 
@@ -186,8 +212,23 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 	quint32 NewConnectionIndex;// = ConnectionIndex ? 0 : 1;
 
 	for (NewConnectionIndex = 0; NewConnectionIndex < NewConnections.size(); NewConnectionIndex++)
-		if (AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type))
-			break;
+	{
+		if (MovingPiece)
+		{
+			if (MovingPiece->IsTrainTrackConnected(NewConnectionIndex))
+				continue;
+
+			const std::vector<lcTrainTrackConnection>& MovingConnections = Info->GetTrainTrackInfo()->GetConnections();
+
+			if (AreConnectionsCompatible(CurrentTrackInfo->GetConnections()[ConnectionIndex].Type, MovingConnections[NewConnectionIndex].Type, AllowNewPieces))
+				break;
+		}
+		else
+		{
+			if (AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type, AllowNewPieces))
+				break;
+		}
+	}
 
 	if (NewConnectionIndex == NewConnections.size())
 		return Pieces;

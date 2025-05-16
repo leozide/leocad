@@ -45,7 +45,7 @@ public:
 	}
 
 	static void Initialize(lcPiecesLibrary* Library);
-	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, int ColorIndex, quint32 PreferredSection, std::optional<lcVector3> ClosestPoint);
+	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint);
 	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
@@ -55,17 +55,17 @@ public:
 		return mConnections;
 	}
 
-	bool CanConnectTo(const lcTrainTrackConnectionType& ConnectionType) const
+	bool CanConnectTo(const lcTrainTrackConnectionType& ConnectionType, bool AllowNewPieces) const
 	{
 		for (const lcTrainTrackConnection& Connection : mConnections)
-			if (AreConnectionsCompatible(Connection.Type, ConnectionType))
+			if (AreConnectionsCompatible(Connection.Type, ConnectionType, AllowNewPieces))
 				return true;
 
 		return false;
 	}
 
 protected:
-	static bool AreConnectionsCompatible(const lcTrainTrackConnectionType& a, const lcTrainTrackConnectionType& b)
+	static bool AreConnectionsCompatible(const lcTrainTrackConnectionType& a, const lcTrainTrackConnectionType& b, bool AllowNewPieces)
 	{
 		if (a.Group != b.Group)
 			return false;
@@ -79,7 +79,7 @@ protected:
 			return b.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper;
 
 		case lcTrainTrackConnectionSleeper::NeedsSleeper:
-			return b.Sleeper == lcTrainTrackConnectionSleeper::HasSleeper || b.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper;
+			return b.Sleeper == lcTrainTrackConnectionSleeper::HasSleeper || (AllowNewPieces && b.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper);
 		}
 
 		return false;

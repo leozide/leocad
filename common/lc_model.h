@@ -269,6 +269,7 @@ public:
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
+	void UpdateSelectedPiecesTrainTrackConnections();
 
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
@@ -345,6 +346,7 @@ public:
 	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
 	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
+	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
 	void UpdateScaleTool(const float Scale);
 	void EraserToolClicked(lcObject* Object);

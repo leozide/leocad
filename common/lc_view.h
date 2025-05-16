@@ -266,7 +266,7 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
-	std::vector<lcInsertPieceInfo> GetMouseInsertPieceInfo(bool IgnoreSelected, PieceInfo* Info) const;
+	std::pair<std::vector<lcInsertPieceInfo>, bool> GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, PieceInfo* Info, lcPiece* MovingPiece) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectRayTest RayTest(bool PiecesOnly, bool IgnoreSelected) const;
@@ -337,8 +337,8 @@ protected:
 	lcDragState mDragState;
 	bool mTrackToolFromOverlay;
 	quint32 mTrackToolSection = ~0U;
-	lcVector3 mMouseDownPosition;
-	PieceInfo* mMouseDownPiece;
+	lcMatrix44 mMouseDownTransform;
+	lcPiece* mMouseDownPiece = nullptr;
 	int mPanX = 0;
 	int mPanY = 0;
 

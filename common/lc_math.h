@@ -970,6 +970,19 @@ inline lcVector3 lcMatrix33ToEulerAngles(const lcMatrix33& RotMat)
 	return Rot;
 }
 
+inline bool lcMatrix33Similar(const lcMatrix33& a, const lcMatrix33& b)
+{
+	for (int Row = 0; Row < 3; Row++)
+	{
+		float Dot = lcDot(a.r[Row], b.r[Row]);
+
+		if (Dot < 0.99f || Dot > 1.01f)
+			return false;
+	}
+
+	return true;
+}
+
 inline float lcMatrix44::Determinant() const
 {
 	return r[0][0] * r[1][1] * r[2][2] + r[0][1] * r[1][2] * r[2][0] +

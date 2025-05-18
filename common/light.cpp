@@ -457,7 +457,7 @@ void lcLight::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 	if (IsPointLight())
 		return;
 
-	if (GetFocusSection() != LC_LIGHT_SECTION_POSITION)
+	if (GetFocusSection() != LC_LIGHT_SECTION_POSITION && GetFocusSection() != LC_LIGHT_SECTION_INVALID)
 		return;
 
 	lcVector3 Distance = mWorldMatrix.GetTranslation() - Center;

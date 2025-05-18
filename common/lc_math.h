@@ -88,12 +88,12 @@ public:
 	{
 	}
 
-	operator const float*() const
+	explicit operator const float*() const
 	{
 		return (const float*)this;
 	}
 
-	operator float*()
+	explicit operator float*()
 	{
 		return (float*)this;
 	}
@@ -130,12 +130,12 @@ public:
 
 	explicit lcVector3(const lcVector4& v);
 
-	operator const float*() const
+	explicit operator const float*() const
 	{
 		return (const float*)this;
 	}
 
-	operator float*()
+	explicit operator float*()
 	{
 		return (float*)this;
 	}
@@ -179,12 +179,12 @@ public:
 	{
 	}
 
-	operator const float*() const
+	explicit operator const float*() const
 	{
 		return (const float*)this;
 	}
 
-	operator float*()
+	explicit operator float*()
 	{
 		return (float*)this;
 	}
@@ -305,6 +305,11 @@ public:
 
 	lcVector4 r[4];
 };
+
+inline bool operator==(const lcVector2& a, const lcVector2& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
 
 inline lcVector3::lcVector3(const lcVector4& v)
 	: x(v.x), y(v.y), z(v.z)
@@ -427,6 +432,31 @@ inline bool operator==(const lcVector3& a, const lcVector3& b)
 inline bool operator!=(const lcVector3& a, const lcVector3& b)
 {
 	return a.x != b.x || a.y != b.y || a.z != b.z;
+}
+
+inline bool operator<(const lcVector3& a, const lcVector3& b)
+{
+	if (a.x < b.x)
+		return true;
+	else if (a.x > b.x)
+		return false;
+
+	if (a.y < b.y)
+		return true;
+	else if (a.y > b.y)
+		return false;
+
+	if (a.z < b.z)
+		return true;
+	else if (a.z > b.z)
+		return false;
+
+	return false;
+}
+
+inline bool operator==(const lcVector4& a, const lcVector4& b)
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
 }
 
 #ifndef QT_NO_DEBUG
@@ -1843,10 +1873,10 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 }
 
 // Return true if a polygon intersects a set of planes.
-inline bool lcTriangleIntersectsPlanes(const float* p1, const float* p2, const float* p3, const lcVector4 Planes[6])
+inline bool lcTriangleIntersectsPlanes(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector4 Planes[6])
 {
 	constexpr int NumPlanes = 6;
-	const float* const Points[3] = { p1, p2, p3 };
+	const lcVector3 Points[3] = { p1, p2, p3 };
 	int Outcodes[3] = { 0, 0, 0 }, i;
 	constexpr int NumPoints = 3;
 

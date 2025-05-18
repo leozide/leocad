@@ -1355,11 +1355,11 @@ void lcContext::FlushState()
 				if (Program.LightPositionLocation != -1)
 				{
 					lcVector3 LightPosition = ViewPosition + lcMul30(lcVector3(300.0f, 300.0f, 0.0f), InverseViewMatrix);
-					glUniform3fv(Program.LightPositionLocation, 1, LightPosition);
+					glUniform3fv(Program.LightPositionLocation, 1, (float*)LightPosition);
 				}
 
 				if (Program.EyePositionLocation != -1)
-					glUniform3fv(Program.EyePositionLocation, 1, ViewPosition);
+					glUniform3fv(Program.EyePositionLocation, 1, (float*)ViewPosition);
 			}
 
 			glUniformMatrix4fv(Program.WorldViewProjectionMatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix));
@@ -1370,20 +1370,20 @@ void lcContext::FlushState()
 
 		if (mColorDirty && Program.MaterialColorLocation != -1)
 		{
-			glUniform4fv(Program.MaterialColorLocation, 1, mColor);
+			glUniform4fv(Program.MaterialColorLocation, 1, (float*)mColor);
 			mColorDirty = false;
 		}
 
 		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
 		{
-			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0]);
+			glUniform4fv(Program.HighlightParamsLocation, 4, (float*)mHighlightParams[0]);
 			mHighlightParamsDirty = false;
 		}
 	}
 	else
 	{
 #if LC_FIXED_FUNCTION
-		glColor4fv(mColor);
+		glColor4fv((float*)mColor);
 
 		if (mWorldMatrixDirty || mViewMatrixDirty)
 		{

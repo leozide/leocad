@@ -203,7 +203,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 				QImage Image(Size, Size, QImage::Format_ARGB32);
 				Image.fill(0);
-				float* Color = gColorList[ColorIndex].Value;
+				const lcVector4& Color = gColorList[ColorIndex].Value;
 				QPainter Painter(&Image);
 				Painter.setPen(Qt::darkGray);
 				Painter.setBrush(QColor::fromRgbF(Color[0], Color[1], Color[2]));

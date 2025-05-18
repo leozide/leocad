@@ -849,8 +849,8 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcVector3 pos, rot;
 			quint8 color, step, group;
 
-			file->ReadFloats(pos, 3);
-			file->ReadFloats(rot, 3);
+			file->ReadFloats((float*)pos, 3);
+			file->ReadFloats((float*)rot, 3);
 			file->ReadU8(&color, 1);
 			file->ReadBuffer(name, 9);
 			strcat(name, ".dat");
@@ -4574,8 +4574,7 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 
 	if (!lcMatrix33Similar(CurrentRotation, NewRotation))
 	{
-		const lcVector3 PieceDistance = NewTransform.GetTranslation() - MousePiece->mModelWorld.GetTranslation();
-		const lcVector3 ObjectDistance = PieceDistance;
+		const lcVector3 Distance = NewTransform.GetTranslation() - MousePiece->mModelWorld.GetTranslation();
 
 		lcMatrix33 RotationMatrix = lcMul(lcMatrix33AffineInverse(CurrentRotation), NewRotation);
 
@@ -4597,26 +4596,32 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 			{
 				lcPiece* Piece = (lcPiece*)Object;
 
-				Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), PieceDistance);
+				Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance);
 				Piece->UpdatePosition(mCurrentStep);
 
 				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
 				Piece->UpdatePosition(mCurrentStep);
 			}
-				else if (Object->IsCamera())
-				{
-					//move
-					//rotate
-				}
-				else if (Object->IsLight())
-				{
-					lcLight* Light = (lcLight*)Object;
+			else if (Object->IsCamera())
+			{
+				lcCamera* Camera = (lcCamera*)Object;
 
-					//move
+				Camera->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance);
+				Camera->UpdatePosition(mCurrentStep);
 
-//					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-					Light->UpdatePosition(mCurrentStep);
-				}
+//				Camera->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+//				Camera->UpdatePosition(mCurrentStep);
+			}
+			else if (Object->IsLight())
+			{
+				lcLight* Light = (lcLight*)Object;
+
+				Light->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance, mMouseToolFirstMove);
+				Light->UpdatePosition(mCurrentStep);
+
+				Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+				Light->UpdatePosition(mCurrentStep);
+			}
 		}
 
 		mMouseToolDistance = NewTransform.GetTranslation() - StartTransform.GetTranslation();

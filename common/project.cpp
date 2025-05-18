@@ -1007,12 +1007,12 @@ bool Project::Export3DStudio(const QString& FileName)
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mAmbientColor, 3);
+	File.WriteFloats((const float*)Properties.mAmbientColor, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(Properties.mAmbientColor, 3);
+	File.WriteFloats((const float*)Properties.mAmbientColor, 3);
 
 	File.WriteU16(0x1200); // CHK_SOLID_BGND
 	File.WriteU32(42);
@@ -1023,12 +1023,12 @@ bool Project::Export3DStudio(const QString& FileName)
 	const lcPreferences& Preferences = lcGetPreferences();
 	lcVector3 BackgroundSolidColor = lcVector3FromColor(Preferences.mBackgroundSolidColor);
 
-	File.WriteFloats(BackgroundSolidColor, 3);
+	File.WriteFloats((const float*)BackgroundSolidColor, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(BackgroundSolidColor, 3);
+	File.WriteFloats((const float*)BackgroundSolidColor, 3);
 
 	File.WriteU16(0x1300); // CHK_V_GRADIENT
 	File.WriteU32(118);
@@ -1041,32 +1041,32 @@ bool Project::Export3DStudio(const QString& FileName)
 	const lcVector3 BackgroundGradientColor1 = lcVector3FromColor(Preferences.mBackgroundGradientColorTop);
 	const lcVector3 BackgroundGradientColor2 = lcVector3FromColor(Preferences.mBackgroundGradientColorBottom);
 
-	File.WriteFloats(BackgroundGradientColor1, 3);
+	File.WriteFloats((const float*)BackgroundGradientColor1, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(BackgroundGradientColor1, 3);
+	File.WriteFloats((const float*)BackgroundGradientColor1, 3);
 
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f, 3);
+	File.WriteFloats((const float*)((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f), 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f, 3);
+	File.WriteFloats((const float*)((BackgroundGradientColor1 + BackgroundGradientColor2) / 2.0f), 3);
 
 	File.WriteU16(0x0010); // CHK_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(BackgroundGradientColor2, 3);
+	File.WriteFloats((const float*)BackgroundGradientColor2, 3);
 
 	File.WriteU16(0x0013); // CHK_LIN_COLOR_F
 	File.WriteU32(18);
 
-	File.WriteFloats(BackgroundGradientColor2, 3);
+	File.WriteFloats((const float*)BackgroundGradientColor2, 3);
 
 	if (Preferences.mBackgroundGradient)
 	{
@@ -1120,10 +1120,10 @@ bool Project::Export3DStudio(const QString& FileName)
 		File.WriteU32(54);
 
 		lcMatrix44 Matrix = lcMatrix44Identity();
-		File.WriteFloats(Matrix[0], 3);
-		File.WriteFloats(Matrix[1], 3);
-		File.WriteFloats(Matrix[2], 3);
-		File.WriteFloats(Matrix[3], 3);
+		File.WriteFloats((const float*)Matrix[0], 3);
+		File.WriteFloats((const float*)Matrix[1], 3);
+		File.WriteFloats((const float*)Matrix[2], 3);
+		File.WriteFloats((const float*)Matrix[3], 3);
 
 		File.WriteU16(0x4165); // CHK_MESH_COLOR
 		File.WriteU32(7);

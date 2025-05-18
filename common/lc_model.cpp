@@ -455,7 +455,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 			{
 				Stream << QLatin1String("0 !LEOCAD SYNTH CONTROL_POINT");
 
-				const float* FloatMatrix = ControlPoint.Transform;
+				const float* FloatMatrix = ControlPoint.Transform.GetFloats();
 				const float Numbers[13] = { FloatMatrix[12], -FloatMatrix[14], FloatMatrix[13], FloatMatrix[0], -FloatMatrix[8], FloatMatrix[4], -FloatMatrix[2], FloatMatrix[10], -FloatMatrix[6], FloatMatrix[1], -FloatMatrix[9], FloatMatrix[5], ControlPoint.Scale };
 
 				for (int NumberIdx = 0; NumberIdx < 13; NumberIdx++)
@@ -742,7 +742,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 				PieceInfo* Info = Library->FindPiece(PartId.toLatin1().constData(), Project, true, true);
 
-				const float* Matrix = IncludeTransform;
+				const float* Matrix = IncludeTransform.GetFloats();
 				const lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
 									       lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
@@ -849,8 +849,8 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcVector3 pos, rot;
 			quint8 color, step, group;
 
-			file->ReadFloats((float*)pos, 3);
-			file->ReadFloats((float*)rot, 3);
+			file->ReadFloats(pos.GetFloats(), 3);
+			file->ReadFloats(rot.GetFloats(), 3);
 			file->ReadU8(&color, 1);
 			file->ReadBuffer(name, 9);
 			strcat(name, ".dat");

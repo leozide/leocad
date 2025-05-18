@@ -604,7 +604,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		}
 		else if (Option == QLatin1String("--camera-angles"))
 		{
-			if ((Options.SetCameraAngles = ParseFloatArray(2, (float*)Options.CameraLatLon, true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
+			if ((Options.SetCameraAngles = ParseFloatArray(2, Options.CameraLatLon.GetFloats(), true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
 			{
 				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360.\n").arg(Option);
 				Options.ParseOK = false;
@@ -612,7 +612,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		}
 		else if (Option == QLatin1String("--camera-position") || Option == QLatin1String("--camera-position-ldraw"))
 		{
-			if ((Options.SetCameraPosition = ParseFloatArray(9, (float*)Options.CameraPosition[0], true)))
+			if ((Options.SetCameraPosition = ParseFloatArray(9, Options.CameraPosition[0].GetFloats(), true)))
 			{
 				if (Option == QLatin1String("--camera-position-ldraw"))
 				{
@@ -646,7 +646,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.SetFoV = ParseFloat(Options.FoV, 1.0f, 180.0f);
 		else if (Option == QLatin1String("--zplanes"))
 		{
-			if ((Options.SetZPlanes = ParseFloatArray(2, (float*)Options.ZPlanes, false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
+			if ((Options.SetZPlanes = ParseFloatArray(2, Options.ZPlanes.GetFloats(), false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
 			{
 				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
 				Options.ParseOK = false;

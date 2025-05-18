@@ -156,7 +156,7 @@ public:
 	lcVector3 ReadVector3()
 	{
 		lcVector3 Vector;
-		ReadFloats((float*)Vector, 3);
+		ReadFloats(Vector.GetFloats(), 3);
 		return Vector;
 	}
 
@@ -277,7 +277,7 @@ public:
 
 	void WriteVector3(const lcVector3& Vector)
 	{
-		WriteFloats((const float*)Vector, 3);
+		WriteFloats(Vector.GetFloats(), 3);
 	}
 
 	void WriteQString(const QString& String)

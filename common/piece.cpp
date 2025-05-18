@@ -120,7 +120,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 
 	if (mPivotPointValid)
 	{
-		const float* PivotMatrix = mPivotMatrix;
+		const float* PivotMatrix = mPivotMatrix.GetFloats();
 		const float PivotNumbers[12] = { PivotMatrix[12], -PivotMatrix[14], PivotMatrix[13], PivotMatrix[0], -PivotMatrix[8], PivotMatrix[4], -PivotMatrix[2], PivotMatrix[10], -PivotMatrix[6], PivotMatrix[1], -PivotMatrix[9], PivotMatrix[5] };
 
 		Stream << QLatin1String("0 !LEOCAD PIECE PIVOT ");
@@ -136,7 +136,7 @@ void lcPiece::SaveLDraw(QTextStream& Stream) const
 
 	Stream << "1 " << mColorCode << ' ';
 
-	const float* Matrix = mModelWorld;
+	const float* Matrix = mModelWorld.GetFloats();
 	const float Numbers[12] = { Matrix[12], -Matrix[14], Matrix[13], Matrix[0], -Matrix[8], Matrix[4], -Matrix[2], Matrix[10], -Matrix[6], Matrix[1], -Matrix[9], Matrix[5] };
 
 	for (int NumberIdx = 0; NumberIdx < 12; NumberIdx++)
@@ -263,13 +263,13 @@ bool lcPiece::FileLoad(lcFile& file)
 
 					if (version > 3)
 					{
-						file.ReadFloats(ModelWorld, 16);
+						file.ReadFloats(ModelWorld.GetFloats(), 16);
 					}
 					else
 					{
 						lcVector3 Translation;
 						float Rotation[3];
-						file.ReadFloats((float*)Translation, 3);
+						file.ReadFloats(Translation.GetFloats(), 3);
 						file.ReadFloats(Rotation, 3);
 						ModelWorld = lcMatrix44Translation(Translation);
 						ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));
@@ -290,7 +290,7 @@ bool lcPiece::FileLoad(lcFile& file)
 			{
 				lcVector3 Translation;
 				float Rotation[3];
-				file.ReadFloats((float*)Translation, 3);
+				file.ReadFloats(Translation.GetFloats(), 3);
 				file.ReadFloats(Rotation, 3);
 				lcMatrix44 ModelWorld = lcMatrix44Translation(Translation);
 				ModelWorld = lcMul(lcMatrix44RotationZ(Rotation[2] * LC_DTOR), lcMul(lcMatrix44RotationY(Rotation[1] * LC_DTOR), lcMul(lcMatrix44RotationX(Rotation[0] * LC_DTOR), ModelWorld)));

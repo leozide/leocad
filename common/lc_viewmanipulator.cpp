@@ -65,7 +65,7 @@ lcViewManipulator::lcViewManipulator(lcView* View)
 
 void lcViewManipulator::CreateResources(lcContext* Context)
 {
-	float* CurVert = (float*)mRotateMoveVertices[0];
+	float* CurVert = mRotateMoveVertices[0].GetFloats();
 
 	const float OverlayMovePlaneSize = 0.5f;
 	const float OverlayMoveArrowSize = 1.5f;
@@ -283,7 +283,7 @@ void lcViewManipulator::CreateResources(lcContext* Context)
 	*CurVert++ =  OverlayTrainTrackBoxSize; *CurVert++ =  OverlayTrainTrackBoxSize; *CurVert++ =  OverlayTrainTrackBoxSize;
 	*CurVert++ =  OverlayTrainTrackBoxSize; *CurVert++ = -OverlayTrainTrackBoxSize; *CurVert++ =  OverlayTrainTrackBoxSize;
 
-	mRotateMoveVertexBuffer = Context->CreateVertexBuffer(sizeof(mRotateMoveVertices), (const float*)mRotateMoveVertices[0]);
+	mRotateMoveVertexBuffer = Context->CreateVertexBuffer(sizeof(mRotateMoveVertices), mRotateMoveVertices[0].GetFloats());
 	mRotateMoveIndexBuffer = Context->CreateIndexBuffer(sizeof(mRotateMoveIndices), mRotateMoveIndices);
 }
 

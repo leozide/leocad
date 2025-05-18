@@ -88,16 +88,6 @@ public:
 	{
 	}
 
-	explicit operator const float*() const
-	{
-		return (const float*)this;
-	}
-
-	explicit operator float*()
-	{
-		return (float*)this;
-	}
-
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -106,6 +96,16 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	const float* GetFloats() const
+	{
+		return (const float*)this;
+	}
+
+	float* GetFloats()
+	{
+		return (float*)this;
 	}
 
 	bool IsNan() const
@@ -130,16 +130,6 @@ public:
 
 	explicit lcVector3(const lcVector4& v);
 
-	explicit operator const float*() const
-	{
-		return (const float*)this;
-	}
-
-	explicit operator float*()
-	{
-		return (float*)this;
-	}
-
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -148,6 +138,16 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	const float* GetFloats() const
+	{
+		return (const float*)this;
+	}
+
+	float* GetFloats()
+	{
+		return (float*)this;
 	}
 
 	bool IsNan() const
@@ -179,16 +179,6 @@ public:
 	{
 	}
 
-	explicit operator const float*() const
-	{
-		return (const float*)this;
-	}
-
-	explicit operator float*()
-	{
-		return (float*)this;
-	}
-
 	const float& operator[](int i) const
 	{
 		return ((float*)this)[i];
@@ -197,6 +187,16 @@ public:
 	float& operator[](int i)
 	{
 		return ((float*)this)[i];
+	}
+
+	const float* GetFloats() const
+	{
+		return (const float*)this;
+	}
+
+	float* GetFloats()
+	{
+		return (float*)this;
 	}
 
 	bool IsNan() const
@@ -223,16 +223,6 @@ public:
 
 	explicit lcMatrix33(const lcMatrix44& Matrix);
 
-	operator const float*() const
-	{
-		return (const float*)this;
-	}
-
-	operator float*()
-	{
-		return (float*)this;
-	}
-
 	const lcVector3& operator[](int i) const
 	{
 		return r[i];
@@ -241,6 +231,16 @@ public:
 	lcVector3& operator[](int i)
 	{
 		return r[i];
+	}
+
+	const float* GetFloats() const
+	{
+		return (const float*)this;
+	}
+
+	float* GetFloats()
+	{
+		return (float*)this;
 	}
 
 	void Orthonormalize();
@@ -281,16 +281,6 @@ public:
 		r[3] = lcVector4(Translation[0], Translation[1], Translation[2], 1.0f);
 	}
 
-	operator const float*() const
-	{
-		return (const float*)this;
-	}
-
-	operator float*()
-	{
-		return (float*)this;
-	}
-
 	const lcVector4& operator[](int i) const
 	{
 		return r[i];
@@ -299,6 +289,16 @@ public:
 	lcVector4& operator[](int i)
 	{
 		return r[i];
+	}
+
+	const float* GetFloats() const
+	{
+		return (const float*)this;
+	}
+
+	float* GetFloats()
+	{
+		return (float*)this;
 	}
 
 	float Determinant() const;
@@ -457,6 +457,11 @@ inline bool operator<(const lcVector3& a, const lcVector3& b)
 inline bool operator==(const lcVector4& a, const lcVector4& b)
 {
 	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+}
+
+inline bool operator==(const lcMatrix33& a, const lcMatrix33& b)
+{
+	return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2];
 }
 
 #ifndef QT_NO_DEBUG

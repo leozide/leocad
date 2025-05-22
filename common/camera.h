@@ -35,9 +35,10 @@ enum class lcCameraType
 	Count
 };
 
-enum lcCameraSection
+enum lcCameraSection : quint32
 {
-	LC_CAMERA_SECTION_POSITION,
+	LC_CAMERA_SECTION_INVALID = ~0U,
+	LC_CAMERA_SECTION_POSITION = 0,
 	LC_CAMERA_SECTION_TARGET,
 	LC_CAMERA_SECTION_UPVECTOR
 };
@@ -212,7 +213,7 @@ public:
 		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
 			return LC_CAMERA_SECTION_UPVECTOR;
 
-		return ~0U;
+		return LC_CAMERA_SECTION_INVALID;
 	}
 
 	quint32 GetAllowedTransforms() const override
@@ -235,6 +236,30 @@ public:
 		}
 
 		return lcVector3(0.0f, 0.0f, 0.0f);
+	}
+
+	lcMatrix33 GetRelativeRotation() const
+	{
+		const quint32 Section = GetFocusSection();
+
+		if (Section == LC_CAMERA_SECTION_POSITION)
+			return lcMatrix33(mWorldView);
+		else
+			return lcMatrix33Identity();
+	}
+
+	lcVector3 GetRotationCenter() const
+	{
+		const quint32 Section = GetFocusSection();
+
+		if (Section != LC_CAMERA_SECTION_TARGET)
+		{
+			return mPosition;
+		}
+		else
+		{
+			return mTargetPosition;
+		}
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
@@ -311,6 +336,7 @@ public:
 	void Center(const lcVector3& NewCenter, lcStep Step, bool AddKey);
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey);
+	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);
 	void SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up);

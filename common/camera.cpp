@@ -425,6 +425,38 @@ void lcCamera::MoveRelative(const lcVector3& Distance, lcStep Step, bool AddKey)
 	UpdatePosition(Step);
 }
 
+void lcCamera::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame)
+{
+	if (GetFocusSection() != LC_CAMERA_SECTION_POSITION && GetFocusSection() != LC_CAMERA_SECTION_INVALID)
+		return;
+
+	const lcMatrix33 LocalToWorldMatrix = lcMatrix33(mWorldView);
+
+	const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
+	lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
+
+	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
+
+	lcVector3 Distance = mPosition - Center;
+	Distance = lcMul(Distance, WorldToLocalMatrix);
+	Distance = lcMul(Distance, NewLocalToWorldMatrix);
+
+	SetPosition(Center + Distance, Step, AddKey);
+
+	Distance = mTargetPosition - Center;
+	Distance = lcMul(Distance, WorldToLocalMatrix);
+	Distance = lcMul(Distance, NewLocalToWorldMatrix);
+
+	SetTargetPosition(Center + Distance, Step, AddKey);
+
+	lcVector3 UpVector = mUpVector;
+	
+	UpVector = lcMul(UpVector, WorldToLocalMatrix);
+	UpVector = lcMul(UpVector, NewLocalToWorldMatrix);
+
+	SetUpVector(UpVector, Step, AddKey);
+}
+
 void lcCamera::UpdatePosition(lcStep Step)
 {
 	mPosition.Update(Step);

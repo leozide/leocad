@@ -399,22 +399,70 @@ void lcLight::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 		ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
 		return;
 	}
-	
-	lcVector3 Min(-LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE, -LC_LIGHT_POSITION_EDGE); // todo: fix light box test
-	lcVector3 Max( LC_LIGHT_POSITION_EDGE,  LC_LIGHT_POSITION_EDGE,  LC_LIGHT_POSITION_EDGE);
 
+	lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(mWorldMatrix);
 	lcVector4 LocalPlanes[6];
 
-	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	for (int PlaneIndex = 0; PlaneIndex < 6; PlaneIndex++)
 	{
-		const lcVector3 Normal = lcMul30(ObjectBoxTest.Planes[PlaneIdx], mWorldMatrix);
-		LocalPlanes[PlaneIdx] = lcVector4(Normal, ObjectBoxTest.Planes[PlaneIdx][3] - lcDot3(mWorldMatrix[3], Normal));
+		const lcVector3 PlaneNormal = lcMul30(ObjectBoxTest.Planes[PlaneIndex], InverseWorldMatrix);
+		LocalPlanes[PlaneIndex] = lcVector4(PlaneNormal, ObjectBoxTest.Planes[PlaneIndex][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
 	}
 
-	if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+	// TODO: Check meshes after the bounding fox test.
+	if (mLightType == lcLightType::Spot)
 	{
-		ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
-		return;
+		lcVector3 Min(-LC_LIGHT_SPOT_CONE_RADIUS, -LC_LIGHT_SPOT_CONE_RADIUS, 0);
+		lcVector3 Max( LC_LIGHT_SPOT_CONE_RADIUS,  LC_LIGHT_SPOT_CONE_RADIUS, LC_LIGHT_SPOT_CONE_HEIGHT);
+
+		if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+		{
+			ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
+			return;
+		}
+	}
+	else if (mLightType == lcLightType::Area)
+	{
+		lcVector3 Min(-mAreaSizeX / 2.0f, -mAreaSizeY / 2.0f, 0);
+		lcVector3 Max( mAreaSizeX / 2.0f,  mAreaSizeY / 2.0f, 0);
+
+		if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+		{
+			ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
+			return;
+		}
+	}
+	else if (mLightType == lcLightType::Directional)
+	{
+		lcVector3 Min(-LC_LIGHT_DIRECTIONAL_RADIUS, -LC_LIGHT_DIRECTIONAL_RADIUS, 0);
+		lcVector3 Max( LC_LIGHT_DIRECTIONAL_RADIUS,  LC_LIGHT_DIRECTIONAL_RADIUS, LC_LIGHT_DIRECTIONAL_HEIGHT);
+
+		if (lcBoundingBoxIntersectsVolume(Min, Max, LocalPlanes))
+		{
+			ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
+			return;
+		}
+	}
+
+	if (IsSelected())
+	{
+		lcVector3 TargetPosition = lcMul31(lcVector3(0.0f, 0.0f, -mTargetDistance), mWorldMatrix);
+		bool Outside = false;
+
+		for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+		{
+			if (lcDot3(TargetPosition, ObjectBoxTest.Planes[PlaneIdx]) + ObjectBoxTest.Planes[PlaneIdx][3] > LC_LIGHT_TARGET_RADIUS)
+			{
+				Outside = true;
+				break;
+			}
+		}
+
+		if (!Outside)
+		{
+			ObjectBoxTest.Objects.emplace_back(const_cast<lcLight*>(this));
+			return;
+		}
 	}
 }
 

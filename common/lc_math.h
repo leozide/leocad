@@ -1589,7 +1589,7 @@ inline lcVector3 lcQuaternionMul(const lcVector3& a, const lcVector4& b)
 }
 
 // Convert world coordinates to screen coordinates.
-inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
+inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int (&Viewport)[4])
 {
 	lcVector4 Tmp;
 
@@ -1603,7 +1603,7 @@ inline lcVector3 lcProjectPoint(const lcVector3& Point, const lcMatrix44& ModelV
 	return lcVector3(Viewport[0] + (1 + Tmp[0]) * Viewport[2] / 2, Viewport[1] + (1 + Tmp[1]) * Viewport[3] / 2, (1 + Tmp[2]) / 2);
 }
 
-inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
+inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int (&Viewport)[4])
 {
 	// Calculate the screen to model transform.
 	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
@@ -1624,7 +1624,7 @@ inline lcVector3 lcUnprojectPoint(const lcVector3& Point, const lcMatrix44& Mode
 	return lcVector3(Tmp[0], Tmp[1], Tmp[2]);
 }
 
-inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int Viewport[4])
+inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44& ModelView, const lcMatrix44& Projection, const int (&Viewport)[4])
 {
 	// Calculate the screen to model transform.
 	const lcMatrix44 Transform = lcMatrix44Inverse(lcMul(ModelView, Projection));
@@ -1648,7 +1648,7 @@ inline void lcUnprojectPoints(lcVector3* Points, int NumPoints, const lcMatrix44
 	}
 }
 
-inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Projection, lcVector4 Planes[6])
+inline void lcGetFrustumPlanes(const lcMatrix44& WorldView, const lcMatrix44& Projection, lcVector4 (&Planes)[6])
 {
 	lcMatrix44 WorldProj = lcMul(WorldView, Projection);
 
@@ -1878,7 +1878,7 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 }
 
 // Return true if a polygon intersects a set of planes.
-inline bool lcTriangleIntersectsPlanes(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector4 Planes[6])
+inline bool lcTriangleIntersectsPlanes(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector4 (&Planes)[6])
 {
 	constexpr int NumPlanes = 6;
 	const lcVector3 Points[3] = { p1, p2, p3 };
@@ -2212,7 +2212,7 @@ inline float lcRayPointDistance(const lcVector3& Point, const lcVector3& Start, 
 }
 
 // Returns true if the axis aligned box intersects the volume defined by planes.
-inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 Planes[6])
+inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3& Max, const lcVector4 (&Planes)[6])
 {
 	constexpr int NumPlanes = 6;
 	lcVector3 Points[8] =
@@ -2287,7 +2287,7 @@ struct lcBoundingBox
 	lcVector3 Max;
 };
 
-inline void lcGetBoxCorners(const lcVector3& Min, const lcVector3& Max, lcVector3 Points[8])
+inline void lcGetBoxCorners(const lcVector3& Min, const lcVector3& Max, lcVector3 (&Points)[8])
 {
 	Points[0] = lcVector3(Max.x, Max.y, Min.z);
 	Points[1] = lcVector3(Min.x, Max.y, Min.z);
@@ -2299,7 +2299,7 @@ inline void lcGetBoxCorners(const lcVector3& Min, const lcVector3& Max, lcVector
 	Points[7] = lcVector3(Min.x, Max.y, Max.z);
 }
 
-inline void lcGetBoxCorners(const lcBoundingBox& BoundingBox, lcVector3 Points[8])
+inline void lcGetBoxCorners(const lcBoundingBox& BoundingBox, lcVector3 (&Points)[8])
 {
 	lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
 }

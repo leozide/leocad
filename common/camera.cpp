@@ -397,16 +397,19 @@ void lcCamera::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	if (IsSimple())
 		AddKey = false;
 
-	if (IsSelected(LC_CAMERA_SECTION_POSITION))
+	const quint32 FocusSection = GetFocusSection();
+
+	if (FocusSection == LC_CAMERA_SECTION_POSITION || FocusSection == LC_CAMERA_SECTION_INVALID)
 	{
 		mPosition.ChangeKey(mPosition + Distance, Step, AddKey);
 	}
 
-	if (IsSelected(LC_CAMERA_SECTION_TARGET))
+	if (FocusSection == LC_CAMERA_SECTION_TARGET || FocusSection == LC_CAMERA_SECTION_INVALID)
 	{
 		mTargetPosition.ChangeKey(mTargetPosition + Distance, Step, AddKey);
 	}
-	else if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+	
+	if (FocusSection == LC_CAMERA_SECTION_UPVECTOR)
 	{
 		mUpVector.ChangeKey(lcNormalize(mUpVector + Distance), Step, AddKey);
 	}

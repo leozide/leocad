@@ -311,51 +311,114 @@ void lcPropertiesWidget::FloatChanged()
 
 	if (PropertyId == lcObjectPropertyId::CameraPositionX || PropertyId == lcObjectPropertyId::CameraPositionY || PropertyId == lcObjectPropertyId::CameraPositionZ)
 	{
-		lcVector3 Center = Camera->mPosition;
-		lcVector3 Position = Center;
+		quint32 FocusSection = LC_CAMERA_SECTION_INVALID;
+		lcVector3 Start;
+
+		if (Camera)
+		{
+			FocusSection = Camera->GetFocusSection();
+			Camera->SetFocused(FocusSection, false);
+			Camera->SetFocused(LC_CAMERA_SECTION_POSITION, true);
+
+			Start = Camera->mPosition;
+		}
+		else
+		{
+			Start = lcVector3(0.0f, 0.0f, 0.0f);
+		}
+
+		lcVector3 End = Start;
 
 		if (PropertyId == lcObjectPropertyId::CameraPositionX)
-			Position[0] = Value;
+			End[0] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraPositionY)
-			Position[1] = Value;
+			End[1] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraPositionZ)
-			Position[2] = Value;
+			End[2] = Value;
 
-		lcVector3 Distance = Position - Center;
+		lcVector3 Distance = End - Start;
 
 		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+
+		if (Camera)
+		{
+			Camera->SetFocused(LC_CAMERA_SECTION_POSITION, false);
+			Camera->SetFocused(FocusSection, true);
+		}
 	}
 	else if (PropertyId == lcObjectPropertyId::CameraTargetX || PropertyId == lcObjectPropertyId::CameraTargetY || PropertyId == lcObjectPropertyId::CameraTargetZ)
 	{
-		lcVector3 Center = Camera->mTargetPosition;
-		lcVector3 Position = Center;
+		quint32 FocusSection = LC_CAMERA_SECTION_INVALID;
+		lcVector3 Start;
+
+		if (Camera)
+		{
+			FocusSection = Camera->GetFocusSection();
+			Camera->SetFocused(FocusSection, false);
+			Camera->SetFocused(LC_CAMERA_SECTION_TARGET, true);
+
+			Start = Camera->mTargetPosition;
+		}
+		else
+		{
+			Start = lcVector3(0.0f, 0.0f, 0.0f);
+		}
+
+		lcVector3 End = Start;
 
 		if (PropertyId == lcObjectPropertyId::CameraTargetX)
-			Position[0] = Value;
+			End[0] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraTargetY)
-			Position[1] = Value;
+			End[1] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraTargetZ)
-			Position[2] = Value;
+			End[2] = Value;
 
-		lcVector3 Distance = Position - Center;
+		lcVector3 Distance = End - Start;
 
 		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+
+		if (Camera)
+		{
+			Camera->SetFocused(LC_CAMERA_SECTION_TARGET, false);
+			Camera->SetFocused(FocusSection, true);
+		}
 	}
 	else if (PropertyId == lcObjectPropertyId::CameraUpX || PropertyId == lcObjectPropertyId::CameraUpY || PropertyId == lcObjectPropertyId::CameraUpZ)
 	{
-		lcVector3 Center = Camera->mUpVector;
-		lcVector3 Position = Center;
+		quint32 FocusSection = LC_CAMERA_SECTION_INVALID;
+		lcVector3 Start;
+
+		if (Camera)
+		{
+			FocusSection = Camera->GetFocusSection();
+			Camera->SetFocused(FocusSection, false);
+			Camera->SetFocused(LC_CAMERA_SECTION_UPVECTOR, true);
+
+			Start = Camera->mUpVector;
+		}
+		else
+		{
+			Start = lcVector3(0.0f, 0.0f, 0.0f);
+		}
+
+		lcVector3 End = Start;
 
 		if (PropertyId == lcObjectPropertyId::CameraUpX)
-			Position[0] = Value;
+			End[0] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraUpY)
-			Position[1] = Value;
+			End[1] = Value;
 		else if (PropertyId == lcObjectPropertyId::CameraUpZ)
-			Position[2] = Value;
+			End[2] = Value;
 
-		lcVector3 Distance = Position - Center;
+		lcVector3 Distance = End - Start;
 
 		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+
+		if (Camera)
+		{
+			Camera->SetFocused(LC_CAMERA_SECTION_UPVECTOR, false);
+			Camera->SetFocused(FocusSection, true);
+		}
 	}
 	else if (Camera)
 	{

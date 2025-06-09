@@ -1513,6 +1513,10 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				ShowMessage(tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
 		}
 
+		QDir Dir(BlenderDir);
+		if(!Dir.exists())
+			Dir.mkpath(".");
+
 		QString ArchiveFileName, OldArchiveFileName = QFileInfo(OldBlenderAddonFile).fileName();
 		QFile File(BlenderAddonFile);
 		if (File.open(QIODevice::WriteOnly))

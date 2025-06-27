@@ -18,7 +18,9 @@ protected slots:
 	void CategoryStateChanged(bool Expanded);
 	void KeyFrameChanged();
 	void BoolChanged();
-	void FloatChanged();
+	void FloatEditingFinished();
+	void FloatEditingCanceled();
+	void FloatChanged(const QString& TextValue);
 	void IntegerChanged();
 	void StepNumberChanged();
 	void StringChanged();
@@ -112,6 +114,8 @@ protected:
 	void UpdateColor(lcObjectPropertyId PropertyId);
 	void UpdatePieceColor(lcObjectPropertyId PropertyId);
 	void UpdatePieceId(lcObjectPropertyId PropertyId);
+
+	void ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging);
 
 	void SetEmpty();
 	void SetPiece(const std::vector<lcObject*>& Selection, lcObject* Focus);

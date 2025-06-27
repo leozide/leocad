@@ -3376,7 +3376,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	gMainWindow->UpdateSelectedObjects(false);
 }
 
-void lcModel::SetCameraFOV(lcCamera* Camera, float FOV)
+void lcModel::SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint)
 {
 	if (Camera->m_fovy == FOV)
 		return;
@@ -3384,11 +3384,13 @@ void lcModel::SetCameraFOV(lcCamera* Camera, float FOV)
 	Camera->m_fovy = FOV;
 	Camera->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Changing FOV"));
+	if (Checkpoint)
+		SaveCheckpoint(tr("Changing FOV"));
+
 	UpdateAllViews();
 }
 
-void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
+void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint)
 {
 	if (Camera->m_zNear == ZNear)
 		return;
@@ -3396,11 +3398,13 @@ void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear)
 	Camera->m_zNear = ZNear;
 	Camera->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Editing Camera"));
+	if (Checkpoint)
+		SaveCheckpoint(tr("Editing Camera"));
+
 	UpdateAllViews();
 }
 
-void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
+void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint)
 {
 	if (Camera->m_zFar == ZFar)
 		return;
@@ -3408,7 +3412,9 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar)
 	Camera->m_zFar = ZFar;
 	Camera->UpdatePosition(mCurrentStep);
 
-	SaveCheckpoint(tr("Editing Camera"));
+	if (Checkpoint)
+		SaveCheckpoint(tr("Editing Camera"));
+
 	UpdateAllViews();
 }
 
@@ -3444,6 +3450,84 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	if (PropertyId == lcObjectPropertyId::PieceId)
 	{
 		gMainWindow->UpdateInUseCategory();
+	}
+}
+
+void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
+{
+	if (!Accept)
+	{
+		if (!mUndoHistory.empty())
+			LoadCheckPoint(mUndoHistory.front());
+		return;
+	}
+
+	switch (PropertyId)
+	{
+	case lcObjectPropertyId::PieceId:
+	case lcObjectPropertyId::PieceColor:
+	case lcObjectPropertyId::PieceStepShow:
+	case lcObjectPropertyId::PieceStepHide:
+	case lcObjectPropertyId::CameraName:
+	case lcObjectPropertyId::CameraType:
+		break;
+
+	case lcObjectPropertyId::CameraFOV:
+		SaveCheckpoint(tr("Changing FOV"));
+		break;
+
+	case lcObjectPropertyId::CameraNear:
+	case lcObjectPropertyId::CameraFar:
+		SaveCheckpoint(tr("Editing Camera"));
+		break;
+
+	case lcObjectPropertyId::CameraPositionX:
+	case lcObjectPropertyId::CameraPositionY:
+	case lcObjectPropertyId::CameraPositionZ:
+	case lcObjectPropertyId::CameraTargetX:
+	case lcObjectPropertyId::CameraTargetY:
+	case lcObjectPropertyId::CameraTargetZ:
+	case lcObjectPropertyId::CameraUpX:
+	case lcObjectPropertyId::CameraUpY:
+	case lcObjectPropertyId::CameraUpZ:
+		SaveCheckpoint(tr("Move"));
+		break;
+
+	case lcObjectPropertyId::LightName:
+	case lcObjectPropertyId::LightType:
+	case lcObjectPropertyId::LightColor:
+	case lcObjectPropertyId::LightBlenderPower:
+	case lcObjectPropertyId::LightPOVRayPower:
+	case lcObjectPropertyId::LightCastShadow:
+	case lcObjectPropertyId::LightPOVRayFadeDistance:
+	case lcObjectPropertyId::LightPOVRayFadePower:
+	case lcObjectPropertyId::LightPointBlenderRadius:
+	case lcObjectPropertyId::LightSpotBlenderRadius:
+	case lcObjectPropertyId::LightDirectionalBlenderAngle:
+	case lcObjectPropertyId::LightAreaSizeX:
+	case lcObjectPropertyId::LightAreaSizeY:
+	case lcObjectPropertyId::LightSpotConeAngle:
+	case lcObjectPropertyId::LightSpotPenumbraAngle:
+	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightAreaShape:
+	case lcObjectPropertyId::LightAreaPOVRayGridX:
+	case lcObjectPropertyId::LightAreaPOVRayGridY:
+		break;
+
+	case lcObjectPropertyId::ObjectPositionX:
+	case lcObjectPropertyId::ObjectPositionY:
+	case lcObjectPropertyId::ObjectPositionZ:
+		SaveCheckpoint(tr("Move"));
+		break;
+
+	case lcObjectPropertyId::ObjectRotationX:
+	case lcObjectPropertyId::ObjectRotationY:
+	case lcObjectPropertyId::ObjectRotationZ:
+		SaveCheckpoint(tr("Rotate"));
+		break;
+
+	case lcObjectPropertyId::Count:
+		break;
 	}
 }
 

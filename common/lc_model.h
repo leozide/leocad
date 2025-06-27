@@ -377,11 +377,12 @@ public:
 	void SetSelectedPiecesStepHide(lcStep Step);
 
 	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
+	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
 	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
-	void SetCameraFOV(lcCamera* Camera, float FOV);
-	void SetCameraZNear(lcCamera* Camera, float ZNear);
-	void SetCameraZFar(lcCamera* Camera, float ZFar);
+	void SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint);
+	void SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint);
+	void SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

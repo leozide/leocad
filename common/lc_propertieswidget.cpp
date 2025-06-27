@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_propertieswidget.h"
 #include "lc_keyframewidget.h"
+#include "lc_doublespinbox.h"
 #include "object.h"
 #include "piece.h"
 #include "camera.h"
@@ -246,11 +247,49 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	mLayoutRow++;
 }
 
-void lcPropertiesWidget::FloatChanged()
+void lcPropertiesWidget::FloatEditingFinished()
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(sender());
+	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
 	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
 
+	if (PropertyId == lcObjectPropertyId::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	Model->EndPropertyEdit(PropertyId, true);
+}
+
+void lcPropertiesWidget::FloatEditingCanceled()
+{
+	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+
+	if (PropertyId == lcObjectPropertyId::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!Model)
+		return;
+
+	Model->EndPropertyEdit(PropertyId, false);
+}
+
+void lcPropertiesWidget::FloatChanged(const QString& TextValue)
+{
+	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+	float Value = lcParseValueLocalized(TextValue);
+
+	ChangeFloatValue(PropertyId, Value, true);
+}
+
+void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging)
+{
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
 
@@ -262,9 +301,6 @@ void lcPropertiesWidget::FloatChanged()
 	lcPiece* Piece = dynamic_cast<lcPiece*>(mFocusObject);
 	lcCamera* Camera = dynamic_cast<lcCamera*>(mFocusObject);
 	lcLight* Light = dynamic_cast<lcLight*>(mFocusObject);
-	float Value = lcParseValueLocalized(Widget->text());
-
-	// todo: mouse drag
 
 	if (PropertyId == lcObjectPropertyId::ObjectPositionX || PropertyId == lcObjectPropertyId::ObjectPositionY || PropertyId == lcObjectPropertyId::ObjectPositionZ)
 	{
@@ -282,7 +318,7 @@ void lcPropertiesWidget::FloatChanged()
 
 		lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
 	}
 	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
 	{
@@ -302,7 +338,7 @@ void lcPropertiesWidget::FloatChanged()
 		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
 			Rotation[2] = Value;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, true);
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, !Dragging);
 	}
 	else if (Piece || Light)
 	{
@@ -338,7 +374,7 @@ void lcPropertiesWidget::FloatChanged()
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
 
 		if (Camera)
 		{
@@ -375,7 +411,7 @@ void lcPropertiesWidget::FloatChanged()
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
 
 		if (Camera)
 		{
@@ -412,7 +448,7 @@ void lcPropertiesWidget::FloatChanged()
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, true, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
 
 		if (Camera)
 		{
@@ -424,28 +460,28 @@ void lcPropertiesWidget::FloatChanged()
 	{
 		if (PropertyId == lcObjectPropertyId::CameraFOV)
 		{
-			Model->SetCameraFOV(Camera, Value);
+			Model->SetCameraFOV(Camera, Value, !Dragging);
 		}
 		else if (PropertyId == lcObjectPropertyId::CameraNear)
 		{
-			Model->SetCameraZNear(Camera, Value);
+			Model->SetCameraZNear(Camera, Value, !Dragging);
 		}
 		else if (PropertyId == lcObjectPropertyId::CameraFar)
 		{
-			Model->SetCameraZFar(Camera, Value);
+			Model->SetCameraZFar(Camera, Value, !Dragging);
 		}
 	}
 }
 
 void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 {
-	QLineEdit* Widget = qobject_cast<QLineEdit*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
+	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
 		
 	if (Widget)
 	{
 		QSignalBlocker Blocker(Widget);
 
-		Widget->setText(lcFormatValueLocalized(Value));
+		Widget->SetValue(Value);
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -455,12 +491,14 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 {
 	AddLabel(PropertyId, Text, ToolTip);
 
-	QLineEdit* Widget = new QLineEdit(this);
+	lcDoubleSpinBox* Widget = new lcDoubleSpinBox(this);
 	Widget->setToolTip(ToolTip);
 
-	Widget->setValidator(new QDoubleValidator(Min, Max, 1, Widget));
+	Widget->setRange(Min, Max);
 
-	connect(Widget, &QLineEdit::editingFinished, this, &lcPropertiesWidget::FloatChanged);
+	connect(Widget, &lcDoubleSpinBox::EditingCanceled, this, &lcPropertiesWidget::FloatEditingCanceled);
+	connect(Widget, &lcDoubleSpinBox::EditingFinished, this, &lcPropertiesWidget::FloatEditingFinished);
+	connect(Widget, &lcDoubleSpinBox::textChanged, this, &lcPropertiesWidget::FloatChanged);
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 

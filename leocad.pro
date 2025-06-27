@@ -188,6 +188,7 @@ SOURCES += \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
 	common/lc_context.cpp \
+	common/lc_doublespinbox.cpp \
 	common/lc_edgecolordialog.cpp \
 	common/lc_file.cpp \
 	common/lc_findreplacewidget.cpp \
@@ -261,6 +262,7 @@ HEADERS += \
 	common/lc_colors.h \
 	common/lc_commands.h \
 	common/lc_context.h \
+	common/lc_doublespinbox.h \
 	common/lc_edgecolordialog.h \
 	common/lc_file.h \
 	common/lc_findreplacewidget.h \

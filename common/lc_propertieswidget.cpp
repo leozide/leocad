@@ -481,6 +481,82 @@ void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 	{
 		QSignalBlocker Blocker(Widget);
 
+		switch (PropertyId)
+		{
+		case lcObjectPropertyId::PieceId:
+		case lcObjectPropertyId::PieceColor:
+		case lcObjectPropertyId::PieceStepShow:
+		case lcObjectPropertyId::PieceStepHide:
+		case lcObjectPropertyId::CameraName:
+		case lcObjectPropertyId::CameraType:
+			break;
+
+		case lcObjectPropertyId::CameraFOV:
+		case lcObjectPropertyId::CameraNear:
+		case lcObjectPropertyId::CameraFar:
+			Widget->SetSnap(lcFloatPropertySnap::Auto);
+			break;
+
+		case lcObjectPropertyId::CameraPositionX:
+		case lcObjectPropertyId::CameraPositionY:
+		case lcObjectPropertyId::CameraPositionZ:
+		case lcObjectPropertyId::CameraTargetX:
+		case lcObjectPropertyId::CameraTargetY:
+		case lcObjectPropertyId::CameraTargetZ:
+			Widget->SetSnap(lcFloatPropertySnap::Position);
+			break;
+
+		case lcObjectPropertyId::CameraUpX:
+		case lcObjectPropertyId::CameraUpY:
+		case lcObjectPropertyId::CameraUpZ:
+			Widget->SetSnap(lcFloatPropertySnap::Auto);
+			break;
+
+		case lcObjectPropertyId::LightName:
+		case lcObjectPropertyId::LightType:
+		case lcObjectPropertyId::LightColor:
+			break;
+
+		case lcObjectPropertyId::LightBlenderPower:
+		case lcObjectPropertyId::LightPOVRayPower:
+		case lcObjectPropertyId::LightCastShadow:
+		case lcObjectPropertyId::LightPOVRayFadeDistance:
+		case lcObjectPropertyId::LightPOVRayFadePower:
+		case lcObjectPropertyId::LightPointBlenderRadius:
+		case lcObjectPropertyId::LightSpotBlenderRadius:
+		case lcObjectPropertyId::LightDirectionalBlenderAngle:
+		case lcObjectPropertyId::LightAreaSizeX:
+		case lcObjectPropertyId::LightAreaSizeY:
+		case lcObjectPropertyId::LightSpotConeAngle:
+		case lcObjectPropertyId::LightSpotPenumbraAngle:
+		case lcObjectPropertyId::LightSpotPOVRayTightness:
+			Widget->SetSnap(lcFloatPropertySnap::Auto);
+			break;
+
+		case lcObjectPropertyId::LightAreaShape:
+		case lcObjectPropertyId::LightAreaPOVRayGridX:
+		case lcObjectPropertyId::LightAreaPOVRayGridY:
+			break;
+
+		case lcObjectPropertyId::ObjectPositionX:
+		case lcObjectPropertyId::ObjectPositionY:
+			Widget->SetSnap(mLayoutMode == LayoutMode::Piece ? lcFloatPropertySnap::PiecePositionXY : lcFloatPropertySnap::Position);
+			break;
+
+		case lcObjectPropertyId::ObjectPositionZ:
+			Widget->SetSnap(mLayoutMode == LayoutMode::Piece ? lcFloatPropertySnap::PiecePositionZ : lcFloatPropertySnap::Position);
+			break;
+
+		case lcObjectPropertyId::ObjectRotationX:
+		case lcObjectPropertyId::ObjectRotationY:
+		case lcObjectPropertyId::ObjectRotationZ:
+			Widget->SetSnap(lcFloatPropertySnap::Rotation);
+			break;
+
+		case lcObjectPropertyId::Count:
+			break;
+		}
+
 		Widget->SetValue(Value);
 	}
 
@@ -858,7 +934,6 @@ void lcPropertiesWidget::AddColorProperty(lcObjectPropertyId PropertyId, const Q
 
 	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
-	Widget->setAutoRaise(true);
 	Widget->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	Widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -955,7 +1030,6 @@ void lcPropertiesWidget::AddPieceColorProperty(lcObjectPropertyId PropertyId, co
 
 	QToolButton* Widget = new QToolButton(this);
 	Widget->setToolTip(ToolTip);
-	Widget->setAutoRaise(true);
 	Widget->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	Widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -1046,7 +1120,6 @@ void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const
 
 	lcElidableToolButton* Widget = new lcElidableToolButton(this);
 	Widget->setToolTip(ToolTip);
-	Widget->setAutoRaise(true);
 	Widget->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	Widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 

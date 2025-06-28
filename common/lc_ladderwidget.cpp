@@ -1,10 +1,13 @@
 #include "lc_global.h"
 #include "lc_ladderwidget.h"
+#include "lc_objectproperty.h"
 
-lcLadderWidget::lcLadderWidget(QAbstractSpinBox* SpinBox)
+lcLadderWidget::lcLadderWidget(QAbstractSpinBox* SpinBox, lcFloatPropertySnap Snap)
 	: QWidget(nullptr, Qt::Popup | Qt::Sheet), mSpinBox(SpinBox)
 {
 	mSpinBox->installEventFilter(this);
+
+	CalculateSteps(Snap);
 }
 
 void lcLadderWidget::Show()
@@ -16,7 +19,6 @@ void lcLadderWidget::Show()
 	const QRect Desktop = QApplication::desktop()->geometry();
 #endif
 
-	mSteps = { 100, 10, 1 };
 	int LineHeight = QFontMetrics(font()).height();
 	int CellSize = LineHeight * 4;
 
@@ -46,6 +48,45 @@ void lcLadderWidget::Show()
 
 	show();
 	grabMouse();
+}
+
+void lcLadderWidget::CalculateSteps(lcFloatPropertySnap Snap)
+{
+	QDoubleSpinBox* SpinBox = qobject_cast<QDoubleSpinBox*>(mSpinBox);
+
+	switch (Snap)
+	{
+	case lcFloatPropertySnap::Auto:
+		if (SpinBox)
+		{
+			double Max = SpinBox->maximum();
+
+			if (Max > 200.0)
+				mSteps = { 1000.0, 100.0, 10.0, 1.0, 0.1 };
+			else
+				mSteps = { 30.0, 10.0, 1.0, 0.1, 0.01 };
+		}
+		break;
+
+	case lcFloatPropertySnap::PiecePositionXY:
+		mSteps = { 80.0, 40.0, 24.0, 20.0, 10.0, 8.0, 1.0 };
+		break;
+
+	case lcFloatPropertySnap::PiecePositionZ:
+		mSteps = { 192.0, 96.0, 48.0, 24.0, 10.0, 8.0, 1.0 };
+		break;
+
+	case lcFloatPropertySnap::Position:
+		mSteps = { 1000.0, 100.0, 50.0, 10.0, 5.0, 1.0, 0.1 };
+		break;
+
+	case lcFloatPropertySnap::Rotation:
+		mSteps = { 90.0, 45.0, 30.0, 22.5, 15.0, 1.0, 0.1 };
+		break;
+	}
+
+	if (mSteps.empty())
+		mSteps = { 100.0, 10.0, 1.0, 0.1, 0.01 };
 }
 
 void lcLadderWidget::UpdateMousePosition()
@@ -128,7 +169,7 @@ void lcLadderWidget::paintEvent(QPaintEvent* Event)
 		QTextOption TextOption(Qt::AlignCenter);
 		QString Text = QString::number(mSteps[Step]);
 
-		if (Step == mCurrentStep)
+		if (Step == mCurrentStep && mSpinBox)
 			Text = QString("%1\n\n(%2)").arg(Text, mSpinBox->text());
 
 		Painter.drawText(Rect, Text, TextOption);

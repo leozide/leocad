@@ -2,6 +2,7 @@
 #include "lc_doublespinbox.h"
 #include "lc_ladderwidget.h"
 #include "lc_qutils.h"
+#include "lc_mainwindow.h"
 
 lcDoubleSpinBox::lcDoubleSpinBox(QWidget* Parent)
 	: QDoubleSpinBox(Parent)
@@ -17,6 +18,34 @@ void lcDoubleSpinBox::SetValue(double Value)
 		mInitialValue = Value;
 
 	setValue(Value);
+}
+
+void lcDoubleSpinBox::SetSnap(lcFloatPropertySnap Snap)
+{
+	mSnap = Snap;
+
+	switch (Snap)
+	{
+	case lcFloatPropertySnap::Auto:
+		setSingleStep(10.0);
+		break;
+
+	case lcFloatPropertySnap::PiecePositionXY:
+		setSingleStep(gMainWindow->GetMoveXYSnap());
+		break;
+
+	case lcFloatPropertySnap::PiecePositionZ:
+		setSingleStep(gMainWindow->GetMoveZSnap());
+		break;
+
+	case lcFloatPropertySnap::Position:
+		setSingleStep(10.0);
+		break;
+
+	case lcFloatPropertySnap::Rotation:
+		setSingleStep(gMainWindow->GetAngleSnap());
+		break;
+	}
 }
 
 QString	lcDoubleSpinBox::textFromValue(double Value) const
@@ -71,7 +100,7 @@ void lcDoubleSpinBox::HandleMousePressEvent(QMouseEvent* MouseEvent)
 
 		if (MouseEvent->buttons() == Qt::MiddleButton)
 		{
-			lcLadderWidget* LadderWidget = new lcLadderWidget(this);
+			lcLadderWidget* LadderWidget = new lcLadderWidget(this, mSnap);
 
 			connect(LadderWidget, &lcLadderWidget::EditingCanceled, this, &lcDoubleSpinBox::CancelEditing);
 			connect(LadderWidget, &lcLadderWidget::EditingFinished, this, &lcDoubleSpinBox::FinishEditing);

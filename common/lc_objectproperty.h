@@ -48,6 +48,15 @@ enum class lcObjectPropertyId
 	Count
 };
 
+enum class lcFloatPropertySnap
+{
+	Auto,
+	PiecePositionXY,
+	PiecePositionZ,
+	Position,
+	Rotation
+};
+
 template<typename T>
 struct lcObjectPropertyKey
 {

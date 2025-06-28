@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lc_objectproperty.h"
+
 class lcDoubleSpinBox : public QDoubleSpinBox
 {
 	Q_OBJECT
@@ -9,6 +11,7 @@ public:
 	virtual ~lcDoubleSpinBox() = default;
 
 	void SetValue(double Value);
+	void SetSnap(lcFloatPropertySnap Snap);
 
 	QString	textFromValue(double Value) const override;
 	bool eventFilter(QObject* Object, QEvent* Event) override;
@@ -53,4 +56,5 @@ protected:
 	double mInitialValue = 0.0;
 	QPoint mLastPosition;
 	DragMode mDragMode = DragMode::None;
+	lcFloatPropertySnap mSnap = lcFloatPropertySnap::Auto;
 };

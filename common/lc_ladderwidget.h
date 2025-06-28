@@ -1,11 +1,13 @@
 #pragma once
 
+enum class lcFloatPropertySnap;
+
 class lcLadderWidget: public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcLadderWidget(QAbstractSpinBox* SpinBox);
+	lcLadderWidget(QAbstractSpinBox* SpinBox, lcFloatPropertySnap Snap);
 	virtual ~lcLadderWidget() = default;
 
 	void Show();
@@ -24,11 +26,12 @@ protected slots:
 	void FinishEditing();
 
 protected:
+	void CalculateSteps(lcFloatPropertySnap Snap);
 	void UpdateMousePosition();
 
 	void paintEvent(QPaintEvent* PaintEvent) override;
 
-	QAbstractSpinBox* mSpinBox = nullptr;
+	QPointer<QAbstractSpinBox> mSpinBox = nullptr;
 	std::vector<double> mSteps;
 	int mCurrentStep = -1;
 	int mLastMousePositionX = 0;

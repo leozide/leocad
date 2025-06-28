@@ -198,6 +198,7 @@ SOURCES += \
 	common/lc_instructions.cpp \
 	common/lc_instructionsdialog.cpp \
 	common/lc_keyframewidget.cpp \
+	common/lc_ladderwidget.cpp \
 	common/lc_library.cpp \
 	common/lc_lxf.cpp \
 	common/lc_mainwindow.cpp \
@@ -273,6 +274,7 @@ HEADERS += \
 	common/lc_instructions.h \
 	common/lc_instructionsdialog.h \
 	common/lc_keyframewidget.h \
+	common/lc_ladderwidget.h \
 	common/lc_library.h \
 	common/lc_lxf.h \
 	common/lc_mainwindow.h \

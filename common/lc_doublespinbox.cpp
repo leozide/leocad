@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_doublespinbox.h"
+#include "lc_ladderwidget.h"
 #include "lc_qutils.h"
 
 lcDoubleSpinBox::lcDoubleSpinBox(QWidget* Parent)
@@ -25,6 +26,9 @@ QString	lcDoubleSpinBox::textFromValue(double Value) const
 
 void lcDoubleSpinBox::CancelEditing()
 {
+	if (value() == mInitialValue)
+		return;
+
 	emit EditingCanceled();
 
 	setValue(mInitialValue);
@@ -38,12 +42,13 @@ void lcDoubleSpinBox::FinishEditing()
 	emit EditingFinished();
 
 	mInitialValue = value();
+
+	clearFocus();
 }
 
 void lcDoubleSpinBox::ReturnPressed()
 {
 	FinishEditing();
-	clearFocus();
 }
 
 void lcDoubleSpinBox::HandleMousePressEvent(QMouseEvent* MouseEvent)
@@ -58,7 +63,23 @@ void lcDoubleSpinBox::HandleMousePressEvent(QMouseEvent* MouseEvent)
 		if (mDragMode == DragMode::Value)
 			CancelEditing();
 
-		mDragMode = DragMode::None;
+		if (mDragMode != DragMode::None)
+		{
+			mDragMode = DragMode::None;
+			return;
+		}
+
+		if (MouseEvent->buttons() == Qt::MiddleButton)
+		{
+			lcLadderWidget* LadderWidget = new lcLadderWidget(this);
+
+			connect(LadderWidget, &lcLadderWidget::EditingCanceled, this, &lcDoubleSpinBox::CancelEditing);
+			connect(LadderWidget, &lcLadderWidget::EditingFinished, this, &lcDoubleSpinBox::FinishEditing);
+
+			mInitialValue = value();
+
+			LadderWidget->Show();
+		}
 	}
 }
 
@@ -126,11 +147,7 @@ void lcDoubleSpinBox::HandleMouseReleaseEvent(QMouseEvent* MouseEvent)
 	Q_UNUSED(MouseEvent);
 
 	if (mDragMode == DragMode::Value)
-	{
 		FinishEditing();
-
-		clearFocus();
-	}
 
 	mDragMode = DragMode::None;
 }

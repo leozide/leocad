@@ -3,7 +3,7 @@
 #include "lc_objectproperty.h"
 
 lcLadderWidget::lcLadderWidget(QAbstractSpinBox* SpinBox, lcFloatPropertySnap Snap)
-	: QWidget(nullptr, Qt::Popup | Qt::Sheet), mSpinBox(SpinBox)
+	: QWidget(SpinBox, Qt::Popup | Qt::Sheet), mSpinBox(SpinBox)
 {
 	mSpinBox->installEventFilter(this);
 
@@ -188,7 +188,7 @@ void lcLadderWidget::paintEvent(QPaintEvent* Event)
 
 bool lcLadderWidget::eventFilter(QObject* Object, QEvent* Event)
 {
-	if (Event->type() == QEvent::ShortcutOverride)
+	if (Event->type() == QEvent::ShortcutOverride || Event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
 
@@ -197,6 +197,8 @@ bool lcLadderWidget::eventFilter(QObject* Object, QEvent* Event)
 			CancelEditing();
 
 			KeyEvent->accept();
+
+			return true;
 		}
 	}
 

@@ -81,7 +81,7 @@ void lcLadderWidget::CalculateSteps(lcFloatPropertySnap Snap)
 		break;
 
 	case lcFloatPropertySnap::Rotation:
-		mSteps = { 90.0, 45.0, 30.0, 22.5, 15.0, 1.0, 0.1 };
+		mSteps = { 45.0, 30.0, 22.5, 15.0, 5.0, 1.0, 0.1 };
 		break;
 	}
 
@@ -112,7 +112,8 @@ void lcLadderWidget::UpdateMousePosition()
 
 		if (SpinBox)
 		{
-			int Steps = (MousePosition.x() - mLastMousePositionX) / 10;
+			const int Sensitivity = 15;
+			int Steps = (MousePosition.x() - mLastMousePositionX) / Sensitivity;
 
 			if (Steps)
 			{

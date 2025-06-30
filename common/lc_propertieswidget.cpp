@@ -574,7 +574,12 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 
 	connect(Widget, &lcDoubleSpinBox::EditingCanceled, this, &lcPropertiesWidget::FloatEditingCanceled);
 	connect(Widget, &lcDoubleSpinBox::EditingFinished, this, &lcPropertiesWidget::FloatEditingFinished);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+	connect(Widget, QOverload<const QString&>::of(&lcDoubleSpinBox::valueChanged), this, &lcPropertiesWidget::FloatChanged);
+#else
 	connect(Widget, &lcDoubleSpinBox::textChanged, this, &lcPropertiesWidget::FloatChanged);
+#endif
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 

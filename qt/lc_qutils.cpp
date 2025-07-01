@@ -5,6 +5,7 @@
 #include "lc_model.h"
 #include "pieceinf.h"
 #include "lc_partselectionwidget.h"
+#include "lc_mainwindow.h"
 
 QString lcFormatValue(float Value, int Precision)
 {
@@ -183,7 +184,7 @@ lcPieceIdPickerPopup::lcPieceIdPickerPopup(PieceInfo* Current, QWidget* Parent)
 
 	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartPicked, this, &lcPieceIdPickerPopup::PartPicked);
 
-	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 	Layout->addWidget(ButtonBox);
 
 	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcPieceIdPickerPopup::Accept);
@@ -229,10 +230,19 @@ void lcPieceIdPickerPopup::Close()
 		Menu->close();
 }
 
-lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType)
-	: QWidget(Parent)
+lcPieceListPickerPopup::lcPieceListPickerPopup(QWidget* Parent, PieceInfo* InitialPart, const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort, bool ShowFilter)
+	: QWidget(Parent), mInitialPart(InitialPart)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
+
+	if (ShowFilter)
+	{
+		mFilterWidget = new QLineEdit(this);
+		mFilterWidget->setPlaceholderText(tr("Filter Parts"));
+		Layout->addWidget(mFilterWidget);
+
+		connect(mFilterWidget, &QLineEdit::textChanged, this, &lcPieceListPickerPopup::FilterChanged);
+	}
 
 	mPartSelectionListView = new lcPartSelectionListView(this, nullptr);
 	Layout->addWidget(mPartSelectionListView);
@@ -240,39 +250,39 @@ lcTrainTrackPickerPopup::lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainT
 	mPartSelectionListView->setMinimumWidth(450);
 	mPartSelectionListView->setDragEnabled(false);
 
-	std::vector<PieceInfo*> Parts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
+	mPartSelectionListView->SetCustomParts(Parts, ColorIndex, Sort);
 
-	mPartSelectionListView->SetCustomParts(Parts);
+	connect(mPartSelectionListView, &lcPartSelectionListView::PartPicked, this, &lcPieceListPickerPopup::Accept);
 
-	connect(mPartSelectionListView, &lcPartSelectionListView::PartPicked, this, &lcTrainTrackPickerPopup::Accept);
-
-	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 	Layout->addWidget(ButtonBox);
 
-	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcTrainTrackPickerPopup::Accept);
-	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcTrainTrackPickerPopup::Reject);
+	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcPieceListPickerPopup::Accept);
+	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcPieceListPickerPopup::Reject);
 }
 
-void lcTrainTrackPickerPopup::showEvent(QShowEvent* ShowEvent)
+void lcPieceListPickerPopup::showEvent(QShowEvent* ShowEvent)
 {
 	QWidget::showEvent(ShowEvent);
 
+	mPartSelectionListView->SetCurrentPart(mInitialPart);
 	mPartSelectionListView->setFocus();
 }
 
-void lcTrainTrackPickerPopup::Accept()
+void lcPieceListPickerPopup::Accept()
 {
-	mPickedTrainTrack = mPartSelectionListView->GetCurrentPart();
+	mPickedPiece = mPartSelectionListView->GetCurrentPart();
+	mAccepted = true;
 
 	Close();
 }
 
-void lcTrainTrackPickerPopup::Reject()
+void lcPieceListPickerPopup::Reject()
 {
 	Close();
 }
 
-void lcTrainTrackPickerPopup::Close()
+void lcPieceListPickerPopup::Close()
 {
 	QMenu* Menu = qobject_cast<QMenu*>(parent());
 
@@ -280,18 +290,58 @@ void lcTrainTrackPickerPopup::Close()
 		Menu->close();
 }
 
-PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType)
+void lcPieceListPickerPopup::FilterChanged(const QString& Text)
+{
+	if (mFilterAction)
+	{
+		if (Text.isEmpty())
+		{
+			delete mFilterAction;
+			mFilterAction = nullptr;
+		}
+	}
+	else
+	{
+		if (!Text.isEmpty())
+		{
+			mFilterAction = mFilterWidget->addAction(QIcon(":/stylesheet/close.svg"), QLineEdit::TrailingPosition);
+			connect(mFilterAction, &QAction::triggered, this, &lcPieceListPickerPopup::FilterTriggered);
+		}
+	}
+
+	mPartSelectionListView->GetListModel()->SetFilter(Text);
+}
+
+void lcPieceListPickerPopup::FilterTriggered()
+{
+	mFilterWidget->clear();
+}
+
+std::optional<PieceInfo*> lcShowPieceListPopup(QWidget* Parent, PieceInfo* InitialPart, const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort, bool ShowFilter, QPoint Position)
 {
 	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
 	QWidgetAction* Action = new QWidgetAction(Menu.get());
-	lcTrainTrackPickerPopup* Popup = new lcTrainTrackPickerPopup(Menu.get(), ConnectionType);
+	lcPieceListPickerPopup* Popup = new lcPieceListPickerPopup(Menu.get(), InitialPart, Parts, ColorIndex, Sort, ShowFilter);
 
 	Action->setDefaultWidget(Popup);
 	Menu->addAction(Action);
 
-	Menu->exec(QCursor::pos());
+	Menu->exec(Position);
 
-	return Popup->GetPickedTrainTrack();
+	return Popup->GetPickedPiece();
+}
+
+std::optional<PieceInfo*> lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType)
+{
+	std::vector<PieceInfo*> TrainTrackParts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
+	std::vector<std::pair<PieceInfo*, std::string>> Parts;
+
+	Parts.reserve(TrainTrackParts.size());
+
+	for (PieceInfo* Info : TrainTrackParts)
+		Parts.emplace_back(Info, std::string());
+
+	return lcShowPieceListPopup(Parent, nullptr, Parts, gMainWindow->mColorIndex, true, false, QCursor::pos());
 }
 
 lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Parent)

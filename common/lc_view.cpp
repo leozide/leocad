@@ -331,7 +331,8 @@ void lcView::ShowTrainTrackPopup()
 	int ConnectionIndex = mTrackToolSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	const lcTrainTrackConnectionType& ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
 
-	PieceInfo* Info = lcShowTrainTrackPopup(mWidget, ConnectionType);
+	std::optional<PieceInfo*> Result = lcShowTrainTrackPopup(mWidget, ConnectionType);
+	PieceInfo* Info = Result.has_value() ? Result.value() : nullptr;
 
 	if (Info)
 	{

@@ -192,31 +192,39 @@ protected:
 	PieceInfo* mInitialPart = nullptr;
 };
 
-class lcTrainTrackPickerPopup : public QWidget
+class lcPieceListPickerPopup : public QWidget
 {
 	Q_OBJECT
 
 public:
-	lcTrainTrackPickerPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType);
+	lcPieceListPickerPopup(QWidget* Parent, PieceInfo* InitialPart, const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort, bool ShowFilter);
+	virtual ~lcPieceListPickerPopup() = default;
 
-	PieceInfo* GetPickedTrainTrack() const
+	std::optional<PieceInfo*> GetPickedPiece() const
 	{
-		return mPickedTrainTrack;
+		return mAccepted ? std::optional<PieceInfo*>(mPickedPiece) : std::nullopt;
 	}
 
 protected slots:
 	void Accept();
 	void Reject();
+	void FilterChanged(const QString& Text);
+	void FilterTriggered();
 
 protected:
 	void showEvent(QShowEvent* ShowEvent) override;
 	void Close();
 
 	lcPartSelectionListView* mPartSelectionListView = nullptr;
-	PieceInfo* mPickedTrainTrack = nullptr;
+	QLineEdit* mFilterWidget = nullptr;
+	QAction* mFilterAction = nullptr;
+	PieceInfo* mInitialPart = nullptr;
+	PieceInfo* mPickedPiece = nullptr;
+	bool mAccepted = false;
 };
 
-PieceInfo* lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType);
+std::optional<PieceInfo*> lcShowPieceListPopup(QWidget* Parent, PieceInfo* InitialPart, const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort, bool ShowFilter, QPoint Position);
+std::optional<PieceInfo*> lcShowTrainTrackPopup(QWidget* Parent, const lcTrainTrackConnectionType& ConnectionType);
 
 class lcColorDialogPopup : public QWidget
 {

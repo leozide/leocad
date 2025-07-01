@@ -57,6 +57,7 @@ protected:
 struct lcPartSelectionListModelEntry
 {
 	PieceInfo* Info = nullptr;
+	std::string Description;
 	int ColorIndex = -1;
 	QPixmap Pixmap;
 	lcPartThumbnailId ThumbnailId = lcPartThumbnailId::Invalid;
@@ -150,7 +151,7 @@ public:
 	void SetModelsCategory();
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
-	void SetCustomParts(const std::vector<PieceInfo*>& Parts);
+	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort);
 	void SetFilter(const QString& Filter);
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
@@ -192,9 +193,10 @@ public:
 	lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget);
 
 	void startDrag(Qt::DropActions SupportedActions) override;
+	QSize sizeHint() const override;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
-	void SetCustomParts(const std::vector<PieceInfo*>& Parts);
+	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort);
 	void SetCurrentPart(PieceInfo* Info);
 
 	PieceInfo* GetCurrentPart() const

@@ -86,9 +86,9 @@ void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
 	if (mColorLocked || ColorIndex == mColorIndex)
 		return;
 
-	UpdateThumbnails();
-
 	mColorIndex = ColorIndex;
+
+	UpdateThumbnails();
 }
 
 void lcPartSelectionListModel::ToggleColorLocked()
@@ -234,29 +234,43 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 	SetFilter(mFilter);
 }
 
-void lcPartSelectionListModel::SetCustomParts(const std::vector<PieceInfo*>& Parts)
+void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort)
 {
 	beginResetModel();
+
+	mColorLocked = true;
+	mColorIndex = ColorIndex;
 
 	ReleaseThumbnails();
 	mParts.clear();
 
-	for (PieceInfo* Part : Parts)
+	for (auto [Info, Description] : Parts)
 	{
 		lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
 		
-		Entry.Info = Part;
+		Entry.Info = Info;
+		Entry.Description = Description;
 
-		if (lcTrainTrackInfo* TrainTrackInfo = Part->GetTrainTrackInfo())
-			Entry.ColorIndex = mColorIndex;
+		if (Info)
+			if (lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo())
+				Entry.ColorIndex = mColorIndex;
 	}
 
-	auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
+	if (Sort)
 	{
-		return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
-	};
+		auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
+		{
+			if (!a.Info)
+				return true;
 
-	std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
+			if (!b.Info)
+				return false;
+
+			return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
+		};
+
+		std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
+	}
 
 	endResetModel();
 
@@ -286,14 +300,16 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 		PieceInfo* Info = mParts[PartIdx].Info;
 		bool Visible = true;
 
-		if (!mShowDecoratedParts && Info->IsPatterned() && !Info->IsProjectPiece())
+		if (!Info)
+			Visible = true;
+		else if (!mShowDecoratedParts && Info->IsPatterned() && !Info->IsProjectPiece())
 			Visible = false;
 		else if (!mShowPartAliases && Info->m_strDescription[0] == '=')
 			Visible = false;
 		else if (!mFilter.isEmpty())
 		{
 			char Description[sizeof(Info->m_strDescription)];
-			char* Src = Info->m_strDescription;
+			const char* Src = mParts[PartIdx].Description.empty() ? Info->m_strDescription : mParts[PartIdx].Description.c_str();
 			char* Dst = Description;
 
 			for (;;)
@@ -312,10 +328,12 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 			if (FixedStringFilter)
 			{
 				if (DefaultFilter)
+				{
 					if (mCaseSensitiveFilter)
 						Visible = strstr(Description, mFilter) || strstr(Info->mFileName, mFilter);
 					else
 						Visible = strcasestr(Description, mFilter) || strcasestr(Info->mFileName, mFilter);
+				}
 				else if (mFileNameFilter)
 					Visible = mCaseSensitiveFilter ? strstr(Info->mFileName, mFilter) : strcasestr(Info->mFileName, mFilter);
 				else if (mPartDescriptionFilter)
@@ -323,14 +341,15 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 			}
 			else
 			{
+				QString DescriptionString = mParts[PartIdx].Description.empty() ? QString(Description) : QString::fromStdString(mParts[PartIdx].Description);
+
 				if (DefaultFilter)
-					Visible = QString(Description).contains(FilterRx) || QString(Info->mFileName).contains(FilterRx);
+					Visible = DescriptionString.contains(FilterRx) || QString(Info->mFileName).contains(FilterRx);
 				else if (mFileNameFilter)
 					Visible = QString(Info->mFileName).contains(FilterRx);
 				else if (mPartDescriptionFilter)
-					Visible = QString(Description).contains(FilterRx);
+					Visible = DescriptionString.contains(FilterRx);
 			}
-
 		}
 
 		mListView->setRowHidden((int)PartIdx, !Visible);
@@ -356,11 +375,13 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 		{
 		case Qt::DisplayRole:
 			if (!mIconSize || mShowPartNames || mListMode)
-				return QVariant(QString::fromLatin1(Info->m_strDescription));
+				return QVariant(mParts[InfoIndex].Description.empty() ? QString::fromLatin1(Info->m_strDescription) : QString::fromStdString(mParts[InfoIndex].Description));
 			break;
 
 		case Qt::ToolTipRole:
-			return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->mFileName)));
+			if (Info)
+				return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->mFileName)));
+			break;
 
 		case Qt::DecorationRole:
 			if (mIconSize && !mParts[InfoIndex].Pixmap.isNull())
@@ -424,6 +445,10 @@ void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 		return;
 
 	PieceInfo* Info = mParts[PartIndex].Info;
+
+	if (!Info)
+		return;
+
 	int ColorIndex = mParts[PartIndex].ColorIndex == -1 ? mColorIndex : mParts[PartIndex].ColorIndex;
 
 	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize);
@@ -581,8 +606,7 @@ void lcPartSelectionListView::DoubleClicked(const QModelIndex& Index)
 {
 	PieceInfo* Info = GetListModel()->GetPieceInfo(Index.row());
 
-	if (Info)
-		emit PartPicked(Info);
+	emit PartPicked(Info);
 }
 
 void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
@@ -671,11 +695,11 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	}
 }
 
-void lcPartSelectionListView::SetCustomParts(const std::vector<PieceInfo*>& Parts)
+void lcPartSelectionListView::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort)
 {
 	mCategoryType = lcPartCategoryType::Custom;
 
-	mListModel->SetCustomParts(Parts);
+	mListModel->SetCustomParts(Parts, ColorIndex, Sort);
 
 	setCurrentIndex(mListModel->index(0, 0));
 }
@@ -838,6 +862,44 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->setMimeData(MimeData);
 
 	Drag->exec(Qt::CopyAction);
+}
+
+QSize lcPartSelectionListView::sizeHint() const
+{
+	if (model()->rowCount() == 0)
+		return QListView::sizeHint();
+
+	if (mListModel->GetIconSize() == 0)
+		return QSize(500, 350);
+
+	QRect CellRect1 = visualRect(model()->index(0, 0));
+	QRect RightRect(CellRect1.topRight(), CellRect1.size());
+	QRect BottomRect(CellRect1.bottomLeft(), CellRect1.size());
+
+	for (int Row = 1; Row < model()->rowCount(); Row++)
+	{
+		QRect Rect = visualRect(model()->index(Row, 0));
+
+		if (Row == 1)
+			RightRect = Rect;
+
+		if (Rect.top() != CellRect1.top())
+		{
+			BottomRect = Rect;
+			break;
+		}
+	}
+
+	int Columns = 5;
+	int Rows = qMin(4, (model()->rowCount() + Columns - 1) / Columns);
+
+	QSize CellSize(RightRect.left() - CellRect1.left(), BottomRect.top() - CellRect1.top());
+	QSize Size(CellSize.width() * Columns + frameWidth() * 2, CellSize.height() * Rows + frameWidth() * 2);
+
+	if (verticalScrollBar())
+		Size += QSize(verticalScrollBar()->width() + 1, 0);
+
+	return Size;
 }
 
 lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)

@@ -76,7 +76,7 @@ public:
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;
-	void SetSelectionIndex(int Type, int Index);
+	void SetPieceInfo(int Type, PieceInfo* Info);
 	void SetColor(int Type, int Color);
 	void SetAngle(int Type, float Angle);
 

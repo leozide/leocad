@@ -9,41 +9,93 @@
 #include "lc_library.h"
 #include "lc_view.h"
 #include "camera.h"
+#include "lc_doublespinbox.h"
+#include "lc_qutils.h"
 
 lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcMinifigDialog)
 {
 	ui->setupUi(this);
 
-	mComboBoxes =
+	QGridLayout* MinifigLayout = ui->MinifigLayout;
+
+	bool HasSpinBox[LC_MFW_NUMITEMS] = { true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true };
+	bool IsLeft[LC_MFW_NUMITEMS] = { true, true, true, true, false, false, false, false, true, false, true, false, true, false, true, false, true };
+	int LeftRow = 0, RightRow = 2;
+
+	QString Labels[LC_MFW_NUMITEMS] =
 	{
-		ui->hatsType, ui->hats2Type, ui->headType, ui->neckType, ui->bodyType, ui->body2Type, ui->body3Type, ui->rarmType, ui->larmType,
-		ui->rhandType, ui->lhandType, ui->rhandaType, ui->lhandaType, ui->rlegType, ui->llegType, ui->rlegaType, ui->llegaType
+		tr("Hat"), tr("Hat Accessory"), tr("Head"), tr("Neck"), tr("Torso"), tr("Hip"), tr("Hip Accessory"), tr("Left Arm"), tr("Right Arm"), tr("Left Hand"), tr("Right Hand"),
+		tr("Left Hand Accessory"), tr("Right Hand Accessory"), tr("Left Leg"), tr("Right Leg"), tr("Left Leg Accessory"), tr("Right Leg Accessory")
 	};
 
-	mColorPickers =
+	QSizePolicy PieceButtonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+	PieceButtonSizePolicy.setHorizontalStretch(2);
+	PieceButtonSizePolicy.setVerticalStretch(0);
+
+	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		ui->hatsColor, ui->hats2Color, ui->headColor, ui->neckColor, ui->bodyColor, ui->body2Color, ui->body3Color, ui->rarmColor, ui->larmColor,
-		ui->rhandColor, ui->lhandColor, ui->rhandaColor, ui->lhandaColor, ui->rlegColor, ui->llegColor, ui->rlegaColor, ui->llegaColor
-	};
+		bool Left = IsLeft[ItemIndex];
 
-	mSpinBoxes =
-	{
-		ui->hatsAngle, ui->hats2Angle, ui->headAngle, nullptr, nullptr, nullptr, nullptr, ui->rarmAngle, ui->larmAngle,
-		ui->rhandAngle, ui->lhandAngle, ui->rhandaAngle, ui->lhandaAngle, ui->rlegAngle, ui->llegAngle, ui->rlegaAngle, ui->llegaAngle
-	};
+		lcElidableToolButton* PieceButton = new lcElidableToolButton(this);
+		mPieceButtons[ItemIndex] = PieceButton;
+		PieceButton->setSizePolicy(PieceButtonSizePolicy);
 
-	for (QComboBox* ComboBox : mComboBoxes)
-		connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(TypeChanged(int)));
+		connect(PieceButton, &QToolButton::clicked, this, &lcMinifigDialog::PieceButtonClicked);
 
-	for (lcColorPicker* ColorPicker : mColorPickers)
+		lcColorPicker* ColorPicker = new lcColorPicker(this);
+		mColorPickers[ItemIndex] = ColorPicker;
+
 		connect(ColorPicker, &lcColorPicker::ColorChanged, this, &lcMinifigDialog::ColorChanged);
 
-	for (QDoubleSpinBox* SpinBox : mSpinBoxes)
-		if (SpinBox)
-			connect(SpinBox, SIGNAL(valueChanged(double)), this, SLOT(AngleChanged(double)));
+		lcDoubleSpinBox* SpinBox = HasSpinBox[ItemIndex] ? new lcDoubleSpinBox(this) : nullptr;
+		mSpinBoxes[ItemIndex] = SpinBox;
 
-	QGridLayout* PreviewLayout = new QGridLayout(ui->minifigFrame);
+		if (SpinBox)
+		{
+			SpinBox->setRange(-360.0, 360.0);
+			SpinBox->SetSnap(lcFloatPropertySnap::Rotation);
+			SpinBox->setSingleStep(5.0);
+
+			connect(SpinBox, QOverload<double>::of(&lcDoubleSpinBox::valueChanged), this, &lcMinifigDialog::AngleChanged);
+		}
+
+		QWidget* Label = new QLabel(Labels[ItemIndex], this);
+
+		auto AddRow=[MinifigLayout, Label, PieceButton, ColorPicker, SpinBox](int& Row, int Column)
+		{
+			if (Row)
+			{
+				MinifigLayout->setRowMinimumHeight(Row++, 2);
+			}
+
+			MinifigLayout->addWidget(Label, Row++, Column + 0, 1, 3);
+			MinifigLayout->addWidget(PieceButton, Row, Column + 0);
+			MinifigLayout->addWidget(ColorPicker, Row, Column + 1);
+
+			if (SpinBox)
+				MinifigLayout->addWidget(SpinBox, Row, Column + 2);
+
+			Row++;
+		};
+
+		if (Left)
+			AddRow(LeftRow, 0);
+		else
+			AddRow(RightRow, 4);
+	}
+
+	QFrame* PreviewFrame = new QFrame(ui->widget);
+	QSizePolicy PreviewSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	PreviewSizePolicy.setHorizontalStretch(3);
+	PreviewSizePolicy.setVerticalStretch(0);
+	PreviewFrame->setSizePolicy(PreviewSizePolicy);
+	PreviewFrame->setFrameShape(QFrame::NoFrame);
+	PreviewFrame->setFrameShadow(QFrame::Plain);
+
+	MinifigLayout->addWidget(PreviewFrame, 0, 3, -1, 1);
+
+	QGridLayout* PreviewLayout = new QGridLayout(PreviewFrame);
 	PreviewLayout->setContentsMargins(0, 0, 0, 0);
 
 	mMinifigWizard = new MinifigWizard();
@@ -58,34 +110,16 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		const std::vector<lcMinifigPieceInfo>& PartList = mMinifigWizard->mSettings[ItemIndex];
-		QStringList ItemStrings;
-		QVector<int> Separators;
+		const std::vector<lcMinifigPieceInfo>& PieceList = mMinifigWizard->mSettings[ItemIndex];
+		int PieceIndex = mMinifigWizard->GetSelectionIndex(ItemIndex);
+		QToolButton* PieceButton = mPieceButtons[ItemIndex];
 
-		for (const lcMinifigPieceInfo& MinifigPieceInfo : PartList)
-		{
-			const char* Description = MinifigPieceInfo.Description;
-
-			if (Description[0] != '-' || Description[1] != '-')
-				ItemStrings.append(Description);
-			else
-				Separators.append(ItemStrings.size());
-		}
-
-		QComboBox* ItemCombo = mComboBoxes[ItemIndex];
-
-		ItemCombo->blockSignals(true);
-		ItemCombo->addItems(ItemStrings);
-		for (int SeparatorIndex = Separators.size() - 1; SeparatorIndex >= 0; SeparatorIndex--)
-			ItemCombo->insertSeparator(Separators[SeparatorIndex]);
-		ItemCombo->setCurrentIndex(mMinifigWizard->GetSelectionIndex(ItemIndex));
-		ItemCombo->blockSignals(false);
+		PieceButton->setText(PieceList[PieceIndex].Description);
 
 		lcColorPicker* ColorPicker = mColorPickers[ItemIndex];
+		QSignalBlocker ColorPickerBlocker(ColorPicker);
 
-		ColorPicker->blockSignals(true);
 		ColorPicker->SetCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
-		ColorPicker->blockSignals(false);
 	}
 
 	UpdateTemplateCombo();
@@ -131,7 +165,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 				{
 					if (Info == MinifigPieceInfo.Info)
 					{
-						mComboBoxes[PartIdx]->setCurrentText(MinifigPieceInfo.Description);
+						mPieceButtons[PartIdx]->setText(MinifigPieceInfo.Description);
 						break;
 					}
 				}
@@ -139,7 +173,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 		}
 		else
 		{
-			mComboBoxes[PartIdx]->setCurrentText("None");
+			mPieceButtons[PartIdx]->setText(tr("None"));
 		}
 
 		mColorPickers[PartIdx]->SetCurrentColorCode(Template.Colors[PartIdx]);
@@ -176,12 +210,12 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 
 	lcMinifigTemplate Template;
 
-	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
+	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		Template.Parts[PartIdx] = mMinifigWizard->mSettings[PartIdx][mComboBoxes[PartIdx]->currentIndex()].Info->mFileName;
-		Template.Colors[PartIdx] = mColorPickers[PartIdx]->GetCurrentColorCode();
-		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
-		Template.Angles[PartIdx] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
+		Template.Parts[ItemIndex] = mMinifigWizard->mSettings[ItemIndex][mMinifigWizard->GetSelectionIndex(ItemIndex)].Info->mFileName;
+		Template.Colors[ItemIndex] = mColorPickers[ItemIndex]->GetCurrentColorCode();
+		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[ItemIndex];
+		Template.Angles[ItemIndex] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
 	}
 
 	mMinifigWizard->SaveTemplate(TemplateName, Template);
@@ -245,16 +279,53 @@ void lcMinifigDialog::on_TemplateExportButton_clicked()
 	File.write(Templates);
 }
 
-void lcMinifigDialog::TypeChanged(int Index)
+void lcMinifigDialog::PieceButtonClicked()
 {
-	std::array<QComboBox*, LC_MFW_NUMITEMS>::iterator Search = std::find(mComboBoxes.begin(), mComboBoxes.end(), sender());
+	QToolButton* PieceButton = qobject_cast<QToolButton*>(sender());
 
-	if (Search == mComboBoxes.end())
+	if (!PieceButton)
 		return;
 
+	std::array<QToolButton*, LC_MFW_NUMITEMS>::iterator Search = std::find(mPieceButtons.begin(), mPieceButtons.end(), PieceButton);
+
+	if (Search == mPieceButtons.end())
+		return;
+
+	int ItemIndex = std::distance(mPieceButtons.begin(), Search);
+	PieceInfo* CurrentInfo = mMinifigWizard->mMinifig.Parts[ItemIndex];
+
+	QPoint Position = PieceButton->mapToGlobal(PieceButton->rect().bottomLeft());
+	std::vector<std::pair<PieceInfo*, std::string>> Parts;
+
+	Parts.reserve(mMinifigWizard->mSettings[ItemIndex].size());
+	Parts.emplace_back(nullptr, tr("None").toStdString());
+
+	for (const lcMinifigPieceInfo& Setting : mMinifigWizard->mSettings[ItemIndex])
+		if (Setting.Info)
+			Parts.emplace_back(Setting.Info, Setting.Description);
+
+	std::optional<PieceInfo*> Result = lcShowPieceListPopup(PieceButton, CurrentInfo, Parts, mMinifigWizard->mMinifig.Colors[ItemIndex], false, true, Position);
+
+	if (!Result.has_value())
+		return;
+
+	PieceInfo* NewPiece = Result.value();
+
 	mView->MakeCurrent();
-	mMinifigWizard->SetSelectionIndex(std::distance(mComboBoxes.begin(), Search), Index);
+	mMinifigWizard->SetPieceInfo(ItemIndex, NewPiece);
 	mView->Redraw();
+
+	if (NewPiece)
+	{
+		const std::vector<lcMinifigPieceInfo>& PieceList = mMinifigWizard->mSettings[ItemIndex];
+		int PieceIndex = mMinifigWizard->GetSelectionIndex(ItemIndex);
+
+		PieceButton->setText(PieceList[PieceIndex].Description);
+	}
+	else
+	{
+		PieceButton->setText("None");
+	}
 }
 
 void lcMinifigDialog::ColorChanged(int Index)

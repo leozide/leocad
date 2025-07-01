@@ -117,7 +117,6 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 
 		if (!FoundSection)
 		{
-
 			lcMinifigPieceInfo MinifigInfo;
 			strncpy(MinifigInfo.Description, "None", sizeof(MinifigInfo.Description));
 			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
@@ -466,14 +465,14 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 	return 0;
 }
 
-void MinifigWizard::SetSelectionIndex(int Type, int Index)
+void MinifigWizard::SetPieceInfo(int Type, PieceInfo* Info)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	if (mMinifig.Parts[Type])
 		Library->ReleasePieceInfo(mMinifig.Parts[Type]);
 
-	mMinifig.Parts[Type] = mSettings[Type][Index].Info;
+	mMinifig.Parts[Type] = Info;
 
 	if (mMinifig.Parts[Type])
 		Library->LoadPieceInfo(mMinifig.Parts[Type], true, true);

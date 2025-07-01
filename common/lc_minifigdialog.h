@@ -24,7 +24,7 @@ protected slots:
 	void on_TemplateDeleteButton_clicked();
 	void on_TemplateImportButton_clicked();
 	void on_TemplateExportButton_clicked();
-	void TypeChanged(int Index);
+	void PieceButtonClicked();
 	void ColorChanged(int Index);
 	void AngleChanged(double Value);
 
@@ -34,7 +34,7 @@ protected:
 	Ui::lcMinifigDialog* ui;
 
 	lcView* mView;
-	std::array<QComboBox*, LC_MFW_NUMITEMS> mComboBoxes;
+	std::array<QToolButton*, LC_MFW_NUMITEMS> mPieceButtons;
 	std::array<lcColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
 };

@@ -211,7 +211,12 @@ void lcDoubleSpinBox::mousePressEvent(QMouseEvent* MouseEvent)
 {
 	HandleMousePressEvent(MouseEvent);
 
+	double InitialValue = value();
+
 	QDoubleSpinBox::mousePressEvent(MouseEvent);
+
+	if (value() != InitialValue)
+		FinishEditing();
 }
 
 void lcDoubleSpinBox::mouseMoveEvent(QMouseEvent* MouseEvent)

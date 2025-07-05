@@ -40,6 +40,7 @@ public:
 	};
 
 	lcToolShortcut mShortcuts[static_cast<int>(lcTool::Count)];
+
 private:
 	void Clear();
 };

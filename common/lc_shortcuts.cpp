@@ -128,12 +128,14 @@ bool lcKeyboardShortcuts::Load(QTextStream& Stream)
 	return true;
 }
 
-void lcMouseShortcuts::Clear() {
-	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++) {
-		mShortcuts[ToolIdx].Modifiers1 = Qt::NoModifier;
-		mShortcuts[ToolIdx].Button1 = Qt::NoButton;
-		mShortcuts[ToolIdx].Modifiers2 = Qt::NoModifier;
-		mShortcuts[ToolIdx].Button2 = Qt::NoButton;
+void lcMouseShortcuts::Clear()
+{
+	for (int ShortcutIndex = 0; ShortcutIndex < static_cast<int>(lcTool::Count); ShortcutIndex++)
+	{
+		mShortcuts[ShortcutIndex].Modifiers1 = Qt::NoModifier;
+		mShortcuts[ShortcutIndex].Button1 = Qt::NoButton;
+		mShortcuts[ShortcutIndex].Modifiers2 = Qt::NoModifier;
+		mShortcuts[ShortcutIndex].Button2 = Qt::NoButton;
 	}
 }
 
@@ -183,25 +185,25 @@ bool lcMouseShortcuts::Save(QStringList& Shortcuts)
 {
 	Shortcuts.clear();
 
-	for (int ToolIdx = 0; ToolIdx < static_cast<int>(lcTool::Count); ToolIdx++)
+	for (int ShortcutIndex = 0; ShortcutIndex < static_cast<int>(lcTool::Count); ShortcutIndex++)
 	{
 		int ButtonIndex1 = 0;
-		for (int Button1 = mShortcuts[ToolIdx].Button1; Button1; Button1 >>= 1)
+		for (int Button1 = mShortcuts[ShortcutIndex].Button1; Button1; Button1 >>= 1)
 			ButtonIndex1++;
 
 		if (!ButtonIndex1)
 			continue;
 
-		QString Shortcut = QKeySequence(mShortcuts[ToolIdx].Modifiers1 | (Qt::Key_0 + ButtonIndex1)).toString(QKeySequence::PortableText);
+		QString Shortcut = QKeySequence(mShortcuts[ShortcutIndex].Modifiers1 | (Qt::Key_0 + ButtonIndex1)).toString(QKeySequence::PortableText);
 
 		int ButtonIndex2 = 0;
-		for (int Button2 = mShortcuts[ToolIdx].Button2; Button2; Button2 >>= 1)
+		for (int Button2 = mShortcuts[ShortcutIndex].Button2; Button2; Button2 >>= 1)
 			ButtonIndex2++;
 
 		if (ButtonIndex2)
-			Shortcut += ',' + QKeySequence(mShortcuts[ToolIdx].Modifiers2 | (Qt::Key_0 + ButtonIndex2)).toString(QKeySequence::PortableText);
+			Shortcut += ',' + QKeySequence(mShortcuts[ShortcutIndex].Modifiers2 | (Qt::Key_0 + ButtonIndex2)).toString(QKeySequence::PortableText);
 
-		Shortcuts << QString::fromLatin1(gToolNames[ToolIdx]) + QLatin1String("=") + Shortcut;
+		Shortcuts << QString::fromLatin1(gToolNames[ShortcutIndex]) + QLatin1String("=") + Shortcut;
 	}
 
 	return true;

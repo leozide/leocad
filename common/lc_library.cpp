@@ -1087,7 +1087,9 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 		PieceInfo* Info = PieceIt.second;
 		quint8 Length;
 
-		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0 || Length >= sizeof(Info->m_strDescription))
+		static_assert(sizeof(Info->m_strDescription) == 256);
+
+		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0)
 			return false;
 
 		if (IndexFile.ReadBuffer((char*)Info->m_strDescription, Length) == 0)

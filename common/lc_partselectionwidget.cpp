@@ -251,9 +251,8 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 		Entry.Info = Info;
 		Entry.Description = Description;
 
-		if (Info)
-			if (lcTrainTrackInfo* TrainTrackInfo = Info->GetTrainTrackInfo())
-				Entry.ColorIndex = mColorIndex;
+		if (Info && Info->GetTrainTrackInfo())
+			Entry.ColorIndex = mColorIndex;
 	}
 
 	if (Sort)

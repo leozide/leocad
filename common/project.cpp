@@ -2403,6 +2403,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char (&Name)[LC_PIECE_NAME_LEN])
 	{
 		strncpy(Name, ModelPart.Info->mFileName, sizeof(Name));
+		Name[sizeof(Name) - 1] = 0;
 
 		for (char* c = Name; *c; c++)
 			if (*c == '-' || *c == '.')
@@ -2433,7 +2434,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		if (!ModelPart.Mesh)
 		{
 			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
-			strncpy(Entry.first, "lc_", 3);
+			strcpy(Entry.first, "lc_");
 			strncat(Entry.first, Name, sizeof(Entry.first) - 1);
 			Entry.first[sizeof(Entry.first) - 1] = 0;
 		}

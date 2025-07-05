@@ -33,6 +33,9 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	PieceButtonSizePolicy.setHorizontalStretch(2);
 	PieceButtonSizePolicy.setVerticalStretch(0);
 
+	QPixmap Pixmap(1, 1);
+	Pixmap.fill(QColor::fromRgba64(0, 0, 0, 0));
+
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
 		bool Left = IsLeft[ItemIndex];
@@ -40,6 +43,8 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		lcElidableToolButton* PieceButton = new lcElidableToolButton(this);
 		mPieceButtons[ItemIndex] = PieceButton;
 		PieceButton->setSizePolicy(PieceButtonSizePolicy);
+		PieceButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		PieceButton->setIcon(Pixmap);
 
 		connect(PieceButton, &QToolButton::clicked, this, &lcMinifigDialog::PieceButtonClicked);
 

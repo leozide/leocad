@@ -562,16 +562,16 @@ void lcTimelineWidget::ItemSelectionChanged()
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
 	QTreeWidgetItem* DropItem = itemAt(Event->pos());
-	lcModel* Model = gMainWindow->GetActiveModel();
-
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
-	clearSelection();
 
 	if (!DropItem)
 		return;
 
+	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	clearSelection();
+
 	QTreeWidgetItem* ParentItem = DropItem->parent();
 	lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+	lcModel* Model = gMainWindow->GetActiveModel();
 
 	if (Step > Model->GetCurrentStep())
 		Model->SetCurrentStep(Step);

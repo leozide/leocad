@@ -2242,7 +2242,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 			if (sscanf(Line,"%128s%128s%10s", Src, Dst, Flags) != 3)
 				continue;
 
-			strncat(Src, ".dat", 4);
+			strcat(Src, ".dat");
 
 			PieceInfo* Info = Library->FindPiece(Src, nullptr, false, false);
 			if (!Info)

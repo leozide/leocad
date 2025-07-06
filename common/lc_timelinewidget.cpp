@@ -562,19 +562,19 @@ void lcTimelineWidget::ItemSelectionChanged()
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
 	QTreeWidgetItem* DropItem = itemAt(Event->pos());
-	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (!DropItem)
+		return;
 
 	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 	clearSelection();
 
-	if (DropItem)
-	{
-		QTreeWidgetItem* ParentItem = DropItem->parent();
-		lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+	QTreeWidgetItem* ParentItem = DropItem->parent();
+	lcStep Step = indexOfTopLevelItem(ParentItem ? ParentItem : DropItem) + 1;
+	lcModel* Model = gMainWindow->GetActiveModel();
 
-		if (Step > Model->GetCurrentStep())
-			Model->SetCurrentStep(Step);
-	}
+	if (Step > Model->GetCurrentStep())
+		Model->SetCurrentStep(Step);
 
 	auto SortItems = [this](QTreeWidgetItem* Item1, QTreeWidgetItem* Item2)
 	{

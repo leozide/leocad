@@ -2401,7 +2401,6 @@ void lcModel::FocusNextTrainTrack()
 		return;
 
 	quint32 FocusSection = FocusPiece->GetFocusSection();
-	std::optional<lcMatrix44> Transform;
 	int ConnectionIndex = 0;
 
 	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION)
@@ -2430,7 +2429,6 @@ void lcModel::FocusPreviousTrainTrack()
 		return;
 
 	quint32 FocusSection = FocusPiece->GetFocusSection();
-	std::optional<lcMatrix44> Transform;
 	int ConnectionIndex = 0;
 
 	if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION)

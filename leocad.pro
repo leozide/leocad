@@ -210,6 +210,7 @@ SOURCES += \
 	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
 	common/lc_partpalettedialog.cpp \
+	common/lc_partselectionpopup.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
 	common/lc_modellistdialog.h \
 	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \
+	common/lc_partselectionpopup.h \
 	common/lc_partselectionwidget.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \

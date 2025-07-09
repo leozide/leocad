@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "lc_doublespinbox.h"
 #include "lc_qutils.h"
+#include "lc_partselectionpopup.h"
 
 lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcMinifigDialog)
@@ -309,7 +310,9 @@ void lcMinifigDialog::PieceButtonClicked()
 		if (Setting.Info)
 			Parts.emplace_back(Setting.Info, Setting.Description);
 
-	std::optional<PieceInfo*> Result = lcShowPieceListPopup(PieceButton, CurrentInfo, Parts, mMinifigWizard->mMinifig.Colors[ItemIndex], false, true, Position);
+	int ColorIndex = mMinifigWizard->mMinifig.Colors[ItemIndex];
+
+	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(CurrentInfo, Parts, ColorIndex, PieceButton, PieceButton->mapToGlobal(PieceButton->rect().bottomLeft()));
 
 	if (!Result.has_value())
 		return;

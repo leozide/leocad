@@ -234,7 +234,7 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 	SetFilter(mFilter);
 }
 
-void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort)
+void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)
 {
 	beginResetModel();
 
@@ -253,22 +253,6 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 
 		if (Info && Info->GetTrainTrackInfo())
 			Entry.ColorIndex = mColorIndex;
-	}
-
-	if (Sort)
-	{
-		auto lcPartSortFunc = [](const lcPartSelectionListModelEntry& a, const lcPartSelectionListModelEntry& b)
-		{
-			if (!a.Info)
-				return true;
-
-			if (!b.Info)
-				return false;
-
-			return strcmp(a.Info->m_strDescription, b.Info->m_strDescription) < 0;
-		};
-
-		std::sort(mParts.begin(), mParts.end(), lcPartSortFunc);
 	}
 
 	endResetModel();
@@ -694,11 +678,11 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	}
 }
 
-void lcPartSelectionListView::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort)
+void lcPartSelectionListView::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)
 {
 	mCategoryType = lcPartCategoryType::Custom;
 
-	mListModel->SetCustomParts(Parts, ColorIndex, Sort);
+	mListModel->SetCustomParts(Parts, ColorIndex);
 
 	setCurrentIndex(mListModel->index(0, 0));
 }
@@ -871,28 +855,11 @@ QSize lcPartSelectionListView::sizeHint() const
 	if (mListModel->GetIconSize() == 0)
 		return QSize(500, 350);
 
-	QRect CellRect1 = visualRect(model()->index(0, 0));
-	QRect RightRect(CellRect1.topRight(), CellRect1.size());
-	QRect BottomRect(CellRect1.bottomLeft(), CellRect1.size());
-
-	for (int Row = 1; Row < model()->rowCount(); Row++)
-	{
-		QRect Rect = visualRect(model()->index(Row, 0));
-
-		if (Row == 1)
-			RightRect = Rect;
-
-		if (Rect.top() != CellRect1.top())
-		{
-			BottomRect = Rect;
-			break;
-		}
-	}
-
 	int Columns = 5;
 	int Rows = qMin(4, (model()->rowCount() + Columns - 1) / Columns);
 
-	QSize CellSize(RightRect.left() - CellRect1.left(), BottomRect.top() - CellRect1.top());
+	QStyleOptionViewItem option = viewOptions();
+	QSize CellSize = itemDelegate()->sizeHint(option, model()->index(0,0));
 	QSize Size(CellSize.width() * Columns + frameWidth() * 2, CellSize.height() * Rows + frameWidth() * 2);
 
 	if (verticalScrollBar())
@@ -1042,9 +1009,20 @@ void lcPartSelectionWidget::DisableIconMode()
 
 void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)
 {
-	mCategoriesWidget->setCurrentItem(mAllPartsCategoryItem);
 	mPartsWidget->SetCurrentPart(Info);
 	mPartsWidget->setFocus();
+}
+
+void lcPartSelectionWidget::SetCategory(lcPartCategoryType Type, int Index)
+{
+	mPartsWidget->SetCategory(Type, Index);
+}
+
+void lcPartSelectionWidget::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)
+{
+	mSplitter->widget(0)->setVisible(false);
+
+	mPartsWidget->SetCustomParts(Parts, ColorIndex);
 }
 
 void lcPartSelectionWidget::SetOrientation(Qt::Orientation Orientation)
@@ -1175,8 +1153,7 @@ void lcPartSelectionWidget::PartViewSelectionChanged(const QModelIndex& Current,
 
 void lcPartSelectionWidget::PartViewPartPicked(PieceInfo* Info)
 {
-	if (Info)
-		emit PartPicked(Info);
+	emit PartPicked(Info);
 }
 
 void lcPartSelectionWidget::OptionsMenuAboutToShow()

@@ -11,6 +11,7 @@
 #include "lc_collapsiblewidget.h"
 #include "lc_colorpicker.h"
 #include "lc_qutils.h"
+#include "lc_partselectionpopup.h"
 
 lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	: QWidget(Parent)
@@ -1088,35 +1089,24 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 
 	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
-	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
+	PieceInfo* Info = Partial ? nullptr : static_cast<PieceInfo*>(Value.value<void*>());
 
-	QMenu* Menu = new QMenu(PieceIdButton);
+	std::tie(Value, Partial) = GetUpdateValue(lcObjectPropertyId::PieceColor);
+	
+	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
-	QWidgetAction* Action = new QWidgetAction(Menu);
-	lcPieceIdPickerPopup* Popup = new lcPieceIdPickerPopup(Partial ? nullptr : Info, Menu);
-	Action->setDefaultWidget(Popup);
-	Menu->addAction(Action);
+	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Info, std::vector<std::pair<PieceInfo*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
 
-	connect(Popup, &lcPieceIdPickerPopup::PieceIdSelected, this, &lcPropertiesWidget::PieceIdChanged);
+	if (Result.has_value())
+	{
+		lcModel* Model = gMainWindow->GetActiveModel();
+		Info = Result.value();
 
-	Menu->exec(PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
+		if (!Model || !Info)
+			return;
 
-	delete Menu;
-}
-
-void lcPropertiesWidget::PieceIdChanged(PieceInfo* Info)
-{
-	lcPieceIdPickerPopup* Popup = qobject_cast<lcPieceIdPickerPopup*>(sender());
-	QMenu* Menu = qobject_cast<QMenu*>(Popup->parent());
-	QToolButton* PieceIdButton = qobject_cast<QToolButton*>(Menu->parent());
-	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(PieceIdButton);
-
-	lcModel* Model = gMainWindow->GetActiveModel();
-
-	if (!Model || !Info)
-		return;
-
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
+	}
 }
 
 void lcPropertiesWidget::AddPieceIdProperty(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip, bool SupportsKeyFrames)

@@ -18,6 +18,7 @@
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
 #include "lc_qutils.h"
+#include "lc_partselectionpopup.h"
 
 lcFindReplaceParams lcView::mFindReplaceParams;
 QPointer<lcFindReplaceWidget> lcView::mFindWidget;
@@ -330,8 +331,29 @@ void lcView::ShowTrainTrackPopup()
 
 	int ConnectionIndex = mTrackToolSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	const lcTrainTrackConnectionType& ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
+	std::vector<PieceInfo*> TrainTrackParts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
 
-	std::optional<PieceInfo*> Result = lcShowTrainTrackPopup(mWidget, ConnectionType);
+	auto PartSortFunc = [](const PieceInfo* a, const PieceInfo* b)
+	{
+		if (!a)
+			return true;
+
+		if (!b)
+			return false;
+
+		return strcmp(a->m_strDescription, b->m_strDescription) < 0;
+	};
+
+	std::sort(TrainTrackParts.begin(), TrainTrackParts.end(), PartSortFunc);
+
+	std::vector<std::pair<PieceInfo*, std::string>> Parts;
+
+	Parts.reserve(TrainTrackParts.size());
+
+	for (PieceInfo* Info : TrainTrackParts)
+		Parts.emplace_back(Info, std::string());
+
+	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
 	PieceInfo* Info = Result.has_value() ? Result.value() : nullptr;
 
 	if (Info)

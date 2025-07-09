@@ -30,7 +30,6 @@ protected slots:
 	void PieceColorButtonClicked();
 	void PieceColorChanged(int ColorIndex);
 	void PieceIdButtonClicked();
-	void PieceIdChanged(PieceInfo* Info);
 
 protected:
 	enum class CategoryIndex

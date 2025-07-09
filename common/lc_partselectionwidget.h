@@ -151,7 +151,7 @@ public:
 	void SetModelsCategory();
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
-	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort);
+	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
 	void SetFilter(const QString& Filter);
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
@@ -196,7 +196,7 @@ public:
 	QSize sizeHint() const override;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
-	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex, bool Sort);
+	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
 	void SetCurrentPart(PieceInfo* Info);
 
 	PieceInfo* GetCurrentPart() const
@@ -277,6 +277,8 @@ public:
 	void DisableIconMode();
 	void SetOrientation(Qt::Orientation Orientation);
 	void SetCurrentPart(PieceInfo* Info);
+	void SetCategory(lcPartCategoryType Type, int Index);
+	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
 
 	int GetColorIndex() const
 	{
@@ -296,6 +298,11 @@ public:
 	PieceInfo* GetCurrentPart() const
 	{
 		return mPartsWidget->GetCurrentPart();
+	}
+
+	void SetDragEnabled(bool Enabled)
+	{
+		mPartsWidget->setDragEnabled(Enabled);
 	}
 
 	void FocusPartFilterWidget() const

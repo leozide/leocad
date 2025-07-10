@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Command Line Options | LeoCAD</title>
+    <link rel="stylesheet" href="../main.css">
+  </head>
+  <body>
+    <div class="container">
+
+<!-- navbar start -->
+<div class="nav-main">
+  <div class="wrap">
+    <a class="nav-home" href="../index.html"><img class="nav-logo" src="../leocad-32.png" width="32" height="32"> LeoCAD </a>
+    <ul class="nav-site nav-site-internal">
+      <li><a href="../download.html">Download</a></li>
+      <li><a href="start.html" class="active">Documentation</a></li>
+<!--      <li><a href="../help.html">Help</a></li> -->
+    </ul>
+    <ul class="nav-site nav-site-external">
+      <li><a href="https://github.com/leozide/leocad">GitHub</a></li>
+    </ul>
+  </div>
+</div>
+<!-- navbar end -->
+
+<section class="content wrap documentationContent">
+
+<!-- docbar start -->
+<div class="nav-docs">
+  <div class="nav-docs-section">
+    <h3>General Information</h3>
+    <ul>
+      <li><a href="start.html">Getting Started</a></li>
+      <li><a href="library.html">Parts Library</a></li>
+      <li><a href="compiling.html">Compiling Guide</a></li>
+      <li><a href="license.html">License</a></li>
+      <li><a href="history.html">Version History</a></li>
+    </ul>
+  </div>
+  <div class="nav-docs-section">
+    <h3>Tutorials</h3>
+    <ul>
+<!--
+      <li><a href="">Choosing and Adding Pieces</a></li>
+      <li><a href="">Moving and Rotating Pieces</a></li>
+      <li><a href="camera.html">Camera and Viewport</a></li> 
+      <li><a href="">Models</a></li> 
+      <li><a href="">Flexible Parts</a></li> 
+      Keyframing
+      POV-Ray
+ -->
+      <li><a href="tutorial1.html">Basic Tutorial</a></li>
+      <li><a href="rotation.html">Rotation Center</a></li>
+    </ul>
+  </div>
+<!--      <li><a href="">Coordinate System</a></li>
+      <li><a href="">Configuration Shortcuts</a></li>
+  -->
+  <div class="nav-docs-section">
+    <h3>Reference</h3>
+    <ul>
+      <li><a href="cli.html" class="active">Command Line Options</a></li>
+      <li><a href="meta.html">Meta Commands</a></li>
+      <li><a href="texmap.html">Texture Mapping</a></li>
+    </ul>
+  </div>
+</div>
+<!-- docbar end -->
+
+<div class="inner-content">
+
+<h2>Command Line Options</h2>
+<div class="subHeader"></div>
+<p>LeoCAD can be used to generate images or export files from the command line.</p>
+
+<div class="highlight"><code>$ leocad [options] [file]</code></div>
+
+<h4>Options</h4>
+
+<p><b>-l, --libpath <i>&lt;path&gt;</i></b></p><p style='margin-left:.25in'>Set the Parts Library location to path.</p>
+<p><b>-i, --image <i>&lt;outfile.ext&gt;</i></b></p><p style='margin-left:.25in'>Save a picture in the format specified by ext and exit.</p>
+<p><b>-w, --width <i>&lt;width&gt;</i></b></p><p style='margin-left:.5in'>Set the picture width.</p>
+<p><b>-h, --height <i>&lt;height&gt;</i></b></p><p style='margin-left:.25in'>Set the picture height.</p>
+<p><b>-f, --from <i>&lt;step&gt;</i></b></p><p style='margin-left:.25in'>Set the first step to save pictures.</p>
+<p><b>-t, --to <i>&lt;step&gt;</i></b></p><p style='margin-left:.25in'>Set the last step to save pictures.</p>
+<p><b>-s, --submodel <i>&lt;submodel&gt;</i></b></p><p style='margin-left:.25in'>Set the active submodel.</p>
+
+<p><b>-c, --camera <i>&lt;camera name&gt;</i></b></p><p style='margin-left:.25in'>Set the active camera.<p>
+<p><b>--viewpoint <i>&lt;viewpoint&gt;</i></b></p><p style='margin-left:.25in'>Set the view to one of the preset viewpoints (front, back, left, right, top, bottom, home).<p>
+<p><b>--camera-angles <i>&lt;latitude&gt; &lt;longitude&gt;</i></b></p><p style='margin-left:.25in'>Set the camera angles in degrees around the model.<p>
+<p><b>--camera-position <i>&lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;</i></b></p><p style='margin-left:.25in'>Set the camera position, target and up vector.<p>
+<p><b>--camera-position-ldraw <i>&lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;</i></b></p><p style='margin-left:.25in'>Set the camera position, target and up vector using LDraw coordinates.<p>
+<p><b>--orthographic</b></p><p style='margin-left:.25in'>Render images using an orthographic projection.<p>
+<p><b>--fov <i>&lt;degrees&gt;</i></b></p><p style='margin-left:.25in'>Set the vertical field of view used to render images.<p>
+<p><b>--zplanes <i>&lt;near&gt; &lt;far&gt;</i></b></p><p style='margin-left:.25in'>Set the near and far clipping planes used to render images.<p>
+
+<p><b>--fade-steps</b></p><p style='margin-left:.25in'>Render parts from prior steps faded.<p>
+<p><b>--no-fade-steps</b></p><p style='margin-left:.25in'>Do not render parts from prior steps faded.<p>
+<p><b>--fade-steps-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>Renderinng color for prior step parts.<p>
+<p><b>--highlight</b></p><p style='margin-left:.25in'>Highlight parts in the steps they appear.<p>
+<p><b>--no-highlight</b></p><p style='margin-left:.25in'>Do not highlight parts in the steps they appear.<p>
+<p><b>--highlight-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>Rendering color for highlighted parts.<p>
+<p><b>--shading <i>&lt;mode&gt;</i></b></p><p style='margin-left:.25in'>Select shading mode for rendering (wireframe, flat, default, full).<p>
+<p><b>--line-width <i>&lt;width&gt;</i></b></p><p style='margin-left:.25in'>Set the width of the edge lines.<p>
+<p><b>--aa-samples <i>&lt;samples&gt;</i></b></p><p style='margin-left:.25in'>AntiAliasing sample size (1, 2, 4, or 8).<p>
+
+<p><b>-ss, --stud-style <i>&lt;style&gt;</i></b></p><p style='margin-left:.25in'>Set the stud style (0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire).</p>
+<p><b>-nscc, --disable-stud-cylinder-color</b></p><p style='margin-left:.25in'>Disable high contrast stud cylinder color.<p>
+<p><b>-scc, --stud-cylinder-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>High contrast stud cylinder color.<p>
+<p><b>-nec, --disable-edge-color</b></p><p style='margin-left:.25in'>Disable high contrast edge color.<p>
+<p><b>-ec, --edge-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>High contrast edge color.<p>
+<p><b>-nbec, --disable-black-edge-color</b></p><p style='margin-left:.25in'>Disable high contrast edge color for black parts.<p>
+<p><b>-bec, --black-edge-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>High contrast edge color for black parts.<p>
+<p><b>-ndec, --disable-dark-edge-color</b></p><p style='margin-left:.25in'>Disable high contrast edge color for dark color parts.<p>
+<p><b>-dec, --dark-edge-color <i>&lt;#AARRGGBB&gt;</i></b></p><p style='margin-left:.25in'>High contrast edge color for dark color parts.<p>
+<p><b>-aec, --automate-edge-color</b></p><p style='margin-left:.25in'>Enable automatically adjusted edge colors.<p>
+<p><b>-cc, --color-contrast <i>&lt;contrast&gt;</i></b></p><p style='margin-left:.25in'>Color contrast value between 0.0 and 1.0.<p>
+<p><b>-ldv, --light-dark-value <i>&lt;value&gt;</i></b></p><p style='margin-left:.25in'>Light/Dark color value between 0.0 and 1.0.<p>
+
+<p><b>-obj, --export-wavefront <i>&lt;outfile.obj&gt;</i></b></p><p style='margin-left:.25in'>Export the model to Wavefront OBJ format.<p>
+<p><b>-3ds, --export-3ds <i>&lt;outfile.3ds&gt;</i></b></p><p style='margin-left:.25in'>Export the model to 3D Studio 3DS format.<p>
+<p><b>-dae, --export-collada <i>&lt;outfile.dae&gt;</i></b></p><p style='margin-left:.25in'>Export the model to COLLADA DAE format.<p>
+<p><b>-csv, --export-csv <i>&lt;outfile.csv&gt;</i></b></p><p style='margin-left:.25in'>Export the list of parts used in csv format.<p>
+<p><b>-html, --export-html <i>&lt;folder&gt;</i></b></p><p style='margin-left:.25in'>Create an HTML page for the model.<p>
+<p><b>-v, --version</b></p><p style='margin-left:.25in'>Output version information and exit.<p>
+<p><b>-?, --help</b></p><p style='margin-left:.25in'>Display help message and exit.<p>
+
+</div>
+      </section>
+<!-- footer start -->
+<footer class="wrap"><div class="right"> &copy; LeoCAD.org </div></footer>
+<!-- footer end -->
+    </div>
+  </body>
+</html>

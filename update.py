@@ -50,6 +50,7 @@ docbar = """<!-- docbar start -->
   <div class="nav-docs-section">
     <h3>Reference</h3>
     <ul>
+      <li><a href="cli.html">Command Line Options</a></li>
       <li><a href="meta.html">Meta Commands</a></li>
       <li><a href="texmap.html">Texture Mapping</a></li>
     </ul>

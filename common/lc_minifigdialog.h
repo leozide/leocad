@@ -37,4 +37,7 @@ protected:
 	std::array<QToolButton*, LC_MFW_NUMITEMS> mPieceButtons;
 	std::array<lcColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
 	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
+
+	QString mCurrentTemplateName;
+	bool mCurrentTemplateModified = false;
 };

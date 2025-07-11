@@ -234,7 +234,7 @@ void lcDoubleSpinBox::mouseReleaseEvent(QMouseEvent* MouseEvent)
 
 bool lcDoubleSpinBox::event(QEvent* Event)
 {
-	if (Event->type() == QEvent::ShortcutOverride)
+	if (Event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
 
@@ -247,6 +247,15 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 
 			clearFocus();
 			KeyEvent->accept();
+
+			return true;
+		}
+		else if (KeyEvent->key() == Qt::Key_Return || KeyEvent->key() == Qt::Key_Enter)
+		{
+			FinishEditing();
+			KeyEvent->accept();
+
+			return true;
 		}
 	}
 

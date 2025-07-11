@@ -34,7 +34,7 @@ struct lcMinifigPieceInfo
 struct lcMinifig
 {
 	PieceInfo* Parts[LC_MFW_NUMITEMS];
-	int Colors[LC_MFW_NUMITEMS];
+	int ColorIndices[LC_MFW_NUMITEMS];
 	float Angles[LC_MFW_NUMITEMS];
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
 };
@@ -42,7 +42,7 @@ struct lcMinifig
 struct lcMinifigTemplate
 {
 	QString Parts[LC_MFW_NUMITEMS];
-	int Colors[LC_MFW_NUMITEMS];
+	int ColorCodes[LC_MFW_NUMITEMS];
 	float Angles[LC_MFW_NUMITEMS];
 };
 
@@ -77,7 +77,7 @@ public:
 	void Calculate();
 	int GetSelectionIndex(int Type) const;
 	void SetPieceInfo(int Type, PieceInfo* Info);
-	void SetColor(int Type, int Color);
+	void SetColorIndex(int Type, int ColorIndex);
 	void SetAngle(int Type, float Angle);
 
 	std::vector<lcMinifigPieceInfo> mSettings[LC_MFW_NUMITEMS];

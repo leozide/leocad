@@ -5111,7 +5111,7 @@ void lcModel::ShowMinifigDialog()
 		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
 
 		Piece->Initialize(Minifig.Matrices[PartIdx], mCurrentStep);
-		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
+		Piece->SetColorIndex(Minifig.ColorIndices[PartIdx]);
 		Piece->SetGroup(Group);
 		AddPiece(Piece);
 		Piece->UpdatePosition(mCurrentStep);
@@ -5139,7 +5139,7 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIdx]);
 
 		Piece->Initialize(Minifig.Matrices[PartIdx], 1);
-		Piece->SetColorIndex(Minifig.Colors[PartIdx]);
+		Piece->SetColorIndex(Minifig.ColorIndices[PartIdx]);
 		AddPiece(Piece);
 		Piece->UpdatePosition(1);
 

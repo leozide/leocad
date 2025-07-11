@@ -78,13 +78,13 @@ void MinifigWizard::LoadDefault()
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 	{
-		mMinifig.Colors[i] = lcGetColorIndex(ColorCodes[i]);
-        mMinifig.Angles[i] = 0.0f;
-        mMinifig.Matrices[i] = lcMatrix44Identity();
+		mMinifig.ColorIndices[i] = lcGetColorIndex(ColorCodes[i]);
+		mMinifig.Angles[i] = 0.0f;
+		mMinifig.Matrices[i] = lcMatrix44Identity();
 
 		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
-        mMinifig.Parts[i] = Info;
-        if (Info)
+		mMinifig.Parts[i] = Info;
+		if (Info)
 			Library->LoadPieceInfo(Info, false, true);
 	}
 
@@ -227,7 +227,7 @@ void MinifigWizard::AddTemplatesJson(const QByteArray& TemplateData)
 			QJsonObject PartObject = TemplateObject.value(QLatin1String(mSectionNames[PartIdx])).toObject();
 
 			Template.Parts[PartIdx] = PartObject["Id"].toString();
-			Template.Colors[PartIdx] = PartObject["Color"].toInt();
+			Template.ColorCodes[PartIdx] = PartObject["Color"].toInt();
 			Template.Angles[PartIdx] = PartObject["Angle"].toDouble();
 		}
 
@@ -249,7 +249,7 @@ QByteArray MinifigWizard::GetTemplatesJson() const
 			QJsonObject PartObject;
 
 			PartObject["Id"] = Template.Parts[PartIdx];
-			PartObject["Color"] = Template.Colors[PartIdx];
+			PartObject["Color"] = Template.ColorCodes[PartIdx];
 			PartObject["Angle"] = Template.Angles[PartIdx];
 
 			TemplateObject[QLatin1String(mSectionNames[PartIdx])] = PartObject;
@@ -480,9 +480,9 @@ void MinifigWizard::SetPieceInfo(int Type, PieceInfo* Info)
 	Calculate();
 }
 
-void MinifigWizard::SetColor(int Type, int Color)
+void MinifigWizard::SetColorIndex(int Type, int ColorIndex)
 {
-	mMinifig.Colors[Type] = Color;
+	mMinifig.ColorIndices[Type] = ColorIndex;
 
 	Calculate();
 }

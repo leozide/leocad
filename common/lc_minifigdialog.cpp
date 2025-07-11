@@ -125,7 +125,7 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		lcColorPicker* ColorPicker = mColorPickers[ItemIndex];
 		QSignalBlocker ColorPickerBlocker(ColorPicker);
 
-		ColorPicker->SetCurrentColor(mMinifigWizard->mMinifig.Colors[ItemIndex]);
+		ColorPicker->SetCurrentColor(mMinifigWizard->mMinifig.ColorIndices[ItemIndex]);
 	}
 
 	UpdateTemplateCombo();
@@ -212,8 +212,8 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 
 		QSignalBlocker ColorBlocker(mColorPickers[PartIdx]);
 
-		mMinifigWizard->SetColor(PartIdx, lcGetColorIndex(Template.Colors[PartIdx]));
-		mColorPickers[PartIdx]->SetCurrentColorCode(Template.Colors[PartIdx]);
+		mMinifigWizard->SetColorIndex(PartIdx, lcGetColorIndex(Template.ColorCodes[PartIdx]));
+		mColorPickers[PartIdx]->SetCurrentColorCode(Template.ColorCodes[PartIdx]);
 
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
 
@@ -258,7 +258,7 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
 		Template.Parts[ItemIndex] = mMinifigWizard->mSettings[ItemIndex][mMinifigWizard->GetSelectionIndex(ItemIndex)].Info->mFileName;
-		Template.Colors[ItemIndex] = mColorPickers[ItemIndex]->GetCurrentColorCode();
+		Template.ColorCodes[ItemIndex] = mColorPickers[ItemIndex]->GetCurrentColorCode();
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[ItemIndex];
 		Template.Angles[ItemIndex] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
 	}
@@ -355,7 +355,7 @@ void lcMinifigDialog::PieceButtonClicked()
 		if (Setting.Info)
 			Parts.emplace_back(Setting.Info, Setting.Description);
 
-	int ColorIndex = mMinifigWizard->mMinifig.Colors[ItemIndex];
+	int ColorIndex = mMinifigWizard->mMinifig.ColorIndices[ItemIndex];
 
 	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(CurrentInfo, Parts, ColorIndex, PieceButton, PieceButton->mapToGlobal(PieceButton->rect().bottomLeft()));
 
@@ -396,7 +396,7 @@ void lcMinifigDialog::ColorChanged(int Index)
 
 	UpdateTemplateCombo();
 
-	mMinifigWizard->SetColor(std::distance(mColorPickers.begin(), Search), Index);
+	mMinifigWizard->SetColorIndex(std::distance(mColorPickers.begin(), Search), Index);
 	mView->Redraw();
 }
 

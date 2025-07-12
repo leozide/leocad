@@ -64,7 +64,6 @@ void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
 	mCurrentCategory->Category = Index;
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
-	CategoryButton->setFocusPolicy(Qt::NoFocus);
 
 	mLayout->addWidget(CategoryButton, mLayoutRow, 0, 1, -1);
 	mCurrentCategory->Button = CategoryButton;

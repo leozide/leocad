@@ -5,6 +5,7 @@ lcKeyFrameWidget::lcKeyFrameWidget(QWidget* Parent)
 	: QCheckBox(Parent)
 {
 	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	setFocusPolicy(Qt::ClickFocus);
 	setCheckable(true);
 }
 

@@ -11,6 +11,7 @@ lcCollapsibleWidgetButton::lcCollapsibleWidgetButton(const QString& Title, QWidg
 	setAutoRaise(true);
 	setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+	setFocusPolicy(Qt::NoFocus);
 
 	UpdateIcon();
 

@@ -858,8 +858,14 @@ QSize lcPartSelectionListView::sizeHint() const
 	int Columns = 5;
 	int Rows = qMin(4, (model()->rowCount() + Columns - 1) / Columns);
 
-	QStyleOptionViewItem option = viewOptions();
-	QSize CellSize = itemDelegate()->sizeHint(option, model()->index(0,0));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	QStyleOptionViewItem Option;
+	initViewItemOption(&Option);
+#else
+	QStyleOptionViewItem Option = viewOptions();
+#endif
+
+	QSize CellSize = itemDelegate()->sizeHint(Option, model()->index(0,0));
 	QSize Size(CellSize.width() * Columns + frameWidth() * 2, CellSize.height() * Rows + frameWidth() * 2);
 
 	if (verticalScrollBar())

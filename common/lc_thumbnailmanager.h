@@ -11,7 +11,7 @@ struct lcPartThumbnail
 	int ReferenceCount;
 };
 
-enum class lcPartThumbnailId : uint64_t
+enum class lcPartThumbnailId : uint32_t
 {
 	Invalid = 0
 };

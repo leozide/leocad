@@ -357,7 +357,7 @@ void lcMinifigDialog::PieceButtonClicked()
 
 	int ColorIndex = mMinifigWizard->mMinifig.ColorIndices[ItemIndex];
 
-	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(CurrentInfo, Parts, ColorIndex, PieceButton, PieceButton->mapToGlobal(PieceButton->rect().bottomLeft()));
+	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(CurrentInfo, Parts, ColorIndex, PieceButton, Position);
 
 	if (!Result.has_value())
 		return;

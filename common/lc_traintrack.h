@@ -16,7 +16,7 @@ enum class lcTrainTrackConnectionSleeper
 
 struct lcTrainTrackConnectionType
 {
-	quint32 Group;
+	size_t Group;
 	lcTrainTrackConnectionSleeper Sleeper;
 };
 
@@ -89,5 +89,5 @@ protected:
 	int mColorCode = 16;
 	bool mVisible = false;
 
-	static std::map<quint32, PieceInfo*> mSleepers;
+	static std::map<size_t, PieceInfo*> mSleepers;
 };

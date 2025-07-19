@@ -15,7 +15,7 @@
 // auto replace cross when going over a straight section
 // set focus connection after adding
 
-std::map<quint32, PieceInfo*> lcTrainTrackInfo::mSleepers;
+std::map<size_t, PieceInfo*> lcTrainTrackInfo::mSleepers;
 
 void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 {
@@ -99,7 +99,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 
 	for (QJsonObject::const_iterator SleepersIt = JsonSleepers.constBegin(); SleepersIt != JsonSleepers.constEnd(); ++SleepersIt)
 	{
-		quint32 Group = qHash(SleepersIt.key());
+		size_t Group = qHash(SleepersIt.key());
 		QString PartId = SleepersIt->toString();
 
 		PieceInfo* SleeperInfo = Library->FindPiece(PartId.toLatin1(), nullptr, false, false);
@@ -235,7 +235,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 
 	if (CurrentConnectionType.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper && NewConnections[NewConnectionIndex].Type.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper)
 	{
-		std::map<quint32, PieceInfo*>::const_iterator SleeperIt = mSleepers.find(CurrentConnectionType.Group);
+		std::map<size_t, PieceInfo*>::const_iterator SleeperIt = mSleepers.find(CurrentConnectionType.Group);
 
 		if (SleeperIt == mSleepers.end())
 			return Pieces;

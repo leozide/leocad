@@ -15,6 +15,10 @@ QToolBar {
     border: none;
 }
 
+QToolButton:checked {
+    background-color: rgb(87, 97, 98);
+}
+
 QTreeView::branch {
     background: transparent;
 }

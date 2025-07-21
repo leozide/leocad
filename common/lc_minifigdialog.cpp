@@ -215,14 +215,14 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 		mMinifigWizard->SetColorIndex(PartIdx, lcGetColorIndex(Template.ColorCodes[PartIdx]));
 		mColorPickers[PartIdx]->SetCurrentColorCode(Template.ColorCodes[PartIdx]);
 
-		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
+		lcDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
 
 		if (AngleSpinBox)
 		{
 			QSignalBlocker AngleBlocker(AngleSpinBox);
 
 			mMinifigWizard->SetAngle(PartIdx, Template.Angles[PartIdx]);
-			AngleSpinBox->setValue(Template.Angles[PartIdx]);
+			AngleSpinBox->SetValue(Template.Angles[PartIdx]);
 		}
 	}
 
@@ -402,7 +402,7 @@ void lcMinifigDialog::ColorChanged(int Index)
 
 void lcMinifigDialog::AngleChanged(double Value)
 {
-	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS>::iterator Search = std::find(mSpinBoxes.begin(), mSpinBoxes.end(), sender());
+	std::array<lcDoubleSpinBox*, LC_MFW_NUMITEMS>::iterator Search = std::find(mSpinBoxes.begin(), mSpinBoxes.end(), sender());
 
 	if (Search == mSpinBoxes.end())
 		return;

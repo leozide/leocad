@@ -19,6 +19,7 @@ public:
 	void mousePressEvent(QMouseEvent* MouseEvent) override;
 	void mouseMoveEvent(QMouseEvent* MouseEvent) override;
 	void mouseReleaseEvent(QMouseEvent* MouseEvent) override;
+	void focusInEvent(QFocusEvent* FocusEvent) override;
 	void focusOutEvent(QFocusEvent* FocusEvent) override;
 
 signals:
@@ -26,12 +27,16 @@ signals:
 	void EditingFinished();
 
 protected slots:
+	void ValueChanged();
 	void CancelEditing();
 	void FinishEditing();
 	void ReturnPressed();
+	void LadderWidgetCanceled();
 
 protected:
 	bool event(QEvent* Event) override;
+
+	void ShowLadderWidget();
 
 	static QPoint GetGlobalMousePosition(QMouseEvent* MouseEvent)
 	{
@@ -42,18 +47,15 @@ protected:
 #endif
 	}
 
-	void HandleMousePressEvent(QMouseEvent* MouseEvent);
-	bool HandleMouseMoveEvent(QMouseEvent* MouseEvent, QObject* Object);
-	void HandleMouseReleaseEvent(QMouseEvent* MouseEvent);
-
 	enum class DragMode
 	{
 		None,
 		Start,
-		Value
+		Dragging
 	};
 
-	double mInitialValue = 0.0;
+	bool mModified = false;
+	double mLadderWidgetInitialValue = 0.0;
 	QPoint mLastPosition;
 	DragMode mDragMode = DragMode::None;
 	lcFloatPropertySnap mSnap = lcFloatPropertySnap::Auto;

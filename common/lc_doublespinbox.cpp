@@ -9,13 +9,13 @@ lcDoubleSpinBox::lcDoubleSpinBox(QWidget* Parent)
 {
 	lineEdit()->installEventFilter(this);
 
+	connect(this, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &lcDoubleSpinBox::ValueChanged);
 	connect(lineEdit(), &QLineEdit::returnPressed, this, &lcDoubleSpinBox::ReturnPressed);
 }
 
 void lcDoubleSpinBox::SetValue(double Value)
 {
-	if (!hasFocus())
-		mInitialValue = Value;
+	mModified = false;
 
 	setValue(Value);
 }
@@ -48,31 +48,46 @@ void lcDoubleSpinBox::SetSnap(lcFloatPropertySnap Snap)
 	}
 }
 
+void lcDoubleSpinBox::ShowLadderWidget()
+{
+	lcLadderWidget* LadderWidget = new lcLadderWidget(this, mSnap);
+
+	mLadderWidgetInitialValue = value();
+
+	connect(LadderWidget, &lcLadderWidget::EditingCanceled, this, &lcDoubleSpinBox::LadderWidgetCanceled);
+
+	LadderWidget->Show();
+}
+
+void lcDoubleSpinBox::LadderWidgetCanceled()
+{
+	setValue(mLadderWidgetInitialValue);
+}
+
 QString	lcDoubleSpinBox::textFromValue(double Value) const
 {
 	return lcFormatValueLocalized(Value);
 }
 
+void lcDoubleSpinBox::ValueChanged()
+{
+	mModified = true;
+}
+
 void lcDoubleSpinBox::CancelEditing()
 {
-	if (value() == mInitialValue)
-		return;
-
-	emit EditingCanceled();
-
-	setValue(mInitialValue);
+	if (mModified)
+	{
+		emit EditingCanceled();
+	}
 }
 
 void lcDoubleSpinBox::FinishEditing()
 {
-	if (value() == mInitialValue)
-		return;
-
-	emit EditingFinished();
-
-	mInitialValue = value();
-
-	clearFocus();
+	if (mModified)
+	{
+		emit EditingFinished();
+	}
 }
 
 void lcDoubleSpinBox::ReturnPressed()
@@ -80,128 +95,14 @@ void lcDoubleSpinBox::ReturnPressed()
 	FinishEditing();
 }
 
-void lcDoubleSpinBox::HandleMousePressEvent(QMouseEvent* MouseEvent)
-{
-	if (MouseEvent->buttons() == Qt::LeftButton)
-	{
-		mDragMode = DragMode::Start;
-		mLastPosition = GetGlobalMousePosition(MouseEvent);
-	}
-	else
-	{
-		if (mDragMode == DragMode::Value)
-			CancelEditing();
-
-		if (mDragMode != DragMode::None)
-		{
-			mDragMode = DragMode::None;
-			return;
-		}
-
-		if (MouseEvent->buttons() == Qt::MiddleButton)
-		{
-			lcLadderWidget* LadderWidget = new lcLadderWidget(this, mSnap);
-
-			connect(LadderWidget, &lcLadderWidget::EditingCanceled, this, &lcDoubleSpinBox::CancelEditing);
-			connect(LadderWidget, &lcLadderWidget::EditingFinished, this, &lcDoubleSpinBox::FinishEditing);
-
-			mInitialValue = value();
-
-			LadderWidget->Show();
-		}
-	}
-}
-
-bool lcDoubleSpinBox::HandleMouseMoveEvent(QMouseEvent* MouseEvent, QObject* Object)
-{
-	if (mDragMode != DragMode::None)
-	{
-		if (mDragMode == DragMode::Start)
-		{
-			if (lineEdit()->selectionLength() > 0 && Object != this)
-			{
-				mDragMode = DragMode::None;
-			}
-			else
-			{
-				QPoint Position = GetGlobalMousePosition(MouseEvent);
-
-				if (abs(mLastPosition.y() - Position.y()) > 3)
-				{
-					mDragMode = DragMode::Value;
-					mLastPosition = QCursor::pos();
-				}
-			}
-		}
-
-		if (mDragMode == DragMode::Value)
-		{
-			QPoint Position = QCursor::pos();
-
-			stepBy(mLastPosition.y() - Position.y());
-
-			QScreen* Screen = QGuiApplication::screenAt(mapToGlobal(QPoint(width() / 2, height() / 2)));
-
-			if (Screen)
-			{
-				int ScreenHeight = Screen->geometry().height();
-
-				if (Position.y() <= 0)
-				{
-					Position.setY(ScreenHeight - 2);
-
-					QCursor::setPos(Position);
-				}
-				else if (Position.y() >= ScreenHeight - 1)
-				{
-					Position.setY(1);
-
-					QCursor::setPos(Position);
-				}
-			}
-
-			mLastPosition = Position;
-
-			MouseEvent->accept();
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void lcDoubleSpinBox::HandleMouseReleaseEvent(QMouseEvent* MouseEvent)
-{
-	Q_UNUSED(MouseEvent);
-
-	if (mDragMode == DragMode::Value)
-		FinishEditing();
-
-	mDragMode = DragMode::None;
-}
-
 bool lcDoubleSpinBox::eventFilter(QObject* Object, QEvent* Event)
 {
-	switch (Event->type())
+	if (mDragMode == DragMode::None && Event->type() == QEvent::MouseButtonPress && Object == lineEdit())
 	{
-	case QEvent::MouseButtonPress:
-		if (Object == lineEdit())
-			HandleMousePressEvent(reinterpret_cast<QMouseEvent*>(Event));
-		break;
+		QMouseEvent* MouseEvent = reinterpret_cast<QMouseEvent*>(Event);
 
-	case QEvent::MouseMove:
-		if (Object == lineEdit())
-			HandleMouseMoveEvent(reinterpret_cast<QMouseEvent*>(Event), Object);
-		break;
-
-	case QEvent::MouseButtonRelease:
-		if (Object == lineEdit())
-			HandleMouseReleaseEvent(reinterpret_cast<QMouseEvent*>(Event));
-		break;
-
-	default:
-		break;
+		if (MouseEvent->buttons() == Qt::MiddleButton)
+			ShowLadderWidget();
 	}
 
 	return QDoubleSpinBox::eventFilter(Object, Event);
@@ -209,25 +110,82 @@ bool lcDoubleSpinBox::eventFilter(QObject* Object, QEvent* Event)
 
 void lcDoubleSpinBox::mousePressEvent(QMouseEvent* MouseEvent)
 {
-	HandleMousePressEvent(MouseEvent);
+	if (mDragMode == DragMode::Dragging)
+	{
+		if (MouseEvent->buttons() != Qt::LeftButton)
+		{
+			CancelEditing();
 
-	double InitialValue = value();
+			mDragMode = DragMode::None;
+		}
+	}
+	else if (mDragMode == DragMode::None)
+	{
+		if (MouseEvent->buttons() == Qt::LeftButton)
+		{
+			mDragMode = DragMode::Start;
+			mLastPosition = GetGlobalMousePosition(MouseEvent);
+		}
+		else if (MouseEvent->buttons() == Qt::MiddleButton)
+		{
+			ShowLadderWidget();
+		}
+	}
+	else
+	{
+		mDragMode = DragMode::None;
+	}
 
 	QDoubleSpinBox::mousePressEvent(MouseEvent);
-
-	if (value() != InitialValue)
-		FinishEditing();
 }
 
 void lcDoubleSpinBox::mouseMoveEvent(QMouseEvent* MouseEvent)
 {
-	if (!HandleMouseMoveEvent(MouseEvent, this))
-		QDoubleSpinBox::mouseMoveEvent(MouseEvent);
+	if (mDragMode == DragMode::Dragging)
+	{
+		QPoint Position = QCursor::pos();
+
+		stepBy(mLastPosition.y() - Position.y());
+
+		QScreen* Screen = QGuiApplication::screenAt(Position);
+
+		if (Screen)
+		{
+			int ScreenHeight = Screen->geometry().height();
+
+			if (Position.y() <= 0)
+			{
+				Position.setY(ScreenHeight - 2);
+
+				QCursor::setPos(Position);
+			}
+			else if (Position.y() >= ScreenHeight - 1)
+			{
+				Position.setY(1);
+
+				QCursor::setPos(Position);
+			}
+		}
+
+		mLastPosition = Position;
+	}
+	else if (mDragMode == DragMode::Start)
+	{
+		QPoint Position = GetGlobalMousePosition(MouseEvent);
+
+		if (abs(mLastPosition.y() - Position.y()) > 3)
+		{
+			mDragMode = DragMode::Dragging;
+			mLastPosition = QCursor::pos();
+		}
+	}
+
+	QDoubleSpinBox::mouseMoveEvent(MouseEvent);
 }
 
 void lcDoubleSpinBox::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
-	HandleMouseReleaseEvent(MouseEvent);
+	mDragMode = DragMode::None;
 
 	QDoubleSpinBox::mouseReleaseEvent(MouseEvent);
 }
@@ -240,8 +198,7 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 
 		if (KeyEvent->key() == Qt::Key_Escape)
 		{
-			if (mDragMode == DragMode::Value)
-				CancelEditing();
+			CancelEditing();
 
 			mDragMode = DragMode::None;
 
@@ -253,6 +210,7 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 		else if (KeyEvent->key() == Qt::Key_Return || KeyEvent->key() == Qt::Key_Enter)
 		{
 			FinishEditing();
+
 			KeyEvent->accept();
 
 			return true;
@@ -262,10 +220,16 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 	return QDoubleSpinBox::event(Event);
 }
 
+void lcDoubleSpinBox::focusInEvent(QFocusEvent* FocusEvent)
+{
+	mModified = false;
+
+	QDoubleSpinBox::focusInEvent(FocusEvent);
+}
+
 void lcDoubleSpinBox::focusOutEvent(QFocusEvent* FocusEvent)
 {
-	if (value() != mInitialValue)
-		CancelEditing();
+	FinishEditing();
 
 	QDoubleSpinBox::focusOutEvent(FocusEvent);
 }

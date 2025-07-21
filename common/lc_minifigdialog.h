@@ -1,7 +1,9 @@
 #pragma once
 
 #include "minifig.h"
+
 class lcColorPicker;
+class lcDoubleSpinBox;
 
 namespace Ui
 {
@@ -36,7 +38,7 @@ protected:
 	lcView* mView;
 	std::array<QToolButton*, LC_MFW_NUMITEMS> mPieceButtons;
 	std::array<lcColorPicker*, LC_MFW_NUMITEMS> mColorPickers;
-	std::array<QDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
+	std::array<lcDoubleSpinBox*, LC_MFW_NUMITEMS> mSpinBoxes;
 
 	QString mCurrentTemplateName;
 	bool mCurrentTemplateModified = false;

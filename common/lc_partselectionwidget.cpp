@@ -11,6 +11,7 @@
 #include "lc_glextensions.h"
 #include "lc_category.h"
 #include "lc_traintrack.h"
+#include "lc_filter.h"
 
 Q_DECLARE_METATYPE(QList<int>)
 
@@ -78,7 +79,7 @@ void lcPartSelectionListModel::UpdateThumbnails()
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
@@ -149,7 +150,7 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetModelsCategory()
@@ -175,7 +176,7 @@ void lcPartSelectionListModel::SetModelsCategory()
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
@@ -203,7 +204,7 @@ void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetCurrentModelCategory()
@@ -231,7 +232,7 @@ void lcPartSelectionListModel::SetCurrentModelCategory()
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)
@@ -257,25 +258,21 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
-void lcPartSelectionListModel::SetFilter(const QString& Filter)
+void lcPartSelectionListModel::SetFilter(const QString& FilterString)
 {
-	mFilter = Filter.toLatin1();
+	mFilterString = FilterString;
 
-	bool DefaultFilter = mFileNameFilter && mPartDescriptionFilter;
-	bool WildcardFilter = mPartFilterType == lcPartFilterType::Wildcard;
-	bool FixedStringFilter = mPartFilterType == lcPartFilterType::FixedString;
+	lcFilter Filter(FilterString.toStdString());
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-	const QString Pattern = WildcardFilter ? QRegularExpression::wildcardToRegularExpression(mFilter) : mFilter;
 	QRegularExpression::PatternOption PatternOptions = mCaseSensitiveFilter ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption;
-	QRegularExpression FilterRx = QRegularExpression(Pattern, PatternOptions);
+	QRegularExpression FilterRx = QRegularExpression(FilterString, PatternOptions);
 #else
 	Qt::CaseSensitivity CaseSensitive = mCaseSensitiveFilter ? Qt::CaseSensitive : Qt::CaseInsensitive;
-	QRegExp::PatternSyntax PatternSyntax = WildcardFilter ? QRegExp::Wildcard : QRegExp::RegExp2;
-	QRegExp FilterRx(mFilter, CaseSensitive, PatternSyntax);
+	QRegExp FilterRx(FilterString, CaseSensitive, QRegExp::RegExp2);
 #endif
 
 	for (size_t PartIdx = 0; PartIdx < mParts.size(); PartIdx++)
@@ -289,52 +286,19 @@ void lcPartSelectionListModel::SetFilter(const QString& Filter)
 			Visible = false;
 		else if (!mShowPartAliases && Info->m_strDescription[0] == '=')
 			Visible = false;
-		else if (!mFilter.isEmpty())
+		else if (mPartFilterType == lcPartFilterType::Default)
 		{
-			char Description[sizeof(Info->m_strDescription)];
-			const char* Src = mParts[PartIdx].Description.empty() ? Info->m_strDescription : mParts[PartIdx].Description.c_str();
-			char* Dst = Description;
+			const char* Description = mParts[PartIdx].Description.empty() ? Info->m_strDescription : mParts[PartIdx].Description.c_str();
 
-			for (;;)
-			{
-				*Dst = *Src;
-
-				if (*Src == ' ' && *(Src + 1) == ' ')
-					Src++;
-				else if (*Src == 0)
-					break;
-
-				Src++;
-				Dst++;
-			}
-
-			if (FixedStringFilter)
-			{
-				if (DefaultFilter)
-				{
-					if (mCaseSensitiveFilter)
-						Visible = strstr(Description, mFilter) || strstr(Info->mFileName, mFilter);
-					else
-						Visible = strcasestr(Description, mFilter) || strcasestr(Info->mFileName, mFilter);
-				}
-				else if (mFileNameFilter)
-					Visible = mCaseSensitiveFilter ? strstr(Info->mFileName, mFilter) : strcasestr(Info->mFileName, mFilter);
-				else if (mPartDescriptionFilter)
-					Visible = mCaseSensitiveFilter ? strstr(Description, mFilter) : strcasestr(Description, mFilter);
-			}
-			else
-			{
-				QString DescriptionString = mParts[PartIdx].Description.empty() ? QString(Description) : QString::fromStdString(mParts[PartIdx].Description);
-
-				if (DefaultFilter)
-					Visible = DescriptionString.contains(FilterRx) || QString(Info->mFileName).contains(FilterRx);
-				else if (mFileNameFilter)
-					Visible = QString(Info->mFileName).contains(FilterRx);
-				else if (mPartDescriptionFilter)
-					Visible = DescriptionString.contains(FilterRx);
-			}
+			Visible = (mPartDescriptionFilter && Filter.Match(Description)) || (mFileNameFilter && Filter.Match(Info->mFileName));
 		}
+		else if (mPartFilterType == lcPartFilterType::RegularExpression)
+		{
+			QString Description = mParts[PartIdx].Description.empty() ? QString(Info->m_strDescription) : QString::fromStdString(mParts[PartIdx].Description);
 
+			Visible = (mPartDescriptionFilter && Description.contains(FilterRx)) || (mFileNameFilter && QString(Info->mFileName).contains(FilterRx));
+		}
+			
 		mListView->setRowHidden((int)PartIdx, !Visible);
 	}
 }
@@ -468,7 +432,7 @@ void lcPartSelectionListModel::SetShowDecoratedParts(bool Show)
 
 	mShowDecoratedParts = Show;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetShowPartAliases(bool Show)
@@ -478,7 +442,7 @@ void lcPartSelectionListModel::SetShowPartAliases(bool Show)
 
 	mShowPartAliases = Show;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetPartFilterType(lcPartFilterType Option)
@@ -488,7 +452,7 @@ void lcPartSelectionListModel::SetPartFilterType(lcPartFilterType Option)
 
 	mPartFilterType = Option;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetCaseSensitiveFilter(bool Option)
@@ -498,7 +462,7 @@ void lcPartSelectionListModel::SetCaseSensitiveFilter(bool Option)
 
 	mCaseSensitiveFilter = Option;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetFileNameFilter(bool Option)
@@ -508,7 +472,7 @@ void lcPartSelectionListModel::SetFileNameFilter(bool Option)
 
 	mFileNameFilter = Option;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetPartDescriptionFilter(bool Option)
@@ -518,7 +482,7 @@ void lcPartSelectionListModel::SetPartDescriptionFilter(bool Option)
 
 	mPartDescriptionFilter = Option;
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetIconSize(int Size)
@@ -534,7 +498,7 @@ void lcPartSelectionListModel::SetIconSize(int Size)
 
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 void lcPartSelectionListModel::SetShowPartNames(bool Show)
@@ -547,7 +511,7 @@ void lcPartSelectionListModel::SetShowPartNames(bool Show)
 	beginResetModel();
 	endResetModel();
 
-	SetFilter(mFilter);
+	SetFilter(mFilterString);
 }
 
 lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget)
@@ -745,19 +709,10 @@ void lcPartSelectionListView::TogglePartAliases()
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ALIASES, Show);
 }
 
-void lcPartSelectionListView::SetFixedStringFilter()
+void lcPartSelectionListView::ToggleRegularExpressionFilter()
 {
-	SetPartFilterType(lcPartFilterType::FixedString);
-}
-
-void lcPartSelectionListView::SetWildcardFilter()
-{
-	SetPartFilterType(lcPartFilterType::Wildcard);
-}
-
-void lcPartSelectionListView::SetRegularExpressionFilter()
-{
-	SetPartFilterType(lcPartFilterType::RegularExpression);
+	bool Option = mListModel->GetPartFilterType() == lcPartFilterType::RegularExpression;
+	SetPartFilterType(Option ? lcPartFilterType::Default : lcPartFilterType::RegularExpression);
 }
 
 void lcPartSelectionListView::ToggleCaseSensitiveFilter()
@@ -1238,28 +1193,15 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	QMenu* FilterMenu = Menu->addMenu(tr("Filter"));
 
-	QActionGroup* FilterGroup = new QActionGroup(Menu);
-
-	QAction* PartFilterType = FilterMenu->addAction(tr("Fixed String"), mPartsWidget, &lcPartSelectionListView::SetFixedStringFilter);
-	PartFilterType->setCheckable(true);
-	PartFilterType->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::FixedString);
-	FilterGroup->addAction(PartFilterType);
-
-	QAction* WildcardFilter = FilterMenu->addAction(tr("Wildcard"), mPartsWidget, &lcPartSelectionListView::SetWildcardFilter);
-	WildcardFilter->setCheckable(true);
-	WildcardFilter->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::Wildcard);
-	FilterGroup->addAction(WildcardFilter);
-
-	QAction* RegularExpressionFilter = FilterMenu->addAction(tr("Regular Expression"), mPartsWidget, &lcPartSelectionListView::SetRegularExpressionFilter);
+	QAction* RegularExpressionFilter = FilterMenu->addAction(tr("Regular Expression"), mPartsWidget, &lcPartSelectionListView::ToggleRegularExpressionFilter);
 	RegularExpressionFilter->setCheckable(true);
 	RegularExpressionFilter->setChecked(ListModel->GetPartFilterType() == lcPartFilterType::RegularExpression);
-	FilterGroup->addAction(RegularExpressionFilter);
-
-	FilterMenu->addSeparator();
 
 	QAction* CaseSensitiveFilter = FilterMenu->addAction(tr("Match Case"), mPartsWidget, &lcPartSelectionListView::ToggleCaseSensitiveFilter);
 	CaseSensitiveFilter->setCheckable(true);
 	CaseSensitiveFilter->setChecked(ListModel->GetCaseSensitiveFilter());
+
+	FilterMenu->addSeparator();
 
 	QAction* FileNameFilter = FilterMenu->addAction(tr("Part ID"), mPartsWidget, &lcPartSelectionListView::ToggleFileNameFilter);
 	FileNameFilter->setCheckable(true);

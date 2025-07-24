@@ -25,8 +25,7 @@ enum class lcPartCategoryRole
 
 enum class lcPartFilterType
 {
-	FixedString,
-	Wildcard,
+	Default,
 	RegularExpression,
 	Count
 };
@@ -152,7 +151,7 @@ public:
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
 	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
-	void SetFilter(const QString& Filter);
+	void SetFilter(const QString& FilterString);
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
 	void SetShowPartAliases(bool Show);
@@ -182,7 +181,7 @@ protected:
 	bool mCaseSensitiveFilter;
 	bool mFileNameFilter;
 	bool mPartDescriptionFilter;
-	QByteArray mFilter;
+	QString mFilterString;
 };
 
 class lcPartSelectionListView : public QListView
@@ -232,9 +231,7 @@ public slots:
 	void SetMediumIcons();
 	void SetLargeIcons();
 	void SetExtraLargeIcons();
-	void SetFixedStringFilter();
-	void SetWildcardFilter();
-	void SetRegularExpressionFilter();
+	void ToggleRegularExpressionFilter();
 	void TogglePartNames();
 	void ToggleDecoratedParts();
 	void TogglePartAliases();

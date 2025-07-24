@@ -80,7 +80,7 @@ bool lcFilter::Match(const char* String) const
 
 	for (const FilterPart& FilterPart : mFilterParts)
 	{
-		bool Match = FilterPart.Wildcard ? FastWildCompare(String, FilterPart.String.c_str()) : strcasestr(String, FilterPart.String.c_str());
+		bool Match = FilterPart.Wildcard ? FastWildCompare(String, FilterPart.String.c_str()) : strcasestr(String, FilterPart.String.c_str()) != nullptr;
 
 		switch (FilterPart.Op)
 		{

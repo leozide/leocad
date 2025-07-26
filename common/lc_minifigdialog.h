@@ -32,6 +32,7 @@ protected slots:
 
 protected:
 	void UpdateTemplateCombo();
+	void SetCurrentTemplateModified();
 
 	Ui::lcMinifigDialog* ui;
 

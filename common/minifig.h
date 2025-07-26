@@ -67,12 +67,13 @@ public:
 		return mTemplates;
 	}
 
+	static QString GetDefaultTemplateName();
+
+	void LoadTemplate(const QString& TemplateName);
 	void SaveTemplate(const QString& TemplateName, const lcMinifigTemplate& Template);
 	void DeleteTemplate(const QString& TemplateName);
 	void AddTemplatesJson(const QByteArray& TemplateData);
 	QByteArray GetTemplatesJson() const;
-
-	void LoadDefault();
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;

@@ -34,6 +34,19 @@ MinifigWizard::MinifigWizard()
 {
 	LoadSettings();
 	LoadTemplates();
+
+	lcMinifigTemplate& Template = mTemplates[GetDefaultTemplateName()];
+	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
+	const char* const Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
+
+	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
+	{
+		Template.Parts[PartIndex] = Pieces[PartIndex];
+		Template.ColorCodes[PartIndex] = ColorCodes[PartIndex];
+		Template.Angles[PartIndex] = 0.0f;
+	}
+
+	memset(&mMinifig, 0, sizeof(mMinifig));
 }
 
 MinifigWizard::~MinifigWizard()
@@ -45,6 +58,11 @@ MinifigWizard::~MinifigWizard()
 			Library->ReleasePieceInfo(mMinifig.Parts[i]); // todo: don't call ReleasePieceInfo here because it may release textures and they need a GL context current
 
 	SaveTemplates();
+}
+
+QString MinifigWizard::GetDefaultTemplateName()
+{
+	return QCoreApplication::translate("MinifigWizard", "Default");
 }
 
 void MinifigWizard::LoadSettings()
@@ -66,30 +84,6 @@ void MinifigWizard::LoadSettings()
 
 	if (MinifigFile.Open(QIODevice::ReadOnly))
 		ParseSettings(MinifigFile);
-}
-
-void MinifigWizard::LoadDefault()
-{
-	LC_ARRAY_SIZE_CHECK(MinifigWizard::mSectionNames, LC_MFW_NUMITEMS);
-
-	const int ColorCodes[LC_MFW_NUMITEMS] = { 4, 7, 14, 7, 1, 0, 7, 4, 4, 14, 14, 7, 7, 0, 0, 7, 7 };
-	const char* const Pieces[LC_MFW_NUMITEMS] = { "3624.dat", "", "3626bp01.dat", "", "973.dat", "3815.dat", "", "3819.dat", "3818.dat", "3820.dat", "3820.dat", "", "", "3817.dat", "3816.dat", "", "" };
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
-	{
-		mMinifig.ColorIndices[i] = lcGetColorIndex(ColorCodes[i]);
-		mMinifig.Angles[i] = 0.0f;
-		mMinifig.Matrices[i] = lcMatrix44Identity();
-
-		PieceInfo* Info = Library->FindPiece(Pieces[i], nullptr, false, false);
-		mMinifig.Parts[i] = Info;
-		if (Info)
-			Library->LoadPieceInfo(Info, false, true);
-	}
-
-	Library->WaitForLoadQueue();
-	Calculate();
 }
 
 void MinifigWizard::ParseSettings(lcFile& Settings)
@@ -189,6 +183,37 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			InfoArray.emplace_back(std::move(MinifigInfo));
 		}
 	}
+}
+
+void MinifigWizard::LoadTemplate(const QString& TemplateName)
+{
+	const std::map<QString, lcMinifigTemplate>::iterator& TemplateIt = mTemplates.find(TemplateName);
+
+	if (TemplateIt == mTemplates.end())
+		return;
+
+	const lcMinifigTemplate& Template = TemplateIt->second;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
+	{
+		mMinifig.ColorIndices[PartIndex] = lcGetColorIndex(Template.ColorCodes[PartIndex]);
+		mMinifig.Angles[PartIndex] = Template.Angles[PartIndex];
+		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
+
+		if (mMinifig.Parts[PartIndex])
+			Library->ReleasePieceInfo(mMinifig.Parts[PartIndex]);
+
+		PieceInfo* Info = Library->FindPiece(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
+
+		mMinifig.Parts[PartIndex] = Info;
+
+		if (Info)
+			Library->LoadPieceInfo(Info, false, true);
+	}
+
+	Library->WaitForLoadQueue();
+	Calculate();
 }
 
 void MinifigWizard::SaveTemplate(const QString& TemplateName, const lcMinifigTemplate& Template)

@@ -112,7 +112,9 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	PreviewLayout->addWidget(ViewWidget);
 
 	mView->MakeCurrent();
-	mMinifigWizard->LoadDefault();
+
+	mCurrentTemplateName = MinifigWizard::GetDefaultTemplateName();
+	mMinifigWizard->LoadTemplate(mCurrentTemplateName);
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
@@ -154,6 +156,9 @@ void lcMinifigDialog::UpdateTemplateCombo()
 
 	for (const auto& [Name, Template] : mMinifigWizard->GetTemplates())
 	{
+		if (Name == MinifigWizard::GetDefaultTemplateName())
+			continue;
+
 		if (mCurrentTemplateModified && Name == mCurrentTemplateName)
 		{
 			CurrentName += " *";
@@ -162,6 +167,10 @@ void lcMinifigDialog::UpdateTemplateCombo()
 		else
 			ui->TemplateComboBox->addItem(Name);
 	}
+
+	if (ui->TemplateComboBox->count())
+		ui->TemplateComboBox->insertSeparator(ui->TemplateComboBox->count());
+	ui->TemplateComboBox->addItem(MinifigWizard::GetDefaultTemplateName());
 
 	ui->TemplateComboBox->setCurrentText(CurrentName);
 }
@@ -183,13 +192,13 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 	
 	mView->MakeCurrent();
 
+	mMinifigWizard->LoadTemplate(TemplateName);
+
 	for (int PartIdx = 0; PartIdx < LC_MFW_NUMITEMS; PartIdx++)
 	{
 		if (!Template.Parts[PartIdx].isEmpty())
 		{
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(Template.Parts[PartIdx].toLatin1(), nullptr, false, false);
-
-			mMinifigWizard->SetPieceInfo(PartIdx, Info);
+			PieceInfo* Info = mMinifigWizard->mMinifig.Parts[PartIdx];
 
 			if (Info)
 			{
@@ -205,14 +214,11 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 		}
 		else
 		{
-			mMinifigWizard->SetPieceInfo(PartIdx, nullptr);
-
 			mPieceButtons[PartIdx]->setText(tr("None"));
 		}
 
 		QSignalBlocker ColorBlocker(mColorPickers[PartIdx]);
 
-		mMinifigWizard->SetColorIndex(PartIdx, lcGetColorIndex(Template.ColorCodes[PartIdx]));
 		mColorPickers[PartIdx]->SetCurrentColorCode(Template.ColorCodes[PartIdx]);
 
 		lcDoubleSpinBox* AngleSpinBox = mSpinBoxes[PartIdx];
@@ -221,12 +227,9 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 		{
 			QSignalBlocker AngleBlocker(AngleSpinBox);
 
-			mMinifigWizard->SetAngle(PartIdx, Template.Angles[PartIdx]);
 			AngleSpinBox->SetValue(Template.Angles[PartIdx]);
 		}
 	}
-
-	mMinifigWizard->Calculate();
 
 	mView->Redraw();
 }
@@ -246,7 +249,13 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 		return;
 	}
 
-	if (TemplateName == CurrentName)
+	if (TemplateName == MinifigWizard::GetDefaultTemplateName())
+	{
+		QMessageBox::information(this, tr("Save Template"), tr("Cannot overwrite the default template."));
+		return;
+	}
+
+	if (mMinifigWizard->GetTemplates().count(TemplateName))
 	{
 		QString Question = tr("Are you sure you want to overwrite the template '%1'?").arg(TemplateName);
 		if (QMessageBox::question(this, tr("Overwrite Template"), Question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
@@ -273,7 +282,7 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 
 void lcMinifigDialog::on_TemplateDeleteButton_clicked()
 {
-	if (mCurrentTemplateName.isEmpty())
+	if (mCurrentTemplateName.isEmpty() || mCurrentTemplateName == MinifigWizard::GetDefaultTemplateName())
 		return;
 
 	QString Template = mCurrentTemplateName;
@@ -330,6 +339,14 @@ void lcMinifigDialog::on_TemplateExportButton_clicked()
 	File.write(Templates);
 }
 
+void lcMinifigDialog::SetCurrentTemplateModified()
+{
+	if (mCurrentTemplateName == MinifigWizard::GetDefaultTemplateName())
+		mCurrentTemplateName.clear();
+	else
+		mCurrentTemplateModified = true;
+}
+
 void lcMinifigDialog::PieceButtonClicked()
 {
 	QToolButton* PieceButton = qobject_cast<QToolButton*>(sender());
@@ -364,8 +381,7 @@ void lcMinifigDialog::PieceButtonClicked()
 
 	PieceInfo* NewPiece = Result.value();
 	
-	mCurrentTemplateModified = true;
-
+	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
 	mView->MakeCurrent();
@@ -392,8 +408,7 @@ void lcMinifigDialog::ColorChanged(int Index)
 	if (Search == mColorPickers.end())
 		return;
 
-	mCurrentTemplateModified = true;
-
+	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
 	mMinifigWizard->SetColorIndex(std::distance(mColorPickers.begin(), Search), Index);
@@ -407,8 +422,7 @@ void lcMinifigDialog::AngleChanged(double Value)
 	if (Search == mSpinBoxes.end())
 		return;
 
-	mCurrentTemplateModified = true;
-
+	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
 	mMinifigWizard->SetAngle(std::distance(mSpinBoxes.begin(), Search), Value);

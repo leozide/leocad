@@ -112,6 +112,9 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		mLineWidthGranularity = 1.0f;
 	}
 
+	mLineWidthRange[1] = qMin(mLineWidthRange[1], 10.0f);
+	mLineWidthGranularity = qMax(mLineWidthGranularity, 0.25f);
+
 	ui->LineWidthSlider->setRange(0, (mLineWidthRange[1] - mLineWidthRange[0]) / mLineWidthGranularity);
 	ui->LineWidthSlider->setValue((mOptions->Preferences.mLineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
 

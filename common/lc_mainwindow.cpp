@@ -474,10 +474,12 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
+#ifndef LC_DISABLE_RENDER_DIALOG
 	QMenu* RenderMenu = FileMenu->addMenu(tr("&Render"));
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_POVRAY]);
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_BLENDER]);
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_OPEN_IN_BLENDER]);
+#endif
 	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
@@ -1074,7 +1076,7 @@ void lcMainWindow::ModelTabChanged(int Index)
 	Project* Project = lcGetActiveProject();
 	lcModelTabWidget* CurrentTab = (lcModelTabWidget*)mModelTabWidget->widget(Index);
 
-	Project->SetActiveModel(CurrentTab ? CurrentTab->GetModel() : nullptr);
+	Project->SetActiveModel(CurrentTab ? CurrentTab->GetModel() : nullptr, true);
 }
 
 void lcMainWindow::ClipboardChanged()
@@ -1317,10 +1319,20 @@ void lcMainWindow::ShowHTMLDialog()
 	lcGetActiveProject()->ExportHTML(Options);
 }
 
-void lcMainWindow::ShowRenderDialog(int Command)
+void lcMainWindow::ShowExportPOVRayDialog()
 {
-	lcRenderDialog Dialog(this, Command);
+	auto [Success, ErrorMessage] = lcGetActiveProject()->ExportPOVRay(QString());
+
+	if (!Success && !ErrorMessage.isEmpty())
+		QMessageBox::warning(this, tr("POV-Ray Export" ), ErrorMessage);
+}
+
+void lcMainWindow::ShowRenderDialog(lcRenderDialogMode RenderDialogMode)
+{
+#ifndef LC_DISABLE_RENDER_DIALOG
+	lcRenderDialog Dialog(this, RenderDialogMode);
 	Dialog.exec();
+#endif
 }
 
 void lcMainWindow::ShowInstructionsDialog()
@@ -1586,9 +1598,9 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 	}
 
 	if (!mModelTabWidget->count())
-		lcGetActiveProject()->SetActiveModel(0);
+		lcGetActiveProject()->SetActiveModel(0, true);
 	else
-		lcGetActiveProject()->SetActiveModel(CurrentTabName);
+		lcGetActiveProject()->SetActiveModel(CurrentTabName, true);
 }
 
 void lcMainWindow::RemoveAllModelTabs()
@@ -2552,7 +2564,7 @@ bool lcMainWindow::SetModelFromFocus()
 	if (Model)
 	{
 		Project* Project = lcGetActiveProject();
-		Project->SetActiveModel(Model);
+		Project->SetActiveModel(Model, true);
 		return true;
 	}
 
@@ -2569,7 +2581,7 @@ void lcMainWindow::SetModelFromSelection()
 	if (Model)
 	{
 		Project* Project = lcGetActiveProject();
-		Project->SetActiveModel(Model);
+		Project->SetActiveModel(Model, true);
 	}
 }
 
@@ -2656,7 +2668,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:
-		lcGetActiveProject()->ExportPOVRay(QString());
+		ShowExportPOVRayDialog();
 		break;
 
 	case LC_FILE_EXPORT_WAVEFRONT:
@@ -2664,9 +2676,15 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_RENDER_POVRAY:
+		ShowRenderDialog(lcRenderDialogMode::RenderPOVRay);
+		break;
+
 	case LC_FILE_RENDER_BLENDER:
+		ShowRenderDialog(lcRenderDialogMode::RenderBlender);
+		break;
+
 	case LC_FILE_RENDER_OPEN_IN_BLENDER:
-		ShowRenderDialog(CommandId - LC_FILE_RENDER_POVRAY);
+		ShowRenderDialog(lcRenderDialogMode::OpenInBlender);
 		break;
 
 	case LC_FILE_INSTRUCTIONS:
@@ -3298,7 +3316,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_MODEL_38:
 	case LC_MODEL_39:
 	case LC_MODEL_40:
-		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01);
+		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01, true);
 		break;
 
 	case LC_HELP_HOMEPAGE:

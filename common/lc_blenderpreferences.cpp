@@ -1087,7 +1087,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 #else
 				ScriptName =  QLatin1String("blender_test.sh");
 #endif
-				ScriptCommand = QString("%1 %2").arg(BlenderExe).arg(Arguments.join(" "));
+				ScriptCommand = QString("\"%1\" %2").arg(BlenderExe).arg(Arguments.join(" "));
 
 				Script.setFileName(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
 				if(Script.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -1133,7 +1133,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				{
 					const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
 					const QString& Header = tr ("Blender test failed.");
-					ShowMessage(Header, Title, Message);
+					ShowMessage(this, Header, Title, Message);
 					return;
 				}
 			} // Test Blender
@@ -1143,7 +1143,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				const QString& Title = tr ("%1 Blender LDraw Addon Modules").arg(LC_PRODUCTNAME_STR);
 				const QString& Header = tr ("No import module enabled. If you continue, the default import module (Import TN) will be used.<br>If you select No, all addon modules will be disabled.");
 				const QString& Body = tr ("Continue with the default import module ?");
-				int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES_NO, QMessageBox::NoIcon);
+				int Exec = ShowMessage(this, Header, Title, Body, QString(), MBB_YES_NO, QMessageBox::NoIcon);
 				if (Exec != QMessageBox::Yes)
 				{
 					mRenderActBox->setChecked(false);
@@ -1200,7 +1200,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!QFileInfo(BlenderInstallFile).exists())
 			{
-				ShowMessage(tr ("Could not find addon install file: %1").arg(BlenderInstallFile));
+				ShowMessage(this, tr("Could not find addon install file: %1").arg(BlenderInstallFile));
 				StatusUpdate(true, true, tr("Not found."));
 				return;
 			}
@@ -1248,7 +1248,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 						QFile File(QFileInfo(List.at(LblIdx)).absoluteFilePath());
 						if (!File.open(QFile::ReadOnly | QFile::Text))
 						{
-							ShowMessage(tr("Cannot read addon file %1<br>%2").arg(List.at(LblIdx).fileName()).arg(File.errorString()));
+							ShowMessage(this, tr("Cannot read addon file %1<br>%2").arg(List.at(LblIdx).fileName()).arg(File.errorString()));
 							break;
 						}
 						else
@@ -1286,7 +1286,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			StatusUpdate(true, true, tr("Install failed."));
 	}
 	else
-		ShowMessage(tr("Blender executable not found at [%1]").arg(BlenderExe), tr("Addon install failed."));
+		ShowMessage(this, tr("Blender executable not found at [%1]").arg(BlenderExe), tr("Addon install failed."));
 }
 
 bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
@@ -1312,7 +1312,7 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 			if (Result.size())
 				Message.append(" "+Result);
 
-			ShowMessage(Message, tr("Extract addon"));
+			ShowMessage(this, Message, tr("Extract addon"));
 		}
 	}
 	else if (AddonAction == ADDON_NO_ACTION)
@@ -1374,7 +1374,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		}
 		else
 		{
-			ShowMessage(tr("Check latest addon version failed."), tr("Latest Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(this, tr("Check latest addon version failed."), tr("Latest Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 			return true; // Reload existing archive
 		}
 
@@ -1387,7 +1387,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			if (!ZipFile.OpenRead(BlenderAddonFile))
 			{
-				ShowMessage(tr("Cannot open addon archive file: %1.").arg(BlenderAddonFile));
+				ShowMessage(this, tr("Cannot open addon archive file: %1.").arg(BlenderAddonFile));
 				return false;
 			}
 
@@ -1395,14 +1395,14 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			if (!ZipFile.ExtractFile(VersionFile, File))
 			{
-				ShowMessage(tr("Cannot extract addon archive version file: %1.").arg(VersionFile));
+				ShowMessage(this, tr("Cannot extract addon archive version file: %1.").arg(VersionFile));
 				return false;
 			}
 
 			Ba = QByteArray::fromRawData((const char*)File.mBuffer, (int)File.GetLength());
 			if (Ba.isEmpty())
 			{
-				ShowMessage(tr("Cannot read addon archive version file: %1.").arg(VersionFile));
+				ShowMessage(this, tr("Cannot read addon archive version file: %1.").arg(VersionFile));
 				return false; // Download new archive
 			}
 		}
@@ -1411,7 +1411,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			QFile File(AddonVersionFile);
 			if (!File.open(QIODevice::ReadOnly))
 			{
-				ShowMessage(tr("Cannot read addon version file: [%1]<br>%2.").arg(AddonVersionFile).arg(File.errorString()));
+				ShowMessage(this, tr("Cannot read addon version file: [%1]<br>%2.").arg(AddonVersionFile).arg(File.errorString()));
 				return false; // Download new archive
 			}
 			Ba = File.readAll();
@@ -1458,7 +1458,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
 				const QString& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR).arg(LocalVersion).arg(OnlineVersion);
 				const QString& Body = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
-				int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
+				int Exec = ShowMessage(this, Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 				if (Exec == QMessageBox::Cancel)
 				{
 					AddonAction = ADDON_CANCELED;
@@ -1494,7 +1494,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			Result &= Dir.rmdir(BlenderAddonDir);
 			if (!Result)
-				ShowMessage(tr("Failed to properly remove Blender addon: %1").arg(BlenderAddonDir), tr("Remove Existing Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+				ShowMessage(this, tr("Failed to properly remove Blender addon: %1").arg(BlenderAddonDir), tr("Remove Existing Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 		}
 	};
 
@@ -1510,7 +1510,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		if (QFileInfo(BlenderAddonFile).exists())
 		{
 			if (!QFile::rename(BlenderAddonFile, OldBlenderAddonFile))
-				ShowMessage(tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
+				ShowMessage(this, tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
 		}
 
 		QDir Dir(BlenderDir);
@@ -1556,35 +1556,35 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 							BlenderAddonValidated = true;
 						}
 						else
-							ShowMessage(tr("Failed to validate Blender addon file name<br>Downloaded:%1<br>Received:%2").arg(ArchiveFileName, ShaReceived.last()));
+							ShowMessage(this, tr("Failed to validate Blender addon file name<br>Downloaded:%1<br>Received:%2").arg(ArchiveFileName, ShaReceived.last()));
 					}
 					else
-						ShowMessage(tr("Failed to validate Blender addon SHA hash <br>Calculated:%1<br>Received:%2").arg(ShaCalculated, ShaReceived.first()));
+						ShowMessage(this, tr("Failed to validate Blender addon SHA hash <br>Calculated:%1<br>Received:%2").arg(ShaCalculated, ShaReceived.first()));
 					gAddonPreferences->mData.clear();
 				}
 				else
-					ShowMessage(tr("Failed to receive SHA hash for Blender addon %1.sha256").arg(LC_BLENDER_ADDON_FILE));
+					ShowMessage(this, tr("Failed to receive SHA hash for Blender addon %1.sha256").arg(LC_BLENDER_ADDON_FILE));
 			}
 			else
-				ShowMessage(tr("Failed to read Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
+				ShowMessage(this, tr("Failed to read Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
 		}
 		else
-			ShowMessage(tr("Failed to write Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
+			ShowMessage(this, tr("Failed to write Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile).arg(File.errorString()));
 
 		if (!BlenderAddonValidated)
 		{
 			if (QFileInfo(BlenderAddonFile).exists())
 				if (!QFile::remove(BlenderAddonFile))
-					ShowMessage(tr("Failed to remove invalid Blender addon archive:<br>%1").arg(BlenderAddonFile));
+					ShowMessage(this, tr("Failed to remove invalid Blender addon archive:<br>%1").arg(BlenderAddonFile));
 			if (QFileInfo(OldBlenderAddonFile).exists())
 				if (!QFile::rename(OldBlenderAddonFile, BlenderAddonFile))
-					ShowMessage(tr("Failed to restore Blender addon archive:<br>%1 from %2").arg(ArchiveFileName, OldArchiveFileName));
+					ShowMessage(this, tr("Failed to restore Blender addon archive:<br>%1 from %2").arg(ArchiveFileName, OldArchiveFileName));
 			AddonAction = ADDON_FAIL;
 		}
 	}
 	else
 	{
-		ShowMessage(tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
+		ShowMessage(this, tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
 		AddonAction = ADDON_FAIL;
 	}
 
@@ -1673,7 +1673,7 @@ void lcBlenderPreferences::ShowResult()
 		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
 		const QString& Header = "<b>" + tr ("Addon install failed.") + "</b>";
 		const QString& Body = tr ("LDraw addon install encountered one or more errors. See Show Details...");
-		ShowMessage(Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Warning);
+		ShowMessage(this, Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Warning);
 	}
 	else
 	{
@@ -1709,7 +1709,7 @@ void lcBlenderPreferences::ShowResult()
 	mProcess = nullptr;
 
 	if (Error)
-		ShowMessage(Message);
+		ShowMessage(this, Message);
 }
 
 void lcBlenderPreferences::SettingChanged(const QString& Value)
@@ -1800,7 +1800,7 @@ void lcBlenderPreferences::GetStandardOutput()
 	QFileInfo FileInfo(LogFile);
 	if (!FileInfo.exists())
 	{
-		ShowMessage(tr("Blender addon standard output file not found: %1.").arg(FileInfo.absoluteFilePath()));
+		ShowMessage(this, tr("Blender addon standard output file not found: %1.").arg(FileInfo.absoluteFilePath()));
 		return;
 	}
 
@@ -1957,7 +1957,7 @@ void lcBlenderPreferences::ReadStdOut()
 		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
 		const QString& Header = "<b>" + tr ("Addon install standard output.") + "</b>";
 		const QString& Body = tr ("LDraw addon install encountered %1. See Show Details...").arg(Items);
-		ShowMessage(Header, Title, Body, ErrorsAndWarnings.append(StdOutLog), MBB_OK, Icon);
+		ShowMessage(this, Header, Title, Body, ErrorsAndWarnings.append(StdOutLog), MBB_OK, Icon);
 	}
 }
 
@@ -2002,7 +2002,7 @@ void lcBlenderPreferences::WriteStdOut()
 		mAddonStdOutButton->setEnabled(true);
 	}
 	else
-		ShowMessage(tr("Error writing to %1 file '%2':\n%3").arg("stdout").arg(File.fileName(), File.errorString()));
+		ShowMessage(this, tr("Error writing to %1 file '%2':\n%3").arg("stdout").arg(File.fileName(), File.errorString()));
 }
 
 bool lcBlenderPreferences::PromptCancel()
@@ -2012,7 +2012,7 @@ bool lcBlenderPreferences::PromptCancel()
 	{
 		const QString& Title = tr ("Cancel %1 Addon Install").arg(LC_PRODUCTNAME_STR);
 		const QString& Header = "<b>" + tr("Are you sure you want to cancel the add on install ?") + "</b>";
-		int Exec = ShowMessage(Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
+		int Exec = ShowMessage(this, Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
 		if (Exec == QMessageBox::Yes)
 		{
 			mProcess->kill();
@@ -2623,11 +2623,11 @@ void lcBlenderPreferences::LoadSettings()
 				gAddonPreferences->ReadStdOut(QString(Ba), Errors);
 
 				if (!Errors.isEmpty())
-					ShowMessage(Errors);
+					ShowMessage(nullptr, Errors);
 			}
 			else
 			{
-				ShowMessage(tr("Blender config file was not found. "
+				ShowMessage(nullptr, tr("Blender config file was not found. "
 							   "Install log check failed:<br>%1:<br>%2")
 								.arg(File.fileName())
 								.arg(File.errorString()));
@@ -3079,7 +3079,7 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 			const QString& Title = tr ("LDraw Render Settings Conflict");
 			const QString& Header = "<b>" + tr ("Crop image configuration settings conflict were resolved.") + "</b>";
 			const QString& Body = QString("%1%2%3").arg(Conflict[0] ? tr("Keep aspect ratio set to false.<br>") : "").arg(Conflict[1] ? tr("Add environment (backdrop and base plane) set to false.<br>") : "").arg(Conflict[2] ? tr("Transparent background set to true.<br>") : "");
-			ShowMessage(Header, Title, Body, QString(), MBB_OK, QMessageBox::Information);
+			ShowMessage(this, Header, Title, Body, QString(), MBB_OK, QMessageBox::Information);
 		}
 	}
 
@@ -3117,7 +3117,7 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 		const QString& Title = tr ("Custom LDraw Colours");
 		const QString& Header = "<b>" + tr ("Colour scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
 		const QString& Body = tr ("Colour scheme 'custom' selected but no LDConfig file was specified.<br>The default colour scheme '%1' will be used.<br>").arg(Settings[Color_Scheme].value);
-		ShowMessage(Header, Title, Body, QString(), MBB_OK, QMessageBox::Warning);
+		ShowMessage(this, Header, Title, Body, QString(), MBB_OK, QMessageBox::Warning);
 	}
 	else
 	{
@@ -3131,7 +3131,7 @@ bool lcBlenderPreferences::PromptAccept()
 {
 	 const QString& Title = tr ("Render Settings Modified");
 	 const QString& Header = "<b>" + tr("Do you want to accept the modified settings before quitting ?") + "</b>";
-	int Exec = ShowMessage(Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
+	int Exec = ShowMessage(this, Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
 	if (Exec == QMessageBox::Yes)
 		return true;
 
@@ -3503,7 +3503,7 @@ bool lcBlenderPreferences::ExportParameterFile()
 		Message = tr("Failed to open Blender parameter file: %1:<br>%2")
 					  .arg(File.fileName())
 					  .arg(File.errorString());
-		ShowMessage(Message);
+		ShowMessage(nullptr, Message);
 		return false;
 	}
 	return true;
@@ -3519,17 +3519,17 @@ bool lcBlenderPreferences::OverwriteFile(const QString& File)
 	const QString& Title = tr ("Replace Existing File");
 	const QString Header = "<b>" + QMessageBox::tr ("Existing file %1 detected.").arg(fileInfo.fileName()) + "</b>";
 	const QString Body = QMessageBox::tr ("\"%1\"<br>This file already exists.<br>Replace existing file?").arg(fileInfo.fileName());
-	int Exec = ShowMessage(Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
+	int Exec = ShowMessage(nullptr, Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 
 	return (Exec == QMessageBox::Yes);
 }
 
-int lcBlenderPreferences::ShowMessage(const QString& Header,  const QString& Title,  const QString& Body, const QString& Detail, int const Buttons, int const Icon)
+int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  const QString& Title,  const QString& Body, const QString& Detail, int const Buttons, int const Icon)
 {
 	if (!gMainWindow)
 		return QMessageBox::Ok;
 
-	QMessageBox Box;
+	QMessageBox Box(Parent);
 	Box.setWindowIcon(QIcon());
 	if (!Icon)
 	{
@@ -3593,7 +3593,8 @@ int lcBlenderPreferences::ShowMessage(const QString& Header,  const QString& Tit
 
 	const bool DownloadRequest = Body.startsWith(tr("Do you want to download version "));
 
-	if (DownloadRequest){
+	if (DownloadRequest)
+	{
 		QCheckBox* AddonVersionCheck = new QCheckBox(tr("Do not show download new addon version message again."));
 		Box.setCheckBox(AddonVersionCheck);
 		QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
@@ -3613,7 +3614,7 @@ void lcBlenderPreferences::DownloadFinished(lcHttpReply* Reply)
 	if (!Reply->error())
 		mData = Reply->readAll();
 	else
-		ShowMessage(tr("Addon download failed."));
+		ShowMessage(this, tr("Addon download failed."));
 
 	mHttpReply = nullptr;
 
@@ -3761,7 +3762,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 				FileInfo.permissions |= QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther;
 			break;
 		default:
-			ShowMessage(tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(this, tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 			Ok = false;
 		}
 

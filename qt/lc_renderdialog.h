@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef LC_DISABLE_RENDER_DIALOG
+
 #include <QDialog>
 
 namespace Ui {
@@ -43,64 +45,75 @@ protected:
 	QImage mScaledImage;
 };
 
+enum class lcRenderDialogMode
+{
+	RenderPOVRay,
+	RenderBlender,
+	OpenInBlender
+};
+
+enum class lcPOVRayRenderQuality
+{
+	Low,
+	Medium,
+	High
+};
+
 class lcRenderDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit lcRenderDialog(QWidget* Parent, int Command);
-	~lcRenderDialog();
+	explicit lcRenderDialog(QWidget* Parent, lcRenderDialogMode Mode);
+	virtual ~lcRenderDialog();
 
 public slots:
 	void reject() override;
-	void on_RenderButton_clicked();
 	void on_OutputBrowseButton_clicked();
-	void on_RenderSettingsButton_clicked();
-	void on_RenderOutputButton_clicked();
 	void Update();
 
 protected slots:
+	void RenderButtonClicked();
+	void SettingsButtonClicked();
+	void LogButtonClicked();
 	void ReadStdOut();
 	void WriteStdOut();
-	void UpdateElapsedTime() const;
 
 protected:
 	QString GetStdOutFileName() const;
 	QString GetStdErrFileName() const;
 	QString GetPOVFileName() const;
 	QString ReadStdErr(bool& Error) const;
+	void RenderPOVRay();
+	void RenderBlender();
 	void CloseProcess();
 	bool PromptCancel();
 	void ShowResult();
-#ifndef QT_NO_PROCESS
-	lcRenderProcess* mProcess;
-#endif
-	enum CommandType
-	{
-		POVRAY_RENDER,
-		BLENDER_RENDER,
-		OPEN_IN_BLENDER
-	};
 
 	QTimer mUpdateTimer;
 	QElapsedTimer mRenderTime;
 	QFile mOutputFile;
-	void* mOutputBuffer;
+	void* mOutputBuffer = nullptr;
 	QImage mImage;
 	QStringList mStdErrList;
 	QStringList mStdOutList;
+	QPushButton* mRenderButton = nullptr;
+	QPushButton* mSettingsButton = nullptr;
+	QPushButton* mLogButton = nullptr;
+	lcRenderProcess* mProcess = nullptr;
 
-	int mWidth;
-	int mHeight;
+	int mWidth = 1280;
+	int mHeight = 720;
+	lcPOVRayRenderQuality mQuality = lcPOVRayRenderQuality::High;
 	int mPreviewWidth;
 	int mPreviewHeight;
-	int mCommand;
+	lcRenderDialogMode mDialogMode;
 	int mBlendProgValue;
 	int mBlendProgMax;
 	double mScale;
-	QString mImportModule;
-	QString mLabelMessage;
 	QString mDataPath;
 
 	Ui::lcRenderDialog* ui;
 };
+
+#endif // LC_DISABLE_RENDER_DIALOG

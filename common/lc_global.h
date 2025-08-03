@@ -28,6 +28,10 @@
 #pragma warning(default : 5038) // data member 'A::y' will be initialized after data member 'A::x'
 #endif
 
+#ifdef QT_NO_PRINTER
+class QPrinter;
+#endif
+
 #ifndef Q_FALLTHROUGH
 #define Q_FALLTHROUGH();
 #endif
@@ -35,6 +39,10 @@
 #ifndef QT_STRINGIFY
 #define QT_STRINGIFY2(x) #x
 #define QT_STRINGIFY(x) QT_STRINGIFY2(x)
+#endif
+
+#ifdef QT_NO_PROCESS
+#define LC_DISABLE_RENDER_DIALOG
 #endif
 
 #define LC_ARRAY_COUNT(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))

@@ -68,9 +68,9 @@ public:
 
 	lcInstructions* GetInstructions();
 
-	void SetActiveModel(lcModel* Model);
-	void SetActiveModel(int ModelIndex);
-	void SetActiveModel(const QString& FileName);
+	void SetActiveModel(lcModel* Model, bool UpdateInterface);
+	void SetActiveModel(int ModelIndex, bool UpdateInterface);
+	void SetActiveModel(const QString& FileName, bool UpdateInterface);
 
 	lcModel* CreateNewModel(bool ShowModel);
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;
@@ -91,7 +91,7 @@ public:
 	bool ExportCOLLADA(const QString& FileName);
 	bool ExportCSV(const QString& FileName);
 	void ExportHTML(const lcHTMLExportOptions& Options);
-	bool ExportPOVRay(const QString& FileName);
+	std::pair<bool, QString> ExportPOVRay(const QString& FileName);
 	bool ExportWavefront(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;

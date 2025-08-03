@@ -86,7 +86,7 @@ void lcPreviewDockWidget::SetPreviewLock()
 lcPreview::lcPreview()
 	: lcView(lcViewType::Preview, nullptr), mLoader(new Project(true))
 {
-	mLoader->SetActiveModel(0);
+	mLoader->SetActiveModel(0, false);
 	mModel = mLoader->GetActiveModel();
 }
 
@@ -127,7 +127,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		if (!mLoader->Load(ModelPath, false))
 			return false;
 
-		mLoader->SetActiveModel(0);
+		mLoader->SetActiveModel(0, false);
 		lcGetPiecesLibrary()->RemoveTemporaryPieces();
 		mModel = mLoader->GetActiveModel();
 		if (!mModel->GetProperties().mDescription.isEmpty())
@@ -145,7 +145,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 void lcPreview::ClearPreview()
 {
 	mLoader = std::unique_ptr<Project>(new Project(true/*IsPreview*/));
-	mLoader->SetActiveModel(0);
+	mLoader->SetActiveModel(0, false);
 	mModel = mLoader->GetActiveModel();
 	lcGetPiecesLibrary()->UnloadUnusedParts();
 	Redraw();

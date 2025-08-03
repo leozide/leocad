@@ -134,7 +134,7 @@ QString Project::GetImageFileName(bool AllowCurrentFolder) const
 	return QDir::toNativeSeparators(FileName) + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 }
 
-void Project::SetActiveModel(lcModel* ActiveModel)
+void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 {
 	if (!ActiveModel)
 		return;
@@ -150,28 +150,28 @@ void Project::SetActiveModel(lcModel* ActiveModel)
 
 	mActiveModel = ActiveModel;
 
-	if (!mIsPreview && gMainWindow)
+	if (!mIsPreview && gMainWindow && UpdateInterface)
 	{
 		gMainWindow->SetCurrentModelTab(mActiveModel);
 		mActiveModel->UpdateInterface();
 	}
 }
 
-void Project::SetActiveModel(int ModelIndex)
+void Project::SetActiveModel(int ModelIndex, bool UpdateInterface)
 {
 	if (ModelIndex < 0 || ModelIndex >= static_cast<int>(mModels.size()))
 		return;
 
-	SetActiveModel(mModels[ModelIndex].get());
+	SetActiveModel(mModels[ModelIndex].get(), UpdateInterface);
 }
 
-void Project::SetActiveModel(const QString& FileName)
+void Project::SetActiveModel(const QString& FileName, bool UpdateInterface)
 {
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
 		if (FileName.compare(Model->GetFileName(), Qt::CaseInsensitive) == 0)
 		{
-			SetActiveModel(Model.get());
+			SetActiveModel(Model.get(), UpdateInterface);
 			return;
 		}
 	}
@@ -264,7 +264,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 	if (ShowModel)
 	{
-		SetActiveModel(mModels.back().get());
+		SetActiveModel(mModels.back().get(), true);
 
 		lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
 		if (ActiveView)
@@ -273,7 +273,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 		gMainWindow->UpdateTitle();
 	}
 	else
-		SetActiveModel(mActiveModel);
+		SetActiveModel(mActiveModel, true);
 
 	return Model;
 }
@@ -352,7 +352,7 @@ void Project::ShowModelListDialog()
 
 	int ModelIndex = Dialog.GetActiveModelIndex();
 	if (ModelIndex != -1)
-		SetActiveModel(ModelIndex);
+		SetActiveModel(ModelIndex, true);
 }
 
 void Project::SetFileName(const QString& FileName)
@@ -643,7 +643,7 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
 
-	SetActiveModel(mActiveModel);
+	SetActiveModel(mActiveModel, false);
 
 	return ModelParts;
 }
@@ -1803,28 +1803,22 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 	}
 }
 
-bool Project::ExportPOVRay(const QString& FileName)
+std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return false;
-	}
+		return { false, tr("Nothing to export.") };
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("pov"), tr("Export POV-Ray"), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return false;
+		return { false, QString() };
 
 	lcDiskFile POVFile(SaveFileName);
 
 	if (!POVFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+		return { false, tr("Could not open file '%1' for writing.").arg(SaveFileName) };
 
 	enum
 	{
@@ -2226,10 +2220,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		lcDiskFile TableFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath());
 
 		if (!TableFile.Open(QIODevice::ReadOnly))
-		{
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
-			return false;
-		}
+			return { false, tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath) };
 
 		while (TableFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -2275,10 +2266,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		lcDiskFile LgeoColorFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath());
 
 		if (!LgeoColorFile.Open(QIODevice::ReadOnly))
-		{
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
-			return false;
-		}
+			return { false, tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath) };
 
 		while (LgeoColorFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -2510,7 +2498,7 @@ bool Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine(Line);
 	}
 
-	return true;
+	return { true, QString() };
 }
 
 bool Project::ExportWavefront(const QString& FileName)

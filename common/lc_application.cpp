@@ -294,7 +294,7 @@ void lcApplication::SetProject(Project* Project)
 	delete mProject;
 	mProject = Project;
 
-	Project->SetActiveModel(0);
+	Project->SetActiveModel(0, true);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 
 	if (mProject && !mProject->GetFileName().isEmpty() && mPreferences.mRestoreTabLayout)
@@ -1022,7 +1022,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	if (ProjectLoaded)
 	{
 		if (!Options.ModelName.isEmpty())
-			mProject->SetActiveModel(Options.ModelName);
+			mProject->SetActiveModel(Options.ModelName, true);
 
 		std::unique_ptr<lcView> ActiveView;
 

@@ -64,7 +64,7 @@ public:
 	static void SaveSettings();
 	static bool ExportParameterFile();
 	static bool SettingsModified(bool Update = true, QString const& Module = QString());
-	static int ShowMessage(QString const& Header, QString const& Title = QString(), QString const& Body = QString(), QString const& Detail = QString(), const int Buttons = MBB_OK, const int Icon = 3 /*QMessageBox::Critical*/);
+	static int ShowMessage(QWidget* Parent, QString const& Header, QString const& Title = QString(), QString const& Body = QString(), QString const& Detail = QString(), const int Buttons = MBB_OK, const int Icon = 3 /*QMessageBox::Critical*/);
 
 	void Apply(const int Response = QDialog::Accepted);
 
@@ -76,8 +76,8 @@ protected:
 	static int NumPaths(bool DefaultSettings = false);
 	static int NumSettings(bool DefaultSettings = false);
 	static int NumSettingsMM(bool DefaultSettings = false);
-	static int GetBlenderAddon(const QString& BlenderDir);
-	static bool ExtractBlenderAddon(const QString& BlenderDir);
+	int GetBlenderAddon(const QString& BlenderDir);
+	bool ExtractBlenderAddon(const QString& BlenderDir);
 	static void LoadDefaultParameters(QByteArray& Buffer, int Which);
 	static bool OverwriteFile(const QString& File);
 

@@ -148,7 +148,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 
 	lcProfileEntry("Render", "Width", 1280),                                                   // LC_PROFILE_RENDER_WIDTH
 	lcProfileEntry("Render", "Height", 720),                                                   // LC_PROFILE_RENDER_HEIGHT
-	lcProfileEntry("Render", "Height", (int)lcPOVRayRenderQuality::High),                      // LC_PROFILE_RENDER_QUALITY
+	lcProfileEntry("Render", "Quality", (int)lcPOVRayRenderQuality::High),                     // LC_PROFILE_RENDER_QUALITY
 
 	lcProfileEntry("Blender", "Path", ""),                                                     // LC_PROFILE_BLENDER_PATH
 	lcProfileEntry("Blender", "LDrawConfigPath", ""),                                          // LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH

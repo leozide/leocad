@@ -499,7 +499,7 @@ void lcRenderDialog::RenderBlender()
 #ifdef Q_OS_WIN
 		mProcess->startDetached(ShellProgram, QStringList() << "/C" << ScriptFile.fileName());
 #else
-		mProcess->startDetached(ShellProgram, QStringList() << Script.fileName());
+		mProcess->startDetached(ShellProgram, QStringList() << ScriptFile.fileName());
 #endif
 		if (mProcess)
 		{
@@ -546,7 +546,7 @@ void lcRenderDialog::RenderBlender()
 #ifdef Q_OS_WIN
 		mProcess->start(ShellProgram, QStringList() << "/C" << ScriptFile.fileName());
 #else
-		mProcess->start(ShellProgram, QStringList() << Script.fileName());
+		mProcess->start(ShellProgram, QStringList() << ScriptFile.fileName());
 #endif
 	}
 

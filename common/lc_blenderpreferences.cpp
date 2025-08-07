@@ -26,6 +26,7 @@
 #include "lc_http.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
+#include "lc_qutils.h"
 #include "project.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -952,15 +953,34 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 		QString Message, ShellProgram;
 		QStringList Arguments;
 		ProcEnc Result = PR_OK;
-		QFile Script;
+		QFile ScriptFile;
 
 		bool NewBlenderExe = BlenderExeCompare != BlenderExe.toLower();
 
 		if (mConfigured && !AddonUpdate && !ModuleChange && !NewBlenderExe)
 			return;
 
+#ifdef Q_OS_WIN
+		ShellProgram = QLatin1String(LC_WINDOWS_SHELL);
+#else
+		ShellProgram = QLatin1String(LC_UNIX_SHELL);
+#endif
 		auto ProcessCommand = [&](ProcEnc Action)
 		{
+#ifdef Q_OS_WIN
+			if (Action == PR_INSTALL)
+			{
+				lcRunElevatedProcess(ShellProgram.toStdWString().c_str(), QString("/C %1").arg(ScriptFile.fileName()).toStdWString().c_str(), BlenderDir.toStdWString().c_str());
+
+				mAddonVersionLabel->clear();
+
+				if (mProgressBar)
+					mProgressBar->close();
+
+				return PR_OK;
+			}
+#endif
+
 			mProcess = new QProcess();
 
 			QString ProcessAction = tr("addon install");
@@ -990,9 +1010,9 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			else
 			{
 #ifdef Q_OS_WIN
-				mProcess->start(ShellProgram, QStringList() << "/C" << Script.fileName());
+				mProcess->start(ShellProgram, QStringList() << "/C" << ScriptFile.fileName());
 #else
-				mProcess->start(ShellProgram, QStringList() << Script.fileName());
+				mProcess->start(ShellProgram, QStringList() << ScriptFile.fileName());
 #endif
 			}
 
@@ -1089,21 +1109,21 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 #endif
 				ScriptCommand = QString("\"%1\" %2").arg(BlenderExe).arg(Arguments.join(" "));
 
-				Script.setFileName(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
-				if(Script.open(QIODevice::WriteOnly | QIODevice::Text))
+				ScriptFile.setFileName(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
+				if (ScriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
 				{
-					QTextStream Stream(&Script);
+					QTextStream Stream(&ScriptFile);
 #ifdef Q_OS_WIN
 					Stream << QLatin1String("@ECHO OFF& SETLOCAL") << LineEnding;
 #else
 					Stream << QLatin1String("#!/bin/bash") << LineEnding;
 #endif
 					Stream << ScriptCommand << LineEnding;
-					Script.close();
+					ScriptFile.close();
 				}
 				else
 				{
-					Message = tr("Cannot write Blender render script file [%1] %2.").arg(Script.fileName()).arg(Script.errorString());
+					Message = tr("Error writing to file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString());
 					Error = true;
 				}
 
@@ -1115,11 +1135,6 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 				QThread::sleep(1);
 
-#ifdef Q_OS_WIN
-				ShellProgram = QLatin1String(LC_WINDOWS_SHELL);
-#else
-				ShellProgram = QLatin1String(LC_UNIX_SHELL);
-#endif
 				Result = ProcessCommand(PR_TEST);
 				bool TestOk = Result != PR_FAIL;
 				const QString statusLabel = TestOk ? "" : tr("Blender test failed.");
@@ -1279,6 +1294,40 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			JsonDoc.setArray(JsonArray);
 			AddonPathsAndModuleNames = JsonDoc.toJson(QJsonDocument::Compact);
 		}
+
+#ifdef Q_OS_WIN
+		bool Error = false;
+
+		QString ScriptName =  QLatin1String("blender_install.bat");
+
+		ScriptFile.setFileName(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
+		if (ScriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
+		{
+			const QString& LdrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
+			QTextStream Stream(&ScriptFile);
+
+			Stream << QLatin1String("@ECHO OFF& SETLOCAL") << Qt::endl;
+			Stream << QLatin1String("SET LDRAW_DIRECTORY=") << LdrawLibPath << Qt::endl;
+			Stream << QLatin1String("SET ADDONS_TO_LOAD=") << AddonPathsAndModuleNames << Qt::endl;
+			Stream << QString("\"%1\"").arg(BlenderExe);
+			for (const QString& Argument : Arguments)
+				Stream << " " << QString("\"%1\"").arg(Argument);
+			Stream << Qt::endl;
+
+			ScriptFile.close();
+		}
+		else
+		{
+			Message = tr("Error writing to file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString());
+			Error = true;
+		}
+
+		if (Error)
+		{
+			StatusUpdate(false);
+			return;
+		}
+#endif
 
 		Result = ProcessCommand(PR_INSTALL);
 

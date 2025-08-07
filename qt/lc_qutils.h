@@ -10,6 +10,13 @@ QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
 float lcParseValueLocalized(const QString& Value);
 
+#ifdef Q_OS_WIN
+
+int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid);
+bool lcRunElevatedProcess(const LPCWSTR ExeName, const LPCWSTR Arguments, const LPCWSTR WorkingFolder);
+
+#endif
+
 class lcQTreeWidgetColumnStretcher : public QObject
 {
 	Q_OBJECT

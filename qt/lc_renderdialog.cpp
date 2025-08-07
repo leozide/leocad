@@ -7,6 +7,7 @@
 #include "lc_blenderpreferences.h"
 #include "lc_mainwindow.h"
 #include "lc_model.h"
+#include "lc_qutils.h"
 
 #ifndef LC_DISABLE_RENDER_DIALOG
 

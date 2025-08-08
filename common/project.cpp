@@ -2288,22 +2288,20 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 		}
 	}
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	auto AddColorDefinition=[UseLGEO, &ColorTable, &LgeoColorTable, &MaterialColors, &Line, &POVFile](int ColorIndex)
 	{
-		size_t ColorIdx = ModelPart.ColorIndex;
-
-		if (!ColorTable[ColorIdx][0])
+		if (!ColorTable[ColorIndex][0])
 		{
-			lcColor* Color = &gColorList[ColorIdx];
+			lcColor* Color = &gColorList[ColorIndex];
 
-			if (LgeoColorTable[ColorIdx].empty())
+			if (LgeoColorTable[ColorIndex].empty())
 			{
-				sprintf(ColorTable[ColorIdx].data(), "lc_%s", Color->SafeName);
+				sprintf(ColorTable[ColorIndex].data(), "lc_%s", Color->SafeName);
 
-				if (lcIsColorTranslucent(ColorIdx))
+				if (lcIsColorTranslucent(ColorIndex))
 				{
-					if (!UseLGEO && !MaterialColors.contains(ColorTable[ColorIdx].data()))
-						MaterialColors.append(ColorTable[ColorIdx].data());
+					if (!UseLGEO && !MaterialColors.contains(ColorTable[ColorIndex].data()))
+						MaterialColors.append(ColorTable[ColorIndex].data());
 
 					sprintf(Line, "#ifndef (lc_%s)\n#declare lc_%s = TranslucentColor(%g, %g, %g, TransFilter)\n#end\n\n",
 							Color->SafeName, Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
@@ -2312,9 +2310,9 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 				{
 					const char* MacroName;
 
-					if (lcIsColorChrome(ColorIdx))
+					if (lcIsColorChrome(ColorIndex))
 						MacroName = "Chrome";
-					else if (lcIsColorRubber(ColorIdx))
+					else if (lcIsColorRubber(ColorIndex))
 						MacroName = "Rubber";
 					else
 						MacroName = "Opaque";
@@ -2324,33 +2322,20 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 			}
 			else
 			{
-				sprintf(ColorTable[ColorIdx].data(), "LDXColor%i", Color->Code);
+				sprintf(ColorTable[ColorIndex].data(), "LDXColor%i", Color->Code);
 
 				sprintf(Line,"#ifndef (LDXColor%i) // %s\n#declare LDXColor%i = material { texture { %s } }\n#end\n\n",
-						Color->Code, Color->Name, Color->Code, LgeoColorTable[ColorIdx].c_str());
+						Color->Code, Color->Name, Color->Code, LgeoColorTable[ColorIndex].c_str());
 			}
 
 			POVFile.WriteLine(Line);
 		}
-	}
+	};
 
-	if (!ColorTable[lcGetColorIndex(TopModelColorCode)][0])
-	{
-		size_t ColorIdx = lcGetColorIndex(TopModelColorCode);
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+		AddColorDefinition(ModelPart.ColorIndex);
 
-		lcColor* Color = &gColorList[ColorIdx];
-
-		sprintf(ColorTable[ColorIdx].data(), "LDXColor%i", Color->Code);
-
-		if (LgeoColorTable[ColorIdx].empty())
-			sprintf(Line, "#ifndef (lc_%s)\n#declare lc_%s = OpaqueColor(%g, %g, %g)\n#end\n\n",
-					Color->SafeName, Color->SafeName, Color->Value[0], Color->Value[1], Color->Value[2]);
-		else
-			sprintf(Line,"#ifndef (LDXColor%i) // %s\n#declare LDXColor%i = material { texture { %s } }\n#end\n\n",
-					Color->Code, Color->Name, Color->Code, LgeoColorTable[ColorIdx].c_str());
-
-		POVFile.WriteLine(Line);
-	}
+	AddColorDefinition(lcGetColorIndex(TopModelColorCode));
 
 	std::set<lcMesh*> AddedMeshes;
 

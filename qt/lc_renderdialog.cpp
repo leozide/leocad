@@ -5,7 +5,6 @@
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_blenderpreferences.h"
-#include "lc_mainwindow.h"
 #include "lc_model.h"
 #include "lc_qutils.h"
 
@@ -180,11 +179,6 @@ bool lcRenderDialog::PromptCancel()
 	if (QMessageBox::question(this, tr("Cancel Render"), tr("Are you sure you want to cancel the current render?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return false;
 
-	if (mDialogMode == lcRenderDialogMode::RenderPOVRay)
-		gMainWindow->mActions[LC_FILE_RENDER_POVRAY]->setEnabled(true);
-	else if (mDialogMode == lcRenderDialogMode::RenderBlender)
-		gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
-
 	if (mProcess)
 	{
 #ifdef Q_OS_WIN
@@ -233,8 +227,6 @@ void lcRenderDialog::reject()
 
 void lcRenderDialog::RenderPOVRay()
 {
-	gMainWindow->mActions[LC_FILE_RENDER_POVRAY]->setEnabled(false);
-
 	QString FileName = GetPOVFileName();
 
 	ui->preview->SetImage(QImage());
@@ -363,7 +355,6 @@ void lcRenderDialog::RenderPOVRay()
 	else
 	{
 		delete Process;
-		gMainWindow->mActions[LC_FILE_RENDER_POVRAY]->setEnabled(true);
 		QMessageBox::information(this, tr("Render Error"), tr("Error starting POV-Ray."));
 		CloseProcess();
 	}
@@ -426,7 +417,6 @@ void lcRenderDialog::RenderBlender()
 	else
 	{
 		Arguments << QLatin1String("--background");
-		gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(false);
 	}
 
 	PythonExpression.append(", cli_render=True)\"");
@@ -466,7 +456,6 @@ void lcRenderDialog::RenderBlender()
 	{
 		QMessageBox::information(this, tr("Render Error"), tr("Cannot write Blender render script file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString()));
 
-		gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
 		return;
 	}
 
@@ -559,7 +548,6 @@ void lcRenderDialog::RenderBlender()
 	}
 	else
 	{
-		gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
 		Message = tr("Error starting Blender render process");
 		QMessageBox::information(this, tr("Render Error"), Message);
 		CloseProcess();
@@ -771,8 +759,6 @@ void lcRenderDialog::ShowResult()
 
 	if (mDialogMode == lcRenderDialogMode::RenderPOVRay)
 	{
-		gMainWindow->mActions[LC_FILE_RENDER_POVRAY]->setEnabled(true);
-
 		ui->preview->SetImage(mImage.scaled(mPreviewWidth, mPreviewHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 		if (!FileName.isEmpty())
@@ -788,8 +774,6 @@ void lcRenderDialog::ShowResult()
 	}
 	else if (mDialogMode == lcRenderDialogMode::RenderBlender)
 	{
-		gMainWindow->mActions[LC_FILE_RENDER_BLENDER]->setEnabled(true);
-
 		Success = QFileInfo(FileName).exists();
 		if (Success)
 		{

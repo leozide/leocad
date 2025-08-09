@@ -1918,7 +1918,7 @@ void lcView::ZoomExtents()
 
 lcCursor lcView::GetCursor() const
 {
-	if (mTrackButton != lcTrackButton::None)
+	if (mTrackButton != lcTrackButton::None && mTrackTool != lcTrackTool::Paint)
 		return lcCursor::Hidden;
 
 	if (mTrackTool == lcTrackTool::Select)
@@ -2657,6 +2657,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 
 	case lcTrackTool::Paint:
 		ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
+		StartTracking(TrackButton);
 		mToolClicked = true;
 		break;
 
@@ -3098,7 +3099,12 @@ void lcView::OnMouseMove()
 	case lcTrackTool::InsertTrainTrack:
 	case lcTrackTool::SelectTrainTrack:
 	case lcTrackTool::Eraser:
+		break;
+
 	case lcTrackTool::Paint:
+		ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
+		break;
+
 	case lcTrackTool::ColorPicker:
 		break;
 

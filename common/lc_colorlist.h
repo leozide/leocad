@@ -13,8 +13,6 @@ struct lcColorListGroup
 	std::vector<size_t> Cells;
 };
 
-void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect);
-
 class lcColorList : public QWidget
 {
 	Q_OBJECT

@@ -75,3 +75,6 @@ inline bool lcIsColorRubber(size_t ColorIndex)
 {
 	return gColorList[ColorIndex].Rubber;
 }
+
+QString lcGetColorToolTip(int ColorIndex);
+void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect);

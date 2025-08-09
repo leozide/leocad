@@ -4,47 +4,6 @@
 #include "lc_library.h"
 #include "lc_colors.h"
 
-void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect)
-{
-	Painter.setBrush(Qt::black);
-	Painter.drawRect(Rect);
-
-	const int SquareSize = 3;
-	int Column = 0;
-
-	for (;;)
-	{
-		int x = Rect.left() + 1 + Column * SquareSize;
-
-		if (x >= Rect.right())
-			break;
-
-		int Row = Column & 1;
-
-		for (;;)
-		{
-			int y = Rect.top() + 1 + Row * SquareSize;
-
-			if (y >= Rect.bottom())
-				break;
-
-			QRect GridRect(x, y, SquareSize, SquareSize);
-
-			if (GridRect.right() > Rect.right())
-				GridRect.setRight(Rect.right());
-
-			if (GridRect.bottom() > Rect.bottom())
-				GridRect.setBottom(Rect.bottom());
-
-			Painter.fillRect(GridRect, Qt::white);
-
-			Row += 2;
-		}
-
-		Column++;
-	}
-}
-
 lcColorList::lcColorList(QWidget* Parent, bool AllowNoColor)
 	: QWidget(Parent), mAllowNoColor(AllowNoColor)
 {
@@ -218,78 +177,50 @@ void lcColorList::SetCurrentColor(int ColorIndex)
 	}
 }
 
-bool lcColorList::event(QEvent *event)
+bool lcColorList::event(QEvent* Event)
 {
-	if (event->type() == QEvent::ToolTip)
+	if (Event->type() == QEvent::ToolTip)
 	{
-		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+		QHelpEvent* HelpEvent = static_cast<QHelpEvent*>(Event);
 
 		for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 		{
-			if (!mCells[CellIndex].Rect.contains(helpEvent->pos()))
+			if (!mCells[CellIndex].Rect.contains(HelpEvent->pos()))
 				continue;
 
-			lcColor* color = &gColorList[mCells[CellIndex].ColorIndex];
-			QColor rgb(color->Value[0] * 255, color->Value[1] * 255, color->Value[2] * 255);
+			QString Text = lcGetColorToolTip(mCells[CellIndex].ColorIndex);
+			QToolTip::showText(HelpEvent->globalPos(), Text);
 
-			QImage image(16, 16, QImage::Format_RGB888);
-			image.fill(rgb);
-			QPainter painter(&image);
-			painter.setPen(Qt::darkGray);
-			if (color->Code != LC_COLOR_NOCOLOR)
-				painter.drawRect(0, 0, image.width() - 1, image.height() - 1);
-			else
-				lcDrawNoColorRect(painter, QRect(0, 0, image.width() - 1, image.height() - 1));
-			painter.end();
-
-			QByteArray ba;
-			QBuffer buffer(&ba);
-			buffer.open(QIODevice::WriteOnly);
-			image.save(&buffer, "PNG");
-			buffer.close();
-
-			int colorIndex = mCells[CellIndex].ColorIndex;
-			QString text;
-			if (color->Code != LC_COLOR_NOCOLOR)
-			{
-				const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";
-				text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name, QString::number(gColorList[colorIndex].Code));
-			}
-			else
-			{
-				const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2</td></tr></table>";
-				text = QString(format).arg(QString(buffer.data().toBase64()), gColorList[colorIndex].Name);
-			}
-
-			QToolTip::showText(helpEvent->globalPos(), text);
 			return true;
 		}
 
 		QToolTip::hideText();
-		event->ignore();
+		Event->ignore();
 
 		return true;
 	}
-	else if (event->type() == QEvent::ShortcutOverride)
+	else if (Event->type() == QEvent::ShortcutOverride)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
 
-		if (keyEvent->modifiers() == Qt::NoModifier || keyEvent->modifiers() == Qt::KeypadModifier)
+		if (KeyEvent->modifiers() == Qt::NoModifier || KeyEvent->modifiers() == Qt::KeypadModifier)
 		{
-			switch (keyEvent->key())
+			switch (KeyEvent->key())
 			{
 			case Qt::Key_Left:
 			case Qt::Key_Right:
 			case Qt::Key_Up:
 			case Qt::Key_Down:
-				keyEvent->accept();
+				KeyEvent->accept();
+				break;
+
 			default:
 				break;
 			}
 		}
 	}
 
-	return QWidget::event(event);
+	return QWidget::event(Event);
 }
 
 void lcColorList::mousePressEvent(QMouseEvent* MouseEvent)

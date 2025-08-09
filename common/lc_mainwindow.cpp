@@ -732,6 +732,7 @@ void lcMainWindow::CreateToolBars()
 	mColorButton->setAutoRaise(true);
 	mColorButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	mColorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+	mColorButton->setToolTip(tr("Change Selection Color"));
 	ColorButtonLayout->addWidget(mColorButton);
 
 	connect(mColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
@@ -2157,6 +2158,7 @@ void lcMainWindow::UpdateColor()
 
 	mColorButton->setIcon(Pixmap);
 	mColorButton->setText(QString("  ") + gColorList[mColorIndex].Name);
+
 	mColorList->SetCurrentColor(mColorIndex);
 }
 

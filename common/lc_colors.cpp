@@ -410,3 +410,85 @@ int lcGetColorIndex(quint32 ColorCode)
 	gColorList.push_back(Color);
 	return (int)gColorList.size() - 1;
 }
+
+QString lcGetColorToolTip(int ColorIndex)
+{
+	lcColor* Color = &gColorList[ColorIndex];
+	QColor Rgb(Color->Value[0] * 255, Color->Value[1] * 255, Color->Value[2] * 255);
+
+	QImage Image(16, 16, QImage::Format_RGB888);
+	Image.fill(Rgb);
+
+	QPainter Painter(&Image);
+	Painter.setPen(Qt::darkGray);
+	
+	if (Color->Code != LC_COLOR_NOCOLOR)
+		Painter.drawRect(0, 0, Image.width() - 1, Image.height() - 1);
+	else
+		lcDrawNoColorRect(Painter, QRect(0, 0, Image.width() - 1, Image.height() - 1));
+
+	Painter.end();
+
+	QByteArray ByteArray;
+	QBuffer Buffer(&ByteArray);
+	Buffer.open(QIODevice::WriteOnly);
+	Image.save(&Buffer, "PNG");
+	Buffer.close();
+
+	QString Text;
+
+	if (Color->Code != LC_COLOR_NOCOLOR)
+	{
+		const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2 (%3)</td></tr></table>";
+		Text = QString(format).arg(QString(Buffer.data().toBase64()), gColorList[ColorIndex].Name, QString::number(gColorList[ColorIndex].Code));
+	}
+	else
+	{
+		const char* format = "<table><tr><td style=\"vertical-align:middle\"><img src=\"data:image/png;base64,%1\"/></td><td>%2</td></tr></table>";
+		Text = QString(format).arg(QString(Buffer.data().toBase64()), gColorList[ColorIndex].Name);
+	}
+
+	return Text;
+}
+
+
+void lcDrawNoColorRect(QPainter& Painter, const QRect& Rect)
+{
+	Painter.setBrush(Qt::black);
+	Painter.drawRect(Rect);
+
+	const int SquareSize = 3;
+	int Column = 0;
+
+	for (;;)
+	{
+		int x = Rect.left() + 1 + Column * SquareSize;
+
+		if (x >= Rect.right())
+			break;
+
+		int Row = Column & 1;
+
+		for (;;)
+		{
+			int y = Rect.top() + 1 + Row * SquareSize;
+
+			if (y >= Rect.bottom())
+				break;
+
+			QRect GridRect(x, y, SquareSize, SquareSize);
+
+			if (GridRect.right() > Rect.right())
+				GridRect.setRight(Rect.right());
+
+			if (GridRect.bottom() > Rect.bottom())
+				GridRect.setBottom(Rect.bottom());
+
+			Painter.fillRect(GridRect, Qt::white);
+
+			Row += 2;
+		}
+
+		Column++;
+	}
+}

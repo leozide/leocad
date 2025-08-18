@@ -27,12 +27,12 @@ public:
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 
 private slots:
-	void sectionResized(int LogicalIndex, int OldSize, int NewSize);
+	void SectionResized(int LogicalIndex, int OldSize, int NewSize);
 
 private:
-	const int m_columnToStretch;
-	bool m_interactiveResize;
-	int m_stretchWidth;
+	const int mColumnToStretch;
+	bool mInteractiveResize;
+	int mStretchWidth;
 };
 
 class lcSmallLineEdit : public QLineEdit

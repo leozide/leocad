@@ -73,7 +73,7 @@ Project::Project(bool IsPreview)
 	mModels.emplace_back(mActiveModel);
 
 	if (!mIsPreview && gMainWindow)
-		QObject::connect(&mFileWatcher, SIGNAL(fileChanged(const QString&)), gMainWindow, SLOT(ProjectFileChanged(const QString&)));
+		QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, gMainWindow, &lcMainWindow::ProjectFileChanged);
 }
 
 Project::~Project()

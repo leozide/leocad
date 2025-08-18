@@ -12,9 +12,9 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 
 	mHttpManager = new lcHttpManager(this);
 
-	connect(ui->SetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(accept()));
-	connect(this, SIGNAL(finished(int)), this, SLOT(Finished(int)));
-	connect(mHttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), this, SLOT(DownloadFinished(lcHttpReply*)));
+	connect(ui->SetsTree, &QTreeWidget::itemDoubleClicked, this, &lcSetsDatabaseDialog::accept);
+	connect(this, &QDialog::finished, this, &lcSetsDatabaseDialog::Finished);
+	connect(mHttpManager, &lcHttpManager::DownloadFinished, this, &lcSetsDatabaseDialog::DownloadFinished);
 
 	mKeyListReply = mHttpManager->DownloadFile(QLatin1String("https://www.leocad.org/rebrickable.json"));
 }

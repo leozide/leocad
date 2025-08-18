@@ -143,7 +143,7 @@ lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidg
 	: QObject(treeWidget->header()), m_columnToStretch(columnToStretch), m_interactiveResize(false), m_stretchWidth(0)
 {
 	parent()->installEventFilter(this);
-	connect(treeWidget->header(), SIGNAL(sectionResized(int, int, int)), SLOT(sectionResized(int, int, int)));
+	connect(treeWidget->header(), &QHeaderView::sectionResized, &lcQTreeWidgetColumnStretcher::sectionResized);
 	QHideEvent fake;
 	lcQTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
 }

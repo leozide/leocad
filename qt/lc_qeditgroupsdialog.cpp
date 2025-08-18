@@ -14,11 +14,13 @@ lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const QMap<lcPiece*, l
 	ui = new Ui::lcQEditGroupsDialog;
 
 	ui->setupUi(this);
-	connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem *,int)), this, SLOT(onItemClicked(QTreeWidgetItem *,int)));
-	connect(ui->treeWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem *,int)), this, SLOT(onItemDoubleClicked(QTreeWidgetItem *,int)));
+
+	connect(ui->treeWidget, &QTreeWidget::itemClicked, this, &lcQEditGroupsDialog::onItemClicked);
+	connect(ui->treeWidget, &QTreeWidget::itemDoubleClicked, this, &lcQEditGroupsDialog::onItemDoubleClicked);
 
 	QPushButton *newGroup = ui->buttonBox->addButton(tr("New Group"), QDialogButtonBox::ActionRole);
-	connect(newGroup, SIGNAL(clicked()), this, SLOT(on_newGroup_clicked()));
+
+	connect(newGroup, &QPushButton::clicked, this, &lcQEditGroupsDialog::on_newGroup_clicked);
 
 	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr);
 	ui->treeWidget->expandAll();

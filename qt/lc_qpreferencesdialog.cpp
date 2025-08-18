@@ -52,12 +52,12 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	connect(ui->LightColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->ControlPointColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->ControlPointFocusedColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
-	connect(ui->categoriesTree, SIGNAL(itemSelectionChanged()), this, SLOT(updateParts()));
+	connect(ui->categoriesTree, &QTreeWidget::itemSelectionChanged, this, &lcQPreferencesDialog::updateParts);
 	ui->shortcutEdit->installEventFilter(this);
-	connect(ui->commandList, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(commandChanged(QTreeWidgetItem*)));
-	connect(ui->mouseTree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(MouseTreeItemChanged(QTreeWidgetItem*)));
-	connect(ui->HighContrastButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
-	connect(ui->AutomateEdgeColorButton, SIGNAL(clicked()), this, SLOT(AutomateEdgeColor()));
+	connect(ui->commandList, &QTreeWidget::currentItemChanged, this, &lcQPreferencesDialog::commandChanged);
+	connect(ui->mouseTree, &QTreeWidget::currentItemChanged, this, &lcQPreferencesDialog::MouseTreeItemChanged);
+	connect(ui->HighContrastButton, &QToolButton::clicked, this, &lcQPreferencesDialog::AutomateEdgeColor);
+	connect(ui->AutomateEdgeColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::AutomateEdgeColor);
 
 	ui->partsLibrary->setText(mOptions->LibraryPath);
 	ui->ColorConfigEdit->setText(mOptions->ColorConfigPath);

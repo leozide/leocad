@@ -16,7 +16,7 @@ lcQSelectDialog::lcQSelectDialog(QWidget* Parent, lcModel* Model)
 	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr, Model);
 	ui->treeWidget->expandAll();
 
-	connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*, int)));
+	connect(ui->treeWidget, &QTreeWidget::itemChanged, this, &lcQSelectDialog::itemChanged);
 }
 
 lcQSelectDialog::~lcQSelectDialog()

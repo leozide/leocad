@@ -819,7 +819,7 @@ void lcLight::DrawAreaLight(lcContext* Context) const
 	{
 		float Verts[4 * 3];
 		float* CurVert = Verts;
-		const lcVector2 Size = { mAreaSizeX, mAreaSizeY };
+		const lcVector2 Size = { mAreaSizeX, mAreaShape == lcLightAreaShape::Square ? mAreaSizeX : mAreaSizeY };
 
 		*CurVert++ = -Size.x / 2.0f;
 		*CurVert++ = -Size.y / 2.0f;
@@ -859,7 +859,7 @@ void lcLight::DrawAreaLight(lcContext* Context) const
 
 		for (int EdgeIndex = 0; EdgeIndex < CircleEdges; EdgeIndex++)
 		{
-			const lcVector2 Size = { mAreaSizeX, mAreaSizeY };
+			const lcVector2 Size = { mAreaSizeX, mAreaShape == lcLightAreaShape::Disk ? mAreaSizeX : mAreaSizeY };
 			float c = cosf((float)EdgeIndex / CircleEdges * LC_2PI) * Size.x / 2.0f;
 			float s = sinf((float)EdgeIndex / CircleEdges * LC_2PI) * Size.y / 2.0f;
 

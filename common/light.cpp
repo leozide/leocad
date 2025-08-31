@@ -610,7 +610,7 @@ bool lcLight::SetBlenderRadius(float Radius, lcStep Step, bool AddKey)
 
 bool lcLight::SetBlenderAngle(float Angle, lcStep Step, bool AddKey)
 {
-	return mBlenderAngle.ChangeKey(Angle, Step, AddKey);
+	return mBlenderAngle.ChangeKey(Angle * LC_DTOR, Step, AddKey);
 }
 
 bool lcLight::SetAreaSizeX(float Size, lcStep Step, bool AddKey)

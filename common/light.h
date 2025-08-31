@@ -301,7 +301,7 @@ public:
 
 	float GetBlenderAngle() const
 	{
-		return mBlenderAngle;
+		return mBlenderAngle * LC_RTOD;
 	}
 
 	bool SetAreaSizeX(float Size, lcStep Step, bool AddKey);

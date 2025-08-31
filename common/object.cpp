@@ -68,20 +68,17 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightPOVRayFadePower:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light POV-Ray Fade Power");
 
-	case lcObjectPropertyId::LightPointBlenderRadius:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Point Light Blender Radius");
+	case lcObjectPropertyId::LightBlenderRadius:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Blender Radius");
 
-	case lcObjectPropertyId::LightSpotBlenderRadius:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Spot Light Blender Radius");
-
-	case lcObjectPropertyId::LightDirectionalBlenderAngle:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Directional Light Blender Angle");
+	case lcObjectPropertyId::LightBlenderAngle:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Blender Angle");
 
 	case lcObjectPropertyId::LightAreaSizeX:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Area X Size");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light X Size");
 
 	case lcObjectPropertyId::LightAreaSizeY:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Light Area Y Size");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Y Size");
 
 	case lcObjectPropertyId::LightSpotConeAngle:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light Cone Angle");
@@ -89,15 +86,15 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light Penumbra Angle");
 
-	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightPOVRaySpotTightness:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Spot Light POV-Ray Tightness");
 
 	case lcObjectPropertyId::LightAreaShape:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Shape");
 
-	case lcObjectPropertyId::LightAreaPOVRayGridX:
-	case lcObjectPropertyId::LightAreaPOVRayGridY:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light Grid");
+	case lcObjectPropertyId::LightPOVRayAreaGridX:
+	case lcObjectPropertyId::LightPOVRayAreaGridY:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Area Light POV-Ray Grid");
 
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:

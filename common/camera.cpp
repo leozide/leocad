@@ -682,17 +682,16 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointBlenderRadius:
-	case lcObjectPropertyId::LightSpotBlenderRadius:
-	case lcObjectPropertyId::LightDirectionalBlenderAngle:
+	case lcObjectPropertyId::LightBlenderRadius:
+	case lcObjectPropertyId::LightBlenderAngle:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightPOVRaySpotTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaPOVRayGridX:
-	case lcObjectPropertyId::LightAreaPOVRayGridY:
+	case lcObjectPropertyId::LightPOVRayAreaGridX:
+	case lcObjectPropertyId::LightPOVRayAreaGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -745,17 +744,16 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointBlenderRadius:
-	case lcObjectPropertyId::LightSpotBlenderRadius:
-	case lcObjectPropertyId::LightDirectionalBlenderAngle:
+	case lcObjectPropertyId::LightBlenderRadius:
+	case lcObjectPropertyId::LightBlenderAngle:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightPOVRaySpotTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaPOVRayGridX:
-	case lcObjectPropertyId::LightAreaPOVRayGridY:
+	case lcObjectPropertyId::LightPOVRayAreaGridX:
+	case lcObjectPropertyId::LightPOVRayAreaGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -807,17 +805,16 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointBlenderRadius:
-	case lcObjectPropertyId::LightSpotBlenderRadius:
-	case lcObjectPropertyId::LightDirectionalBlenderAngle:
+	case lcObjectPropertyId::LightBlenderRadius:
+	case lcObjectPropertyId::LightBlenderAngle:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightPOVRaySpotTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaPOVRayGridX:
-	case lcObjectPropertyId::LightAreaPOVRayGridY:
+	case lcObjectPropertyId::LightPOVRayAreaGridX:
+	case lcObjectPropertyId::LightPOVRayAreaGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:
@@ -869,17 +866,16 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::LightCastShadow:
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightPointBlenderRadius:
-	case lcObjectPropertyId::LightSpotBlenderRadius:
-	case lcObjectPropertyId::LightDirectionalBlenderAngle:
+	case lcObjectPropertyId::LightBlenderRadius:
+	case lcObjectPropertyId::LightBlenderAngle:
 	case lcObjectPropertyId::LightAreaSizeX:
 	case lcObjectPropertyId::LightAreaSizeY:
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightSpotPOVRayTightness:
+	case lcObjectPropertyId::LightPOVRaySpotTightness:
 	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightAreaPOVRayGridX:
-	case lcObjectPropertyId::LightAreaPOVRayGridY:
+	case lcObjectPropertyId::LightPOVRayAreaGridX:
+	case lcObjectPropertyId::LightPOVRayAreaGridY:
 	case lcObjectPropertyId::ObjectPositionX:
 	case lcObjectPropertyId::ObjectPositionY:
 	case lcObjectPropertyId::ObjectPositionZ:

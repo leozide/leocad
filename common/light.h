@@ -266,7 +266,7 @@ public:
 
 	float GetSpotPOVRayTightness() const
 	{
-		return mSpotPOVRayTightness;
+		return mPOVRaySpotTightness;
 	}
 
 	bool SetAreaShape(lcLightAreaShape LightAreaShape);
@@ -280,35 +280,28 @@ public:
 
 	int GetAreaPOVRayGridX() const
 	{
-		return mAreaPOVRayGridX;
+		return mPOVRayAreaGridX;
 	}
 
 	bool SetAreaPOVRayGridY(int AreaGrid, lcStep Step, bool AddKey);
 
 	int GetAreaPOVRayGridY() const
 	{
-		return mAreaPOVRayGridY;
+		return mPOVRayAreaGridY;
 	}
 
-	bool SetPointBlenderRadius(float Radius, lcStep Step, bool AddKey);
+	bool SetBlenderRadius(float Radius, lcStep Step, bool AddKey);
 
-	float GetPointBlenderRadius() const
+	float GetBlenderRadius() const
 	{
-		return mPointBlenderRadius;
+		return mBlenderRadius;
 	}
 
-	bool SetSpotBlenderRadius(float Radius, lcStep Step, bool AddKey);
+	bool SetBlenderAngle(float Angle, lcStep Step, bool AddKey);
 
-	float GetSpotBlenderRadius() const
+	float GetBlenderAngle() const
 	{
-		return mSpotBlenderRadius;
-	}
-
-	bool SetDirectionalBlenderAngle(float Angle, lcStep Step, bool AddKey);
-
-	float GetDirectionalBlenderAngle() const
-	{
-		return mDirectionalBlenderAngle;
+		return mBlenderAngle;
 	}
 
 	bool SetAreaSizeX(float Size, lcStep Step, bool AddKey);
@@ -377,21 +370,20 @@ protected:
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 	lcObjectProperty<lcMatrix33> mRotation = lcObjectProperty<lcMatrix33>(lcMatrix33Identity());
 	lcObjectProperty<lcVector3> mColor = lcObjectProperty<lcVector3>(lcVector3(1.0f, 1.0f, 1.0f));
-	lcObjectProperty<float> mPointBlenderRadius = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mSpotBlenderRadius = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mDirectionalBlenderAngle = lcObjectProperty<float>(0.526f * LC_DTOR);
-	lcObjectProperty<float> mAreaSizeX = lcObjectProperty<float>(250.0f);
-	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
 	lcObjectProperty<float> mBlenderPower = lcObjectProperty<float>(10.0f);
+	lcObjectProperty<float> mBlenderRadius = lcObjectProperty<float>(0.0f);
+	lcObjectProperty<float> mBlenderAngle = lcObjectProperty<float>(0.526f * LC_DTOR);
 	lcObjectProperty<float> mPOVRayPower = lcObjectProperty<float>(1.0f);
 	lcObjectProperty<float> mPOVRayFadeDistance = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mPOVRayFadePower = lcObjectProperty<float>(0.0f);
 	lcObjectProperty<float> mSpotConeAngle = lcObjectProperty<float>(80.0f);
 	lcObjectProperty<float> mSpotPenumbraAngle = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<float> mSpotPOVRayTightness = lcObjectProperty<float>(0.0f);
-	lcObjectProperty<int> mAreaPOVRayGridX = lcObjectProperty<int>(2);
-	lcObjectProperty<int> mAreaPOVRayGridY = lcObjectProperty<int>(2);
+	lcObjectProperty<float> mPOVRaySpotTightness = lcObjectProperty<float>(0.0f);
 	lcLightAreaShape mAreaShape = lcLightAreaShape::Rectangle;
+	lcObjectProperty<float> mAreaSizeX = lcObjectProperty<float>(250.0f);
+	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
+	lcObjectProperty<int> mPOVRayAreaGridX = lcObjectProperty<int>(2);
+	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
 
 	quint32 mState = 0;
 	bool mSelected = false;

@@ -3416,7 +3416,7 @@ void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint)
 	UpdateAllViews();
 }
 
-void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
+void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo)
 {
 	bool Modified = false;
 
@@ -3434,7 +3434,9 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	if (!Modified)
 		return;
 
-	SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
+	if (AddUndo)
+		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
+
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 
@@ -3494,9 +3496,16 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 	case lcObjectPropertyId::LightName:
 	case lcObjectPropertyId::LightType:
 	case lcObjectPropertyId::LightColor:
+		break;
+
 	case lcObjectPropertyId::LightBlenderPower:
 	case lcObjectPropertyId::LightPOVRayPower:
+		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
+		break;
+
 	case lcObjectPropertyId::LightCastShadow:
+		break;
+
 	case lcObjectPropertyId::LightPOVRayFadeDistance:
 	case lcObjectPropertyId::LightPOVRayFadePower:
 	case lcObjectPropertyId::LightBlenderRadius:
@@ -3506,6 +3515,9 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 	case lcObjectPropertyId::LightSpotConeAngle:
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
 	case lcObjectPropertyId::LightPOVRaySpotTightness:
+		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
+		break;
+
 	case lcObjectPropertyId::LightAreaShape:
 	case lcObjectPropertyId::LightPOVRayAreaGridX:
 	case lcObjectPropertyId::LightPOVRayAreaGridY:

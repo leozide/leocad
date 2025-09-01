@@ -2,8 +2,8 @@ version: '{branch}.{build}'
 skip_tags: true
 image:
 - Ubuntu1604
-- macos
-- Visual Studio 2019
+- macOS
+- Visual Studio 2022
 configuration: Release
 platform: x64
 
@@ -37,7 +37,7 @@ for:
     - mkdir appdir
     - copy build\release\leocad.exe appdir
     - copy docs\readme.md appdir\readme.txt
-    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-23.06.zip -FileName library.zip
+    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-25.08.zip -FileName library.zip
     - 7z e library.zip
     - copy library.bin appdir\\library.bin
     - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
@@ -79,7 +79,7 @@ for:
       
     after_build:
       - make install INSTALL_ROOT=AppDir
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-23.06.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-25.08.zip -FileName library.zip
       - unzip library.zip
       - mkdir -p AppDir/usr/share/leocad
       - mv library.bin AppDir/usr/share/leocad/library.bin
@@ -119,7 +119,7 @@ for:
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
       - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povray
       - chmod +x povray
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-23.06.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v23.03/Library-25.08.zip -FileName library.zip
       - unzip library.zip
      
     build_script:

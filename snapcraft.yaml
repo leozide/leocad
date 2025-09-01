@@ -1,7 +1,7 @@
 name: leocad
 base: core18
 adopt-info: leocad
-version: '23.03'
+version: '25.09'
 
 grade: stable
 confinement: strict
@@ -31,7 +31,7 @@ parts:
       - libqt5concurrent5
       - libqt5printsupport5
       - libqt5xml5
-    source: https://github.com/leozide/leocad/archive/v23.03.tar.gz
+    source: https://github.com/leozide/leocad/archive/v25.09.tar.gz
     parse-info: [usr/share/metainfo/leocad.appdata.xml]
   library:
     source: .

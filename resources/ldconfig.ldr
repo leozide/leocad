@@ -1,9 +1,16 @@
 0 LDraw.org Configuration File
 0 Name: LDConfig.ldr
 0 Author: LDraw.org
-0 !LDRAW_ORG Configuration UPDATE 2025-06-11
+0 !LDRAW_ORG Configuration UPDATE 2025-08-04
 
-0 // Last update: Added 424 - Ochre Yellow
+0 // Last update: Added Regular Colours 10022, 296, 315, 316
+0 // Last update: Added Modulex Category with 41 New Colours (Range 30000-31002)
+0 // Last update: Added Fluorescent Paint Colours with 2 New Colours (332, 333)
+0 // Last update: Added 13 (regular) Rubber Colours (10028, 10092, 10084, 10326, 10212, 10005, 10003, 10085, 10288, 10151, 10191, 10330, 10008)
+0 // Last update: Added 8 Rubber Metallic Colours (10135, 10137, 10147, 10148, 10150, 10189, 10200, 10297)
+0 // Last update: Added 2 Rubber Transparent Colours (10057, 10079)
+0 // Last update: Added 9 Canvas Colours (20006, 20007, 20019, 20022, 20028, 20071, 20072, 20320, 20335)
+0 // Last update: Updated some Reference Comments
 
 0 // * LDraw and BrickLink mostly share naming conventions for their colours.
 0 // * Where possible LEGO colour numbers were used.
@@ -31,189 +38,207 @@
 
 0 // LDraw Solid Colours
 0                              // LEGOID  26 - Black
-0 !COLOUR Black                                                 CODE   0   VALUE #1B2A34   EDGE #808080
+0 !COLOUR Black                                                 CODE     0   VALUE #1B2A34   EDGE #808080
 0                              // LEGOID  23 - Bright Blue
-0 !COLOUR Blue                                                  CODE   1   VALUE #1E5AA8   EDGE #333333
+0 !COLOUR Blue                                                  CODE     1   VALUE #1E5AA8   EDGE #333333
 0                              // LEGOID  28 - Dark Green
-0 !COLOUR Green                                                 CODE   2   VALUE #00852B   EDGE #333333
+0 !COLOUR Green                                                 CODE     2   VALUE #00852B   EDGE #333333
 0                              // LEGOID 107 - Bright Bluish Green
-0 !COLOUR Dark_Turquoise                                        CODE   3   VALUE #069D9F   EDGE #333333
+0 !COLOUR Dark_Turquoise                                        CODE     3   VALUE #069D9F   EDGE #333333
 0                              // LEGOID  21 - Bright Red
-0 !COLOUR Red                                                   CODE   4   VALUE #B40000   EDGE #333333
-0                              // LEGOID  22 / 221 - Medium Reddish Violet / Bright Purple
-0 !COLOUR Dark_Pink                                             CODE   5   VALUE #D3359D   EDGE #333333
+0 !COLOUR Red                                                   CODE     4   VALUE #B40000   EDGE #333333
+0                              // LEGOID 221 - Bright Purple
+0 !COLOUR Dark_Pink                                             CODE     5   VALUE #D3359D   EDGE #333333
 0                              // LEGOID  25 - Earth Orange
-0 !COLOUR Brown                                                 CODE   6   VALUE #543324   EDGE #1E1E1E
+0 !COLOUR Brown                                                 CODE     6   VALUE #543324   EDGE #1E1E1E
 0                              // LEGOID   2 - Grey
-0 !COLOUR Light_Grey                                            CODE   7   VALUE #8A928D   EDGE #333333
+0 !COLOUR Light_Grey                                            CODE     7   VALUE #8A928D   EDGE #333333
 0                              // LEGOID  27 - Dark Grey
-0 !COLOUR Dark_Grey                                             CODE   8   VALUE #545955   EDGE #333333
+0 !COLOUR Dark_Grey                                             CODE     8   VALUE #545955   EDGE #333333
 0                              // LEGOID  45 - Light Blue
-0 !COLOUR Light_Blue                                            CODE   9   VALUE #97CBD9   EDGE #333333
+0 !COLOUR Light_Blue                                            CODE     9   VALUE #97CBD9   EDGE #333333
 0                              // LEGOID  37 - Bright Green
-0 !COLOUR Bright_Green                                          CODE  10   VALUE #58AB41   EDGE #333333
+0 !COLOUR Bright_Green                                          CODE    10   VALUE #58AB41   EDGE #333333
 0                              // LEGOID 116 - Medium Bluish Green
-0 !COLOUR Light_Turquoise                                       CODE  11   VALUE #00AAA4   EDGE #333333
+0 !COLOUR Light_Turquoise                                       CODE    11   VALUE #00AAA4   EDGE #333333
 0                              // LEGOID 101 - Medium Red
-0 !COLOUR Salmon                                                CODE  12   VALUE #F06D61   EDGE #333333
+0 !COLOUR Salmon                                                CODE    12   VALUE #F06D61   EDGE #333333
 0                              // LEGOID   9 - Light Reddish Violet
-0 !COLOUR Pink                                                  CODE  13   VALUE #F6A9BB   EDGE #333333
+0 !COLOUR Pink                                                  CODE    13   VALUE #F6A9BB   EDGE #333333
 0                              // LEGOID  24 - Bright Yellow
-0 !COLOUR Yellow                                                CODE  14   VALUE #FAC80A   EDGE #333333
+0 !COLOUR Yellow                                                CODE    14   VALUE #FAC80A   EDGE #333333
 0                              // LEGOID   1/426 - White
-0 !COLOUR White                                                 CODE  15   VALUE #F4F4F4   EDGE #333333
+0 !COLOUR White                                                 CODE    15   VALUE #F4F4F4   EDGE #333333
 0                              // LEGOID   6 - Light Green
-0 !COLOUR Light_Green                                           CODE  17   VALUE #ADD9A8   EDGE #333333
+0 !COLOUR Light_Green                                           CODE    17   VALUE #ADD9A8   EDGE #333333
 0                              // LEGOID   3 - Light Yellow
-0 !COLOUR Light_Yellow                                          CODE  18   VALUE #FFD67F   EDGE #333333
+0 !COLOUR Light_Yellow                                          CODE    18   VALUE #FFD67F   EDGE #333333
 0                              // LEGOID   5 - Brick Yellow
-0 !COLOUR Tan                                                   CODE  19   VALUE #D7BA8C   EDGE #333333
+0 !COLOUR Tan                                                   CODE    19   VALUE #D7BA8C   EDGE #333333
 0                              // LEGOID  39 - Light Bluish Violet
-0 !COLOUR Light_Violet                                          CODE  20   VALUE #AFBED6   EDGE #333333
+0 !COLOUR Light_Violet                                          CODE    20   VALUE #AFBED6   EDGE #333333
 0                              // LEGOID 104 - Bright Violet
-0 !COLOUR Purple                                                CODE  22   VALUE #671F81   EDGE #333333
+0 !COLOUR Purple                                                CODE    22   VALUE #671F81   EDGE #333333
 0                              // LEGOID 196 - Dark Royal Blue
-0 !COLOUR Dark_Blue_Violet                                      CODE  23   VALUE #0E3E9A   EDGE #333333
+0 !COLOUR Dark_Blue_Violet                                      CODE    23   VALUE #0E3E9A   EDGE #333333
 0                              // LEGOID 106 - Bright Orange
-0 !COLOUR Orange                                                CODE  25   VALUE #D67923   EDGE #333333
+0 !COLOUR Orange                                                CODE    25   VALUE #D67923   EDGE #333333
 0                              // LEGOID 124 - Bright Reddish Violet
-0 !COLOUR Magenta                                               CODE  26   VALUE #901F76   EDGE #333333
+0 !COLOUR Magenta                                               CODE    26   VALUE #901F76   EDGE #333333
 0                              // LEGOID 119 - Bright Yellowish Green
-0 !COLOUR Lime                                                  CODE  27   VALUE #A5CA18   EDGE #333333
+0 !COLOUR Lime                                                  CODE    27   VALUE #A5CA18   EDGE #333333
 0                              // LEGOID 138 - Sand Yellow
-0 !COLOUR Dark_Tan                                              CODE  28   VALUE #897D62   EDGE #333333
+0 !COLOUR Dark_Tan                                              CODE    28   VALUE #897D62   EDGE #333333
 0                              // LEGOID 222 - Light Purple
-0 !COLOUR Bright_Pink                                           CODE  29   VALUE #FF9ECD   EDGE #333333
+0 !COLOUR Bright_Pink                                           CODE    29   VALUE #FF9ECD   EDGE #333333
 0                              // LEGOID 324 - Medium Lavender
-0 !COLOUR Medium_Lavender                                       CODE  30   VALUE #A06EB9   EDGE #333333
+0 !COLOUR Medium_Lavender                                       CODE    30   VALUE #A06EB9   EDGE #333333
 0                              // LEGOID 325 - Lavender
-0 !COLOUR Lavender                                              CODE  31   VALUE #CDA4DE   EDGE #333333
+0 !COLOUR Lavender                                              CODE    31   VALUE #CDA4DE   EDGE #333333
 0                              // LEGOID  36 - Light Yellowish Orange
-0 !COLOUR Very_Light_Orange                                     CODE  68   VALUE #FDC383   EDGE #333333
+0 !COLOUR Very_Light_Orange                                     CODE    68   VALUE #FDC383   EDGE #333333
 0                              // LEGOID 198 - Bright Reddish Lilac
-0 !COLOUR Bright_Reddish_Lilac                                  CODE  69   VALUE #8A12A8   EDGE #333333
+0 !COLOUR Bright_Reddish_Lilac                                  CODE    69   VALUE #8A12A8   EDGE #333333
 0                              // LEGOID 192 - Reddish Brown
-0 !COLOUR Reddish_Brown                                         CODE  70   VALUE #5F3109   EDGE #808080
+0 !COLOUR Reddish_Brown                                         CODE    70   VALUE #5F3109   EDGE #808080
 0                              // LEGOID 194 - Medium Stone Grey
-0 !COLOUR Light_Bluish_Grey                                     CODE  71   VALUE #969696   EDGE #333333
+0 !COLOUR Light_Bluish_Grey                                     CODE    71   VALUE #969696   EDGE #333333
 0                              // LEGOID 199 - Dark Stone Grey
-0 !COLOUR Dark_Bluish_Grey                                      CODE  72   VALUE #646464   EDGE #333333
+0 !COLOUR Dark_Bluish_Grey                                      CODE    72   VALUE #646464   EDGE #333333
 0                              // LEGOID 102 - Medium Blue
-0 !COLOUR Medium_Blue                                           CODE  73   VALUE #7396C8   EDGE #333333
+0 !COLOUR Medium_Blue                                           CODE    73   VALUE #7396C8   EDGE #333333
 0                              // LEGOID  29 - Medium Green
-0 !COLOUR Medium_Green                                          CODE  74   VALUE #7FC475   EDGE #333333
+0 !COLOUR Medium_Green                                          CODE    74   VALUE #7FC475   EDGE #333333
 0                              // LEGOID 223 - Light Pink
-0 !COLOUR Light_Pink                                            CODE  77   VALUE #FECCCF   EDGE #333333
+0 !COLOUR Light_Pink                                            CODE    77   VALUE #FECCCF   EDGE #333333
 0                              // LEGOID 283 - Light Nougat
-0 !COLOUR Light_Nougat                                          CODE  78   VALUE #FFC995   EDGE #333333
+0 !COLOUR Light_Nougat                                          CODE    78   VALUE #FFC995   EDGE #333333
 0                              // LEGOID 312 - Medium Nougat
-0 !COLOUR Medium_Nougat                                         CODE  84   VALUE #AA7D55   EDGE #333333
+0 !COLOUR Medium_Nougat                                         CODE    84   VALUE #AA7D55   EDGE #333333
 0                              // LEGOID 268 - Medium Lilac
-0 !COLOUR Medium_Lilac                                          CODE  85   VALUE #441A91   EDGE #333333
+0 !COLOUR Medium_Lilac                                          CODE    85   VALUE #441A91   EDGE #333333
 0                              // LEGOID 217 - Brown
-0 !COLOUR Light_Brown                                           CODE  86   VALUE #7B5D41   EDGE #333333
+0 !COLOUR Light_Brown                                           CODE    86   VALUE #7B5D41   EDGE #333333
 0                              // LEGOID 195 - Medium Royal Blue
-0 !COLOUR Blue_Violet                                           CODE  89   VALUE #1C58A7   EDGE #333333
+0 !COLOUR Blue_Violet                                           CODE    89   VALUE #1C58A7   EDGE #333333
 0                              // LEGOID  18 - Nougat
-0 !COLOUR Nougat                                                CODE  92   VALUE #BB805A   EDGE #333333
+0 !COLOUR Nougat                                                CODE    92   VALUE #BB805A   EDGE #333333
 0                              // LEGOID 100 - Light Red
-0 !COLOUR Light_Salmon                                          CODE 100   VALUE #F9B7A5   EDGE #333333
+0 !COLOUR Light_Salmon                                          CODE   100   VALUE #F9B7A5   EDGE #333333
 0                              // LEGOID 110 - Bright Bluish Violet
-0 !COLOUR Violet                                                CODE 110   VALUE #26469A   EDGE #333333
+0 !COLOUR Violet                                                CODE   110   VALUE #26469A   EDGE #333333
 0                              // LEGOID 112 - Medium Bluish Violet
-0 !COLOUR Medium_Violet                                         CODE 112   VALUE #4861AC   EDGE #333333
+0 !COLOUR Medium_Violet                                         CODE   112   VALUE #4861AC   EDGE #333333
 0                              // LEGOID 115 - Medium Yellowish Green
-0 !COLOUR Medium_Lime                                           CODE 115   VALUE #B7D425   EDGE #333333
+0 !COLOUR Medium_Lime                                           CODE   115   VALUE #B7D425   EDGE #333333
 0                              // LEGOID 118 - Light Bluish Green
-0 !COLOUR Aqua                                                  CODE 118   VALUE #9CD6CC   EDGE #333333
+0 !COLOUR Aqua                                                  CODE   118   VALUE #9CD6CC   EDGE #333333
 0                              // LEGOID 120 - Light Yellowish Green
-0 !COLOUR Light_Lime                                            CODE 120   VALUE #DEEA92   EDGE #333333
+0 !COLOUR Light_Lime                                            CODE   120   VALUE #DEEA92   EDGE #333333
+0                              // LEGOID 121 - Medium Yellowish Orange
+0 !COLOUR Light_Orange                                          CODE   121   VALUE #F89A39   EDGE #333333
+0                              // LEGOID 123 - Bright Reddish Orange
+0 !COLOUR Dark_Salmon                                           CODE   123   VALUE #EE5434   EDGE #333333
 0                              // LEGOID 125 - Light Orange
-0 !COLOUR Light_Orange                                          CODE 125   VALUE #F9A777   EDGE #333333
+0 !COLOUR Spud_Orange                                           CODE   125   VALUE #F9A777   EDGE #333333
 0                              // LEGOID 128 - Dark Nougat
-0 !COLOUR Dark_Nougat                                           CODE 128   VALUE #AD6140   EDGE #333333
+0 !COLOUR Dark_Nougat                                           CODE   128   VALUE #AD6140   EDGE #333333
 0                              // LEGOID 208 - Light Stone Grey
-0 !COLOUR Very_Light_Bluish_Grey                                CODE 151   VALUE #C8C8C8   EDGE #333333
+0 !COLOUR Very_Light_Bluish_Grey                                CODE   151   VALUE #C8C8C8   EDGE #333333
+0                              // LEGOID 180 - Curry
+0 !COLOUR Dark_Yellow                                           CODE   180   VALUE #DD982E   EDGE #333333
 0                              // LEGOID 191 - Flame Yellowish Orange
-0 !COLOUR Bright_Light_Orange                                   CODE 191   VALUE #FCAC00   EDGE #333333
+0 !COLOUR Bright_Light_Orange                                   CODE   191   VALUE #FCAC00   EDGE #333333
 0                              // LEGOID 212 - Light Royal Blue
-0 !COLOUR Bright_Light_Blue                                     CODE 212   VALUE #9DC3F7   EDGE #333333
+0 !COLOUR Bright_Light_Blue                                     CODE   212   VALUE #9DC3F7   EDGE #333333
+0                              // LEGOID 213 - Medium Royal Blue
+0 !COLOUR Medium_Blue_Violet                                    CODE   213   VALUE #476FB6   EDGE #333333
 0                              // LEGOID 216 - Rust
-0 !COLOUR Rust                                                  CODE 216   VALUE #872B17   EDGE #333333
+0 !COLOUR Rust                                                  CODE   216   VALUE #872B17   EDGE #333333
 0                              // LEGOID 218 - Reddish Lilac
-0 !COLOUR Reddish_Lilac                                         CODE 218   VALUE #8E5597   EDGE #333333
+0 !COLOUR Reddish_Lilac                                         CODE   218   VALUE #8E5597   EDGE #333333
 0                              // LEGOID 219 - Lilac
-0 !COLOUR Lilac                                                 CODE 219   VALUE #564E9D   EDGE #333333
+0 !COLOUR Lilac                                                 CODE   219   VALUE #564E9D   EDGE #333333
+0                              // LEGOID 220 - Light Lilac
+0 !COLOUR Light_Lilac                                           CODE   220   VALUE #9195CA   EDGE #333333
+0                              // LEGOID 225 - Warm Yellowish Orange
+0 !COLOUR Warm_Yellowish_Orange                                 CODE   225   VALUE #FAA964   EDGE #333333
 0                              // LEGOID 226/427 - Cool Yellow
-0 !COLOUR Bright_Light_Yellow                                   CODE 226   VALUE #FFEC6C   EDGE #333333
+0 !COLOUR Bright_Light_Yellow                                   CODE   226   VALUE #FFEC6C   EDGE #333333
 0                              // LEGOID 232 - Dove Blue
-0 !COLOUR Sky_Blue                                              CODE 232   VALUE #77C9D8   EDGE #333333
-0                              // LEGOID 140 - Earth Blue
-0 !COLOUR Dark_Blue                                             CODE 272   VALUE #19325A   EDGE #333333
+0 !COLOUR Sky_Blue                                              CODE   232   VALUE #77C9D8   EDGE #333333
+0                              // LEGOID 140/428 - Earth Blue
+0 !COLOUR Dark_Blue                                             CODE   272   VALUE #19325A   EDGE #333333
 0                              // LEGOID 141 - Earth Green
-0 !COLOUR Dark_Green                                            CODE 288   VALUE #00451A   EDGE #808080
+0 !COLOUR Dark_Green                                            CODE   288   VALUE #00451A   EDGE #808080
 0                              // LEGOID 295 - Flamingo Pink
-0 !COLOUR Flamingo_Pink                                         CODE 295   VALUE #FF94C2   EDGE #333333
+0 !COLOUR Flamingo_Pink                                         CODE   295   VALUE #FF94C2   EDGE #333333
 0                              // LEGOID 308 - Dark Brown
-0 !COLOUR Dark_Brown                                            CODE 308   VALUE #352100   EDGE #808080
+0 !COLOUR Dark_Brown                                            CODE   308   VALUE #352100   EDGE #808080
 0                              // LEGOID  11 - Pastel Blue
-0 !COLOUR Maersk_Blue                                           CODE 313   VALUE #ABD9FF   EDGE #333333
+0 !COLOUR Maersk_Blue                                           CODE   313   VALUE #ABD9FF   EDGE #333333
 0                              // LEGOID 154 - New Dark Red
-0 !COLOUR Dark_Red                                              CODE 320   VALUE #720012   EDGE #333333
+0 !COLOUR Dark_Red                                              CODE   320   VALUE #720012   EDGE #333333
 0                              // LEGOID 321 - Dark Azur
-0 !COLOUR Dark_Azure                                            CODE 321   VALUE #469BC3   EDGE #333333
+0 !COLOUR Dark_Azure                                            CODE   321   VALUE #469BC3   EDGE #333333
 0                              // LEGOID 322 - Medium Azur
-0 !COLOUR Medium_Azure                                          CODE 322   VALUE #68C3E2   EDGE #333333
+0 !COLOUR Medium_Azure                                          CODE   322   VALUE #68C3E2   EDGE #333333
 0                              // LEGOID 323 - Aqua
-0 !COLOUR Light_Aqua                                            CODE 323   VALUE #D3F2EA   EDGE #333333
+0 !COLOUR Light_Aqua                                            CODE   323   VALUE #D3F2EA   EDGE #333333
 0                              // LEGOID 326 - Spring Yellowish Green
-0 !COLOUR Yellowish_Green                                       CODE 326   VALUE #E2F99A   EDGE #333333
+0 !COLOUR Yellowish_Green                                       CODE   326   VALUE #E2F99A   EDGE #333333
 0                              // LEGOID 330 - Olive Green
-0 !COLOUR Olive_Green                                           CODE 330   VALUE #77774E   EDGE #333333
+0 !COLOUR Olive_Green                                           CODE   330   VALUE #77774E   EDGE #333333
 0                              // LEGOID 153 - Sand Red
-0 !COLOUR Sand_Red                                              CODE 335   VALUE #88605E   EDGE #333333
+0 !COLOUR Sand_Red                                              CODE   335   VALUE #88605E   EDGE #333333
 0                              // LEGOID  16 - Pink
-0 !COLOUR Medium_Dark_Pink                                      CODE 351   VALUE #F785B1   EDGE #333333
+0 !COLOUR Medium_Dark_Pink                                      CODE   351   VALUE #F785B1   EDGE #333333
 0                              // LEGOID 353 - Vibrant Coral
-0 !COLOUR Coral                                                 CODE 353   VALUE #FF6D77   EDGE #333333
+0 !COLOUR Coral                                                 CODE   353   VALUE #FF6D77   EDGE #333333
 0                              // LEGOID  12 - Light Orange Brown
-0 !COLOUR Earth_Orange                                          CODE 366   VALUE #D86D2C   EDGE #333333
+0 !COLOUR Earth_Orange                                          CODE   366   VALUE #D86D2C   EDGE #333333
 0                              // LEGOID 368 - Vibrant Yellow 
-0 !COLOUR Neon_Yellow                                           CODE 368   VALUE #EDFF21   EDGE #333333
+0 !COLOUR Neon_Yellow                                           CODE   368   VALUE #EDFF21   EDGE #333333
 0                              // LEGOID 370 - Medium Brown
-0 !COLOUR Medium_Brown                                          CODE 370   VALUE #755945   EDGE #333333
+0 !COLOUR Medium_Brown                                          CODE   370   VALUE #755945   EDGE #333333
 0                              // LEGOID 371 - Warm Tan
-0 !COLOUR Medium_Tan                                            CODE 371   VALUE #CCA373   EDGE #333333
+0 !COLOUR Medium_Tan                                            CODE   371   VALUE #CCA373   EDGE #333333
 0                              // LEGOID 136 - Sand Violet
-0 !COLOUR Sand_Purple                                           CODE 373   VALUE #75657D   EDGE #333333
+0 !COLOUR Sand_Purple                                           CODE   373   VALUE #75657D   EDGE #333333
 0                              // LEGOID 151 - Sand Green
-0 !COLOUR Sand_Green                                            CODE 378   VALUE #708E7C   EDGE #333333
+0 !COLOUR Sand_Green                                            CODE   378   VALUE #708E7C   EDGE #333333
 0                              // LEGOID 135 - Sand Blue
-0 !COLOUR Sand_Blue                                             CODE 379   VALUE #70819A   EDGE #333333
+0 !COLOUR Sand_Blue                                             CODE   379   VALUE #70819A   EDGE #333333
 0                              // LEGOID 402 - Reddish Orange
-0 !COLOUR Reddish_Orange                                        CODE 402   VALUE #CA4C0B   EDGE #333333
+0 !COLOUR Reddish_Orange                                        CODE   402   VALUE #CA4C0B   EDGE #333333
 0                              // LEGOID 422 - Sienna Brown
-0 !COLOUR Sienna_Brown                                          CODE 422   VALUE #915C3C   EDGE #333333
+0 !COLOUR Sienna_Brown                                          CODE   422   VALUE #915C3C   EDGE #333333
+0                              // LEGOID 423 - Umber Brown 
+0 !COLOUR Umber_Brown                                           CODE   423   VALUE #543F33   EDGE #333333
 0                              // LEGOID 424 - Ochre Yellow 
-0 !COLOUR Ochre_Yellow                                          CODE 424   VALUE #DD9E47   EDGE #333333
-0                              // LEGOID 432 - Umber Brown 
-0 !COLOUR Umber_Brown                                           CODE 423   VALUE #543F33   EDGE #333333
+0 !COLOUR Ochre_Yellow                                          CODE   424   VALUE #DD9E47   EDGE #333333
 0                              // LEGOID   4 - Brick Red
-0 !COLOUR Fabuland_Brown                                        CODE 450   VALUE #D27744   EDGE #333333
+0 !COLOUR Fabuland_Brown                                        CODE   450   VALUE #D27744   EDGE #333333
 0                              // LEGOID 105 - Bright Yellowish Orange
-0 !COLOUR Medium_Orange                                         CODE 462   VALUE #F58624   EDGE #333333
+0 !COLOUR Medium_Orange                                         CODE   462   VALUE #F58624   EDGE #333333
 0                              // LEGOID  38 - Dark Orange
-0 !COLOUR Dark_Orange                                           CODE 484   VALUE #91501C   EDGE #333333
+0 !COLOUR Dark_Orange                                           CODE   484   VALUE #91501C   EDGE #333333
 0                              // LEGOID 103 - Light Grey
-0 !COLOUR Very_Light_Grey                                       CODE 503   VALUE #BCB4A5   EDGE #333333
-0                              // LEGOID 12 - Light Orange Brown
-0 !COLOUR Light_Orange_Brown                                    CODE 507   VALUE #FA9C1C   EDGE #333333
+0 !COLOUR Very_Light_Grey                                       CODE   503   VALUE #BCB4A5   EDGE #333333
+0                              // LEGOID  12 - Light Orange Brown (OBSOLETE)
+0 !COLOUR Light_Orange_Brown                                    CODE   507   VALUE #FA9C1C   EDGE #333333
 0                              // LEGOID  13 - Red Orange
-0 !COLOUR Fabuland_Red                                          CODE 508   VALUE #C65127   EDGE #333333
+0 !COLOUR Fabuland_Red                                          CODE   508   VALUE #C65127   EDGE #333333
 0                              // LEGOID  19 - Light Brown
-0 !COLOUR Fabuland_Orange                                       CODE 509   VALUE #CF8A47   EDGE #333333
+0 !COLOUR Fabuland_Orange                                       CODE   509   VALUE #CF8A47   EDGE #333333
 0                              // LEGOID  14 - Pastel Green
-0 !COLOUR Fabuland_Lime                                         CODE 510   VALUE #78FC78   EDGE #333333
+0 !COLOUR Fabuland_Lime                                         CODE   510   VALUE #78FC78   EDGE #333333
+0                              // LEGOID  15 - Lemon
+0 !COLOUR Lemon                                                 CODE 10015   VALUE #FFF230   EDGE #333333
+0                              // LEGOID  17 - Rose
+0 !COLOUR Rose_Pink                                             CODE 10017   VALUE #FF9494   EDGE #333333
+0                              // LEGOID  22 - Medium Reddish Violet
+0 !COLOUR Yellowish_Dark_Pink                                   CODE 10022   VALUE #D05098   EDGE #333333
 
 
 0 // LDraw Transparent Colours
@@ -274,9 +299,12 @@
 
 
 0 // LDraw Chrome Plated Colours
+0                              // LEGO - Anti.Gold
 0 !COLOUR Chrome_Antique_Brass                                  CODE  60   VALUE #645A4C   EDGE #665B4D                               CHROME
+0                              // LEGO - Bluemetal
 0 !COLOUR Chrome_Blue                                           CODE  61   VALUE #6C96BF   EDGE #3D638A                               CHROME
 0 !COLOUR Chrome_Green                                          CODE  62   VALUE #3CB371   EDGE #226741                               CHROME
+0                              // LEGO - Metalred
 0 !COLOUR Chrome_Pink                                           CODE  63   VALUE #AA4D8E   EDGE #632C52                               CHROME
 0 !COLOUR Chrome_Black                                          CODE  64   VALUE #1B2A34   EDGE #3D5F76                               CHROME
 0                              // LEGOID 310 - Metalized Gold
@@ -290,7 +318,7 @@
 0 !COLOUR Pearl_Black                                           CODE  83   VALUE #0A1327   EDGE #333333                               PEARLESCENT
 0                              // LEGOID 139 - Copper
 0 !COLOUR Copper                                                CODE 134   VALUE #764D3B   EDGE #333333                               PEARLESCENT
-0                              // LEGOID 296 / 131 / 315 - Cool Silver / Silver / Silver Metallic
+0                              // LEGOID 131 - Silver
 0 !COLOUR Pearl_Light_Grey                                      CODE 135   VALUE #A0A0A0   EDGE #333333                               PEARLESCENT
 0                              // LEGOID 145 - Sand Blue Metallic
 0 !COLOUR Metallic_Blue                                         CODE 137   VALUE #5B7590   EDGE #333333                               PEARLESCENT
@@ -322,14 +350,24 @@
 0 !COLOUR Reddish_Gold                                          CODE 189   VALUE #AC8247   EDGE #333333                               PEARLESCENT
 0                              // LEGOID 200 - Lemon Metallic
 0 !COLOUR Lemon_Metallic                                        CODE 200   VALUE #708224   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 296 - Cool Silver
+0 !COLOUR Cool_Silver                                           CODE 296   VALUE #ADADAD   EDGE #333333                               PEARLESCENT
 0                              // LEGOID 297 - Warm Gold
 0 !COLOUR Pearl_Gold                                            CODE 297   VALUE #AA7F2E   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 315 - Silver Metallic
+0 !COLOUR Flat_Silver                                           CODE 315   VALUE #8C8C8C   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 316 - Titanium Metallic
+0 !COLOUR Titanium_Metallic                                     CODE 316   VALUE #3E3C39   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 342 - Conductive Black
+0 !COLOUR Conductive_Black                                      CODE 342   VALUE #3E3C39   EDGE #333333                               PEARLESCENT
+0                              // LEGOID 346 - Copper Metallic
+0 !COLOUR Reddish_Copper                                        CODE 346   VALUE #803D07   EDGE #333333                               PEARLESCENT
 
 
 0 // LDraw Metallic Paint Colours
 0                              // LEGOID 298 / 336 - Cool Silver Drum Lacq / Silver Ink
 0 !COLOUR Metallic_Silver                                       CODE  80   VALUE #767676   EDGE #333333                               METAL
-0                              // BricksetID 910 - Metallic Green
+0                              // LEGO Gr.Metal / BricksetID 910 - Metallic Green
 0 !COLOUR Metallic_Green                                        CODE  81   VALUE #C2C06F   EDGE #333333                               METAL
 0                              // LEGOID 299 / 335 - Warm Gold Drum Lacq / Gold Ink
 0 !COLOUR Metallic_Gold                                         CODE  82   VALUE #DBAC34   EDGE #333333                               METAL
@@ -337,10 +375,19 @@
 0 !COLOUR Metallic_Dark_Grey                                    CODE  87   VALUE #3E3C39   EDGE #333333                               METAL
 0                              // LEGOID 300 / 334 - Copper Drum Lacq / Copper Ink
 0 !COLOUR Metallic_Copper                                       CODE 300   VALUE #C27F53   EDGE #333333                               METAL
+0                              // LEGOID 344 - Cyan Metallic Ink
 0 !COLOUR Metallic_Light_Blue                                   CODE 10045 VALUE #97CBD9   EDGE #333333                               METAL
 0                              // BricksetID 911 - Metallic Pink
 0 !COLOUR Metallic_Pink                                         CODE 10046 VALUE #AD659A   EDGE #333333                               METAL
+0                              // LEGOID 345 - Magenta Metallic Ink
 0 !COLOUR Metallic_Light_Pink                                   CODE 10049 VALUE #FECCCF   EDGE #333333                               METAL
+
+
+0 // LDraw Fluorescent Paint Colours
+0                              // LEGOID 332 - Fluorescent Red Ink
+0 !COLOUR Fluorescent_Red_Ink                                   CODE   332 VALUE #D06D4F   EDGE #333333
+0                              // LEGOID 333 - Fluorescent Green Ink
+0 !COLOUR Fluorescent_Green_Ink                                 CODE   333 VALUE #DBEA7A   EDGE #333333
 
 
 0 // LDraw Milky Colours
@@ -386,30 +433,121 @@
 
 
 0 // LDraw Speckle Colours
+0                               // LEGOID 306 - Copper, Diffuse
 0 !COLOUR Speckle_Black_Copper                                  CODE  75   VALUE #000000   EDGE #AB6038                               MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
 0 !COLOUR Speckle_Dark_Bluish_Grey_Silver                       CODE  76   VALUE #635F61   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
-0                               // LEGOID 132 - Black Glitter
+0                               // LEGOID 304 - Cool Silver, Diffuse
 0 !COLOUR Speckle_Black_Silver                                  CODE 132   VALUE #000000   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0                               // LEGOID 305 - Warm Gold Diffuse
 0 !COLOUR Speckle_Black_Gold                                    CODE 133   VALUE #000000   EDGE #DBAC34                               MATERIAL SPECKLE VALUE #DBAC34 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
 
 
+0 // LDraw Modulex Colours
+0                              // MODULEXID  0/10 - Clear
+0 !COLOUR Modulex_Clear                                         CODE 30000   VALUE #FCFCFC   EDGE #C9C9C9      ALPHA 128
+0                              // MODULEXID  1/31 - White
+0 !COLOUR Modulex_White                                         CODE 30001   VALUE #F4F4F4   EDGE #333333
+0                              // MODULEXID  2 - Grey
+0 !COLOUR Modulex_Light_Grey                                    CODE 30002   VALUE #8A928D   EDGE #333333
+0                              // MODULEXID  3/57 - Black
+0 !COLOUR Modulex_Black                                         CODE 30003   VALUE #34434D   EDGE #333333
+0                              // MODULEXID  4 - Terracotta
+0 !COLOUR Modulex_Terracotta                                    CODE 30004   VALUE #D27744   EDGE #333333
+0                              // MODULEXID  5 - Buff
+0 !COLOUR Modulex_Buff                                          CODE 30005   VALUE #D7BA8C   EDGE #333333
+0                              // MODULEXID  6 - Ocher Yellow
+0 !COLOUR Modulex_Ochre_Yellow                                  CODE 30006   VALUE #FED557   EDGE #333333
+0                              // MODULEXID  7 - Olive Green
+0 !COLOUR Modulex_Olive_Green                                   CODE 30007   VALUE #7C9051   EDGE #333333
+0                              // MODULEXID  8 - Teal Blue
+0 !COLOUR Modulex_Teal_Blue                                     CODE 30008   VALUE #467083   EDGE #333333
+0                              // MODULEXID  9 - Brown
+0 !COLOUR Modulex_Brown                                         CODE 30009   VALUE #907450   EDGE #333333
+0                              // MODULEXID  10 - Strong Red
+0 !COLOUR Modulex_Strong_Red                                    CODE 30010   VALUE #B40000   EDGE #333333
+0                              // MODULEXID  11 - Pastel Blue
+0 !COLOUR Modulex_Pastel_Blue                                   CODE 30011   VALUE #ABD9FF   EDGE #333333
+0                              // MODULEXID  12 - Orange
+0 !COLOUR Modulex_Orange                                        CODE 30012   VALUE #D86D2C   EDGE #333333
+0                              // MODULEXID  13 - Red
+0 !COLOUR Modulex_Red                                           CODE 30013   VALUE #C65127   EDGE #333333
+0                              // MODULEXID 14 - Pastel Green
+0 !COLOUR Modulex_Pastel_Green                                  CODE 30014   VALUE #78FC78   EDGE #333333
+0                              // MODULEXID  15 - Lemon
+0 !COLOUR Modulex_Lemon                                         CODE 30015   VALUE #FFF230   EDGE #333333
+0                              // MODULEXID  16 - Pink
+0 !COLOUR Modulex_Pink                                          CODE 30016   VALUE #F785B1   EDGE #333333
+0                              // MODULEXID  32 - Grey
+0 !COLOUR Modulex_Light_Bluish_Grey                             CODE 30032   VALUE #AFB5C7   EDGE #333333
+0                              // MODULEXID  33 - Pink Red
+0 !COLOUR Modulex_Pink_Red                                      CODE 30033   VALUE #F45C40   EDGE #333333
+0                              // MODULEXID  34 - Aqua Green
+0 !COLOUR Modulex_Aqua_Green                                    CODE 30034   VALUE #27867E   EDGE #333333
+0                              // MODULEXID  35 - Light Yellow
+0 !COLOUR Modulex_Light_Yellow                                  CODE 30035   VALUE #FFE371   EDGE #333333
+0                              // MODULEXID  37 - Violet
+0 !COLOUR Modulex_Violet                                        CODE 30037   VALUE #BD7D85   EDGE #333333
+0                              // MODULEXID  38 - Medium Blue
+0 !COLOUR Modulex_Medium_Blue                                   CODE 30038   VALUE #61AFFF   EDGE #333333
+0                              // MODULEXID  39 - Light Orange
+0 !COLOUR Modulex_Light_Orange                                  CODE 30039   VALUE #F7AD63   EDGE #333333
+0                              // MODULEXID  40 - Charcoal Grey
+0 !COLOUR Modulex_Charcoal_Grey                                 CODE 30040   VALUE #595D60   EDGE #333333
+0                              // MODULEXID  54 - Brown (Bricklink 131 Mx Tile Brown)
+0 !COLOUR Modulex_Dark_Brown                                    CODE 30054   VALUE #330000   EDGE #808080
+0                              // MODULEXID  80 - White
+0 !COLOUR Modulex_Foil_White                                    CODE 30080   VALUE #F4F4F4   EDGE #333333 
+0                              // MODULEXID  81 - Black
+0 !COLOUR Modulex_Foil_Black                                    CODE 30081   VALUE #34434D   EDGE #333333 
+0                              // MODULEXID  82 - Dark Grey
+0 !COLOUR Modulex_Foil_Dark_Grey                                CODE 30082   VALUE #595D60   EDGE #333333 
+0                              // MODULEXID  83 - Light Grey
+0 !COLOUR Modulex_Foil_Light_Grey                               CODE 30083   VALUE #9C9C9C   EDGE #333333 
+0                              // MODULEXID  84 - Dark Green
+0 !COLOUR Modulex_Foil_Dark_Green                               CODE 30084   VALUE #006400   EDGE #808080 
+0                              // MODULEXID  85 - Light Green
+0 !COLOUR Modulex_Foil_Light_Green                              CODE 30085   VALUE #7DB538   EDGE #333333 
+0                              // MODULEXID  86 - Dark Blue
+0 !COLOUR Modulex_Foil_Dark_Blue                                CODE 30086   VALUE #0057A6   EDGE #333333 
+0                              // MODULEXID  87 - Light Blue
+0 !COLOUR Modulex_Foil_Light_Blue                               CODE 30087   VALUE #68AECE   EDGE #333333 
+0                              // MODULEXID  88 - Violet
+0 !COLOUR Modulex_Foil_Violet                                   CODE 30088   VALUE #4B0082   EDGE #333333 
+0                              // MODULEXID  89 - Dark Red
+0 !COLOUR Modulex_Foil_Dark_Red                                 CODE 30089   VALUE #8B0000   EDGE #333333 
+0                              // MODULEXID  90 - Yellow
+0 !COLOUR Modulex_Foil_Yellow                                   CODE 30090   VALUE #FED557   EDGE #333333 
+0                              // MODULEXID  91 - Orange
+0 !COLOUR Modulex_Foil_Orange                                   CODE 30091   VALUE #F7AD63   EDGE #333333
+0                              // MODULEXID  7 - Grey
+0 !COLOUR Modulex_Dark_Grey                                     CODE 31000    VALUE #6B5A5A   EDGE #333333
+0                              // MODULEXID  8 - Blue
+0 !COLOUR Modulex_Blue                                          CODE 31001    VALUE #0057A6   EDGE #333333
+0                              // (Mx Very Light Bluish Gray for Printed Plancopy Tiles)
+0 !COLOUR Modulex_Very_Light_Grey                               CODE 31002    VALUE #D9D5CC   EDGE #333333
+
+
 0 // LDraw Rubber Colours
-0 !COLOUR Rubber_Yellow                                         CODE  65   VALUE #FAC80A   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Black                                          CODE 256   VALUE #1B2A34   EDGE #808080                               RUBBER
-0 !COLOUR Rubber_Blue                                           CODE 273   VALUE #1E5AA8   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Red                                            CODE 324   VALUE #B40000   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Orange                                         CODE 350   VALUE #D67923   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Light_Grey                                     CODE 375   VALUE #8A928D   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Dark_Blue                                      CODE 406   VALUE #19325A   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Purple                                         CODE 449   VALUE #671F81   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Lime                                           CODE 490   VALUE #A5CA18   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Light_Bluish_Grey                              CODE 496   VALUE #969696   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_Flat_Silver                                    CODE 504   VALUE #898788   EDGE #333333                               RUBBER
-0 !COLOUR Rubber_White                                          CODE 511   VALUE #F4F4F4   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Yellow                                         CODE    65 VALUE #FAC80A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Black                                          CODE   256 VALUE #1B2A34   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Blue                                           CODE   273 VALUE #1E5AA8   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Red                                            CODE   324 VALUE #B40000   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Orange                                         CODE   350 VALUE #D67923   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Grey                                     CODE   375 VALUE #8A928D   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Blue                                      CODE   406 VALUE #19325A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Purple                                         CODE   449 VALUE #671F81   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Lime                                           CODE   490 VALUE #A5CA18   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Light_Bluish_Grey                              CODE   496 VALUE #969696   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Flat_Silver                                    CODE   504 VALUE #898788   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_White                                          CODE   511 VALUE #F4F4F4   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Green                                          CODE 10002 VALUE #00852B   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Turquoise                                 CODE 10003 VALUE #069D9F   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Pink                                      CODE 10005 VALUE #D3359D   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Grey                                      CODE 10008 VALUE #545955   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Bright_Green                                   CODE 10010 VALUE #58AB41   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Tan                                            CODE 10019 VALUE #D7BA8C   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Magenta                                        CODE 10026 VALUE #901F76   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Tan                                       CODE 10028 VALUE #897D62   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Bright_Pink                                    CODE 10029 VALUE #FF9ECD   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Medium_Lavender                                CODE 10030 VALUE #A06EB9   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Lavender                                       CODE 10031 VALUE #CDA4DE   EDGE #333333                               RUBBER
@@ -417,12 +555,29 @@
 0 !COLOUR Rubber_Dark_Bluish_Grey                               CODE 10072 VALUE #646464   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Medium_Blue                                    CODE 10073 VALUE #7396C8   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Light_Nougat                                   CODE 10078 VALUE #FFC995   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Nougat                                  CODE 10084 VALUE #AA7D55   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Medium_Lilac                                   CODE 10085 VALUE #441A91   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Nougat                                         CODE 10092 VALUE #BB805A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Light_Grey                               CODE 10135 VALUE #A0A0A0   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Metallic_Blue                                  CODE 10137 VALUE #5B7590   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Dark_Gold                                CODE 10147 VALUE #83724F   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Dark_Grey                                CODE 10148 VALUE #484D48   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Pearl_Very_Light_Grey                          CODE 10150 VALUE #989B99   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Very_Light_Bluish_Grey                         CODE 10151 VALUE #C8C8C8   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Reddish_Gold                                   CODE 10189 VALUE #AC8247   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Light_Orange                            CODE 10191 VALUE #FCAC00   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Lemon_Metallic                                 CODE 10200 VALUE #708224   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Bright_Light_Blue                              CODE 10212 VALUE #9DC3F7   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Bright_Light_Yellow                            CODE 10226 VALUE #FFEC6C   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Dark_Green                                     CODE 10288 VALUE #00451A   EDGE #808080                               RUBBER
+0 !COLOUR Rubber_Pearl_Gold                                     CODE 10297 VALUE #AA7F2E   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Brown                                     CODE 10308 VALUE #352100   EDGE #808080                               RUBBER
 0 !COLOUR Rubber_Dark_Red                                       CODE 10320 VALUE #720012   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Azure                                     CODE 10321 VALUE #469BC3   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Medium_Azure                                   CODE 10322 VALUE #68C3E2   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Light_Aqua                                     CODE 10323 VALUE #D3F2EA   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Yellowish_Green                                CODE 10326 VALUE #E2F99A   EDGE #333333                               RUBBER
+0 !COLOUR Rubber_Olive_Green                                    CODE 10330 VALUE #77774E   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Sand_Green                                     CODE 10378 VALUE #708E7C   EDGE #333333                               RUBBER
 0 !COLOUR Rubber_Dark_Orange                                    CODE 10484 VALUE #91501C   EDGE #333333                               RUBBER
 
@@ -433,19 +588,32 @@
 0 !COLOUR Rubber_Trans_Bright_Green                             CODE 10035 VALUE #56E646   EDGE #27AF18   ALPHA 128                   RUBBER
 0 !COLOUR Rubber_Trans_Red                                      CODE 10036 VALUE #C91A09   EDGE #660D05   ALPHA 128                   RUBBER
 0 !COLOUR Rubber_Trans_Light_Blue                               CODE 10043 VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Trans_Orange                                   CODE 10057 VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   RUBBER
+0 !COLOUR Rubber_Milky_White                                    CODE 10079 VALUE #EEEEEE   EDGE #BABABA   ALPHA 240                   RUBBER
+
 
 0 // LDraw Fabric Colours
 0 !COLOUR Canvas_Black                                          CODE 20000 VALUE #1B2A34   EDGE #808080                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Blue                                           CODE 20001 VALUE #1E5AA8   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Green                                          CODE 20002 VALUE #00852B   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Red                                            CODE 20004 VALUE #B40000   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Brown                                          CODE 20006 VALUE #543324   EDGE #1E1E1E                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Light_Grey                                     CODE 20007 VALUE #8A928D   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Bright_Green                                   CODE 20010 VALUE #58AB41   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Yellow                                         CODE 20014 VALUE #FAC80A   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_White                                          CODE 20015 VALUE #F4F4F4   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Tan                                            CODE 20019 VALUE #D7BA8C   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Purple                                         CODE 20022 VALUE #671F81   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Tan                                       CODE 20028 VALUE #897D62   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Reddish_Brown                                  CODE 20070 VALUE #5F3109   EDGE #808080                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Light_Bluish_Grey                              CODE 20071 VALUE #969696   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Bluish_Grey                               CODE 20072 VALUE #646464   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Light_Brown                                    CODE 20086 VALUE #7B5D41   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Dark_Green                                     CODE 20288 VALUE #00451A   EDGE #808080                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Dark_Red                                       CODE 20320 VALUE #720012   EDGE #333333                               MATERIAL FABRIC CANVAS
+0 !COLOUR Canvas_Sand_Red                                       CODE 20335 VALUE #88605E   EDGE #333333                               MATERIAL FABRIC CANVAS
 0 !COLOUR Canvas_Cream                                          CODE 20500 VALUE #F8F3E4   EDGE #333333                               MATERIAL FABRIC CANVAS
+
 
 0 // LDraw Internal Common Material Colours
 0 !COLOUR Main_Colour                                           CODE  16   VALUE #FFFF80   EDGE #333333
@@ -560,4 +728,3 @@
 0 !AVATAR CATEGORY "Wing" DESCRIPTION "Wing" PART 1 0 0  0 1 0  0 0 1 "3936.dat"
 
 0 !AVATAR CATEGORY "Znap" DESCRIPTION "Znap" PART 1 0 0  0 1 0  0 0 1 "32210.dat" 
-

@@ -4,8 +4,8 @@
 	[
 		{
 			"Description": "Train Track  9V Point Right",
-			"IDs": [ "2859c03.dat", "2859c04.dat" ],
-			"HiddenIDs": [ "2859c01.dat", "2859c02.dat" ],
+			"IDs": [ "75541c01-f1.dat", "75541c01-f2.dat" ],
+			"HiddenIDs": [ " 75541-f1.dat", " 75541-f2.dat" ],
 			"Color": 7,
 			"Connections":
 			[
@@ -28,8 +28,8 @@
 		},
 		{
 			"Description": "Train Track  9V Point Left",
-			"IDs": [ "2861c03.dat", "2861c04.dat" ],
-			"HiddenIDs": [ "2861c01.dat", "2861c02.dat" ],
+			"IDs": [ "75542c01-f1.dat", "75542c01-f2.dat" ],
+			"HiddenIDs": [ "75542-f1.dat", "75542-f2.dat" ],
 			"Color": 7,
 			"Connections":
 			[

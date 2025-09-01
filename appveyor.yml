@@ -3,7 +3,7 @@ skip_tags: true
 image:
 - Ubuntu1604
 - macOS
-- Visual Studio 2022
+- Visual Studio 2019
 configuration: Release
 platform: x64
 
@@ -18,10 +18,10 @@ for:
   -
     matrix:
       only:
-        - image: Visual Studio 2022
+        - image: Visual Studio 2019
         
     before_build:
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
     - set PATH=C:\Qt\5.15\msvc2019_64\bin;%PATH%
     - git rev-parse --short HEAD > version.txt
     - set /p VERSION= < version.txt

@@ -207,6 +207,7 @@ SOURCES += \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
+	common/lc_modelaction.cpp \
 	common/lc_modellistdialog.cpp \
 	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_modelaction.h \
 	common/lc_modellistdialog.h \
 	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \

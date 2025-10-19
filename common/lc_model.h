@@ -4,6 +4,12 @@
 #include "lc_commands.h"
 
 enum class lcObjectPropertyId;
+class lcModelAction;
+class lcModelActionSelection;
+class lcModelActionAddPieces;
+class lcModelActionGroupPieces;
+enum class lcModelActionSelectionMode;
+enum class lcModelActionAddPieceSelectionMode;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -99,6 +105,7 @@ public:
 
 struct lcModelHistoryEntry
 {
+	std::vector<std::unique_ptr<lcModelAction>> ModelActions;
 	QByteArray File;
 	QString Description;
 };
@@ -121,7 +128,10 @@ public:
 
 	bool IsModified() const
 	{
-		return mSavedHistory != mUndoHistory[0];
+		if (mUndoHistory.empty())
+			return mSavedHistory != nullptr;
+		else
+			return mSavedHistory != mUndoHistory.front().get();
 	}
 
 	bool IsActive() const
@@ -253,11 +263,7 @@ public:
 
 	void SetSaved()
 	{
-		if (mUndoHistory.empty())
-			SaveCheckpoint(QString());
-
-		if (!mIsPreview)
-			mSavedHistory = mUndoHistory[0];
+		mSavedHistory = mUndoHistory.empty() ? nullptr : mUndoHistory.front().get();
 	}
 
 	void SetMinifig(const lcMinifig& Minifig);
@@ -392,9 +398,21 @@ public:
 
 protected:
 	void DeleteModel();
-	void DeleteHistory();
+
+	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode);
+	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
+	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
+	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
+	void RecordGroupPiecesAction(const QString& GroupName);
+	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
+
+	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
+	void BeginActionSequence();
+	void EndActionSequence(const QString& Description);
+	void CancelActionSequence();
+
 	void SaveCheckpoint(const QString& Description);
-	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
+	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply);
 
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();
@@ -422,9 +440,10 @@ protected:
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
 
+	std::vector<std::unique_ptr<lcModelAction>> mActionSequence;
 	lcModelHistoryEntry* mSavedHistory;
-	std::vector<lcModelHistoryEntry*> mUndoHistory;
-	std::vector<lcModelHistoryEntry*> mRedoHistory;
+	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
+	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;
 
 	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };

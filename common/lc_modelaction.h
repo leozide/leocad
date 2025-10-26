@@ -15,7 +15,8 @@ public:
 enum class lcModelActionSelectionMode
 {
 	Clear,
-	Save
+	Save,
+	Restore
 };
 
 class lcModelActionSelection : public lcModelAction
@@ -84,11 +85,22 @@ protected:
 	lcModelActionAddPieceSelectionMode mSelectionMode;
 };
 
+enum class lcModelActionGroupPiecesMode
+{
+	Group,
+	Ungroup
+};
+
 class lcModelActionGroupPieces : public lcModelAction
 {
 public:
-	lcModelActionGroupPieces(const QString& GroupName);
+	lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	virtual ~lcModelActionGroupPieces() = default;
+
+	lcModelActionGroupPiecesMode GetMode() const
+	{
+		return mMode;
+	}
 
 	const QString& GetGroupName() const
 	{
@@ -96,5 +108,6 @@ public:
 	}
 
 protected:
+	lcModelActionGroupPiecesMode mMode;
 	QString mGroupName;
 };

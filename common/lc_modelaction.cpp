@@ -127,7 +127,7 @@ void lcModelActionAddPieces::SetPieceData(const std::vector<lcInsertPieceInfo>& 
 	}
 }
 
-lcModelActionGroupPieces::lcModelActionGroupPieces(const QString& GroupName)
-	: mGroupName(GroupName)
+lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
+	: mMode(Mode), mGroupName(GroupName)
 {
 }

@@ -10,6 +10,7 @@ class lcModelActionAddPieces;
 class lcModelActionGroupPieces;
 enum class lcModelActionSelectionMode;
 enum class lcModelActionAddPieceSelectionMode;
+enum class lcModelActionGroupPiecesMode;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -403,7 +404,7 @@ protected:
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
-	void RecordGroupPiecesAction(const QString& GroupName);
+	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
 
 	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);

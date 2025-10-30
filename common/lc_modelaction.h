@@ -15,6 +15,7 @@ public:
 enum class lcModelActionSelectionMode
 {
 	Clear,
+	Set,
 	Save,
 	Restore
 };
@@ -110,4 +111,8 @@ public:
 protected:
 	lcModelActionGroupPiecesMode mMode;
 	QString mGroupName;
+};
+
+class lcModelActionDuplicatePieces : public lcModelAction
+{
 };

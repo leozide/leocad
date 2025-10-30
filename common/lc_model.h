@@ -8,6 +8,7 @@ class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionAddPieces;
 class lcModelActionGroupPieces;
+class lcModelActionDuplicatePieces;
 enum class lcModelActionSelectionMode;
 enum class lcModelActionAddPieceSelectionMode;
 enum class lcModelActionGroupPiecesMode;
@@ -228,7 +229,6 @@ public:
 	void RemoveStep(lcStep Step);
 
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
-	void DeleteAllCameras();
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
 	void RemoveSelectedPiecesKeyFrames();
@@ -406,6 +406,8 @@ protected:
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
+	void RecordDuplicatePiecesAction();
+	void RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* ModelActionDuplicatePieces, bool Apply);
 
 	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();

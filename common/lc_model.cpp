@@ -1733,7 +1733,7 @@ void lcModel::RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPie
 	if (Apply)
 	{
 		std::vector<lcObject*> Pieces;
-		lcStep Step =  ModelActionAddPieces->GetStep();
+		lcStep Step = ModelActionAddPieces->GetStep();
 
 		for (const lcModelActionAddPieces::PieceData& PieceData : ModelActionAddPieces->GetPieceData())
 		{
@@ -1864,7 +1864,7 @@ void lcModel::RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGr
 
 void lcModel::RecordDuplicatePiecesAction()
 {
-	std::unique_ptr<lcModelActionDuplicatePieces> ModelActionDuplicatePieces = std::make_unique<lcModelActionDuplicatePieces>();
+	std::unique_ptr<lcModelActionDuplicatePieces> ModelActionDuplicatePieces = std::make_unique<lcModelActionDuplicatePieces>(mCurrentStep);
 
 	RunDuplicatePiecesAction(ModelActionDuplicatePieces.get(), true);
 
@@ -1881,6 +1881,7 @@ void lcModel::RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* Model
 		std::vector<lcObject*> NewPieces;
 		lcPiece* Focus = nullptr;
 		std::map<lcGroup*, lcGroup*> GroupMap;
+		lcStep Step = ModelActionDuplicatePieces->GetStep();
 
 		std::function<lcGroup*(lcGroup*)> GetNewGroup = [this, &GroupMap, &GetNewGroup](lcGroup* Group)
 		{
@@ -1919,7 +1920,7 @@ void lcModel::RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* Model
 				continue;
 
 			lcPiece* NewPiece = new lcPiece(*Piece);
-			NewPiece->UpdatePosition(mCurrentStep);
+			NewPiece->UpdatePosition(Step);
 			NewPieces.emplace_back(NewPiece);
 
 			if (Piece->IsFocused())

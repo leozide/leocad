@@ -132,6 +132,11 @@ lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode 
 {
 }
 
+lcModelActionDuplicatePieces::lcModelActionDuplicatePieces(lcStep Step)
+	: mStep(Step)
+{
+}
+
 lcModelActionHidePieces::lcModelActionHidePieces(lcModelActionHidePiecesMode Mode)
 	: mMode(Mode)
 {

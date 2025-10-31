@@ -115,6 +115,17 @@ protected:
 
 class lcModelActionDuplicatePieces : public lcModelAction
 {
+public:
+	lcModelActionDuplicatePieces(lcStep Step);
+	virtual ~lcModelActionDuplicatePieces() = default;
+
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
+
+protected:
+	lcStep mStep;
 };
 
 enum class lcModelActionHidePiecesMode

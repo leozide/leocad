@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_qselectdialog.h"
 #include "ui_lc_qselectdialog.h"
-#include "lc_application.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "camera.h"

@@ -135,7 +135,7 @@ bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, s
 					WorldMatrix[2][0] = BoneElements[6].toFloat();
 					WorldMatrix[2][1] = BoneElements[7].toFloat();
 					WorldMatrix[2][2] = BoneElements[8].toFloat();
-					WorldMatrix[3][3] = 0.0f;
+					WorldMatrix[2][3] = 0.0f;
 					WorldMatrix[3][0] = BoneElements[9].toFloat();
 					WorldMatrix[3][1] = BoneElements[10].toFloat();
 					WorldMatrix[3][2] = BoneElements[11].toFloat();

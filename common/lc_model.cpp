@@ -49,7 +49,7 @@ void lcModelProperties::SaveLDraw(QTextStream& Stream) const
 
 	if (!mComments.isEmpty())
 	{
-		QStringList Comments = mComments.split('\n');
+		const QStringList Comments = mComments.split('\n');
 		for (const QString& Comment : Comments)
 			Stream << QLatin1String("0 !LEOCAD MODEL COMMENT ") << Comment << LineEnding;
 	}
@@ -1052,7 +1052,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 {
 	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
 	QJsonObject Root = Document.object();
-	QJsonArray Parts = Root["results"].toArray();
+	const QJsonArray Parts = Root["results"].toArray();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	for (const QJsonValue& Part : Parts)

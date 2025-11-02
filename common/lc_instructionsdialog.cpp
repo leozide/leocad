@@ -81,7 +81,7 @@ void lcInstructionsPageWidget::StepSettingsChanged(lcModel* Model, lcStep Step)
 {
 	QGraphicsScene* Scene = scene();
 
-	QList<QGraphicsItem*> Items = Scene->items();
+	const QList<QGraphicsItem*> Items = Scene->items();
 
 	for (QGraphicsItem* Item : Items)
 	{

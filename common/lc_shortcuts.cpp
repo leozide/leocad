@@ -246,7 +246,7 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 		if (ToolIdx == static_cast<int>(lcTool::Count))
 			continue;
 
-		QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
+		const QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
 		bool AddedShortcut = false;
 
 		for (const QString& Shortcut : Shortcuts)

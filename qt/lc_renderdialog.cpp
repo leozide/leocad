@@ -82,7 +82,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
 
 		QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
-		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first()).arg(LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
+		if (!QDir(QString("%1/Blender/addons/%2").arg(DataPathList.first(), LC_BLENDER_ADDON_RENDER_FOLDER)).isReadable())
 		{
 			BlenderConfigured = false;
 			lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
@@ -305,28 +305,28 @@ void lcRenderDialog::RenderPOVRay()
 	const QString POVRayDir = QFileInfo(POVRayPath).absolutePath();
 	const QString IncludePath = QDir::cleanPath(POVRayDir + "/include");
 
-	if (QFileInfo(IncludePath).exists())
+	if (QFileInfo::exists(IncludePath))
 		Arguments.append(QString("+L\"%1\"").arg(IncludePath));
 
 	const QString IniPath = QDir::cleanPath(POVRayDir + "/ini");
 
-	if (QFileInfo(IniPath).exists())
+	if (QFileInfo::exists(IniPath))
 		Arguments.append(QString("+L\"%1\"").arg(IniPath));
 
 	if (lcGetActiveProject()->GetModels()[0]->GetPOVRayOptions().UseLGEO)
 	{
 		const QString LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 
-		if (QFileInfo(LGEOPath).exists())
+		if (QFileInfo::exists(LGEOPath))
 		{
 			const QString LgPath = QDir::cleanPath(LGEOPath + "/lg");
-			if (QFileInfo(LgPath).exists())
+			if (QFileInfo::exists(LgPath))
 				Arguments.append(QString("+L\"%1\"").arg(LgPath));
 			const QString ArPath = QDir::cleanPath(LGEOPath + "/ar");
-			if (QFileInfo(ArPath).exists())
+			if (QFileInfo::exists(ArPath))
 				Arguments.append(QString("+L\"%1\"").arg(ArPath));
 			const QString StlPath = QDir::cleanPath(LGEOPath + "/stl");
-			if (QFileInfo(StlPath).exists())
+			if (QFileInfo::exists(StlPath))
 				Arguments.append(QString("+L\"%1\"").arg(StlPath));
 		}
 	}
@@ -376,7 +376,7 @@ void lcRenderDialog::RenderBlender()
 
 	const QStringList DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
 	mDataPath = DataPathList.first();
-	const QString DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath).arg(LC_BLENDER_ADDON_BLEND_FILE);
+	const QString DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath, LC_BLENDER_ADDON_BLEND_FILE);
 
 	lcModel* Model = lcGetActiveProject()->GetActiveModel();
 	const QString ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Step_%2.ldr").arg(QFileInfo(Model->GetProperties().mFileName).baseName()).arg(Model->GetCurrentStep())).absoluteFilePath();
@@ -400,8 +400,8 @@ void lcRenderDialog::RenderBlender()
 										"image_file=r'%5'")
 										.arg(mWidth).arg(mHeight)
 										.arg(mScale * 100)
-										.arg(QDir::toNativeSeparators(ModelFileName).replace("\\","\\\\"))
-										.arg(QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"));
+										.arg(QDir::toNativeSeparators(ModelFileName).replace("\\","\\\\"),
+	                                         QDir::toNativeSeparators(ui->OutputEdit->text()).replace("\\","\\\\"));
 	if (BlenderImportModule == QLatin1String("MM"))
 		PythonExpression.append(", use_ldraw_import_mm=True");
 	if (SearchCustomDir)
@@ -421,7 +421,7 @@ void lcRenderDialog::RenderBlender()
 
 	PythonExpression.append(", cli_render=True)\"");
 
-	if (QFileInfo(DefaultBlendFile).exists())
+	if (QFileInfo::exists(DefaultBlendFile))
 		Arguments << QDir::toNativeSeparators(DefaultBlendFile);
 	Arguments << QString("--python-expr");
 	Arguments << PythonExpression;
@@ -433,14 +433,14 @@ void lcRenderDialog::RenderBlender()
 #else
 	ScriptName =  QLatin1String("render_ldraw_model.sh");
 #endif
-	ScriptCommand = QString("\"%1\" %2").arg(lcGetProfileString(LC_PROFILE_BLENDER_PATH)).arg(Arguments.join(" "));
+	ScriptCommand = QString("\"%1\" %2").arg(lcGetProfileString(LC_PROFILE_BLENDER_PATH), Arguments.join(" "));
 
 	if (mDialogMode == lcRenderDialogMode::OpenInBlender)
 		ScriptCommand.append(QString(" > %1").arg(QDir::toNativeSeparators(GetStdOutFileName())));
 
 	const QLatin1String LineEnding("\r\n");
 
-	QFile ScriptFile(QString("%1/%2").arg(QDir::tempPath()).arg(ScriptName));
+	QFile ScriptFile(QString("%1/%2").arg(QDir::tempPath(), ScriptName));
 	if (ScriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
 		QTextStream Stream(&ScriptFile);
@@ -608,7 +608,7 @@ QString lcRenderDialog::ReadStdErr(bool& HasError) const
 
 	if (!File.open(QFile::ReadOnly | QFile::Text))
 	{
-		const QString message = tr("Failed to open log file: %1:\n%2").arg(File.fileName()).arg(File.errorString());
+		const QString message = tr("Failed to open log file: %1:\n%2").arg(File.fileName(), File.errorString());
 		return message;
 	}
 
@@ -646,7 +646,7 @@ void lcRenderDialog::WriteStdOut()
 	{
 		QTextStream Out(&File);
 
-		for (const QString& Line : mStdOutList)
+		for (const QString& Line : std::as_const(mStdOutList))
 			Out << Line;
 
 		File.close();
@@ -774,7 +774,7 @@ void lcRenderDialog::ShowResult()
 	}
 	else if (mDialogMode == lcRenderDialogMode::RenderBlender)
 	{
-		Success = QFileInfo(FileName).exists();
+		Success = QFileInfo::exists(FileName);
 		if (Success)
 		{
 			setMinimumSize(100, 100);

@@ -245,7 +245,7 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 	ReleaseThumbnails();
 	mParts.clear();
 
-	for (auto [Info, Description] : Parts)
+	for (const auto& [Info, Description] : Parts)
 	{
 		lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
 		
@@ -1269,7 +1269,7 @@ void lcPartSelectionWidget::LoadPartPalettes()
 		lcPartPalette Palette;
 		Palette.Name = ElementIt.key();
 
-		QJsonArray Parts = ElementIt.value().toArray();
+		const QJsonArray Parts = ElementIt.value().toArray();
 
 		for (const QJsonValue& Part : Parts)
 			Palette.Parts.emplace_back(Part.toString().toStdString());

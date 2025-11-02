@@ -4,8 +4,6 @@
 #include "piece.h"
 #include "pieceinf.h"
 #include "lc_mainwindow.h"
-#include "lc_viewwidget.h"
-#include "lc_previewwidget.h"
 
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	: QTreeWidget(Parent)
@@ -383,7 +381,7 @@ void lcTimelineWidget::MoveSelection()
 		return;
 	Step++;
 
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
 	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
@@ -421,7 +419,7 @@ void lcTimelineWidget::MoveSelectionBefore()
 
 	Step++;
 
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
 	gMainWindow->GetActiveModel()->InsertStep(Step);
 
@@ -463,7 +461,7 @@ void lcTimelineWidget::MoveSelectionAfter()
 
 	Step += 2;
 
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
 	gMainWindow->GetActiveModel()->InsertStep(Step);
 
@@ -526,7 +524,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 {
 	std::vector<lcObject*> Selection;
 	lcStep LastStep = 1;
-	QList<QTreeWidgetItem*> SelectedItems = selectedItems();
+	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
 
 	for (QTreeWidgetItem* PieceItem : SelectedItems)
 	{
@@ -589,7 +587,7 @@ void lcTimelineWidget::dropEvent(QDropEvent* Event)
 
 	std::sort(SelectedItems.begin(), SelectedItems.end(), SortItems);
 
-	for (QTreeWidgetItem* SelectedItem : SelectedItems)
+	for (QTreeWidgetItem* SelectedItem : std::as_const(SelectedItems))
 		SelectedItem->setSelected(true);
 
 	QTreeWidget::dropEvent(Event);

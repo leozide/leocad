@@ -47,7 +47,8 @@ protected:
 enum class lcModelActionAddPieceSelectionMode
 {
 	FocusLast,
-	SelectAll
+	SelectAll,
+	AddToSelection
 };
 
 class lcModelActionAddPieces : public lcModelAction

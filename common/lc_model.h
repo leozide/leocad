@@ -7,6 +7,7 @@ enum class lcObjectPropertyId;
 class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionAddPieces;
+class lcModelActionAddLight;
 class lcModelActionGroupPieces;
 class lcModelActionDuplicatePieces;
 class lcModelActionHidePieces;
@@ -406,6 +407,8 @@ protected:
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
+	void RecordAddLightAction(const lcVector3& Position, lcLightType LightType);
+	void RunAddLightAction(const lcModelActionAddLight* ModelActionAddLight, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
 	void RecordDuplicatePiecesAction();

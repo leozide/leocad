@@ -4,6 +4,7 @@
 
 struct lcInsertPieceInfo;
 enum class lcObjectType;
+enum class lcLightType;
 
 class lcModelAction
 {
@@ -85,6 +86,27 @@ protected:
 	std::vector<PieceData> mPieceData;
 	lcStep mStep;
 	lcModelActionAddPieceSelectionMode mSelectionMode;
+};
+
+class lcModelActionAddLight : public lcModelAction
+{
+public:
+	lcModelActionAddLight(const lcVector3& Position, lcLightType LightType);
+	virtual ~lcModelActionAddLight() = default;
+
+	const lcVector3& GetPosition() const
+	{
+		return mPosition;
+	}
+
+	lcLightType GetLightType() const
+	{
+		return mLightType;
+	}
+
+protected:
+	lcVector3 mPosition;
+	lcLightType mLightType;
 };
 
 enum class lcModelActionGroupPiecesMode

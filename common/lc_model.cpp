@@ -1792,6 +1792,38 @@ void lcModel::RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPie
 	}
 }
 
+void lcModel::RecordAddLightAction(const lcVector3& Position, lcLightType LightType)
+{
+	std::unique_ptr<lcModelActionAddLight> ModelActionAddLight = std::make_unique<lcModelActionAddLight>(Position, LightType);
+
+	RunAddLightAction(ModelActionAddLight.get(), true);
+
+	mActionSequence.emplace_back(std::move(ModelActionAddLight));
+}
+
+void lcModel::RunAddLightAction(const lcModelActionAddLight* ModelActionAddLight, bool Apply)
+{
+	if (!ModelActionAddLight)
+		return;
+
+	if (Apply)
+	{
+		lcLight* Light = new lcLight(ModelActionAddLight->GetPosition(), ModelActionAddLight->GetLightType());
+    	Light->CreateName(mLights);
+        mLights.emplace_back(Light);
+
+    	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
+	}
+	else
+	{
+		if (!mLights.empty())
+			mLights.pop_back();
+
+		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateInUseCategory();
+	}
+}
+
 void lcModel::RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
 {
 	std::unique_ptr<lcModelActionGroupPieces> ModelActionGroupPieces = std::make_unique<lcModelActionGroupPieces>(Mode, GroupName);
@@ -2031,6 +2063,8 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunSelectionAction(ModelActionSelection, Apply);
 		else if (const lcModelActionAddPieces* ModelActionAddPieces = dynamic_cast<const lcModelActionAddPieces*>(ModelAction))
 			RunAddPiecesAction(ModelActionAddPieces, Apply);
+		else if (const lcModelActionAddLight* ModelActionAddLight = dynamic_cast<const lcModelActionAddLight*>(ModelAction))
+			RunAddLightAction(ModelActionAddLight, Apply);
 		else if (const lcModelActionGroupPieces* ModelActionGroupPieces = dynamic_cast<const lcModelActionGroupPieces*>(ModelAction))
 			RunGroupPiecesAction(ModelActionGroupPieces, Apply);
 		else if (const lcModelActionDuplicatePieces* ModelActionDuplicatePieces = dynamic_cast<const lcModelActionDuplicatePieces*>(ModelAction))
@@ -4940,33 +4974,36 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 
 void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType LightType)
 {
-	lcLight* Light = new lcLight(Position, LightType);
-	Light->CreateName(mLights);
-	mLights.emplace_back(Light);
-
-	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
+	QString ActionName;
 
 	switch (LightType)
 	{
 	case lcLightType::Point:
-		SaveCheckpoint(tr("New Point Light"));
+		ActionName = tr("Add Point Light");
 		break;
 
 	case lcLightType::Spot:
-		SaveCheckpoint(tr("New Spot Light"));
+		ActionName = tr("Add Spot Light");
 		break;
 
 	case lcLightType::Directional:
-		SaveCheckpoint(tr("New Directional Light"));
+		ActionName = tr("Add Directional Light");
 		break;
 
 	case lcLightType::Area:
-		SaveCheckpoint(tr("New Area Light"));
+		ActionName = tr("Add Area Light");
 		break;
 
 	case lcLightType::Count:
-		break;
+		return;
 	}
+
+	BeginActionSequence();
+
+	RecordSelectionAction(lcModelActionSelectionMode::Save);
+	RecordAddLightAction(Position, LightType);
+
+	EndActionSequence(ActionName);
 }
 
 void lcModel::BeginCameraTool(const lcVector3& Position, const lcVector3& Target)
@@ -5412,7 +5449,7 @@ void lcModel::ShowArrayDialog()
 	RecordSelectionAction(lcModelActionSelectionMode::Save);
 	RecordAddPiecesAction(PieceInfoTransforms, lcModelActionAddPieceSelectionMode::AddToSelection);
 
-	EndActionSequence(tr("Array"));
+	EndActionSequence(tr("Piece Array"));
 }
 
 void lcModel::ShowMinifigDialog()

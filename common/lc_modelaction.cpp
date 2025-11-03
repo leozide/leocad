@@ -127,6 +127,11 @@ void lcModelActionAddPieces::SetPieceData(const std::vector<lcInsertPieceInfo>& 
 	}
 }
 
+lcModelActionAddLight::lcModelActionAddLight(const lcVector3& Position, lcLightType LightType)
+	: mPosition(Position), mLightType(LightType)
+{
+}
+
 lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
 	: mMode(Mode), mGroupName(GroupName)
 {

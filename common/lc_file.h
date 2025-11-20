@@ -459,7 +459,7 @@ class lcMemFile : public lcFile
 {
 public:
 	lcMemFile();
-	~lcMemFile();
+	virtual ~lcMemFile();
 
 	lcMemFile(const lcMemFile&) = delete;
 	lcMemFile(lcMemFile&&) = delete;
@@ -498,9 +498,9 @@ public:
 	{
 	}
 
-	~lcDiskFile()
+	virtual ~lcDiskFile()
 	{
-		Close();
+		lcDiskFile::Close();
 	}
 
 	lcDiskFile(const lcDiskFile&) = delete;

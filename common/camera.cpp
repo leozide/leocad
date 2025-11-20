@@ -1,8 +1,6 @@
 #include "lc_global.h"
 #include "lc_math.h"
-#include "lc_colors.h"
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <float.h>
 #include "lc_file.h"
@@ -28,7 +26,7 @@ lcCamera::lcCamera(bool Simple)
 		mTargetPosition.SetValue(lcVector3(0.0f, 0.0f, 0.0f));
 		mUpVector.SetValue(lcVector3(-0.2357f, -0.2357f, 0.94281f));
 
-		UpdatePosition(1);
+		lcCamera::UpdatePosition(1);
 	}
 }
 
@@ -51,7 +49,7 @@ lcCamera::lcCamera(float ex, float ey, float ez, float tx, float ty, float tz)
 	mTargetPosition.SetValue(lcVector3(tx, ty, tz));
 	mUpVector.SetValue(UpVector);
 
-	UpdatePosition(1);
+	lcCamera::UpdatePosition(1);
 }
 
 lcCamera::~lcCamera()

@@ -31,7 +31,7 @@ static void APIENTRY lcGLDebugCallback(GLenum Source, GLenum Type, GLuint Id, GL
 
 void lcInitializeGLExtensions(const QOpenGLContext* Context)
 {
-	const QOpenGLFunctions* Functions = Context->functions();
+	QOpenGLFunctions* Functions = Context->functions();
 
 #if !defined(QT_NO_DEBUG) && defined(GL_ARB_debug_output)
 	if (Context->hasExtension("GL_KHR_debug"))
@@ -53,7 +53,7 @@ void lcInitializeGLExtensions(const QOpenGLContext* Context)
 
 	if (Context->hasExtension("GL_EXT_texture_filter_anisotropic"))
 	{
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &gMaxAnisotropy);
+		Functions->glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &gMaxAnisotropy);
 
 		gSupportsAnisotropic = true;
 	}

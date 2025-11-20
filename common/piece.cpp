@@ -907,6 +907,17 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
+void lcPiece::SaveKeyFrames(QDataStream& Stream) const
+{
+	mPosition.SaveToDataStream(Stream);
+	mRotation.SaveToDataStream(Stream);	
+}
+
+bool lcPiece::LoadKeyFrames(QDataStream& Stream)
+{
+	return mPosition.LoadFromDataStream(Stream) && mRotation.LoadFromDataStream(Stream);
+}
+
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const
 {
 	lcRenderMeshState RenderMeshState = lcRenderMeshState::Default;

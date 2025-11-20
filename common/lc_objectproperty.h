@@ -96,6 +96,8 @@ public:
 
 	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);
+	void SaveToDataStream(QDataStream& Stream) const;
+	bool LoadFromDataStream(QDataStream& Stream);
 
 protected:
 	T mValue;

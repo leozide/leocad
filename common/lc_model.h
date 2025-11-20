@@ -11,10 +11,12 @@ class lcModelActionAddLight;
 class lcModelActionGroupPieces;
 class lcModelActionDuplicatePieces;
 class lcModelActionHidePieces;
+class lcModelActionStep;
 enum class lcModelActionSelectionMode;
 enum class lcModelActionAddPieceSelectionMode;
 enum class lcModelActionGroupPiecesMode;
 enum class lcModelActionHidePiecesMode;
+enum class lcModelActionStepMode;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -415,6 +417,8 @@ protected:
 	void RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* ModelActionDuplicatePieces, bool Apply);
 	void RecordHidePiecesAction(lcModelActionHidePiecesMode Mode);
 	void RunHidePiecesAction(const lcModelActionHidePieces* ModelActionHidePieces, bool Apply);
+	void RecordStepAction(lcModelActionStepMode Mode, lcStep Step);
+	void RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply);
 
 	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();

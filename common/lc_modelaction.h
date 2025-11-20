@@ -181,3 +181,67 @@ protected:
 	std::vector<bool> mHiddenState;
 	lcModelActionHidePiecesMode mMode;
 };
+
+enum class lcModelActionStepMode
+{
+	Insert,
+	Remove
+};
+
+struct lcModelActionStepPieceState
+{
+	lcStep StepShow;
+	lcStep StepHide;
+	QByteArray KeyFrames;
+};
+
+struct lcModelActionStepCameraState
+{
+	QByteArray KeyFrames;
+};
+
+struct lcModelActionStepLightState
+{
+	QByteArray KeyFrames;
+};
+
+class lcModelActionStep : public lcModelAction
+{
+public:
+	lcModelActionStep(lcModelActionStepMode Mode, lcStep Step);
+	virtual ~lcModelActionStep() = default;
+
+	lcModelActionStepMode GetMode() const
+	{
+		return mMode;
+	}
+
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
+
+    void SaveState(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights);
+
+	const std::vector<lcModelActionStepPieceState>& GetPieceStates() const
+	{
+		return mPieceStates;
+	}
+	
+	const std::vector<lcModelActionStepCameraState>& GetCameraStates() const
+	{
+		return mCameraStates;
+	}
+	
+	const std::vector<lcModelActionStepLightState>& GetLightStates() const
+	{
+		return mLightStates;
+	}
+	
+protected:
+	std::vector<lcModelActionStepPieceState> mPieceStates;
+	std::vector<lcModelActionStepCameraState> mCameraStates;
+	std::vector<lcModelActionStepLightState> mLightStates;
+	lcModelActionStepMode mMode;
+	lcStep mStep;
+};

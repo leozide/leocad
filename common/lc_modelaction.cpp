@@ -154,3 +154,50 @@ void lcModelActionHidePieces::SaveHiddenState(const std::vector<std::unique_ptr<
 	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 		mHiddenState[PieceIndex] = Pieces[PieceIndex]->IsHidden();
 }
+
+lcModelActionStep::lcModelActionStep(lcModelActionStepMode Mode, lcStep Step)
+    : mMode(Mode), mStep(Step)
+{
+}
+
+void lcModelActionStep::SaveState(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights)
+{
+	mPieceStates.resize(Pieces.size());
+	
+	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+	{
+		lcModelActionStepPieceState& PieceState = mPieceStates[PieceIndex];
+		const lcPiece* Piece = Pieces[PieceIndex].get();
+		
+		PieceState.StepShow = Piece->GetStepShow();
+		PieceState.StepHide = Piece->GetStepHide();
+		
+		QDataStream Stream(&PieceState.KeyFrames, QIODevice::WriteOnly);
+		
+		Piece->SaveKeyFrames(Stream);
+	}
+
+	mCameraStates.resize(Cameras.size());
+	
+	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+	{
+		lcModelActionStepCameraState& CameraState = mCameraStates[CameraIndex];
+		const lcCamera* Camera = Cameras[CameraIndex].get();
+		
+		QDataStream Stream(&CameraState.KeyFrames, QIODevice::WriteOnly);
+		
+		Camera->SaveKeyFrames(Stream);
+	}
+
+	mLightStates.resize(Lights.size());
+	
+	for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
+	{
+		lcModelActionStepLightState& LightState = mLightStates[LightIndex];
+		const lcLight* Light = Lights[LightIndex].get();
+		
+		QDataStream Stream(&LightState.KeyFrames, QIODevice::WriteOnly);
+		
+		Light->SaveKeyFrames(Stream);
+	}
+}

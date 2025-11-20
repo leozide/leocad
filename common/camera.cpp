@@ -896,6 +896,18 @@ void lcCamera::RemoveKeyFrames()
 	mUpVector.RemoveAllKeys();
 }
 
+void lcCamera::SaveKeyFrames(QDataStream& Stream) const
+{
+	mPosition.SaveToDataStream(Stream);
+	mTargetPosition.SaveToDataStream(Stream);
+	mUpVector.SaveToDataStream(Stream);
+}
+
+bool lcCamera::LoadKeyFrames(QDataStream& Stream)
+{
+	return mPosition.LoadFromDataStream(Stream) && mTargetPosition.LoadFromDataStream(Stream) && mUpVector.LoadFromDataStream(Stream);
+}
+
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	lcVector3 Min = lcVector3(-LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE, -LC_CAMERA_POSITION_EDGE);

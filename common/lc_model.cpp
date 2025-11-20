@@ -2055,6 +2055,113 @@ void lcModel::RunHidePiecesAction(const lcModelActionHidePieces* ModelActionHide
 	}
 }
 
+void lcModel::RecordStepAction(lcModelActionStepMode Mode, lcStep Step)
+{
+	std::unique_ptr<lcModelActionStep> ModelActionStep = std::make_unique<lcModelActionStep>(Mode, Step);
+
+	ModelActionStep->SaveState(mPieces, mCameras, mLights);
+    
+	RunStepAction(ModelActionStep.get(), true);
+	
+	mActionSequence.emplace_back(std::move(ModelActionStep));	
+}
+
+void lcModel::RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply)
+{
+	if (!ModelActionStep)
+		return;
+
+	lcStep Step = ModelActionStep->GetStep();
+
+	if (Apply)
+	{
+		if (ModelActionStep->GetMode() == lcModelActionStepMode::Insert)
+		{
+			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			{
+				Piece->InsertTime(Step, 1);
+				
+				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+					Piece->SetSelected(false);
+			}
+			
+			for (std::unique_ptr<lcCamera>& Camera : mCameras)
+				Camera->InsertTime(Step, 1);
+			
+			for (const std::unique_ptr<lcLight>& Light : mLights)
+				Light->InsertTime(Step, 1);
+		}
+		else
+		{
+			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			{
+				Piece->RemoveTime(Step, 1);
+				
+				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+					Piece->SetSelected(false);
+			}
+			
+			for (std::unique_ptr<lcCamera>& Camera : mCameras)
+				Camera->RemoveTime(Step, 1);
+			
+			for (const std::unique_ptr<lcLight>& Light : mLights)
+				Light->RemoveTime(Step, 1);
+		}
+	}
+	else
+	{
+		const std::vector<lcModelActionStepPieceState>& PieceStates = ModelActionStep->GetPieceStates();
+
+		if (PieceStates.size() != mPieces.size())
+			return;
+
+		for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
+		{
+			const lcModelActionStepPieceState& PieceState = PieceStates[PieceIndex];
+			lcPiece* Piece = mPieces[PieceIndex].get();
+
+			Piece->SetStepShow(PieceState.StepShow);
+			Piece->SetStepHide(PieceState.StepHide);
+			
+			QDataStream Stream(const_cast<QByteArray*>(&PieceState.KeyFrames), QIODevice::ReadOnly);
+			
+			Piece->LoadKeyFrames(Stream);
+		}
+		
+		const std::vector<lcModelActionStepCameraState>& CameraStates = ModelActionStep->GetCameraStates();
+
+		if (CameraStates.size() != mCameras.size())
+			return;
+
+		for (size_t CameraIndex = 0; CameraIndex < mCameras.size(); CameraIndex++)
+		{
+			const lcModelActionStepCameraState& CameraState = CameraStates[CameraIndex];
+			lcCamera* Camera = mCameras[CameraIndex].get();
+
+			QDataStream Stream(const_cast<QByteArray*>(&CameraState.KeyFrames), QIODevice::ReadOnly);
+			
+			Camera->LoadKeyFrames(Stream);
+		}
+
+		const std::vector<lcModelActionStepLightState>& LightStates = ModelActionStep->GetLightStates();
+
+		if (LightStates.size() != mLights.size())
+			return;
+
+		for (size_t LightIndex = 0; LightIndex < mLights.size(); LightIndex++)
+		{
+			const lcModelActionStepLightState& LightState = LightStates[LightIndex];
+			lcLight* Light = mLights[LightIndex].get();
+
+			QDataStream Stream(const_cast<QByteArray*>(&LightState.KeyFrames), QIODevice::ReadOnly);
+			
+			Light->LoadKeyFrames(Stream);
+		}
+	}
+	
+	SetCurrentStep(mCurrentStep);
+}
+
 void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	auto PerformAction=[this](const lcModelAction* ModelAction, bool Apply)
@@ -2071,6 +2178,8 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunDuplicatePiecesAction(ModelActionDuplicatePieces, Apply);
 		else if (const lcModelActionHidePieces* ModelActionHidePieces = dynamic_cast<const lcModelActionHidePieces*>(ModelAction))
 			RunHidePiecesAction(ModelActionHidePieces, Apply);
+		else if (const lcModelActionStep* ModelActionStep = dynamic_cast<const lcModelActionStep*>(ModelAction))
+			RunStepAction(ModelActionStep, Apply);
 	};
 
 	if (Apply)
@@ -2276,6 +2385,15 @@ lcStep lcModel::GetLastStep() const
 
 void lcModel::InsertStep(lcStep Step)
 {
+	BeginActionSequence();
+
+	RecordSelectionAction(lcModelActionSelectionMode::Restore);
+	RecordStepAction(lcModelActionStepMode::Insert, Step);
+//	RecordSelectionAction(lcModelActionSelectionMode::Save);
+
+	EndActionSequence(tr("Insert Step"));
+
+/*
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		Piece->InsertTime(Step, 1);
@@ -2290,11 +2408,19 @@ void lcModel::InsertStep(lcStep Step)
 		Light->InsertTime(Step, 1);
 
 	SaveCheckpoint(tr("Inserting Step"));
-	SetCurrentStep(mCurrentStep);
+	SetCurrentStep(mCurrentStep);*/
 }
 
 void lcModel::RemoveStep(lcStep Step)
 {
+	BeginActionSequence();
+	
+	RecordSelectionAction(lcModelActionSelectionMode::Restore);
+	RecordStepAction(lcModelActionStepMode::Remove, Step);
+	//	RecordSelectionAction(lcModelActionSelectionMode::Save);
+	
+	EndActionSequence(tr("Remove Step"));
+	/*
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		Piece->RemoveTime(Step, 1);
@@ -2309,7 +2435,7 @@ void lcModel::RemoveStep(lcStep Step)
 		Light->RemoveTime(Step, 1);
 
 	SaveCheckpoint(tr("Removing Step"));
-	SetCurrentStep(mCurrentStep);
+	SetCurrentStep(mCurrentStep);*/
 }
 
 lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)

@@ -394,8 +394,8 @@ int lcGetColorIndex(quint32 ColorCode)
 		Color.Value[1] = (float)((ColorCode & 0x00ff00) >> 8) / 255.0f;
 		Color.Value[2] = (float)((ColorCode & 0x0000ff) >> 0) / 255.0f;
 		Color.Value[3] = 1.0f;
-		sprintf(Color.Name, "Color %06X", ColorCode & 0xffffff);
-		sprintf(Color.SafeName, "Color_%06X", ColorCode & 0xffffff);
+		snprintf(Color.Name, sizeof(Color.Name), "Color %06X", ColorCode & 0xffffff);
+		snprintf(Color.SafeName, sizeof(Color.SafeName), "Color_%06X", ColorCode & 0xffffff);
 	}
 	else
 	{
@@ -403,8 +403,8 @@ int lcGetColorIndex(quint32 ColorCode)
 		Color.Value[1] = 0.5f;
 		Color.Value[2] = 0.5f;
 		Color.Value[3] = 1.0f;
-		sprintf(Color.Name, "Color %03d", ColorCode);
-		sprintf(Color.SafeName, "Color_%03d", ColorCode);
+		snprintf(Color.Name, sizeof(Color.Name), "Color %03d", ColorCode);
+		snprintf(Color.SafeName, sizeof(Color.SafeName), "Color_%03d", ColorCode);
 	}
 
 	gColorList.push_back(Color);

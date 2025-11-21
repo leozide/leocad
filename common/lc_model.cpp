@@ -2387,55 +2387,20 @@ void lcModel::InsertStep(lcStep Step)
 {
 	BeginActionSequence();
 
-	RecordSelectionAction(lcModelActionSelectionMode::Restore);
+	RecordSelectionAction(lcModelActionSelectionMode::Set);
 	RecordStepAction(lcModelActionStepMode::Insert, Step);
-//	RecordSelectionAction(lcModelActionSelectionMode::Save);
 
 	EndActionSequence(tr("Insert Step"));
-
-/*
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
-		Piece->InsertTime(Step, 1);
-		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-			Piece->SetSelected(false);
-	}
-
-	for (std::unique_ptr<lcCamera>& Camera : mCameras)
-		Camera->InsertTime(Step, 1);
-
-	for (const std::unique_ptr<lcLight>& Light : mLights)
-		Light->InsertTime(Step, 1);
-
-	SaveCheckpoint(tr("Inserting Step"));
-	SetCurrentStep(mCurrentStep);*/
 }
 
 void lcModel::RemoveStep(lcStep Step)
 {
 	BeginActionSequence();
 	
-	RecordSelectionAction(lcModelActionSelectionMode::Restore);
+	RecordSelectionAction(lcModelActionSelectionMode::Set);
 	RecordStepAction(lcModelActionStepMode::Remove, Step);
-	//	RecordSelectionAction(lcModelActionSelectionMode::Save);
 	
 	EndActionSequence(tr("Remove Step"));
-	/*
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
-		Piece->RemoveTime(Step, 1);
-		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-			Piece->SetSelected(false);
-	}
-
-	for (std::unique_ptr<lcCamera>& Camera : mCameras)
-		Camera->RemoveTime(Step, 1);
-
-	for (const std::unique_ptr<lcLight>& Light : mLights)
-		Light->RemoveTime(Step, 1);
-
-	SaveCheckpoint(tr("Removing Step"));
-	SetCurrentStep(mCurrentStep);*/
 }
 
 lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)

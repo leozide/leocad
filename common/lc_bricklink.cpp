@@ -109,15 +109,15 @@ void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList
 	{
 		BrickLinkFile.WriteLine("  <ITEM>\n");
 		BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
-		sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Item.second.mId.c_str());
+		snprintf(Line, sizeof(Line), "    <ITEMID>%s</ITEMID>\n", Item.second.mId.c_str());
 		BrickLinkFile.WriteLine(Line);
 
-		sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Item.second.mCount);
+		snprintf(Line, sizeof(Line), "    <MINQTY>%d</MINQTY>\n", Item.second.mCount);
 		BrickLinkFile.WriteLine(Line);
 
 		if (Item.second.mColor)
 		{
-			sprintf(Line, "    <COLOR>%d</COLOR>\n", Item.second.mColor);
+			snprintf(Line, sizeof(Line), "    <COLOR>%d</COLOR>\n", Item.second.mColor);
 			BrickLinkFile.WriteLine(Line);
 		}
 

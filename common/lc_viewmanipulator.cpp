@@ -890,7 +890,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->EnableColorBlend(true);
 
 		char buf[32];
-		sprintf(buf, "[%.2f]", fabsf(Angle));
+		snprintf(buf, sizeof(buf), "[%.2f]", fabsf(Angle));
 
 		int cx, cy;
 		gTexFont.GetStringDimensions(&cx, &cy, buf);

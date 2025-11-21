@@ -284,9 +284,9 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 	}
 
 	if (NumSections > 1)
-		sprintf(Line, "#declare lc_%s = union {\n", MeshName);
+		snprintf(Line, sizeof(Line), "#declare lc_%s = union {\n", MeshName);
 	else
-		sprintf(Line, "#declare lc_%s = mesh {\n", MeshName);
+		snprintf(Line, sizeof(Line), "#declare lc_%s = mesh {\n", MeshName);
 	File.WriteLine(Line);
 
 	for (int SectionIdx = 0; SectionIdx < mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
@@ -310,8 +310,8 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 				const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
 				const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
 
-				sprintf(Line, "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
-						-v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
+				snprintf(Line, sizeof(Line), "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
+				         -v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
 				File.WriteLine(Line);
 			}
 		}
@@ -332,8 +332,8 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 				const lcVector3 n2 = lcUnpackNormal(Verts[Indices[Idx + 1]].Normal);
 				const lcVector3 n3 = lcUnpackNormal(Verts[Indices[Idx + 2]].Normal);
 
-				sprintf(Line, "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
-						-v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
+				snprintf(Line, sizeof(Line), "  smooth_triangle { <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g>, <%g, %g, %g> }\n",
+				         -v1.y, -v1.x, v1.z, -n1.y, -n1.x, n1.z, -v2.y, -v2.x, v2.z, -n2.y, -n2.x, n2.z, -v3.y, -v3.x, v3.z, -n3.y, -n3.x, n3.z);
 				File.WriteLine(Line);
 			}
 		}
@@ -342,7 +342,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 
 		if (Section->ColorIndex != gDefaultColor)
 		{
-			sprintf(Line, "  material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[Section->ColorIndex]);
+			snprintf(Line, sizeof(Line), "  material { texture { %s normal { bumps 0.1 scale 2 } } }", ColorTable[Section->ColorIndex]);
 			File.WriteLine(Line);
 		}
 
@@ -376,9 +376,9 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
 
 		if (Section->ColorIndex == gDefaultColor)
-			sprintf(Line, "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
+			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
 		else
-			sprintf(Line, "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
+			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
 		File.WriteLine(Line);
 
 		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
@@ -388,8 +388,10 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 			const long int idx3 = Indices[Idx + 2] + VertexOffset;
 
 			if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
-				sprintf(Line, "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
-			File.WriteLine(Line);
+			{
+				snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
+				File.WriteLine(Line);
+			}
 		}
 	}
 

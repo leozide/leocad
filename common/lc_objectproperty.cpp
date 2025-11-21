@@ -335,7 +335,7 @@ bool lcObjectProperty<T>::LoadFromDataStream(QDataStream& Stream)
 	
 	mKeys.resize(KeyCount);
 	
-	int DataSize = KeyCount * sizeof(lcObjectPropertyKey<T>);
+	size_t DataSize = KeyCount * sizeof(lcObjectPropertyKey<T>);
 	
 	if (Stream.readRawData(reinterpret_cast<char*>(mKeys.data()), DataSize) != DataSize)
 		return false;

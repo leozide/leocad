@@ -28,11 +28,13 @@ class lcPiece : public lcObject
 public:
 	lcPiece(PieceInfo* Info);
 	lcPiece(const lcPiece& Other);
-	~lcPiece();
+	virtual ~lcPiece();
 
 	lcPiece(lcPiece&&) = delete;
 	lcPiece& operator=(const lcPiece&) = delete;
 	lcPiece& operator=(lcPiece&&) = delete;
+
+	void CopyProperties(const lcPiece& Other);
 
 	bool IsSelected() const override
 	{
@@ -182,7 +184,7 @@ public:
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait);
+	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo);
 	bool SetPieceId(PieceInfo* Info);
 	bool FileLoad(lcFile& file);
 

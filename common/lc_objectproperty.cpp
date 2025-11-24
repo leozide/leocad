@@ -321,13 +321,17 @@ void lcObjectProperty<T>::SaveToDataStream(QDataStream& Stream) const
 	size_t KeyCount = mKeys.size();
 	size_t DataSize = KeyCount * sizeof(lcObjectPropertyKey<T>);
 	
-	Stream.writeRawData(reinterpret_cast<char*>(&KeyCount), sizeof(KeyCount));
+	Stream.writeRawData(reinterpret_cast<const char*>(&mValue), sizeof(mValue));
+	Stream.writeRawData(reinterpret_cast<const char*>(&KeyCount), sizeof(KeyCount));
 	Stream.writeRawData(reinterpret_cast<const char*>(mKeys.data()), DataSize);
 }
 
 template<typename T>
 bool lcObjectProperty<T>::LoadFromDataStream(QDataStream& Stream)
 {
+	if (Stream.readRawData(reinterpret_cast<char*>(&mValue), sizeof(mValue)) != sizeof(mValue))
+		return false;
+	
 	size_t KeyCount;
 	
 	if (Stream.readRawData(reinterpret_cast<char*>(&KeyCount), sizeof(KeyCount)) != sizeof(KeyCount))

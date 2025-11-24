@@ -5,6 +5,7 @@
 struct lcInsertPieceInfo;
 enum class lcObjectType;
 enum class lcLightType;
+enum class lcTool;
 
 class lcModelAction
 {
@@ -43,6 +44,50 @@ protected:
 	uint32_t mFocusSection = 0;
 	lcObjectType mFocusType = (lcObjectType)0;
 	lcModelActionSelectionMode mMode = lcModelActionSelectionMode::Clear;
+};
+
+class lcModelActionMouseTool : public lcModelAction
+{
+public:
+	lcModelActionMouseTool(lcTool Tool);
+	virtual ~lcModelActionMouseTool() = default;
+
+	void SaveSelectionStartState(const lcModel* Model);
+	void LoadSelectionStartState(lcModel* Model) const;
+	void SaveSelectionEndState(const lcModel* Model);
+	void LoadSelectionEndState(lcModel* Model) const;
+
+	void SetCameraStartState(const lcCamera* Camera);
+	void SetCameraEndState(const lcCamera* Camera);
+
+	const QByteArray& GetStartState() const
+	{
+		return mStartState;
+	}
+
+	const QByteArray& GetEndState() const
+	{
+		return mEndState;
+	}
+
+	lcTool GetTool() const
+	{
+		return mTool;
+	}
+
+	const QString& GetCameraName() const
+	{
+		return mCameraName;
+	}
+
+protected:
+	static void SaveSelectionState(const lcModel* Model, QByteArray& State);
+	static void LoadSelectionState(lcModel* Model, const QByteArray& State);
+
+	lcTool mTool;
+	QString mCameraName;
+	QByteArray mStartState;
+	QByteArray mEndState;
 };
 
 enum class lcModelActionAddPieceSelectionMode

@@ -31,6 +31,29 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	UpdatePosition(1);
 }
 
+void lcLight::CopyProperties(const lcLight& Other)
+{
+	mLightType = Other.mLightType;
+	mCastShadow = Other.mCastShadow;
+	mPosition = Other.mPosition;
+	mRotation = Other.mRotation;
+	mColor = Other.mColor;
+	mBlenderPower = Other.mBlenderPower;
+	mBlenderRadius = Other.mBlenderRadius;
+	mBlenderAngle = Other.mBlenderAngle;
+	mPOVRayPower = Other.mPOVRayPower;
+	mPOVRayFadeDistance = Other.mPOVRayFadeDistance;
+	mPOVRayFadePower = Other.mPOVRayFadePower;
+	mSpotConeAngle = Other.mSpotConeAngle;
+	mSpotPenumbraAngle = Other.mSpotPenumbraAngle;
+	mPOVRaySpotTightness = Other.mPOVRaySpotTightness;
+	mAreaShape = Other.mAreaShape;
+	mAreaSizeX = Other.mAreaSizeX;
+	mAreaSizeY = Other.mAreaSizeY;
+	mPOVRayAreaGridX = Other.mPOVRayAreaGridX;
+	mPOVRayAreaGridY = Other.mPOVRayAreaGridY;
+}
+
 QString lcLight::GetLightTypeString(lcLightType LightType)
 {
 	switch (LightType)

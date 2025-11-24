@@ -107,6 +107,105 @@ std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> lcModelActionSelection::
 	return { SelectedObjects, FocusObject, mFocusSection };
 }
 
+lcModelActionMouseTool::lcModelActionMouseTool(lcTool Tool)
+	: mTool( Tool )
+{
+}
+
+void lcModelActionMouseTool::SetCameraStartState(const lcCamera* Camera)
+{
+	QDataStream Stream(&mStartState, QIODevice::WriteOnly);
+	
+	Camera->SaveKeyFrames(Stream);
+
+	mCameraName = Camera->GetName();
+}
+
+void lcModelActionMouseTool::SetCameraEndState(const lcCamera* Camera)
+{
+	QDataStream Stream(&mEndState, QIODevice::WriteOnly);
+	
+	Camera->SaveKeyFrames(Stream);
+}
+
+void lcModelActionMouseTool::SaveSelectionStartState(const lcModel* Model)
+{
+	SaveSelectionState(Model, mStartState);
+}
+
+void lcModelActionMouseTool::LoadSelectionStartState(lcModel* Model) const
+{
+	LoadSelectionState(Model, mStartState);
+}
+
+void lcModelActionMouseTool::LoadSelectionEndState(lcModel* Model) const
+{
+	LoadSelectionState(Model, mEndState);
+}
+
+void lcModelActionMouseTool::SaveSelectionEndState(const lcModel* Model)
+{
+	SaveSelectionState(Model, mEndState);
+}
+
+void lcModelActionMouseTool::SaveSelectionState(const lcModel* Model, QByteArray& State)
+{
+	QTextStream Stream(&State, QIODevice::WriteOnly);
+
+	Model->SaveLDraw(Stream, false, 0);
+}
+
+void lcModelActionMouseTool::LoadSelectionState(lcModel* Model, const QByteArray& State)
+{
+	QBuffer Buffer(const_cast<QByteArray*>(&State));
+	Buffer.open(QIODevice::ReadOnly);
+
+	std::unique_ptr<lcModel> SavedModel = std::make_unique<lcModel>(QString(), Model->GetProject(), false);
+	SavedModel->LoadLDraw(Buffer, Model->GetProject());
+
+	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
+	const std::vector<std::unique_ptr<lcPiece>>& SavedPieces = SavedModel->GetPieces();
+
+	if (Pieces.size() != SavedPieces.size())
+		return;
+
+	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+	{
+		lcPiece* Piece = Pieces[PieceIndex].get();
+
+		if (Piece->IsSelected())
+			Piece->CopyProperties(*SavedPieces[PieceIndex].get());
+	}
+
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& SavedCameras = SavedModel->GetCameras();
+
+	if (Cameras.size() != SavedCameras.size())
+		return;
+
+	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+	{
+		lcCamera* Camera = Cameras[CameraIndex].get();
+
+		if (Camera->IsSelected())
+			Camera->CopyProperties(*SavedCameras[CameraIndex].get());
+	}
+
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
+	const std::vector<std::unique_ptr<lcLight>>& SavedLights = SavedModel->GetLights();
+
+	if (Lights.size() != SavedLights.size())
+		return;
+
+	for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
+	{
+		lcLight* Light = Lights[LightIndex].get();
+
+		if (Light->IsSelected())
+			Light->CopyProperties(*SavedLights[LightIndex].get());
+	}
+}
+
 lcModelActionAddPieces::lcModelActionAddPieces(lcStep Step, lcModelActionAddPieceSelectionMode SelectionMode)
 	: mStep(Step), mSelectionMode(SelectionMode)
 {

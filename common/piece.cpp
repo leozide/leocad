@@ -21,7 +21,7 @@ constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Info, QString(), true);
+	SetPieceInfo(Info, QString(), true, true);
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
 	mStepShow = 1;
@@ -33,7 +33,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
+	SetPieceInfo(Other.mPieceInfo, Other.mID, true, true);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
 	mColorIndex = Other.mColorIndex;
@@ -63,7 +63,29 @@ lcPiece::~lcPiece()
 	delete mMesh;
 }
 
-void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
+void lcPiece::CopyProperties(const lcPiece& Other)
+{
+	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
+
+	mPosition = Other.mPosition;
+	mRotation = Other.mRotation;
+
+	mColorIndex = Other.mColorIndex;
+	mColorCode = Other.mColorCode;
+
+	mStepShow = Other.mStepShow;
+	mStepHide = Other.mStepHide;
+
+	mPivotPointValid = Other.mPivotPointValid;
+	mPivotMatrix = Other.mPivotMatrix;
+
+	mControlPoints = Other.mControlPoints;
+	mTrainTrackConnections = Other.mTrainTrackConnections;
+
+	UpdateMesh();
+}
+
+void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
@@ -79,15 +101,19 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 		mID.clear();
 
 	mControlPoints.clear();
+
 	delete mMesh;
 	mMesh = nullptr;
 
-	const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
-
-	if (SynthInfo)
+	if (UpdateSynthInfo)
 	{
-		SynthInfo->GetDefaultControlPoints(mControlPoints);
-		UpdateMesh();
+		const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
+
+		if (SynthInfo)
+		{
+			SynthInfo->GetDefaultControlPoints(mControlPoints);
+			UpdateMesh();
+		}
 	}
 }
 
@@ -98,7 +124,7 @@ bool lcPiece::SetPieceId(PieceInfo* Info)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->ReleasePieceInfo(mPieceInfo);
-	SetPieceInfo(Info, QString(), true);
+	SetPieceInfo(Info, QString(), true, true);
 
 	return true;
 }
@@ -313,7 +339,7 @@ bool lcPiece::FileLoad(lcFile& file)
 	strcat(name, ".dat");
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
-	SetPieceInfo(pInfo, QString(), true);
+	SetPieceInfo(pInfo, QString(), true, true);
 
 	// 11 (0.77)
 	if (version < 11)

@@ -331,6 +331,15 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetBoundingBox(Min, Max);
 }
 
+lcCamera* lcModel::GetCamera(const QString& Name) const
+{
+	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+		if (Camera->GetName() == Name)
+			return Camera.get();
+
+	return nullptr;
+}
+
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
 {
 	const QLatin1String LineEnding("\r\n");
@@ -737,7 +746,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 									       lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info, PartId, false);
+				Piece->SetPieceInfo(Info, PartId, false, true);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->VerifyControlPoints(ControlPoints);
@@ -1073,7 +1082,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 		while (Quantity--)
 		{
 			lcPiece* Piece = new lcPiece(nullptr);
-			Piece->SetPieceInfo(Info, QString(), false);
+			Piece->SetPieceInfo(Info, QString(), false, true);
 			Piece->Initialize(lcMatrix44Identity(), 1);
 			Piece->SetColorCode(ColorCode);
 			AddPiece(Piece);
@@ -1714,6 +1723,167 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 	}
 }
 
+void lcModel::BeginMouseToolAction(lcTool Tool, lcView* View)
+{
+	std::unique_ptr<lcModelActionMouseTool> ModelActionMouseTool = std::make_unique<lcModelActionMouseTool>(Tool);
+
+	switch (Tool)
+	{
+	case lcTool::Insert:
+	case lcTool::PointLight:
+	case lcTool::SpotLight:
+	case lcTool::DirectionalLight:
+	case lcTool::AreaLight:
+		break;
+
+//	case lcTool::Camera:
+//		SaveCheckpoint(tr("New Camera"));
+//		break;
+
+	case lcTool::Select:
+		break;
+
+	case lcTool::Move:
+	case lcTool::Rotate:
+		ModelActionMouseTool->SaveSelectionStartState(this);
+		break;
+
+	case lcTool::Eraser:
+	case lcTool::Paint:
+	case lcTool::ColorPicker:
+		break;
+
+	case lcTool::Zoom:
+	case lcTool::Pan:
+	case lcTool::RotateView:
+	case lcTool::Roll:
+		ModelActionMouseTool->SetCameraStartState(View->GetCamera());
+		break;
+
+	case lcTool::ZoomRegion:
+		break;
+
+	case lcTool::Count:
+		break;
+	}
+
+	mActionSequence.emplace_back(std::move(ModelActionMouseTool));
+}
+
+void lcModel::EndMouseToolAction(lcTool Tool, lcView* View, const QString& Description)
+{
+	if (mActionSequence.empty())
+		return;
+
+	lcModelActionMouseTool* ModelActionMouseTool = dynamic_cast<lcModelActionMouseTool*>(mActionSequence.back().get());
+
+	if (!ModelActionMouseTool || Tool != ModelActionMouseTool->GetTool())
+		return;
+
+	switch (Tool)
+	{
+	case lcTool::Insert:
+	case lcTool::PointLight:
+	case lcTool::SpotLight:
+	case lcTool::DirectionalLight:
+	case lcTool::AreaLight:
+		break;
+
+//	case lcTool::Camera:
+//		SaveCheckpoint(tr("New Camera"));
+//		break;
+
+	case lcTool::Select:
+		break;
+
+	case lcTool::Move:
+	case lcTool::Rotate:
+		ModelActionMouseTool->SaveSelectionEndState(this);
+		break;
+
+	case lcTool::Eraser:
+	case lcTool::Paint:
+	case lcTool::ColorPicker:
+		break;
+
+	case lcTool::Zoom:
+	case lcTool::Pan:
+	case lcTool::RotateView:
+	case lcTool::Roll:
+		ModelActionMouseTool->SetCameraEndState(View->GetCamera());
+		break;
+
+	case lcTool::ZoomRegion:
+		break;
+
+	case lcTool::Count:
+		break;
+	}
+
+	RecordSelectionAction(lcModelActionSelectionMode::Set);
+	EndActionSequence(Description);
+}
+
+void lcModel::RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseTool, bool Apply)
+{
+	if (!ModelActionMouseTool)
+		return;
+
+	lcTool Tool = ModelActionMouseTool->GetTool();
+
+	switch (Tool)
+	{
+	case lcTool::Insert:
+	case lcTool::PointLight:
+	case lcTool::SpotLight:
+	case lcTool::DirectionalLight:
+	case lcTool::AreaLight:
+		break;
+
+//	case lcTool::Camera:
+//		SaveCheckpoint(tr("New Camera"));
+//		break;
+
+	case lcTool::Select:
+		break;
+
+	case lcTool::Move:
+	case lcTool::Rotate:
+		if (Apply)
+			ModelActionMouseTool->LoadSelectionEndState(this);
+		else
+			ModelActionMouseTool->LoadSelectionStartState(this);
+		SetCurrentStep(mCurrentStep);
+		break;
+
+	case lcTool::Eraser:
+	case lcTool::Paint:
+	case lcTool::ColorPicker:
+		break;
+
+	case lcTool::Zoom:
+	case lcTool::Pan:
+	case lcTool::RotateView:
+	case lcTool::Roll:
+		if (lcCamera* Camera = GetCamera(ModelActionMouseTool->GetCameraName()))
+		{
+			const QByteArray& State = Apply ? ModelActionMouseTool->GetEndState() : ModelActionMouseTool->GetStartState();
+			QDataStream Stream(const_cast<QByteArray*>(&State), QIODevice::ReadOnly);
+
+			Camera->LoadKeyFrames(Stream);
+
+			SetCurrentStep(mCurrentStep);
+		}
+		break;
+
+	case lcTool::ZoomRegion:
+		break;
+
+	case lcTool::Count:
+		break;
+	}
+}
+
 void lcModel::RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode)
 {
 	std::unique_ptr<lcModelActionAddPieces> ModelActionAddPieces = std::make_unique<lcModelActionAddPieces>(mCurrentStep, SelectionMode);
@@ -2168,6 +2338,8 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 	{
 		if (const lcModelActionSelection* ModelActionSelection = dynamic_cast<const lcModelActionSelection*>(ModelAction))
 			RunSelectionAction(ModelActionSelection, Apply);
+		else if (const lcModelActionMouseTool* ModelActionMouseTool = dynamic_cast<const lcModelActionMouseTool*>(ModelAction))
+			RunMouseToolAction(ModelActionMouseTool, Apply);
 		else if (const lcModelActionAddPieces* ModelActionAddPieces = dynamic_cast<const lcModelActionAddPieces*>(ModelAction))
 			RunAddPiecesAction(ModelActionAddPieces, Apply);
 		else if (const lcModelActionAddLight* ModelActionAddLight = dynamic_cast<const lcModelActionAddLight*>(ModelAction))
@@ -2215,8 +2387,11 @@ void lcModel::EndActionSequence(const QString& Description)
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 
-void lcModel::CancelActionSequence()
+void lcModel::RevertActionSequence()
 {
+	PerformActionSequence(mActionSequence, false);
+
+	mActionSequence.clear();
 }
 
 void lcModel::SaveCheckpoint(const QString& )
@@ -3328,7 +3503,7 @@ void lcModel::InlineSelectedModels()
 			if (ColorIndex == gDefaultColor)
 				ColorIndex = Piece->GetColorIndex();
 
-			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true);
+			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true, true);
 			NewPiece->Initialize(lcMul(ModelPiece->mModelWorld, Piece->mModelWorld), Piece->GetStepShow());
 			NewPiece->SetColorIndex(ColorIndex);
 			NewPiece->UpdatePosition(mCurrentStep);
@@ -3916,7 +4091,7 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 {
 	if (!Accept)
 	{
-		CancelActionSequence();
+		RevertActionSequence();
 		return;
 	}
 
@@ -4858,7 +5033,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			Piece->SetColorIndex(Params.ReplaceColorIndex);
 
 		if (ReplacePieceInfo)
-			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true);
+			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true, true);
 	};
 
 	size_t StartIndex = mPieces.size() - 1;
@@ -4979,17 +5154,68 @@ void lcModel::RedoAction()
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 
-void lcModel::BeginMouseTool()
+void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 {
+	switch (Tool)
+	{
+		case lcTool::Insert:
+		case lcTool::PointLight:
+		case lcTool::SpotLight:
+		case lcTool::DirectionalLight:
+		case lcTool::AreaLight:
+			break;
+
+//		case lcTool::Camera:
+//		{
+//			lcVector3 Position = GetCameraLightInsertPosition();
+//			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
+//			ActiveModel->BeginCameraTool(Position, Target);
+//		}
+//		break;
+
+		case lcTool::Select:
+			break;
+
+		case lcTool::Move:
+		case lcTool::Rotate:
+			BeginActionSequence();
+			RecordSelectionAction(lcModelActionSelectionMode::Set);
+			BeginMouseToolAction(Tool, View);
+			break;
+
+		case lcTool::Eraser:
+		case lcTool::Paint:
+		case lcTool::ColorPicker:
+			break;
+
+	    case lcTool::Pan:
+	    case lcTool::Zoom:
+		case lcTool::RotateView:
+		case lcTool::Roll:
+			if (!View->GetCamera()->IsSimple())
+			{
+				BeginActionSequence();
+				RecordSelectionAction(lcModelActionSelectionMode::Set);
+				BeginMouseToolAction(Tool, View);
+			}
+			break;
+
+		case lcTool::ZoomRegion:
+			break;
+
+		case lcTool::Count:
+			break;
+	}
+
 	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
 	mMouseToolFirstMove = true;
 }
 
-void lcModel::EndMouseTool(lcTool Tool, bool Accept)
+void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 {
 	if (!Accept)
 	{
-		CancelActionSequence();
+		RevertActionSequence();
 		return;
 	}
 
@@ -5002,19 +5228,19 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 	case lcTool::AreaLight:
 		break;
 
-	case lcTool::Camera:
-		SaveCheckpoint(tr("New Camera"));
-		break;
+//	case lcTool::Camera:
+//		SaveCheckpoint(tr("New Camera"));
+//		break;
 
 	case lcTool::Select:
 		break;
 
 	case lcTool::Move:
-		SaveCheckpoint(tr("Move"));
+		EndMouseToolAction(Tool, View, tr("Move"));
 		break;
 
 	case lcTool::Rotate:
-		SaveCheckpoint(tr("Rotate"));
+		EndMouseToolAction(Tool, View, tr("Rotate"));
 		break;
 
 	case lcTool::Eraser:
@@ -5023,23 +5249,23 @@ void lcModel::EndMouseTool(lcTool Tool, bool Accept)
 		break;
 
 	case lcTool::Zoom:
-		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
-			SaveCheckpoint(tr("Zoom"));
+		if (!View->GetCamera()->IsSimple())
+			EndMouseToolAction(Tool, View, tr("Zoom"));
 		break;
 
 	case lcTool::Pan:
-		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
-			SaveCheckpoint(tr("Pan"));
+		if (!View->GetCamera()->IsSimple())
+			EndMouseToolAction(Tool, View, tr("Pan"));
 		break;
 
 	case lcTool::RotateView:
-		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
-			SaveCheckpoint(tr("Orbit"));
+		if (!View->GetCamera()->IsSimple())
+			EndMouseToolAction(Tool, View, tr("Orbit"));
 		break;
 
 	case lcTool::Roll:
-		if (!gMainWindow->GetActiveView()->GetCamera()->IsSimple())
-			SaveCheckpoint(tr("Roll"));
+		if (!View->GetCamera()->IsSimple())
+			EndMouseToolAction(Tool, View, tr("Roll"));
 		break;
 
 	case lcTool::ZoomRegion:

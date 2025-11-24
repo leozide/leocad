@@ -48,7 +48,7 @@ class lcCamera : public lcObject
 public:
 	lcCamera(bool Simple);
 	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
-	~lcCamera();
+	virtual ~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
 	lcCamera(lcCamera&&) = delete;
@@ -58,6 +58,8 @@ public:
 	static QString GetCameraTypeString(lcCameraType CameraType);
 	static QStringList GetCameraTypeStrings();
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
+
+	void CopyProperties(const lcCamera& Other);
 
 	QString GetName() const override
 	{

@@ -56,6 +56,19 @@ lcCamera::~lcCamera()
 {
 }
 
+void lcCamera::CopyProperties(const lcCamera& Other)
+{
+	m_fovy = Other.m_fovy;
+	m_zNear = Other.m_zNear;
+	m_zFar = Other.m_zFar;
+
+	mPosition = Other.mPosition;
+	mTargetPosition = Other.mTargetPosition;
+	mUpVector = Other.mUpVector;
+
+	SetOrtho(Other.IsOrtho());
+}
+
 QString lcCamera::GetCameraTypeString(lcCameraType CameraType)
 {
 	switch (CameraType)

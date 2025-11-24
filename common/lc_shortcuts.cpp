@@ -107,7 +107,7 @@ bool lcKeyboardShortcuts::Load(QTextStream& Stream)
 
 	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
 	{
-		int Equals = Line.indexOf('=');
+		qsizetype Equals = Line.indexOf('=');
 
 		if (Equals == -1)
 			continue;
@@ -231,7 +231,7 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 
 	for (const QString& FullShortcut : FullShortcuts)
 	{
-		int Equals = FullShortcut.indexOf('=');
+		qsizetype Equals = FullShortcut.indexOf('=');
 
 		if (Equals == -1)
 			continue;

@@ -1578,8 +1578,8 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				qint64 DataSize = File.size();
 				const qint64 BufferSize = Q_INT64_C(1000);
 				char Buf[BufferSize];
-				int BytesRead;
-				int ReadSize = qMin(DataSize, BufferSize);
+				qint64 BytesRead;
+				qint64 ReadSize = qMin(DataSize, BufferSize);
 				while (ReadSize > 0 && (BytesRead = File.read(Buf, ReadSize)) > 0)
 				{
 					DataSize -= BytesRead;
@@ -1883,7 +1883,7 @@ void lcBlenderPreferences::ReadStdOut(const QString& StdOutput, QString& Errors)
 	const QString SaveAddonVersion = mAddonVersion;
 	const QString SaveVersion = mBlenderVersion;
 
-	int EditListItems = mPathLineEditList.size();
+	qsizetype EditListItems = mPathLineEditList.size();
 	for (const QString& StdOutLine : StdOutLines)
 	{
 		if (StdOutLine.isEmpty())
@@ -3625,7 +3625,7 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 		QWidget* TextWidget = BoxLayoutItem->widget();
 		if (TextWidget)
 		{
-			int FixedWidth = Body.length() * FontWidth;
+			qsizetype FixedWidth = Body.length() * FontWidth;
 			if (FixedWidth == MinimumWidth)
 			{
 				int Index = (MinimumWidth / FontWidth) - 1;
@@ -3634,7 +3634,7 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 			}
 			else if (FixedWidth < MinimumWidth)
 				FixedWidth = MinimumWidth;
-			TextWidget->setFixedWidth(FixedWidth);
+			TextWidget->setFixedWidth(static_cast<int>(FixedWidth));
 		}
 	}
 

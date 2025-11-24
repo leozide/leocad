@@ -106,7 +106,7 @@ bool lcLoadCategories(const QByteArray& Buffer, std::vector<lcLibraryCategory>& 
 
 	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
 	{
-		int Equals = Line.indexOf('=');
+		qsizetype Equals = Line.indexOf('=');
 
 		if (Equals == -1)
 			continue;

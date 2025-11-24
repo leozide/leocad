@@ -359,7 +359,7 @@ void lcMinifigDialog::PieceButtonClicked()
 	if (Search == mPieceButtons.end())
 		return;
 
-	int ItemIndex = std::distance(mPieceButtons.begin(), Search);
+	int ItemIndex = static_cast<int>(std::distance(mPieceButtons.begin(), Search));
 	PieceInfo* CurrentInfo = mMinifigWizard->mMinifig.Parts[ItemIndex];
 
 	QPoint Position = PieceButton->mapToGlobal(PieceButton->rect().bottomLeft());
@@ -411,7 +411,9 @@ void lcMinifigDialog::ColorChanged(int Index)
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
-	mMinifigWizard->SetColorIndex(std::distance(mColorPickers.begin(), Search), Index);
+	int ItemIndex = static_cast<int>(std::distance(mColorPickers.begin(), Search));
+
+	mMinifigWizard->SetColorIndex(ItemIndex, Index);
 	mView->Redraw();
 }
 
@@ -425,6 +427,8 @@ void lcMinifigDialog::AngleChanged(double Value)
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
-	mMinifigWizard->SetAngle(std::distance(mSpinBoxes.begin(), Search), Value);
+	int ItemIndex = static_cast<int>(std::distance(mSpinBoxes.begin(), Search));
+
+	mMinifigWizard->SetAngle(ItemIndex, Value);
 	mView->Redraw();
 }

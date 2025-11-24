@@ -15,7 +15,7 @@
 QString lcFormatValue(float Value, int Precision)
 {
 	QString String = QString::number(Value, 'f', Precision);
-	const int Dot = String.indexOf('.');
+	const qsizetype Dot = String.indexOf('.');
 
 	if (Dot != -1)
 	{

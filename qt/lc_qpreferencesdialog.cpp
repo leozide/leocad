@@ -903,8 +903,9 @@ void lcQPreferencesDialog::updateCommandList()
 
 		const QString identifier = tr(gCommands[actionIdx].ID);
 
-		int pos = identifier.indexOf(QLatin1Char('.'));
-		int subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
+		qsizetype pos = identifier.indexOf(QLatin1Char('.'));
+		qsizetype subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
+		
 		if (subPos == -1)
 			subPos = pos;
 

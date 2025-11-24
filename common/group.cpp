@@ -41,7 +41,7 @@ void lcGroup::CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups)
 
 	int Max = 0;
 	QString Prefix = QApplication::tr("Group #");
-	const int Length = Prefix.length();
+	const qsizetype Length = Prefix.length();
 
 	for (const std::unique_ptr<lcGroup>& Group : Groups)
 	{

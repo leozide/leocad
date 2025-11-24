@@ -18,14 +18,21 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 #endif
 
 	lcViewWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
-	QSurfaceFormat Format = Widget->context()->format();
-
+	QOpenGLContext* Context = Widget->context();
+	QOpenGLFunctions* Functions = Context->functions();
+	QSurfaceFormat Format = Context->format();
+	qDebug() << Format;
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
 
 	const QString QtVersionFormat = tr("Qt Version %1 (compiled with %2)\n\n");
 	const QString QtVersion = QtVersionFormat.arg(qVersion(), QT_VERSION_STR);
+	
 	const QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
-	const QString Version = VersionFormat.arg(QString((const char*)glGetString(GL_VERSION)), QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)), QString((const char*)glGetString(GL_RENDERER)), QString((const char*)glGetString(GL_VENDOR)));
+	const QString GLVersion(reinterpret_cast<const char*>(Functions->glGetString(GL_VERSION)));
+	const QString ShaderVersion(reinterpret_cast<const char*>(Functions->glGetString(GL_SHADING_LANGUAGE_VERSION)));
+	const QString Renderer(reinterpret_cast<const char*>(Functions->glGetString(GL_RENDERER)));
+	const QString Vendor(reinterpret_cast<const char*>(Functions->glGetString(GL_VENDOR)));
+	const QString Version = VersionFormat.arg(GLVersion, ShaderVersion, Renderer, Vendor);
 	const QString BuffersFormat = tr("Color Buffer: %1 bits\nDepth Buffer: %2 bits\nStencil Buffer: %3 bits\n\n");
 	const QString Buffers = BuffersFormat.arg(QString::number(ColorDepth), QString::number(Format.depthBufferSize()), QString::number(Format.stencilBufferSize()));
 

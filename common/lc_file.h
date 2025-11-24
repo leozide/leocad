@@ -283,7 +283,7 @@ public:
 	void WriteQString(const QString& String)
 	{
 		QByteArray Data = String.toUtf8();
-		WriteU32(Data.size());
+		WriteU32(static_cast<quint32>(Data.size()));
 		WriteBuffer(Data, Data.size());
 	}
 

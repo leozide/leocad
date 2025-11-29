@@ -1282,15 +1282,15 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 	{
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
-
-		sprintf(FileName, "parts/%s", Info->mFileName);
+		
+		snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 		PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 		if (PieceFile.Open(QIODevice::ReadOnly))
 			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
 		if (mHasUnofficial && !Loaded)
 		{
-			sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
+			snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
@@ -1356,14 +1356,14 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			lcDiskFile IncludeFile;
 			char FileName[LC_MAXPATH];
 			bool Found = false;
-
-			sprintf(FileName, "parts/%s", Info->mFileName);
+			
+			snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 			IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			Found = IncludeFile.Open(QIODevice::ReadOnly);
 
 			if (mHasUnofficial && !Found)
 			{
-				sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
+				snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
 				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 				Found = IncludeFile.Open(QIODevice::ReadOnly);
 			}
@@ -1383,7 +1383,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const char* Folder, lcZipFileType ZipFileType)
 			{
 				char IncludeFileName[LC_MAXPATH];
-				sprintf(IncludeFileName, Folder, PieceName);
+				snprintf(IncludeFileName, sizeof(IncludeFileName), Folder, PieceName);
 				return mZipFiles[static_cast<int>(ZipFileType)]->ExtractFile(IncludeFileName, IncludeFile);
 			};
 
@@ -1531,12 +1531,12 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcMemFile TextureFile;
-
-		sprintf(FileName, "ldraw/parts/textures/%s.png", Texture->mName);
+		
+		snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Texture->mName);
 
 		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))
 		{
-			sprintf(FileName, "parts/textures/%s.png", Texture->mName);
+			snprintf(FileName, sizeof(FileName), "parts/textures/%s.png", Texture->mName);
 
 			if (!mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || !mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile))
 				return false;

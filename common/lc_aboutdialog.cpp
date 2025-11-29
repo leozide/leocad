@@ -21,7 +21,7 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 	QOpenGLContext* Context = Widget->context();
 	QOpenGLFunctions* Functions = Context->functions();
 	QSurfaceFormat Format = Context->format();
-	qDebug() << Format;
+	
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
 
 	const QString QtVersionFormat = tr("Qt Version %1 (compiled with %2)\n\n");

@@ -12,6 +12,10 @@ class lcModelAction
 public:
 	lcModelAction() = default;
 	virtual ~lcModelAction() = default;
+
+protected:
+	static void SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly);
+	static void LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model, bool SelectedOnly);
 };
 
 enum class lcModelActionSelectionMode
@@ -52,23 +56,15 @@ public:
 	lcModelActionMouseTool(lcTool Tool);
 	virtual ~lcModelActionMouseTool() = default;
 
+	void SaveCameraStartState(const lcCamera* Camera);
+	void LoadCameraStartState(lcCamera* Camera) const;
+	void SaveCameraEndState(const lcCamera* Camera);
+	void LoadCameraEndState(lcCamera* Camera) const;
+
 	void SaveSelectionStartState(const lcModel* Model);
 	void LoadSelectionStartState(lcModel* Model) const;
 	void SaveSelectionEndState(const lcModel* Model);
 	void LoadSelectionEndState(lcModel* Model) const;
-
-	void SetCameraStartState(const lcCamera* Camera);
-	void SetCameraEndState(const lcCamera* Camera);
-
-	const QByteArray& GetStartState() const
-	{
-		return mStartState;
-	}
-
-	const QByteArray& GetEndState() const
-	{
-		return mEndState;
-	}
 
 	lcTool GetTool() const
 	{
@@ -81,13 +77,10 @@ public:
 	}
 
 protected:
-	static void SaveSelectionState(const lcModel* Model, QByteArray& State);
-	static void LoadSelectionState(lcModel* Model, const QByteArray& State);
-
 	lcTool mTool;
 	QString mCameraName;
-	QByteArray mStartState;
-	QByteArray mEndState;
+	QByteArray mStartBuffer;
+	QByteArray mEndBuffer;
 };
 
 enum class lcModelActionAddPieceSelectionMode
@@ -249,27 +242,11 @@ public:
 		return mStep;
 	}
 
-    void SaveState(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights);
+    void SaveModelState(const lcModel* Model);
+	void LoadModelState(lcModel* Model) const;
 
-	const std::vector<QByteArray>& GetPieceStates() const
-	{
-		return mPieceStates;
-	}
-	
-	const std::vector<QByteArray>& GetCameraStates() const
-	{
-		return mCameraStates;
-	}
-	
-	const std::vector<QByteArray>& GetLightStates() const
-	{
-		return mLightStates;
-	}
-	
 protected:
-	std::vector<QByteArray> mPieceStates;
-	std::vector<QByteArray> mCameraStates;
-	std::vector<QByteArray> mLightStates;
+	QByteArray mUndoBuffer;
 	lcModelActionStepMode mMode;
 	lcStep mStep;
 };

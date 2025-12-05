@@ -1757,7 +1757,7 @@ void lcModel::BeginMouseToolAction(lcTool Tool, lcView* View)
 	case lcTool::Pan:
 	case lcTool::RotateView:
 	case lcTool::Roll:
-		ModelActionMouseTool->SetCameraStartState(View->GetCamera());
+		ModelActionMouseTool->SaveCameraStartState(View->GetCamera());
 		break;
 
 	case lcTool::ZoomRegion:
@@ -1810,7 +1810,7 @@ void lcModel::EndMouseToolAction(lcTool Tool, lcView* View, const QString& Descr
 	case lcTool::Pan:
 	case lcTool::RotateView:
 	case lcTool::Roll:
-		ModelActionMouseTool->SetCameraEndState(View->GetCamera());
+		ModelActionMouseTool->SaveCameraEndState(View->GetCamera());
 		break;
 
 	case lcTool::ZoomRegion:
@@ -1853,6 +1853,7 @@ void lcModel::RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseT
 			ModelActionMouseTool->LoadSelectionEndState(this);
 		else
 			ModelActionMouseTool->LoadSelectionStartState(this);
+
 		SetCurrentStep(mCurrentStep);
 		break;
 
@@ -1867,10 +1868,10 @@ void lcModel::RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseT
 	case lcTool::Roll:
 		if (lcCamera* Camera = GetCamera(ModelActionMouseTool->GetCameraName()))
 		{
-			const QByteArray& State = Apply ? ModelActionMouseTool->GetEndState() : ModelActionMouseTool->GetStartState();
-			QDataStream Stream(const_cast<QByteArray*>(&State), QIODevice::ReadOnly);
-
-			Camera->LoadUndoData(Stream);
+			if (Apply)
+				ModelActionMouseTool->LoadCameraEndState(Camera);
+			else
+				ModelActionMouseTool->LoadCameraStartState(Camera);
 
 			SetCurrentStep(mCurrentStep);
 		}
@@ -2229,11 +2230,11 @@ void lcModel::RecordStepAction(lcModelActionStepMode Mode, lcStep Step)
 {
 	std::unique_ptr<lcModelActionStep> ModelActionStep = std::make_unique<lcModelActionStep>(Mode, Step);
 
-	ModelActionStep->SaveState(mPieces, mCameras, mLights);
-    
+	ModelActionStep->SaveModelState(this);
+
 	RunStepAction(ModelActionStep.get(), true);
-	
-	mActionSequence.emplace_back(std::move(ModelActionStep));	
+
+	mActionSequence.emplace_back(std::move(ModelActionStep));
 }
 
 void lcModel::RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply)
@@ -2280,50 +2281,7 @@ void lcModel::RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply
 	}
 	else
 	{
-		const std::vector<QByteArray>& PieceStates = ModelActionStep->GetPieceStates();
-
-		if (PieceStates.size() != mPieces.size())
-			return;
-
-		for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
-		{
-			const QByteArray& PieceState = PieceStates[PieceIndex];
-			lcPiece* Piece = mPieces[PieceIndex].get();
-
-			QDataStream Stream(const_cast<QByteArray*>(&PieceState), QIODevice::ReadOnly);
-			
-			Piece->LoadUndoData(Stream);
-		}
-		
-		const std::vector<QByteArray>& CameraStates = ModelActionStep->GetCameraStates();
-
-		if (CameraStates.size() != mCameras.size())
-			return;
-
-		for (size_t CameraIndex = 0; CameraIndex < mCameras.size(); CameraIndex++)
-		{
-			const QByteArray& CameraState = CameraStates[CameraIndex];
-			lcCamera* Camera = mCameras[CameraIndex].get();
-
-			QDataStream Stream(const_cast<QByteArray*>(&CameraState), QIODevice::ReadOnly);
-			
-			Camera->LoadUndoData(Stream);
-		}
-
-		const std::vector<QByteArray>& LightStates = ModelActionStep->GetLightStates();
-
-		if (LightStates.size() != mLights.size())
-			return;
-
-		for (size_t LightIndex = 0; LightIndex < mLights.size(); LightIndex++)
-		{
-			const QByteArray& LightState = LightStates[LightIndex];
-			lcLight* Light = mLights[LightIndex].get();
-
-			QDataStream Stream(const_cast<QByteArray*>(&LightState), QIODevice::ReadOnly);
-			
-			Light->LoadUndoData(Stream);
-		}
+		ModelActionStep->LoadModelState(this);
 	}
 	
 	SetCurrentStep(mCurrentStep);

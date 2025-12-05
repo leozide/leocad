@@ -933,15 +933,59 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
-void lcPiece::SaveKeyFrames(QDataStream& Stream) const
+void lcPiece::SaveUndoData(QDataStream& Stream) const
 {
-	mPosition.SaveToDataStream(Stream);
-	mRotation.SaveToDataStream(Stream);	
+//	PieceInfo* mPieceInfo;
+	Stream << mFileLine;
+	Stream << mID;
+
+//	lcGroup* mGroup;
+
+	Stream << mColorIndex;
+	Stream << mColorCode;
+
+	Stream << mStepShow;
+	Stream << mStepHide;
+
+	Stream << mPivotMatrix;
+	Stream << mPivotPointValid;
+
+	Stream << mHidden;
+
+//	std::vector<lcPieceControlPoint> mControlPoints;
+//	std::vector<bool> mTrainTrackConnections;
+
+	mPosition.SaveUndoData(Stream);
+	mRotation.SaveUndoData(Stream);	
 }
 
-bool lcPiece::LoadKeyFrames(QDataStream& Stream)
+bool lcPiece::LoadUndoData(QDataStream& Stream)
 {
-	return mPosition.LoadFromDataStream(Stream) && mRotation.LoadFromDataStream(Stream);
+//	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
+
+//	PieceInfo* mPieceInfo;
+	Stream >> mFileLine;
+	Stream >> mID;
+
+//	lcGroup* mGroup;
+
+	Stream >> mColorIndex;
+	Stream >> mColorCode;
+
+	Stream >> mStepShow;
+	Stream >> mStepHide;
+
+	Stream >> mPivotMatrix;
+	Stream >> mPivotPointValid;
+
+	Stream >> mHidden;
+
+//	std::vector<lcPieceControlPoint> mControlPoints;
+//	std::vector<bool> mTrainTrackConnections;
+
+//	UpdateMesh();
+
+	return mPosition.LoadUndoData(Stream) && mRotation.LoadUndoData(Stream);
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const

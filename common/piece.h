@@ -116,8 +116,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	void SaveKeyFrames(QDataStream& Stream) const override;
-	bool LoadKeyFrames(QDataStream& Stream) override;
+	void SaveUndoData(QDataStream& Stream) const override;
+	bool LoadUndoData(QDataStream& Stream) override;
 
 	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;

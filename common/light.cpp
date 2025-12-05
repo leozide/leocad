@@ -1530,42 +1530,54 @@ void lcLight::RemoveKeyFrames()
 	mPOVRayFadePower.RemoveAllKeys();
 }
 
-void lcLight::SaveKeyFrames(QDataStream& Stream) const
+void lcLight::SaveUndoData(QDataStream& Stream) const
 {
-	mPosition.SaveToDataStream(Stream);
-	mRotation.SaveToDataStream(Stream);
-	mColor.SaveToDataStream(Stream);
-	mSpotConeAngle.SaveToDataStream(Stream);
-	mSpotPenumbraAngle.SaveToDataStream(Stream);
-	mPOVRaySpotTightness.SaveToDataStream(Stream);
-	mPOVRayAreaGridX.SaveToDataStream(Stream);
-	mPOVRayAreaGridY.SaveToDataStream(Stream);
-	mBlenderRadius.SaveToDataStream(Stream);
-	mBlenderAngle.SaveToDataStream(Stream);
-	mAreaSizeX.SaveToDataStream(Stream);
-	mAreaSizeY.SaveToDataStream(Stream);
-	mBlenderPower.SaveToDataStream(Stream);
-	mPOVRayPower.SaveToDataStream(Stream);
-	mPOVRayFadeDistance.SaveToDataStream(Stream);
-	mPOVRayFadePower.SaveToDataStream(Stream);
+	Stream << mName;
+	Stream << mLightType;
+	Stream << mCastShadow;
+	Stream << mAreaShape;
+	Stream << mState;
+
+	mPosition.SaveUndoData(Stream);
+	mRotation.SaveUndoData(Stream);
+	mColor.SaveUndoData(Stream);
+	mSpotConeAngle.SaveUndoData(Stream);
+	mSpotPenumbraAngle.SaveUndoData(Stream);
+	mPOVRaySpotTightness.SaveUndoData(Stream);
+	mPOVRayAreaGridX.SaveUndoData(Stream);
+	mPOVRayAreaGridY.SaveUndoData(Stream);
+	mBlenderRadius.SaveUndoData(Stream);
+	mBlenderAngle.SaveUndoData(Stream);
+	mAreaSizeX.SaveUndoData(Stream);
+	mAreaSizeY.SaveUndoData(Stream);
+	mBlenderPower.SaveUndoData(Stream);
+	mPOVRayPower.SaveUndoData(Stream);
+	mPOVRayFadeDistance.SaveUndoData(Stream);
+	mPOVRayFadePower.SaveUndoData(Stream);
 }
 
-bool lcLight::LoadKeyFrames(QDataStream& Stream)
+bool lcLight::LoadUndoData(QDataStream& Stream)
 {
-	return mPosition.LoadFromDataStream(Stream) &&
-        mRotation.LoadFromDataStream(Stream) &&
-        mColor.LoadFromDataStream(Stream) &&
-        mSpotConeAngle.LoadFromDataStream(Stream) &&
-        mSpotPenumbraAngle.LoadFromDataStream(Stream) &&
-        mPOVRaySpotTightness.LoadFromDataStream(Stream) &&
-        mPOVRayAreaGridX.LoadFromDataStream(Stream) &&
-        mPOVRayAreaGridY.LoadFromDataStream(Stream) &&
-        mBlenderRadius.LoadFromDataStream(Stream) &&
-        mBlenderAngle.LoadFromDataStream(Stream) &&
-        mAreaSizeX.LoadFromDataStream(Stream) &&
-        mAreaSizeY.LoadFromDataStream(Stream) &&
-        mBlenderPower.LoadFromDataStream(Stream) &&
-        mPOVRayPower.LoadFromDataStream(Stream) &&
-        mPOVRayFadeDistance.LoadFromDataStream(Stream) &&
-        mPOVRayFadePower.LoadFromDataStream(Stream);
+	Stream >> mName;
+	Stream >> mLightType;
+	Stream >> mCastShadow;
+	Stream >> mAreaShape;
+	Stream >> mState;
+
+	return mPosition.LoadUndoData(Stream) &&
+        mRotation.LoadUndoData(Stream) &&
+        mColor.LoadUndoData(Stream) &&
+        mSpotConeAngle.LoadUndoData(Stream) &&
+        mSpotPenumbraAngle.LoadUndoData(Stream) &&
+        mPOVRaySpotTightness.LoadUndoData(Stream) &&
+        mPOVRayAreaGridX.LoadUndoData(Stream) &&
+        mPOVRayAreaGridY.LoadUndoData(Stream) &&
+        mBlenderRadius.LoadUndoData(Stream) &&
+        mBlenderAngle.LoadUndoData(Stream) &&
+        mAreaSizeX.LoadUndoData(Stream) &&
+        mAreaSizeY.LoadUndoData(Stream) &&
+        mBlenderPower.LoadUndoData(Stream) &&
+        mPOVRayPower.LoadUndoData(Stream) &&
+        mPOVRayFadeDistance.LoadUndoData(Stream) &&
+        mPOVRayFadePower.LoadUndoData(Stream);
 }

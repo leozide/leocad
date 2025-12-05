@@ -907,16 +907,32 @@ void lcCamera::RemoveKeyFrames()
 	mUpVector.RemoveAllKeys();
 }
 
-void lcCamera::SaveKeyFrames(QDataStream& Stream) const
+void lcCamera::SaveUndoData(QDataStream& Stream) const
 {
-	mPosition.SaveToDataStream(Stream);
-	mTargetPosition.SaveToDataStream(Stream);
-	mUpVector.SaveToDataStream(Stream);
+	Stream << m_fovy;
+	Stream << m_zNear;
+	Stream << m_zFar;
+	Stream << mName;
+	Stream << (mState & (LC_CAMERA_HIDDEN | LC_CAMERA_ORTHO));
+
+	mPosition.SaveUndoData(Stream);
+	mTargetPosition.SaveUndoData(Stream);
+	mUpVector.SaveUndoData(Stream);
 }
 
-bool lcCamera::LoadKeyFrames(QDataStream& Stream)
+bool lcCamera::LoadUndoData(QDataStream& Stream)
 {
-	return mPosition.LoadFromDataStream(Stream) && mTargetPosition.LoadFromDataStream(Stream) && mUpVector.LoadFromDataStream(Stream);
+	Stream >> m_fovy;
+	Stream >> m_zNear;
+	Stream >> m_zFar;
+	Stream >> mName;
+
+	quint32 State;
+	Stream >> State;
+	
+	mState = (mState & ~(LC_CAMERA_HIDDEN | LC_CAMERA_ORTHO)) | State;
+
+	return mPosition.LoadUndoData(Stream) && mTargetPosition.LoadUndoData(Stream) && mUpVector.LoadUndoData(Stream);
 }
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const

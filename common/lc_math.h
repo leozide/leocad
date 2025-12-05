@@ -521,9 +521,33 @@ inline QDataStream& operator<<(QDataStream& Stream, const lcVector4& v)
 	return Stream;
 }
 
-inline QDataStream& operator >> (QDataStream& Stream, lcVector4& v)
+inline QDataStream& operator>>(QDataStream& Stream, lcVector4& v)
 {
 	Stream >> v.x >> v.y >> v.z >> v.w;
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcMatrix33& m)
+{
+	Stream << m[0] << m[1] << m[2];
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcMatrix33& m)
+{
+	Stream >> m[0] >> m[1] >> m[2];
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcMatrix44& m)
+{
+	Stream << m[0] << m[1] << m[2] << m[3];
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcMatrix44& m)
+{
+	Stream >> m[0] >> m[1] >> m[2] >> m[3];
 	return Stream;
 }
 

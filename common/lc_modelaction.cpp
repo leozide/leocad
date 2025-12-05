@@ -116,7 +116,7 @@ void lcModelActionMouseTool::SetCameraStartState(const lcCamera* Camera)
 {
 	QDataStream Stream(&mStartState, QIODevice::WriteOnly);
 	
-	Camera->SaveKeyFrames(Stream);
+	Camera->SaveUndoData(Stream);
 
 	mCameraName = Camera->GetName();
 }
@@ -125,7 +125,7 @@ void lcModelActionMouseTool::SetCameraEndState(const lcCamera* Camera)
 {
 	QDataStream Stream(&mEndState, QIODevice::WriteOnly);
 	
-	Camera->SaveKeyFrames(Stream);
+	Camera->SaveUndoData(Stream);
 }
 
 void lcModelActionMouseTool::SaveSelectionStartState(const lcModel* Model)
@@ -265,38 +265,35 @@ void lcModelActionStep::SaveState(const std::vector<std::unique_ptr<lcPiece>>& P
 	
 	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 	{
-		lcModelActionStepPieceState& PieceState = mPieceStates[PieceIndex];
+		QByteArray& PieceState = mPieceStates[PieceIndex];
 		const lcPiece* Piece = Pieces[PieceIndex].get();
 		
-		PieceState.StepShow = Piece->GetStepShow();
-		PieceState.StepHide = Piece->GetStepHide();
+		QDataStream Stream(&PieceState, QIODevice::WriteOnly);
 		
-		QDataStream Stream(&PieceState.KeyFrames, QIODevice::WriteOnly);
-		
-		Piece->SaveKeyFrames(Stream);
+		Piece->SaveUndoData(Stream);
 	}
 
 	mCameraStates.resize(Cameras.size());
 	
 	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
 	{
-		lcModelActionStepCameraState& CameraState = mCameraStates[CameraIndex];
+		QByteArray& CameraState = mCameraStates[CameraIndex];
 		const lcCamera* Camera = Cameras[CameraIndex].get();
 		
-		QDataStream Stream(&CameraState.KeyFrames, QIODevice::WriteOnly);
+		QDataStream Stream(&CameraState, QIODevice::WriteOnly);
 		
-		Camera->SaveKeyFrames(Stream);
+		Camera->SaveUndoData(Stream);
 	}
 
 	mLightStates.resize(Lights.size());
 	
 	for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
 	{
-		lcModelActionStepLightState& LightState = mLightStates[LightIndex];
+		QByteArray& LightState = mLightStates[LightIndex];
 		const lcLight* Light = Lights[LightIndex].get();
 		
-		QDataStream Stream(&LightState.KeyFrames, QIODevice::WriteOnly);
+		QDataStream Stream(&LightState, QIODevice::WriteOnly);
 		
-		Light->SaveKeyFrames(Stream);
+		Light->SaveUndoData(Stream);
 	}
 }

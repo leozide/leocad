@@ -220,8 +220,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	void SaveKeyFrames(QDataStream& Stream) const override;
-	bool LoadKeyFrames(QDataStream& Stream) override;
+	void SaveUndoData(QDataStream& Stream) const override;
+	bool LoadUndoData(QDataStream& Stream) override;
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

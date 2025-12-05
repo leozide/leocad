@@ -1870,7 +1870,7 @@ void lcModel::RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseT
 			const QByteArray& State = Apply ? ModelActionMouseTool->GetEndState() : ModelActionMouseTool->GetStartState();
 			QDataStream Stream(const_cast<QByteArray*>(&State), QIODevice::ReadOnly);
 
-			Camera->LoadKeyFrames(Stream);
+			Camera->LoadUndoData(Stream);
 
 			SetCurrentStep(mCurrentStep);
 		}
@@ -2280,52 +2280,49 @@ void lcModel::RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply
 	}
 	else
 	{
-		const std::vector<lcModelActionStepPieceState>& PieceStates = ModelActionStep->GetPieceStates();
+		const std::vector<QByteArray>& PieceStates = ModelActionStep->GetPieceStates();
 
 		if (PieceStates.size() != mPieces.size())
 			return;
 
 		for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
 		{
-			const lcModelActionStepPieceState& PieceState = PieceStates[PieceIndex];
+			const QByteArray& PieceState = PieceStates[PieceIndex];
 			lcPiece* Piece = mPieces[PieceIndex].get();
 
-			Piece->SetStepShow(PieceState.StepShow);
-			Piece->SetStepHide(PieceState.StepHide);
+			QDataStream Stream(const_cast<QByteArray*>(&PieceState), QIODevice::ReadOnly);
 			
-			QDataStream Stream(const_cast<QByteArray*>(&PieceState.KeyFrames), QIODevice::ReadOnly);
-			
-			Piece->LoadKeyFrames(Stream);
+			Piece->LoadUndoData(Stream);
 		}
 		
-		const std::vector<lcModelActionStepCameraState>& CameraStates = ModelActionStep->GetCameraStates();
+		const std::vector<QByteArray>& CameraStates = ModelActionStep->GetCameraStates();
 
 		if (CameraStates.size() != mCameras.size())
 			return;
 
 		for (size_t CameraIndex = 0; CameraIndex < mCameras.size(); CameraIndex++)
 		{
-			const lcModelActionStepCameraState& CameraState = CameraStates[CameraIndex];
+			const QByteArray& CameraState = CameraStates[CameraIndex];
 			lcCamera* Camera = mCameras[CameraIndex].get();
 
-			QDataStream Stream(const_cast<QByteArray*>(&CameraState.KeyFrames), QIODevice::ReadOnly);
+			QDataStream Stream(const_cast<QByteArray*>(&CameraState), QIODevice::ReadOnly);
 			
-			Camera->LoadKeyFrames(Stream);
+			Camera->LoadUndoData(Stream);
 		}
 
-		const std::vector<lcModelActionStepLightState>& LightStates = ModelActionStep->GetLightStates();
+		const std::vector<QByteArray>& LightStates = ModelActionStep->GetLightStates();
 
 		if (LightStates.size() != mLights.size())
 			return;
 
 		for (size_t LightIndex = 0; LightIndex < mLights.size(); LightIndex++)
 		{
-			const lcModelActionStepLightState& LightState = LightStates[LightIndex];
+			const QByteArray& LightState = LightStates[LightIndex];
 			lcLight* Light = mLights[LightIndex].get();
 
-			QDataStream Stream(const_cast<QByteArray*>(&LightState.KeyFrames), QIODevice::ReadOnly);
+			QDataStream Stream(const_cast<QByteArray*>(&LightState), QIODevice::ReadOnly);
 			
-			Light->LoadKeyFrames(Stream);
+			Light->LoadUndoData(Stream);
 		}
 	}
 	

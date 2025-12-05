@@ -233,23 +233,6 @@ enum class lcModelActionStepMode
 	Remove
 };
 
-struct lcModelActionStepPieceState
-{
-	lcStep StepShow;
-	lcStep StepHide;
-	QByteArray KeyFrames;
-};
-
-struct lcModelActionStepCameraState
-{
-	QByteArray KeyFrames;
-};
-
-struct lcModelActionStepLightState
-{
-	QByteArray KeyFrames;
-};
-
 class lcModelActionStep : public lcModelAction
 {
 public:
@@ -268,25 +251,25 @@ public:
 
     void SaveState(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights);
 
-	const std::vector<lcModelActionStepPieceState>& GetPieceStates() const
+	const std::vector<QByteArray>& GetPieceStates() const
 	{
 		return mPieceStates;
 	}
 	
-	const std::vector<lcModelActionStepCameraState>& GetCameraStates() const
+	const std::vector<QByteArray>& GetCameraStates() const
 	{
 		return mCameraStates;
 	}
 	
-	const std::vector<lcModelActionStepLightState>& GetLightStates() const
+	const std::vector<QByteArray>& GetLightStates() const
 	{
 		return mLightStates;
 	}
 	
 protected:
-	std::vector<lcModelActionStepPieceState> mPieceStates;
-	std::vector<lcModelActionStepCameraState> mCameraStates;
-	std::vector<lcModelActionStepLightState> mLightStates;
+	std::vector<QByteArray> mPieceStates;
+	std::vector<QByteArray> mCameraStates;
+	std::vector<QByteArray> mLightStates;
 	lcModelActionStepMode mMode;
 	lcStep mStep;
 };

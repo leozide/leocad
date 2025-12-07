@@ -15,7 +15,7 @@ void lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, boo
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 
-	size_t PieceCount = Pieces.size(), CameraCount = Cameras.size(), LightCount = Lights.size();
+	uint64_t PieceCount = Pieces.size(), CameraCount = Cameras.size(), LightCount = Lights.size();
 
 	Stream << PieceCount;
 	Stream << CameraCount;
@@ -42,7 +42,7 @@ void lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model, boo
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 
-	size_t PieceCount, CameraCount, LightCount;
+	uint64_t PieceCount, CameraCount, LightCount;
 
 	Stream >> PieceCount;
 	Stream >> CameraCount;
@@ -237,6 +237,11 @@ void lcModelActionAddPieces::SetPieceData(const std::vector<lcInsertPieceInfo>& 
 		PieceData.Transform = PieceInfoTransform.Transform;
 		PieceData.ColorCode = lcGetColorCode(PieceInfoTransform.ColorIndex);
 	}
+}
+
+lcModelActionAddCamera::lcModelActionAddCamera(const lcVector3& Position, const lcVector3& TargetPosition)
+    : mPosition(Position), mTargetPosition(TargetPosition)
+{
 }
 
 lcModelActionAddLight::lcModelActionAddLight(const lcVector3& Position, lcLightType LightType)

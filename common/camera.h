@@ -47,7 +47,7 @@ class lcCamera : public lcObject
 {
 public:
 	lcCamera(bool Simple);
-	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
+	lcCamera(const lcVector3& Position, const lcVector3& TargetPosition);
 	virtual ~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;

@@ -8,6 +8,7 @@ class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionMouseTool;
 class lcModelActionAddPieces;
+class lcModelActionAddCamera;
 class lcModelActionAddLight;
 class lcModelActionGroupPieces;
 class lcModelActionDuplicatePieces;
@@ -357,9 +358,8 @@ public:
 	void BeginMouseTool(lcTool Tool, lcView* View);
 	void EndMouseTool(lcTool Tool, lcView* View, bool Accept);
 	void InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms);
+	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
-	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
 	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
@@ -415,6 +415,8 @@ protected:
 	void RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseTool, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
+	void RecordAddCameraAction(const lcVector3& Position, const lcVector3& TargetPosition);
+	void RunAddCameraAction(const lcModelActionAddCamera* ModelActionAddCamera, bool Apply);
 	void RecordAddLightAction(const lcVector3& Position, lcLightType LightType);
 	void RunAddLightAction(const lcModelActionAddLight* ModelActionAddLight, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);

@@ -126,6 +126,27 @@ protected:
 	lcModelActionAddPieceSelectionMode mSelectionMode;
 };
 
+class lcModelActionAddCamera : public lcModelAction
+{
+public:
+	lcModelActionAddCamera(const lcVector3& Position, const lcVector3& TargetPosition);
+	virtual ~lcModelActionAddCamera() = default;
+	
+	const lcVector3& GetPosition() const
+	{
+		return mPosition;
+	}
+	
+	const lcVector3& GetTargetPosition() const
+	{
+		return mTargetPosition;
+	}
+	
+protected:
+	lcVector3 mPosition;
+	lcVector3 mTargetPosition;
+};
+
 class lcModelActionAddLight : public lcModelAction
 {
 public:

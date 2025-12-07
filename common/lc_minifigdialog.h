@@ -16,16 +16,16 @@ class lcMinifigDialog : public QDialog
 
 public:
 	explicit lcMinifigDialog(QWidget* Parent);
-	~lcMinifigDialog();
+	virtual ~lcMinifigDialog();
 
 	MinifigWizard* mMinifigWizard;
 
 protected slots:
-	void on_TemplateComboBox_currentIndexChanged(const QString& TemplateName);
-	void on_TemplateSaveButton_clicked();
-	void on_TemplateDeleteButton_clicked();
-	void on_TemplateImportButton_clicked();
-	void on_TemplateExportButton_clicked();
+	void TemplateComboBoxCurrentTextChanged(const QString& TemplateName);
+	void TemplateSaveButtonClicked();
+	void TemplateDeleteButtonClicked();
+	void TemplateImportButtonClicked();
+	void TemplateExportButtonClicked();
 	void PieceButtonClicked();
 	void ColorChanged(int Index);
 	void AngleChanged(double Value);

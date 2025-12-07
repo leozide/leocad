@@ -4,7 +4,6 @@
 #include "lc_viewwidget.h"
 #include "lc_colorpicker.h"
 #include "minifig.h"
-#include "lc_application.h"
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_view.h"
@@ -135,6 +134,12 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	mMinifigWizard->Calculate();
 	mView->GetCamera()->SetViewpoint(lcVector3(0.0f, -270.0f, 90.0f));
 	mView->ZoomExtents();
+	
+	connect(ui->TemplateComboBox, &QComboBox::currentTextChanged, this, &lcMinifigDialog::TemplateComboBoxCurrentTextChanged);
+	connect(ui->TemplateSaveButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateSaveButtonClicked);
+	connect(ui->TemplateDeleteButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateDeleteButtonClicked);
+	connect(ui->TemplateImportButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateImportButtonClicked);
+	connect(ui->TemplateExportButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateExportButtonClicked);
 }
 
 lcMinifigDialog::~lcMinifigDialog()
@@ -175,7 +180,7 @@ void lcMinifigDialog::UpdateTemplateCombo()
 	ui->TemplateComboBox->setCurrentText(CurrentName);
 }
 
-void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
+void lcMinifigDialog::TemplateComboBoxCurrentTextChanged(const QString& TemplateName)
 {
 	const auto& Templates = mMinifigWizard->GetTemplates();
 	const auto& Position = Templates.find(TemplateName);
@@ -234,7 +239,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 	mView->Redraw();
 }
 
-void lcMinifigDialog::on_TemplateSaveButton_clicked()
+void lcMinifigDialog::TemplateSaveButtonClicked()
 {
 	QString CurrentName = mCurrentTemplateName;
 	bool Ok;
@@ -280,7 +285,7 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateDeleteButton_clicked()
+void lcMinifigDialog::TemplateDeleteButtonClicked()
 {
 	if (mCurrentTemplateName.isEmpty() || mCurrentTemplateName == MinifigWizard::GetDefaultTemplateName())
 		return;
@@ -299,7 +304,7 @@ void lcMinifigDialog::on_TemplateDeleteButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateImportButton_clicked()
+void lcMinifigDialog::TemplateImportButtonClicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 
@@ -320,7 +325,7 @@ void lcMinifigDialog::on_TemplateImportButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateExportButton_clicked()
+void lcMinifigDialog::TemplateExportButtonClicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 

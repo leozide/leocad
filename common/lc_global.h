@@ -67,12 +67,6 @@ class QPrinter;
 typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
 
-#ifdef Q_OS_WIN
-char* strcasestr(const char *s, const char *find);
-#else
-char* strupr(char* string);
-#endif
-
 // Version number.
 #define LC_VERSION_MAJOR 25
 #define LC_VERSION_MINOR 9

@@ -4,8 +4,7 @@
 #include "lc_library.h"
 #include "lc_model.h"
 #include "pieceinf.h"
-#include "lc_partselectionwidget.h"
-#include "lc_mainwindow.h"
+#include "lc_string.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -238,7 +237,7 @@ std::vector<bool> lcPieceIdStringModel::GetFilteredRows(const QString& FilterTex
 	{
 		const PieceInfo* Info = mSortedPieces[PieceInfoIndex];
 
-		FilteredRows[PieceInfoIndex] = (strcasestr(Info->m_strDescription, Text.c_str()) || strcasestr(Info->mFileName, Text.c_str()));
+		FilteredRows[PieceInfoIndex] = (lcstrcasestr(Info->m_strDescription, Text.c_str()) || lcstrcasestr(Info->mFileName, Text.c_str()));
 	}
 
 	return FilteredRows;

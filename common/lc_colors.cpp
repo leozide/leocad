@@ -3,6 +3,7 @@
 #include "lc_file.h"
 #include "lc_library.h"
 #include "lc_application.h"
+#include "lc_string.h"
 #include <float.h>
 
 std::vector<lcColor> gColorList;
@@ -79,7 +80,7 @@ static std::vector<lcColor> lcParseColorFile(lcFile& File)
 			continue;
 
 		GetToken(Ptr, Token);
-		strupr(Token);
+		lcstrupr(Token);
 		if (strcmp(Token, "!COLOUR"))
 			continue;
 
@@ -107,7 +108,7 @@ static std::vector<lcColor> lcParseColorFile(lcFile& File)
 
 		for (GetToken(Ptr, Token); Token[0]; GetToken(Ptr, Token))
 		{
-			strupr(Token);
+			lcstrupr(Token);
 
 			if (!strcmp(Token, "CODE"))
 			{
@@ -258,8 +259,8 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		MainColor.Edge[1] = 0.2f;
 		MainColor.Edge[2] = 0.2f;
 		MainColor.Edge[3] = 1.0f;
-		strcpy(MainColor.Name, "Main Color");
-		strcpy(MainColor.SafeName, "Main_Color");
+		lcstrcpy(MainColor.Name, "Main Color");
+		lcstrcpy(MainColor.SafeName, "Main_Color");
 
 		Colors.push_back(MainColor);
 	}
@@ -281,8 +282,8 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		EdgeColor.Edge[1] = 0.2f;
 		EdgeColor.Edge[2] = 0.2f;
 		EdgeColor.Edge[3] = 1.0f;
-		strcpy(EdgeColor.Name, "Edge Color");
-		strcpy(EdgeColor.SafeName, "Edge_Color");
+		lcstrcpy(EdgeColor.Name, "Edge Color");
+		lcstrcpy(EdgeColor.SafeName, "Edge_Color");
 
 		Colors.push_back(EdgeColor);
 	}
@@ -299,8 +300,8 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		StudCylinderColor.Group = LC_NUM_COLORGROUPS;
 		StudCylinderColor.Value = lcVector4FromColor(Preferences.mStudCylinderColor);
 		StudCylinderColor.Edge = lcVector4FromColor(Preferences.mPartEdgeColor);
-		strcpy(StudCylinderColor.Name, "Stud Cylinder Color");
-		strcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
+		lcstrcpy(StudCylinderColor.Name, "Stud Cylinder Color");
+		lcstrcpy(StudCylinderColor.SafeName, "Stud_Cylinder_Color");
 
 		Colors.push_back(StudCylinderColor);
 	}
@@ -322,8 +323,8 @@ bool lcLoadColorFile(lcFile& File, lcStudStyle StudStyle)
 		NoColor.Edge[1] = 0.2f;
 		NoColor.Edge[2] = 0.2f;
 		NoColor.Edge[3] = 1.0f;
-		strcpy(NoColor.Name, "No Color");
-		strcpy(NoColor.SafeName, "No_Color");
+		lcstrcpy(NoColor.Name, "No Color");
+		lcstrcpy(NoColor.SafeName, "No_Color");
 
 		Colors.push_back(NoColor);
 	}

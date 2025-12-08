@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
-#include <locale.h>
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"
@@ -18,6 +17,7 @@
 #include "lc_qimagedialog.h"
 #include "lc_modellistdialog.h"
 #include "lc_bricklink.h"
+#include "lc_string.h"
 
 lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)
 {
@@ -2413,7 +2413,7 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 		if (!ModelPart.Mesh)
 		{
 			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
-			strcpy(Entry.first, "lc_");
+			lcstrcpy(Entry.first, "lc_");
 			strncat(Entry.first, Name, sizeof(Entry.first) - 1);
 			Entry.first[sizeof(Entry.first) - 1] = 0;
 		}

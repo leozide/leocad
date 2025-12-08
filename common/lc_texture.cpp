@@ -4,6 +4,7 @@
 #include "lc_library.h"
 #include "image.h"
 #include "lc_glextensions.h"
+#include "lc_string.h"
 
 lcTexture* gGridTexture;
 
@@ -18,7 +19,7 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 	}
 	else
 	{
-		strcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
+		lcstrcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
 		Texture->SetTemporary(true);
 	}
 

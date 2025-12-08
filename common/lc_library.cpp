@@ -16,8 +16,7 @@
 #include "project.h"
 #include "lc_profile.h"
 #include "lc_meshloader.h"
-#include <ctype.h>
-#include <locale.h>
+#include "lc_string.h"
 #include <zlib.h>
 #include <QtConcurrent>
 
@@ -129,8 +128,8 @@ void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 	Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
 
 	char PieceName[LC_PIECE_NAME_LEN];
-	strcpy(PieceName, Info->mFileName);
-	strupr(PieceName);
+	lcstrcpy(PieceName, Info->mFileName);
+	lcstrupr(PieceName);
 
 	mPieces[PieceName] = Info;
 }
@@ -761,7 +760,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 				if (FileTime == CachedFileTime)
 				{
-					strcpy(Info->m_strDescription, Description);
+					lcstrcpy(Info->m_strDescription, Description);
 					return;
 				}
 			}
@@ -769,7 +768,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 		if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
 		{
-			strcpy(Info->m_strDescription, "Unknown");
+			lcstrcpy(Info->m_strDescription, "Unknown");
 			return;
 		}
 
@@ -1668,9 +1667,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
 				char Name[LC_PIECE_NAME_LEN];
-				strcpy(Name, "8/");
+				lcstrcpy(Name, "8/");
 				strcat(Name, Primitive->mName);
-				strupr(Name);
+				lcstrupr(Name);
 
 				LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo, because the low stud gets added as shared
 			}
@@ -1769,7 +1768,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 
 			// Find the parent of this patterned piece.
 			char ParentName[LC_PIECE_NAME_LEN];
-			strcpy(ParentName, Info->mFileName);
+			lcstrcpy(ParentName, Info->mFileName);
 			*strchr(ParentName, 'P') = '\0';
 			strcat(ParentName, ".dat");
 

@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_filter.h"
+#include "lc_string.h"
 
 lcFilter::lcFilter(const std::string_view FilterString)
 {
@@ -80,7 +81,7 @@ bool lcFilter::Match(const char* String) const
 
 	for (const FilterPart& FilterPart : mFilterParts)
 	{
-		bool Match = FilterPart.Wildcard ? FastWildCompare(String, FilterPart.String.c_str()) : strcasestr(String, FilterPart.String.c_str()) != nullptr;
+		bool Match = FilterPart.Wildcard ? FastWildCompare(String, FilterPart.String.c_str()) : lcstrcasestr(String, FilterPart.String.c_str()) != nullptr;
 
 		switch (FilterPart.Op)
 		{

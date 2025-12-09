@@ -6,7 +6,7 @@
 enum class lcObjectPropertyId;
 class lcModelAction;
 class lcModelActionSelection;
-class lcModelActionMouseTool;
+class lcModelActionObjectEdit;
 class lcModelActionAddPieces;
 class lcModelActionAddCamera;
 class lcModelActionAddLight;
@@ -16,6 +16,7 @@ class lcModelActionHidePieces;
 class lcModelActionStep;
 enum class lcModelActionSelectionMode;
 enum class lcModelActionAddPieceSelectionMode;
+enum class lcModelActionObjectEditMode;
 enum class lcModelActionGroupPiecesMode;
 enum class lcModelActionHidePiecesMode;
 enum class lcModelActionStepMode;
@@ -371,7 +372,7 @@ public:
 	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
-	void ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
+	void ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
@@ -410,9 +411,9 @@ protected:
 
 	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
-	void BeginMouseToolAction(lcTool Tool, lcView* View);
-	void EndMouseToolAction(lcTool Tool, lcView* View, const QString& Description);
-	void RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseTool, bool Apply);
+	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View);
+	void EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View);
+	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
 	void RecordAddCameraAction(const lcVector3& Position, const lcVector3& TargetPosition);

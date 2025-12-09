@@ -63,7 +63,7 @@ void lcViewWidget::SetView(lcView* View)
 
 void lcViewWidget::UpdateMousePosition()
 {
-	QPoint MousePosition = mapFromGlobal( QCursor::pos() );
+	QPoint MousePosition = mapFromGlobal(QCursor::pos());
 	float DeviceScale = GetDeviceScale();
 
 	mView->SetMousePosition(MousePosition.x() * DeviceScale, mView->GetHeight() - MousePosition.y() * DeviceScale - 1);

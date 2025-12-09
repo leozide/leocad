@@ -9,7 +9,6 @@
 #include "lc_texture.h"
 #include "piece.h"
 #include "pieceinf.h"
-#include "lc_synth.h"
 #include "lc_traintrack.h"
 #include "lc_scene.h"
 #include "lc_context.h"
@@ -2465,7 +2464,7 @@ void lcView::StopTracking(bool Accept)
 			if (lcLineSegmentPlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLineSegmentPlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLineSegmentPlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
 			{
 				float AspectRatio = (float)mWidth / (float)mHeight;
-				ActiveModel->ZoomRegionToolClicked(mCamera, AspectRatio, Points[0], Target, Corners);
+				ActiveModel->ZoomRegionToolClicked(this, AspectRatio, Points[0], Target, Corners);
 			}
 		}
 		break;

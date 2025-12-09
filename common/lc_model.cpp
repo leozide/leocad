@@ -1721,149 +1721,76 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 	}
 }
 
-void lcModel::BeginMouseToolAction(lcTool Tool, lcView* View)
+void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View)
 {
-	std::unique_ptr<lcModelActionMouseTool> ModelActionMouseTool = std::make_unique<lcModelActionMouseTool>(Tool);
+	std::unique_ptr<lcModelActionObjectEdit> ModelActionObjectEdit = std::make_unique<lcModelActionObjectEdit>(ModelActionObjectEditMode);
 
-	switch (Tool)
+	switch (ModelActionObjectEditMode)
 	{
-	case lcTool::Insert:
-	case lcTool::PointLight:
-	case lcTool::SpotLight:
-	case lcTool::DirectionalLight:
-	case lcTool::AreaLight:
-	case lcTool::Camera:
-	case lcTool::Select:
+	case lcModelActionObjectEditMode::Camera:
+		ModelActionObjectEdit->SaveCameraStartState(View->GetCamera());
 		break;
-
-	case lcTool::Move:
-	case lcTool::Rotate:
-		ModelActionMouseTool->SaveSelectionStartState(this);
-		break;
-
-	case lcTool::Eraser:
-	case lcTool::Paint:
-	case lcTool::ColorPicker:
-		break;
-
-	case lcTool::Zoom:
-	case lcTool::Pan:
-	case lcTool::RotateView:
-	case lcTool::Roll:
-		ModelActionMouseTool->SaveCameraStartState(View->GetCamera());
-		break;
-
-	case lcTool::ZoomRegion:
-		break;
-
-	case lcTool::Count:
+	
+	case lcModelActionObjectEditMode::Selection:
+		ModelActionObjectEdit->SaveSelectionStartState(this);
 		break;
 	}
 
-	mActionSequence.emplace_back(std::move(ModelActionMouseTool));
+	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
 }
 
-void lcModel::EndMouseToolAction(lcTool Tool, lcView* View, const QString& Description)
+void lcModel::EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View)
 {
 	if (mActionSequence.empty())
 		return;
 
-	lcModelActionMouseTool* ModelActionMouseTool = dynamic_cast<lcModelActionMouseTool*>(mActionSequence.back().get());
+	lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<lcModelActionObjectEdit*>(mActionSequence.back().get());
 
-	if (!ModelActionMouseTool || Tool != ModelActionMouseTool->GetTool())
+	if (!ModelActionObjectEdit || ModelActionObjectEditMode != ModelActionObjectEdit->GetMode())
 		return;
 
-	switch (Tool)
+	switch (ModelActionObjectEditMode)
 	{
-	case lcTool::Insert:
-	case lcTool::PointLight:
-	case lcTool::SpotLight:
-	case lcTool::DirectionalLight:
-	case lcTool::AreaLight:
-	case lcTool::Camera:
-	case lcTool::Select:
+	case lcModelActionObjectEditMode::Camera:
+		ModelActionObjectEdit->SaveCameraEndState(View->GetCamera());
 		break;
-
-	case lcTool::Move:
-	case lcTool::Rotate:
-		ModelActionMouseTool->SaveSelectionEndState(this);
-		break;
-
-	case lcTool::Eraser:
-	case lcTool::Paint:
-	case lcTool::ColorPicker:
-		break;
-
-	case lcTool::Zoom:
-	case lcTool::Pan:
-	case lcTool::RotateView:
-	case lcTool::Roll:
-		ModelActionMouseTool->SaveCameraEndState(View->GetCamera());
-		break;
-
-	case lcTool::ZoomRegion:
-		break;
-
-	case lcTool::Count:
+		
+	case lcModelActionObjectEditMode::Selection:
+		ModelActionObjectEdit->SaveSelectionEndState(this);
 		break;
 	}
 
 	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	EndActionSequence(Description);
 }
 
-void lcModel::RunMouseToolAction(const lcModelActionMouseTool* ModelActionMouseTool, bool Apply)
+void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply)
 {
-	if (!ModelActionMouseTool)
+	if (!ModelActionObjectEdit)
 		return;
 
-	lcTool Tool = ModelActionMouseTool->GetTool();
+	lcModelActionObjectEditMode ModelActionObjectEditMode = ModelActionObjectEdit->GetMode();
 
-	switch (Tool)
+	switch (ModelActionObjectEditMode)
 	{
-	case lcTool::Insert:
-	case lcTool::PointLight:
-	case lcTool::SpotLight:
-	case lcTool::DirectionalLight:
-	case lcTool::AreaLight:
-	case lcTool::Camera:
-	case lcTool::Select:
-		break;
-
-	case lcTool::Move:
-	case lcTool::Rotate:
-		if (Apply)
-			ModelActionMouseTool->LoadSelectionEndState(this);
-		else
-			ModelActionMouseTool->LoadSelectionStartState(this);
-
-		SetCurrentStep(mCurrentStep);
-		break;
-
-	case lcTool::Eraser:
-	case lcTool::Paint:
-	case lcTool::ColorPicker:
-		break;
-
-	case lcTool::Zoom:
-	case lcTool::Pan:
-	case lcTool::RotateView:
-	case lcTool::Roll:
-		if (lcCamera* Camera = GetCamera(ModelActionMouseTool->GetCameraName()))
+	case lcModelActionObjectEditMode::Camera:
+		if (lcCamera* Camera = GetCamera(ModelActionObjectEdit->GetCameraName()))
 		{
 			if (Apply)
-				ModelActionMouseTool->LoadCameraEndState(Camera);
+				ModelActionObjectEdit->LoadCameraEndState(Camera);
 			else
-				ModelActionMouseTool->LoadCameraStartState(Camera);
-
+				ModelActionObjectEdit->LoadCameraStartState(Camera);
+			
 			SetCurrentStep(mCurrentStep);
 		}
 		break;
+		
+	case lcModelActionObjectEditMode::Selection:
+		if (Apply)
+			ModelActionObjectEdit->LoadSelectionEndState(this);
+		else
+			ModelActionObjectEdit->LoadSelectionStartState(this);
 
-	case lcTool::ZoomRegion:
-		break;
-
-	case lcTool::Count:
+		SetCurrentStep(mCurrentStep);
 		break;
 	}
 }
@@ -2308,8 +2235,8 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 	{
 		if (const lcModelActionSelection* ModelActionSelection = dynamic_cast<const lcModelActionSelection*>(ModelAction))
 			RunSelectionAction(ModelActionSelection, Apply);
-		else if (const lcModelActionMouseTool* ModelActionMouseTool = dynamic_cast<const lcModelActionMouseTool*>(ModelAction))
-			RunMouseToolAction(ModelActionMouseTool, Apply);
+		else if (const lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
+			RunObjectEditAction(ModelActionObjectEdit, Apply);
 		else if (const lcModelActionAddPieces* ModelActionAddPieces = dynamic_cast<const lcModelActionAddPieces*>(ModelAction))
 			RunAddPiecesAction(ModelActionAddPieces, Apply);
 		else if (const lcModelActionAddCamera* ModelActionAddCamera = dynamic_cast<const lcModelActionAddCamera*>(ModelAction))
@@ -5143,7 +5070,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Rotate:
 			BeginActionSequence();
 			RecordSelectionAction(lcModelActionSelectionMode::Set);
-			BeginMouseToolAction(Tool, View);
+			BeginObjectEditAction(lcModelActionObjectEditMode::Selection, View);
 			break;
 
 		case lcTool::Eraser:
@@ -5158,8 +5085,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 			if (!View->GetCamera()->IsSimple())
 			{
 				BeginActionSequence();
-				RecordSelectionAction(lcModelActionSelectionMode::Set);
-				BeginMouseToolAction(Tool, View);
+				BeginObjectEditAction(lcModelActionObjectEditMode::Camera, View);
 			}
 			break;
 
@@ -5194,11 +5120,13 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		break;
 
 	case lcTool::Move:
-		EndMouseToolAction(Tool, View, tr("Move"));
+		EndObjectEditAction(lcModelActionObjectEditMode::Selection, View);
+		EndActionSequence(tr("Move"));
 		break;
 
 	case lcTool::Rotate:
-		EndMouseToolAction(Tool, View, tr("Rotate"));
+		EndObjectEditAction(lcModelActionObjectEditMode::Selection, View);
+		EndActionSequence(tr("Rotate"));
 		break;
 
 	case lcTool::Eraser:
@@ -5208,22 +5136,34 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 
 	case lcTool::Zoom:
 		if (!View->GetCamera()->IsSimple())
-			EndMouseToolAction(Tool, View, tr("Zoom"));
+		{
+			EndObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+			EndActionSequence(tr("Zoom"));
+		}
 		break;
 
 	case lcTool::Pan:
 		if (!View->GetCamera()->IsSimple())
-			EndMouseToolAction(Tool, View, tr("Pan"));
+		{
+			EndObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+			EndActionSequence(tr("Pan"));
+		}
 		break;
 
 	case lcTool::RotateView:
 		if (!View->GetCamera()->IsSimple())
-			EndMouseToolAction(Tool, View, tr("Orbit"));
+		{
+			EndObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+			EndActionSequence(tr("Orbit"));
+		}
 		break;
 
 	case lcTool::Roll:
 		if (!View->GetCamera()->IsSimple())
-			EndMouseToolAction(Tool, View, tr("Roll"));
+		{
+			EndObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+			EndActionSequence(tr("Roll"));
+		}
 		break;
 
 	case lcTool::ZoomRegion:
@@ -5519,15 +5459,26 @@ void lcModel::UpdateRollTool(lcCamera* Camera, float Mouse)
 	UpdateAllViews();
 }
 
-void lcModel::ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
+void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners)
 {
+	lcCamera* Camera = View->GetCamera();
+	
+	if (!Camera->IsSimple())
+	{
+		BeginActionSequence();
+		BeginObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+	}
+	
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
-
+	
+	if (!Camera->IsSimple())
+	{
+		EndObjectEditAction(lcModelActionObjectEditMode::Camera, View);
+		EndActionSequence(tr("Zoom"));
+	}
+	
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
-
-	if (!Camera->IsSimple())
-		SaveCheckpoint(tr("Zoom"));
 }
 
 void lcModel::LookAt(lcCamera* Camera)

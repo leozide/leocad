@@ -164,12 +164,12 @@ std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> lcModelActionSelection::
 	return { SelectedObjects, FocusObject, mFocusSection };
 }
 
-lcModelActionMouseTool::lcModelActionMouseTool(lcTool Tool)
-	: mTool( Tool )
+lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mode)
+	: mMode(Mode)
 {
 }
 
-void lcModelActionMouseTool::SaveCameraStartState(const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveCameraStartState(const lcCamera* Camera)
 {
 	QDataStream Stream(&mStartBuffer, QIODevice::WriteOnly);
 	
@@ -178,43 +178,43 @@ void lcModelActionMouseTool::SaveCameraStartState(const lcCamera* Camera)
 	mCameraName = Camera->GetName();
 }
 
-void lcModelActionMouseTool::LoadCameraStartState(lcCamera* Camera) const
+void lcModelActionObjectEdit::LoadCameraStartState(lcCamera* Camera) const
 {
 	QDataStream Stream(const_cast<QByteArray*>(&mStartBuffer), QIODevice::ReadOnly);
 	
 	Camera->LoadUndoData(Stream);
 }
 
-void lcModelActionMouseTool::SaveCameraEndState(const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveCameraEndState(const lcCamera* Camera)
 {
 	QDataStream Stream(&mEndBuffer, QIODevice::WriteOnly);
 	
 	Camera->SaveUndoData(Stream);
 }
 
-void lcModelActionMouseTool::LoadCameraEndState(lcCamera* Camera) const
+void lcModelActionObjectEdit::LoadCameraEndState(lcCamera* Camera) const
 {
 	QDataStream Stream(const_cast<QByteArray*>(&mEndBuffer), QIODevice::ReadOnly);
 	
 	Camera->LoadUndoData(Stream);
 }
 
-void lcModelActionMouseTool::SaveSelectionStartState(const lcModel* Model)
+void lcModelActionObjectEdit::SaveSelectionStartState(const lcModel* Model)
 {
 	SaveUndoBuffer(mStartBuffer, Model, true);
 }
 
-void lcModelActionMouseTool::LoadSelectionStartState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadSelectionStartState(lcModel* Model) const
 {
 	LoadUndoBuffer(mStartBuffer, Model, true);
 }
 
-void lcModelActionMouseTool::SaveSelectionEndState(const lcModel* Model)
+void lcModelActionObjectEdit::SaveSelectionEndState(const lcModel* Model)
 {
 	SaveUndoBuffer(mEndBuffer, Model, true);
 }
 
-void lcModelActionMouseTool::LoadSelectionEndState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadSelectionEndState(lcModel* Model) const
 {
 	LoadUndoBuffer(mEndBuffer, Model, true);
 }

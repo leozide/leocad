@@ -1076,19 +1076,30 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 			MaxX = lcMax(MaxX, Point.x);
 			MaxY = lcMax(MaxY, Point.y);
 		}
+		
+		float Width = fabsf(MaxX - MinX);
+		float Height = fabsf(MaxY - MinY);
 
 		const lcVector3 ViewCenter = lcMul30(Center, mWorldView);
-		float Width = qMax(fabsf(MaxX - ViewCenter.x), fabsf(ViewCenter.x - MinX)) * 2;
-		float Height = qMax(fabsf(MaxY - ViewCenter.y), fabsf(ViewCenter.y - MinY)) * 2;
-
+		
+		float OffsetX = (fabsf(MaxX - ViewCenter.x) - fabsf(ViewCenter.x - MinX)) / 2.0f;
+		float OffsetY = (fabsf(MaxY - ViewCenter.y) - fabsf(ViewCenter.y - MinY)) / 2.0f;
+		lcVector3 ViewOffset(OffsetX, OffsetY, 0.0f);
+		
+		lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
+		ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
+		
+		lcVector3 WorldOffset = lcMul30(ViewOffset, ViewWorldMatrix);
+		
 		if (Width > Height * AspectRatio)
 			Height = Width / AspectRatio;
 
 		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
 		const lcVector3 FrontVector(mTargetPosition - mPosition);
-		Position = Center - lcNormalize(FrontVector) * f;
-		TargetPosition = Center;
+		
+		TargetPosition = Center + WorldOffset;
+		Position = TargetPosition - lcNormalize(FrontVector) * f;
 	}
 	else
 	{

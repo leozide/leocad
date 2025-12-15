@@ -1668,7 +1668,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 			{
 				char Name[LC_PIECE_NAME_LEN];
 				lcstrcpy(Name, "8/");
-				strcat(Name, Primitive->mName);
+				lcstrcat(Name, Primitive->mName);
 				lcstrupr(Name);
 
 				LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo, because the low stud gets added as shared
@@ -1770,7 +1770,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 			char ParentName[LC_PIECE_NAME_LEN];
 			lcstrcpy(ParentName, Info->mFileName);
 			*strchr(ParentName, 'P') = '\0';
-			strcat(ParentName, ".dat");
+			lcstrcat(ParentName, ".dat");
 
 			Parent = FindPiece(ParentName, nullptr, false, false);
 

@@ -15,6 +15,7 @@
 #include "lc_qutils.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
+#include "lc_string.h"
 
 constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 
@@ -336,7 +337,7 @@ bool lcPiece::FileLoad(lcFile& file)
 	}
 	else
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
-	strcat(name, ".dat");
+	lcstrcat(name, ".dat");
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
 	SetPieceInfo(pInfo, QString(), true, true);

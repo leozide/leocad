@@ -850,7 +850,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			file->ReadFloats(rot.GetFloats(), 3);
 			file->ReadU8(&color, 1);
 			file->ReadBuffer(name, 9);
-			strcat(name, ".dat");
+			lcstrcat(name, ".dat");
 			file->ReadU8(&step, 1);
 			file->ReadU8(&group, 1);
 

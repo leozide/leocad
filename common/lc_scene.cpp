@@ -6,6 +6,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "object.h"
+#include "lc_colors.h"
 
 lcScene::lcScene()
 {

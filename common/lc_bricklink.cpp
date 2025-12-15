@@ -4,6 +4,7 @@
 #include "lc_mainwindow.h"
 #include "lc_string.h"
 #include "pieceinf.h"
+#include "lc_colors.h"
 
 static QJsonDocument lcLoadBrickLinkMapping()
 {

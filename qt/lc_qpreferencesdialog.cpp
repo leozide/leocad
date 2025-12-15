@@ -10,6 +10,9 @@
 #include "pieceinf.h"
 #include "lc_edgecolordialog.h"
 #include "lc_blenderpreferences.h"
+#include "lc_mainwindow.h"
+#include "lc_viewwidget.h"
+#include "lc_view.h"
 
 static const char* gLanguageLocales[] =
 {
@@ -98,17 +101,21 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->ConditionalLinesCheckBox->setChecked(false);
 		ui->ConditionalLinesCheckBox->setEnabled(false);
 	}
+	
+	lcViewWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
+	QOpenGLContext* Context = Widget->context();
+	QOpenGLFunctions* Functions = Context->functions();
 
 #ifndef LC_OPENGLES
 	if (QSurfaceFormat::defaultFormat().samples() > 1)
 	{
-		glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);
-		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &mLineWidthGranularity);
+		Functions->glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, mLineWidthRange);
+		Functions->glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &mLineWidthGranularity);
 	}
 	else
 #endif
 	{
-		glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, mLineWidthRange);
+		Functions->glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, mLineWidthRange);
 		mLineWidthGranularity = 1.0f;
 	}
 

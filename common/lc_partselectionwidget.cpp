@@ -12,6 +12,7 @@
 #include "lc_category.h"
 #include "lc_traintrack.h"
 #include "lc_filter.h"
+#include "lc_colors.h"
 
 Q_DECLARE_METATYPE(QList<int>)
 

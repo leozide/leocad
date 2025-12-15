@@ -806,9 +806,10 @@ void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep 
 
 bool lcView::BeginRenderToImage(int Width, int Height)
 {
+	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	GLint MaxTexture;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
-
+	
+	Context->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 	MaxTexture = qMin(MaxTexture, 2048);
 
 	const int Samples = QSurfaceFormat::defaultFormat().samples();

@@ -18,6 +18,7 @@
 #include "lc_modellistdialog.h"
 #include "lc_bricklink.h"
 #include "lc_string.h"
+#include "lc_colors.h"
 
 lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)
 {

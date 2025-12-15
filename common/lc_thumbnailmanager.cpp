@@ -19,10 +19,10 @@ lcThumbnailManager::~lcThumbnailManager()
 			mLibrary->ReleasePieceInfo(Thumbnail.Info);
 }
 
-std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size)
+std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale)
 {
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Info == Info && Thumbnail.ColorIndex == ColorIndex && Thumbnail.Size == Size)
+		if (Thumbnail.Info == Info && Thumbnail.ColorIndex == ColorIndex && Thumbnail.Size == Size && Thumbnail.DeviceScale == DeviceScale)
 			return { ThumbnailId, Thumbnail.Pixmap };
 
 	lcPartThumbnailId ThumbnailId = static_cast<lcPartThumbnailId>(mNextThumbnailId++);
@@ -31,6 +31,7 @@ std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(Piece
 	Thumbnail.Info = Info;
 	Thumbnail.ColorIndex = ColorIndex;
 	Thumbnail.Size = Size;
+	Thumbnail.DeviceScale = DeviceScale;
 	Thumbnail.ReferenceCount = 1;
 
 	mLibrary->LoadPieceInfo(Info, false, false);
@@ -70,8 +71,8 @@ void lcThumbnailManager::PartLoaded(PieceInfo* Info)
 
 void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
 {
-	const int Width = Thumbnail.Size * 2;
-	const int Height = Thumbnail.Size * 2;
+	const int Width = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
+	const int Height = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
 
 	if (mView && (mView->GetWidth() != Width || mView->GetHeight() != Height))
 		mView.reset();
@@ -145,8 +146,12 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 		Painter.drawImage(QPoint(0, 0), Icon);
 		Painter.end();
 	}
-
-	Thumbnail.Pixmap = QPixmap::fromImage(Image).scaled(Thumbnail.Size, Thumbnail.Size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	
+	Image.setDevicePixelRatio(Thumbnail.DeviceScale);
+	
+	float ScaledSize = Thumbnail.Size * Thumbnail.DeviceScale;
+	
+	Thumbnail.Pixmap = QPixmap::fromImage(Image).scaled(ScaledSize, ScaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	mLibrary->ReleasePieceInfo(Info);
 

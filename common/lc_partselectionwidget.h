@@ -159,7 +159,7 @@ public:
 	void SetCaseSensitiveFilter(bool Option);
 	void SetFileNameFilter(bool Option);
 	void SetPartDescriptionFilter(bool Option);
-	void SetIconSize(int Size);
+	void SetIconSize(int Size, float DeviceScale);
 	void SetShowPartNames(bool Show);
 
 protected slots:
@@ -172,6 +172,7 @@ protected:
 	std::vector<lcPartSelectionListModelEntry> mParts;
 	lcPartFilterType mPartFilterType;
 	int mIconSize;
+	float mDeviceScale = 1.0f;
 	bool mColorLocked;
 	int mColorIndex;
 	bool mShowPartNames;

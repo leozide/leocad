@@ -399,7 +399,7 @@ void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 
 	int ColorIndex = mParts[PartIndex].ColorIndex == -1 ? mColorIndex : mParts[PartIndex].ColorIndex;
 
-	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize);
+	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize, mDeviceScale);
 
 	mParts[PartIndex].ThumbnailId = ThumbnailId;
 
@@ -486,12 +486,13 @@ void lcPartSelectionListModel::SetPartDescriptionFilter(bool Option)
 	SetFilter(mFilterString);
 }
 
-void lcPartSelectionListModel::SetIconSize(int Size)
+void lcPartSelectionListModel::SetIconSize(int Size, float DeviceScale)
 {
-	if (Size == mIconSize)
+	if (Size == mIconSize && DeviceScale == mDeviceScale)
 		return;
 
 	mIconSize = Size;
+	mDeviceScale = DeviceScale;
 
 	beginResetModel();
 
@@ -770,7 +771,14 @@ void lcPartSelectionListView::SetIconSize(int Size)
 {
 	setIconSize(QSize(Size, Size));
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
-	mListModel->SetIconSize(Size);
+	
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+	float DeviceScale = devicePixelRatioF();
+#else
+	float DeviceScale = devicePixelRatio();
+#endif
+	
+	mListModel->SetIconSize(Size, DeviceScale);
 	UpdateViewMode();
 
 	int Width = Size + 2 * frameWidth() + 6;

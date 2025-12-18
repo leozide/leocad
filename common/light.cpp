@@ -28,7 +28,7 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 
 	mPosition.SetValue(Position);
 
-	UpdatePosition(1);
+	lcLight::UpdatePosition(1);
 }
 
 void lcLight::CopyProperties(const lcLight& Other)

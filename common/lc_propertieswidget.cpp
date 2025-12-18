@@ -1324,8 +1324,10 @@ void lcPropertiesWidget::SetPiece(const std::vector<lcObject*>& Selection, lcObj
 	lcMatrix33 RelativeRotation;
 	lcModel* Model = gMainWindow->GetActiveModel();
 
-	if (Model)
-		Model->GetMoveRotateTransform(Position, RelativeRotation);
+	if (!Model)
+		return;
+	
+	Model->GetMoveRotateTransform(Position, RelativeRotation);
 
 	UpdateFloat(lcObjectPropertyId::ObjectPositionX, Position[0]);
 	UpdateFloat(lcObjectPropertyId::ObjectPositionY, Position[1]);

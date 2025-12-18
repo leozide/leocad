@@ -363,11 +363,11 @@ bool lcCamera::FileLoad(lcFile& file)
 
 		if (version < 5)
 		{
-			n = file.ReadS32();
+			file.ReadS32();
 		}
 		else
 		{
-			ch = file.ReadU8();
+			file.ReadU8();
 			file.ReadU8();
 		}
 	}

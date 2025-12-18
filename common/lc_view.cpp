@@ -1518,70 +1518,77 @@ void lcView::DrawGrid()
 
 		if (Preferences.mDrawGridLines)
 			VertexBufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3 * sizeof(float);
-
-		float* Verts = (float*)malloc(VertexBufferSize);
-		if (!Verts)
-			return;
-		float* CurVert = Verts;
-
-		if (Preferences.mDrawGridStuds)
+		
+		float* Verts = nullptr;
+		
+		if (VertexBufferSize)
 		{
-			float Left = MinX * 20.0f * Spacing;
-			float Right = MaxX * 20.0f * Spacing;
-			float Top = MinY * 20.0f * Spacing;
-			float Bottom = MaxY * 20.0f * Spacing;
-			float Z = 0;
-			float U = (MaxX - MinX) * Spacing;
-			float V = (MaxY - MinY) * Spacing;
-
-			*CurVert++ = Left;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = V;
-
-			*CurVert++ = Right;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = V;
-
-			*CurVert++ = Left;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = 0.0f;
-
-			*CurVert++ = Right;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = 0.0f;
-		}
-
-		if (Preferences.mDrawGridLines)
-		{
-			float LineSpacing = Spacing * 20.0f;
-
-			for (int Step = MinX; Step < MaxX + 1; Step++)
-			{
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MinY * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MaxY * LineSpacing;
-				*CurVert++ = 0.0f;
-			}
-
-			for (int Step = MinY; Step < MaxY + 1; Step++)
-			{
-				*CurVert++ = MinX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = MaxX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
-			}
+			Verts = static_cast<float*>(malloc(VertexBufferSize));
+			
+			if (!Verts)
+    			return;
+		
+            float* CurVert = Verts;
+    
+            if (Preferences.mDrawGridStuds)
+            {
+                float Left = MinX * 20.0f * Spacing;
+                float Right = MaxX * 20.0f * Spacing;
+                float Top = MinY * 20.0f * Spacing;
+                float Bottom = MaxY * 20.0f * Spacing;
+                float Z = 0;
+                float U = (MaxX - MinX) * Spacing;
+                float V = (MaxY - MinY) * Spacing;
+    
+                *CurVert++ = Left;
+                *CurVert++ = Top;
+                *CurVert++ = Z;
+                *CurVert++ = 0.0f;
+                *CurVert++ = V;
+    
+                *CurVert++ = Right;
+                *CurVert++ = Top;
+                *CurVert++ = Z;
+                *CurVert++ = U;
+                *CurVert++ = V;
+    
+                *CurVert++ = Left;
+                *CurVert++ = Bottom;
+                *CurVert++ = Z;
+                *CurVert++ = 0.0f;
+                *CurVert++ = 0.0f;
+    
+                *CurVert++ = Right;
+                *CurVert++ = Bottom;
+                *CurVert++ = Z;
+                *CurVert++ = U;
+                *CurVert++ = 0.0f;
+            }
+    
+            if (Preferences.mDrawGridLines)
+            {
+                float LineSpacing = Spacing * 20.0f;
+    
+                for (int Step = MinX; Step < MaxX + 1; Step++)
+                {
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = MinY * LineSpacing;
+                    *CurVert++ = 0.0f;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = MaxY * LineSpacing;
+                    *CurVert++ = 0.0f;
+                }
+    
+                for (int Step = MinY; Step < MaxY + 1; Step++)
+                {
+                    *CurVert++ = MinX * LineSpacing;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = 0.0f;
+                    *CurVert++ = MaxX * LineSpacing;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = 0.0f;
+                }
+            }
 		}
 
 		mGridSettings[0] = MinX;

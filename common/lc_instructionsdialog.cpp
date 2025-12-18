@@ -649,7 +649,11 @@ void lcInstructionsDialog::Print(QPrinter* Printer)
 			for (int PageCopy = 0; PageCopy < PageCopies; PageCopy++)
 			{
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
+				{
+					delete Scene;
+					
 					return;
+				}
 
 				if (!FirstPage)
 					Printer->newPage();

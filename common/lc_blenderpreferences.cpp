@@ -26,7 +26,6 @@
 #include "lc_http.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
-#include "lc_qutils.h"
 #include "project.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -53,10 +52,10 @@ const QLatin1String LineEnding("\r\n");
 #define LC_BLENDER_ADDON_URL               LC_BLENDER_ADDON_STR "releases/latest/download/" LC_BLENDER_ADDON_FILE
 #define LC_BLENDER_ADDON_SHA_HASH_URL      LC_BLENDER_ADDON_URL ".sha256"
 
-#define LC_THEME_DARK_PALETTE_MIDLIGHT     "#3E3E3E" //  62,  62,  62, 255
-#define LC_THEME_DEFAULT_PALETTE_LIGHT     "#AEADAC" // 174, 173, 172, 255
+#define LC_THEME_DARK_PALETTE_MIDLIGHT     QColor( 62,  62,  62, 255)
+#define LC_THEME_DEFAULT_PALETTE_LIGHT     QColor(174, 173, 172, 255)
 #define LC_THEME_DARK_DECORATE_QUOTED_TEXT "#81D4FA" // 129, 212, 250, 255
-#define LC_DISABLED_TEXT                   "#808080" // 128, 128, 128, 255
+#define LC_DISABLED_TEXT                   QColor(128, 128, 128, 255)
 
 #define LC_RENDER_IMAGE_MAX_SIZE           32768 // pixels
 
@@ -415,10 +414,10 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	QPalette ReadOnlyPalette = QApplication::palette();
 	const lcPreferences& Preferences = lcGetPreferences();
 	if (Preferences.mColorTheme == lcColorTheme::Dark)
-		ReadOnlyPalette.setColor(QPalette::Base,QColor(LC_THEME_DARK_PALETTE_MIDLIGHT));
+		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DARK_PALETTE_MIDLIGHT);
 	else
-		ReadOnlyPalette.setColor(QPalette::Base,QColor(LC_THEME_DEFAULT_PALETTE_LIGHT));
-	ReadOnlyPalette.setColor(QPalette::Text,QColor(LC_DISABLED_TEXT));
+		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DEFAULT_PALETTE_LIGHT);
+	ReadOnlyPalette.setColor(QPalette::Text, LC_DISABLED_TEXT);
 
 	QGroupBox* BlenderExeBox = new QGroupBox(tr("Blender Executable"),mContent);
 	mForm->addRow(BlenderExeBox);
@@ -3629,7 +3628,7 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 			if (FixedWidth == MinimumWidth)
 			{
 				int Index = (MinimumWidth / FontWidth) - 1;
-				if (!Body.mid(Index,1).isEmpty())
+				if (!Body.mid(Index, 1).isEmpty())
 					FixedWidth = Body.indexOf(" ", Index);
 			}
 			else if (FixedWidth < MinimumWidth)

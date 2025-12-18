@@ -411,8 +411,8 @@ protected:
 
 	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
-	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View);
-	void EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcView* View);
+	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
+	void EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);

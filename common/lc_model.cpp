@@ -3120,17 +3120,26 @@ void lcModel::DeleteSelectedObjects()
 
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
+	BeginActionSequence();
+	RecordSelectionAction(lcModelActionSelectionMode::Set);
+	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
-
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	EndActionSequence(tr("Reset Pivot Point"));
+	
 	UpdateAllViews();
-
-	SaveCheckpoint(tr("Resetting Pivot Point"));
 }
 
 void lcModel::RemoveSelectedPiecesKeyFrames()
 {
+	BeginActionSequence();
+	RecordSelectionAction(lcModelActionSelectionMode::Set);
+	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->RemoveKeyFrames();
@@ -3142,21 +3151,22 @@ void lcModel::RemoveSelectedPiecesKeyFrames()
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
-
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	EndActionSequence(tr("Remove Key Frames"));
+	
 	UpdateAllViews();
-	SaveCheckpoint(tr("Removing Key Frames"));
 }
 
 void lcModel::InsertControlPoint()
 {
-	lcObject* Focus = GetFocusObject();
+	lcPiece* Piece = dynamic_cast<lcPiece*>(GetFocusObject());
 
-	if (!Focus || !Focus->IsPiece())
+	if (!Piece)
 		return;
 
-	lcPiece* Piece = (lcPiece*)Focus;
-
 	lcVector3 Start, End;
+	
 	gMainWindow->GetActiveView()->GetRayUnderPointer(Start, End);
 
 	if (Piece->InsertControlPoint(Start, End))
@@ -3169,13 +3179,11 @@ void lcModel::InsertControlPoint()
 
 void lcModel::RemoveFocusedControlPoint()
 {
-	lcObject* Focus = GetFocusObject();
-
-	if (!Focus || !Focus->IsPiece())
+	lcPiece* Piece = dynamic_cast<lcPiece*>(GetFocusObject());
+	
+	if (!Piece)
 		return;
-
-	lcPiece* Piece = (lcPiece*)Focus;
-
+	
 	if (Piece->RemoveFocusedControlPoint())
 	{
 		SaveCheckpoint(tr("Modifying"));

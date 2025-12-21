@@ -107,7 +107,7 @@ public:
 	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
 	virtual bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) = 0;
 	virtual void RemoveKeyFrames() = 0;
-	virtual void SaveUndoData(QDataStream& Stream) const = 0;
+	virtual bool SaveUndoData(QDataStream& Stream) const = 0;
 	virtual bool LoadUndoData(QDataStream& Stream) = 0;
 	virtual QString GetName() const = 0;
 	static QString GetCheckpointString(lcObjectPropertyId PropertyId);

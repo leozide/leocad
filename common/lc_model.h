@@ -432,6 +432,7 @@ protected:
 	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();
 	void EndActionSequence(const QString& Description);
+	void DiscardActionSequence();
 	void RevertActionSequence();
 
 	void SaveCheckpoint(const QString& Description);

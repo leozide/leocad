@@ -1759,8 +1759,6 @@ void lcModel::EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectE
 		ModelActionObjectEdit->SaveSelectionEndState(this);
 		break;
 	}
-
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
 }
 
 void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply)
@@ -2284,6 +2282,11 @@ void lcModel::EndActionSequence(const QString& Description)
 
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
+}
+
+void lcModel::DiscardActionSequence()
+{
+	mActionSequence.clear();
 }
 
 void lcModel::RevertActionSequence()
@@ -3121,7 +3124,6 @@ void lcModel::DeleteSelectedObjects()
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
 	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
 	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
@@ -3137,7 +3139,6 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 void lcModel::RemoveSelectedPiecesKeyFrames()
 {
 	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
 	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
@@ -3811,7 +3812,6 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
 	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
 	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
 	
 	bool Modified = false;
@@ -3836,7 +3836,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 	}
 	else
 	{
-		RevertActionSequence();
+		DiscardActionSequence();
 	}
 }
 
@@ -5098,7 +5098,6 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Move:
 		case lcTool::Rotate:
 			BeginActionSequence();
-			RecordSelectionAction(lcModelActionSelectionMode::Set);
 			BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
 			break;
 

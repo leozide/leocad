@@ -934,7 +934,7 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
-void lcPiece::SaveUndoData(QDataStream& Stream) const
+bool lcPiece::SaveUndoData(QDataStream& Stream) const
 {
 //	PieceInfo* mPieceInfo;
 	Stream << mFileLine;
@@ -956,8 +956,7 @@ void lcPiece::SaveUndoData(QDataStream& Stream) const
 //	std::vector<lcPieceControlPoint> mControlPoints;
 //	std::vector<bool> mTrainTrackConnections;
 
-	mPosition.SaveUndoData(Stream);
-	mRotation.SaveUndoData(Stream);	
+	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream);	
 }
 
 bool lcPiece::LoadUndoData(QDataStream& Stream)

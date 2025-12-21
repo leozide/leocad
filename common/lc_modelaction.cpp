@@ -7,7 +7,7 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 
-void lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly)
+bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly)
 {
 	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
 
@@ -21,20 +21,61 @@ void lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, boo
 	Stream << CameraCount;
 	Stream << LightCount;
 	
-	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
+	for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+	{
+		const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
+		
 		if (!SelectedOnly || Piece->IsSelected())
-			Piece->SaveUndoData(Stream);
-
-	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
+		{
+			if (Stream.writeRawData(reinterpret_cast<const char*>(&PieceIndex), sizeof(PieceIndex)) != sizeof(PieceIndex))
+				return false;
+			
+			if (!Piece->SaveUndoData(Stream))
+				return false;
+		}
+	}
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
+		return false;
+	
+	for (uint64_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+	{
+		const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
+		
 		if (!SelectedOnly || Camera->IsSelected())
-			Camera->SaveUndoData(Stream);
-
-	for (const std::unique_ptr<lcLight>& Light : Lights)
+		{
+			if (Stream.writeRawData(reinterpret_cast<const char*>(&CameraIndex), sizeof(CameraIndex)) != sizeof(CameraIndex))
+				return false;
+			
+			if (!Camera->SaveUndoData(Stream))
+				return false;
+		}
+	}
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
+		return false;
+	
+	for (uint64_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
+	{
+		const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
+		
 		if (!SelectedOnly || Light->IsSelected())
-			Light->SaveUndoData(Stream);
+		{
+			if (Stream.writeRawData(reinterpret_cast<const char*>(&LightIndex), sizeof(LightIndex)) != sizeof(LightIndex))
+				return false;
+			
+			if (!Light->SaveUndoData(Stream))
+				return false;
+		}
+	}
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
+		return false;
+	
+	return true;
 }
 
-void lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model, bool SelectedOnly)
+bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model)
 {
 	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
 
@@ -49,19 +90,66 @@ void lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model, boo
 	Stream >> LightCount;
 
 	if (PieceCount != Pieces.size() || CameraCount != Cameras.size() || LightCount != Lights.size())
-		return;
-
-	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
-		if (!SelectedOnly || Piece->IsSelected())
-			Piece->LoadUndoData(Stream);
-
-	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
-		if (!SelectedOnly || Camera->IsSelected())
-			Camera->LoadUndoData(Stream);
-
-	for (const std::unique_ptr<lcLight>& Light : Lights)
-		if (!SelectedOnly || Light->IsSelected())
-			Light->LoadUndoData(Stream);
+		return false;
+	
+	for (;;)
+	{
+		uint64_t PieceIndex;
+		
+		if (Stream.readRawData(reinterpret_cast<char*>(&PieceIndex), sizeof(PieceIndex)) != sizeof(PieceIndex))
+			return false;
+		
+		if (PieceIndex == mEndOfList)
+			break;
+		
+		if (PieceIndex >= Pieces.size())
+			return false;
+		
+		const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
+		
+		if (!Piece->LoadUndoData(Stream))
+			return false;
+	}
+	
+	for (;;)
+	{
+		uint64_t CameraIndex;
+		
+		if (Stream.readRawData(reinterpret_cast<char*>(&CameraIndex), sizeof(CameraIndex)) != sizeof(CameraIndex))
+			return false;
+		
+		if (CameraIndex == mEndOfList)
+			break;
+		
+		if (CameraIndex >= Cameras.size())
+			return false;
+		
+		const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
+		
+		if (!Camera->LoadUndoData(Stream))
+			return false;
+	}
+	
+	for (;;)
+	{
+		uint64_t LightIndex;
+		
+		if (Stream.readRawData(reinterpret_cast<char*>(&LightIndex), sizeof(LightIndex)) != sizeof(LightIndex))
+			return false;
+		
+		if (LightIndex == mEndOfList)
+			break;
+		
+		if (LightIndex >= Lights.size())
+			return false;
+		
+		const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
+		
+		if (!Light->LoadUndoData(Stream))
+			return false;
+	}
+	
+	return true;	
 }
 
 lcModelActionSelection::lcModelActionSelection(lcModelActionSelectionMode Mode)
@@ -206,7 +294,7 @@ void lcModelActionObjectEdit::SaveSelectionStartState(const lcModel* Model)
 
 void lcModelActionObjectEdit::LoadSelectionStartState(lcModel* Model) const
 {
-	LoadUndoBuffer(mStartBuffer, Model, true);
+	LoadUndoBuffer(mStartBuffer, Model);
 }
 
 void lcModelActionObjectEdit::SaveSelectionEndState(const lcModel* Model)
@@ -216,7 +304,7 @@ void lcModelActionObjectEdit::SaveSelectionEndState(const lcModel* Model)
 
 void lcModelActionObjectEdit::LoadSelectionEndState(lcModel* Model) const
 {
-	LoadUndoBuffer(mEndBuffer, Model, true);
+	LoadUndoBuffer(mEndBuffer, Model);
 }
 
 lcModelActionAddPieces::lcModelActionAddPieces(lcStep Step, lcModelActionAddPieceSelectionMode SelectionMode)
@@ -284,5 +372,5 @@ void lcModelActionStep::SaveModelState(const lcModel* Model)
 
 void lcModelActionStep::LoadModelState(lcModel* Model) const
 {
-	LoadUndoBuffer(mUndoBuffer, Model, false);
+	LoadUndoBuffer(mUndoBuffer, Model);
 }

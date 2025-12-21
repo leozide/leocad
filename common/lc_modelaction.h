@@ -13,8 +13,10 @@ public:
 	virtual ~lcModelAction() = default;
 
 protected:
-	static void SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly);
-	static void LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model, bool SelectedOnly);
+	static bool SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly);
+	static bool LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model);
+	
+	static constexpr uint64_t mEndOfList = UINT64_MAX;	
 };
 
 enum class lcModelActionSelectionMode

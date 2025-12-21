@@ -53,8 +53,9 @@ protected:
 
 enum class lcModelActionObjectEditMode
 {
-	Camera,
-	Selection
+	All,
+	Selection,
+	Camera
 };
 
 class lcModelActionObjectEdit: public lcModelAction
@@ -68,10 +69,10 @@ public:
 	void SaveCameraEndState(const lcCamera* Camera);
 	void LoadCameraEndState(lcCamera* Camera) const;
 
-	void SaveSelectionStartState(const lcModel* Model);
-	void LoadSelectionStartState(lcModel* Model) const;
-	void SaveSelectionEndState(const lcModel* Model);
-	void LoadSelectionEndState(lcModel* Model) const;
+	void SaveModelStartState(const lcModel* Model);
+	void LoadModelStartState(lcModel* Model) const;
+	void SaveModelEndState(const lcModel* Model);
+	void LoadModelEndState(lcModel* Model) const;
 
 	lcModelActionObjectEditMode GetMode() const
 	{
@@ -246,35 +247,4 @@ public:
 protected:
 	std::vector<bool> mHiddenState;
 	lcModelActionHidePiecesMode mMode;
-};
-
-enum class lcModelActionStepMode
-{
-	Insert,
-	Remove
-};
-
-class lcModelActionStep : public lcModelAction
-{
-public:
-	lcModelActionStep(lcModelActionStepMode Mode, lcStep Step);
-	virtual ~lcModelActionStep() = default;
-
-	lcModelActionStepMode GetMode() const
-	{
-		return mMode;
-	}
-
-	lcStep GetStep() const
-	{
-		return mStep;
-	}
-
-    void SaveModelState(const lcModel* Model);
-	void LoadModelState(lcModel* Model) const;
-
-protected:
-	QByteArray mUndoBuffer;
-	lcModelActionStepMode mMode;
-	lcStep mStep;
 };

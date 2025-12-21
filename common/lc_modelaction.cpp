@@ -287,22 +287,22 @@ void lcModelActionObjectEdit::LoadCameraEndState(lcCamera* Camera) const
 	Camera->LoadUndoData(Stream);
 }
 
-void lcModelActionObjectEdit::SaveSelectionStartState(const lcModel* Model)
+void lcModelActionObjectEdit::SaveModelStartState(const lcModel* Model)
 {
-	SaveUndoBuffer(mStartBuffer, Model, true);
+	SaveUndoBuffer(mStartBuffer, Model, mMode == lcModelActionObjectEditMode::Selection);
 }
 
-void lcModelActionObjectEdit::LoadSelectionStartState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadModelStartState(lcModel* Model) const
 {
 	LoadUndoBuffer(mStartBuffer, Model);
 }
 
-void lcModelActionObjectEdit::SaveSelectionEndState(const lcModel* Model)
+void lcModelActionObjectEdit::SaveModelEndState(const lcModel* Model)
 {
-	SaveUndoBuffer(mEndBuffer, Model, true);
+	SaveUndoBuffer(mEndBuffer, Model, mMode == lcModelActionObjectEditMode::Selection);
 }
 
-void lcModelActionObjectEdit::LoadSelectionEndState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadModelEndState(lcModel* Model) const
 {
 	LoadUndoBuffer(mEndBuffer, Model);
 }
@@ -358,19 +358,4 @@ void lcModelActionHidePieces::SaveHiddenState(const std::vector<std::unique_ptr<
 
 	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 		mHiddenState[PieceIndex] = Pieces[PieceIndex]->IsHidden();
-}
-
-lcModelActionStep::lcModelActionStep(lcModelActionStepMode Mode, lcStep Step)
-    : mMode(Mode), mStep(Step)
-{
-}
-
-void lcModelActionStep::SaveModelState(const lcModel* Model)
-{
-	SaveUndoBuffer(mUndoBuffer, Model, false);
-}
-
-void lcModelActionStep::LoadModelState(lcModel* Model) const
-{
-	LoadUndoBuffer(mUndoBuffer, Model);
 }

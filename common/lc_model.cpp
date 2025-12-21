@@ -1727,12 +1727,13 @@ void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjec
 
 	switch (ModelActionObjectEditMode)
 	{
+	case lcModelActionObjectEditMode::All:
+	case lcModelActionObjectEditMode::Selection:
+		ModelActionObjectEdit->SaveModelStartState(this);
+		break;
+		
 	case lcModelActionObjectEditMode::Camera:
 		ModelActionObjectEdit->SaveCameraStartState(Camera);
-		break;
-	
-	case lcModelActionObjectEditMode::Selection:
-		ModelActionObjectEdit->SaveSelectionStartState(this);
 		break;
 	}
 
@@ -1751,12 +1752,13 @@ void lcModel::EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectE
 
 	switch (ModelActionObjectEditMode)
 	{
-	case lcModelActionObjectEditMode::Camera:
-		ModelActionObjectEdit->SaveCameraEndState(Camera);
+	case lcModelActionObjectEditMode::All:
+	case lcModelActionObjectEditMode::Selection:
+		ModelActionObjectEdit->SaveModelEndState(this);
 		break;
 		
-	case lcModelActionObjectEditMode::Selection:
-		ModelActionObjectEdit->SaveSelectionEndState(this);
+	case lcModelActionObjectEditMode::Camera:
+		ModelActionObjectEdit->SaveCameraEndState(Camera);
 		break;
 	}
 }
@@ -1770,6 +1772,16 @@ void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObje
 
 	switch (ModelActionObjectEditMode)
 	{
+	case lcModelActionObjectEditMode::All:
+	case lcModelActionObjectEditMode::Selection:
+		if (Apply)
+			ModelActionObjectEdit->LoadModelEndState(this);
+		else
+			ModelActionObjectEdit->LoadModelStartState(this);
+
+		SetCurrentStep(mCurrentStep);
+		break;
+		
 	case lcModelActionObjectEditMode::Camera:
 		if (lcCamera* Camera = GetCamera(ModelActionObjectEdit->GetCameraName()))
 		{
@@ -1780,15 +1792,6 @@ void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObje
 			
 			SetCurrentStep(mCurrentStep);
 		}
-		break;
-		
-	case lcModelActionObjectEditMode::Selection:
-		if (Apply)
-			ModelActionObjectEdit->LoadSelectionEndState(this);
-		else
-			ModelActionObjectEdit->LoadSelectionStartState(this);
-
-		SetCurrentStep(mCurrentStep);
 		break;
 	}
 }
@@ -2166,67 +2169,6 @@ void lcModel::RunHidePiecesAction(const lcModelActionHidePieces* ModelActionHide
 	}
 }
 
-void lcModel::RecordStepAction(lcModelActionStepMode Mode, lcStep Step)
-{
-	std::unique_ptr<lcModelActionStep> ModelActionStep = std::make_unique<lcModelActionStep>(Mode, Step);
-
-	ModelActionStep->SaveModelState(this);
-
-	RunStepAction(ModelActionStep.get(), true);
-
-	mActionSequence.emplace_back(std::move(ModelActionStep));
-}
-
-void lcModel::RunStepAction(const lcModelActionStep* ModelActionStep, bool Apply)
-{
-	if (!ModelActionStep)
-		return;
-
-	lcStep Step = ModelActionStep->GetStep();
-
-	if (Apply)
-	{
-		if (ModelActionStep->GetMode() == lcModelActionStepMode::Insert)
-		{
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			{
-				Piece->InsertTime(Step, 1);
-				
-				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(false);
-			}
-			
-			for (std::unique_ptr<lcCamera>& Camera : mCameras)
-				Camera->InsertTime(Step, 1);
-			
-			for (const std::unique_ptr<lcLight>& Light : mLights)
-				Light->InsertTime(Step, 1);
-		}
-		else
-		{
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			{
-				Piece->RemoveTime(Step, 1);
-				
-				if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(false);
-			}
-			
-			for (std::unique_ptr<lcCamera>& Camera : mCameras)
-				Camera->RemoveTime(Step, 1);
-			
-			for (const std::unique_ptr<lcLight>& Light : mLights)
-				Light->RemoveTime(Step, 1);
-		}
-	}
-	else
-	{
-		ModelActionStep->LoadModelState(this);
-	}
-	
-	SetCurrentStep(mCurrentStep);
-}
-
 void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	auto PerformAction=[this](const lcModelAction* ModelAction, bool Apply)
@@ -2247,8 +2189,6 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunDuplicatePiecesAction(ModelActionDuplicatePieces, Apply);
 		else if (const lcModelActionHidePieces* ModelActionHidePieces = dynamic_cast<const lcModelActionHidePieces*>(ModelAction))
 			RunHidePiecesAction(ModelActionHidePieces, Apply);
-		else if (const lcModelActionStep* ModelActionStep = dynamic_cast<const lcModelActionStep*>(ModelAction))
-			RunStepAction(ModelActionStep, Apply);
 	};
 
 	if (Apply)
@@ -2463,21 +2403,52 @@ lcStep lcModel::GetLastStep() const
 void lcModel::InsertStep(lcStep Step)
 {
 	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	RecordStepAction(lcModelActionStepMode::Insert, Step);
-
+	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		Piece->InsertTime(Step, 1);
+		
+		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(false);
+	}
+	
+	for (std::unique_ptr<lcCamera>& Camera : mCameras)
+		Camera->InsertTime(Step, 1);
+	
+	for (const std::unique_ptr<lcLight>& Light : mLights)
+		Light->InsertTime(Step, 1);
+	
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
 	EndActionSequence(tr("Insert Step"));
+	
+    SetCurrentStep(mCurrentStep);
 }
 
 void lcModel::RemoveStep(lcStep Step)
 {
 	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
 	
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	RecordStepAction(lcModelActionStepMode::Remove, Step);
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		Piece->RemoveTime(Step, 1);
+		
+		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+			Piece->SetSelected(false);
+	}
 	
+	for (std::unique_ptr<lcCamera>& Camera : mCameras)
+		Camera->RemoveTime(Step, 1);
+	
+	for (const std::unique_ptr<lcLight>& Light : mLights)
+		Light->RemoveTime(Step, 1);
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
 	EndActionSequence(tr("Remove Step"));
+	
+	SetCurrentStep(mCurrentStep);
 }
 
 lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)

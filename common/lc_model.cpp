@@ -2104,71 +2104,6 @@ void lcModel::RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* Model
 	}
 }
 
-void lcModel::RecordHidePiecesAction(lcModelActionHidePiecesMode Mode)
-{
-	std::unique_ptr<lcModelActionHidePieces> ModelActionHidePieces = std::make_unique<lcModelActionHidePieces>(Mode);
-
-	ModelActionHidePieces->SaveHiddenState(mPieces);
-
-	RunHidePiecesAction(ModelActionHidePieces.get(), true);
-
-	mActionSequence.emplace_back(std::move(ModelActionHidePieces));
-}
-
-void lcModel::RunHidePiecesAction(const lcModelActionHidePieces* ModelActionHidePieces, bool Apply)
-{
-	if (!ModelActionHidePieces)
-		return;
-
-	if (Apply)
-	{
-		switch (ModelActionHidePieces->GetMode())
-		{
-		case lcModelActionHidePiecesMode::HideSelected:
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			{
-				if (Piece->IsSelected())
-				{
-					Piece->SetHidden(true);
-					Piece->SetSelected(false);
-				}
-			}
-			break;
-
-		case lcModelActionHidePiecesMode::HideUnselected:
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (!Piece->IsSelected() && !Piece->IsHidden())
-					Piece->SetHidden(true);
-			break;
-
-		case lcModelActionHidePiecesMode::UnhideSelected:
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (Piece->IsSelected() && Piece->IsHidden())
-					Piece->SetHidden(false);
-			break;
-
-		case lcModelActionHidePiecesMode::UnhideAll:
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (Piece->IsHidden())
-					Piece->SetHidden(false);
-			break;
-		}
-
-		gMainWindow->UpdateTimeline(false, true);
-		gMainWindow->UpdateSelectedObjects(true);
-	}
-	else
-	{
-		const std::vector<bool>& HiddenState = ModelActionHidePieces->GetHiddenState();
-
-		if (mPieces.size() != HiddenState.size())
-			return;
-
-		for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
-			mPieces[PieceIndex]->SetHidden(HiddenState[PieceIndex]);
-	}
-}
-
 void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	auto PerformAction=[this](const lcModelAction* ModelAction, bool Apply)
@@ -2187,8 +2122,6 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunGroupPiecesAction(ModelActionGroupPieces, Apply);
 		else if (const lcModelActionDuplicatePieces* ModelActionDuplicatePieces = dynamic_cast<const lcModelActionDuplicatePieces*>(ModelAction))
 			RunDuplicatePiecesAction(ModelActionDuplicatePieces, Apply);
-		else if (const lcModelActionHidePieces* ModelActionHidePieces = dynamic_cast<const lcModelActionHidePieces*>(ModelAction))
-			RunHidePiecesAction(ModelActionHidePieces, Apply);
 	};
 
 	if (Apply)
@@ -4814,92 +4747,131 @@ void lcModel::InvertSelection()
 
 void lcModel::HideSelectedPieces()
 {
-	if (!AnyPiecesSelected())
-	{
-		QMessageBox::information(gMainWindow, tr("Hide Pieces"), tr("No pieces selected."));
-		return;
-	}
-
 	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	RecordHidePiecesAction(lcModelActionHidePiecesMode::HideSelected);
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-
+	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	
+	bool Modified = false;
+	
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (Piece->IsSelected() && !Piece->IsHidden())
+		{
+			Piece->SetHidden(true);
+			Piece->SetSelected(false);
+			
+			Modified = true;
+		}
+	}
+	
+	if (!Modified)
+	{
+		DiscardActionSequence();
+		
+		return;
+	}		
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);	
 	EndActionSequence(tr("Hide Pieces"));
+	
+	gMainWindow->UpdateTimeline(false, true);
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
 }
 
 void lcModel::HideUnselectedPieces()
 {
-	bool HasHidden = false;
-
+	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	
+	bool Modified = false;
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (!Piece->IsSelected() && !Piece->IsHidden())
 		{
-			HasHidden = true;
-			break;
+			Piece->SetHidden(true);
+			
+			Modified = true;
 		}
 	}
-
-	if (!HasHidden)
+	
+	if (!Modified)
 	{
-		QMessageBox::information(gMainWindow, tr("Hide Unselected Pieces"), tr("No unselected pieces are hidden."));
+		DiscardActionSequence();
+		
 		return;
-	}
-
-	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	RecordHidePiecesAction(lcModelActionHidePiecesMode::HideUnselected);
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-
+	}		
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);	
 	EndActionSequence(tr("Hide Pieces"));
+	
+	gMainWindow->UpdateTimeline(false, true);
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
 }
 
 void lcModel::UnhideSelectedPieces()
 {
-	if (!AnyPiecesSelected())
-	{
-		QMessageBox::information(gMainWindow, tr("Unhide Pieces"), tr("No pieces selected."));
-		return;
-	}
-
 	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Set);
-	RecordHidePiecesAction(lcModelActionHidePiecesMode::UnhideSelected);
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-
+	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	
+	bool Modified = false;
+	
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (Piece->IsSelected() && Piece->IsHidden())
+		{
+			Piece->SetHidden(false);
+			
+			Modified = true;
+		}
+	}
+	
+	if (!Modified)
+	{
+		DiscardActionSequence();
+		
+		return;
+	}		
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);	
 	EndActionSequence(tr("Unhide Pieces"));
+	
+	gMainWindow->UpdateTimeline(false, true);
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
 }
 
 void lcModel::UnhideAllPieces()
 {
-	bool HasHidden = false;
-
+	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	
+	bool Modified = false;
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsHidden())
 		{
-			HasHidden = true;
-			break;
+			Piece->SetHidden(false);
+			
+			Modified = true;
 		}
 	}
-
-	if (!HasHidden)
+	
+	if (!Modified)
 	{
-		QMessageBox::information(gMainWindow, tr("Unhide All Pieces"), tr("No pieces are hidden."));
+		DiscardActionSequence();
+		
 		return;
-	}
-
-	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Restore);
-	RecordHidePiecesAction(lcModelActionHidePiecesMode::UnhideAll);
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-
-	EndActionSequence(tr("Unhide All Pieces"));
+	}		
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);	
+	EndActionSequence(tr("Unhide Pieces"));
+	
+	gMainWindow->UpdateTimeline(false, true);
+	gMainWindow->UpdateSelectedObjects(true);
+	UpdateAllViews();
 }
 
 void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)

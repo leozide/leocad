@@ -217,34 +217,3 @@ public:
 protected:
 	lcStep mStep;
 };
-
-enum class lcModelActionHidePiecesMode
-{
-	HideSelected,
-	HideUnselected,
-	UnhideSelected,
-	UnhideAll
-};
-
-class lcModelActionHidePieces : public lcModelAction
-{
-public:
-	lcModelActionHidePieces(lcModelActionHidePiecesMode Mode);
-	virtual ~lcModelActionHidePieces() = default;
-
-	lcModelActionHidePiecesMode GetMode() const
-	{
-		return mMode;
-	}
-
-	const std::vector<bool>& GetHiddenState() const
-	{
-		return mHiddenState;
-	}
-
-	void SaveHiddenState(const std::vector<std::unique_ptr<lcPiece>>& Pieces);
-
-protected:
-	std::vector<bool> mHiddenState;
-	lcModelActionHidePiecesMode mMode;
-};

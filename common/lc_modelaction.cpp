@@ -346,16 +346,3 @@ lcModelActionDuplicatePieces::lcModelActionDuplicatePieces(lcStep Step)
 	: mStep(Step)
 {
 }
-
-lcModelActionHidePieces::lcModelActionHidePieces(lcModelActionHidePiecesMode Mode)
-	: mMode(Mode)
-{
-}
-
-void lcModelActionHidePieces::SaveHiddenState(const std::vector<std::unique_ptr<lcPiece>>& Pieces)
-{
-	mHiddenState.resize(Pieces.size());
-
-	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
-		mHiddenState[PieceIndex] = Pieces[PieceIndex]->IsHidden();
-}

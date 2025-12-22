@@ -12,6 +12,8 @@ float lcParseValueLocalized(const QString& Value);
 
 #ifdef Q_OS_WIN
 
+#include <windows.h>
+
 int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid);
 bool lcRunElevatedProcess(const LPCWSTR ExeName, const LPCWSTR Arguments, const LPCWSTR WorkingFolder);
 

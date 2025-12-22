@@ -21,7 +21,7 @@ for:
         - image: Visual Studio 2022
         
     before_build:
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+    - call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
     - set PATH=C:\Qt\6.9\msvc2022_64\bin;%PATH%
     - git rev-parse --short HEAD > version.txt
     - set /p VERSION= < version.txt

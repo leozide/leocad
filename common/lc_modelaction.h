@@ -13,8 +13,8 @@ public:
 	virtual ~lcModelAction() = default;
 
 protected:
-	bool SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model);
-	bool LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) const;
+	bool SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model);
+	bool LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const;
 	
 	std::vector<size_t> mPieceIndices;
 	std::vector<size_t> mCameraIndices;
@@ -60,7 +60,9 @@ enum class lcModelActionObjectEditMode
 	EditSelectedObjects,
 	EditSelectedPieces,
 	EditUnselectedPieces,
-	EditCamera
+	EditCamera,
+	CreateCamera,
+	CreateLight
 };
 
 class lcModelActionObjectEdit: public lcModelAction
@@ -69,8 +71,8 @@ public:
 	lcModelActionObjectEdit(lcModelActionObjectEditMode Mode);
 	virtual ~lcModelActionObjectEdit() = default;
 	
-	void SaveStartState(const lcModel* Model, const lcCamera* Camera);
-	void SaveEndState(const lcModel* Model, const lcCamera* Camera);
+	bool SaveStartState(const lcModel* Model, const lcCamera* Camera);
+	bool SaveEndState(const lcModel* Model, const lcCamera* Camera);
 	void LoadStartState(lcModel* Model) const;
 	void LoadEndState(lcModel* Model) const;
 
@@ -128,48 +130,6 @@ protected:
 	std::vector<PieceData> mPieceData;
 	lcStep mStep;
 	lcModelActionAddPieceSelectionMode mSelectionMode;
-};
-
-class lcModelActionAddCamera : public lcModelAction
-{
-public:
-	lcModelActionAddCamera(const lcVector3& Position, const lcVector3& TargetPosition);
-	virtual ~lcModelActionAddCamera() = default;
-	
-	const lcVector3& GetPosition() const
-	{
-		return mPosition;
-	}
-	
-	const lcVector3& GetTargetPosition() const
-	{
-		return mTargetPosition;
-	}
-	
-protected:
-	lcVector3 mPosition;
-	lcVector3 mTargetPosition;
-};
-
-class lcModelActionAddLight : public lcModelAction
-{
-public:
-	lcModelActionAddLight(const lcVector3& Position, lcLightType LightType);
-	virtual ~lcModelActionAddLight() = default;
-
-	const lcVector3& GetPosition() const
-	{
-		return mPosition;
-	}
-
-	lcLightType GetLightType() const
-	{
-		return mLightType;
-	}
-
-protected:
-	lcVector3 mPosition;
-	lcLightType mLightType;
 };
 
 enum class lcModelActionGroupPiecesMode

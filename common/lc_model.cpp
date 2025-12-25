@@ -1728,7 +1728,8 @@ void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjec
 	if (!ModelActionObjectEdit)
 		return;
 	
-	ModelActionObjectEdit->SaveStartState(this, Camera);
+	if (!ModelActionObjectEdit->SaveStartState(this, Camera))
+		return;
 
 	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
 }
@@ -1742,8 +1743,9 @@ void lcModel::EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectE
 
 	if (!ModelActionObjectEdit || ModelActionObjectEditMode != ModelActionObjectEdit->GetMode())
 		return;
-
-	ModelActionObjectEdit->SaveEndState(this, Camera);
+	
+	if (!ModelActionObjectEdit->SaveEndState(this, Camera))
+		mActionSequence.pop_back();
 }
 
 void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply)
@@ -1832,70 +1834,6 @@ void lcModel::RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPie
 			PieceIt = mPieces.erase(--PieceIt);
 
 		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateInUseCategory();
-	}
-}
-
-void lcModel::RecordAddCameraAction(const lcVector3& Position, const lcVector3& TargetPosition)
-{
-	std::unique_ptr<lcModelActionAddCamera> ModelActionAddCamera = std::make_unique<lcModelActionAddCamera>(Position, TargetPosition);
-	
-	RunAddCameraAction(ModelActionAddCamera.get(), true);
-	
-	mActionSequence.emplace_back(std::move(ModelActionAddCamera));
-}
-
-void lcModel::RunAddCameraAction(const lcModelActionAddCamera* ModelActionAddCamera, bool Apply)
-{
-	if (!ModelActionAddCamera)
-		return;
-	
-	if (Apply)
-	{
-		lcCamera* Camera = new lcCamera(ModelActionAddCamera->GetPosition(), ModelActionAddCamera->GetTargetPosition());
-		Camera->CreateName(mCameras);
-		mCameras.emplace_back(Camera);
-		
-		ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_POSITION, false);
-	}
-	else
-	{
-		if (!mCameras.empty())
-			mCameras.pop_back();
-		
-		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateInUseCategory();
-	}	
-}
-
-void lcModel::RecordAddLightAction(const lcVector3& Position, lcLightType LightType)
-{
-	std::unique_ptr<lcModelActionAddLight> ModelActionAddLight = std::make_unique<lcModelActionAddLight>(Position, LightType);
-
-	RunAddLightAction(ModelActionAddLight.get(), true);
-
-	mActionSequence.emplace_back(std::move(ModelActionAddLight));
-}
-
-void lcModel::RunAddLightAction(const lcModelActionAddLight* ModelActionAddLight, bool Apply)
-{
-	if (!ModelActionAddLight)
-		return;
-
-	if (Apply)
-	{
-		lcLight* Light = new lcLight(ModelActionAddLight->GetPosition(), ModelActionAddLight->GetLightType());
-    	Light->CreateName(mLights);
-        mLights.emplace_back(Light);
-
-    	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
-	}
-	else
-	{
-		if (!mLights.empty())
-			mLights.pop_back();
-
 		gMainWindow->UpdateSelectedObjects(true);
 		gMainWindow->UpdateInUseCategory();
 	}
@@ -2077,10 +2015,6 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunObjectEditAction(ModelActionObjectEdit, Apply);
 		else if (const lcModelActionAddPieces* ModelActionAddPieces = dynamic_cast<const lcModelActionAddPieces*>(ModelAction))
 			RunAddPiecesAction(ModelActionAddPieces, Apply);
-		else if (const lcModelActionAddCamera* ModelActionAddCamera = dynamic_cast<const lcModelActionAddCamera*>(ModelAction))
-			RunAddCameraAction(ModelActionAddCamera, Apply);
-		else if (const lcModelActionAddLight* ModelActionAddLight = dynamic_cast<const lcModelActionAddLight*>(ModelAction))
-			RunAddLightAction(ModelActionAddLight, Apply);
 		else if (const lcModelActionGroupPieces* ModelActionGroupPieces = dynamic_cast<const lcModelActionGroupPieces*>(ModelAction))
 			RunGroupPiecesAction(ModelActionGroupPieces, Apply);
 		else if (const lcModelActionDuplicatePieces* ModelActionDuplicatePieces = dynamic_cast<const lcModelActionDuplicatePieces*>(ModelAction))
@@ -2800,6 +2734,48 @@ void lcModel::InsertPiece(lcPiece* Piece, size_t Index)
 	mPieces.insert(mPieces.begin() + Index, std::unique_ptr<lcPiece>(Piece));
 }
 
+void lcModel::AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex)
+{
+	if (CameraIndex > mCameras.size())
+		return;
+	
+	mCameras.insert(mCameras.begin() + CameraIndex, std::move(Camera));	
+}
+
+void lcModel::DeleteCamera(size_t CameraIndex)
+{
+	if (CameraIndex >= mCameras.size())
+		return;
+	
+	std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin() + CameraIndex;
+	
+	RemoveCameraFromViews(CameraIt->get());
+	
+	mCameras.erase(CameraIt);
+	
+	gMainWindow->UpdateSelectedObjects(true);
+}
+
+void lcModel::AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex)
+{
+	if (LightIndex > mLights.size())
+		return;
+	
+	mLights.insert(mLights.begin() + LightIndex, std::move(Light));	
+}
+
+void lcModel::DeleteLight(size_t LightIndex)
+{
+	if (LightIndex >= mLights.size())
+		return;
+	
+	std::vector<std::unique_ptr<lcLight>>::iterator LightIt = mLights.begin() + LightIndex;
+	
+	mLights.erase(LightIt);
+	
+	gMainWindow->UpdateSelectedObjects(true);
+}
+
 void lcModel::FocusNextTrainTrack()
 {
 	const lcObject* Focus = GetFocusObject();
@@ -3302,13 +3278,22 @@ void lcModel::InlineSelectedModels()
 	SetSelectionAndFocus(NewPieces, nullptr, 0, false);
 }
 
+void lcModel::RemoveCameraFromViews(lcCamera* Camera)
+{
+	std::vector<lcView*> Views = lcView::GetModelViews(this);
+	
+	for (lcView* View : Views)
+		if (Camera == View->GetCamera())
+			View->SetCamera(Camera, true);
+}
+
 bool lcModel::RemoveSelectedObjects()
 {
 	bool RemovedPiece = false;
 	bool RemovedCamera = false;
 	bool RemovedLight = false;
 
-	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
+	for (std::vector<std::unique_ptr<lcPiece>>::iterator PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
 		lcPiece* Piece = PieceIt->get();
 
@@ -3327,12 +3312,8 @@ bool lcModel::RemoveSelectedObjects()
 
 		if (Camera->IsSelected())
 		{
-			std::vector<lcView*> Views = lcView::GetModelViews(this);
-
-			for (lcView* View : Views)
-				if (Camera == View->GetCamera())
-					View->SetCamera(Camera, true);
-
+			RemoveCameraFromViews(Camera);
+			
 			RemovedCamera = true;
 			CameraIt = mCameras.erase(CameraIt);
 		}
@@ -5125,16 +5106,18 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 
 void lcModel::InsertCameraToolClicked(const lcVector3& Position)
 {
-	lcVector3 TargetPosition;
-	
-	GetPieceFocusOrSelectionCenter(TargetPosition);
-	
 	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::CreateCamera, nullptr);
 	
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-	RecordAddCameraAction(Position, TargetPosition);
+	lcCamera* Camera = new lcCamera(Position, GetSelectionOrModelCenter());
 	
-	EndActionSequence(tr("Add Camera"));	
+	Camera->CreateName(mCameras);
+	mCameras.emplace_back(Camera);
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::CreateCamera, nullptr);
+	EndActionSequence(tr("Add Camera"));
+	
+	ClearSelectionAndSetFocus(Camera, LC_CAMERA_SECTION_POSITION, false);
 }
 
 void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType LightType)
@@ -5164,11 +5147,17 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 	}
 
 	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::CreateLight, nullptr);
 
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-	RecordAddLightAction(Position, LightType);
-
+	lcLight* Light = new lcLight(Position, LightType);
+	
+	Light->CreateName(mLights);
+	mLights.emplace_back(Light);
+	
+	EndObjectEditAction(lcModelActionObjectEditMode::CreateLight, nullptr);
 	EndActionSequence(ActionName);
+	
+	ClearSelectionAndSetFocus(Light, LC_LIGHT_SECTION_POSITION, false);
 }
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag)

@@ -8,8 +8,6 @@ class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
 class lcModelActionAddPieces;
-class lcModelActionAddCamera;
-class lcModelActionAddLight;
 class lcModelActionGroupPieces;
 class lcModelActionDuplicatePieces;
 enum class lcModelActionSelectionMode;
@@ -235,6 +233,10 @@ public:
 	void RemoveStep(lcStep Step);
 
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
+	void AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex);
+	void DeleteCamera(size_t CameraIndex);
+	void AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex);
+	void DeleteLight(size_t LightIndex);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
 	void RemoveSelectedObjectsKeyFrames();
@@ -412,10 +414,6 @@ protected:
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
-	void RecordAddCameraAction(const lcVector3& Position, const lcVector3& TargetPosition);
-	void RunAddCameraAction(const lcModelActionAddCamera* ModelActionAddCamera, bool Apply);
-	void RecordAddLightAction(const lcVector3& Position, lcLightType LightType);
-	void RunAddLightAction(const lcModelActionAddLight* ModelActionAddLight, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
 	void RecordDuplicatePiecesAction();
@@ -433,6 +431,7 @@ protected:
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
+	void RemoveCameraFromViews(lcCamera* Camera);
 
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 

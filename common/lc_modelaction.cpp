@@ -7,7 +7,7 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 
-bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model)
+bool lcModelAction::SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model)
 {
 	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
 
@@ -35,7 +35,7 @@ bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model)
 	return true;
 }
 
-bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) const
+bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const
 {
 	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
 
@@ -47,6 +47,13 @@ bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) con
 	
 	if (Stream.readRawData(reinterpret_cast<char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
 		return false;
+	
+	if (CreateObjects)
+	{
+		ObjectCount[0] -= mPieceIndices.size();
+		ObjectCount[1] -= mCameraIndices.size();
+		ObjectCount[2] -= mLightIndices.size();
+	}
 	
 	if (ObjectCount[0] != Pieces.size() || ObjectCount[1] != Cameras.size() || ObjectCount[2] != Lights.size())
 		return false;
@@ -62,28 +69,59 @@ bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) con
 			return false;
 	}
 	
-	for (size_t CameraIndex : mCameraIndices)
+	if (CreateObjects)
 	{
-		if (CameraIndex >= Cameras.size())
-			return false;
+		for (size_t CameraIndex : mCameraIndices)
+		{
+            if (CameraIndex > Cameras.size())
+                return false;
+            
+            std::unique_ptr<lcCamera> Camera(new lcCamera(false));
+            
+            if (!Camera->LoadUndoData(Stream))
+                return false;
+            
+            Model->AddCamera(std::move(Camera), CameraIndex);
+		}
 		
-		const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
-		
-		if (!Camera->LoadUndoData(Stream))
-			return false;
+		for (size_t LightIndex : mLightIndices)
+		{
+			if (LightIndex > Lights.size())
+				return false;
+			
+			std::unique_ptr<lcLight> Light(new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point));
+			
+			if (!Light->LoadUndoData(Stream))
+				return false;
+			
+			Model->AddLight(std::move(Light), LightIndex);
+		}
 	}
-	
-	for (size_t LightIndex : mLightIndices)
+	else
 	{
-		if (LightIndex >= Lights.size())
-			return false;
+		for (size_t CameraIndex : mCameraIndices)
+		{
+			if (CameraIndex >= Cameras.size())
+				return false;
+			
+			const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
+			
+			if (!Camera->LoadUndoData(Stream))
+				return false;
+		}
 		
-		const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
+		for (size_t LightIndex : mLightIndices)
+		{
+			if (LightIndex >= Lights.size())
+				return false;
+			
+			const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
+			
+			if (!Light->LoadUndoData(Stream))
+				return false;
+		}
+	}		
 		
-		if (!Light->LoadUndoData(Stream))
-			return false;
-	}
-	
 	return true;	
 }
 
@@ -192,7 +230,7 @@ lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mod
 {
 }
 
-void lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
+bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
 {
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
@@ -252,24 +290,85 @@ void lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamer
 			}
 		}
 		break;
-	};	
 	
-	SaveUndoBuffer(mStartBuffer, Model);
+	case lcModelActionObjectEditMode::CreateCamera:
+	case lcModelActionObjectEditMode::CreateLight:
+		break;
+	};
+	
+	return SaveHistoryBuffer(mStartBuffer, Model);
 }
 
-void lcModelActionObjectEdit::SaveEndState(const lcModel* Model, const lcCamera* Camera)
+bool lcModelActionObjectEdit::SaveEndState(const lcModel* Model, const lcCamera* Camera)
 {
-	SaveUndoBuffer(mEndBuffer, Model);	
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
+	
+	switch (mMode)
+	{
+	case lcModelActionObjectEditMode::EditAllObjects:
+	case lcModelActionObjectEditMode::EditAllPieces:
+	case lcModelActionObjectEditMode::EditSelectedObjects:
+	case lcModelActionObjectEditMode::EditSelectedPieces:
+	case lcModelActionObjectEditMode::EditUnselectedPieces:
+	case lcModelActionObjectEditMode::EditCamera:
+		break;
+	
+	case lcModelActionObjectEditMode::CreateCamera:
+		mCameraIndices.push_back(Cameras.size() - 1);
+		break;
+		
+	case lcModelActionObjectEditMode::CreateLight:
+		mLightIndices.push_back(Lights.size() - 1);
+		break;
+	};
+	
+	return SaveHistoryBuffer(mEndBuffer, Model);	
 }
 
 void lcModelActionObjectEdit::LoadStartState(lcModel* Model) const
 {
-	LoadUndoBuffer(mStartBuffer, Model);
+	switch (mMode)
+	{
+	case lcModelActionObjectEditMode::EditAllObjects:
+	case lcModelActionObjectEditMode::EditAllPieces:
+	case lcModelActionObjectEditMode::EditSelectedObjects:
+	case lcModelActionObjectEditMode::EditSelectedPieces:
+	case lcModelActionObjectEditMode::EditUnselectedPieces:
+	case lcModelActionObjectEditMode::EditCamera:
+		LoadHistoryBuffer(mStartBuffer, Model, false);
+		break;
+	
+	case lcModelActionObjectEditMode::CreateCamera:
+		for (size_t CameraIndex : mCameraIndices)
+    		Model->DeleteCamera(CameraIndex);
+		break;
+		
+	case lcModelActionObjectEditMode::CreateLight:
+		for (size_t LightIndex : mLightIndices)
+			Model->DeleteLight(LightIndex);
+		break;
+	};
 }
 
 void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
 {
-	LoadUndoBuffer(mEndBuffer, Model);
+	switch (mMode)
+	{
+	case lcModelActionObjectEditMode::EditAllObjects:
+	case lcModelActionObjectEditMode::EditAllPieces:
+	case lcModelActionObjectEditMode::EditSelectedObjects:
+	case lcModelActionObjectEditMode::EditSelectedPieces:
+	case lcModelActionObjectEditMode::EditUnselectedPieces:
+	case lcModelActionObjectEditMode::EditCamera:
+		LoadHistoryBuffer(mEndBuffer, Model, false);
+		break;
+	
+	case lcModelActionObjectEditMode::CreateCamera:
+	case lcModelActionObjectEditMode::CreateLight:
+		LoadHistoryBuffer(mEndBuffer, Model, true);
+		break;
+	};
 }
 
 lcModelActionAddPieces::lcModelActionAddPieces(lcStep Step, lcModelActionAddPieceSelectionMode SelectionMode)
@@ -290,16 +389,6 @@ void lcModelActionAddPieces::SetPieceData(const std::vector<lcInsertPieceInfo>& 
 		PieceData.Transform = PieceInfoTransform.Transform;
 		PieceData.ColorCode = lcGetColorCode(PieceInfoTransform.ColorIndex);
 	}
-}
-
-lcModelActionAddCamera::lcModelActionAddCamera(const lcVector3& Position, const lcVector3& TargetPosition)
-    : mPosition(Position), mTargetPosition(TargetPosition)
-{
-}
-
-lcModelActionAddLight::lcModelActionAddLight(const lcVector3& Position, lcLightType LightType)
-	: mPosition(Position), mLightType(LightType)
-{
 }
 
 lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)

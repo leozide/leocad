@@ -13,10 +13,12 @@ public:
 	virtual ~lcModelAction() = default;
 
 protected:
-	static bool SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly);
-	static bool LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model);
+	bool SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model);
+	bool LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) const;
 	
-	static constexpr uint64_t mEndOfList = UINT64_MAX;	
+	std::vector<size_t> mPieceIndices;
+	std::vector<size_t> mCameraIndices;
+	std::vector<size_t> mLightIndices;
 };
 
 enum class lcModelActionSelectionMode
@@ -53,9 +55,12 @@ protected:
 
 enum class lcModelActionObjectEditMode
 {
-	All,
-	Selection,
-	Camera
+	EditAllObjects,
+	EditAllPieces,
+	EditSelectedObjects,
+	EditSelectedPieces,
+	EditUnselectedPieces,
+	EditCamera
 };
 
 class lcModelActionObjectEdit: public lcModelAction
@@ -63,30 +68,21 @@ class lcModelActionObjectEdit: public lcModelAction
 public:
 	lcModelActionObjectEdit(lcModelActionObjectEditMode Mode);
 	virtual ~lcModelActionObjectEdit() = default;
-
-	void SaveCameraStartState(const lcCamera* Camera);
-	void LoadCameraStartState(lcCamera* Camera) const;
-	void SaveCameraEndState(const lcCamera* Camera);
-	void LoadCameraEndState(lcCamera* Camera) const;
-
-	void SaveModelStartState(const lcModel* Model);
-	void LoadModelStartState(lcModel* Model) const;
-	void SaveModelEndState(const lcModel* Model);
-	void LoadModelEndState(lcModel* Model) const;
+	
+	void SaveStartState(const lcModel* Model, const lcCamera* Camera);
+	void SaveEndState(const lcModel* Model, const lcCamera* Camera);
+	void LoadStartState(lcModel* Model) const;
+	void LoadEndState(lcModel* Model) const;
 
 	lcModelActionObjectEditMode GetMode() const
 	{
 		return mMode;
 	}
 
-	const QString& GetCameraName() const
-	{
-		return mCameraName;
-	}
-
 protected:
+	void SaveState(QByteArray& Buffer);
+	
 	lcModelActionObjectEditMode mMode;
-	QString mCameraName;
 	QByteArray mStartBuffer;
 	QByteArray mEndBuffer;
 };

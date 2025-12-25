@@ -7,7 +7,7 @@
 #include "pieceinf.h"
 #include "lc_colors.h"
 
-bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, bool SelectedOnly)
+bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model)
 {
 	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
 
@@ -15,67 +15,27 @@ bool lcModelAction::SaveUndoBuffer(QByteArray& Buffer, const lcModel* Model, boo
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 
-	uint64_t PieceCount = Pieces.size(), CameraCount = Cameras.size(), LightCount = Lights.size();
-
-	Stream << PieceCount;
-	Stream << CameraCount;
-	Stream << LightCount;
+	uint64_t ObjectCount[3] = { Pieces.size(), Cameras.size(), Lights.size() };
 	
-	for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
-	{
-		const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
-		
-		if (!SelectedOnly || Piece->IsSelected())
-		{
-			if (Stream.writeRawData(reinterpret_cast<const char*>(&PieceIndex), sizeof(PieceIndex)) != sizeof(PieceIndex))
-				return false;
-			
-			if (!Piece->SaveUndoData(Stream))
-				return false;
-		}
-	}
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
+	if (Stream.writeRawData(reinterpret_cast<const char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
 		return false;
 	
-	for (uint64_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
-	{
-		const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
-		
-		if (!SelectedOnly || Camera->IsSelected())
-		{
-			if (Stream.writeRawData(reinterpret_cast<const char*>(&CameraIndex), sizeof(CameraIndex)) != sizeof(CameraIndex))
-				return false;
-			
-			if (!Camera->SaveUndoData(Stream))
-				return false;
-		}
-	}
+	for (size_t PieceIndex : mPieceIndices)
+		if (!Pieces[PieceIndex]->SaveUndoData(Stream))
+            return false;
 	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
-		return false;
+	for (size_t CameraIndex : mCameraIndices)
+		if (!Cameras[CameraIndex]->SaveUndoData(Stream))
+			return false;
 	
-	for (uint64_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
-	{
-		const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
-		
-		if (!SelectedOnly || Light->IsSelected())
-		{
-			if (Stream.writeRawData(reinterpret_cast<const char*>(&LightIndex), sizeof(LightIndex)) != sizeof(LightIndex))
-				return false;
-			
-			if (!Light->SaveUndoData(Stream))
-				return false;
-		}
-	}
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&mEndOfList), sizeof(mEndOfList)) != sizeof(mEndOfList))
-		return false;
+	for (size_t LightIndex : mLightIndices)
+		if (!Lights[LightIndex]->SaveUndoData(Stream))
+			return false;
 	
 	return true;
 }
 
-bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model)
+bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model) const
 {
 	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
 
@@ -83,25 +43,16 @@ bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model)
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 
-	uint64_t PieceCount, CameraCount, LightCount;
-
-	Stream >> PieceCount;
-	Stream >> CameraCount;
-	Stream >> LightCount;
-
-	if (PieceCount != Pieces.size() || CameraCount != Cameras.size() || LightCount != Lights.size())
+	uint64_t ObjectCount[3];
+	
+	if (Stream.readRawData(reinterpret_cast<char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
 		return false;
 	
-	for (;;)
+	if (ObjectCount[0] != Pieces.size() || ObjectCount[1] != Cameras.size() || ObjectCount[2] != Lights.size())
+		return false;
+	
+	for (size_t PieceIndex : mPieceIndices)
 	{
-		uint64_t PieceIndex;
-		
-		if (Stream.readRawData(reinterpret_cast<char*>(&PieceIndex), sizeof(PieceIndex)) != sizeof(PieceIndex))
-			return false;
-		
-		if (PieceIndex == mEndOfList)
-			break;
-		
 		if (PieceIndex >= Pieces.size())
 			return false;
 		
@@ -111,16 +62,8 @@ bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model)
 			return false;
 	}
 	
-	for (;;)
+	for (size_t CameraIndex : mCameraIndices)
 	{
-		uint64_t CameraIndex;
-		
-		if (Stream.readRawData(reinterpret_cast<char*>(&CameraIndex), sizeof(CameraIndex)) != sizeof(CameraIndex))
-			return false;
-		
-		if (CameraIndex == mEndOfList)
-			break;
-		
 		if (CameraIndex >= Cameras.size())
 			return false;
 		
@@ -130,16 +73,8 @@ bool lcModelAction::LoadUndoBuffer(const QByteArray& Buffer, lcModel* Model)
 			return false;
 	}
 	
-	for (;;)
+	for (size_t LightIndex : mLightIndices)
 	{
-		uint64_t LightIndex;
-		
-		if (Stream.readRawData(reinterpret_cast<char*>(&LightIndex), sizeof(LightIndex)) != sizeof(LightIndex))
-			return false;
-		
-		if (LightIndex == mEndOfList)
-			break;
-		
 		if (LightIndex >= Lights.size())
 			return false;
 		
@@ -257,52 +192,82 @@ lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mod
 {
 }
 
-void lcModelActionObjectEdit::SaveCameraStartState(const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
 {
-	QDataStream Stream(&mStartBuffer, QIODevice::WriteOnly);
+	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 	
-	Camera->SaveUndoData(Stream);
-
-	mCameraName = Camera->GetName();
-}
-
-void lcModelActionObjectEdit::LoadCameraStartState(lcCamera* Camera) const
-{
-	QDataStream Stream(const_cast<QByteArray*>(&mStartBuffer), QIODevice::ReadOnly);
+	switch (mMode)
+	{
+	case lcModelActionObjectEditMode::EditAllObjects:
+		mPieceIndices.resize(Pieces.size());
+		std::iota(mPieceIndices.begin(), mPieceIndices.end(), 0);
+		
+		mCameraIndices.resize(Cameras.size());
+		std::iota(mCameraIndices.begin(), mCameraIndices.end(), 0);
+		
+		mLightIndices.resize(Lights.size());
+		std::iota(mLightIndices.begin(), mLightIndices.end(), 0);
+		break;
+		
+	case lcModelActionObjectEditMode::EditAllPieces:
+		mPieceIndices.resize(Pieces.size());
+		std::iota(mPieceIndices.begin(), mPieceIndices.end(), 0);
+		break;
+		
+	case lcModelActionObjectEditMode::EditSelectedObjects:
+		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+			if (Pieces[PieceIndex]->IsSelected())
+				mPieceIndices.push_back(PieceIndex);
+		
+		for (uint64_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+			if (Cameras[CameraIndex]->IsSelected())
+				mCameraIndices.push_back(CameraIndex);
+		
+		for (uint64_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
+			if (Lights[LightIndex]->IsSelected())
+				mLightIndices.push_back(LightIndex);
+		break;
+		
+	case lcModelActionObjectEditMode::EditSelectedPieces:
+		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+			if (Pieces[PieceIndex]->IsSelected())
+				mPieceIndices.push_back(PieceIndex);
+		break;
+		
+	case lcModelActionObjectEditMode::EditUnselectedPieces:
+		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+			if (!Pieces[PieceIndex]->IsSelected())
+				mPieceIndices.push_back(PieceIndex);
+		break;
+		
+	case lcModelActionObjectEditMode::EditCamera:
+		for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+		{
+			if (Cameras[CameraIndex].get() == Camera)
+			{
+				mCameraIndices.push_back(CameraIndex);
+				break;
+			}
+		}
+		break;
+	};	
 	
-	Camera->LoadUndoData(Stream);
+	SaveUndoBuffer(mStartBuffer, Model);
 }
 
-void lcModelActionObjectEdit::SaveCameraEndState(const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveEndState(const lcModel* Model, const lcCamera* Camera)
 {
-	QDataStream Stream(&mEndBuffer, QIODevice::WriteOnly);
-	
-	Camera->SaveUndoData(Stream);
+	SaveUndoBuffer(mEndBuffer, Model);	
 }
 
-void lcModelActionObjectEdit::LoadCameraEndState(lcCamera* Camera) const
-{
-	QDataStream Stream(const_cast<QByteArray*>(&mEndBuffer), QIODevice::ReadOnly);
-	
-	Camera->LoadUndoData(Stream);
-}
-
-void lcModelActionObjectEdit::SaveModelStartState(const lcModel* Model)
-{
-	SaveUndoBuffer(mStartBuffer, Model, mMode == lcModelActionObjectEditMode::Selection);
-}
-
-void lcModelActionObjectEdit::LoadModelStartState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadStartState(lcModel* Model) const
 {
 	LoadUndoBuffer(mStartBuffer, Model);
 }
 
-void lcModelActionObjectEdit::SaveModelEndState(const lcModel* Model)
-{
-	SaveUndoBuffer(mEndBuffer, Model, mMode == lcModelActionObjectEditMode::Selection);
-}
-
-void lcModelActionObjectEdit::LoadModelEndState(lcModel* Model) const
+void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
 {
 	LoadUndoBuffer(mEndBuffer, Model);
 }

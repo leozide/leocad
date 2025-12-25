@@ -2936,7 +2936,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_REMOVE_KEY_FRAMES:
 		if (ActiveModel)
-			ActiveModel->RemoveSelectedPiecesKeyFrames();
+			ActiveModel->RemoveSelectedObjectsKeyFrames();
 		break;
 
 	case LC_PIECE_CONTROL_POINT_INSERT:

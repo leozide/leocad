@@ -237,7 +237,7 @@ public:
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
-	void RemoveSelectedPiecesKeyFrames();
+	void RemoveSelectedObjectsKeyFrames();
 	void InsertControlPoint();
 	void RemoveFocusedControlPoint();
 	void FocusNextTrainTrack();

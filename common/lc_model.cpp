@@ -1724,18 +1724,11 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera)
 {
 	std::unique_ptr<lcModelActionObjectEdit> ModelActionObjectEdit = std::make_unique<lcModelActionObjectEdit>(ModelActionObjectEditMode);
-
-	switch (ModelActionObjectEditMode)
-	{
-	case lcModelActionObjectEditMode::All:
-	case lcModelActionObjectEditMode::Selection:
-		ModelActionObjectEdit->SaveModelStartState(this);
-		break;
-		
-	case lcModelActionObjectEditMode::Camera:
-		ModelActionObjectEdit->SaveCameraStartState(Camera);
-		break;
-	}
+	
+	if (!ModelActionObjectEdit)
+		return;
+	
+	ModelActionObjectEdit->SaveStartState(this, Camera);
 
 	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
 }
@@ -1750,50 +1743,20 @@ void lcModel::EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectE
 	if (!ModelActionObjectEdit || ModelActionObjectEditMode != ModelActionObjectEdit->GetMode())
 		return;
 
-	switch (ModelActionObjectEditMode)
-	{
-	case lcModelActionObjectEditMode::All:
-	case lcModelActionObjectEditMode::Selection:
-		ModelActionObjectEdit->SaveModelEndState(this);
-		break;
-		
-	case lcModelActionObjectEditMode::Camera:
-		ModelActionObjectEdit->SaveCameraEndState(Camera);
-		break;
-	}
+	ModelActionObjectEdit->SaveEndState(this, Camera);
 }
 
 void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply)
 {
 	if (!ModelActionObjectEdit)
 		return;
-
-	lcModelActionObjectEditMode ModelActionObjectEditMode = ModelActionObjectEdit->GetMode();
-
-	switch (ModelActionObjectEditMode)
-	{
-	case lcModelActionObjectEditMode::All:
-	case lcModelActionObjectEditMode::Selection:
-		if (Apply)
-			ModelActionObjectEdit->LoadModelEndState(this);
-		else
-			ModelActionObjectEdit->LoadModelStartState(this);
-
-		SetCurrentStep(mCurrentStep);
-		break;
-		
-	case lcModelActionObjectEditMode::Camera:
-		if (lcCamera* Camera = GetCamera(ModelActionObjectEdit->GetCameraName()))
-		{
-			if (Apply)
-				ModelActionObjectEdit->LoadCameraEndState(Camera);
-			else
-				ModelActionObjectEdit->LoadCameraStartState(Camera);
-			
-			SetCurrentStep(mCurrentStep);
-		}
-		break;
-	}
+	
+	if (Apply)
+		ModelActionObjectEdit->LoadEndState(this);
+	else
+		ModelActionObjectEdit->LoadStartState(this);
+	
+	SetCurrentStep(mCurrentStep);
 }
 
 void lcModel::RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode)
@@ -2336,7 +2299,7 @@ lcStep lcModel::GetLastStep() const
 void lcModel::InsertStep(lcStep Step)
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2353,7 +2316,7 @@ void lcModel::InsertStep(lcStep Step)
 		Light->InsertTime(Step, 1);
 	
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	EndObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	EndActionSequence(tr("Insert Step"));
 	
     SetCurrentStep(mCurrentStep);
@@ -2362,7 +2325,7 @@ void lcModel::InsertStep(lcStep Step)
 void lcModel::RemoveStep(lcStep Step)
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2378,7 +2341,7 @@ void lcModel::RemoveStep(lcStep Step)
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		Light->RemoveTime(Step, 1);
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	EndObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	EndActionSequence(tr("Remove Step"));
 	
 	SetCurrentStep(mCurrentStep);
@@ -3028,22 +2991,22 @@ void lcModel::DeleteSelectedObjects()
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 	EndActionSequence(tr("Reset Pivot Point"));
 	
 	UpdateAllViews();
 }
 
-void lcModel::RemoveSelectedPiecesKeyFrames()
+void lcModel::RemoveSelectedObjectsKeyFrames()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedObjects, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
@@ -3057,7 +3020,7 @@ void lcModel::RemoveSelectedPiecesKeyFrames()
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedObjects, nullptr);
 	EndActionSequence(tr("Remove Key Frames"));
 	
 	UpdateAllViews();
@@ -3716,7 +3679,7 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 	
 	bool Modified = false;
 
@@ -3731,7 +3694,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 	if (Modified)
 	{
-		EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 		EndActionSequence(tr("Paint"));
 		
 		gMainWindow->UpdateSelectedObjects(false);
@@ -3824,7 +3787,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	if (!Camera->IsSimple())
 	{
 		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 	}
 	
 	Camera->SetOrtho(Ortho);
@@ -3832,7 +3795,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 		EndActionSequence(tr("Change Projection"));
 	}
 	
@@ -4748,7 +4711,7 @@ void lcModel::InvertSelection()
 void lcModel::HideSelectedPieces()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 	
 	bool Modified = false;
 	
@@ -4770,7 +4733,7 @@ void lcModel::HideSelectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);	
+	EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);	
 	EndActionSequence(tr("Hide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4781,7 +4744,7 @@ void lcModel::HideSelectedPieces()
 void lcModel::HideUnselectedPieces()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditUnselectedPieces, nullptr);
 	
 	bool Modified = false;
 	
@@ -4802,7 +4765,7 @@ void lcModel::HideUnselectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);	
+	EndObjectEditAction(lcModelActionObjectEditMode::EditUnselectedPieces, nullptr);	
 	EndActionSequence(tr("Hide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4813,7 +4776,7 @@ void lcModel::HideUnselectedPieces()
 void lcModel::UnhideSelectedPieces()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);
 	
 	bool Modified = false;
 	
@@ -4834,7 +4797,7 @@ void lcModel::UnhideSelectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);	
+	EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedPieces, nullptr);	
 	EndActionSequence(tr("Unhide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4845,7 +4808,7 @@ void lcModel::UnhideSelectedPieces()
 void lcModel::UnhideAllPieces()
 {
 	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionObjectEditMode::All, nullptr);
+	BeginObjectEditAction(lcModelActionObjectEditMode::EditAllPieces, nullptr);
 	
 	bool Modified = false;
 	
@@ -4866,7 +4829,7 @@ void lcModel::UnhideAllPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(lcModelActionObjectEditMode::All, nullptr);	
+	EndObjectEditAction(lcModelActionObjectEditMode::EditAllPieces, nullptr);	
 	EndActionSequence(tr("Unhide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -5041,7 +5004,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Move:
 		case lcTool::Rotate:
 			BeginActionSequence();
-			BeginObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+			BeginObjectEditAction(lcModelActionObjectEditMode::EditSelectedObjects, nullptr);
 			break;
 
 		case lcTool::Eraser:
@@ -5056,7 +5019,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 			if (!View->GetCamera()->IsSimple())
 			{
 				BeginActionSequence();
-				BeginObjectEditAction(lcModelActionObjectEditMode::Camera, View->GetCamera());
+				BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, View->GetCamera());
 			}
 			break;
 
@@ -5093,12 +5056,12 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		break;
 
 	case lcTool::Move:
-		EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedObjects, nullptr);
 		EndActionSequence(tr("Move"));
 		break;
 
 	case lcTool::Rotate:
-		EndObjectEditAction(lcModelActionObjectEditMode::Selection, nullptr);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditSelectedObjects, nullptr);
 		EndActionSequence(tr("Rotate"));
 		break;
 
@@ -5110,7 +5073,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Zoom:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+			EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 			EndActionSequence(tr("Zoom"));
 		}
 		break;
@@ -5118,7 +5081,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Pan:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+			EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 			EndActionSequence(tr("Pan"));
 		}
 		break;
@@ -5126,7 +5089,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::RotateView:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+			EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 			EndActionSequence(tr("Orbit"));
 		}
 		break;
@@ -5134,7 +5097,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Roll:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+			EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 			EndActionSequence(tr("Roll"));
 		}
 		break;
@@ -5439,14 +5402,14 @@ void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVec
 	if (!Camera->IsSimple())
 	{
 		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 	}
 	
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 	
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 		EndActionSequence(tr("Zoom"));
 	}
 	
@@ -5471,7 +5434,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	if (!Camera->IsSimple())
 	{
 		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 	}
 	
 	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5481,7 +5444,7 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 		EndActionSequence(tr("Look At"));
 	}
 }
@@ -5518,7 +5481,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 	if (!Camera->IsSimple())
 	{
 		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 	}
 		
 	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
@@ -5530,7 +5493,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(lcModelActionObjectEditMode::Camera, Camera);
+		EndObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 		EndActionSequence(tr("Zoom Extents"));
 	}
 }

@@ -9,7 +9,6 @@ class lcModelActionSelection;
 class lcModelActionObjectEdit;
 class lcModelActionAddPieces;
 class lcModelActionGroupPieces;
-class lcModelActionDuplicatePieces;
 enum class lcModelActionSelectionMode;
 enum class lcModelActionAddPieceSelectionMode;
 enum class lcModelActionObjectEditMode;
@@ -233,10 +232,12 @@ public:
 	void RemoveStep(lcStep Step);
 
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
+	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
+	void RemovePieces(const std::vector<size_t>& PieceIndices);
 	void AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex);
-	void DeleteCamera(size_t CameraIndex);
+	void RemoveCameras(const std::vector<size_t>& CameraIndices);
 	void AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex);
-	void DeleteLight(size_t LightIndex);
+	void RemoveLights(const std::vector<size_t>& LightIndices);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
 	void RemoveSelectedObjectsKeyFrames();
@@ -410,14 +411,12 @@ protected:
 	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
-	void EndObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
+	void EndObjectEditAction(std::vector<size_t>&& ObjectIndices);
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode);
 	void RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
-	void RecordDuplicatePiecesAction();
-	void RunDuplicatePiecesAction(const lcModelActionDuplicatePieces* ModelActionDuplicatePieces, bool Apply);
 
 	void PerformActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();
@@ -436,7 +435,6 @@ protected:
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	void AddPiece(lcPiece* Piece);
-	void InsertPiece(lcPiece* Piece, size_t Index);
 
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;

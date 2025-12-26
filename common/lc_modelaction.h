@@ -60,6 +60,7 @@ enum class lcModelActionObjectEditMode
 	EditSelectedPieces,
 	EditUnselectedPieces,
 	EditCamera,
+	CreatePieces,
 	CreateCamera,
 	CreateLight
 };
@@ -71,7 +72,7 @@ public:
 	virtual ~lcModelActionObjectEdit() = default;
 	
 	bool SaveStartState(const lcModel* Model, const lcCamera* Camera);
-	bool SaveEndState(const lcModel* Model, const lcCamera* Camera);
+	bool SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices);
 	void LoadStartState(lcModel* Model) const;
 	void LoadEndState(lcModel* Model) const;
 
@@ -156,19 +157,4 @@ public:
 protected:
 	lcModelActionGroupPiecesMode mMode;
 	QString mGroupName;
-};
-
-class lcModelActionDuplicatePieces : public lcModelAction
-{
-public:
-	lcModelActionDuplicatePieces(lcStep Step);
-	virtual ~lcModelActionDuplicatePieces() = default;
-
-	lcStep GetStep() const
-	{
-		return mStep;
-	}
-
-protected:
-	lcStep mStep;
 };

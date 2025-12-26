@@ -938,7 +938,6 @@ bool lcPiece::SaveUndoData(QDataStream& Stream) const
 {
 	static_assert(sizeof(lcPiece) == 376);
 	
-//	PieceInfo* mPieceInfo;
 	Stream << mFileLine;
 	Stream << mID;
 
@@ -970,13 +969,14 @@ bool lcPiece::SaveUndoData(QDataStream& Stream) const
 }
 
 bool lcPiece::LoadUndoData(QDataStream& Stream)
-{	
-//	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
-
-//	PieceInfo* mPieceInfo;
+{
 	Stream >> mFileLine;
 	Stream >> mID;
-
+	
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
+	
+	SetPieceInfo(Info, mID, true, false);
+	
 //	lcGroup* mGroup;
 
 	Stream >> mColorIndex;

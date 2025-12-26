@@ -58,19 +58,21 @@ bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, 
 	if (ObjectCount[0] != Pieces.size() || ObjectCount[1] != Cameras.size() || ObjectCount[2] != Lights.size())
 		return false;
 	
-	for (size_t PieceIndex : mPieceIndices)
-	{
-		if (PieceIndex >= Pieces.size())
-			return false;
-		
-		const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
-		
-		if (!Piece->LoadUndoData(Stream))
-			return false;
-	}
-	
 	if (CreateObjects)
 	{
+		for (size_t PieceIndex : mPieceIndices)
+		{
+			if (PieceIndex > Pieces.size())
+				return false;
+			
+			std::unique_ptr<lcPiece> Piece(new lcPiece(nullptr));
+			
+			if (!Piece->LoadUndoData(Stream))
+				return false;
+			
+			Model->AddPiece(std::move(Piece), PieceIndex);
+		}
+		
 		for (size_t CameraIndex : mCameraIndices)
 		{
             if (CameraIndex > Cameras.size())
@@ -99,6 +101,17 @@ bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, 
 	}
 	else
 	{
+		for (size_t PieceIndex : mPieceIndices)
+		{
+			if (PieceIndex >= Pieces.size())
+				return false;
+			
+			const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
+			
+			if (!Piece->LoadUndoData(Stream))
+				return false;
+		}
+		
 		for (size_t CameraIndex : mCameraIndices)
 		{
 			if (CameraIndex >= Cameras.size())
@@ -291,6 +304,7 @@ bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamer
 		}
 		break;
 	
+	case lcModelActionObjectEditMode::CreatePieces:
 	case lcModelActionObjectEditMode::CreateCamera:
 	case lcModelActionObjectEditMode::CreateLight:
 		break;
@@ -299,11 +313,8 @@ bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamer
 	return SaveHistoryBuffer(mStartBuffer, Model);
 }
 
-bool lcModelActionObjectEdit::SaveEndState(const lcModel* Model, const lcCamera* Camera)
+bool lcModelActionObjectEdit::SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices)
 {
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-	
 	switch (mMode)
 	{
 	case lcModelActionObjectEditMode::EditAllObjects:
@@ -314,12 +325,16 @@ bool lcModelActionObjectEdit::SaveEndState(const lcModel* Model, const lcCamera*
 	case lcModelActionObjectEditMode::EditCamera:
 		break;
 	
+	case lcModelActionObjectEditMode::CreatePieces:
+		mPieceIndices = std::move(ObjectIndices);
+		break;
+		
 	case lcModelActionObjectEditMode::CreateCamera:
-		mCameraIndices.push_back(Cameras.size() - 1);
+		mCameraIndices = std::move(ObjectIndices);
 		break;
 		
 	case lcModelActionObjectEditMode::CreateLight:
-		mLightIndices.push_back(Lights.size() - 1);
+		mLightIndices = std::move(ObjectIndices);
 		break;
 	};
 	
@@ -339,14 +354,16 @@ void lcModelActionObjectEdit::LoadStartState(lcModel* Model) const
 		LoadHistoryBuffer(mStartBuffer, Model, false);
 		break;
 	
+	case lcModelActionObjectEditMode::CreatePieces:
+		Model->RemovePieces(mPieceIndices);
+		break;
+		
 	case lcModelActionObjectEditMode::CreateCamera:
-		for (size_t CameraIndex : mCameraIndices)
-    		Model->DeleteCamera(CameraIndex);
+   		Model->RemoveCameras(mCameraIndices);
 		break;
 		
 	case lcModelActionObjectEditMode::CreateLight:
-		for (size_t LightIndex : mLightIndices)
-			Model->DeleteLight(LightIndex);
+		Model->RemoveLights(mLightIndices);
 		break;
 	};
 }
@@ -364,6 +381,7 @@ void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
 		LoadHistoryBuffer(mEndBuffer, Model, false);
 		break;
 	
+	case lcModelActionObjectEditMode::CreatePieces:
 	case lcModelActionObjectEditMode::CreateCamera:
 	case lcModelActionObjectEditMode::CreateLight:
 		LoadHistoryBuffer(mEndBuffer, Model, true);
@@ -393,10 +411,5 @@ void lcModelActionAddPieces::SetPieceData(const std::vector<lcInsertPieceInfo>& 
 
 lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
 	: mMode(Mode), mGroupName(GroupName)
-{
-}
-
-lcModelActionDuplicatePieces::lcModelActionDuplicatePieces(lcStep Step)
-	: mStep(Step)
 {
 }

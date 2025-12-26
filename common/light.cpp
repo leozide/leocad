@@ -1532,6 +1532,8 @@ void lcLight::RemoveKeyFrames()
 
 bool lcLight::SaveUndoData(QDataStream& Stream) const
 {
+	static_assert(sizeof(lcLight) == 704);
+	
 	Stream << mName;
 	Stream << mLightType;
 	Stream << mCastShadow;

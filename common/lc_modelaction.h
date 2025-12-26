@@ -4,7 +4,6 @@
 
 struct lcInsertPieceInfo;
 enum class lcObjectType;
-enum class lcLightType;
 
 class lcModelAction
 {

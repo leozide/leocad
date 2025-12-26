@@ -936,6 +936,8 @@ void lcPiece::RemoveKeyFrames()
 
 bool lcPiece::SaveUndoData(QDataStream& Stream) const
 {
+	static_assert(sizeof(lcPiece) == 376);
+	
 //	PieceInfo* mPieceInfo;
 	Stream << mFileLine;
 	Stream << mID;
@@ -952,15 +954,23 @@ bool lcPiece::SaveUndoData(QDataStream& Stream) const
 	Stream << mPivotPointValid;
 
 	Stream << mHidden;
-
-//	std::vector<lcPieceControlPoint> mControlPoints;
+	
+	size_t ControlPointCount = mControlPoints.size();
+	qint64 DataSize = ControlPointCount * sizeof(lcPieceControlPoint);
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(&ControlPointCount), sizeof(ControlPointCount)) != sizeof(ControlPointCount))
+		return false;
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(mControlPoints.data()), DataSize) != DataSize)
+		return false;
+	
 //	std::vector<bool> mTrainTrackConnections;
 
 	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream);	
 }
 
 bool lcPiece::LoadUndoData(QDataStream& Stream)
-{
+{	
 //	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
 
 //	PieceInfo* mPieceInfo;
@@ -979,11 +989,22 @@ bool lcPiece::LoadUndoData(QDataStream& Stream)
 	Stream >> mPivotPointValid;
 
 	Stream >> mHidden;
-
-//	std::vector<lcPieceControlPoint> mControlPoints;
+	
+	size_t ControlPointCount;
+	
+	if (Stream.readRawData(reinterpret_cast<char*>(&ControlPointCount), sizeof(ControlPointCount)) != sizeof(ControlPointCount))
+		return false;
+	
+	mControlPoints.resize(ControlPointCount);
+	
+	qsizetype DataSize = ControlPointCount * sizeof(lcPieceControlPoint);
+	
+	if (Stream.readRawData(reinterpret_cast<char*>(mControlPoints.data()), DataSize) != DataSize)
+		return false;
+	
+	UpdateMesh();
+	
 //	std::vector<bool> mTrainTrackConnections;
-
-//	UpdateMesh();
 
 	return mPosition.LoadUndoData(Stream) && mRotation.LoadUndoData(Stream);
 }

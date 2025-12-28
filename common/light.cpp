@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_math.h"
-#include "lc_colors.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -1530,9 +1529,10 @@ void lcLight::RemoveKeyFrames()
 	mPOVRayFadePower.RemoveAllKeys();
 }
 
-bool lcLight::SaveUndoData(QDataStream& Stream) const
+bool lcLight::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 {
 	static_assert(sizeof(lcLight) == 704);
+	Q_UNUSED(Model);
 	
 	Stream << mName;
 	Stream << mLightType;
@@ -1548,8 +1548,10 @@ bool lcLight::SaveUndoData(QDataStream& Stream) const
 	       mPOVRayFadePower.SaveUndoData(Stream);
 }
 
-bool lcLight::LoadUndoData(QDataStream& Stream)
+bool lcLight::LoadUndoData(QDataStream& Stream, const lcModel* Model)
 {
+	Q_UNUSED(Model);
+	
 	Stream >> mName;
 	Stream >> mLightType;
 	Stream >> mCastShadow;

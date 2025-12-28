@@ -135,6 +135,8 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	mView->GetCamera()->SetViewpoint(lcVector3(0.0f, -270.0f, 90.0f));
 	mView->ZoomExtents();
 	
+	ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setFocus();
+	
 	connect(ui->TemplateComboBox, &QComboBox::currentTextChanged, this, &lcMinifigDialog::TemplateComboBoxCurrentTextChanged);
 	connect(ui->TemplateSaveButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateSaveButtonClicked);
 	connect(ui->TemplateDeleteButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateDeleteButtonClicked);

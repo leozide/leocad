@@ -1,8 +1,5 @@
 #pragma once
 
-#include "lc_math.h"
-
-struct lcInsertPieceInfo;
 enum class lcObjectType;
 
 class lcModelAction
@@ -15,6 +12,7 @@ protected:
 	bool SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model);
 	bool LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const;
 	
+	std::vector<size_t> mGroupIndices;
 	std::vector<size_t> mPieceIndices;
 	std::vector<size_t> mCameraIndices;
 	std::vector<size_t> mLightIndices;
@@ -72,7 +70,7 @@ public:
 	virtual ~lcModelActionObjectEdit() = default;
 	
 	bool SaveStartState(const lcModel* Model, const lcCamera* Camera);
-	bool SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices);
+	bool SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices);
 	void LoadStartState(lcModel* Model) const;
 	void LoadEndState(lcModel* Model) const;
 
@@ -87,49 +85,6 @@ protected:
 	lcModelActionObjectEditMode mMode;
 	QByteArray mStartBuffer;
 	QByteArray mEndBuffer;
-};
-
-enum class lcModelActionAddPieceSelectionMode
-{
-	FocusLast,
-	SelectAll,
-	AddToSelection
-};
-
-class lcModelActionAddPieces : public lcModelAction
-{
-public:
-	lcModelActionAddPieces(lcStep Step, lcModelActionAddPieceSelectionMode SelectionMode);
-	virtual ~lcModelActionAddPieces() = default;
-
-	struct PieceData
-	{
-		std::string PieceId;
-		lcMatrix44 Transform;
-		quint32 ColorCode;
-	};
-
-	void SetPieceData(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms);
-
-	const std::vector<PieceData>& GetPieceData() const
-	{
-		return mPieceData;
-	}
-
-	lcStep GetStep() const
-	{
-		return mStep;
-	}
-
-	lcModelActionAddPieceSelectionMode GetSelectionMode() const
-	{
-		return mSelectionMode;
-	}
-
-protected:
-	std::vector<PieceData> mPieceData;
-	lcStep mStep;
-	lcModelActionAddPieceSelectionMode mSelectionMode;
 };
 
 enum class lcModelActionGroupPiecesMode

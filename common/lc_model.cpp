@@ -1793,17 +1793,17 @@ void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjec
 	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
 }
 
-void lcModel::EndObjectEditAction(std::vector<size_t>&& ObjectIndices)
+void lcModel::EndObjectEditAction(std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices)
 {
 	if (mActionSequence.empty())
 		return;
-
+	
 	lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<lcModelActionObjectEdit*>(mActionSequence.back().get());
-
+	
 	if (!ModelActionObjectEdit)
 		return;
 	
-	if (!ModelActionObjectEdit->SaveEndState(this, std::move(ObjectIndices)))
+	if (!ModelActionObjectEdit->SaveEndState(this, std::move(ObjectIndices), std::move(GroupIndices)))
 		mActionSequence.pop_back();
 }
 
@@ -1818,84 +1818,6 @@ void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObje
 		ModelActionObjectEdit->LoadStartState(this);
 	
 	SetCurrentStep(mCurrentStep);
-}
-
-void lcModel::RecordAddPiecesAction(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms, lcModelActionAddPieceSelectionMode SelectionMode)
-{
-	std::unique_ptr<lcModelActionAddPieces> ModelActionAddPieces = std::make_unique<lcModelActionAddPieces>(mCurrentStep, SelectionMode);
-
-	ModelActionAddPieces->SetPieceData(PieceInfoTransforms);
-
-	RunAddPiecesAction(ModelActionAddPieces.get(), true);
-
-	mActionSequence.emplace_back(std::move(ModelActionAddPieces));
-}
-
-void lcModel::RunAddPiecesAction(const lcModelActionAddPieces* ModelActionAddPieces, bool Apply)
-{
-	if (!ModelActionAddPieces)
-		return;
-
-	if (Apply)
-	{
-		std::vector<lcObject*> Pieces;
-		lcStep Step = ModelActionAddPieces->GetStep();
-
-		for (const lcModelActionAddPieces::PieceData& PieceData : ModelActionAddPieces->GetPieceData())
-		{
-			PieceInfo* PieceInfo = lcGetPiecesLibrary()->FindPiece(PieceData.PieceId.c_str(), nullptr, true, false);
-
-			if (!PieceInfo)
-				continue;
-
-			lcPiece* Piece = new lcPiece(PieceInfo);
-
-			Piece->Initialize(PieceData.Transform, Step);
-			Piece->SetColorIndex(lcGetColorIndex(PieceData.ColorCode));
-			Piece->UpdatePosition(Step);
-
-			AddPiece(Piece);
-			Pieces.push_back(Piece);
-		}
-
-		if (Pieces.empty())
-			return;
-
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateInUseCategory();
-
-		switch (ModelActionAddPieces->GetSelectionMode())
-		{
-		case lcModelActionAddPieceSelectionMode::FocusLast:
-			ClearSelectionAndSetFocus(Pieces.back(), LC_PIECE_SECTION_POSITION, false);
-			UpdateTrainTrackConnections(dynamic_cast<lcPiece*>(Pieces.back()), false);
-			break;
-
-		case lcModelActionAddPieceSelectionMode::SelectAll:
-			SetSelectionAndFocus(Pieces, nullptr, 0, false);
-			break;
-
-		case lcModelActionAddPieceSelectionMode::AddToSelection:
-			AddToSelection(Pieces, false, true);
-			break;
-		}
-	}
-	else
-	{
-		std::vector<std::unique_ptr<lcPiece>>::iterator PieceIt;
-		lcStep Step = ModelActionAddPieces->GetStep();
-
-		for (PieceIt = mPieces.begin(); PieceIt != mPieces.end(); ++PieceIt)
-			if ((*PieceIt)->GetStepShow() > Step)
-				break;
-
-		for (size_t PieceIndex = 0; PieceIndex < ModelActionAddPieces->GetPieceData().size(); PieceIndex++)
-			PieceIt = mPieces.erase(--PieceIt);
-
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
-		gMainWindow->UpdateInUseCategory();
-	}
 }
 
 void lcModel::RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
@@ -1987,8 +1909,6 @@ void lcModel::PerformActionSequence(const std::vector<std::unique_ptr<lcModelAct
 			RunSelectionAction(ModelActionSelection, Apply);
 		else if (const lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
 			RunObjectEditAction(ModelActionObjectEdit, Apply);
-		else if (const lcModelActionAddPieces* ModelActionAddPieces = dynamic_cast<const lcModelActionAddPieces*>(ModelAction))
-			RunAddPiecesAction(ModelActionAddPieces, Apply);
 		else if (const lcModelActionGroupPieces* ModelActionGroupPieces = dynamic_cast<const lcModelActionGroupPieces*>(ModelAction))
 			RunGroupPiecesAction(ModelActionGroupPieces, Apply);
 	};
@@ -2222,7 +2142,7 @@ void lcModel::InsertStep(lcStep Step)
 		Light->InsertTime(Step, 1);
 	
 	
-	EndObjectEditAction(std::vector<size_t>());
+	EndObjectEditAction();
 	EndActionSequence(tr("Insert Step"));
 	
     SetCurrentStep(mCurrentStep);
@@ -2247,7 +2167,7 @@ void lcModel::RemoveStep(lcStep Step)
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		Light->RemoveTime(Step, 1);
 	
-	EndObjectEditAction(std::vector<size_t>());
+	EndObjectEditAction();
 	EndActionSequence(tr("Remove Step"));
 	
 	SetCurrentStep(mCurrentStep);
@@ -2262,6 +2182,11 @@ lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)
 	Group->mGroup = Parent;
 
 	return Group;
+}
+
+void lcModel::AddGroup(std::unique_ptr<lcGroup> Group, size_t GroupIndex)
+{
+	mGroups.insert(mGroups.begin() + GroupIndex, std::move(Group));
 }
 
 lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
@@ -2712,18 +2637,23 @@ void lcModel::RemovePieces(const std::vector<size_t>& PieceIndices)
 	gMainWindow->UpdateSelectedObjects(true);
 }
 
-void lcModel::AddPiece(lcPiece* Piece)
+size_t lcModel::AddPiece(lcPiece* Piece)
 {
-	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
+	size_t PieceIndex;
+	
+	for (PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
 	{
 		if (mPieces[PieceIndex]->GetStepShow() > Piece->GetStepShow())
 		{
 			AddPiece(std::unique_ptr<lcPiece>(Piece), PieceIndex);
-			return;
+			
+			return PieceIndex;
 		}
 	}
 
-	AddPiece(std::unique_ptr<lcPiece>(Piece), mPieces.size());
+	AddPiece(std::unique_ptr<lcPiece>(Piece), PieceIndex);
+	
+	return PieceIndex;	
 }
 
 void lcModel::AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex)
@@ -2975,7 +2905,7 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 	
-	EndObjectEditAction(std::vector<size_t>());
+	EndObjectEditAction();
 	EndActionSequence(tr("Reset Pivot Point"));
 	
 	UpdateAllViews();
@@ -2998,7 +2928,7 @@ void lcModel::RemoveSelectedObjectsKeyFrames()
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
 	
-	EndObjectEditAction(std::vector<size_t>());
+	EndObjectEditAction();
 	EndActionSequence(tr("Remove Key Frames"));
 	
 	UpdateAllViews();
@@ -3677,7 +3607,7 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 	if (Modified)
 	{
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Paint"));
 		
 		gMainWindow->UpdateSelectedObjects(false);
@@ -3778,7 +3708,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 	
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Change Projection"));
 	}
 	
@@ -4716,7 +4646,7 @@ void lcModel::HideSelectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(std::vector<size_t>());	
+	EndObjectEditAction();	
 	EndActionSequence(tr("Hide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4748,7 +4678,7 @@ void lcModel::HideUnselectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(std::vector<size_t>());	
+	EndObjectEditAction();	
 	EndActionSequence(tr("Hide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4780,7 +4710,7 @@ void lcModel::UnhideSelectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction(std::vector<size_t>());	
+	EndObjectEditAction();	
 	EndActionSequence(tr("Unhide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -4812,7 +4742,7 @@ void lcModel::UnhideAllPieces()
 		return;
 	}
 	
-	EndObjectEditAction(std::vector<size_t>());	
+	EndObjectEditAction();	
 	EndActionSequence(tr("Unhide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);
@@ -5039,12 +4969,12 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		break;
 
 	case lcTool::Move:
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Move"));
 		break;
 
 	case lcTool::Rotate:
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Rotate"));
 		break;
 
@@ -5056,7 +4986,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Zoom:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(std::vector<size_t>());
+			EndObjectEditAction();
 			EndActionSequence(tr("Zoom"));
 		}
 		break;
@@ -5064,7 +4994,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Pan:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(std::vector<size_t>());
+			EndObjectEditAction();
 			EndActionSequence(tr("Pan"));
 		}
 		break;
@@ -5072,7 +5002,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::RotateView:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(std::vector<size_t>());
+			EndObjectEditAction();
 			EndActionSequence(tr("Orbit"));
 		}
 		break;
@@ -5080,7 +5010,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Roll:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction(std::vector<size_t>());
+			EndObjectEditAction();
 			EndActionSequence(tr("Roll"));
 		}
 		break;
@@ -5099,11 +5029,31 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 		return;
 
 	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::CreatePieces, nullptr);
 
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-	RecordAddPiecesAction(PieceInfoTransforms, lcModelActionAddPieceSelectionMode::FocusLast);
-
+	lcPiece* Piece = nullptr;
+	std::vector<size_t> PieceIndices;
+	
+	for (const lcInsertPieceInfo& PieceInfoTransform : PieceInfoTransforms)
+	{
+		Piece = new lcPiece(PieceInfoTransform.Info);
+		
+		Piece->Initialize(PieceInfoTransform.Transform, mCurrentStep);
+		Piece->SetColorIndex(PieceInfoTransform.ColorIndex);
+		Piece->UpdatePosition(mCurrentStep);
+		
+		PieceIndices.push_back(AddPiece(Piece));
+	}
+	
+	EndObjectEditAction(std::move(PieceIndices));
 	EndActionSequence(tr("Add Piece"));
+	
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateInUseCategory();
+	
+	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION, false);
+	
+	UpdateTrainTrackConnections(Piece, false);
 }
 
 void lcModel::InsertCameraToolClicked(const lcVector3& Position)
@@ -5400,7 +5350,7 @@ void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVec
 	
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Zoom"));
 	}
 	
@@ -5435,7 +5385,7 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Look At"));
 	}
 }
@@ -5484,7 +5434,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction(std::vector<size_t>());
+		EndObjectEditAction();
 		EndActionSequence(tr("Zoom Extents"));
 	}
 }
@@ -5560,9 +5510,12 @@ void lcModel::ShowArrayDialog()
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less, no pieces added."));
 		return;
 	}
-
-	std::vector<lcInsertPieceInfo> PieceInfoTransforms;
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::CreatePieces, nullptr);
+	
+	std::vector<lcObject*> NewPieces;
+	
 	for (int Step1 = 0; Step1 < Dialog.mCounts[0]; Step1++)
 	{
 		for (int Step2 = 0; Step2 < Dialog.mCounts[1]; Step2++)
@@ -5590,23 +5543,32 @@ void lcModel::ShowArrayDialog()
 
 					Position = lcVector3(ModelWorld.r[3].x, ModelWorld.r[3].y, ModelWorld.r[3].z);
 					ModelWorld.SetTranslation(Position + Offset);
-
-					lcInsertPieceInfo& InsertPieceInfo = PieceInfoTransforms.emplace_back();
-
-					InsertPieceInfo.Info = Piece->mPieceInfo;
-					InsertPieceInfo.Transform = ModelWorld;
-					InsertPieceInfo.ColorIndex = Piece->GetColorIndex();
+					
+					lcPiece* NewPiece = new lcPiece(nullptr);
+					NewPiece->SetPieceInfo(Piece->mPieceInfo, Piece->GetID(), true, true);
+					NewPiece->Initialize(ModelWorld, mCurrentStep);
+					NewPiece->SetColorIndex(Piece->GetColorIndex());
+					
+					NewPieces.emplace_back(NewPiece);
 				}
 			}
 		}
 	}
-
-	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-	RecordAddPiecesAction(PieceInfoTransforms, lcModelActionAddPieceSelectionMode::AddToSelection);
-
+	
+	std::vector<size_t> PieceIndices;
+	
+	for (size_t PieceIdx = 0; PieceIdx < NewPieces.size(); PieceIdx++)
+	{
+		lcPiece* Piece = (lcPiece*)NewPieces[PieceIdx];
+		Piece->UpdatePosition(mCurrentStep);
+		PieceIndices.push_back(AddPiece(Piece));
+	}
+	
+	EndObjectEditAction(std::move(PieceIndices));
 	EndActionSequence(tr("Piece Array"));
+	
+	AddToSelection(NewPieces, false, true);
+	gMainWindow->UpdateTimeline(false, false);	
 }
 
 void lcModel::ShowMinifigDialog()
@@ -5617,29 +5579,39 @@ void lcModel::ShowMinifigDialog()
 		return;
 
 	gMainWindow->GetActiveView()->MakeCurrent();
-
-	std::vector<lcInsertPieceInfo> PieceInfoTransforms;
+	
+	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionObjectEditMode::CreatePieces, nullptr);
+	
+	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
+	std::vector<lcObject*> Pieces;
+	std::vector<size_t> PieceIndices;
 	lcMinifig& Minifig = Dialog.mMinifigWizard->mMinifig;
-
+	
+	Pieces.reserve(LC_MFW_NUMITEMS);
+	PieceIndices.reserve(LC_MFW_NUMITEMS);
+	
 	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
 	{
 		if (!Minifig.Parts[PartIndex])
 			continue;
-
-		lcInsertPieceInfo& InsertPieceInfo = PieceInfoTransforms.emplace_back();
-
-		InsertPieceInfo.Info = Minifig.Parts[PartIndex];
-		InsertPieceInfo.Transform = Minifig.Matrices[PartIndex];
-		InsertPieceInfo.ColorIndex = Minifig.ColorIndices[PartIndex];
+		
+		lcPiece* Piece = new lcPiece(Minifig.Parts[PartIndex]);
+		
+		Piece->Initialize(Minifig.Matrices[PartIndex], mCurrentStep);
+		Piece->SetColorIndex(Minifig.ColorIndices[PartIndex]);
+		Piece->SetGroup(Group);
+		PieceIndices.push_back(AddPiece(Piece));
+		Piece->UpdatePosition(mCurrentStep);
+		
+		Pieces.emplace_back(Piece);
 	}
-
-	BeginActionSequence();
-
-	RecordSelectionAction(lcModelActionSelectionMode::Save);
-	RecordAddPiecesAction(PieceInfoTransforms, lcModelActionAddPieceSelectionMode::SelectAll);
-	RecordGroupPiecesAction(lcModelActionGroupPiecesMode::Group, GetGroupName(tr("Minifig #")));
-
+	
+	EndObjectEditAction(std::move(PieceIndices), { mGroups.size() - 1});	
 	EndActionSequence(tr("Add Minifig"));
+	
+	SetSelectionAndFocus(Pieces, nullptr, 0, false);
+	gMainWindow->UpdateTimeline(false, false);
 }
 
 void lcModel::SetMinifig(const lcMinifig& Minifig)

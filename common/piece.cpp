@@ -16,6 +16,7 @@
 #include "lc_synth.h"
 #include "lc_traintrack.h"
 #include "lc_string.h"
+#include "lc_model.h"
 
 constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 
@@ -934,15 +935,22 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
-bool lcPiece::SaveUndoData(QDataStream& Stream) const
+bool lcPiece::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 {
 	static_assert(sizeof(lcPiece) == 376);
 	
 	Stream << mFileLine;
 	Stream << mID;
-
-//	lcGroup* mGroup;
-
+	
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	uint64_t ParentIndex = UINT64_MAX;
+	
+	if (mGroup)
+		for (ParentIndex = 0; ParentIndex < Groups.size(); ParentIndex++)
+			if (mGroup == Groups[ParentIndex].get())
+				break;
+	
+	Stream << ParentIndex;
 	Stream << mColorIndex;
 	Stream << mColorCode;
 
@@ -963,12 +971,10 @@ bool lcPiece::SaveUndoData(QDataStream& Stream) const
 	if (Stream.writeRawData(reinterpret_cast<const char*>(mControlPoints.data()), DataSize) != DataSize)
 		return false;
 	
-//	std::vector<bool> mTrainTrackConnections;
-
 	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream);	
 }
 
-bool lcPiece::LoadUndoData(QDataStream& Stream)
+bool lcPiece::LoadUndoData(QDataStream& Stream, const lcModel* Model)
 {
 	Stream >> mFileLine;
 	Stream >> mID;
@@ -977,8 +983,13 @@ bool lcPiece::LoadUndoData(QDataStream& Stream)
 	
 	SetPieceInfo(Info, mID, true, false);
 	
-//	lcGroup* mGroup;
-
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	uint64_t ParentIndex;
+	
+	Stream >> ParentIndex;
+	
+	mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
+	
 	Stream >> mColorIndex;
 	Stream >> mColorCode;
 

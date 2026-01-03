@@ -96,16 +96,6 @@ public:
 			mFocusedSection = LC_LIGHT_SECTION_INVALID;
 	}
 
-	void SetSelected(quint32 Section, bool Selected) override
-	{
-		Q_UNUSED(Section);
-
-		mSelected = Selected;
-
-		if (!Selected)
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
 	bool IsFocused() const override
 	{
 		return mFocusedSection != LC_LIGHT_SECTION_INVALID;

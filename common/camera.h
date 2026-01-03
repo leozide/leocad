@@ -126,33 +126,6 @@ public:
 			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
 	}
 
-	void SetSelected(quint32 Section, bool Selected) override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			if (Selected)
-				mState |= LC_CAMERA_POSITION_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			if (Selected)
-				mState |= LC_CAMERA_TARGET_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			if (Selected)
-				mState |= LC_CAMERA_UPVECTOR_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
-			break;
-		}
-	}
-
 	bool IsFocused() const override
 	{
 		return (mState & LC_CAMERA_FOCUS_MASK) != 0;

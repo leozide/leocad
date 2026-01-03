@@ -4569,11 +4569,7 @@ void lcModel::RemoveFromSelection(const lcObjectSection& ObjectSection)
 
 	const bool WasSelected = SelectedObject->IsSelected();
 
-	if (SelectedObject->IsFocused(ObjectSection.Section))
-		SelectedObject->SetSelected(ObjectSection.Section, false);
-	else
-		SelectedObject->SetSelected(false);
-
+	SelectedObject->SetSelected(false);
 
 	if (SelectedObject->IsPiece() && WasSelected)
 	{

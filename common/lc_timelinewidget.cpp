@@ -561,7 +561,11 @@ void lcTimelineWidget::ItemSelectionChanged()
 
 void lcTimelineWidget::dropEvent(QDropEvent* Event)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	QTreeWidgetItem* DropItem = itemAt(Event->position().toPoint());
+#else
 	QTreeWidgetItem* DropItem = itemAt(Event->pos());
+#endif
 
 	if (!DropItem)
 		return;

@@ -151,7 +151,11 @@ void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
 	lcKeyFrameWidget* Widget = new lcKeyFrameWidget(this);
 	Widget->setToolTip(tr("Toggle Key Frame"));
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+	connect(Widget, &QCheckBox::checkStateChanged, this, &lcPropertiesWidget::KeyFrameChanged);
+#else
 	connect(Widget, &QCheckBox::stateChanged, this, &lcPropertiesWidget::KeyFrameChanged);
+#endif
 
 	mLayout->addWidget(Widget, mLayoutRow, 3);
 
@@ -234,7 +238,11 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	QCheckBox* Widget = new QCheckBox(this);
 	Widget->setToolTip(ToolTip);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+	connect(Widget, &QCheckBox::checkStateChanged, this, &lcPropertiesWidget::BoolChanged);
+#else
 	connect(Widget, &QCheckBox::stateChanged, this, &lcPropertiesWidget::BoolChanged);
+#endif
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
 

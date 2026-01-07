@@ -455,7 +455,12 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 
 	QCheckBox* AddonVersionCheck = new QCheckBox(tr("Prompt to download new addon version when available"), BlenderAddonVersionBox);
 	AddonVersionCheck->setChecked(lcGetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK));
+	
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+	QObject::connect(AddonVersionCheck, &QCheckBox::checkStateChanged, [](int State)
+#else
 	QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
+#endif
 	{
 		 const bool VersionCheck = static_cast<Qt::CheckState>(State) == Qt::CheckState::Checked;
 		 lcSetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK, (int)VersionCheck);
@@ -1583,7 +1588,11 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 				while (ReadSize > 0 && (BytesRead = File.read(Buf, ReadSize)) > 0)
 				{
 					DataSize -= BytesRead;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 3, 0)
+					Sha256Hash.addData(QByteArrayView(Buf, BytesRead));
+#else
 					Sha256Hash.addData(Buf, BytesRead);
+#endif
 					ReadSize = qMin(DataSize, BufferSize);
 				}
 				File.close();
@@ -3646,7 +3655,12 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 	{
 		QCheckBox* AddonVersionCheck = new QCheckBox(tr("Do not show download new addon version message again."));
 		Box.setCheckBox(AddonVersionCheck);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+		QObject::connect(AddonVersionCheck, &QCheckBox::checkStateChanged, [](int State)
+#else
 		QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
+#endif
 		{
 			bool VersionCheck = true;
 			if (static_cast<Qt::CheckState>(State) == Qt::CheckState::Checked)

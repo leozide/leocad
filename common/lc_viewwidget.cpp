@@ -132,7 +132,12 @@ void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mView->SetMousePosition(MouseEvent->position().x() * DeviceScale, mView->GetHeight() - MouseEvent->position().y() * DeviceScale - 1);
+#else
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+#endif
+
 	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
@@ -166,7 +171,12 @@ void lcViewWidget::mouseReleaseEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mView->SetMousePosition(MouseEvent->position().x() * DeviceScale, mView->GetHeight() - MouseEvent->position().y() * DeviceScale - 1);
+#else
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+#endif
+
 	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
@@ -200,7 +210,12 @@ void lcViewWidget::mouseDoubleClickEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mView->SetMousePosition(MouseEvent->position().x() * DeviceScale, mView->GetHeight() - MouseEvent->position().y() * DeviceScale - 1);
+#else
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+#endif
+
 	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	switch (MouseEvent->button())
@@ -218,7 +233,12 @@ void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 {
 	float DeviceScale = GetDeviceScale();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+	mView->SetMousePosition(MouseEvent->position().x() * DeviceScale, mView->GetHeight() - MouseEvent->position().y() * DeviceScale - 1);
+#else
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
+#endif
+
 	mView->SetMouseModifiers(MouseEvent->modifiers());
 
 	mView->OnMouseMove();
@@ -314,8 +334,13 @@ void lcViewWidget::dragMoveEvent(QDragMoveEvent* DragMoveEvent)
 	{
 		float DeviceScale = GetDeviceScale();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+		mView->SetMousePosition(DragMoveEvent->position().x() * DeviceScale, mView->GetHeight() - DragMoveEvent->position().y() * DeviceScale - 1);
+		mView->SetMouseModifiers(DragMoveEvent->modifiers());
+#else
 		mView->SetMousePosition(DragMoveEvent->pos().x() * DeviceScale, mView->GetHeight() - DragMoveEvent->pos().y() * DeviceScale - 1);
 		mView->SetMouseModifiers(DragMoveEvent->keyboardModifiers());
+#endif
 
 		mView->OnMouseMove();
 

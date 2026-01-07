@@ -8,7 +8,6 @@
 #include "lc_mainwindow.h"
 
 #ifdef Q_OS_WIN
-#include <windows.h>
 #include <TlHelp32.h>
 #endif
 

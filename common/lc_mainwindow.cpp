@@ -2784,12 +2784,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_SELECT_NONE:
 		if (ActiveModel)
-			ActiveModel->ClearSelection(true);
+			ActiveModel->ClearSelection();
 		break;
 
 	case LC_EDIT_SELECT_INVERT:
 		if (ActiveModel)
-			ActiveModel->InvertSelection();
+			ActiveModel->InvertPieceSelection();
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:

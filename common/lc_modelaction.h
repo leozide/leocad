@@ -20,7 +20,9 @@ protected:
 
 enum class lcModelActionSelectionMode
 {
-	Clear,
+	ClearSelection,
+	SelectAllPieces,
+	InvertPieceSelection,
 	Set,
 	Save,
 	Restore
@@ -29,14 +31,19 @@ enum class lcModelActionSelectionMode
 class lcModelActionSelection : public lcModelAction
 {
 public:
-	lcModelActionSelection(lcModelActionSelectionMode Mode);
+	lcModelActionSelection(lcModelActionSelectionMode Mode, lcStep Step);
 	virtual ~lcModelActionSelection() = default;
 
 	lcModelActionSelectionMode GetMode() const
 	{
 		return mMode;
 	}
-
+	
+	lcStep GetStep() const
+	{
+		return mStep;
+	}
+	
 	void SetSelection(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights);
 	std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> GetSelection(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights) const;
 
@@ -47,7 +54,8 @@ protected:
 	size_t mFocusIndex = SIZE_MAX;
 	uint32_t mFocusSection = 0;
 	lcObjectType mFocusType = (lcObjectType)0;
-	lcModelActionSelectionMode mMode = lcModelActionSelectionMode::Clear;
+	lcModelActionSelectionMode mMode;
+	lcStep mStep;
 };
 
 enum class lcModelActionObjectEditMode

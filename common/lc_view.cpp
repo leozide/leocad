@@ -2494,7 +2494,7 @@ void lcView::CancelTrackingOrClearSelection()
 	{
 		lcModel* ActiveModel = GetActiveModel();
 		if (ActiveModel)
-			ActiveModel->ClearSelection(true);
+			ActiveModel->ClearSelection();
 	}
 }
 

@@ -182,8 +182,8 @@ bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, 
 	return true;	
 }
 
-lcModelActionSelection::lcModelActionSelection(lcModelActionSelectionMode Mode)
-	: mMode(Mode)
+lcModelActionSelection::lcModelActionSelection(lcModelActionSelectionMode Mode, lcStep Step)
+    : mMode(Mode), mStep(Step)
 {
 }
 

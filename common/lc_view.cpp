@@ -2577,7 +2577,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			else if (mMouseModifiers & Qt::ShiftModifier)
 				ActiveModel->RemoveFromSelection(ObjectSection);
 			else
-				ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+				ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 
 			StartTracking(TrackButton);
 		}
@@ -2643,7 +2643,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			ObjectSection.Object = Focus;
 			ObjectSection.Section = mTrackToolSection;
 
-			ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+			ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 		}
 		break;
 
@@ -2741,7 +2741,7 @@ void lcView::OnLeftButtonDoubleClick()
 	else if (mMouseModifiers & Qt::ShiftModifier)
 		ActiveModel->RemoveFromSelection(ObjectSection);
 	else
-		ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+		ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 }
 
 void lcView::OnMiddleButtonDown()

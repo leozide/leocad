@@ -322,14 +322,13 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
-	std::vector<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
 	
 	void ClearSelection();
+	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
 	void InvertPieceSelection();
+    // to update:	
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
-	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode);
-	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode);
 	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
 	void AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
 	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
@@ -407,7 +406,7 @@ public:
 protected:
 	void DeleteModel();
 
-	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode);
+	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
 	void EndObjectEditAction(std::vector<size_t>&& ObjectIndices = std::vector<size_t>(), std::vector<size_t>&& GroupIndices = std::vector<size_t>());
@@ -428,9 +427,11 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 	void RemoveCameraFromViews(lcCamera* Camera);
-
+	
+	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece, lcStep Step) const;
 	void DeselectAllObjects();
-	void SelectGroup(lcGroup* TopGroup, bool Select);
+	void SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step);
+	void SelectGroup(lcGroup* TopGroup, lcStep Step, bool Select);
 
 	size_t AddPiece(lcPiece* Piece);
 

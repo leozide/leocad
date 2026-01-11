@@ -1,6 +1,7 @@
 #pragma once
 
 enum class lcObjectType;
+enum class lcSelectionMode;
 
 class lcModelAction
 {
@@ -21,6 +22,7 @@ protected:
 enum class lcModelActionSelectionMode
 {
 	ClearSelection,
+	ClearSelectionAndSetFocus,
 	SelectAllPieces,
 	InvertPieceSelection,
 	Set,
@@ -33,7 +35,9 @@ class lcModelActionSelection : public lcModelAction
 public:
 	lcModelActionSelection(lcModelActionSelectionMode Mode, lcStep Step);
 	virtual ~lcModelActionSelection() = default;
-
+	
+	bool Initialize(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	
 	lcModelActionSelectionMode GetMode() const
 	{
 		return mMode;
@@ -44,16 +48,36 @@ public:
 		return mStep;
 	}
 	
-	void SetSelection(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights);
+	lcSelectionMode GetSelectionMode() const
+	{
+		return mSelectionMode;
+	}
+	
+	uint32_t GetNewFocusSection() const
+	{
+		return mNewFocusSection;
+	}
+	
+	lcObject* GetNewFocusObject(const lcModel* Model) const;
 	std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> GetSelection(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights) const;
 
 protected:
-	std::vector<size_t> mSelectedPieces;
-	std::vector<size_t> mSelectedCameras;
-	std::vector<size_t> mSelectedLights;
-	size_t mFocusIndex = SIZE_MAX;
-	uint32_t mFocusSection = 0;
-	lcObjectType mFocusType = (lcObjectType)0;
+	bool HasChanges(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection) const;
+	void SaveSelection(const lcModel* Model);
+	void SaveNewFocusObject(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection);
+	
+	std::vector<size_t> mPreviousSelectedPieces;
+	std::vector<size_t> mPreviousSelectedCameras;
+	std::vector<size_t> mPreviousSelectedLights;
+	size_t mPreviousFocusIndex = SIZE_MAX;
+	uint32_t mPreviousFocusSection = 0;
+	lcObjectType mPreviousFocusObjectType = (lcObjectType)0;
+	
+	size_t mNewFocusIndex = SIZE_MAX;
+	uint32_t mNewFocusSection = 0;
+	lcObjectType mNewFocusObjectType = (lcObjectType)0;
+	lcSelectionMode mSelectionMode = (lcSelectionMode)0;
+
 	lcModelActionSelectionMode mMode;
 	lcStep mStep;
 };

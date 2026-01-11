@@ -41,13 +41,6 @@ public:
 		return mSelected;
 	}
 
-	bool IsSelected(quint32 Section) const override
-	{
-		Q_UNUSED(Section);
-
-		return mSelected;
-	}
-
 	void SetSelected(bool Selected) override
 	{
 		mSelected = Selected;

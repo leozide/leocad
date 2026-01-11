@@ -905,7 +905,7 @@ void lcLight::SetupLightMatrix(lcContext* Context) const
 	const lcPreferences& Preferences = lcGetPreferences();
 	const float LineWidth = Preferences.mLineWidth;
 
-	if (IsSelected(LC_LIGHT_SECTION_POSITION))
+	if (IsSelected())
 	{
 		const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
 		const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);
@@ -1066,7 +1066,7 @@ void lcLight::DrawTarget(lcContext* Context) const
 	const lcPreferences& Preferences = lcGetPreferences();
 	const float LineWidth = Preferences.mLineWidth;
 
-	if (IsSelected(LC_LIGHT_SECTION_TARGET))
+	if (IsSelected())
 	{
 		const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
 		const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);

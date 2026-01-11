@@ -327,12 +327,11 @@ public:
 	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
 	void InvertPieceSelection();
-    // to update:	
+	void RemoveFromSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode);
+	// to update:	
 	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
 	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
 	void AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
-	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
-	void RemoveFromSelection(const lcObjectSection& ObjectSection);
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
@@ -406,7 +405,7 @@ public:
 protected:
 	void DeleteModel();
 
-	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
 	void EndObjectEditAction(std::vector<size_t>&& ObjectIndices = std::vector<size_t>(), std::vector<size_t>&& GroupIndices = std::vector<size_t>());
@@ -430,7 +429,7 @@ protected:
 	
 	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece, lcStep Step) const;
 	void DeselectAllObjects();
-	void SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step);
+	void SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step, bool Select);
 	void SelectGroup(lcGroup* TopGroup, lcStep Step, bool Select);
 
 	size_t AddPiece(lcPiece* Piece);

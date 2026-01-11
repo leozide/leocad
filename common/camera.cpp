@@ -594,7 +594,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	}
 	else
 	{
-		if (IsSelected(LC_CAMERA_SECTION_POSITION))
+		if (IsSelected())
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_POSITION))
@@ -610,7 +610,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 		Context->DrawIndexedPrimitives(GL_LINES, 40, GL_UNSIGNED_SHORT, 0);
 
-		if (IsSelected(LC_CAMERA_SECTION_TARGET))
+		if (IsSelected())
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_TARGET))
@@ -626,7 +626,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 40 * 2);
 
-		if (IsSelected(LC_CAMERA_SECTION_UPVECTOR))
+		if (IsSelected())
 		{
 			Context->SetLineWidth(2.0f * LineWidth);
 			if (IsFocused(LC_CAMERA_SECTION_UPVECTOR))

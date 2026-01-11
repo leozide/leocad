@@ -99,25 +99,6 @@ public:
 		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
 	}
 
-	bool IsSelected(quint32 Section) const override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			return (mState & LC_CAMERA_POSITION_SELECTED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			return (mState & LC_CAMERA_TARGET_SELECTED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			return (mState & LC_CAMERA_UPVECTOR_SELECTED) != 0;
-			break;
-		}
-		return false;
-	}
-
 	void SetSelected(bool Selected) override
 	{
 		if (Selected)

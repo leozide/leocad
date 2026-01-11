@@ -88,7 +88,6 @@ public:
 	}
 
 	virtual bool IsSelected() const = 0;
-	virtual bool IsSelected(quint32 Section) const = 0;
 	virtual void SetSelected(bool Selected) = 0;
 	virtual bool IsFocused() const = 0;
 	virtual bool IsFocused(quint32 Section) const = 0;

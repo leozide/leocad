@@ -25,6 +25,7 @@ enum class lcModelActionSelectionMode
 	ClearSelectionAndSetFocus,
 	SelectAllPieces,
 	InvertPieceSelection,
+	RemoveFromSelection,
 	Set,
 	Save,
 	Restore
@@ -36,7 +37,7 @@ public:
 	lcModelActionSelection(lcModelActionSelectionMode Mode, lcStep Step);
 	virtual ~lcModelActionSelection() = default;
 	
-	bool Initialize(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	bool Initialize(const lcModel* Model, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
 	
 	lcModelActionSelectionMode GetMode() const
 	{
@@ -58,12 +59,15 @@ public:
 		return mNewFocusSection;
 	}
 	
+	std::vector<lcObject*> GetNewObjects(const lcModel* Model) const;
 	lcObject* GetNewFocusObject(const lcModel* Model) const;
-	std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> GetSelection(const std::vector<std::unique_ptr<lcPiece>>& Pieces, const std::vector<std::unique_ptr<lcCamera>>& Cameras, const std::vector<std::unique_ptr<lcLight>>& Lights) const;
+	std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> GetPreviousSelection(const lcModel* Model) const;
 
 protected:
-	bool HasChanges(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection) const;
-	void SaveSelection(const lcModel* Model);
+	static size_t GetObjectIndex(const lcObject* Object, const lcModel* Model);
+	bool HasChanges(const lcModel* Model, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection) const;
+	void SavePreviousSelection(const lcModel* Model);
+	void SaveNewObjects(const std::vector<lcObject*>& Objects, const lcModel* Model);
 	void SaveNewFocusObject(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection);
 	
 	std::vector<size_t> mPreviousSelectedPieces;
@@ -73,6 +77,7 @@ protected:
 	uint32_t mPreviousFocusSection = 0;
 	lcObjectType mPreviousFocusObjectType = (lcObjectType)0;
 	
+	std::vector<std::pair<size_t, lcObjectType>> mNewObjects;
 	size_t mNewFocusIndex = SIZE_MAX;
 	uint32_t mNewFocusSection = 0;
 	lcObjectType mNewFocusObjectType = (lcObjectType)0;

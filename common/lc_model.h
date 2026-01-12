@@ -324,14 +324,13 @@ public:
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
 	
 	void ClearSelection();
-	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, lcSelectionMode SelectionMode);
+	void ClearSelectionAndSetFocus(lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
+	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
+	void FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
 	void InvertPieceSelection();
+	void AddToSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode);
 	void RemoveFromSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode);
-	// to update:	
-	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
-	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
-	void AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();

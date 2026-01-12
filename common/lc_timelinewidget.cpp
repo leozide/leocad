@@ -552,7 +552,7 @@ void lcTimelineWidget::ItemSelectionChanged()
 		UpdateCurrentStepItem();
 	}
 
-	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, false);
+	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
 }

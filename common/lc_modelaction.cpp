@@ -244,7 +244,34 @@ bool lcModelActionSelection::HasChanges(const lcModel* Model, const std::vector<
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-
+	
+	auto HasSelectionChanges=[&Objects, FocusObject, FocusSection](lcObject* CheckObject)
+	{
+		if (CheckObject->IsFocused())
+		{
+			if (CheckObject != FocusObject || CheckObject->GetFocusSection() != FocusSection)
+				return true;
+		}
+		else
+		{
+			if (CheckObject == FocusObject)
+				return true;
+		}
+		
+		if (CheckObject == FocusObject || std::find(Objects.begin(), Objects.end(), CheckObject) != Objects.end())
+		{
+			if (!CheckObject->IsSelected())
+				return true;
+		}
+		else
+		{
+			if (CheckObject->IsSelected())
+				return true;
+		}
+		
+		return false;
+	};
+	
 	switch (mMode)
 	{
 	case lcModelActionSelectionMode::ClearSelection:
@@ -268,6 +295,38 @@ bool lcModelActionSelection::HasChanges(const lcModel* Model, const std::vector<
 		
 		return false;
 		
+	case lcModelActionSelectionMode::SetFocus:
+		if (FocusObject)
+		{
+			if (!FocusObject->IsFocused(FocusSection))
+				return true;
+		}
+		else
+		{
+			if (Model->GetFocusObject())
+				return true;
+		}
+		
+		return false;
+		
+	case lcModelActionSelectionMode::SetSelectionAndFocus:
+		if (FocusObject && !FocusObject->IsFocused(FocusSection))
+			return true;
+
+		for (const std::unique_ptr<lcPiece>& Piece : Pieces)
+			if (HasSelectionChanges(Piece.get()))
+				return true;
+		
+		for (const std::unique_ptr<lcCamera>& Camera : Cameras)
+			if (HasSelectionChanges(Camera.get()))
+				return true;
+		
+		for (const std::unique_ptr<lcLight>& Light : Lights)
+			if (HasSelectionChanges(Light.get()))
+				return true;
+		
+		return false;
+
 	case lcModelActionSelectionMode::SelectAllPieces:
 		for (const std::unique_ptr<lcPiece>& Piece : Pieces)
 			if (Piece->IsVisible(mStep) && !Piece->IsSelected())
@@ -278,6 +337,13 @@ bool lcModelActionSelection::HasChanges(const lcModel* Model, const std::vector<
 	case lcModelActionSelectionMode::InvertPieceSelection:
 		for (const std::unique_ptr<lcPiece>& Piece : Pieces)
 			if (Piece->IsVisible(mStep))
+				return true;
+		
+		return false;
+		
+	case lcModelActionSelectionMode::AddToSelection:
+		for (lcObject* Object : Objects)
+			if (!Object->IsSelected())
 				return true;
 		
 		return false;

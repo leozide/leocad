@@ -2421,11 +2421,11 @@ void lcView::StopTracking(bool Accept)
 			std::vector<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
 
 			if (mMouseModifiers & Qt::ControlModifier)
-				ActiveModel->AddToSelection(Objects, true, true);
+				ActiveModel->AddToSelection(Objects, lcSelectionMode::Single);
 			else if (mMouseModifiers & Qt::ShiftModifier)
 				ActiveModel->RemoveFromSelection(Objects, lcSelectionMode::Single);
 			else
-				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, true);
+				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, gMainWindow->GetSelectionMode());
 		}
 		break;
 
@@ -2573,7 +2573,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 			if (mMouseModifiers & Qt::ControlModifier)
-				ActiveModel->FocusOrDeselectObject(ObjectSection);
+				ActiveModel->FocusOrDeselectObject(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 			else if (mMouseModifiers & Qt::ShiftModifier)
 		    {
 			    if (ObjectSection.Object)
@@ -2740,7 +2740,7 @@ void lcView::OnLeftButtonDoubleClick()
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 	if (mMouseModifiers & Qt::ControlModifier)
-		ActiveModel->FocusOrDeselectObject(ObjectSection);
+		ActiveModel->FocusOrDeselectObject(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 	else if (mMouseModifiers & Qt::ShiftModifier)
 	{
 		if (ObjectSection.Object)

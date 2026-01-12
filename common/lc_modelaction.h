@@ -23,8 +23,11 @@ enum class lcModelActionSelectionMode
 {
 	ClearSelection,
 	ClearSelectionAndSetFocus,
+	SetFocus,
+	SetSelectionAndFocus,
 	SelectAllPieces,
 	InvertPieceSelection,
+	AddToSelection,
 	RemoveFromSelection,
 	Set,
 	Save,

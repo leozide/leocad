@@ -1333,7 +1333,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->IsVisible(mCurrentStep))
+		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 		{
 			if (Piece->IsFocused())
 				FocusPiece = Piece.get();
@@ -1660,7 +1660,7 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
+		if ((Piece->IsSelected() || Piece->IsVisible(mCurrentStep)) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
 			Piece->RayTest(ObjectRayTest);
 
 	if (ObjectRayTest.PiecesOnly)
@@ -1678,7 +1678,7 @@ void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep))
+		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
@@ -1873,7 +1873,7 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 		if (Apply)
 		{
 			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (Piece->IsVisible(Step))
+				if (Piece->IsSelected() || Piece->IsVisible(Step))
 					Piece->SetSelected(!Piece->IsSelected());
 		}
 		else
@@ -2215,17 +2215,7 @@ void lcModel::SetActive(bool Active)
 void lcModel::CalculateStep(lcStep Step)
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
 		Piece->UpdatePosition(Step);
-
-		if (Piece->IsSelected())
-		{
-			if (!Piece->IsVisible(Step))
-				Piece->SetSelected(false);
-			else
-				SelectGroup(Piece->GetTopGroup(), Step, true);
-		}
-	}
 
 	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->UpdatePosition(Step);
@@ -2295,12 +2285,7 @@ void lcModel::InsertStep(lcStep Step)
 	BeginObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
 		Piece->InsertTime(Step, 1);
-		
-		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-			Piece->SetSelected(false);
-	}
 	
 	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->InsertTime(Step, 1);
@@ -2321,12 +2306,7 @@ void lcModel::RemoveStep(lcStep Step)
 	BeginObjectEditAction(lcModelActionObjectEditMode::EditAllObjects, nullptr);
 	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
 		Piece->RemoveTime(Step, 1);
-		
-		if (Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
-			Piece->SetSelected(false);
-	}
 	
 	for (std::unique_ptr<lcCamera>& Camera : mCameras)
 		Camera->RemoveTime(Step, 1);
@@ -2898,11 +2878,10 @@ void lcModel::FocusNextTrainTrack()
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 		ConnectionIndex = (ConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
 	}
-
-	FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, true);
-
-	gMainWindow->UpdateSelectedObjects(true);
-	UpdateAllViews();
+	
+	BeginActionSequence();
+	RecordSelectionAction(lcModelActionSelectionMode::SetFocus, std::vector<lcObject*>(), FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
+	EndActionSequence(tr("Selection"));
 }
 
 void lcModel::FocusPreviousTrainTrack()
@@ -2926,11 +2905,10 @@ void lcModel::FocusPreviousTrainTrack()
 		ConnectionIndex = FocusSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 		ConnectionIndex = (ConnectionIndex + static_cast<int>(TrainTrackInfo->GetConnections().size()) - 1) % TrainTrackInfo->GetConnections().size();
 	}
-
-	FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, true);
-
-	gMainWindow->UpdateSelectedObjects(true);
-	UpdateAllViews();
+	
+	BeginActionSequence();
+	RecordSelectionAction(lcModelActionSelectionMode::SetFocus, std::vector<lcObject*>(), FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
+	EndActionSequence(tr("Selection"));
 }
 
 void lcModel::RotateFocusedTrainTrack(int Direction)
@@ -3195,11 +3173,9 @@ void lcModel::ShowSelectedPiecesLater()
 				Step++;
 				Piece->SetStepShow(Step);
 
-				if (!Piece->IsVisible(mCurrentStep))
-					Piece->SetSelected(false);
-
 				MovedPieces.emplace_back(PieceIt->release());
 				PieceIt = mPieces.erase(PieceIt);
+				
 				continue;
 			}
 		}
@@ -3218,7 +3194,7 @@ void lcModel::ShowSelectedPiecesLater()
 
 	SaveCheckpoint(tr("Modifying"));
 	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateSelectedObjects(true);
+	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 }
 
@@ -3243,9 +3219,6 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 			mPieces[PieceIdx] = std::unique_ptr<lcPiece>(Piece);
 			Piece->SetStepShow(Step);
 
-			if (!Piece->IsVisible(mCurrentStep))
-				Piece->SetSelected(false);
-
 			Modified = true;
 		}
 	}
@@ -3255,7 +3228,7 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 		SaveCheckpoint(tr("Modifying"));
 		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
+		gMainWindow->UpdateSelectedObjects(false);
 	}
 }
 
@@ -3794,7 +3767,6 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
 	std::vector<lcPiece*> MovedPieces;
-	bool SelectionChanged = false;
 
 	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
@@ -3803,12 +3775,6 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 		if (Piece->IsSelected() && Piece->GetStepShow() != Step)
 		{
 			Piece->SetStepShow(Step);
-
-			if (!Piece->IsVisible(mCurrentStep))
-			{
-				Piece->SetSelected(false);
-				SelectionChanged = true;
-			}
 
 			MovedPieces.emplace_back(PieceIt->release());
 			PieceIt = mPieces.erase(PieceIt);
@@ -3830,25 +3796,18 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	SaveCheckpoint(tr("Showing Pieces"));
 	UpdateAllViews();
 	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateSelectedObjects(SelectionChanged);
+	gMainWindow->UpdateSelectedObjects(false);
 }
 
 void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 {
 	bool Modified = false;
-	bool SelectionChanged = false;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected() && Piece->GetStepHide() != Step)
 		{
 			Piece->SetStepHide(Step);
-
-			if (!Piece->IsVisible(mCurrentStep))
-			{
-				Piece->SetSelected(false);
-				SelectionChanged = true;
-			}
 
 			Modified = true;
 		}
@@ -3859,7 +3818,7 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 		SaveCheckpoint(tr("Hiding Pieces"));
 		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(SelectionChanged);
+		gMainWindow->UpdateSelectedObjects(false);
 	}
 }
 
@@ -4356,7 +4315,7 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->IsVisible(mCurrentStep))
+		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 		{
 			Piece->CompareBoundingBox(Min, Max);
 			Valid = true;
@@ -4371,7 +4330,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
 	std::vector<lcVector3> Points;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsVisible(mCurrentStep))
+		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points);
 
 	return Points;
@@ -4644,7 +4603,7 @@ void lcModel::SelectGroup(lcGroup* TopGroup, lcStep Step, bool Select)
 		return;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (!Piece->IsSelected() && Piece->IsVisible(Step) && (Piece->GetTopGroup() == TopGroup))
+		if (!Piece->IsSelected() && (Piece->GetTopGroup() == TopGroup))
 			Piece->SetSelected(Select);
 }
 

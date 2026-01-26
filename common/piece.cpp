@@ -937,7 +937,7 @@ void lcPiece::RemoveKeyFrames()
 
 bool lcPiece::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 {
-	static_assert(sizeof(lcPiece) == 376);
+	static_assert(sizeof(lcPiece) == 384);
 	
 	Stream << mFileLine;
 	Stream << mID;

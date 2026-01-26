@@ -10,7 +10,7 @@ class PieceInfo;
 
 enum lcPieceSection : quint32
 {
-	LC_PIECE_SECTION_INVALID = ~0U,
+	LC_PIECE_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
 	LC_PIECE_SECTION_POSITION = 0,
 	LC_PIECE_SECTION_CONTROL_POINT_FIRST,
 	LC_PIECE_SECTION_CONTROL_POINT_LAST = LC_PIECE_SECTION_CONTROL_POINT_FIRST + LC_MAX_CONTROL_POINTS - 1,
@@ -35,45 +35,6 @@ public:
 	lcPiece& operator=(lcPiece&&) = delete;
 
 	void CopyProperties(const lcPiece& Other);
-
-	bool IsSelected() const override
-	{
-		return mSelected;
-	}
-
-	void SetSelected(bool Selected) override
-	{
-		mSelected = Selected;
-
-		if (!Selected)
-			mFocusedSection = LC_PIECE_SECTION_INVALID;
-	}
-
-	bool IsFocused() const override
-	{
-		return mFocusedSection != LC_PIECE_SECTION_INVALID;
-	}
-
-	bool IsFocused(quint32 Section) const override
-	{
-		return mFocusedSection == Section;
-	}
-
-	void SetFocused(quint32 Section, bool Focused) override
-	{
-		if (Focused)
-		{
-			mFocusedSection = Section;
-			mSelected = true;
-		}
-		else
-			mFocusedSection = LC_PIECE_SECTION_INVALID;
-	}
-
-	quint32 GetFocusSection() const override
-	{
-		return mFocusedSection;
-	}
 
 	quint32 GetAllowedTransforms() const override;
 	lcVector3 GetSectionPosition(quint32 Section) const override;
@@ -315,8 +276,6 @@ protected:
 
 	bool mPivotPointValid = false;
 	bool mHidden = false;
-	bool mSelected = false;
-	quint32 mFocusedSection = LC_PIECE_SECTION_INVALID;
 	std::vector<lcPieceControlPoint> mControlPoints;
 	std::vector<bool> mTrainTrackConnections;
 	lcMesh* mMesh = nullptr;

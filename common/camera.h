@@ -3,18 +3,9 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_CAMERA_HIDDEN            0x0001
-#define LC_CAMERA_SIMPLE            0x0002
-#define LC_CAMERA_ORTHO             0x0004
-#define LC_CAMERA_POSITION_SELECTED 0x0010
-#define LC_CAMERA_POSITION_FOCUSED  0x0020
-#define LC_CAMERA_TARGET_SELECTED   0x0040
-#define LC_CAMERA_TARGET_FOCUSED    0x0080
-#define LC_CAMERA_UPVECTOR_SELECTED 0x0100
-#define LC_CAMERA_UPVECTOR_FOCUSED  0x0200
-
-#define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
-#define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
+#define LC_CAMERA_HIDDEN            0x01
+#define LC_CAMERA_SIMPLE            0x02
+#define LC_CAMERA_ORTHO             0x04
 
 enum class lcViewpoint
 {
@@ -37,7 +28,7 @@ enum class lcCameraType
 
 enum lcCameraSection : quint32
 {
-	LC_CAMERA_SECTION_INVALID = ~0U,
+	LC_CAMERA_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
 	LC_CAMERA_SECTION_POSITION = 0,
 	LC_CAMERA_SECTION_TARGET,
 	LC_CAMERA_SECTION_UPVECTOR
@@ -92,84 +83,6 @@ public:
 			mState |= LC_CAMERA_ORTHO;
 		else
 			mState &= ~LC_CAMERA_ORTHO;
-	}
-
-	bool IsSelected() const override
-	{
-		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
-	}
-
-	void SetSelected(bool Selected) override
-	{
-		if (Selected)
-			mState |= LC_CAMERA_SELECTION_MASK;
-		else
-			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
-	}
-
-	bool IsFocused() const override
-	{
-		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
-	}
-
-	bool IsFocused(quint32 Section) const override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			return (mState & LC_CAMERA_POSITION_FOCUSED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			return (mState & LC_CAMERA_TARGET_FOCUSED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			return (mState & LC_CAMERA_UPVECTOR_FOCUSED) != 0;
-			break;
-		}
-		return false;
-	}
-
-	void SetFocused(quint32 Section, bool Focus) override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_POSITION_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_POSITION_FOCUSED;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_TARGET_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_TARGET_FOCUSED;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_UPVECTOR_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_UPVECTOR_FOCUSED;
-			break;
-		}
-	}
-
-	quint32 GetFocusSection() const override
-	{
-		if (mState & LC_CAMERA_POSITION_FOCUSED)
-			return LC_CAMERA_SECTION_POSITION;
-
-		if (mState & LC_CAMERA_TARGET_FOCUSED)
-			return LC_CAMERA_SECTION_TARGET;
-
-		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
-			return LC_CAMERA_SECTION_UPVECTOR;
-
-		return LC_CAMERA_SECTION_INVALID;
 	}
 
 	quint32 GetAllowedTransforms() const override

@@ -8,7 +8,7 @@
 
 enum lcLightSection : quint32
 {
-	LC_LIGHT_SECTION_INVALID = ~0U,
+	LC_LIGHT_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
 	LC_LIGHT_SECTION_POSITION = 0,
 	LC_LIGHT_SECTION_TARGET
 };
@@ -75,45 +75,6 @@ public:
 	}
 
 	bool SetLightType(lcLightType LightType);
-
-	bool IsSelected() const override
-	{
-		return mSelected;
-	}
-
-	void SetSelected(bool Selected) override
-	{
-		mSelected = Selected;
-
-		if (!Selected)
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
-	bool IsFocused() const override
-	{
-		return mFocusedSection != LC_LIGHT_SECTION_INVALID;
-	}
-
-	bool IsFocused(quint32 Section) const override
-	{
-		return mFocusedSection == Section;
-	}
-
-	void SetFocused(quint32 Section, bool Focused) override
-	{
-		if (Focused)
-		{
-			mFocusedSection = Section;
-			mSelected = true;
-		}
-		else
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
-	quint32 GetFocusSection() const override
-	{
-		return mFocusedSection;
-	}
 
 	quint32 GetAllowedTransforms() const override
 	{
@@ -373,8 +334,6 @@ protected:
 	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
 
 	quint32 mState = 0;
-	bool mSelected = false;
-	quint32 mFocusedSection = LC_LIGHT_SECTION_INVALID;
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
 	lcMatrix44 mWorldMatrix;
 

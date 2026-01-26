@@ -909,7 +909,7 @@ void lcCamera::RemoveKeyFrames()
 
 bool lcCamera::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 {
-	static_assert(sizeof(lcCamera) == 240);
+	static_assert(sizeof(lcCamera) == 248);
 	Q_UNUSED(Model);
 	
 	Stream << m_fovy;

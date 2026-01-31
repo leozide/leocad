@@ -428,8 +428,8 @@ protected:
 	
 	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece, lcStep Step) const;
 	void DeselectAllObjects();
-	void SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step, bool Select);
-	void SelectGroup(lcGroup* TopGroup, lcStep Step, bool Select);
+	void SelectObjects(const std::vector<lcObject*>& Objects, bool Select);
+	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	size_t AddPiece(lcPiece* Piece);
 

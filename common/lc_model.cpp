@@ -1764,10 +1764,10 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 			{
 				lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
 				
-				SelectGroup(Piece->GetTopGroup(), Step, true);
+				SelectGroup(Piece->GetTopGroup(), true);
 				
 				std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-				SelectObjects(Pieces, Step, true);
+				SelectObjects(Pieces, true);
 			}
 		}
 	};
@@ -1784,10 +1784,10 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 			{
 				lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
 				
-				SelectGroup(Piece->GetTopGroup(), Step, true);
+				SelectGroup(Piece->GetTopGroup(), true);
 				
 				std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-				SelectObjects(Pieces, Step, true);
+				SelectObjects(Pieces, true);
 			}
 		}
 		
@@ -1847,10 +1847,10 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 				{
 					lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
 					
-					SelectGroup(Piece->GetTopGroup(), Step, true);
+					SelectGroup(Piece->GetTopGroup(), true);
 					
 					std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-					SelectObjects(Pieces, Step, true);
+					SelectObjects(Pieces, true);
     			}
 			}
 		}
@@ -1908,10 +1908,10 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 				{
 					lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
 					
-					SelectGroup(Piece->GetTopGroup(), Step, false);
+					SelectGroup(Piece->GetTopGroup(), false);
 					
 					std::vector<lcObject*> Pieces = GetSelectionModePieces(ModelActionSelection->GetSelectionMode(), Piece, Step);
-					SelectObjects(Pieces, Step, false);
+					SelectObjects(Pieces, false);
 				}
 			}
 		}
@@ -4583,7 +4583,7 @@ void lcModel::DeselectAllObjects()
 		Light->SetSelected(false);
 }
 
-void lcModel::SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step, bool Select)
+void lcModel::SelectObjects(const std::vector<lcObject*>& Objects, bool Select)
 {
 	for (lcObject* Object : Objects)
 	{
@@ -4593,11 +4593,11 @@ void lcModel::SelectObjects(const std::vector<lcObject*>& Objects, lcStep Step, 
 		Object->SetSelected(Select);
 		
 		if (Object->IsPiece())
-			SelectGroup(dynamic_cast<lcPiece*>(Object)->GetTopGroup(), Step, Select);
+			SelectGroup(dynamic_cast<lcPiece*>(Object)->GetTopGroup(), Select);
 	}
 }
 
-void lcModel::SelectGroup(lcGroup* TopGroup, lcStep Step, bool Select)
+void lcModel::SelectGroup(lcGroup* TopGroup, bool Select)
 {
 	if (!TopGroup)
 		return;

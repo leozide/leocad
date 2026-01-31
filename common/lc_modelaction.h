@@ -34,6 +34,16 @@ enum class lcModelActionSelectionMode
 	Restore
 };
 
+struct lcModelActionSelectionState
+{
+	std::vector<bool> SelectedPieces;
+	std::vector<bool> SelectedCameras;
+	std::vector<bool> SelectedLights;
+	size_t FocusIndex = SIZE_MAX;
+	uint32_t FocusSection = 0;
+	lcObjectType FocusObjectType = static_cast<lcObjectType>(~0);
+};
+
 class lcModelActionSelection : public lcModelAction
 {
 public:
@@ -67,18 +77,13 @@ public:
 	std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> GetPreviousSelection(const lcModel* Model) const;
 
 protected:
+	static void SaveState(lcModelActionSelectionState& State, const lcModel* Model);
 	static size_t GetObjectIndex(const lcObject* Object, const lcModel* Model);
 	bool HasChanges(const lcModel* Model, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection) const;
-	void SavePreviousSelection(const lcModel* Model);
 	void SaveNewObjects(const std::vector<lcObject*>& Objects, const lcModel* Model);
 	void SaveNewFocusObject(const lcModel* Model, lcObject* FocusObject, uint32_t FocusSection);
 	
-	std::vector<size_t> mPreviousSelectedPieces;
-	std::vector<size_t> mPreviousSelectedCameras;
-	std::vector<size_t> mPreviousSelectedLights;
-	size_t mPreviousFocusIndex = SIZE_MAX;
-	uint32_t mPreviousFocusSection = 0;
-	lcObjectType mPreviousFocusObjectType = (lcObjectType)0;
+	lcModelActionSelectionState mStartState;
 	
 	std::vector<std::pair<size_t, lcObjectType>> mNewObjects;
 	size_t mNewFocusIndex = SIZE_MAX;
@@ -120,8 +125,6 @@ public:
 	}
 
 protected:
-	void SaveState(QByteArray& Buffer);
-	
 	lcModelActionObjectEditMode mMode;
 	QByteArray mStartBuffer;
 	QByteArray mEndBuffer;

@@ -194,7 +194,7 @@ bool lcModelActionSelection::Initialize(const lcModel* Model, const std::vector<
 
 	mSelectionMode = SelectionMode;
 
-	SavePreviousSelection(Model);
+	SaveState(mStartState, Model);
 	SaveNewObjects(Objects, Model);
 	SaveNewFocusObject(Model, FocusObject, FocusSection);
 	
@@ -236,7 +236,7 @@ size_t lcModelActionSelection::GetObjectIndex(const lcObject* Object, const lcMo
 		break;
 	}
 
-	return SIZE_T_MAX;
+	return SIZE_MAX;
 }
 
 bool lcModelActionSelection::HasChanges(const lcModel* Model, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection) const
@@ -364,15 +364,12 @@ bool lcModelActionSelection::HasChanges(const lcModel* Model, const std::vector<
 	return true;
 }
 
-void lcModelActionSelection::SavePreviousSelection(const lcModel* Model)
+void lcModelActionSelection::SaveState(lcModelActionSelectionState& State, const lcModel* Model)
 {
+	State = lcModelActionSelectionState();
+
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-	
-	mPreviousSelectedPieces.clear();
-	mPreviousSelectedCameras.clear();
-	mPreviousSelectedLights.clear();
+	State.SelectedPieces.resize(Pieces.size(), false);
 
 	for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 	{
@@ -381,15 +378,18 @@ void lcModelActionSelection::SavePreviousSelection(const lcModel* Model)
 		if (!Piece->IsSelected())
 			continue;
 
-		mPreviousSelectedPieces.push_back(PieceIndex);
+		State.SelectedPieces[PieceIndex] = true;
 
 		if (Piece->IsFocused())
 		{
-			mPreviousFocusIndex = PieceIndex;
-			mPreviousFocusSection = Piece->GetFocusSection();
-			mPreviousFocusObjectType = lcObjectType::Piece;
+			State.FocusIndex = PieceIndex;
+			State.FocusSection = Piece->GetFocusSection();
+			State.FocusObjectType = lcObjectType::Piece;
 		}
 	}
+
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	State.SelectedCameras.resize(Cameras.size(), false);
 
 	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
 	{
@@ -398,15 +398,18 @@ void lcModelActionSelection::SavePreviousSelection(const lcModel* Model)
 		if (!Camera->IsSelected())
 			continue;
 
-		mPreviousSelectedCameras.push_back(CameraIndex);
+		State.SelectedCameras[CameraIndex] = true;
 
 		if (Camera->IsFocused())
 		{
-			mPreviousFocusIndex = CameraIndex;
-			mPreviousFocusSection = Camera->GetFocusSection();
-			mPreviousFocusObjectType = lcObjectType::Camera;
+			State.FocusIndex = CameraIndex;
+			State.FocusSection = Camera->GetFocusSection();
+			State.FocusObjectType = lcObjectType::Camera;
 		}
 	}
+
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
+	State.SelectedLights.resize(Lights.size(), false);
 
 	for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
 	{
@@ -415,11 +418,13 @@ void lcModelActionSelection::SavePreviousSelection(const lcModel* Model)
 		if (!Light->IsSelected())
 			continue;
 
+		State.SelectedLights[LightIndex] = true;
+
 		if (Light->IsFocused())
 		{
-			mPreviousFocusIndex = LightIndex;
-			mPreviousFocusSection = Light->GetFocusSection();
-			mPreviousFocusObjectType = lcObjectType::Light;
+			State.FocusIndex = LightIndex;
+			State.FocusSection = Light->GetFocusSection();
+			State.FocusObjectType = lcObjectType::Light;
 		}
 	}
 }
@@ -518,38 +523,35 @@ std::tuple<std::vector<lcObject*>, lcObject*, uint32_t> lcModelActionSelection::
 	std::vector<lcObject*> SelectedObjects;
 	lcObject* FocusObject = nullptr;
 
-	for (size_t PieceIndex : mPreviousSelectedPieces)
-		if (PieceIndex < Pieces.size())
+	for (size_t PieceIndex = 0; PieceIndex < mStartState.SelectedPieces.size(); PieceIndex++)
+		if (mStartState.SelectedPieces[PieceIndex] && PieceIndex < Pieces.size())
 			SelectedObjects.push_back(Pieces[PieceIndex].get());
 
-	for (size_t CameraIndex : mPreviousSelectedCameras)
-		if (CameraIndex < Cameras.size())
+	for (size_t CameraIndex = 0; CameraIndex < mStartState.SelectedCameras.size(); CameraIndex++)
+		if (mStartState.SelectedCameras[CameraIndex] && CameraIndex < Cameras.size())
 			SelectedObjects.push_back(Cameras[CameraIndex].get());
 
-	for (size_t LightIndex : mPreviousSelectedLights)
-		if (LightIndex < Lights.size())
+	for (size_t LightIndex = 0; LightIndex < mStartState.SelectedLights.size(); LightIndex++)
+		if (mStartState.SelectedLights[LightIndex] && LightIndex < Lights.size())
 			SelectedObjects.push_back(Lights[LightIndex].get());
 
-	if (mPreviousFocusIndex != SIZE_MAX)
+	switch (mStartState.FocusObjectType)
 	{
-		switch (mPreviousFocusObjectType)
-		{
-		case lcObjectType::Piece:
-			if (mPreviousFocusIndex < Pieces.size())
-				FocusObject = Pieces[mPreviousFocusIndex].get();
-			break;
-		case lcObjectType::Camera:
-			if (mPreviousFocusIndex < Cameras.size())
-				FocusObject = Cameras[mPreviousFocusIndex].get();
-			break;
-		case lcObjectType::Light:
-			if (mPreviousFocusIndex < Lights.size())
-				FocusObject = Lights[mPreviousFocusIndex].get();
-			break;
-		}
+	case lcObjectType::Piece:
+		if (mStartState.FocusIndex < Pieces.size())
+			FocusObject = Pieces[mStartState.FocusIndex].get();
+		break;
+	case lcObjectType::Camera:
+		if (mStartState.FocusIndex < Cameras.size())
+			FocusObject = Cameras[mStartState.FocusIndex].get();
+		break;
+	case lcObjectType::Light:
+		if (mStartState.FocusIndex < Lights.size())
+			FocusObject = Lights[mStartState.FocusIndex].get();
+		break;
 	}
 
-	return { SelectedObjects, FocusObject, mPreviousFocusSection };
+	return { SelectedObjects, FocusObject, mStartState.FocusSection };
 }
 
 lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mode)
@@ -582,27 +584,27 @@ bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamer
 		break;
 		
 	case lcModelActionObjectEditMode::EditSelectedObjects:
-		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 			if (Pieces[PieceIndex]->IsSelected())
 				mPieceIndices.push_back(PieceIndex);
 		
-		for (uint64_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
+		for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
 			if (Cameras[CameraIndex]->IsSelected())
 				mCameraIndices.push_back(CameraIndex);
 		
-		for (uint64_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
+		for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
 			if (Lights[LightIndex]->IsSelected())
 				mLightIndices.push_back(LightIndex);
 		break;
 		
 	case lcModelActionObjectEditMode::EditSelectedPieces:
-		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 			if (Pieces[PieceIndex]->IsSelected())
 				mPieceIndices.push_back(PieceIndex);
 		break;
 		
 	case lcModelActionObjectEditMode::EditUnselectedPieces:
-		for (uint64_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
 			if (!Pieces[PieceIndex]->IsSelected())
 				mPieceIndices.push_back(PieceIndex);
 		break;

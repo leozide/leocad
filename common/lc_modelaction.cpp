@@ -182,11 +182,6 @@ bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, 
 	return true;
 }
 
-lcModelActionSelection::lcModelActionSelection(lcModelActionSelectionMode Mode)
-    : mMode(Mode)
-{
-}
-
 void lcModelActionSelection::SaveStartState(const lcModel* Model)
 {
 	SaveState(mStartState, Model);

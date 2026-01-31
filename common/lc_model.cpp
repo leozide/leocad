@@ -1736,8 +1736,7 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 void lcModel::RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
 {
-	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>(ModelActionSelectionMode);
-	bool ForceAdd = false;
+	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>();
 
 	ModelActionSelection->SaveStartState(this);
 
@@ -1776,17 +1775,11 @@ void lcModel::RecordSelectionAction(lcModelActionSelectionMode ModelActionSelect
 	case lcModelActionSelectionMode::RemoveFromSelection:
 		SetObjectsSelected(Objects, false);
 		break;
-
-	case lcModelActionSelectionMode::Set:
-	case lcModelActionSelectionMode::Save:
-	case lcModelActionSelectionMode::Restore:
-		ForceAdd = true;
-		break;
 	}
 
 	ModelActionSelection->SaveEndState(this);
 
-	if (ForceAdd || ModelActionSelection->StateChanged())
+	if (ModelActionSelection->StateChanged())
 		mActionSequence.emplace_back(std::move(ModelActionSelection));
 }
 
@@ -1795,35 +1788,10 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 	if (!ModelActionSelection)
 		return;
 	
-	switch (ModelActionSelection->GetMode())
-	{
-	case lcModelActionSelectionMode::ClearSelection:
-	case lcModelActionSelectionMode::SetSelectionAndFocus:
-	case lcModelActionSelectionMode::SetFocus:
-	case lcModelActionSelectionMode::SelectAllPieces:
-	case lcModelActionSelectionMode::InvertPieceSelection:
-	case lcModelActionSelectionMode::AddToSelection:
-	case lcModelActionSelectionMode::RemoveFromSelection:
-		if (Apply)
-			ModelActionSelection->LoadEndState(this);
-		else
-			ModelActionSelection->LoadStartState(this);
-		break;
-	
-	case lcModelActionSelectionMode::Set:
+	if (Apply)
+		ModelActionSelection->LoadEndState(this);
+	else
 		ModelActionSelection->LoadStartState(this);
-		break;
-
-	case lcModelActionSelectionMode::Save:
-		if (!Apply)
-			ModelActionSelection->LoadStartState(this);
-		break;
-
-	case lcModelActionSelectionMode::Restore:
-		if (Apply)
-			ModelActionSelection->LoadStartState(this);
-		break;
-	}
 }
 
 void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera)
@@ -2272,9 +2240,7 @@ void lcModel::GroupSelection()
 
 	BeginActionSequence();
 
-	RecordSelectionAction(lcModelActionSelectionMode::Restore, std::vector<lcObject*>(), nullptr, 0, lcSelectionMode::Single);
 	RecordGroupPiecesAction(lcModelActionGroupPiecesMode::Group, Dialog.mName);
-	RecordSelectionAction(lcModelActionSelectionMode::Save, std::vector<lcObject*>(), nullptr, 0, lcSelectionMode::Single);
 
 	EndActionSequence(tr("Group"));
 }
@@ -2306,9 +2272,7 @@ void lcModel::UngroupSelection()
 
 	BeginActionSequence();
 
-	RecordSelectionAction(lcModelActionSelectionMode::Restore, std::vector<lcObject*>(), nullptr, 0, lcSelectionMode::Single);
 	RecordGroupPiecesAction(lcModelActionGroupPiecesMode::Ungroup, QString());
-	RecordSelectionAction(lcModelActionSelectionMode::Save, std::vector<lcObject*>(), nullptr, 0, lcSelectionMode::Single);
 
 	EndActionSequence(tr("Ungroup"));
 }

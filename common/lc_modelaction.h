@@ -27,10 +27,7 @@ enum class lcModelActionSelectionMode
 	SelectAllPieces,
 	InvertPieceSelection,
 	AddToSelection,
-	RemoveFromSelection,
-	Set,
-	Save,
-	Restore
+	RemoveFromSelection
 };
 
 struct lcModelActionSelectionState
@@ -52,13 +49,8 @@ struct lcModelActionSelectionState
 class lcModelActionSelection : public lcModelAction
 {
 public:
-	lcModelActionSelection(lcModelActionSelectionMode Mode);
+	lcModelActionSelection() = default;
 	virtual ~lcModelActionSelection() = default;
-
-	lcModelActionSelectionMode GetMode() const
-	{
-		return mMode;
-	}
 	
 	void SaveStartState(const lcModel* Model);
 	void SaveEndState(const lcModel* Model);
@@ -73,7 +65,6 @@ protected:
 	
 	lcModelActionSelectionState mStartState;
 	lcModelActionSelectionState mEndState;
-	lcModelActionSelectionMode mMode;
 };
 
 enum class lcModelActionObjectEditMode

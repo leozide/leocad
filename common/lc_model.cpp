@@ -1230,11 +1230,9 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	SaveCheckpoint(tr("Pasting"));
 
 	if (SelectedObjects.size() == 1)
-		RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), SelectedObjects.front(), LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
-//		ClearSelectionAndSetFocus(SelectedObjects[0], LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+		RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), SelectedObjects.front(), LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 	else
 		RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, SelectedObjects, nullptr, 0, lcSelectionMode::Single);
-//		SetSelectionAndFocus(SelectedObjects, nullptr, 0, false);
 
 	CalculateStep(mCurrentStep);
 	gMainWindow->UpdateTimeline(false, false);
@@ -1738,9 +1736,57 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 void lcModel::RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
 {
-	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>(ModelActionSelectionMode, mCurrentStep);
+	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>(ModelActionSelectionMode);
+	bool ForceAdd = false;
 
-	if (ModelActionSelection->Initialize(this, Objects, FocusObject, FocusSection, SelectionMode))
+	ModelActionSelection->SaveStartState(this);
+
+	switch (ModelActionSelectionMode)
+	{
+	case lcModelActionSelectionMode::ClearSelection:
+		DeselectAllObjects();
+		break;
+
+	case lcModelActionSelectionMode::SetSelectionAndFocus:
+		DeselectAllObjects();
+		SetObjectsSelected(Objects, true);
+		SetFocusedObject(FocusObject, FocusSection, SelectionMode);
+		break;
+
+	case lcModelActionSelectionMode::SetFocus:
+		SetFocusedObject(FocusObject, FocusSection, SelectionMode);
+		break;
+
+	case lcModelActionSelectionMode::SelectAllPieces:
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep))
+				Piece->SetSelected(true);
+		break;
+
+	case lcModelActionSelectionMode::InvertPieceSelection:
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+				Piece->SetSelected(!Piece->IsSelected());
+		break;
+
+	case lcModelActionSelectionMode::AddToSelection:
+		SetObjectsSelected(Objects, true);
+		break;
+
+	case lcModelActionSelectionMode::RemoveFromSelection:
+		SetObjectsSelected(Objects, false);
+		break;
+
+	case lcModelActionSelectionMode::Set:
+	case lcModelActionSelectionMode::Save:
+	case lcModelActionSelectionMode::Restore:
+		ForceAdd = true;
+		break;
+	}
+
+	ModelActionSelection->SaveEndState(this);
+
+	if (ForceAdd || ModelActionSelection->StateChanged())
 		mActionSequence.emplace_back(std::move(ModelActionSelection));
 }
 
@@ -1749,188 +1795,33 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 	if (!ModelActionSelection)
 		return;
 	
-	lcStep Step = ModelActionSelection->GetStep();
-	
-	auto AddToSelection=[this](const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode, lcStep Step)
-	{
-		for (lcObject* Object : Objects)
-		{
-			if (Object->IsSelected())
-				continue;
-			
-			Object->SetSelected(true);
-			
-			if (Object->IsPiece())
-			{
-				lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
-				
-				SelectGroup(Piece->GetTopGroup(), true);
-				
-				std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-				SelectObjects(Pieces, true);
-			}
-		}
-	};
-	
-	auto SetSelectionAndFocus=[this, &AddToSelection](const std::vector<lcObject*>& Objects, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode, lcStep Step)
-	{
-		DeselectAllObjects();
-		
-		if (Focus)
-		{
-			Focus->SetFocused(Section, true);
-			
-			if (Focus->IsPiece())
-			{
-				lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
-				
-				SelectGroup(Piece->GetTopGroup(), true);
-				
-				std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-				SelectObjects(Pieces, true);
-			}
-		}
-		
-		AddToSelection(Objects, SelectionMode, Step);
-	};
-	
-	auto LoadPreviousSelection = [this, ModelActionSelection, Step, &SetSelectionAndFocus]()
-	{
-		auto [SelectedObjects, FocusObject, FocusSection] = ModelActionSelection->GetPreviousSelection(this);
-
-		SetSelectionAndFocus(SelectedObjects, FocusObject, FocusSection, lcSelectionMode::Single, Step);
-	};
-	
 	switch (ModelActionSelection->GetMode())
 	{
 	case lcModelActionSelectionMode::ClearSelection:
-		if (Apply)
-			DeselectAllObjects();
-		else
-			LoadPreviousSelection();
-		break;
-
-	case lcModelActionSelectionMode::ClearSelectionAndSetFocus:
 	case lcModelActionSelectionMode::SetSelectionAndFocus:
-		if (Apply)
-		{
-			std::vector<lcObject*> Objects = ModelActionSelection->GetNewObjects(this);
-			lcObject* Focus = ModelActionSelection->GetNewFocusObject(this);
-			uint32_t Section = ModelActionSelection->GetNewFocusSection();
-			lcSelectionMode SelectionMode = ModelActionSelection->GetSelectionMode();
-			
-			SetSelectionAndFocus(Objects, Focus, Section, SelectionMode, Step);
-		}
-		else
-			LoadPreviousSelection();
-		break;
-		
 	case lcModelActionSelectionMode::SetFocus:
-		if (Apply)
-		{
-			lcObject* Focus = ModelActionSelection->GetNewFocusObject(this);
-			uint32_t Section = ModelActionSelection->GetNewFocusSection();
-			lcSelectionMode SelectionMode = ModelActionSelection->GetSelectionMode();
-			
-			lcObject* PreviousFocus = GetFocusObject();
-			
-			if (PreviousFocus && PreviousFocus != Focus)
-				PreviousFocus->SetFocused(PreviousFocus->GetFocusSection(), false);
-			
-			if (Focus)
-			{
-				const bool WasSelected = Focus->IsSelected();
-				
-				Focus->SetFocused(Section, true);
-				
-				if (Focus->IsPiece() && !WasSelected)
-				{
-					lcPiece* Piece = dynamic_cast<lcPiece*>(Focus);
-					
-					SelectGroup(Piece->GetTopGroup(), true);
-					
-					std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
-					SelectObjects(Pieces, true);
-				}
-			}
-		}
-		else
-			LoadPreviousSelection();
-		break;
-		
 	case lcModelActionSelectionMode::SelectAllPieces:
-		if (Apply)
-		{
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (Piece->IsVisible(Step))
-					Piece->SetSelected(true);
-		}
-		else
-			LoadPreviousSelection();
-		break;
-		
 	case lcModelActionSelectionMode::InvertPieceSelection:
-		if (Apply)
-		{
-			for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-				if (Piece->IsSelected() || Piece->IsVisible(Step))
-					Piece->SetSelected(!Piece->IsSelected());
-		}
-		else
-			LoadPreviousSelection();
-		break;
-		
 	case lcModelActionSelectionMode::AddToSelection:
-		if (Apply)
-		{
-			std::vector<lcObject*> Objects = ModelActionSelection->GetNewObjects(this);
-			lcSelectionMode SelectionMode = ModelActionSelection->GetSelectionMode();
-			
-			AddToSelection(Objects, SelectionMode, Step);
-		}
-		else
-			LoadPreviousSelection();
-		break;
-	
 	case lcModelActionSelectionMode::RemoveFromSelection:
 		if (Apply)
-		{
-			std::vector<lcObject*> Objects = ModelActionSelection->GetNewObjects(this);
-			
-			for (lcObject* Object : Objects)
-			{
-				if (!Object->IsSelected())
-					continue;
-				
-				Object->SetSelected(false);
-				
-				if (Object->IsPiece())
-				{
-					lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
-					
-					SelectGroup(Piece->GetTopGroup(), false);
-					
-					std::vector<lcObject*> Pieces = GetSelectionModePieces(ModelActionSelection->GetSelectionMode(), Piece, Step);
-					SelectObjects(Pieces, false);
-				}
-			}
-		}
+			ModelActionSelection->LoadEndState(this);
 		else
-			LoadPreviousSelection();
+			ModelActionSelection->LoadStartState(this);
 		break;
 	
 	case lcModelActionSelectionMode::Set:
-		LoadPreviousSelection();
+		ModelActionSelection->LoadStartState(this);
 		break;
 
 	case lcModelActionSelectionMode::Save:
 		if (!Apply)
-			LoadPreviousSelection();
+			ModelActionSelection->LoadStartState(this);
 		break;
 
 	case lcModelActionSelectionMode::Restore:
 		if (Apply)
-			LoadPreviousSelection();
+			ModelActionSelection->LoadStartState(this);
 		break;
 	}
 }
@@ -2099,8 +1990,6 @@ void lcModel::EndActionSequence(const QString& Description)
 	if (mActionSequence.empty())
 		return;
 	
-	RunActionSequence(mActionSequence, true);
-
 	std::unique_ptr<lcModelHistoryEntry> ModelHistoryEntry = std::make_unique<lcModelHistoryEntry>(lcModelHistoryEntry());
 
 	ModelHistoryEntry->Description = Description;
@@ -2111,6 +2000,8 @@ void lcModel::EndActionSequence(const QString& Description)
 
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
+
+	UpdateAllViews();
 }
 
 void lcModel::DiscardActionSequence()
@@ -2743,8 +2634,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 	}
 
 	gMainWindow->UpdateTimeline(false, false);
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
-//	ClearSelectionAndSetFocus(Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
 	SaveCheckpoint(tr("Adding Piece"));
 
@@ -3295,8 +3185,8 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 	SaveCheckpoint(tr("New Model"));
 	gMainWindow->UpdateTimeline(false, false);
-//	ClearSelectionAndSetFocus(ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+
+	RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 }
 
 void lcModel::InlineSelectedModels()
@@ -4470,51 +4360,11 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 	}
 }
 
-std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece, lcStep Step) const
-{
-	const PieceInfo* Info = SelectedPiece->mPieceInfo;
-	const int ColorIndex = SelectedPiece->GetColorIndex();
-	std::vector<lcObject*> Pieces;
-
-	switch (SelectionMode)
-	{
-	case lcSelectionMode::Single:
-		break;
-
-	case lcSelectionMode::Piece:
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsVisible(Step) && Piece->mPieceInfo == Info && Piece.get() != SelectedPiece)
-				Pieces.emplace_back(Piece.get());
-		break;
-
-	case lcSelectionMode::Color:
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsVisible(Step) && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
-				Pieces.emplace_back(Piece.get());
-		break;
-
-	case lcSelectionMode::PieceColor:
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsVisible(Step) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
-				Pieces.emplace_back(Piece.get());
-		break;
-	}
-
-	return Pieces;
-}
-
 void lcModel::ClearSelection()
 {
 	BeginActionSequence();
 	RecordSelectionAction(lcModelActionSelectionMode::ClearSelection, std::vector<lcObject*>(), nullptr, 0, lcSelectionMode::Single);
 	EndActionSequence(tr("Selection"));
-}
-
-void lcModel::ClearSelectionAndSetFocus(lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode)
-{
-	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Focus, Section, SelectionMode);
-	EndActionSequence(tr("Selection"));	
 }
 
 void lcModel::SetSelectionAndFocus(const std::vector<lcObject*>& Objects, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode)
@@ -4557,18 +4407,51 @@ void lcModel::InvertPieceSelection()
 	EndActionSequence(tr("Selection"));
 }
 
-void lcModel::AddToSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode)
+void lcModel::AddToSelection(const std::vector<lcObject*>& Objects)
 {
 	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::AddToSelection, Objects, nullptr, 0, SelectionMode);
+	RecordSelectionAction(lcModelActionSelectionMode::AddToSelection, Objects, nullptr, 0, lcSelectionMode::Single);
 	EndActionSequence(tr("Selection"));
 }
 
-void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode)
+void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects)
 {
 	BeginActionSequence();
-	RecordSelectionAction(lcModelActionSelectionMode::RemoveFromSelection, Objects, nullptr, 0, SelectionMode);
+	RecordSelectionAction(lcModelActionSelectionMode::RemoveFromSelection, Objects, nullptr, 0, lcSelectionMode::Single);
 	EndActionSequence(tr("Selection"));
+}
+
+std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const
+{
+	const PieceInfo* Info = SelectedPiece->mPieceInfo;
+	const int ColorIndex = SelectedPiece->GetColorIndex();
+	std::vector<lcObject*> Pieces;
+
+	switch (SelectionMode)
+	{
+	case lcSelectionMode::Single:
+		break;
+
+	case lcSelectionMode::Piece:
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
+		break;
+
+	case lcSelectionMode::Color:
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
+		break;
+
+	case lcSelectionMode::PieceColor:
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
+				Pieces.emplace_back(Piece.get());
+		break;
+	}
+
+	return Pieces;
 }
 
 void lcModel::DeselectAllObjects()
@@ -4583,17 +4466,46 @@ void lcModel::DeselectAllObjects()
 		Light->SetSelected(false);
 }
 
-void lcModel::SelectObjects(const std::vector<lcObject*>& Objects, bool Select)
+void lcModel::SetFocusedObject(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
+{
+	lcObject* PreviousFocus = GetFocusObject();
+
+	if (PreviousFocus)
+		PreviousFocus->SetFocused(PreviousFocus->GetFocusSection(), false);
+	
+	if (FocusObject)
+	{
+		lcPiece* Piece = dynamic_cast<lcPiece*>(FocusObject);
+
+		if (Piece)
+		{
+			if (!Piece->IsSelected())
+				SetObjectsSelected({ Piece }, true);
+
+			std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece);
+
+			SetObjectsSelected(Pieces, true);
+		}
+
+		FocusObject->SetFocused(FocusSection, true);
+	}
+}
+
+void lcModel::SetObjectsSelected(const std::vector<lcObject*>& Objects, bool Selected)
 {
 	for (lcObject* Object : Objects)
 	{
-		if (Object->IsSelected() == Select)
+		if (Object->IsSelected() == Selected)
 			continue;
 		
-		Object->SetSelected(Select);
+		Object->SetSelected(Selected);
 		
 		if (Object->IsPiece())
-			SelectGroup(dynamic_cast<lcPiece*>(Object)->GetTopGroup(), Select);
+		{
+			lcPiece* Piece = dynamic_cast<lcPiece*>(Object);
+
+			SelectGroup(Piece->GetTopGroup(), Selected);
+		}
 	}
 }
 
@@ -4842,11 +4754,9 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 	}
 
 	if (FindAll)
-//		SetSelectionAndFocus(Selection, nullptr, 0, false);
 		RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, Selection, nullptr, 0, lcSelectionMode::Single);
 	else
-//		ClearSelectionAndSetFocus(Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
-		RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+		RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
 	if (ReplacedCount)
 	{
@@ -5035,7 +4945,7 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 	
 	EndObjectEditAction(std::move(PieceIndices));
 	
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 	
 	EndActionSequence(tr("Add Piece"));
 	
@@ -5057,7 +4967,7 @@ void lcModel::InsertCameraToolClicked(const lcVector3& Position)
 	
 	EndObjectEditAction({ mCameras.size() - 1 });
 	
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Camera, LC_CAMERA_SECTION_POSITION, lcSelectionMode::Single);
+	RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), Camera, LC_CAMERA_SECTION_POSITION, lcSelectionMode::Single);
 	
 	EndActionSequence(tr("Add Camera"));
 }
@@ -5098,7 +5008,7 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 	
 	EndObjectEditAction({ mLights.size() - 1 });
 	
-	RecordSelectionAction(lcModelActionSelectionMode::ClearSelectionAndSetFocus, std::vector<lcObject*>(), Light, LC_LIGHT_SECTION_POSITION, lcSelectionMode::Single);
+	RecordSelectionAction(lcModelActionSelectionMode::SetSelectionAndFocus, std::vector<lcObject*>(), Light, LC_LIGHT_SECTION_POSITION, lcSelectionMode::Single);
 	
 	EndActionSequence(ActionName);
 }

@@ -324,13 +324,12 @@ public:
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
 	
 	void ClearSelection();
-	void ClearSelectionAndSetFocus(lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
 	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
 	void FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
 	void InvertPieceSelection();
-	void AddToSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode);
-	void RemoveFromSelection(const std::vector<lcObject*>& Objects, lcSelectionMode SelectionMode);
+	void AddToSelection(const std::vector<lcObject*>& Objects);
+	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
@@ -426,9 +425,10 @@ protected:
 	bool RemoveSelectedObjects();
 	void RemoveCameraFromViews(lcCamera* Camera);
 	
-	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece, lcStep Step) const;
+	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const;
 	void DeselectAllObjects();
-	void SelectObjects(const std::vector<lcObject*>& Objects, bool Select);
+	void SetFocusedObject(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void SetObjectsSelected(const std::vector<lcObject*>& Objects, bool Selected);
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	size_t AddPiece(lcPiece* Piece);

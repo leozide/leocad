@@ -2421,9 +2421,9 @@ void lcView::StopTracking(bool Accept)
 			std::vector<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
 
 			if (mMouseModifiers & Qt::ControlModifier)
-				ActiveModel->AddToSelection(Objects, lcSelectionMode::Single);
+				ActiveModel->AddToSelection(Objects);
 			else if (mMouseModifiers & Qt::ShiftModifier)
-				ActiveModel->RemoveFromSelection(Objects, lcSelectionMode::Single);
+				ActiveModel->RemoveFromSelection(Objects);
 			else
 				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, gMainWindow->GetSelectionMode());
 		}
@@ -2577,10 +2577,10 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			else if (mMouseModifiers & Qt::ShiftModifier)
 		    {
 			    if (ObjectSection.Object)
-				    ActiveModel->RemoveFromSelection({ ObjectSection.Object }, gMainWindow->GetSelectionMode());
+				    ActiveModel->RemoveFromSelection({ ObjectSection.Object });
 		    }
 			else
-				ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
+				ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 
 			StartTracking(TrackButton);
 		}
@@ -2646,7 +2646,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			ObjectSection.Object = Focus;
 			ObjectSection.Section = mTrackToolSection;
 
-			ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
+			ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 		}
 		break;
 
@@ -2744,10 +2744,10 @@ void lcView::OnLeftButtonDoubleClick()
 	else if (mMouseModifiers & Qt::ShiftModifier)
 	{
 		if (ObjectSection.Object)
-			ActiveModel->RemoveFromSelection({ ObjectSection.Object }, gMainWindow->GetSelectionMode());
+			ActiveModel->RemoveFromSelection({ ObjectSection.Object });
 	}
 	else
-		ActiveModel->ClearSelectionAndSetFocus(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
+		ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 }
 
 void lcView::OnMiddleButtonDown()

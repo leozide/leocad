@@ -139,7 +139,7 @@ void lcPOVRayOptions::ParseLDrawLine(QTextStream& LineStream)
 	else if (Token == QLatin1String("EXCLUDE_FLOOR"))
 		ExcludeFloor = true;
 	else if (Token == QLatin1String("EXCLUDE_BACKGROUND"))
-		ExcludeFloor = true;
+		ExcludeBackground = true;
 	else if (Token == QLatin1String("NO_REFLECTION"))
 		NoReflection = true;
 	else if (Token == QLatin1String("NO_SHADOWS"))
@@ -1741,7 +1741,7 @@ void lcModel::RecordSelectionAction(lcModelActionSelectionMode ModelActionSelect
 	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>(ModelActionSelectionMode, mCurrentStep);
 
 	if (ModelActionSelection->Initialize(this, Objects, FocusObject, FocusSection, SelectionMode))
-    	mActionSequence.emplace_back(std::move(ModelActionSelection));
+		mActionSequence.emplace_back(std::move(ModelActionSelection));
 }
 
 void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply)
@@ -1851,7 +1851,7 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 					
 					std::vector<lcObject*> Pieces = GetSelectionModePieces(SelectionMode, Piece, Step);
 					SelectObjects(Pieces, true);
-    			}
+				}
 			}
 		}
 		else
@@ -2297,7 +2297,7 @@ void lcModel::InsertStep(lcStep Step)
 	EndObjectEditAction();
 	EndActionSequence(tr("Insert Step"));
 	
-    SetCurrentStep(mCurrentStep);
+	SetCurrentStep(mCurrentStep);
 }
 
 void lcModel::RemoveStep(lcStep Step)
@@ -2820,13 +2820,13 @@ void lcModel::RemoveCameras(const std::vector<size_t>& CameraIndices)
 		size_t CameraIndex = *CameraIndicesIt;
 		
 		if (CameraIndex >= mCameras.size())
-    		continue;
+			continue;
 	
-        std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin() + CameraIndex;
-        
-        RemoveCameraFromViews(CameraIt->get());
-        
-        mCameras.erase(CameraIt);
+		std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin() + CameraIndex;
+
+		RemoveCameraFromViews(CameraIt->get());
+
+		mCameras.erase(CameraIt);
 	}
 	
 	gMainWindow->UpdateSelectedObjects(true);
@@ -2842,16 +2842,16 @@ void lcModel::AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex)
 
 void lcModel::RemoveLights(const std::vector<size_t>& LightIndices)
 {
-	for (auto LightIndicesIt = LightIndices.crbegin(); LightIndicesIt != LightIndices.crbegin(); ++LightIndicesIt)
+	for (auto LightIndicesIt = LightIndices.crbegin(); LightIndicesIt != LightIndices.crend(); ++LightIndicesIt)
 	{
 		size_t LightIndex = *LightIndicesIt;
 		
 		if (LightIndex >= mLights.size())
-    		return;
+			continue;
 	
-    	std::vector<std::unique_ptr<lcLight>>::iterator LightIt = mLights.begin() + LightIndex;
+		std::vector<std::unique_ptr<lcLight>>::iterator LightIt = mLights.begin() + LightIndex;
 	
-        mLights.erase(LightIt);
+		mLights.erase(LightIt);
 	}
 	
 	gMainWindow->UpdateSelectedObjects(true);
@@ -4913,8 +4913,8 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::ColorPicker:
 			break;
 
-	    case lcTool::Pan:
-	    case lcTool::Zoom:
+		case lcTool::Pan:
+		case lcTool::Zoom:
 		case lcTool::RotateView:
 		case lcTool::Roll:
 			if (!View->GetCamera()->IsSimple())

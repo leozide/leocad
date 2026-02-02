@@ -19,17 +19,6 @@ protected:
 	std::vector<size_t> mLightIndices;
 };
 
-enum class lcModelActionSelectionMode
-{
-	ClearSelection,
-	SetFocus,
-	SetSelectionAndFocus,
-	SelectAllPieces,
-	InvertPieceSelection,
-	AddToSelection,
-	RemoveFromSelection
-};
-
 struct lcModelActionSelectionState
 {
 	std::vector<bool> PieceSelection;

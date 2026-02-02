@@ -402,8 +402,15 @@ public:
 
 protected:
 	void DeleteModel();
-
-	void RecordSelectionAction(lcModelActionSelectionMode ModelActionSelectionMode, const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	
+	void RecordSelectionAction(std::function<void()> Callback);
+	void RecordClearSelectionAction();
+	void RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+    void RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+    void RecordSelectAllPiecesAction();
+    void RecordInvertPieceSelectionAction();
+    void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
+    void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
 	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
 	void EndObjectEditAction(std::vector<size_t>&& ObjectIndices = std::vector<size_t>(), std::vector<size_t>&& GroupIndices = std::vector<size_t>());

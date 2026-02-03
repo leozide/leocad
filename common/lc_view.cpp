@@ -74,8 +74,7 @@ lcView::~lcView()
 	if (mLastFocusedView == this)
 		mLastFocusedView = nullptr;
 
-	if (mDeleteContext)
-		delete mContext;
+	delete mContext;
 }
 
 std::vector<lcView*> lcView::GetModelViews(const lcModel* Model)

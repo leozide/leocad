@@ -319,7 +319,6 @@ protected:
 	lcViewWidget* mWidget = nullptr;
 	int mWidth = 1;
 	int mHeight = 1;
-	bool mDeleteContext = true;
 	lcViewType mViewType;
 
 	int mMouseX = 0;

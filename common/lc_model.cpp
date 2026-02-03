@@ -1287,7 +1287,7 @@ void lcModel::DuplicateSelectedPieces()
 	
 	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); PieceIndex++)
 	{
-		lcPiece* Piece = mPieces[PieceIndex].get();
+		const lcPiece* Piece = mPieces[PieceIndex].get();
 		
 		if (!Piece->IsSelected())
 			continue;
@@ -1305,7 +1305,7 @@ void lcModel::DuplicateSelectedPieces()
 		
 		lcGroup* Group = Piece->GetGroup();
 		if (Group)
-			Piece->SetGroup(GetNewGroup(Group));
+			NewPiece->SetGroup(GetNewGroup(Group));
 	}
 	
 	EndObjectEditAction(std::move(PieceIndices));
@@ -1853,6 +1853,8 @@ void lcModel::RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const Q
 {
 	std::unique_ptr<lcModelActionGroupPieces> ModelActionGroupPieces = std::make_unique<lcModelActionGroupPieces>(Mode, GroupName);
 
+	RunGroupPiecesAction(ModelActionGroupPieces.get(), true);
+
 	mActionSequence.emplace_back(std::move(ModelActionGroupPieces));
 }
 
@@ -1983,6 +1985,15 @@ void lcModel::EndActionSequence(const QString& Description)
 
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
+
+	for (const std::unique_ptr<lcModelAction>& ModelAction : mUndoHistory.front()->ModelActions)
+	{
+		if (const lcModelActionSelection* ModelActionSelection = dynamic_cast<const lcModelActionSelection*>(ModelAction.get()))
+		{
+			gMainWindow->UpdateSelectedObjects(true);
+			break;
+		}
+	}
 
 	UpdateAllViews();
 }
@@ -4362,7 +4373,7 @@ void lcModel::FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelect
 		if (!Object->IsFocused(Section))
 			RecordSetFocusAction(Object, Section, SelectionMode);
 		else
-			RecordSetFocusAction(nullptr, ~0, SelectionMode);
+			RecordSetFocusAction(nullptr, ~0U, SelectionMode);
 	}
 	else
 	{

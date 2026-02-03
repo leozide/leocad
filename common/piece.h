@@ -152,7 +152,7 @@ public:
 		mGroup = Group;
 	}
 
-	lcGroup* GetGroup()
+	lcGroup* GetGroup() const
 	{
 		return mGroup;
 	}

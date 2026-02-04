@@ -6,182 +6,6 @@
 #include "light.h"
 #include "group.h"
 
-bool lcModelAction::SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model)
-{
-	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
-	
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-
-	uint64_t ObjectCount[4] = { Groups.size(), Pieces.size(), Cameras.size(), Lights.size() };
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
-		return false;
-	
-	for (size_t GroupIndex : mGroupIndices)
-	{
-		const lcGroup* Group = Groups[GroupIndex].get();
-		uint64_t ParentIndex = UINT64_MAX;
-		
-		if (Group->mGroup)
-			for (ParentIndex = 0; ParentIndex < Groups.size(); ParentIndex++)
-				if (Group->mGroup == Groups[ParentIndex].get())
-					break;
-		
-		Stream << Group->mName;
-		Stream << ParentIndex;
-	}
-	
-	for (size_t PieceIndex : mPieceIndices)
-		if (!Pieces[PieceIndex]->SaveUndoData(Stream, Model))
-            return false;
-	
-	for (size_t CameraIndex : mCameraIndices)
-		if (!Cameras[CameraIndex]->SaveUndoData(Stream, Model))
-			return false;
-	
-	for (size_t LightIndex : mLightIndices)
-		if (!Lights[LightIndex]->SaveUndoData(Stream, Model))
-			return false;
-	
-	return true;
-}
-
-bool lcModelAction::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const
-{
-	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
-	
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-
-	uint64_t ObjectCount[4];
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
-		return false;
-	
-	if (CreateObjects)
-	{
-		ObjectCount[0] -= mGroupIndices.size();
-		ObjectCount[1] -= mPieceIndices.size();
-		ObjectCount[2] -= mCameraIndices.size();
-		ObjectCount[3] -= mLightIndices.size();
-	}
-	
-	if (ObjectCount[0] != Groups.size() || ObjectCount[1] != Pieces.size() || ObjectCount[2] != Cameras.size() || ObjectCount[3] != Lights.size())
-		return false;
-	
-	if (CreateObjects)
-	{
-		for (size_t GroupIndex : mGroupIndices)
-		{
-			std::unique_ptr<lcGroup> Group(new lcGroup());
-			QString Name;
-			uint64_t ParentIndex;
-			
-			Stream >> Name;
-			Stream >> ParentIndex;
-			
-			Group->mName = Name;
-			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
-			
-			Model->AddGroup(std::move(Group), GroupIndex);			
-		}
-		
-		for (size_t PieceIndex : mPieceIndices)
-		{
-			if (PieceIndex > Pieces.size())
-				return false;
-			
-			std::unique_ptr<lcPiece> Piece(new lcPiece(nullptr));
-			
-			if (!Piece->LoadUndoData(Stream, Model))
-				return false;
-			
-			Model->AddPiece(std::move(Piece), PieceIndex);
-		}
-		
-		for (size_t CameraIndex : mCameraIndices)
-		{
-            if (CameraIndex > Cameras.size())
-                return false;
-            
-            std::unique_ptr<lcCamera> Camera(new lcCamera(false));
-            
-            if (!Camera->LoadUndoData(Stream, Model))
-                return false;
-            
-            Model->AddCamera(std::move(Camera), CameraIndex);
-		}
-		
-		for (size_t LightIndex : mLightIndices)
-		{
-			if (LightIndex > Lights.size())
-				return false;
-			
-			std::unique_ptr<lcLight> Light(new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point));
-			
-			if (!Light->LoadUndoData(Stream, Model))
-				return false;
-			
-			Model->AddLight(std::move(Light), LightIndex);
-		}
-	}
-	else
-	{
-		for (size_t GroupIndex : mGroupIndices)
-		{
-			lcGroup* Group = Groups[GroupIndex].get();
-			QString Name;
-			uint64_t ParentIndex;
-			
-			Stream >> Name;
-			Stream >> ParentIndex;
-			
-			Group->mName = Name;
-			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
-		}
-		
-		for (size_t PieceIndex : mPieceIndices)
-		{
-			if (PieceIndex >= Pieces.size())
-				return false;
-			
-			const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
-			
-			if (!Piece->LoadUndoData(Stream, Model))
-				return false;
-		}
-		
-		for (size_t CameraIndex : mCameraIndices)
-		{
-			if (CameraIndex >= Cameras.size())
-				return false;
-			
-			const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
-			
-			if (!Camera->LoadUndoData(Stream, Model))
-				return false;
-		}
-		
-		for (size_t LightIndex : mLightIndices)
-		{
-			if (LightIndex >= Lights.size())
-				return false;
-			
-			const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
-
-			if (!Light->LoadUndoData(Stream, Model))
-				return false;
-		}
-	}
-
-	return true;
-}
-
 void lcModelActionSelection::SaveStartState(const lcModel* Model)
 {
 	SaveState(mStartState, Model);
@@ -321,6 +145,183 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mode)
 	: mMode(Mode)
 {
+}
+
+
+bool lcModelActionObjectEdit::SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model)
+{
+	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
+	
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
+	
+	uint64_t ObjectCount[4] = { Groups.size(), Pieces.size(), Cameras.size(), Lights.size() };
+	
+	if (Stream.writeRawData(reinterpret_cast<const char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
+		return false;
+	
+	for (size_t GroupIndex : mGroupIndices)
+	{
+		const lcGroup* Group = Groups[GroupIndex].get();
+		uint64_t ParentIndex = UINT64_MAX;
+		
+		if (Group->mGroup)
+			for (ParentIndex = 0; ParentIndex < Groups.size(); ParentIndex++)
+				if (Group->mGroup == Groups[ParentIndex].get())
+					break;
+		
+		Stream << Group->mName;
+		Stream << ParentIndex;
+	}
+	
+	for (size_t PieceIndex : mPieceIndices)
+		if (!Pieces[PieceIndex]->SaveUndoData(Stream, Model))
+			return false;
+	
+	for (size_t CameraIndex : mCameraIndices)
+		if (!Cameras[CameraIndex]->SaveUndoData(Stream, Model))
+			return false;
+	
+	for (size_t LightIndex : mLightIndices)
+		if (!Lights[LightIndex]->SaveUndoData(Stream, Model))
+			return false;
+	
+	return true;
+}
+
+bool lcModelActionObjectEdit::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const
+{
+	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
+	
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
+	
+	uint64_t ObjectCount[4];
+	
+	if (Stream.readRawData(reinterpret_cast<char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
+		return false;
+	
+	if (CreateObjects)
+	{
+		ObjectCount[0] -= mGroupIndices.size();
+		ObjectCount[1] -= mPieceIndices.size();
+		ObjectCount[2] -= mCameraIndices.size();
+		ObjectCount[3] -= mLightIndices.size();
+	}
+	
+	if (ObjectCount[0] != Groups.size() || ObjectCount[1] != Pieces.size() || ObjectCount[2] != Cameras.size() || ObjectCount[3] != Lights.size())
+		return false;
+	
+	if (CreateObjects)
+	{
+		for (size_t GroupIndex : mGroupIndices)
+		{
+			std::unique_ptr<lcGroup> Group(new lcGroup());
+			QString Name;
+			uint64_t ParentIndex;
+			
+			Stream >> Name;
+			Stream >> ParentIndex;
+			
+			Group->mName = Name;
+			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
+			
+			Model->AddGroup(std::move(Group), GroupIndex);			
+		}
+		
+		for (size_t PieceIndex : mPieceIndices)
+		{
+			if (PieceIndex > Pieces.size())
+				return false;
+			
+			std::unique_ptr<lcPiece> Piece(new lcPiece(nullptr));
+			
+			if (!Piece->LoadUndoData(Stream, Model))
+				return false;
+			
+			Model->AddPiece(std::move(Piece), PieceIndex);
+		}
+		
+		for (size_t CameraIndex : mCameraIndices)
+		{
+			if (CameraIndex > Cameras.size())
+				return false;
+			
+			std::unique_ptr<lcCamera> Camera(new lcCamera(false));
+			
+			if (!Camera->LoadUndoData(Stream, Model))
+				return false;
+			
+			Model->AddCamera(std::move(Camera), CameraIndex);
+		}
+		
+		for (size_t LightIndex : mLightIndices)
+		{
+			if (LightIndex > Lights.size())
+				return false;
+			
+			std::unique_ptr<lcLight> Light(new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point));
+			
+			if (!Light->LoadUndoData(Stream, Model))
+				return false;
+			
+			Model->AddLight(std::move(Light), LightIndex);
+		}
+	}
+	else
+	{
+		for (size_t GroupIndex : mGroupIndices)
+		{
+			lcGroup* Group = Groups[GroupIndex].get();
+			QString Name;
+			uint64_t ParentIndex;
+			
+			Stream >> Name;
+			Stream >> ParentIndex;
+			
+			Group->mName = Name;
+			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
+		}
+		
+		for (size_t PieceIndex : mPieceIndices)
+		{
+			if (PieceIndex >= Pieces.size())
+				return false;
+			
+			const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
+			
+			if (!Piece->LoadUndoData(Stream, Model))
+				return false;
+		}
+		
+		for (size_t CameraIndex : mCameraIndices)
+		{
+			if (CameraIndex >= Cameras.size())
+				return false;
+			
+			const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
+			
+			if (!Camera->LoadUndoData(Stream, Model))
+				return false;
+		}
+		
+		for (size_t LightIndex : mLightIndices)
+		{
+			if (LightIndex >= Lights.size())
+				return false;
+			
+			const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
+			
+			if (!Light->LoadUndoData(Stream, Model))
+				return false;
+		}
+	}
+	
+	return true;
 }
 
 bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)

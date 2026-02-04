@@ -1988,7 +1988,7 @@ void lcModel::EndActionSequence(const QString& Description)
 
 	for (const std::unique_ptr<lcModelAction>& ModelAction : mUndoHistory.front()->ModelActions)
 	{
-		if (const lcModelActionSelection* ModelActionSelection = dynamic_cast<const lcModelActionSelection*>(ModelAction.get()))
+		if (dynamic_cast<const lcModelActionSelection*>(ModelAction.get()))
 		{
 			gMainWindow->UpdateSelectedObjects(true);
 			break;

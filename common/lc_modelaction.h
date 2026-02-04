@@ -8,15 +8,6 @@ class lcModelAction
 public:
 	lcModelAction() = default;
 	virtual ~lcModelAction() = default;
-
-protected:
-	bool SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model);
-	bool LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const;
-	
-	std::vector<size_t> mGroupIndices;
-	std::vector<size_t> mPieceIndices;
-	std::vector<size_t> mCameraIndices;
-	std::vector<size_t> mLightIndices;
 };
 
 struct lcModelActionSelectionState
@@ -25,7 +16,7 @@ struct lcModelActionSelectionState
 	std::vector<bool> CameraSelection;
 	std::vector<bool> LightSelection;
 	size_t FocusIndex = SIZE_MAX;
-	uint32_t FocusSection = 0;
+	uint32_t FocusSection = ~0U;
 	lcObjectType FocusObjectType = static_cast<lcObjectType>(~0);
 
 	bool operator!=(const lcModelActionSelectionState& Other) const
@@ -86,6 +77,14 @@ public:
 	}
 
 protected:
+	bool SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model);
+	bool LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const;
+	
+	std::vector<size_t> mGroupIndices;
+	std::vector<size_t> mPieceIndices;
+	std::vector<size_t> mCameraIndices;
+	std::vector<size_t> mLightIndices;
+	
 	lcModelActionObjectEditMode mMode;
 	QByteArray mStartBuffer;
 	QByteArray mEndBuffer;

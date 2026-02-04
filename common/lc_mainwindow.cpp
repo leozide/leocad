@@ -2232,7 +2232,7 @@ void lcMainWindow::ProjectionMenuAboutToShow()
 
 	if (ActiveView)
 	{
-		if (ActiveView->GetCamera()->IsOrtho())
+		if (ActiveView->GetCamera()->GetProjection() == lcCameraProjection::Orthographic)
 			mActions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
 		else
 			mActions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
@@ -2885,12 +2885,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:
 		if (ActiveView)
-			ActiveView->SetProjection(false);
+			ActiveView->SetCameraProjection(lcCameraProjection::Perspective);
 		break;
 
 	case LC_VIEW_PROJECTION_ORTHO:
 		if (ActiveView)
-			ActiveView->SetProjection(true);
+			ActiveView->SetCameraProjection(lcCameraProjection::Orthographic);
 		break;
 
 	case LC_VIEW_TOGGLE_VIEW_SPHERE:

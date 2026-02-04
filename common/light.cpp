@@ -1154,7 +1154,7 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1245,7 +1245,7 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1336,7 +1336,7 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1427,7 +1427,7 @@ bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1538,7 +1538,7 @@ bool lcLight::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 	Stream << mLightType;
 	Stream << mCastShadow;
 	Stream << mAreaShape;
-	Stream << mState;
+	Stream << mHidden;
 
 	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream) && mColor.SaveUndoData(Stream) &&
            mSpotConeAngle.SaveUndoData(Stream) && mSpotPenumbraAngle.SaveUndoData(Stream) && mPOVRaySpotTightness.SaveUndoData(Stream) &&
@@ -1556,7 +1556,7 @@ bool lcLight::LoadUndoData(QDataStream& Stream, const lcModel* Model)
 	Stream >> mLightType;
 	Stream >> mCastShadow;
 	Stream >> mAreaShape;
-	Stream >> mState;
+	Stream >> mHidden;
 
 	return mPosition.LoadUndoData(Stream) &&
         mRotation.LoadUndoData(Stream) &&

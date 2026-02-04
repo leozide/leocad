@@ -493,7 +493,7 @@ void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 		case lcObjectPropertyId::PieceStepShow:
 		case lcObjectPropertyId::PieceStepHide:
 		case lcObjectPropertyId::CameraName:
-		case lcObjectPropertyId::CameraType:
+		case lcObjectPropertyId::CameraProjection:
 			break;
 
 		case lcObjectPropertyId::CameraFOV:
@@ -1159,7 +1159,7 @@ void lcPropertiesWidget::CreateWidgets()
 	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
 	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
-	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), false, lcCamera::GetCameraTypeStrings());
+	AddStringListProperty(lcObjectPropertyId::CameraProjection, tr("Projection"), tr("Camera projection"), false, lcCamera::GetCameraProjectionStrings());
 
 	AddSpacing();
 
@@ -1414,7 +1414,7 @@ void lcPropertiesWidget::SetCamera(const std::vector<lcObject*>& Selection, lcOb
 	}
 
 	UpdateString(lcObjectPropertyId::CameraName);
-	UpdateStringList(lcObjectPropertyId::CameraType);
+	UpdateStringList(lcObjectPropertyId::CameraProjection);
 
 	UpdateFloat(lcObjectPropertyId::CameraFOV, FoV);
 	UpdateFloat(lcObjectPropertyId::CameraNear, ZNear);

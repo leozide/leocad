@@ -7,7 +7,7 @@ enum class lcObjectPropertyId
 	PieceStepShow,
 	PieceStepHide,
 	CameraName,
-	CameraType,
+	CameraProjection,
 	CameraFOV,
 	CameraNear,
 	CameraFar,

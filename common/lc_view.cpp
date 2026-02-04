@@ -249,7 +249,7 @@ lcMatrix44 lcView::GetProjectionMatrix() const
 {
 	float AspectRatio = (float)mWidth / (float)mHeight;
 
-	if (mCamera->IsOrtho())
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
 		float OrthoWidth = OrthoHeight * AspectRatio;
@@ -267,8 +267,8 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 
 	double ImageLeft, ImageRight, ImageBottom, ImageTop, Near, Far;
 	double AspectRatio = (double)ImageWidth / (double)ImageHeight;
-
-	if (mCamera->IsOrtho())
+	
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
 		float OrthoWidth = OrthoHeight * AspectRatio;
@@ -300,8 +300,8 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 	double Right = Left + (ImageRight - ImageLeft) * CurrentTileWidth / ImageWidth;
 	double Bottom = ImageBottom + (ImageTop - ImageBottom) * (CurrentRow * mHeight) / ImageHeight;
 	double Top = Bottom + (ImageTop - ImageBottom) * CurrentTileHeight / ImageHeight;
-
-	if (mCamera->IsOrtho())
+	
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 		return lcMatrix44Ortho(Left, Right, Bottom, Top, Near, Far);
 	else
 		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
@@ -1874,18 +1874,19 @@ void lcView::SetCameraIndex(size_t CameraIndex)
 	Redraw();
 }
 
-void lcView::SetProjection(bool Ortho)
+void lcView::SetCameraProjection(lcCameraProjection CameraProjection)
 {
 	if (mCamera->IsSimple())
 	{
-		mCamera->SetOrtho(Ortho);
+		mCamera->SetProjection(CameraProjection);
 		Redraw();
 	}
 	else
 	{
 		lcModel* ActiveModel = GetActiveModel();
+		
 		if (ActiveModel)
-			ActiveModel->SetCameraOrthographic(mCamera, Ortho);
+			ActiveModel->SetCameraProjection(mCamera, CameraProjection);
 	}
 }
 

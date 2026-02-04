@@ -5,7 +5,6 @@
 
 #define LC_CAMERA_HIDDEN            0x01
 #define LC_CAMERA_SIMPLE            0x02
-#define LC_CAMERA_ORTHO             0x04
 
 enum class lcViewpoint
 {
@@ -19,7 +18,7 @@ enum class lcViewpoint
 	Count
 };
 
-enum class lcCameraType
+enum class lcCameraProjection
 {
 	Perspective,
 	Orthographic,
@@ -46,8 +45,8 @@ public:
 	lcCamera& operator=(const lcCamera&) = delete;
 	lcCamera& operator=(lcCamera&&) = delete;
 
-	static QString GetCameraTypeString(lcCameraType CameraType);
-	static QStringList GetCameraTypeStrings();
+	static QString GetCameraProjectionString(lcCameraProjection CameraProjection);
+	static QStringList GetCameraProjectionStrings();
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
 	void CopyProperties(const lcCamera& Other);
@@ -65,25 +64,12 @@ public:
 		return (mState & LC_CAMERA_SIMPLE) != 0;
 	}
 
-	lcCameraType GetCameraType() const
+	lcCameraProjection GetProjection() const
 	{
-		return ((mState & LC_CAMERA_ORTHO) == 0) ? lcCameraType::Perspective : lcCameraType::Orthographic;
+		return mProjection;
 	}
 
-	bool SetCameraType(lcCameraType CameraType);
-
-	bool IsOrtho() const
-	{
-		return (mState & LC_CAMERA_ORTHO) != 0;
-	}
-
-	void SetOrtho(bool Ortho)
-	{
-		if (Ortho)
-			mState |= LC_CAMERA_ORTHO;
-		else
-			mState &= ~LC_CAMERA_ORTHO;
-	}
+	bool SetProjection(lcCameraProjection CameraProjection);
 
 	quint32 GetAllowedTransforms() const override
 	{
@@ -228,4 +214,5 @@ protected:
 
 	QString mName;
 	quint32 mState;
+	lcCameraProjection mProjection = lcCameraProjection::Perspective;
 };

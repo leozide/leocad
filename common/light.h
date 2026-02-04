@@ -3,9 +3,6 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_LIGHT_HIDDEN            0x0001
-#define LC_LIGHT_DISABLED          0x0002
-
 enum lcLightSection : quint32
 {
 	LC_LIGHT_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
@@ -172,7 +169,7 @@ public:
 
 	bool IsVisible() const
 	{
-		return (mState & LC_LIGHT_HIDDEN) == 0;
+		return !mHidden;
 	}
 
 	bool SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
@@ -332,8 +329,8 @@ protected:
 	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
 	lcObjectProperty<int> mPOVRayAreaGridX = lcObjectProperty<int>(2);
 	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
-
-	quint32 mState = 0;
+	
+	bool mHidden = false;
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
 	lcMatrix44 mWorldMatrix;
 

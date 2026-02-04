@@ -3702,9 +3702,9 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	}
 }
 
-void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
+void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection)
 {
-	if (Camera->IsOrtho() == Ortho)
+	if (Camera->GetProjection() == CameraProjection)
 		return;
 	
 	if (!Camera->IsSimple())
@@ -3713,7 +3713,7 @@ void lcModel::SetCameraOrthographic(lcCamera* Camera, bool Ortho)
 		BeginObjectEditAction(lcModelActionObjectEditMode::EditCamera, Camera);
 	}
 	
-	Camera->SetOrtho(Ortho);
+	Camera->SetProjection(CameraProjection);
 	Camera->UpdatePosition(mCurrentStep);
 	
 	if (!Camera->IsSimple())
@@ -3820,7 +3820,7 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 		break;
 
 	case lcObjectPropertyId::CameraFOV:

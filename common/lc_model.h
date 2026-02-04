@@ -4,6 +4,7 @@
 #include "lc_commands.h"
 
 enum class lcObjectPropertyId;
+enum class lcCameraProjection;
 class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
@@ -389,7 +390,7 @@ public:
 	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo);
 	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
-	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
+	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);
 	void SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint);
 	void SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint);
 	void SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint);

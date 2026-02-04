@@ -5,6 +5,7 @@
 #include "lc_commands.h"
 
 struct lcInsertPieceInfo;
+enum class lcCameraProjection;
 
 enum class lcDragState
 {
@@ -252,7 +253,7 @@ public:
 	void SetCamera(const QString& CameraName);
 	void SetCameraIndex(size_t CameraIndex);
 
-	void SetProjection(bool Ortho);
+	void SetCameraProjection(lcCameraProjection CameraProjection);
 	void LookAt();
 	void MoveCamera(const lcVector3& Direction);
 	void Zoom(float Amount);

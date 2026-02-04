@@ -27,8 +27,8 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 	case lcObjectPropertyId::CameraName:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Renaming Camera");
 
-	case lcObjectPropertyId::CameraType:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Camera Type");
+	case lcObjectPropertyId::CameraProjection:
+		return QT_TRANSLATE_NOOP("Checkpoint", "Changing Camera Projection");
 
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:

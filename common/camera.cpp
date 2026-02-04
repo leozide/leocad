@@ -65,35 +65,35 @@ void lcCamera::CopyProperties(const lcCamera& Other)
 	mPosition = Other.mPosition;
 	mTargetPosition = Other.mTargetPosition;
 	mUpVector = Other.mUpVector;
-
-	SetOrtho(Other.IsOrtho());
+	
+	mProjection = Other.mProjection;
 }
 
-QString lcCamera::GetCameraTypeString(lcCameraType CameraType)
+QString lcCamera::GetCameraProjectionString(lcCameraProjection CameraProjection)
 {
-	switch (CameraType)
+	switch (CameraProjection)
 	{
-	case lcCameraType::Perspective:
-		return QT_TRANSLATE_NOOP("Camera Type", "Perspective");
+	case lcCameraProjection::Perspective:
+		return QT_TRANSLATE_NOOP("Camera Projection", "Perspective");
 
-	case lcCameraType::Orthographic:
-		return QT_TRANSLATE_NOOP("Camera Type", "Orthographic");
+	case lcCameraProjection::Orthographic:
+		return QT_TRANSLATE_NOOP("Camera Projection", "Orthographic");
 
-	case lcCameraType::Count:
+	case lcCameraProjection::Count:
 		break;
 	}
 
 	return QString();
 }
 
-QStringList lcCamera::GetCameraTypeStrings()
+QStringList lcCamera::GetCameraProjectionStrings()
 {
-	QStringList CameraType;
+	QStringList CameraProjections;
 
-	for (int CameraTypeIndex = 0; CameraTypeIndex < static_cast<int>(lcCameraType::Count); CameraTypeIndex++)
-		CameraType.push_back(GetCameraTypeString(static_cast<lcCameraType>(CameraTypeIndex)));
+	for (int CameraProjectionIndex = 0; CameraProjectionIndex < static_cast<int>(lcCameraProjection::Count); CameraProjectionIndex++)
+		CameraProjections.push_back(GetCameraProjectionString(static_cast<lcCameraProjection>(CameraProjectionIndex)));
 
-	return CameraType;
+	return CameraProjections;
 }
 
 lcViewpoint lcCamera::GetViewpoint(const QString& ViewpointName)
@@ -175,15 +175,15 @@ void lcCamera::CreateName(const std::vector<std::unique_ptr<lcCamera>>& Cameras)
 	mName = Prefix + QString::number(MaxCameraNumber + 1);
 }
 
-bool lcCamera::SetCameraType(lcCameraType CameraType)
+bool lcCamera::SetProjection(lcCameraProjection CameraProjection)
 {
-	if (static_cast<int>(CameraType) < 0 || CameraType >= lcCameraType::Count)
+	if (static_cast<int>(CameraProjection) < 0 || CameraProjection >= lcCameraProjection::Count)
 		return false;
 
-	if (GetCameraType() == CameraType)
+	if (GetProjection() == CameraProjection)
 		return false;
-
-	SetOrtho(CameraType == lcCameraType::Orthographic);
+	
+	mProjection = CameraProjection;
 
 	return true;
 }
@@ -203,7 +203,7 @@ void lcCamera::SaveLDraw(QTextStream& Stream) const
 	if (IsHidden())
 		Stream << QLatin1String("HIDDEN");
 
-	if (IsOrtho())
+	if (mProjection == lcCameraProjection::Orthographic)
 		Stream << QLatin1String("ORTHOGRAPHIC ");
 
 	Stream << QLatin1String("NAME ") << mName << LineEnding;
@@ -219,7 +219,7 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 		if (Token == QLatin1String("HIDDEN"))
 			SetHidden(true);
 		else if (Token == QLatin1String("ORTHOGRAPHIC"))
-			SetOrtho(true);
+			SetProjection(lcCameraProjection::Orthographic);
 		else if (Token == QLatin1String("FOV"))
 			Stream >> m_fovy;
 		else if (Token == QLatin1String("ZNEAR"))
@@ -494,16 +494,16 @@ void lcCamera::CopyPosition(const lcCamera* Camera)
 	mPosition = Camera->mPosition;
 	mTargetPosition = Camera->mTargetPosition;
 	mUpVector = Camera->mUpVector;
-	mState |= (Camera->mState & LC_CAMERA_ORTHO);
+	mProjection = Camera->mProjection;
 }
 
-void lcCamera::CopySettings(const lcCamera* camera)
+void lcCamera::CopySettings(const lcCamera* Camera)
 {
-	m_fovy = camera->m_fovy;
-	m_zNear = camera->m_zNear;
-	m_zFar = camera->m_zFar;
+	m_fovy = Camera->m_fovy;
+	m_zNear = Camera->m_zNear;
+	m_zFar = Camera->m_zFar;
 
-	mState |= (camera->mState & LC_CAMERA_ORTHO);
+	mProjection = Camera->mProjection;
 }
 
 void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
@@ -670,8 +670,8 @@ QVariant lcCamera::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::CameraName:
 		return GetName();
 
-	case lcObjectPropertyId::CameraType:
-		return static_cast<int>(GetCameraType());
+	case lcObjectPropertyId::CameraProjection:
+		return static_cast<int>(GetProjection());
 
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
@@ -732,8 +732,8 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	case lcObjectPropertyId::CameraName:
 		return SetName(Value.toString());
 
-	case lcObjectPropertyId::CameraType:
-		return SetCameraType(static_cast<lcCameraType>(Value.toInt()));
+	case lcObjectPropertyId::CameraProjection:
+		return SetProjection(static_cast<lcCameraProjection>(Value.toInt()));
 
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
@@ -787,7 +787,7 @@ bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -848,7 +848,7 @@ bool lcCamera::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyF
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -916,7 +916,8 @@ bool lcCamera::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 	Stream << m_zNear;
 	Stream << m_zFar;
 	Stream << mName;
-	Stream << (mState & (LC_CAMERA_HIDDEN | LC_CAMERA_ORTHO));
+	Stream << mProjection;
+	Stream << (mState & LC_CAMERA_HIDDEN);
 
 	return mPosition.SaveUndoData(Stream) && mTargetPosition.SaveUndoData(Stream) && mUpVector.SaveUndoData(Stream);
 }
@@ -929,11 +930,12 @@ bool lcCamera::LoadUndoData(QDataStream& Stream, const lcModel* Model)
 	Stream >> m_zNear;
 	Stream >> m_zFar;
 	Stream >> mName;
+	Stream >> mProjection;
 
 	quint32 State;
 	Stream >> State;
 	
-	mState = (mState & ~(LC_CAMERA_HIDDEN | LC_CAMERA_ORTHO)) | State;
+	mState = (mState & ~LC_CAMERA_HIDDEN) | State;
 
 	return mPosition.LoadUndoData(Stream) && mTargetPosition.LoadUndoData(Stream) && mUpVector.LoadUndoData(Stream);
 }
@@ -1065,8 +1067,8 @@ void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey)
 {
 	lcVector3 Position, TargetPosition;
-
-	if (IsOrtho())
+	
+	if (GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
 
@@ -1125,8 +1127,8 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey)
 {
 	lcVector3 NewPosition;
-
-	if (IsOrtho())
+	
+	if (GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
 
@@ -1175,7 +1177,7 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 	FrontVector *= -5.0f * Distance;
 
 	// Don't zoom ortho in if it would cross the ortho focal plane.
-	if (IsOrtho())
+	if (GetProjection() == lcCameraProjection::Orthographic)
 	{
 		if ((Distance > 0) && (lcDot(mPosition + FrontVector - mTargetPosition, mPosition - mTargetPosition) <= 0))
 			return;
@@ -1185,8 +1187,8 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 		AddKey = false;
 
 	mPosition.ChangeKey(mPosition + FrontVector, Step, AddKey);
-
-	if (!IsOrtho())
+	
+	if (GetProjection() != lcCameraProjection::Orthographic)
 		mTargetPosition.ChangeKey(mTargetPosition + FrontVector, Step, AddKey);
 
 	UpdatePosition(Step);

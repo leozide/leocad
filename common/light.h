@@ -330,7 +330,6 @@ protected:
 	lcObjectProperty<int> mPOVRayAreaGridX = lcObjectProperty<int>(2);
 	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
 	
-	bool mHidden = false;
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
 	lcMatrix44 mWorldMatrix;
 

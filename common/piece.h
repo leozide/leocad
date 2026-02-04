@@ -275,7 +275,6 @@ protected:
 	lcStep mStepHide;
 
 	bool mPivotPointValid = false;
-	bool mHidden = false;
 	std::vector<lcPieceControlPoint> mControlPoints;
 	std::vector<bool> mTrainTrackConnections;
 	lcMesh* mMesh = nullptr;

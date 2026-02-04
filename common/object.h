@@ -148,6 +148,7 @@ private:
 	lcObjectType mObjectType;
 	
 protected:
+	bool mHidden = false;
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_OBJECT_SECTION_INVALID;
 };

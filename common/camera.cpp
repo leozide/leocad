@@ -14,13 +14,9 @@
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
 lcCamera::lcCamera(bool Simple)
-	: lcObject(lcObjectType::Camera)
+    : lcObject(lcObjectType::Camera), mSimple(Simple)
 {
-	Initialize();
-
-	if (Simple)
-		mState |= LC_CAMERA_SIMPLE;
-	else
+	if (!Simple)
 	{
 		mPosition.SetValue(lcVector3(-250.0f, -250.0f, 75.0f));
 		mTargetPosition.SetValue(lcVector3(0.0f, 0.0f, 0.0f));
@@ -42,8 +38,6 @@ lcCamera::lcCamera(const lcVector3& Position, const lcVector3& TargetPosition)
 		SideVector = lcCross(FrontVector, UpVector);
 	UpVector = lcCross(SideVector, FrontVector);
 	UpVector.Normalize();
-
-	Initialize();
 
 	mPosition.SetValue(Position);
 	mTargetPosition.SetValue(TargetPosition);
@@ -116,14 +110,6 @@ lcViewpoint lcCamera::GetViewpoint(const QString& ViewpointName)
 			return static_cast<lcViewpoint>(ViewpointIndex);
 
 	return lcViewpoint::Count;
-}
-
-void lcCamera::Initialize()
-{
-	m_fovy = 30.0f;
-	m_zNear = 25.0f;
-	m_zFar = 50000.0f;
-	mState = 0;
 }
 
 bool lcCamera::SetName(const QString& Name)
@@ -917,7 +903,7 @@ bool lcCamera::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
 	Stream << m_zFar;
 	Stream << mName;
 	Stream << mProjection;
-	Stream << (mState & LC_CAMERA_HIDDEN);
+	Stream << mHidden;
 
 	return mPosition.SaveUndoData(Stream) && mTargetPosition.SaveUndoData(Stream) && mUpVector.SaveUndoData(Stream);
 }
@@ -931,11 +917,7 @@ bool lcCamera::LoadUndoData(QDataStream& Stream, const lcModel* Model)
 	Stream >> m_zFar;
 	Stream >> mName;
 	Stream >> mProjection;
-
-	quint32 State;
-	Stream >> State;
-	
-	mState = (mState & ~LC_CAMERA_HIDDEN) | State;
+	Stream >> mHidden;
 
 	return mPosition.LoadUndoData(Stream) && mTargetPosition.LoadUndoData(Stream) && mUpVector.LoadUndoData(Stream);
 }

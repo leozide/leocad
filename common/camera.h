@@ -3,9 +3,6 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_CAMERA_HIDDEN            0x01
-#define LC_CAMERA_SIMPLE            0x02
-
 enum class lcViewpoint
 {
 	Front,
@@ -61,7 +58,7 @@ public:
 
 	bool IsSimple() const
 	{
-		return (mState & LC_CAMERA_SIMPLE) != 0;
+		return mSimple;
 	}
 
 	lcCameraProjection GetProjection() const
@@ -122,19 +119,18 @@ public:
 
 public:
 	bool IsVisible() const
-		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
+	{
+		return !mHidden;
+	}
 
 	bool IsHidden() const
 	{
-		return (mState & LC_CAMERA_HIDDEN) != 0;
+		return mHidden;
 	}
 
 	void SetHidden(bool Hidden)
 	{
-		if (Hidden)
-			mState |= LC_CAMERA_HIDDEN;
-		else
-			mState &= ~LC_CAMERA_HIDDEN;
+		mHidden = Hidden;
 	}
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
@@ -200,9 +196,9 @@ public:
 	void GetAngles(float& Latitude, float& Longitude, float& Distance) const;
 	void SetAngles(float Latitude, float Longitude, float Distance);
 
-	float m_fovy;
-	float m_zNear;
-	float m_zFar;
+	float m_fovy = 30.0f;
+	float m_zNear = 25.0f;
+	float m_zFar = 50000;
 
 	lcMatrix44 mWorldView;
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
@@ -210,9 +206,7 @@ public:
 	lcObjectProperty<lcVector3> mUpVector = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 
 protected:
-	void Initialize();
-
 	QString mName;
-	quint32 mState;
+	bool mSimple = false;
 	lcCameraProjection mProjection = lcCameraProjection::Perspective;
 };

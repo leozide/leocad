@@ -10,6 +10,8 @@ enum class lcObjectType
 	Light
 };
 
+enum class lcObjectId : uint32_t;
+
 struct lcObjectSection
 {
 	lcObject* Object = nullptr;
@@ -89,6 +91,11 @@ public:
 		return mObjectType;
 	}
 	
+	lcObjectId GetId() const
+	{
+		return mId;
+	}
+	
 	bool IsSelected() const
 	{
 		return mSelected;
@@ -139,8 +146,6 @@ public:
 	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
 	virtual bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) = 0;
 	virtual void RemoveKeyFrames() = 0;
-	virtual bool SaveUndoData(QDataStream& Stream, const lcModel* Model) const = 0;
-	virtual bool LoadUndoData(QDataStream& Stream, const lcModel* Model) = 0;
 	virtual QString GetName() const = 0;
 	static QString GetCheckpointString(lcObjectPropertyId PropertyId);
 
@@ -151,4 +156,7 @@ protected:
 	bool mHidden = false;
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_OBJECT_SECTION_INVALID;
+	lcObjectId mId = static_cast<lcObjectId>(0);
+	
+	static lcObjectId mNextId;
 };

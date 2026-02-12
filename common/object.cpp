@@ -1,9 +1,12 @@
 #include "lc_global.h"
 #include "object.h"
 
+lcObjectId lcObject::mNextId;
+
 lcObject::lcObject(lcObjectType ObjectType)
-	: mObjectType(ObjectType)
+    : mObjectType(ObjectType), mId(mNextId)
 {
+	mNextId = static_cast<lcObjectId>(static_cast<uint32_t>(mNextId) + 1);
 }
 
 lcObject::~lcObject()

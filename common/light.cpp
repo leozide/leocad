@@ -19,6 +19,11 @@
 static const std::array<QLatin1String, static_cast<int>(lcLightType::Count)> gLightTypes = { QLatin1String("POINT"), QLatin1String("SPOT"), QLatin1String("DIRECTIONAL"), QLatin1String("AREA") };
 static const std::array<QLatin1String, static_cast<int>(lcLightAreaShape::Count)> gLightAreaShapes = { QLatin1String("RECTANGLE"), QLatin1String("SQUARE"), QLatin1String("DISK"), QLatin1String("ELLIPSE") };
 
+lcLight::lcLight()
+    : lcObject(lcObjectType::Light)
+{
+}
+
 lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	: lcObject(lcObjectType::Light), mLightType(LightType)
 {
@@ -1529,49 +1534,58 @@ void lcLight::RemoveKeyFrames()
 	mPOVRayFadePower.RemoveAllKeys();
 }
 
-bool lcLight::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
+lcLightHistoryState lcLight::GetHistoryState(const lcModel* Model) const
 {
-	static_assert(sizeof(lcLight) == 704);
-	Q_UNUSED(Model);
+	lcLightHistoryState State;
 	
-	Stream << mName;
-	Stream << mLightType;
-	Stream << mCastShadow;
-	Stream << mAreaShape;
-	Stream << mHidden;
+	State.Id = mId;
+	State.Hidden = mHidden;
+	State.Name = mName;
+	State.LightType = mLightType;
+	State.CastShadow = mCastShadow;
+	State.Position = mPosition;
+	State.Rotation = mRotation;
+	State.Color = mColor;
+	State.BlenderPower = mBlenderPower;
+	State.BlenderRadius = mBlenderRadius;
+	State.BlenderAngle = mBlenderAngle;
+	State.POVRayPower = mPOVRayPower;
+	State.POVRayFadeDistance = mPOVRayFadeDistance;
+	State.POVRayFadePower = mPOVRayFadePower;
+	State.SpotConeAngle = mSpotConeAngle;
+	State.SpotPenumbraAngle = mSpotPenumbraAngle;
+	State.POVRaySpotTightness = mPOVRaySpotTightness;
+	State.AreaShape = mAreaShape;
+	State.AreaSizeX = mAreaSizeX;
+	State.AreaSizeY = mAreaSizeY;
+	State.POVRayAreaGridX = mPOVRayAreaGridX;
+	State.POVRayAreaGridY = mPOVRayAreaGridY;
 
-	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream) && mColor.SaveUndoData(Stream) &&
-           mSpotConeAngle.SaveUndoData(Stream) && mSpotPenumbraAngle.SaveUndoData(Stream) && mPOVRaySpotTightness.SaveUndoData(Stream) &&
-	       mPOVRayAreaGridX.SaveUndoData(Stream) && mPOVRayAreaGridY.SaveUndoData(Stream) && mBlenderRadius.SaveUndoData(Stream) &&
-	       mBlenderAngle.SaveUndoData(Stream) && mAreaSizeX.SaveUndoData(Stream) && mAreaSizeY.SaveUndoData(Stream) &&
-	       mBlenderPower.SaveUndoData(Stream) && mPOVRayPower.SaveUndoData(Stream) && mPOVRayFadeDistance.SaveUndoData(Stream) &&
-	       mPOVRayFadePower.SaveUndoData(Stream);
+	return State;
 }
 
-bool lcLight::LoadUndoData(QDataStream& Stream, const lcModel* Model)
+void lcLight::SetHistoryState(const lcLightHistoryState& State, const lcModel* Model)
 {
-	Q_UNUSED(Model);
-	
-	Stream >> mName;
-	Stream >> mLightType;
-	Stream >> mCastShadow;
-	Stream >> mAreaShape;
-	Stream >> mHidden;
-
-	return mPosition.LoadUndoData(Stream) &&
-        mRotation.LoadUndoData(Stream) &&
-        mColor.LoadUndoData(Stream) &&
-        mSpotConeAngle.LoadUndoData(Stream) &&
-        mSpotPenumbraAngle.LoadUndoData(Stream) &&
-        mPOVRaySpotTightness.LoadUndoData(Stream) &&
-        mPOVRayAreaGridX.LoadUndoData(Stream) &&
-        mPOVRayAreaGridY.LoadUndoData(Stream) &&
-        mBlenderRadius.LoadUndoData(Stream) &&
-        mBlenderAngle.LoadUndoData(Stream) &&
-        mAreaSizeX.LoadUndoData(Stream) &&
-        mAreaSizeY.LoadUndoData(Stream) &&
-        mBlenderPower.LoadUndoData(Stream) &&
-        mPOVRayPower.LoadUndoData(Stream) &&
-        mPOVRayFadeDistance.LoadUndoData(Stream) &&
-        mPOVRayFadePower.LoadUndoData(Stream);
+	mId = State.Id;
+	mHidden = State.Hidden;
+	mName = State.Name;
+	mLightType = State.LightType;
+	mCastShadow = State.CastShadow;
+	mPosition = State.Position;
+	mRotation = State.Rotation;
+	mColor = State.Color;
+	mBlenderPower = State.BlenderPower;
+	mBlenderRadius = State.BlenderRadius;
+	mBlenderAngle = State.BlenderAngle;
+	mPOVRayPower = State.POVRayPower;
+	mPOVRayFadeDistance = State.POVRayFadeDistance;
+	mPOVRayFadePower = State.POVRayFadePower;
+	mSpotConeAngle = State.SpotConeAngle;
+	mSpotPenumbraAngle = State.SpotPenumbraAngle;
+	mPOVRaySpotTightness = State.POVRaySpotTightness;
+	mAreaShape = State.AreaShape;
+	mAreaSizeX = State.AreaSizeX;
+	mAreaSizeY = State.AreaSizeY;
+	mPOVRayAreaGridX = State.POVRayAreaGridX;
+	mPOVRayAreaGridY = State.POVRayAreaGridY;
 }

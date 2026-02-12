@@ -28,9 +28,47 @@ enum class lcLightAreaShape
 	Count
 };
 
+struct lcLightHistoryState
+{
+	lcObjectId Id;
+	bool Hidden;
+	QString Name;
+	lcLightType LightType;
+	bool CastShadow;
+	lcObjectProperty<lcVector3> Position;
+	lcObjectProperty<lcMatrix33> Rotation;
+	lcObjectProperty<lcVector3> Color;
+	lcObjectProperty<float> BlenderPower;
+	lcObjectProperty<float> BlenderRadius;
+	lcObjectProperty<float> BlenderAngle;
+	lcObjectProperty<float> POVRayPower;
+	lcObjectProperty<float> POVRayFadeDistance;
+	lcObjectProperty<float> POVRayFadePower;
+	lcObjectProperty<float> SpotConeAngle;
+	lcObjectProperty<float> SpotPenumbraAngle;
+	lcObjectProperty<float> POVRaySpotTightness;
+	lcLightAreaShape AreaShape;
+	lcObjectProperty<float> AreaSizeX;
+	lcObjectProperty<float> AreaSizeY;
+	lcObjectProperty<int> POVRayAreaGridX;
+	lcObjectProperty<int> POVRayAreaGridY;
+	
+	bool operator==(const lcLightHistoryState& Other) const
+	{
+		return Id == Other.Id && Hidden == Other.Hidden && Name == Other.Name && LightType == Other.LightType &&
+            CastShadow == Other.CastShadow && Position == Other.Position && Rotation == Other.Rotation && Color == Other.Color &&
+            BlenderPower == Other.BlenderPower && BlenderRadius == Other.BlenderRadius && BlenderAngle == Other.BlenderAngle &&
+            POVRayPower == Other.POVRayPower && POVRayFadeDistance == Other.POVRayFadeDistance && POVRayFadePower == Other.POVRayFadePower &&
+            SpotConeAngle == Other.SpotConeAngle && SpotPenumbraAngle == Other.SpotPenumbraAngle &&
+            POVRaySpotTightness == Other.POVRaySpotTightness && AreaShape == Other.AreaShape && AreaSizeX == Other.AreaSizeX &&
+            AreaSizeY == Other.AreaSizeY && POVRayAreaGridX == Other.POVRayAreaGridX && POVRayAreaGridY == Other.POVRayAreaGridY;
+	}
+};
+
 class lcLight : public lcObject
 {
 public:
+	lcLight();
 	lcLight(const lcVector3& Position, lcLightType LightType);
 	virtual ~lcLight() = default;
 
@@ -161,8 +199,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	bool SaveUndoData(QDataStream& Stream, const lcModel* Model) const override;
-	bool LoadUndoData(QDataStream& Stream, const lcModel* Model) override;
+	lcLightHistoryState GetHistoryState(const lcModel* Model) const;
+	void SetHistoryState(const lcLightHistoryState& State, const lcModel* Model);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

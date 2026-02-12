@@ -20,15 +20,17 @@
 
 constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
 
+lcPiece::lcPiece()
+    : lcObject(lcObjectType::Piece)
+{
+}
+
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(lcObjectType::Piece)
 {
 	SetPieceInfo(Info, QString(), true, true);
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
-	mStepShow = 1;
-	mStepHide = LC_STEP_MAX;
-	mGroup = nullptr;
 	mPivotMatrix = lcMatrix44Identity();
 }
 
@@ -935,89 +937,68 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
-bool lcPiece::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
+lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 {
-	static_assert(sizeof(lcPiece) == 384);
+	lcPieceHistoryState State;
 	
-	Stream << mFileLine;
-	Stream << mID;
+	State.Id = mId;
+	State.Hidden = mHidden;
+	State.FileLine = mFileLine;
+	State.PieceId = mID;
+	State.GroupIndex = ~0;
+	State.ColorIndex = mColorIndex;
+	State.ColorCode = mColorCode;
+	State.StepShow = mStepShow;
+	State.StepHide = mStepHide;
+	State.PivotMatrix = mPivotMatrix;
+	State.PivotPointValid = mPivotPointValid;
+	State.ControlPoints = mControlPoints;
+	State.Position = mPosition;
+	State.Rotation = mRotation;
 	
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	uint64_t ParentIndex = UINT64_MAX;
 	
 	if (mGroup)
-		for (ParentIndex = 0; ParentIndex < Groups.size(); ParentIndex++)
-			if (mGroup == Groups[ParentIndex].get())
+	{
+		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
+		{
+			if (mGroup == Groups[GroupIndex].get())
+			{
+				State.GroupIndex = GroupIndex;
 				break;
+			}
+		}
+	}
 	
-	Stream << ParentIndex;
-	Stream << mColorIndex;
-	Stream << mColorCode;
-
-	Stream << mStepShow;
-	Stream << mStepHide;
-
-	Stream << mPivotMatrix;
-	Stream << mPivotPointValid;
-
-	Stream << mHidden;
-	
-	size_t ControlPointCount = mControlPoints.size();
-	qint64 DataSize = ControlPointCount * sizeof(lcPieceControlPoint);
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&ControlPointCount), sizeof(ControlPointCount)) != sizeof(ControlPointCount))
-		return false;
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(mControlPoints.data()), DataSize) != DataSize)
-		return false;
-	
-	return mPosition.SaveUndoData(Stream) && mRotation.SaveUndoData(Stream);	
+	return State;
 }
 
-bool lcPiece::LoadUndoData(QDataStream& Stream, const lcModel* Model)
+void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model)
 {
-	Stream >> mFileLine;
-	Stream >> mID;
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	
+	mId = State.Id;
+	mHidden = State.Hidden;
+	mFileLine = State.FileLine;
+	mID = State.PieceId;
+	mGroup = (State.GroupIndex < Groups.size()) ? Groups[State.GroupIndex].get() : nullptr;;
+	mColorIndex = State.ColorIndex;
+	mColorCode = State.ColorCode;
+	mStepShow = State.StepShow;
+	mStepHide = State.StepHide;
+	mPivotMatrix = State.PivotMatrix;
+	mPivotPointValid = State.PivotPointValid;
+	mControlPoints = State.ControlPoints;
+	mPosition = State.Position;
+	mRotation = State.Rotation;
 	
 	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
 	
 	SetPieceInfo(Info, mID, true, false);
 	
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	uint64_t ParentIndex;
-	
-	Stream >> ParentIndex;
-	
-	mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
-	
-	Stream >> mColorIndex;
-	Stream >> mColorCode;
-
-	Stream >> mStepShow;
-	Stream >> mStepHide;
-
-	Stream >> mPivotMatrix;
-	Stream >> mPivotPointValid;
-
-	Stream >> mHidden;
-	
-	size_t ControlPointCount;
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(&ControlPointCount), sizeof(ControlPointCount)) != sizeof(ControlPointCount))
-		return false;
-	
-	mControlPoints.resize(ControlPointCount);
-	
-	qsizetype DataSize = ControlPointCount * sizeof(lcPieceControlPoint);
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(mControlPoints.data()), DataSize) != DataSize)
-		return false;
-	
 	UpdateMesh();
 	
-//	std::vector<bool> mTrainTrackConnections;
-
-	return mPosition.LoadUndoData(Stream) && mRotation.LoadUndoData(Stream);
+	//	std::vector<bool> mTrainTrackConnections;
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const

@@ -30,11 +30,34 @@ enum lcCameraSection : quint32
 	LC_CAMERA_SECTION_UPVECTOR
 };
 
+struct lcCameraHistoryState
+{
+	lcObjectId Id;
+	bool Hidden;
+	bool Simple;
+	float Fovy;
+	float NearPlane;
+	float FarPlane;
+	lcCameraProjection Projection;
+	lcObjectProperty<lcVector3> Position;
+	lcObjectProperty<lcVector3> TargetPosition;
+	lcObjectProperty<lcVector3> UpVector;
+	QString Name;
+	
+	bool operator==(const lcCameraHistoryState& Other) const
+	{
+		return Id == Other.Id && Hidden == Other.Hidden && Simple == Other.Simple && Fovy == Other.Fovy &&
+            NearPlane == Other.NearPlane && FarPlane == Other.FarPlane && Projection == Other.Projection &&
+            Position == Other.Position && TargetPosition == Other.TargetPosition && UpVector == Other.UpVector && Name == Other.Name;
+	}
+};
+
 class lcCamera : public lcObject
 {
 public:
+	lcCamera();
 	lcCamera(bool Simple);
-	lcCamera(const lcVector3& Position, const lcVector3& TargetPosition);
+	lcCamera(bool Simple, const lcVector3& Position, const lcVector3& TargetPosition);
 	virtual ~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
@@ -167,8 +190,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	bool SaveUndoData(QDataStream& Stream, const lcModel* Model) const override;
-	bool LoadUndoData(QDataStream& Stream, const lcModel* Model) override;
+	lcCameraHistoryState GetHistoryState(const lcModel* Model) const;
+	void SetHistoryState(const lcCameraHistoryState& State, const lcModel* Model);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -207,6 +230,6 @@ public:
 
 protected:
 	QString mName;
-	bool mSimple = false;
+	bool mSimple = true;
 	lcCameraProjection mProjection = lcCameraProjection::Perspective;
 };

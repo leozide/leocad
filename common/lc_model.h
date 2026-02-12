@@ -5,6 +5,7 @@
 
 enum class lcObjectPropertyId;
 enum class lcCameraProjection;
+struct lcModelHistoryState;
 class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
@@ -229,7 +230,11 @@ public:
 	void ShowNextStep();
 	void InsertStep(lcStep Step);
 	void RemoveStep(lcStep Step);
-
+	
+	template<typename StateType, typename ObjectType>
+	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
+	void LoadHistoryState(const lcModelHistoryState& HistoryState);
+	
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
 	void RemovePieces(const std::vector<size_t>& PieceIndices);

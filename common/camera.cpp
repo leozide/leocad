@@ -13,6 +13,11 @@
 
 #define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
+lcCamera::lcCamera()
+    : lcObject(lcObjectType::Camera)
+{
+}
+
 lcCamera::lcCamera(bool Simple)
     : lcObject(lcObjectType::Camera), mSimple(Simple)
 {
@@ -26,8 +31,8 @@ lcCamera::lcCamera(bool Simple)
 	}
 }
 
-lcCamera::lcCamera(const lcVector3& Position, const lcVector3& TargetPosition)
-	: lcObject(lcObjectType::Camera)
+lcCamera::lcCamera(bool Simple, const lcVector3& Position, const lcVector3& TargetPosition)
+    : lcObject(lcObjectType::Camera), mSimple(Simple)
 {
 	// Fix the up vector
 	lcVector3 UpVector(0, 0, 1), FrontVector(Position - TargetPosition), SideVector;
@@ -893,33 +898,38 @@ void lcCamera::RemoveKeyFrames()
 	mUpVector.RemoveAllKeys();
 }
 
-bool lcCamera::SaveUndoData(QDataStream& Stream, const lcModel* Model) const
+lcCameraHistoryState lcCamera::GetHistoryState(const lcModel* Model) const
 {
-	static_assert(sizeof(lcCamera) == 248);
-	Q_UNUSED(Model);
+	lcCameraHistoryState State;
 	
-	Stream << m_fovy;
-	Stream << m_zNear;
-	Stream << m_zFar;
-	Stream << mName;
-	Stream << mProjection;
-	Stream << mHidden;
-
-	return mPosition.SaveUndoData(Stream) && mTargetPosition.SaveUndoData(Stream) && mUpVector.SaveUndoData(Stream);
+	State.Id = mId;
+	State.Hidden = mHidden;
+	State.Simple = mSimple;
+	State.Fovy = m_fovy;
+	State.NearPlane = m_zNear;
+	State.FarPlane = m_zFar;
+	State.Projection = mProjection;
+	State.Position = mPosition;
+	State.TargetPosition = mTargetPosition;
+	State.UpVector = mUpVector;
+	State.Name = mName;
+	
+	return State;
 }
 
-bool lcCamera::LoadUndoData(QDataStream& Stream, const lcModel* Model)
+void lcCamera::SetHistoryState(const lcCameraHistoryState& State, const lcModel* Model)
 {
-	Q_UNUSED(Model);
-	
-	Stream >> m_fovy;
-	Stream >> m_zNear;
-	Stream >> m_zFar;
-	Stream >> mName;
-	Stream >> mProjection;
-	Stream >> mHidden;
-
-	return mPosition.LoadUndoData(Stream) && mTargetPosition.LoadUndoData(Stream) && mUpVector.LoadUndoData(Stream);
+	mId = State.Id;
+	mHidden = State.Hidden;
+	mSimple = State.Simple;
+	m_fovy = State.Fovy;
+	m_zNear = State.NearPlane;
+	m_zFar = State.FarPlane;
+	mProjection = State.Projection;
+	mPosition = State.Position;
+	mTargetPosition = State.TargetPosition;
+	mUpVector = State.UpVector;
+	mName = State.Name;
 }
 
 void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const

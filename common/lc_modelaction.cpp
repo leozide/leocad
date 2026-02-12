@@ -143,332 +143,60 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 }
 
 lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mode)
-	: mMode(Mode)
 {
 }
 
-
-bool lcModelActionObjectEdit::SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model)
+void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcModel* Model)
 {
-	QDataStream Stream(&Buffer, QIODevice::WriteOnly);
-	
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+	
+	for (const std::unique_ptr<lcGroup>& Group : Groups)
+		State.Groups.emplace_back(Group->GetHistoryState(Model));
+	
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
+	
+	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
+		State.Pieces.emplace_back(Piece->GetHistoryState(Model));
+	
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
+	
+	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
+		State.Cameras.emplace_back(Camera->GetHistoryState(Model));
+	
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
 	
-	uint64_t ObjectCount[4] = { Groups.size(), Pieces.size(), Cameras.size(), Lights.size() };
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
-		return false;
-	
-	for (size_t GroupIndex : mGroupIndices)
-	{
-		const lcGroup* Group = Groups[GroupIndex].get();
-		uint64_t ParentIndex = UINT64_MAX;
-		
-		if (Group->mGroup)
-			for (ParentIndex = 0; ParentIndex < Groups.size(); ParentIndex++)
-				if (Group->mGroup == Groups[ParentIndex].get())
-					break;
-		
-		Stream << Group->mName;
-		Stream << ParentIndex;
-	}
-	
-	for (size_t PieceIndex : mPieceIndices)
-		if (!Pieces[PieceIndex]->SaveUndoData(Stream, Model))
-			return false;
-	
-	for (size_t CameraIndex : mCameraIndices)
-		if (!Cameras[CameraIndex]->SaveUndoData(Stream, Model))
-			return false;
-	
-	for (size_t LightIndex : mLightIndices)
-		if (!Lights[LightIndex]->SaveUndoData(Stream, Model))
-			return false;
-	
-	return true;
+	for (const std::unique_ptr<lcLight>& Light : Lights)
+		State.Lights.emplace_back(Light->GetHistoryState(Model));
 }
 
-bool lcModelActionObjectEdit::LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const
+void lcModelActionObjectEdit::LoadState(const lcModelHistoryState& State, lcModel* Model)
 {
-	QDataStream Stream(const_cast<QByteArray*>(&Buffer), QIODevice::ReadOnly);
-	
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-	
-	uint64_t ObjectCount[4];
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(ObjectCount), sizeof(ObjectCount)) != sizeof(ObjectCount))
-		return false;
-	
-	if (CreateObjects)
-	{
-		ObjectCount[0] -= mGroupIndices.size();
-		ObjectCount[1] -= mPieceIndices.size();
-		ObjectCount[2] -= mCameraIndices.size();
-		ObjectCount[3] -= mLightIndices.size();
-	}
-	
-	if (ObjectCount[0] != Groups.size() || ObjectCount[1] != Pieces.size() || ObjectCount[2] != Cameras.size() || ObjectCount[3] != Lights.size())
-		return false;
-	
-	if (CreateObjects)
-	{
-		for (size_t GroupIndex : mGroupIndices)
-		{
-			std::unique_ptr<lcGroup> Group(new lcGroup());
-			QString Name;
-			uint64_t ParentIndex;
-			
-			Stream >> Name;
-			Stream >> ParentIndex;
-			
-			Group->mName = Name;
-			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
-			
-			Model->AddGroup(std::move(Group), GroupIndex);			
-		}
-		
-		for (size_t PieceIndex : mPieceIndices)
-		{
-			if (PieceIndex > Pieces.size())
-				return false;
-			
-			std::unique_ptr<lcPiece> Piece(new lcPiece(nullptr));
-			
-			if (!Piece->LoadUndoData(Stream, Model))
-				return false;
-			
-			Model->AddPiece(std::move(Piece), PieceIndex);
-		}
-		
-		for (size_t CameraIndex : mCameraIndices)
-		{
-			if (CameraIndex > Cameras.size())
-				return false;
-			
-			std::unique_ptr<lcCamera> Camera(new lcCamera(false));
-			
-			if (!Camera->LoadUndoData(Stream, Model))
-				return false;
-			
-			Model->AddCamera(std::move(Camera), CameraIndex);
-		}
-		
-		for (size_t LightIndex : mLightIndices)
-		{
-			if (LightIndex > Lights.size())
-				return false;
-			
-			std::unique_ptr<lcLight> Light(new lcLight(lcVector3(0.0f, 0.0f, 0.0f), lcLightType::Point));
-			
-			if (!Light->LoadUndoData(Stream, Model))
-				return false;
-			
-			Model->AddLight(std::move(Light), LightIndex);
-		}
-	}
-	else
-	{
-		for (size_t GroupIndex : mGroupIndices)
-		{
-			lcGroup* Group = Groups[GroupIndex].get();
-			QString Name;
-			uint64_t ParentIndex;
-			
-			Stream >> Name;
-			Stream >> ParentIndex;
-			
-			Group->mName = Name;
-			Group->mGroup = ParentIndex < Groups.size() ? Groups[ParentIndex].get() : nullptr;
-		}
-		
-		for (size_t PieceIndex : mPieceIndices)
-		{
-			if (PieceIndex >= Pieces.size())
-				return false;
-			
-			const std::unique_ptr<lcPiece>& Piece = Pieces[PieceIndex];
-			
-			if (!Piece->LoadUndoData(Stream, Model))
-				return false;
-		}
-		
-		for (size_t CameraIndex : mCameraIndices)
-		{
-			if (CameraIndex >= Cameras.size())
-				return false;
-			
-			const std::unique_ptr<lcCamera>& Camera = Cameras[CameraIndex];
-			
-			if (!Camera->LoadUndoData(Stream, Model))
-				return false;
-		}
-		
-		for (size_t LightIndex : mLightIndices)
-		{
-			if (LightIndex >= Lights.size())
-				return false;
-			
-			const std::unique_ptr<lcLight>& Light = Lights[LightIndex];
-			
-			if (!Light->LoadUndoData(Stream, Model))
-				return false;
-		}
-	}
-	
-	return true;
+	Model->LoadHistoryState(State);
 }
 
-bool lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
 {
-	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-	
-	switch (mMode)
-	{
-	case lcModelActionObjectEditMode::EditAllObjects:
-		mPieceIndices.resize(Pieces.size());
-		std::iota(mPieceIndices.begin(), mPieceIndices.end(), 0);
-		
-		mCameraIndices.resize(Cameras.size());
-		std::iota(mCameraIndices.begin(), mCameraIndices.end(), 0);
-		
-		mLightIndices.resize(Lights.size());
-		std::iota(mLightIndices.begin(), mLightIndices.end(), 0);
-		break;
-		
-	case lcModelActionObjectEditMode::EditAllPieces:
-		mPieceIndices.resize(Pieces.size());
-		std::iota(mPieceIndices.begin(), mPieceIndices.end(), 0);
-		break;
-		
-	case lcModelActionObjectEditMode::EditSelectedObjects:
-		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
-			if (Pieces[PieceIndex]->IsSelected())
-				mPieceIndices.push_back(PieceIndex);
-		
-		for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
-			if (Cameras[CameraIndex]->IsSelected())
-				mCameraIndices.push_back(CameraIndex);
-		
-		for (size_t LightIndex = 0; LightIndex < Lights.size(); LightIndex++)
-			if (Lights[LightIndex]->IsSelected())
-				mLightIndices.push_back(LightIndex);
-		break;
-		
-	case lcModelActionObjectEditMode::EditSelectedPieces:
-		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
-			if (Pieces[PieceIndex]->IsSelected())
-				mPieceIndices.push_back(PieceIndex);
-		break;
-		
-	case lcModelActionObjectEditMode::EditUnselectedPieces:
-		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
-			if (!Pieces[PieceIndex]->IsSelected())
-				mPieceIndices.push_back(PieceIndex);
-		break;
-		
-	case lcModelActionObjectEditMode::EditCamera:
-		for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
-		{
-			if (Cameras[CameraIndex].get() == Camera)
-			{
-				mCameraIndices.push_back(CameraIndex);
-				break;
-			}
-		}
-		break;
-	
-	case lcModelActionObjectEditMode::CreatePieces:
-	case lcModelActionObjectEditMode::CreateCamera:
-	case lcModelActionObjectEditMode::CreateLight:
-		break;
-	};
-	
-	return SaveHistoryBuffer(mStartBuffer, Model);
+	SaveState(mStartState, Model);
 }
 
-bool lcModelActionObjectEdit::SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices)
+void lcModelActionObjectEdit::SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices)
 {
-	switch (mMode)
-	{
-	case lcModelActionObjectEditMode::EditAllObjects:
-	case lcModelActionObjectEditMode::EditAllPieces:
-	case lcModelActionObjectEditMode::EditSelectedObjects:
-	case lcModelActionObjectEditMode::EditSelectedPieces:
-	case lcModelActionObjectEditMode::EditUnselectedPieces:
-	case lcModelActionObjectEditMode::EditCamera:
-		break;
-	
-	case lcModelActionObjectEditMode::CreatePieces:
-		mPieceIndices = std::move(ObjectIndices);
-		mGroupIndices = std::move(GroupIndices);
-		break;
-		
-	case lcModelActionObjectEditMode::CreateCamera:
-		mCameraIndices = std::move(ObjectIndices);
-		break;
-		
-	case lcModelActionObjectEditMode::CreateLight:
-		mLightIndices = std::move(ObjectIndices);
-		break;
-	};
-	
-	return SaveHistoryBuffer(mEndBuffer, Model);	
+	SaveState(mEndState, Model);
 }
 
 void lcModelActionObjectEdit::LoadStartState(lcModel* Model) const
 {
-	switch (mMode)
-	{
-	case lcModelActionObjectEditMode::EditAllObjects:
-	case lcModelActionObjectEditMode::EditAllPieces:
-	case lcModelActionObjectEditMode::EditSelectedObjects:
-	case lcModelActionObjectEditMode::EditSelectedPieces:
-	case lcModelActionObjectEditMode::EditUnselectedPieces:
-	case lcModelActionObjectEditMode::EditCamera:
-		LoadHistoryBuffer(mStartBuffer, Model, false);
-		break;
-	
-	case lcModelActionObjectEditMode::CreatePieces:
-		Model->RemovePieces(mPieceIndices);
-		break;
-		
-	case lcModelActionObjectEditMode::CreateCamera:
-   		Model->RemoveCameras(mCameraIndices);
-		break;
-		
-	case lcModelActionObjectEditMode::CreateLight:
-		Model->RemoveLights(mLightIndices);
-		break;
-	};
+	LoadState(mStartState, Model);
 }
 
 void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
 {
-	switch (mMode)
-	{
-	case lcModelActionObjectEditMode::EditAllObjects:
-	case lcModelActionObjectEditMode::EditAllPieces:
-	case lcModelActionObjectEditMode::EditSelectedObjects:
-	case lcModelActionObjectEditMode::EditSelectedPieces:
-	case lcModelActionObjectEditMode::EditUnselectedPieces:
-	case lcModelActionObjectEditMode::EditCamera:
-		LoadHistoryBuffer(mEndBuffer, Model, false);
-		break;
-	
-	case lcModelActionObjectEditMode::CreatePieces:
-	case lcModelActionObjectEditMode::CreateCamera:
-	case lcModelActionObjectEditMode::CreateLight:
-		LoadHistoryBuffer(mEndBuffer, Model, true);
-		break;
-	};
+	LoadState(mEndState, Model);
+}
+
+bool lcModelActionObjectEdit::StateChanged() const
+{
+	return mStartState != mEndState;
 }
 
 lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)

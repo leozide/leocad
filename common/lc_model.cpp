@@ -1809,6 +1809,49 @@ void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelect
 		ModelActionSelection->LoadStartState(this);
 }
 
+template<typename StateType, typename ObjectType>
+void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects)
+{
+	std::vector<std::unique_ptr<ObjectType>> NewObjects;
+	
+	NewObjects.reserve(ObjectStates.size());
+	
+	for (const StateType& ObjectState : ObjectStates)
+	{
+		auto ObjectId = ObjectState.Id;
+		bool Found = false;
+		
+		for (auto ObjectIt = Objects.begin(); ObjectIt != Objects.end(); ++ObjectIt)
+		{
+			ObjectType* Object = ObjectIt->get();
+			
+			if (Object->GetId() == ObjectId)
+			{
+				NewObjects.emplace_back(std::move(*ObjectIt));
+				Objects.erase(ObjectIt);
+				Found = true;
+				break;
+			}
+		}
+		
+		if (!Found)
+			NewObjects.emplace_back(new ObjectType());
+	}
+	
+	Objects = std::move(NewObjects);
+	
+	for (size_t ObjectIndex = 0; ObjectIndex < Objects.size(); ObjectIndex++)
+		Objects[ObjectIndex]->SetHistoryState(ObjectStates[ObjectIndex], this);
+}
+
+void lcModel::LoadHistoryState(const lcModelHistoryState& HistoryState)
+{
+	LoadObjectHistoryState(HistoryState.Groups, mGroups);
+	LoadObjectHistoryState(HistoryState.Pieces, mPieces);
+	LoadObjectHistoryState(HistoryState.Cameras, mCameras);
+	LoadObjectHistoryState(HistoryState.Lights, mLights);
+}
+
 void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera)
 {
 	std::unique_ptr<lcModelActionObjectEdit> ModelActionObjectEdit = std::make_unique<lcModelActionObjectEdit>(ModelActionObjectEditMode);
@@ -1816,8 +1859,7 @@ void lcModel::BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjec
 	if (!ModelActionObjectEdit)
 		return;
 	
-	if (!ModelActionObjectEdit->SaveStartState(this, Camera))
-		return;
+	ModelActionObjectEdit->SaveStartState(this, Camera);
 
 	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
 }
@@ -1832,7 +1874,9 @@ void lcModel::EndObjectEditAction(std::vector<size_t>&& ObjectIndices, std::vect
 	if (!ModelActionObjectEdit)
 		return;
 	
-	if (!ModelActionObjectEdit->SaveEndState(this, std::move(ObjectIndices), std::move(GroupIndices)))
+	ModelActionObjectEdit->SaveEndState(this, std::move(ObjectIndices), std::move(GroupIndices));
+	
+	if (ModelActionObjectEdit->StateChanged())
 		mActionSequence.pop_back();
 }
 
@@ -4950,7 +4994,7 @@ void lcModel::InsertCameraToolClicked(const lcVector3& Position)
 	BeginActionSequence();
 	BeginObjectEditAction(lcModelActionObjectEditMode::CreateCamera, nullptr);
 	
-	lcCamera* Camera = new lcCamera(Position, GetSelectionOrModelCenter());
+	lcCamera* Camera = new lcCamera(false, Position, GetSelectionOrModelCenter());
 	
 	Camera->CreateName(mCameras);
 	mCameras.emplace_back(Camera);

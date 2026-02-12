@@ -21,11 +21,44 @@ struct lcPieceControlPoint
 {
 	lcMatrix44 Transform;
 	float Scale;
+	
+	bool operator==(const lcPieceControlPoint& Other) const
+	{
+		return Transform == Other.Transform && Scale == Other.Scale;
+	}
+};
+
+struct lcPieceHistoryState
+{
+	lcObjectId Id;
+	bool Hidden;
+	int FileLine;
+	QString PieceId;
+	uint32_t GroupIndex;
+	int ColorIndex;
+	quint32 ColorCode;
+	lcStep StepShow;
+	lcStep StepHide;
+	lcMatrix44 PivotMatrix;
+	bool PivotPointValid;
+	std::vector<lcPieceControlPoint> ControlPoints;
+	lcObjectProperty<lcVector3> Position;
+	lcObjectProperty<lcMatrix33> Rotation;
+	
+	bool operator==(const lcPieceHistoryState& Other) const
+	{
+		return Id == Other.Id && Hidden == Other.Hidden && FileLine == Other.FileLine && PieceId == Other.PieceId &&
+            GroupIndex == Other.GroupIndex && ColorIndex == Other.ColorIndex && ColorCode == Other.ColorCode &&
+            StepShow == Other.StepShow && StepHide == Other.StepHide && PivotMatrix == Other.PivotMatrix &&
+            PivotPointValid == Other.PivotPointValid && ControlPoints == Other.ControlPoints &&
+            Position == Other.Position && Rotation == Other.Rotation;
+	}
 };
 
 class lcPiece : public lcObject
 {
 public:
+	lcPiece();
 	lcPiece(PieceInfo* Info);
 	lcPiece(const lcPiece& Other);
 	virtual ~lcPiece();
@@ -60,8 +93,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	bool SaveUndoData(QDataStream& Stream, const lcModel* Model) const override;
-	bool LoadUndoData(QDataStream& Stream, const lcModel* Model) override;
+	lcPieceHistoryState GetHistoryState(const lcModel* Model) const;
+	void SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model);
 
 	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
@@ -240,10 +273,10 @@ public:
 	}
 
 public:
-	PieceInfo* mPieceInfo;
+	PieceInfo* mPieceInfo = nullptr;
 
 	lcMatrix44 mModelWorld;
-	lcMatrix44 mPivotMatrix;
+	lcMatrix44 mPivotMatrix = lcMatrix44Identity();
 
 protected:
 	void UpdateMesh();
@@ -266,13 +299,13 @@ protected:
 	int mFileLine = -1;
 	QString mID;
 
-	lcGroup* mGroup;
+	lcGroup* mGroup = nullptr;
 
 	int mColorIndex;
 	quint32 mColorCode;
 
-	lcStep mStepShow;
-	lcStep mStepHide;
+	lcStep mStepShow = 1;
+	lcStep mStepHide = LC_STEP_MAX;
 
 	bool mPivotPointValid = false;
 	std::vector<lcPieceControlPoint> mControlPoints;

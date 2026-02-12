@@ -464,6 +464,11 @@ inline bool operator==(const lcMatrix33& a, const lcMatrix33& b)
 	return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2];
 }
 
+inline bool operator==(const lcMatrix44& a, const lcMatrix44& b)
+{
+	return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2] && a.r[3] == b.r[3];
+}
+
 #ifndef QT_NO_DEBUG
 
 inline QDebug operator<<(QDebug Debug, const lcVector2& v)

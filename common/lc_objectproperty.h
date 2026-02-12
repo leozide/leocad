@@ -67,11 +67,13 @@ template<typename T>
 class lcObjectProperty
 {
 public:
+	lcObjectProperty() = default;
+	
 	explicit lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{
 	}
-
+	
 	operator const T& () const
 	{
 		return mValue;
@@ -96,8 +98,6 @@ public:
 
 	void Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const;
 	bool Load(QTextStream& Stream, const QString& Token, const char* VariableName);
-	bool SaveUndoData(QDataStream& Stream) const;
-	bool LoadUndoData(QDataStream& Stream);
 
 protected:
 	T mValue;

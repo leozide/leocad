@@ -10,9 +10,7 @@
 	template bool lcObjectProperty<T>::HasKeyFrame(lcStep Time) const; \
 	template bool lcObjectProperty<T>::SetKeyFrame(lcStep Time, bool KeyFrame); \
 	template void lcObjectProperty<T>::Save(QTextStream& Stream, const char* ObjectName, const char* VariableName, bool SaveEmpty) const; \
-	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName); \
-    template bool lcObjectProperty<T>::SaveUndoData(QDataStream& Stream) const; \
-    template bool lcObjectProperty<T>::LoadUndoData(QDataStream& Stream);
+	template bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const char* VariableName);
 
 LC_OBJECT_PROPERTY(float)
 LC_OBJECT_PROPERTY(int)
@@ -313,43 +311,4 @@ bool lcObjectProperty<T>::Load(QTextStream& Stream, const QString& Token, const 
 	}
 
 	return false;
-}
-
-template<typename T>
-bool lcObjectProperty<T>::SaveUndoData(QDataStream& Stream) const
-{
-	size_t KeyCount = mKeys.size();
-	qint64 DataSize = KeyCount * sizeof(lcObjectPropertyKey<T>);
-	
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&mValue), sizeof(mValue)) != sizeof(mValue))
-		return false;
-
-	if (Stream.writeRawData(reinterpret_cast<const char*>(&KeyCount), sizeof(KeyCount)) != sizeof(KeyCount))
-		return false;
-
-	if (Stream.writeRawData(reinterpret_cast<const char*>(mKeys.data()), DataSize) != DataSize)
-		return false;
-
-	return true;
-}
-
-template<typename T>
-bool lcObjectProperty<T>::LoadUndoData(QDataStream& Stream)
-{
-	if (Stream.readRawData(reinterpret_cast<char*>(&mValue), sizeof(mValue)) != sizeof(mValue))
-		return false;
-	
-	size_t KeyCount;
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(&KeyCount), sizeof(KeyCount)) != sizeof(KeyCount))
-		return false;
-	
-	mKeys.resize(KeyCount);
-	
-	qsizetype DataSize = KeyCount * sizeof(lcObjectPropertyKey<T>);
-	
-	if (Stream.readRawData(reinterpret_cast<char*>(mKeys.data()), DataSize) != DataSize)
-		return false;
-	
-	return true;	
 }

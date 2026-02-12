@@ -60,34 +60,43 @@ enum class lcModelActionObjectEditMode
 	CreateLight
 };
 
+struct lcGroupHistoryState;
+struct lcPieceHistoryState;
+struct lcCameraHistoryState;
+struct lcLightHistoryState;
+
+struct lcModelHistoryState
+{
+	std::vector<lcGroupHistoryState> Groups;
+	std::vector<lcPieceHistoryState> Pieces;
+	std::vector<lcCameraHistoryState> Cameras;
+	std::vector<lcLightHistoryState> Lights;
+	
+	bool operator!=(const lcModelHistoryState& Other) const
+	{
+		return Groups != Other.Groups || Pieces != Other.Pieces || Cameras != Other.Cameras || Lights != Other.Lights;
+	}
+};
+
 class lcModelActionObjectEdit: public lcModelAction
 {
 public:
 	lcModelActionObjectEdit(lcModelActionObjectEditMode Mode);
 	virtual ~lcModelActionObjectEdit() = default;
 	
-	bool SaveStartState(const lcModel* Model, const lcCamera* Camera);
-	bool SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices);
+	void SaveStartState(const lcModel* Model, const lcCamera* Camera);
+	void SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices);
 	void LoadStartState(lcModel* Model) const;
 	void LoadEndState(lcModel* Model) const;
-
-	lcModelActionObjectEditMode GetMode() const
-	{
-		return mMode;
-	}
+	
+	bool StateChanged() const;
 
 protected:
-	bool SaveHistoryBuffer(QByteArray& Buffer, const lcModel* Model);
-	bool LoadHistoryBuffer(const QByteArray& Buffer, lcModel* Model, bool CreateObjects) const;
+	static void SaveState(lcModelHistoryState& State, const lcModel* Model);
+	static void LoadState(const lcModelHistoryState& State, lcModel* Model);
 	
-	std::vector<size_t> mGroupIndices;
-	std::vector<size_t> mPieceIndices;
-	std::vector<size_t> mCameraIndices;
-	std::vector<size_t> mLightIndices;
-	
-	lcModelActionObjectEditMode mMode;
-	QByteArray mStartBuffer;
-	QByteArray mEndBuffer;
+	lcModelHistoryState mStartState;
+	lcModelHistoryState mEndState;
 };
 
 enum class lcModelActionGroupPiecesMode

@@ -47,19 +47,6 @@ protected:
 	lcModelActionSelectionState mEndState;
 };
 
-enum class lcModelActionObjectEditMode
-{
-	EditAllObjects,
-	EditAllPieces,
-	EditSelectedObjects,
-	EditSelectedPieces,
-	EditUnselectedPieces,
-	EditCamera,
-	CreatePieces,
-	CreateCamera,
-	CreateLight
-};
-
 struct lcGroupHistoryState;
 struct lcPieceHistoryState;
 struct lcCameraHistoryState;
@@ -81,11 +68,11 @@ struct lcModelHistoryState
 class lcModelActionObjectEdit: public lcModelAction
 {
 public:
-	lcModelActionObjectEdit(lcModelActionObjectEditMode Mode);
+	lcModelActionObjectEdit() = default;
 	virtual ~lcModelActionObjectEdit() = default;
 	
-	void SaveStartState(const lcModel* Model, const lcCamera* Camera);
-	void SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices);
+	void SaveStartState(const lcModel* Model);
+	void SaveEndState(const lcModel* Model);
 	void LoadStartState(lcModel* Model) const;
 	void LoadEndState(lcModel* Model) const;
 	

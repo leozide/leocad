@@ -418,8 +418,8 @@ protected:
     void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
     void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
 	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
-	void BeginObjectEditAction(lcModelActionObjectEditMode ModelActionObjectEditMode, const lcCamera* Camera);
-	void EndObjectEditAction(std::vector<size_t>&& ObjectIndices = std::vector<size_t>(), std::vector<size_t>&& GroupIndices = std::vector<size_t>());
+	void BeginObjectEditAction();
+	void EndObjectEditAction();
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
 	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);

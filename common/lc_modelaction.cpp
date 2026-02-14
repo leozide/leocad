@@ -142,10 +142,6 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 	}
 }
 
-lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionObjectEditMode Mode)
-{
-}
-
 void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
@@ -174,12 +170,12 @@ void lcModelActionObjectEdit::LoadState(const lcModelHistoryState& State, lcMode
 	Model->LoadHistoryState(State);
 }
 
-void lcModelActionObjectEdit::SaveStartState(const lcModel* Model, const lcCamera* Camera)
+void lcModelActionObjectEdit::SaveStartState(const lcModel* Model)
 {
 	SaveState(mStartState, Model);
 }
 
-void lcModelActionObjectEdit::SaveEndState(const lcModel* Model, std::vector<size_t>&& ObjectIndices, std::vector<size_t>&& GroupIndices)
+void lcModelActionObjectEdit::SaveEndState(const lcModel* Model)
 {
 	SaveState(mEndState, Model);
 }

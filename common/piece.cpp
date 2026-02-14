@@ -104,13 +104,13 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 	else
 		mID.clear();
 
-	mControlPoints.clear();
-
-	delete mMesh;
-	mMesh = nullptr;
-
 	if (UpdateSynthInfo)
 	{
+		mControlPoints.clear();
+
+		delete mMesh;
+		mMesh = nullptr;
+
 		const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
 
 		if (SynthInfo)
@@ -945,7 +945,7 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 	State.Hidden = mHidden;
 	State.FileLine = mFileLine;
 	State.PieceId = mID;
-	State.GroupIndex = ~0;
+	State.GroupIndex = ~0U;
 	State.ColorIndex = mColorIndex;
 	State.ColorCode = mColorCode;
 	State.StepShow = mStepShow;
@@ -964,7 +964,7 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 		{
 			if (mGroup == Groups[GroupIndex].get())
 			{
-				State.GroupIndex = GroupIndex;
+				State.GroupIndex = static_cast<uint32_t>(GroupIndex);
 				break;
 			}
 		}

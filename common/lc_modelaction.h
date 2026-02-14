@@ -85,30 +85,3 @@ protected:
 	lcModelHistoryState mStartState;
 	lcModelHistoryState mEndState;
 };
-
-enum class lcModelActionGroupPiecesMode
-{
-	Group,
-	Ungroup
-};
-
-class lcModelActionGroupPieces : public lcModelAction
-{
-public:
-	lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
-	virtual ~lcModelActionGroupPieces() = default;
-
-	lcModelActionGroupPiecesMode GetMode() const
-	{
-		return mMode;
-	}
-
-	const QString& GetGroupName() const
-	{
-		return mGroupName;
-	}
-
-protected:
-	lcModelActionGroupPiecesMode mMode;
-	QString mGroupName;
-};

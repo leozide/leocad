@@ -68,7 +68,7 @@ lcGroupHistoryState lcGroup::GetHistoryState(const lcModel* Model) const
 	lcGroupHistoryState State;
 	
 	State.Id = mId;
-	State.ParentIndex = ~0;
+	State.ParentIndex = ~0U;
 	State.Name = mName;
 	
 	if (mGroup)
@@ -79,7 +79,7 @@ lcGroupHistoryState lcGroup::GetHistoryState(const lcModel* Model) const
 		{
 			if (Groups[GroupIndex].get() == mGroup)
 			{
-				State.ParentIndex = GroupIndex;
+				State.ParentIndex = static_cast<uint32_t>(GroupIndex);
 				break;
 			}
 		}

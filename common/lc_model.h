@@ -9,10 +9,6 @@ struct lcModelHistoryState;
 class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
-class lcModelActionGroupPieces;
-enum class lcModelActionSelectionMode;
-enum class lcModelActionObjectEditMode;
-enum class lcModelActionGroupPiecesMode;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -163,8 +159,6 @@ public:
 	{
 		return mCameras;
 	}
-
-	lcCamera* GetCamera(const QString& Name) const;
 
 	const std::vector<std::unique_ptr<lcLight>>& GetLights() const
 	{
@@ -421,8 +415,6 @@ protected:
 	void BeginObjectEditAction();
 	void EndObjectEditAction();
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
-	void RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName);
-	void RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply);
 
 	void RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();

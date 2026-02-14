@@ -329,15 +329,6 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetBoundingBox(Min, Max);
 }
 
-lcCamera* lcModel::GetCamera(const QString& Name) const
-{
-	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
-		if (Camera->GetName() == Name)
-			return Camera.get();
-
-	return nullptr;
-}
-
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
 {
 	const QLatin1String LineEnding("\r\n");
@@ -1873,7 +1864,7 @@ void lcModel::EndObjectEditAction()
 	
 	ModelActionObjectEdit->SaveEndState(this);
 	
-	if (ModelActionObjectEdit->StateChanged())
+	if (!ModelActionObjectEdit->StateChanged())
 		mActionSequence.pop_back();
 }
 
@@ -1890,87 +1881,6 @@ void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObje
 	SetCurrentStep(mCurrentStep);
 }
 
-void lcModel::RecordGroupPiecesAction(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
-{
-	std::unique_ptr<lcModelActionGroupPieces> ModelActionGroupPieces = std::make_unique<lcModelActionGroupPieces>(Mode, GroupName);
-
-	RunGroupPiecesAction(ModelActionGroupPieces.get(), true);
-
-	mActionSequence.emplace_back(std::move(ModelActionGroupPieces));
-}
-
-void lcModel::RunGroupPiecesAction(const lcModelActionGroupPieces* ModelActionGroupPieces, bool Apply)
-{
-	if (!ModelActionGroupPieces)
-		return;
-
-	if (Apply == (ModelActionGroupPieces->GetMode() == lcModelActionGroupPiecesMode::Group))
-	{
-		lcGroup* NewGroup = new lcGroup();
-		mGroups.emplace_back(NewGroup);
-
-		NewGroup->mName = ModelActionGroupPieces->GetGroupName();
-		NewGroup->mGroup = nullptr;
-
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			if (Piece->IsSelected())
-			{
-				lcGroup* TopGroup = Piece->GetTopGroup();
-
-				if (!TopGroup)
-					Piece->SetGroup(NewGroup);
-				else if (TopGroup != NewGroup)
-					TopGroup->mGroup = NewGroup;
-			}
-		}
-	}
-	else
-	{
-		std::set<lcGroup*> SelectedGroups;
-
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			if (Piece->IsSelected())
-			{
-				lcGroup* Group = Piece->GetTopGroup();
-
-				if (SelectedGroups.insert(Group).second)
-				{
-					for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = mGroups.begin(); GroupIt != mGroups.end(); GroupIt++)
-					{
-						if (GroupIt->get() == Group)
-						{
-							GroupIt->release();
-							mGroups.erase(GroupIt);
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			lcGroup* Group = Piece->GetGroup();
-
-			if (SelectedGroups.find(Group) != SelectedGroups.end())
-				Piece->SetGroup(nullptr);
-		}
-
-		for (const std::unique_ptr<lcGroup>& Group : mGroups)
-			if (SelectedGroups.find(Group->mGroup) != SelectedGroups.end())
-				Group->mGroup = nullptr;
-
-		for (lcGroup* Group : SelectedGroups)
-			delete Group;
-
-		RemoveEmptyGroups();
-	}
-
-	gMainWindow->UpdateSelectedObjects(true);
-}
-
 void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	bool SelectionChanged = false;
@@ -1985,8 +1895,6 @@ void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>
 		}
 		else if (const lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
 			RunObjectEditAction(ModelActionObjectEdit, Apply);
-		else if (const lcModelActionGroupPieces* ModelActionGroupPieces = dynamic_cast<const lcModelActionGroupPieces*>(ModelAction))
-			RunGroupPiecesAction(ModelActionGroupPieces, Apply);
 	};
 
 	if (Apply)
@@ -2306,10 +2214,27 @@ void lcModel::GroupSelection()
 		return;
 
 	BeginActionSequence();
+	BeginObjectEditAction();
 
-	RecordGroupPiecesAction(lcModelActionGroupPiecesMode::Group, Dialog.mName);
+	lcGroup* NewGroup = GetGroup(Dialog.mName, true);
 
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (Piece->IsSelected())
+		{
+			lcGroup* Group = Piece->GetTopGroup();
+
+			if (!Group)
+				Piece->SetGroup(NewGroup);
+			else if (Group != NewGroup)
+				Group->mGroup = NewGroup;
+		}
+	}
+
+	EndObjectEditAction();
 	EndActionSequence(tr("Group"));
+
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::UngroupSelection()
@@ -2320,28 +2245,59 @@ void lcModel::UngroupSelection()
 		return;
 	}
 
-	bool FoundGroup = false;
+	std::set<lcGroup*> SelectedGroups;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->IsSelected() && Piece->GetGroup())
+		if (Piece->IsSelected())
 		{
-			FoundGroup = true;
-			break;
+			lcGroup* Group = Piece->GetTopGroup();
+
+			if (SelectedGroups.insert(Group).second)
+			{
+				for (std::vector<std::unique_ptr<lcGroup>>::iterator GroupIt = mGroups.begin(); GroupIt != mGroups.end(); GroupIt++)
+				{
+					if (GroupIt->get() == Group)
+					{
+						GroupIt->release();
+						mGroups.erase(GroupIt);
+						break;
+					}
+				}
+			}
 		}
 	}
 
-	if (!FoundGroup)
+	if (!SelectedGroups.empty())
 	{
 		QMessageBox::information(gMainWindow, tr("Ungroup Selection"), tr("No groups selected."));
 		return;
 	}
 
 	BeginActionSequence();
+	BeginObjectEditAction();
 
-	RecordGroupPiecesAction(lcModelActionGroupPiecesMode::Ungroup, QString());
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		lcGroup* Group = Piece->GetGroup();
 
+		if (SelectedGroups.find(Group) != SelectedGroups.end())
+			Piece->SetGroup(nullptr);
+	}
+
+	for (const std::unique_ptr<lcGroup>& Group : mGroups)
+		if (SelectedGroups.find(Group->mGroup) != SelectedGroups.end())
+			Group->mGroup = nullptr;
+
+	for (lcGroup* Group : SelectedGroups)
+		delete Group;
+
+	RemoveEmptyGroups();
+
+	EndObjectEditAction();
 	EndActionSequence(tr("Ungroup"));
+
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::AddSelectedPiecesToGroup()

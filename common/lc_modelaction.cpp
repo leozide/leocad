@@ -194,8 +194,3 @@ bool lcModelActionObjectEdit::StateChanged() const
 {
 	return mStartState != mEndState;
 }
-
-lcModelActionGroupPieces::lcModelActionGroupPieces(lcModelActionGroupPiecesMode Mode, const QString& GroupName)
-	: mMode(Mode), mGroupName(GroupName)
-{
-}

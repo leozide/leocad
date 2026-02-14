@@ -898,7 +898,7 @@ void lcCamera::RemoveKeyFrames()
 	mUpVector.RemoveAllKeys();
 }
 
-lcCameraHistoryState lcCamera::GetHistoryState(const lcModel* Model) const
+lcCameraHistoryState lcCamera::GetHistoryState([[maybe_unused]] const lcModel* Model) const
 {
 	lcCameraHistoryState State;
 	
@@ -917,7 +917,7 @@ lcCameraHistoryState lcCamera::GetHistoryState(const lcModel* Model) const
 	return State;
 }
 
-void lcCamera::SetHistoryState(const lcCameraHistoryState& State, const lcModel* Model)
+void lcCamera::SetHistoryState(const lcCameraHistoryState& State, [[maybe_unused]] const lcModel* Model)
 {
 	mId = State.Id;
 	mHidden = State.Hidden;

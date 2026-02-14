@@ -1165,15 +1165,21 @@ void lcModel::Merge(lcModel* Other)
 
 void lcModel::Cut()
 {
+	if (!AnyObjectsSelected())
+		return;
+	
 	Copy();
-
-	if (RemoveSelectedObjects())
-	{
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(true);
-		UpdateAllViews();
-		SaveCheckpoint(tr("Cutting"));
-	}
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	RemoveSelectedObjects();
+	
+	EndObjectEditAction();
+	EndActionSequence(tr("Cut"));
+	
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::Copy()
@@ -2332,17 +2338,31 @@ void lcModel::AddSelectedPiecesToGroup()
 
 void lcModel::RemoveFocusPieceFromGroup()
 {
+	bool Modified = false;
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsFocused())
 		{
 			Piece->SetGroup(nullptr);
+			
+			Modified = true;
+			
 			break;
 		}
 	}
-
+	
+	if (!Modified)
+	{
+		DiscardActionSequence();
+		
+		return;
+	}
+	
 	RemoveEmptyGroups();
-	SaveCheckpoint(tr("Ungrouping"));
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Ungroup"));
 }
 
 void lcModel::ShowEditGroupsDialog()
@@ -2643,26 +2663,6 @@ void lcModel::AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex)
 	mPieces.insert(mPieces.begin() + PieceIndex, std::move(Piece));
 }
 
-void lcModel::RemovePieces(const std::vector<size_t>& PieceIndices)
-{
-	for (auto PieceIndicesIt = PieceIndices.crbegin(); PieceIndicesIt != PieceIndices.crend(); ++PieceIndicesIt)
-	{
-		size_t PieceIndex = *PieceIndicesIt;
-		
-		if (PieceIndex >= mPieces.size())
-			continue;
-		
-		std::vector<std::unique_ptr<lcPiece>>::iterator PieceIt = mPieces.begin() + PieceIndex;
-		
-		mPieces.erase(PieceIt);
-	}	
-	
-	RemoveEmptyGroups();
-	
-	gMainWindow->UpdateTimeline(false, false);
-	gMainWindow->UpdateSelectedObjects(true);
-}
-
 size_t lcModel::AddPiece(lcPiece* Piece)
 {
 	size_t PieceIndex;
@@ -2680,58 +2680,6 @@ size_t lcModel::AddPiece(lcPiece* Piece)
 	AddPiece(std::unique_ptr<lcPiece>(Piece), PieceIndex);
 	
 	return PieceIndex;	
-}
-
-void lcModel::AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex)
-{
-	if (CameraIndex > mCameras.size())
-		return;
-	
-	mCameras.insert(mCameras.begin() + CameraIndex, std::move(Camera));	
-}
-
-void lcModel::RemoveCameras(const std::vector<size_t>& CameraIndices)
-{
-	for (auto CameraIndicesIt = CameraIndices.crbegin(); CameraIndicesIt != CameraIndices.crend(); ++CameraIndicesIt)
-	{
-		size_t CameraIndex = *CameraIndicesIt;
-		
-		if (CameraIndex >= mCameras.size())
-			continue;
-	
-		std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin() + CameraIndex;
-
-		RemoveCameraFromViews(CameraIt->get());
-
-		mCameras.erase(CameraIt);
-	}
-	
-	gMainWindow->UpdateSelectedObjects(true);
-}
-
-void lcModel::AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex)
-{
-	if (LightIndex > mLights.size())
-		return;
-	
-	mLights.insert(mLights.begin() + LightIndex, std::move(Light));	
-}
-
-void lcModel::RemoveLights(const std::vector<size_t>& LightIndices)
-{
-	for (auto LightIndicesIt = LightIndices.crbegin(); LightIndicesIt != LightIndices.crend(); ++LightIndicesIt)
-	{
-		size_t LightIndex = *LightIndicesIt;
-		
-		if (LightIndex >= mLights.size())
-			continue;
-	
-		std::vector<std::unique_ptr<lcLight>>::iterator LightIt = mLights.begin() + LightIndex;
-	
-		mLights.erase(LightIt);
-	}
-	
-	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::FocusNextTrainTrack()
@@ -2906,18 +2854,31 @@ void lcModel::UpdateSelectedPiecesTrainTrackConnections()
 
 void lcModel::DeleteSelectedObjects()
 {
-	if (RemoveSelectedObjects())
+	if (mIsPreview)
 	{
-		if (!mIsPreview)
-		{
-			gMainWindow->UpdateTimeline(false, false);
-			gMainWindow->UpdateSelectedObjects(true);
-			gMainWindow->UpdateInUseCategory();
+		RemoveSelectedObjects();
 
-			UpdateAllViews();
-			SaveCheckpoint(tr("Deleting"));
-		}
+		return;
 	}
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	bool Modified = RemoveSelectedObjects();
+	
+	if (!Modified)
+	{
+		DiscardActionSequence();
+		
+		return;
+	}		
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Delete"));
+	
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(true);
+	gMainWindow->UpdateInUseCategory();
 }
 
 void lcModel::ResetSelectedPiecesPivotPoint()
@@ -2968,13 +2929,23 @@ void lcModel::InsertControlPoint()
 	lcVector3 Start, End;
 	
 	gMainWindow->GetActiveView()->GetRayUnderPointer(Start, End);
-
-	if (Piece->InsertControlPoint(Start, End))
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	bool Modified = Piece->InsertControlPoint(Start, End);
+	
+	if (!Modified)
 	{
-		SaveCheckpoint(tr("Modifying"));
-		gMainWindow->UpdateSelectedObjects(true);
-		UpdateAllViews();
-	}
+		DiscardActionSequence();
+		
+		return;
+	}		
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Add Control Point"));
+	
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::RemoveFocusedControlPoint()
@@ -2984,12 +2955,22 @@ void lcModel::RemoveFocusedControlPoint()
 	if (!Piece)
 		return;
 	
-	if (Piece->RemoveFocusedControlPoint())
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	bool Modified = Piece->RemoveFocusedControlPoint();
+	
+	if (!Modified)
 	{
-		SaveCheckpoint(tr("Modifying"));
-		gMainWindow->UpdateSelectedObjects(true);
-		UpdateAllViews();
-	}
+		DiscardActionSequence();
+		
+		return;
+	}		
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Remove Control Point"));
+	
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::ShowSelectedPiecesEarlier()
@@ -3663,15 +3644,19 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 
 	if (MovedPieces.empty())
 		return;
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
 	for (lcPiece* Piece : MovedPieces)
 	{
 		Piece->SetFileLine(-1);
 		AddPiece(Piece);
 	}
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Set Show Step"));
 
-	SaveCheckpoint(tr("Showing Pieces"));
-	UpdateAllViews();
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(false);
 }
@@ -3679,7 +3664,10 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 {
 	bool Modified = false;
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction();	
+	
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected() && Piece->GetStepHide() != Step)
@@ -3689,14 +3677,19 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 			Modified = true;
 		}
 	}
-
-	if (Modified)
+	
+	if (!Modified)
 	{
-		SaveCheckpoint(tr("Hiding Pieces"));
-		UpdateAllViews();
-		gMainWindow->UpdateTimeline(false, false);
-		gMainWindow->UpdateSelectedObjects(false);
+		DiscardActionSequence();
+		
+		return;
 	}
+	
+	EndObjectEditAction();	
+	EndActionSequence(tr("Set Hide Step"));
+	
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(false);
 }
 
 void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection)
@@ -5169,11 +5162,15 @@ void lcModel::PaintToolClicked(lcObject* Object)
 
 	if (Piece->GetColorIndex() != gMainWindow->mColorIndex)
 	{
+		BeginActionSequence();
+		BeginObjectEditAction();
+
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
-		SaveCheckpoint(tr("Painting"));
+		EndObjectEditAction();
+		EndActionSequence(tr("Paint"));
+		
 		gMainWindow->UpdateSelectedObjects(false);
-		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
 }

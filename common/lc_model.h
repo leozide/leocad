@@ -231,11 +231,6 @@ public:
 	
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
-	void RemovePieces(const std::vector<size_t>& PieceIndices);
-	void AddCamera(std::unique_ptr<lcCamera> Camera, size_t CameraIndex);
-	void RemoveCameras(const std::vector<size_t>& CameraIndices);
-	void AddLight(std::unique_ptr<lcLight> Light, size_t LightIndex);
-	void RemoveLights(const std::vector<size_t>& LightIndices);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
 	void RemoveSelectedObjectsKeyFrames();

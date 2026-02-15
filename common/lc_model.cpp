@@ -1832,6 +1832,10 @@ void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates,
 			NewObjects.emplace_back(new ObjectType());
 	}
 	
+	if constexpr(std::is_same_v<ObjectType, lcCamera>)
+		for (const std::unique_ptr<lcCamera>& Camera : Objects)
+			RemoveCameraFromViews(Camera.get());
+	
 	Objects = std::move(NewObjects);
 	
 	for (size_t ObjectIndex = 0; ObjectIndex < Objects.size(); ObjectIndex++)

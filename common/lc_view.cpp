@@ -1181,7 +1181,7 @@ void lcView::DrawViewport() const
 
 		mContext->EnableColorBlend(true);
 
-		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
+		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, GetUIScale(), CameraName.toLatin1().constData());
 
 		mContext->EnableColorBlend(false);
 	}
@@ -1696,6 +1696,11 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 	LC_ARRAY_SIZE_CHECK(TrackToolFromTool, lcTool::Count);
 
 	return TrackToolFromTool[static_cast<int>(OverrideTool)];
+}
+
+float lcView::GetUIScale() const
+{
+	return mWidget ? mWidget->GetDeviceScale() : 1.0f;
 }
 
 float lcView::GetOverlayScale() const

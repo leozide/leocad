@@ -986,7 +986,25 @@ void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)
 
 void lcPartSelectionWidget::SetCategory(lcPartCategoryType Type, int Index)
 {
-	mPartsWidget->SetCategory(Type, Index);
+	for (int Row = 0; Row < mCategoriesWidget->topLevelItemCount(); Row++)
+	{
+		QTreeWidgetItem* Item = mCategoriesWidget->topLevelItem(Row);
+		lcPartCategoryType ItemType = static_cast<lcPartCategoryType>(Item->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt());
+		
+		if (ItemType != Type)
+			continue;
+		
+		if (Type == lcPartCategoryType::Palette || Type == lcPartCategoryType::Category)
+		{
+			int ItemIndex = Item->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
+			
+			if (ItemIndex != Index)
+				continue;
+		}
+		
+		mCategoriesWidget->setCurrentItem(Item);
+		break;
+	}
 }
 
 void lcPartSelectionWidget::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)

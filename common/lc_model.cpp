@@ -4667,7 +4667,10 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	size_t StartIndex = mPieces.size() - 1;
 	int ReplacedCount = 0;
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
 	if (!FindAll)
 	{
 		// We have to find the currently focused piece, in order to find next/prev match and (optionally) to replace it
@@ -4736,7 +4739,9 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 		if (CurrentIndex == StartIndex)
 			break;
 	}
-
+	
+	EndObjectEditAction();
+	
 	if (FindAll)
 		RecordSetSelectionAndFocusAction(Selection, nullptr, 0, lcSelectionMode::Single);
 	else
@@ -4744,11 +4749,13 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	if (ReplacedCount)
 	{
-		SaveCheckpoint(tr("Replacing Piece(s)", "", ReplacedCount));
+		EndActionSequence(tr("Replace Piece(s)", "", ReplacedCount));
+		
 		gMainWindow->UpdateSelectedObjects(false);
-		UpdateAllViews();
 		gMainWindow->UpdateTimeline(false, true);
 	}
+	else
+		EndActionSequence(tr("Selection"));
 }
 
 void lcModel::UndoAction()

@@ -2371,50 +2371,57 @@ void lcModel::RemoveFocusPieceFromGroup()
 
 void lcModel::ShowEditGroupsDialog()
 {
-	QMap<lcPiece*, lcGroup*> PieceParents;
-	QMap<lcGroup*, lcGroup*> GroupParents;
-
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		PieceParents[Piece.get()] = Piece->GetGroup();
-
-	for (const std::unique_ptr<lcGroup>& Group : mGroups)
-		GroupParents[Group.get()] = Group->mGroup;
-
-	lcQEditGroupsDialog Dialog(gMainWindow, PieceParents, GroupParents, this);
+	lcQEditGroupsDialog Dialog(gMainWindow, this);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
-
-	bool Modified = Dialog.mNewGroups.isEmpty();
-
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	std::function<void(const lcQEditGroupsDialog::GroupInfo&, lcGroup*)> UpdateGroups=[this, &UpdateGroups](const lcQEditGroupsDialog::GroupInfo& GroupInfo, lcGroup* ParentGroup)
 	{
-		lcGroup* ParentGroup = Dialog.mPieceParents.value(Piece.get());
-
-		if (ParentGroup != Piece->GetGroup())
+		lcGroup* Group = GroupInfo.Group;
+		
+		if (!Group)
 		{
-			Piece->SetGroup(ParentGroup);
-			Modified = true;
+			Group = new lcGroup();
+			mGroups.emplace_back(Group);
 		}
-	}
+		
+		Group->mName = GroupInfo.Name;
+		Group->mGroup = ParentGroup;
+		
+		for (const lcQEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
+			UpdateGroups(ChildGroupInfo, Group);
+		
+		for (lcPiece* Piece : GroupInfo.ChildPieces)
+			Piece->SetGroup(Group);		
+	};
+	
+	lcQEditGroupsDialog::GroupInfo GroupInfo = Dialog.GetGroups();
+	
+	for (const lcQEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
+		UpdateGroups(ChildGroupInfo, nullptr);
+	
+	for (lcPiece* Piece : GroupInfo.ChildPieces)
+		Piece->SetGroup(nullptr);
+	
+	RemoveEmptyGroups();
 
-	for (const std::unique_ptr<lcGroup>& Group : mGroups)
+	EndObjectEditAction();
+	
+	if (mActionSequence.empty())
 	{
-		lcGroup* ParentGroup = Dialog.mGroupParents.value(Group.get());
-
-		if (ParentGroup != Group->mGroup)
-		{
-			Group->mGroup = ParentGroup;
-			Modified = true;
-		}
+		DiscardActionSequence();
+		return;
 	}
+	
+	RecordClearSelectionAction();
+	
+	EndActionSequence(tr("Edit Groups"));
 
-	if (Modified)
-	{
-		DeselectAllObjects();
-		gMainWindow->UpdateSelectedObjects(true);
-		SaveCheckpoint(tr("Editing Groups"));
-	}
+	gMainWindow->UpdateSelectedObjects(true);
 }
 
 QString lcModel::GetGroupName(const QString& Prefix)

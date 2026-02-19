@@ -1123,7 +1123,7 @@ bool lcModel::LoadInventory(const QByteArray& Inventory)
 	return true;
 }
 
-void lcModel::Merge(lcModel* Other)
+void lcModel::Merge(std::unique_ptr<lcModel> Other)
 {
 	for (std::unique_ptr<lcPiece>& Piece : Other->mPieces)
 	{
@@ -1157,8 +1157,6 @@ void lcModel::Merge(lcModel* Other)
 	}
 
 	Other->mGroups.clear();
-
-	delete Other;
 
 	gMainWindow->UpdateTimeline(false, false);
 }
@@ -1197,7 +1195,7 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	if (gApplication->mClipboard.isEmpty())
 		return;
 
-	lcModel* Model = new lcModel(QString(), nullptr, false);
+	std::unique_ptr<lcModel> Model(new lcModel(QString(), nullptr, false));
 
 	QBuffer Buffer(&gApplication->mClipboard);
 	Buffer.open(QIODevice::ReadOnly);
@@ -1222,18 +1220,27 @@ void lcModel::Paste(bool PasteToCurrentStep)
 				SelectedObjects.emplace_back(Piece.get());
 		}
 	}
-
-	Merge(Model);
-	SaveCheckpoint(tr("Pasting"));
+	
+	if (PastedPieces.empty())
+		return;
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	Merge(std::move(Model));
+	
+	CalculateStep(mCurrentStep);
+	
+	EndObjectEditAction();
 
 	if (SelectedObjects.size() == 1)
 		RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), SelectedObjects.front(), LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 	else
 		RecordSetSelectionAndFocusAction(SelectedObjects, nullptr, 0, lcSelectionMode::Single);
-
-	CalculateStep(mCurrentStep);
+	
+	EndActionSequence(tr("Paste"));
+	
 	gMainWindow->UpdateTimeline(false, false);
-	UpdateAllViews();
 }
 
 void lcModel::DuplicateSelectedPieces()
@@ -2323,21 +2330,28 @@ void lcModel::AddSelectedPiecesToGroup()
 				break;
 		}
 	}
-
-	if (Group)
+	
+	if (!Group)
+		return;
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		if (Piece->IsFocused())
 		{
-			if (Piece->IsFocused())
-			{
-				Piece->SetGroup(Group);
-				break;
-			}
+			Piece->SetGroup(Group);
+			break;
 		}
 	}
 
 	RemoveEmptyGroups();
-	SaveCheckpoint(tr("Grouping"));
+	
+	EndObjectEditAction();
+	EndActionSequence(tr("Group"));
+	
+	gMainWindow->UpdateSelectedObjects(false);	
 }
 
 void lcModel::RemoveFocusPieceFromGroup()
@@ -2611,7 +2625,10 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 		Piece->SetColorIndex(ColorIndex);
 		AddPiece(Piece);
 	};
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
 	if (Last)
 	{
 		std::vector<lcInsertPieceInfo> TrainTracks;
@@ -2650,11 +2667,21 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 
 		CreatePiece(Info, WorldMatrix, gMainWindow->mColorIndex);
 	}
-
-	gMainWindow->UpdateTimeline(false, false);
+	
+	if (!Piece)
+	{
+		DiscardActionSequence();
+		
+		return nullptr;
+	}
+	
+	EndObjectEditAction();
+	
 	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
-	SaveCheckpoint(tr("Adding Piece"));
+	EndActionSequence(tr("Add Piece"));
+	
+	gMainWindow->UpdateTimeline(false, false);
 
 	return Piece;
 }
@@ -2796,17 +2823,23 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 
 	if (!Transform)
 		return;
-
-	if ((FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION) || !TracksConnected)
-		FocusPiece->SetFocused(LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + NewConnectionIndex, true);
-
+	
+	BeginActionSequence();
+		
+	BeginObjectEditAction();
+	
 	FocusPiece->SetPosition(Transform.value().GetTranslation(), mCurrentStep, gMainWindow->GetAddKeys());
 	FocusPiece->SetRotation(lcMatrix33(Transform.value()), mCurrentStep, gMainWindow->GetAddKeys());
 	FocusPiece->UpdatePosition(mCurrentStep);
-
+	
+	EndObjectEditAction();
+	
+	if ((FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION) || !TracksConnected)
+		RecordSetFocusAction(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + NewConnectionIndex, lcSelectionMode::Single);
+	
+	EndActionSequence(tr("Rotate"));
+	
 	gMainWindow->UpdateSelectedObjects(true);
-	UpdateAllViews();
-	SaveCheckpoint(tr("Rotating"));
 }
 
 void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const
@@ -3170,7 +3203,11 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 void lcModel::InlineSelectedModels()
 {
+	BeginActionSequence();
+	BeginObjectEditAction();
+	
 	std::vector<lcObject*> NewPieces;
+	bool Modified = false;
 
 	for (size_t PieceIndex = 0; PieceIndex < mPieces.size(); )
 	{
@@ -3186,6 +3223,8 @@ void lcModel::InlineSelectedModels()
 		mPieces.erase(mPieces.begin() + PieceIndex);
 
 		lcModel* Model = Piece->mPieceInfo->GetModel();
+		
+		Modified = true;
 
 		for (const std::unique_ptr<lcPiece>& ModelPiece : Model->mPieces)
 		{
@@ -3211,15 +3250,21 @@ void lcModel::InlineSelectedModels()
 		delete Piece;
 	}
 
-	if (!NewPieces.size())
+	if (!Modified)
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No models selected."));
+		
+		DiscardActionSequence();
+		
 		return;
 	}
 	
+	EndObjectEditAction();
+	
 	RecordSetSelectionAndFocusAction(NewPieces, nullptr, 0, lcSelectionMode::Single);
 
-	SaveCheckpoint(tr("Inlining"));
+	EndActionSequence(tr("Inline Model"));
+	
 	gMainWindow->UpdateTimeline(false, false);
 }
 

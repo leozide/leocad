@@ -263,7 +263,7 @@ public:
 	bool LoadLDD(const QString& FileData);
 	bool LoadInventory(const QByteArray& Inventory);
 	int SplitMPD(QIODevice& Device);
-	void Merge(lcModel* Other);
+	void Merge(std::unique_ptr<lcModel> Other);
 
 	void SetSaved()
 	{

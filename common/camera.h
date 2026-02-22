@@ -90,6 +90,9 @@ public:
 	}
 
 	bool SetProjection(lcCameraProjection CameraProjection);
+	bool SetFOV(float Fovy);
+	bool SetNearPlane(float NearPlane);
+	bool SetFarPlane(float FarPlane);
 
 	quint32 GetAllowedTransforms() const override
 	{

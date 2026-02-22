@@ -179,6 +179,36 @@ bool lcCamera::SetProjection(lcCameraProjection CameraProjection)
 	return true;
 }
 
+bool lcCamera::SetFOV(float Fovy)
+{
+	if (m_fovy == Fovy)
+		return false;
+
+	m_fovy = Fovy;
+
+	return true;
+}
+
+bool lcCamera::SetNearPlane(float NearPlane)
+{
+	if (m_zNear == NearPlane)
+		return false;
+
+	m_zNear = NearPlane;
+
+	return true;
+}
+
+bool lcCamera::SetFarPlane(float FarPlane)
+{
+	if (m_zFar == FarPlane)
+		return false;
+
+	m_zFar = FarPlane;
+
+	return true;
+}
+
 void lcCamera::SaveLDraw(QTextStream& Stream) const
 {
 	const QLatin1String LineEnding("\r\n");
@@ -727,8 +757,14 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 		return SetProjection(static_cast<lcCameraProjection>(Value.toInt()));
 
 	case lcObjectPropertyId::CameraFOV:
+		return SetFOV(Value.toFloat());
+
 	case lcObjectPropertyId::CameraNear:
+		return SetNearPlane(Value.toFloat());
+
 	case lcObjectPropertyId::CameraFar:
+		return SetFarPlane(Value.toFloat());
+
 	case lcObjectPropertyId::CameraPositionX:
 	case lcObjectPropertyId::CameraPositionY:
 	case lcObjectPropertyId::CameraPositionZ:

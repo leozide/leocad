@@ -287,6 +287,7 @@ void lcPropertiesWidget::FloatChanged(const QString& TextValue)
 	float Value = lcParseValueLocalized(TextValue);
 
 	ChangeFloatValue(PropertyId, Value, true);
+	qDebug() << Value;
 }
 
 void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging)
@@ -461,17 +462,9 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 	}
 	else if (Camera)
 	{
-		if (PropertyId == lcObjectPropertyId::CameraFOV)
+		if (PropertyId == lcObjectPropertyId::CameraFOV || PropertyId == lcObjectPropertyId::CameraNear || PropertyId == lcObjectPropertyId::CameraFar)
 		{
-			Model->SetCameraFOV(Camera, Value, !Dragging);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraNear)
-		{
-			Model->SetCameraZNear(Camera, Value, !Dragging);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraFar)
-		{
-			Model->SetCameraZFar(Camera, Value, !Dragging);
+			Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, !Dragging);
 		}
 	}
 
@@ -1164,8 +1157,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddSpacing();
 
 	AddFloatProperty(lcObjectPropertyId::CameraFOV, tr("FOV"), tr("Field of view in degrees"), false, 0.1f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.001f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.001f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.1f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.1f, FLT_MAX);
 
 	AddSpacing();
 

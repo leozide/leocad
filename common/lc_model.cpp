@@ -3834,48 +3834,6 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 	gMainWindow->UpdateSelectedObjects(false);
 }
 
-void lcModel::SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint)
-{
-	if (Camera->m_fovy == FOV)
-		return;
-
-	Camera->m_fovy = FOV;
-	Camera->UpdatePosition(mCurrentStep);
-
-	if (Checkpoint)
-		SaveCheckpoint(tr("Changing FOV"));
-
-	UpdateAllViews();
-}
-
-void lcModel::SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint)
-{
-	if (Camera->m_zNear == ZNear)
-		return;
-
-	Camera->m_zNear = ZNear;
-	Camera->UpdatePosition(mCurrentStep);
-
-	if (Checkpoint)
-		SaveCheckpoint(tr("Editing Camera"));
-
-	UpdateAllViews();
-}
-
-void lcModel::SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint)
-{
-	if (Camera->m_zFar == ZFar)
-		return;
-
-	Camera->m_zFar = ZFar;
-	Camera->UpdatePosition(mCurrentStep);
-
-	if (Checkpoint)
-		SaveCheckpoint(tr("Editing Camera"));
-
-	UpdateAllViews();
-}
-
 void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo)
 {
 	bool Modified = false;

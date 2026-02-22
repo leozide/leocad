@@ -392,9 +392,6 @@ public:
 	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
 	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);
-	void SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint);
-	void SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint);
-	void SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();

@@ -1898,6 +1898,38 @@ void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObje
 	SetCurrentStep(mCurrentStep);
 }
 
+void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
+{
+	mProperties = ModelProperties;
+
+	if (gMainWindow)
+		gMainWindow->GetPreviewWidget()->UpdatePreview();
+}
+
+void lcModel::RecordModelPropertiesAction(const lcModelProperties& ModelProperties)
+{
+	std::unique_ptr<lcModelActionProperties> ModelActionProperties = std::make_unique<lcModelActionProperties>();
+	ModelActionProperties->SaveStartState(this);
+
+	SetModelProperties(ModelProperties);
+
+	ModelActionProperties->SaveEndState(this);
+
+	if (ModelActionProperties->StateChanged())
+		mActionSequence.emplace_back(std::move(ModelActionProperties));
+}
+
+void lcModel::RunModelPropertiesAction(const lcModelActionProperties* ModelActionProperties, bool Apply)
+{
+	if (!ModelActionProperties)
+		return;
+
+	if (Apply)
+		ModelActionProperties->LoadEndState(this);
+	else
+		ModelActionProperties->LoadStartState(this);
+}
+
 void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	bool SelectionChanged = false;
@@ -1912,6 +1944,8 @@ void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>
 		}
 		else if (const lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
 			RunObjectEditAction(ModelActionObjectEdit, Apply);
+		else if (const lcModelActionProperties* ModelActionProperties = dynamic_cast<const lcModelActionProperties*>(ModelAction))
+			RunModelPropertiesAction(ModelActionProperties, Apply);
 	};
 
 	if (Apply)
@@ -3286,6 +3320,7 @@ void lcModel::InlineSelectedModels()
 	EndActionSequence(tr("Inline Model"));
 	
 	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateInUseCategory();
 }
 
 void lcModel::RemoveCameraFromViews(lcCamera* Camera)
@@ -4667,8 +4702,8 @@ void lcModel::UnhideSelectedPieces()
 		DiscardActionSequence();
 		
 		return;
-	}		
-	
+	}
+
 	EndObjectEditAction();	
 	EndActionSequence(tr("Unhide Pieces"));
 	
@@ -5443,11 +5478,9 @@ void lcModel::ShowPropertiesDialog()
 	if (mProperties == Options.Properties)
 		return;
 
-	mProperties = Options.Properties;
-
-	gMainWindow->GetPreviewWidget()->UpdatePreview();
-
-	SaveCheckpoint(tr("Changing Properties"));
+	BeginActionSequence();
+	RecordModelPropertiesAction(Options.Properties);
+	EndActionSequence(tr("Change Model Properties"));
 }
 
 void lcModel::ShowSelectByNameDialog()

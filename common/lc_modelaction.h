@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lc_model.h"
+
 enum class lcObjectType;
 enum class lcSelectionMode;
 
@@ -84,4 +86,25 @@ protected:
 	
 	lcModelHistoryState mStartState;
 	lcModelHistoryState mEndState;
+};
+
+class lcModelActionProperties : public lcModelAction
+{
+public:
+	lcModelActionProperties() = default;
+	virtual ~lcModelActionProperties() = default;
+
+	void SaveStartState(const lcModel* Model);
+	void SaveEndState(const lcModel* Model);
+	void LoadStartState(lcModel* Model) const;
+	void LoadEndState(lcModel* Model) const;
+
+	bool StateChanged() const;
+
+protected:
+	static void SaveState(lcModelProperties& State, const lcModel* Model);
+	static void LoadState(const lcModelProperties& State, lcModel* Model);
+
+	lcModelProperties mStartState;
+	lcModelProperties mEndState;
 };

@@ -5,7 +5,7 @@
 #include "piece.h"
 #include "group.h"
 
-constexpr uintptr_t LC_GROUPDIALOG_NEW_GROUP = ~0;
+constexpr uintptr_t LC_GROUPDIALOG_NEW_GROUP = ~0U;
 
 class lcEditGroupsDialogDelegate : public QItemDelegate
 {

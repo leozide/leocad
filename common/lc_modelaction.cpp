@@ -194,3 +194,38 @@ bool lcModelActionObjectEdit::StateChanged() const
 {
 	return mStartState != mEndState;
 }
+
+void lcModelActionProperties::SaveStartState(const lcModel* Model)
+{
+	SaveState(mStartState, Model);
+}
+
+void lcModelActionProperties::SaveEndState(const lcModel* Model)
+{
+	SaveState(mEndState, Model);
+}
+
+void lcModelActionProperties::LoadStartState(lcModel* Model) const
+{
+	LoadState(mStartState, Model);
+}
+
+void lcModelActionProperties::LoadEndState(lcModel* Model) const
+{
+	LoadState(mEndState, Model);
+}
+
+bool lcModelActionProperties::StateChanged() const
+{
+	return mStartState != mEndState;
+}
+
+void lcModelActionProperties::SaveState(lcModelProperties& State, const lcModel* Model)
+{
+	State = Model->GetProperties();
+}
+
+void lcModelActionProperties::LoadState(const lcModelProperties& State, lcModel* Model)
+{
+	Model->SetModelProperties(State);
+}

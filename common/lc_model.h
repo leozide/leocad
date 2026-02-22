@@ -9,6 +9,7 @@ struct lcModelHistoryState;
 class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
+class lcModelActionProperties;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -68,6 +69,11 @@ public:
 			return false;
 
 		return true;
+	}
+
+	bool operator!=(const lcModelProperties& Properties) const
+	{
+		return !(*this == Properties);
 	}
 
 	void SaveLDraw(QTextStream& Stream) const;
@@ -228,6 +234,7 @@ public:
 	template<typename StateType, typename ObjectType>
 	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
 	void LoadHistoryState(const lcModelHistoryState& HistoryState);
+	void SetModelProperties(const lcModelProperties& ModelProperties);
 	
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
@@ -410,6 +417,8 @@ protected:
 	void BeginObjectEditAction();
 	void EndObjectEditAction();
 	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
+	void RecordModelPropertiesAction(const lcModelProperties& ModelProperties);
+	void RunModelPropertiesAction(const lcModelActionProperties* ModelActionProperties, bool Apply);
 
 	void RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();

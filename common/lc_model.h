@@ -381,7 +381,7 @@ public:
 
 	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove);
 	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
-	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
+	void ScaleSelectedPieces(const float Scale);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
 	void SetSelectedPiecesColorIndex(int ColorIndex);

@@ -3632,7 +3632,7 @@ void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool
 	}
 }
 
-void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint)
+void lcModel::ScaleSelectedPieces(const float Scale)
 {
 	if (Scale < 0.001f)
 		return;
@@ -3648,14 +3648,6 @@ void lcModel::ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoin
 	{
 		const int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 		Piece->SetControlPointScale(ControlPointIndex, Scale);
-
-		if (Update)
-		{
-			UpdateAllViews();
-			if (Checkpoint)
-				SaveCheckpoint(tr("Scaling"));
-			gMainWindow->UpdateSelectedObjects(false);
-		}
 	}
 }
 
@@ -3837,6 +3829,12 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo)
 {
 	bool Modified = false;
+	
+	if (AddUndo)
+	{
+		BeginActionSequence();
+		BeginObjectEditAction();
+	}
 
 	for (lcObject* Object : Objects)
 	{
@@ -3850,10 +3848,17 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	}
 
 	if (!Modified)
+	{
+		DiscardActionSequence();
+
 		return;
+	}
 
 	if (AddUndo)
-		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
+	{
+		EndObjectEditAction();
+		EndActionSequence(lcObject::GetCheckpointString(PropertyId));
+	}
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
@@ -3890,12 +3895,9 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 		break;
 
 	case lcObjectPropertyId::CameraFOV:
-		SaveCheckpoint(tr("Changing FOV"));
-		break;
-
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
-		SaveCheckpoint(tr("Editing Camera"));
+		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
 		break;
 
 	case lcObjectPropertyId::CameraPositionX:
@@ -5170,7 +5172,7 @@ void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag
 
 void lcModel::UpdateScaleTool(const float Scale)
 {
-	ScaleSelectedPieces(Scale, true, false);
+	ScaleSelectedPieces(Scale);
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();

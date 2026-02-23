@@ -287,7 +287,6 @@ void lcPropertiesWidget::FloatChanged(const QString& TextValue)
 	float Value = lcParseValueLocalized(TextValue);
 
 	ChangeFloatValue(PropertyId, Value, true);
-	qDebug() << Value;
 }
 
 void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging)

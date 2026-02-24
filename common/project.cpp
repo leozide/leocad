@@ -2683,19 +2683,42 @@ bool Project::ExportSTL(const QString& FileName)
 
 			lcVector3 Normal = lcNormalize(Cross);
 
+			// 3D printer optimizations (1 LDU = 0.4mm):
+			// Inset each face by 0.1mm (0.25 LDU) along its face normal to create
+			// assembly clearance between printed bricks. Moving all three vertices by
+			// the same vector preserves the face normal.
+			const float InsetAmount = 0.25f;
+			lcVector3 A = V1 - Normal * InsetAmount;
+			lcVector3 B = V2 - Normal * InsetAmount;
+			lcVector3 C = V3 - Normal * InsetAmount;
+
+			// In LDraw coordinates Y points downward, so Normal.y > 0 identifies a
+			// downward-facing (overhanging) face. Lift such faces 0.6mm (1.5 LDU) in
+			// the upward direction (-Y) to reduce unsupported overhang depth, which
+			// improves printability particularly on flat bricks where the anti-stud
+			// cavity creates a challenging horizontal overhang at the bottom.
+			const float OverhangThreshold = 0.5f; // cos(60°): faces tilted > 60° from vertical
+			if (Normal.y > OverhangThreshold)
+			{
+				const float OverhangLift = 1.5f;
+				A.y -= OverhangLift;
+				B.y -= OverhangLift;
+				C.y -= OverhangLift;
+			}
+
 			float Triangle[12];
 			Triangle[0] = Normal[0];
 			Triangle[1] = Normal[1];
 			Triangle[2] = Normal[2];
-			Triangle[3] = V1[0];
-			Triangle[4] = V1[1];
-			Triangle[5] = V1[2];
-			Triangle[6] = V2[0];
-			Triangle[7] = V2[1];
-			Triangle[8] = V2[2];
-			Triangle[9] = V3[0];
-			Triangle[10] = V3[1];
-			Triangle[11] = V3[2];
+			Triangle[3] = A[0];
+			Triangle[4] = A[1];
+			Triangle[5] = A[2];
+			Triangle[6] = B[0];
+			Triangle[7] = B[1];
+			Triangle[8] = B[2];
+			Triangle[9] = C[0];
+			Triangle[10] = C[1];
+			Triangle[11] = C[2];
 
 			File.write(reinterpret_cast<const char*>(Triangle), 48);
 			const quint16 Attr = 0;

@@ -280,11 +280,10 @@ void lcPropertiesWidget::FloatEditingCanceled()
 	Model->EndPropertyEdit(PropertyId, false);
 }
 
-void lcPropertiesWidget::FloatChanged(const QString& TextValue)
+void lcPropertiesWidget::FloatChanged(double Value)
 {
 	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
 	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
-	float Value = lcParseValueLocalized(TextValue);
 
 	ChangeFloatValue(PropertyId, Value, true);
 }
@@ -572,9 +571,9 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 	connect(Widget, &lcDoubleSpinBox::EditingFinished, this, &lcPropertiesWidget::FloatEditingFinished);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-	connect(Widget, QOverload<const QString&>::of(&lcDoubleSpinBox::valueChanged), this, &lcPropertiesWidget::FloatChanged);
+	connect(Widget, QOverload<double>::of(&lcDoubleSpinBox::valueChanged), this, &lcPropertiesWidget::FloatChanged);
 #else
-	connect(Widget, &lcDoubleSpinBox::textChanged, this, &lcPropertiesWidget::FloatChanged);
+	connect(Widget, &lcDoubleSpinBox::valueChanged, this, &lcPropertiesWidget::FloatChanged);
 #endif
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);

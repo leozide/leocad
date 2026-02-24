@@ -216,7 +216,24 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 			return true;
 		}
 	}
-
+	else if (Event->type() == QEvent::ShortcutOverride)
+	{
+		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
+		
+		switch (KeyEvent->key())
+		{
+		case Qt::Key_Up:
+		case Qt::Key_Down:
+		case Qt::Key_PageUp:
+		case Qt::Key_PageDown:
+			Event->accept();
+			return true;
+		
+		default:
+			break;
+		}
+	}
+	
 	return QDoubleSpinBox::event(Event);
 }
 

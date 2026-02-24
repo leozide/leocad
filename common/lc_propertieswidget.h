@@ -20,7 +20,7 @@ protected slots:
 	void BoolChanged();
 	void FloatEditingFinished();
 	void FloatEditingCanceled();
-	void FloatChanged(const QString& TextValue);
+	void FloatChanged(double Value);
 	void IntegerChanged();
 	void StepNumberChanged();
 	void StringChanged();

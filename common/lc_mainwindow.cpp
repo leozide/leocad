@@ -472,6 +472,7 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_CSV]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_HTML]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
+	ExportMenu->addAction(mActions[LC_FILE_EXPORT_STL]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
 #ifndef LC_DISABLE_RENDER_DIALOG
@@ -2675,6 +2676,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_EXPORT_WAVEFRONT:
 		lcGetActiveProject()->ExportWavefront(QString());
+		break;
+
+	case LC_FILE_EXPORT_STL:
+		lcGetActiveProject()->ExportSTL(QString());
 		break;
 
 	case LC_FILE_RENDER_POVRAY:

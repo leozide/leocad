@@ -2629,3 +2629,147 @@ void Project::MarkAsModified()
 {
 	mModified = true;
 }
+
+bool Project::ExportSTL(const QString& FileName)
+{
+	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+
+	if (ModelParts.empty())
+	{
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
+		return false;
+	}
+
+	QString SaveFileName = GetExportFileName(FileName, QLatin1String("stl"), tr("Export STL"), tr("STL Files (*.stl);;All Files (*.*)"));
+
+	if (SaveFileName.isEmpty())
+		return false;
+
+	QFile File(SaveFileName);
+
+	if (!File.open(QIODevice::WriteOnly))
+	{
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
+		return false;
+	}
+
+	// Write binary STL header (80 bytes)
+	char Header[80] = {};
+	qstrncpy(Header, "LeoCAD STL Export", sizeof(Header));
+	File.write(Header, 80);
+
+	// Write a placeholder triangle count; will be updated after writing all triangles
+	quint32 NumTriangles = 0;
+	File.write(reinterpret_cast<const char*>(&NumTriangles), 4);
+
+	// Write each triangle
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	{
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		if (!Mesh)
+			continue;
+
+		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
+		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+
+		auto WriteTriangle = [&](const lcVector3& V1, const lcVector3& V2, const lcVector3& V3)
+		{
+			lcVector3 Edge1 = V2 - V1;
+			lcVector3 Edge2 = V3 - V1;
+			lcVector3 Cross = lcCross(Edge1, Edge2);
+
+			if (lcLengthSquared(Cross) == 0.0f)
+				return;
+
+			lcVector3 Normal = lcNormalize(Cross);
+
+			// 3D printer optimizations (1 LDU = 0.4mm):
+			// Inset each face by 0.1mm (0.25 LDU) along its face normal to create
+			// assembly clearance between printed bricks. Moving all three vertices by
+			// the same vector preserves the face normal.
+			const float InsetAmount = 0.25f;
+			lcVector3 A = V1 - Normal * InsetAmount;
+			lcVector3 B = V2 - Normal * InsetAmount;
+			lcVector3 C = V3 - Normal * InsetAmount;
+
+			// In LDraw coordinates Y points downward, so Normal.y > 0 identifies a
+			// downward-facing (overhanging) face. Lift such faces 0.6mm (1.5 LDU) in
+			// the upward direction (-Y) to reduce unsupported overhang depth, which
+			// improves printability particularly on flat bricks where the anti-stud
+			// cavity creates a challenging horizontal overhang at the bottom.
+			const float OverhangThreshold = 0.5f; // cos(60°): faces tilted > 60° from vertical
+			if (Normal.y > OverhangThreshold)
+			{
+				const float OverhangLift = 1.5f;
+				A.y -= OverhangLift;
+				B.y -= OverhangLift;
+				C.y -= OverhangLift;
+			}
+
+			float Triangle[12];
+			Triangle[0] = Normal[0];
+			Triangle[1] = Normal[1];
+			Triangle[2] = Normal[2];
+			Triangle[3] = A[0];
+			Triangle[4] = A[1];
+			Triangle[5] = A[2];
+			Triangle[6] = B[0];
+			Triangle[7] = B[1];
+			Triangle[8] = B[2];
+			Triangle[9] = C[0];
+			Triangle[10] = C[1];
+			Triangle[11] = C[2];
+
+			File.write(reinterpret_cast<const char*>(Triangle), 48);
+			const quint16 Attr = 0;
+			File.write(reinterpret_cast<const char*>(&Attr), 2);
+			NumTriangles++;
+		};
+
+		if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
+		{
+			GLushort* IndexData = (GLushort*)Mesh->mIndexData;
+			for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
+			{
+				lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+				if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+					continue;
+
+				GLushort* Indices = IndexData + Section->IndexOffset / sizeof(GLushort);
+				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				{
+					lcVector3 V1 = lcMul31(Verts[Indices[Idx + 0]].Position, ModelWorld);
+					lcVector3 V2 = lcMul31(Verts[Indices[Idx + 1]].Position, ModelWorld);
+					lcVector3 V3 = lcMul31(Verts[Indices[Idx + 2]].Position, ModelWorld);
+					WriteTriangle(V1, V2, V3);
+				}
+			}
+		}
+		else
+		{
+			GLuint* IndexData = (GLuint*)Mesh->mIndexData;
+			for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
+			{
+				lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+				if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+					continue;
+
+				GLuint* Indices = IndexData + Section->IndexOffset / sizeof(GLuint);
+				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				{
+					lcVector3 V1 = lcMul31(Verts[Indices[Idx + 0]].Position, ModelWorld);
+					lcVector3 V2 = lcMul31(Verts[Indices[Idx + 1]].Position, ModelWorld);
+					lcVector3 V3 = lcMul31(Verts[Indices[Idx + 2]].Position, ModelWorld);
+					WriteTriangle(V1, V2, V3);
+				}
+			}
+		}
+	}
+
+	// Seek back and write the actual triangle count
+	File.seek(80);
+	File.write(reinterpret_cast<const char*>(&NumTriangles), 4);
+
+	File.close();
+	return true;
+}

@@ -2010,6 +2010,30 @@ void lcModel::RevertActionSequence()
 	mActionSequence.clear();
 }
 
+bool lcModel::IsModified() const
+{
+	const lcModelHistoryEntry* FirstModifyAction = GetFirstUndoChange();
+	
+	if (!FirstModifyAction)
+		return mSavedHistory != nullptr;
+	else
+		return mSavedHistory != FirstModifyAction;
+}
+
+void lcModel::SetSaved()
+{
+	mSavedHistory = GetFirstUndoChange();
+}
+
+const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
+{
+	for (const std::unique_ptr<lcModelHistoryEntry>& UndoEntry : mUndoHistory)
+		if (UndoEntry->ModelActions.size() != 1 || !dynamic_cast<lcModelActionSelection*>(UndoEntry->ModelActions.front().get()))
+			return UndoEntry.get();
+	
+	return nullptr;
+}
+
 void lcModel::SaveCheckpoint(const QString& )
 {
 	/*

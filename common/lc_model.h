@@ -131,19 +131,14 @@ public:
 		return mProject;
 	}
 
-	bool IsModified() const
-	{
-		if (mUndoHistory.empty())
-			return mSavedHistory != nullptr;
-		else
-			return mSavedHistory != mUndoHistory.front().get();
-	}
-
 	bool IsActive() const
 	{
 		return mActive;
 	}
-
+	
+	bool IsModified() const;
+	void SetSaved();
+	
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
@@ -271,12 +266,7 @@ public:
 	bool LoadInventory(const QByteArray& Inventory);
 	int SplitMPD(QIODevice& Device);
 	void Merge(std::unique_ptr<lcModel> Other);
-
-	void SetSaved()
-	{
-		mSavedHistory = mUndoHistory.empty() ? nullptr : mUndoHistory.front().get();
-	}
-
+	
 	void SetMinifig(const lcMinifig& Minifig);
 	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
 
@@ -422,6 +412,7 @@ protected:
 	void EndActionSequence(const QString& Description);
 	void DiscardActionSequence();
 	void RevertActionSequence();
+	const lcModelHistoryEntry* GetFirstUndoChange() const;
 
 	void SaveCheckpoint(const QString& Description);
 	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply);
@@ -457,7 +448,7 @@ protected:
 	QStringList mFileLines;
 
 	std::vector<std::unique_ptr<lcModelAction>> mActionSequence;
-	lcModelHistoryEntry* mSavedHistory;
+	const lcModelHistoryEntry* mSavedHistory = nullptr;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;
 

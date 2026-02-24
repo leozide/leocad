@@ -93,6 +93,7 @@ public:
 	void ExportHTML(const lcHTMLExportOptions& Options);
 	std::pair<bool, QString> ExportPOVRay(const QString& FileName);
 	bool ExportWavefront(const QString& FileName);
+	bool ExportSTL(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 

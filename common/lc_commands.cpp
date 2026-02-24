@@ -108,6 +108,13 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Status", "Export the current model in Wavefront OBJ format"),
 		""
 	},
+	// LC_FILE_EXPORT_STL
+	{
+		QT_TRANSLATE_NOOP("Action", "File.Export.STL"),
+		QT_TRANSLATE_NOOP("Menu", "&STL..."),
+		QT_TRANSLATE_NOOP("Status", "Export the current model in STL format"),
+		""
+	},
 	// LC_FILE_RENDER_POVRAY
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.POVRay"),

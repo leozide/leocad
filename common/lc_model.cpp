@@ -1963,6 +1963,7 @@ void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>
 		gMainWindow->UpdateSelectedObjects(true);
 
 	UpdateAllViews();
+	gMainWindow->UpdateTimeline(true, false);
 }
 
 void lcModel::BeginActionSequence()
@@ -1996,6 +1997,7 @@ void lcModel::EndActionSequence(const QString& Description)
 	}
 
 	UpdateAllViews();
+	gMainWindow->UpdateTimeline(true, false);
 }
 
 void lcModel::DiscardActionSequence()
@@ -4626,7 +4628,7 @@ void lcModel::HideSelectedPieces()
 		DiscardActionSequence();
 		
 		return;
-	}		
+	}
 	
 	EndObjectEditAction();
 	

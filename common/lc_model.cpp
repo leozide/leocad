@@ -2322,6 +2322,9 @@ void lcModel::UngroupSelection()
 
 	std::set<lcGroup*> SelectedGroups;
 
+	BeginActionSequence();
+	BeginObjectEditAction();
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsSelected())
@@ -2343,14 +2346,14 @@ void lcModel::UngroupSelection()
 		}
 	}
 
-	if (!SelectedGroups.empty())
+	if (SelectedGroups.empty())
 	{
+		DiscardActionSequence();
+		
 		QMessageBox::information(gMainWindow, tr("Ungroup Selection"), tr("No groups selected."));
+		
 		return;
 	}
-
-	BeginActionSequence();
-	BeginObjectEditAction();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{

@@ -553,8 +553,11 @@ void lcTimelineWidget::ItemSelectionChanged()
 	}
 
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
+	
+	UpdateSelection();
 }
 
 void lcTimelineWidget::dropEvent(QDropEvent* Event)

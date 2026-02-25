@@ -4616,7 +4616,6 @@ void lcModel::HideSelectedPieces()
 		if (Piece->IsSelected() && !Piece->IsHidden())
 		{
 			Piece->SetHidden(true);
-			Piece->SetSelected(false);
 			
 			Modified = true;
 		}
@@ -4629,7 +4628,10 @@ void lcModel::HideSelectedPieces()
 		return;
 	}		
 	
-	EndObjectEditAction();	
+	EndObjectEditAction();
+	
+	RecordClearSelectionAction();
+	
 	EndActionSequence(tr("Hide Pieces"));
 	
 	gMainWindow->UpdateTimeline(false, true);

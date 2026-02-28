@@ -10,6 +10,11 @@ class lcModelAction
 public:
 	lcModelAction() = default;
 	virtual ~lcModelAction() = default;
+	
+	virtual void SaveStartState(const lcModel* Model) = 0;
+	virtual void SaveEndState(const lcModel* Model) = 0;
+	virtual void LoadStartState(lcModel* Model) const = 0;
+	virtual void LoadEndState(lcModel* Model) const = 0;
 };
 
 struct lcModelActionSelectionState
@@ -34,10 +39,10 @@ public:
 	lcModelActionSelection() = default;
 	virtual ~lcModelActionSelection() = default;
 	
-	void SaveStartState(const lcModel* Model);
-	void SaveEndState(const lcModel* Model);
-	void LoadStartState(lcModel* Model) const;
-	void LoadEndState(lcModel* Model) const;
+	void SaveStartState(const lcModel* Model) override;
+	void SaveEndState(const lcModel* Model) override;
+	void LoadStartState(lcModel* Model) const override;
+	void LoadEndState(lcModel* Model) const override;
 
 	bool StateChanged() const;
 
@@ -73,10 +78,10 @@ public:
 	lcModelActionObjectEdit() = default;
 	virtual ~lcModelActionObjectEdit() = default;
 	
-	void SaveStartState(const lcModel* Model);
-	void SaveEndState(const lcModel* Model);
-	void LoadStartState(lcModel* Model) const;
-	void LoadEndState(lcModel* Model) const;
+	void SaveStartState(const lcModel* Model) override;
+	void SaveEndState(const lcModel* Model) override;
+	void LoadStartState(lcModel* Model) const override;
+	void LoadEndState(lcModel* Model) const override;
 	
 	bool StateChanged() const;
 
@@ -94,10 +99,10 @@ public:
 	lcModelActionProperties() = default;
 	virtual ~lcModelActionProperties() = default;
 
-	void SaveStartState(const lcModel* Model);
-	void SaveEndState(const lcModel* Model);
-	void LoadStartState(lcModel* Model) const;
-	void LoadEndState(lcModel* Model) const;
+	void SaveStartState(const lcModel* Model) override;
+	void SaveEndState(const lcModel* Model) override;
+	void LoadStartState(lcModel* Model) const override;
+	void LoadEndState(lcModel* Model) const override;
 
 	bool StateChanged() const;
 

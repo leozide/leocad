@@ -395,17 +395,14 @@ protected:
 	void RecordSelectionAction(std::function<void()> Callback);
 	void RecordClearSelectionAction();
 	void RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
-    void RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
-    void RecordSelectAllPiecesAction();
-    void RecordInvertPieceSelectionAction();
-    void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
-    void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
-	void RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply);
+	void RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void RecordSelectAllPiecesAction();
+	void RecordInvertPieceSelectionAction();
+	void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
+	void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
 	void BeginObjectEditAction();
 	void EndObjectEditAction();
-	void RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply);
 	void RecordModelPropertiesAction(const lcModelProperties& ModelProperties);
-	void RunModelPropertiesAction(const lcModelActionProperties* ModelActionProperties, bool Apply);
 
 	void RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
 	void BeginActionSequence();

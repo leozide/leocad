@@ -1799,17 +1799,6 @@ void lcModel::RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Obje
 	RecordSelectionAction([this, &Objects](){ SetObjectsSelected(Objects, false); });
 }
 
-void lcModel::RunSelectionAction(const lcModelActionSelection* ModelActionSelection, bool Apply)
-{
-	if (!ModelActionSelection)
-		return;
-	
-	if (Apply)
-		ModelActionSelection->LoadEndState(this);
-	else
-		ModelActionSelection->LoadStartState(this);
-}
-
 template<typename StateType, typename ObjectType>
 void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects)
 {
@@ -1885,19 +1874,6 @@ void lcModel::EndObjectEditAction()
 		mActionSequence.pop_back();
 }
 
-void lcModel::RunObjectEditAction(const lcModelActionObjectEdit* ModelActionObjectEdit, bool Apply)
-{
-	if (!ModelActionObjectEdit)
-		return;
-	
-	if (Apply)
-		ModelActionObjectEdit->LoadEndState(this);
-	else
-		ModelActionObjectEdit->LoadStartState(this);
-	
-	SetCurrentStep(mCurrentStep);
-}
-
 void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
 {
 	mProperties = ModelProperties;
@@ -1919,33 +1895,31 @@ void lcModel::RecordModelPropertiesAction(const lcModelProperties& ModelProperti
 		mActionSequence.emplace_back(std::move(ModelActionProperties));
 }
 
-void lcModel::RunModelPropertiesAction(const lcModelActionProperties* ModelActionProperties, bool Apply)
-{
-	if (!ModelActionProperties)
-		return;
-
-	if (Apply)
-		ModelActionProperties->LoadEndState(this);
-	else
-		ModelActionProperties->LoadStartState(this);
-}
-
 void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
 {
 	bool SelectionChanged = false;
 	
 	auto RunAction=[this, &SelectionChanged](const lcModelAction* ModelAction, bool Apply)
 	{
-		if (const lcModelActionSelection* ModelActionSelection = dynamic_cast<const lcModelActionSelection*>(ModelAction))
+		if (!ModelAction)
+			return;
+
+		if (Apply)
+			ModelAction->LoadEndState(this);
+		else
+			ModelAction->LoadStartState(this);
+		
+		if (dynamic_cast<const lcModelActionSelection*>(ModelAction))
 		{
-			RunSelectionAction(ModelActionSelection, Apply);
-			
 			SelectionChanged = true;
 		}
-		else if (const lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
-			RunObjectEditAction(ModelActionObjectEdit, Apply);
-		else if (const lcModelActionProperties* ModelActionProperties = dynamic_cast<const lcModelActionProperties*>(ModelAction))
-			RunModelPropertiesAction(ModelActionProperties, Apply);
+		else if (dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
+		{
+			SetCurrentStep(mCurrentStep);
+		}
+		else if (dynamic_cast<const lcModelActionProperties*>(ModelAction))
+		{
+		}
 	};
 
 	if (Apply)

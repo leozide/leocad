@@ -320,7 +320,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
 	}
 	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
 	{
@@ -340,7 +340,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
 			Rotation[2] = Value;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, !Dragging);
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, !Dragging);
 	}
 	else if (Piece || Light)
 	{
@@ -376,7 +376,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
 
 		if (Camera)
 		{
@@ -413,7 +413,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
 
 		if (Camera)
 		{
@@ -450,7 +450,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
 
 		if (Camera)
 		{

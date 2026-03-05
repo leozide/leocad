@@ -3387,7 +3387,7 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove)
 {
 	bool Moved = false;
 	lcMatrix33 RelativeRotation;
@@ -3455,7 +3455,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 		}
 	}
 
-	if (Moved && Update)
+	if (Moved)
 	{
 		UpdateAllViews();
 
@@ -3466,10 +3466,16 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	}
 }
 
-void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint)
+void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
+
+	if (Checkpoint)
+	{
+		BeginActionSequence();
+		BeginObjectEditAction();
+	}
 
 	lcMatrix33 RotationMatrix = lcMatrix33Identity();
 	bool Rotated = false;
@@ -3626,13 +3632,22 @@ void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool
 		}
 	}
 
-	if (Rotated && Update)
+	if (!Rotated)
 	{
-		UpdateAllViews();
 		if (Checkpoint)
-			SaveCheckpoint(tr("Rotating"));
-		gMainWindow->UpdateSelectedObjects(false);
+			DiscardActionSequence();
+
+		return;
 	}
+
+	if (Checkpoint)
+	{
+		EndObjectEditAction();
+		EndActionSequence(tr("Rotate"));
+	}
+
+	UpdateAllViews();
+	gMainWindow->UpdateSelectedObjects(false);
 }
 
 void lcModel::ScaleSelectedPieces(const float Scale)
@@ -3659,19 +3674,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case lcTransformType::AbsoluteTranslation:
-		MoveSelectedObjects(Transform, false, false, true, true, true);
+		MoveSelectedObjects(Transform, false, false, true, true);
 		break;
 
 	case lcTransformType::RelativeTranslation:
-		MoveSelectedObjects(Transform, true, false, true, true, true);
+		MoveSelectedObjects(Transform, true, false, true, true);
 		break;
 
 	case lcTransformType::AbsoluteRotation:
-		RotateSelectedObjects(Transform, false, false, true, true);
+		RotateSelectedObjects(Transform, false, false, true);
 		break;
 
 	case lcTransformType::RelativeRotation:
-		RotateSelectedObjects(Transform, true, false, true, true);
+		RotateSelectedObjects(Transform, true, false, true);
 		break;
 
 	case lcTransformType::Count:
@@ -5083,7 +5098,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 	const lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, true, false, mMouseToolFirstMove);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, false, mMouseToolFirstMove);
 
 	mMouseToolDistance = Distance;
 	mMouseToolFirstMove = false;
@@ -5166,13 +5181,10 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
 {
 	const lcVector3 Delta = SnapRotation(Angles) - SnapRotation(mMouseToolDistance);
-	RotateSelectedObjects(Delta, true, AlternateButtonDrag, false, false);
+	RotateSelectedObjects(Delta, true, AlternateButtonDrag, false);
 
 	mMouseToolDistance = Angles;
 	mMouseToolFirstMove = false;
-
-	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
 }
 
 void lcModel::UpdateScaleTool(const float Scale)

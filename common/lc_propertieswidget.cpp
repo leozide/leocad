@@ -330,6 +330,8 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
 		else if (Light)
 			InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
+		else
+			InitialRotation = mLastRotation;
 
 		lcVector3 Rotation = InitialRotation;
 
@@ -341,6 +343,8 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 			Rotation[2] = Value;
 
 		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, !Dragging);
+
+		mLastRotation = Rotation;
 	}
 	else if (Piece || Light)
 	{
@@ -1566,6 +1570,7 @@ void lcPropertiesWidget::Update(const std::vector<lcObject*>& Selection, lcObjec
 	if (mDisableUpdates)
 		return;
 
+	mLastRotation = lcVector3(0.0f, 0.0f, 0.0f);
 	mFocusObject = nullptr;
 	mSelection.clear();
 

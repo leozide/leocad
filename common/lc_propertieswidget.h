@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_objectproperty.h"
+#include "lc_math.h"
 
 class lcCollapsibleWidgetButton;
 class lcKeyFrameWidget;
@@ -131,6 +132,7 @@ protected:
 	std::vector<lcObject*> mSelection;
 	lcObject* mFocusObject = nullptr;
 	bool mDisableUpdates = false;
+	lcVector3 mLastRotation = lcVector3(0.0f, 0.0f, 0.0f);
 
 	std::array<PropertyWidgets, static_cast<int>(lcObjectPropertyId::Count)> mPropertyWidgets = {};
 	std::array<CategoryWidgets, static_cast<int>(CategoryIndex::Count)> mCategoryWidgets = {};

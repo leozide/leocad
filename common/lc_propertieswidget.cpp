@@ -12,6 +12,7 @@
 #include "lc_colorpicker.h"
 #include "lc_qutils.h"
 #include "lc_partselectionpopup.h"
+#include "lc_modelaction.h"
 
 lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	: QWidget(Parent)
@@ -342,7 +343,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
 			Rotation[2] = Value;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, !Dragging);
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, lcModelActionEditMerge::PropertiesRotate);
 
 		mLastRotation = Rotation;
 	}

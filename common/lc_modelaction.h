@@ -15,6 +15,18 @@ public:
 	virtual void SaveEndState(const lcModel* Model) = 0;
 	virtual void LoadStartState(lcModel* Model) const = 0;
 	virtual void LoadEndState(lcModel* Model) const = 0;
+
+	virtual bool CanMergeWith(const lcModelAction* Other) const
+	{
+		Q_UNUSED(Other);
+
+		return false;
+	}
+
+	virtual void MergeWith(lcModelAction* Other)
+	{
+		Q_UNUSED(Other);
+	}
 };
 
 struct lcModelActionSelectionState
@@ -65,18 +77,22 @@ struct lcModelHistoryState
 	std::vector<lcPieceHistoryState> Pieces;
 	std::vector<lcCameraHistoryState> Cameras;
 	std::vector<lcLightHistoryState> Lights;
-	
-	bool operator!=(const lcModelHistoryState& Other) const
-	{
-		return Groups != Other.Groups || Pieces != Other.Pieces || Cameras != Other.Cameras || Lights != Other.Lights;
-	}
+};
+
+bool operator!=(const lcModelHistoryState& a, const lcModelHistoryState& b);
+
+enum class lcModelActionEditMerge
+{
+	None,
+	KeyboardRotate,
+	PropertiesRotate
 };
 
 class lcModelActionObjectEdit: public lcModelAction
 {
 public:
-	lcModelActionObjectEdit() = default;
-	virtual ~lcModelActionObjectEdit() = default;
+	lcModelActionObjectEdit(lcModelActionEditMerge ModelActionEditMerge);
+	virtual ~lcModelActionObjectEdit();
 	
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;
@@ -84,6 +100,8 @@ public:
 	void LoadEndState(lcModel* Model) const override;
 	
 	bool StateChanged() const;
+	bool CanMergeWith(const lcModelAction* Other) const override;
+	void MergeWith(lcModelAction* Other) override;
 
 protected:
 	static void SaveState(lcModelHistoryState& State, const lcModel* Model);
@@ -91,6 +109,7 @@ protected:
 	
 	lcModelHistoryState mStartState;
 	lcModelHistoryState mEndState;
+	lcModelActionEditMerge mMerge;
 };
 
 class lcModelActionProperties : public lcModelAction

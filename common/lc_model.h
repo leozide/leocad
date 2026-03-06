@@ -10,6 +10,7 @@ class lcModelAction;
 class lcModelActionSelection;
 class lcModelActionObjectEdit;
 class lcModelActionProperties;
+enum class lcModelActionEditMerge;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -370,7 +371,7 @@ public:
 	}
 
 	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove);
-	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint);
+	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelActionEditMerge ModelActionEditMerge);
 	void ScaleSelectedPieces(const float Scale);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
@@ -400,7 +401,7 @@ protected:
 	void RecordInvertPieceSelectionAction();
 	void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
 	void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
-	void BeginObjectEditAction();
+	void BeginObjectEditAction(lcModelActionEditMerge ModelActionEditMerge);
 	void EndObjectEditAction();
 	void RecordModelPropertiesAction(const lcModelProperties& ModelProperties);
 

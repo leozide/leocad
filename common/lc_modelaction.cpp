@@ -142,6 +142,20 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 	}
 }
 
+bool operator!=(const lcModelHistoryState& a, const lcModelHistoryState& b)
+{
+	return a.Groups != b.Groups || a.Pieces != b.Pieces || a.Cameras != b.Cameras || a.Lights != b.Lights;
+}
+
+lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionEditMerge ModelActionEditMerge)
+	: mMerge(ModelActionEditMerge)
+{
+}
+
+lcModelActionObjectEdit::~lcModelActionObjectEdit()
+{
+}
+
 void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
@@ -193,6 +207,21 @@ void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
 bool lcModelActionObjectEdit::StateChanged() const
 {
 	return mStartState != mEndState;
+}
+
+bool lcModelActionObjectEdit::CanMergeWith(const lcModelAction* Other) const
+{
+	const lcModelActionObjectEdit* OtherModelActionEdit = dynamic_cast<const lcModelActionObjectEdit*>(Other);
+
+	return OtherModelActionEdit && mMerge != lcModelActionEditMerge::None && mMerge == OtherModelActionEdit->mMerge;
+}
+
+void lcModelActionObjectEdit::MergeWith(lcModelAction* Other)
+{
+	lcModelActionObjectEdit* OtherModelActionEdit = dynamic_cast<lcModelActionObjectEdit*>(Other);
+
+	if (OtherModelActionEdit)
+		mEndState = std::move(OtherModelActionEdit->mEndState);
 }
 
 void lcModelActionProperties::SaveStartState(const lcModel* Model)

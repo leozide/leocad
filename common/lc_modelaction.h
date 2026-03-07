@@ -84,7 +84,9 @@ bool operator!=(const lcModelHistoryState& a, const lcModelHistoryState& b);
 enum class lcModelActionEditMerge
 {
 	None,
+	KeyboardMove,
 	KeyboardRotate,
+	PropertiesMove,
 	PropertiesRotate
 };
 

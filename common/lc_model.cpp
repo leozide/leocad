@@ -3406,8 +3406,14 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge)
 {
+	if (Checkpoint)
+	{
+		BeginActionSequence();
+		BeginObjectEditAction(ModelActionEditMerge);
+	}
+
 	bool Moved = false;
 	lcMatrix33 RelativeRotation;
 
@@ -3474,15 +3480,22 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 		}
 	}
 
-	if (Moved)
+	if (!Moved)
 	{
-		UpdateAllViews();
-
 		if (Checkpoint)
-			SaveCheckpoint(tr("Moving"));
+			DiscardActionSequence();
 
-		gMainWindow->UpdateSelectedObjects(false);
+		return;
 	}
+
+	if (Checkpoint)
+	{
+		EndObjectEditAction();
+		EndActionSequence(tr("Move"));
+	}
+
+	UpdateAllViews();
+	gMainWindow->UpdateSelectedObjects(false);
 }
 
 void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelActionEditMerge ModelActionEditMerge)
@@ -3693,11 +3706,11 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case lcTransformType::AbsoluteTranslation:
-		MoveSelectedObjects(Transform, false, false, true, true);
+		MoveSelectedObjects(Transform, false, false, true, true, lcModelActionEditMerge::None);
 		break;
 
 	case lcTransformType::RelativeTranslation:
-		MoveSelectedObjects(Transform, true, false, true, true);
+		MoveSelectedObjects(Transform, true, false, true, true, lcModelActionEditMerge::None);
 		break;
 
 	case lcTransformType::AbsoluteRotation:
@@ -5117,7 +5130,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 	const lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, false, mMouseToolFirstMove);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, false, mMouseToolFirstMove, lcModelActionEditMerge::None);
 
 	mMouseToolDistance = Distance;
 	mMouseToolFirstMove = false;

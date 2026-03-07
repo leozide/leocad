@@ -321,7 +321,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 	}
 	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
 	{
@@ -381,7 +381,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -418,7 +418,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -455,7 +455,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{

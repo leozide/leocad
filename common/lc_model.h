@@ -379,7 +379,7 @@ public:
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 
-	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo);
+	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
 	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
 	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);

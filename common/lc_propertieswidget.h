@@ -115,7 +115,7 @@ protected:
 	void UpdatePieceColor(lcObjectPropertyId PropertyId);
 	void UpdatePieceId(lcObjectPropertyId PropertyId);
 
-	void ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging);
+	void ChangeFloatValue(lcObjectPropertyId PropertyId, float Value);
 
 	void SetEmpty();
 	void SetPiece(const std::vector<lcObject*>& Selection, lcObject* Focus);

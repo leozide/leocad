@@ -3876,16 +3876,13 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 	gMainWindow->UpdateSelectedObjects(false);
 }
 
-void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo)
+void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
 {
+	BeginActionSequence();
+	BeginObjectEditAction(static_cast<lcModelActionEditMerge>(static_cast<uint32_t>(lcModelActionEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+
 	bool Modified = false;
 	
-	if (AddUndo)
-	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
-	}
-
 	for (lcObject* Object : Objects)
 	{
 		bool ObjectModified = Object->SetPropertyValue(PropertyId, mCurrentStep, gMainWindow->GetAddKeys(), Value);
@@ -3904,14 +3901,10 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 		return;
 	}
 
-	if (AddUndo)
-	{
-		EndObjectEditAction();
-		EndActionSequence(lcObject::GetCheckpointString(PropertyId));
-	}
+	EndObjectEditAction();
+	EndActionSequence(lcObject::GetCheckpointString(PropertyId));
 
 	gMainWindow->UpdateSelectedObjects(false);
-	UpdateAllViews();
 
 	// todo: fix hacky timeline update
 	if (PropertyId == lcObjectPropertyId::PieceId || PropertyId == lcObjectPropertyId::PieceColor)

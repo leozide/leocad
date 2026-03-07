@@ -87,7 +87,8 @@ enum class lcModelActionEditMerge
 	KeyboardMove,
 	KeyboardRotate,
 	PropertiesMove,
-	PropertiesRotate
+	PropertiesRotate,
+	PropertiesEdit = 0x40000000
 };
 
 class lcModelActionObjectEdit: public lcModelAction

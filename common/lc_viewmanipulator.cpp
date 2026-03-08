@@ -896,7 +896,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		gTexFont.GetStringDimensions(&cx, &cy, buf);
 
 		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-		gTexFont.PrintText(Context, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, mView->GetUIScale(), buf);
+		gTexFont.PrintText(Context, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
 
 		Context->EnableColorBlend(false);
 	}

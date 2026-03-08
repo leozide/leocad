@@ -162,7 +162,7 @@ void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 	}
 }
 
-void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, float Scale, const char* Text) const
+void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
 {
 	const size_t Length = strlen(Text);
 
@@ -175,8 +175,8 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, floa
 	while (*Text)
 	{
 		int ch = *Text;
-		float Right = Left + mGlyphs[ch].width * Scale;
-		float Bottom = Top - mFontHeight * Scale;
+		float Right = Left + mGlyphs[ch].width;
+		float Bottom = Top - mFontHeight;
 
 		*CurVert++ = Left;
 		*CurVert++ = Top;

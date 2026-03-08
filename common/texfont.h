@@ -18,7 +18,7 @@ public:
 	bool Initialize(lcContext* Context);
 	void Reset();
 
-	void PrintText(lcContext* Context, float Left, float Top, float Z, float Scale, const char* Text) const;
+	void PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const;
 	void GetTriangles(const lcMatrix44& Transform, const char* Text, float* Buffer) const;
 	void GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const;
 	void GetStringDimensions(int* cx, int* cy, const char* Text) const;

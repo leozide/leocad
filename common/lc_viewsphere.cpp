@@ -183,9 +183,10 @@ void lcViewSphere::Draw()
 		return;
 
 	lcContext* Context = mView->mContext;
+	const float UIScale = mView->GetUIScale();
 	const int Width = mView->GetWidth();
 	const int Height = mView->GetHeight();
-	const int ViewportSize = mSize;
+	const int ViewportSize = mSize * UIScale;
 	const int Left = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	const int Bottom = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
 	Context->SetViewport(Left, Bottom, ViewportSize, ViewportSize);
@@ -240,7 +241,7 @@ void lcViewSphere::Draw()
 	Context->EnableCullFace(false);
 	Context->SetDepthFunction(lcDepthFunction::LessEqual);
 
-	Context->SetViewport(0, 0, Width, Height);
+	Context->SetViewport(0, 0, mView->GetWidth(), mView->GetHeight());
 }
 
 bool lcViewSphere::OnLeftButtonDown()
@@ -323,9 +324,10 @@ bool lcViewSphere::IsDragging() const
 
 std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 {
+	const float UIScale = mView->GetUIScale();
 	const int Width = mView->GetWidth();
 	const int Height = mView->GetHeight();
-	const int ViewportSize = mSize;
+	const int ViewportSize = mSize * UIScale;
 	const int Left = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::TopLeft) ? 0 : Width - ViewportSize;
 	const int Bottom = (mLocation == lcViewSphereLocation::BottomLeft || mLocation == lcViewSphereLocation::BottomRight) ? 0 : Height - ViewportSize;
 	const int x = mView->GetMouseX() - Left;

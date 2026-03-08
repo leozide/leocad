@@ -1150,9 +1150,13 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 
 void lcView::DrawViewport() const
 {
+	float Scale = GetUIScale();
+	float Width = mWidth / Scale;
+	float Height = mHeight / Scale;
+	
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, Width, 0.0f, Height, -1.0f, 1.0f));
 	mContext->SetLineWidth(1.0f);
 
 	mContext->SetDepthWrite(false);
@@ -1165,7 +1169,7 @@ void lcView::DrawViewport() const
 	else
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mInactiveViewColor));
 
-	float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
+	float Verts[8] = { 0.0f, 0.0f, Width - 1.0f, 0.0f, Width - 1.0f, Height - 1.0f, 0.0f, Height - 1.0f };
 
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormatPosition(2);
@@ -1181,7 +1185,7 @@ void lcView::DrawViewport() const
 
 		mContext->EnableColorBlend(true);
 
-		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, GetUIScale(), CameraName.toLatin1().constData());
+		gTexFont.PrintText(mContext, 3.0f, (float)Height - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
 
 		mContext->EnableColorBlend(false);
 	}
@@ -1243,26 +1247,28 @@ void lcView::DrawAxes() const
 	};
 
 	lcMatrix44 TranslationMatrix;
+	float Scale = GetUIScale();
 
 	switch (Preferences.mAxisIconLocation)
 	{
 	default:
 	case lcAxisIconLocation::BottomLeft:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(32, 32, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, 32, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::BottomRight:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, 32, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, 32, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::TopLeft:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(32, mHeight - 36, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, mHeight - 36, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::TopRight:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f) / Scale);
 		break;
 	}
+	
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
@@ -1270,7 +1276,7 @@ void lcView::DrawAxes() const
 	mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth / Scale, 0, mHeight / Scale, -50, 50));
 
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormat(0, 3, 0, 0, 4, false);
@@ -1720,7 +1726,8 @@ float lcView::GetOverlayScale() const
 	lcVector3 Point = UnprojectPoint(ScreenPos);
 
 	lcVector3 Dist(Point - WorldMatrix.GetTranslation());
-	return Dist.Length() * 5.0f;
+	
+	return Dist.Length() * 5.0f * GetUIScale();
 }
 
 void lcView::BeginDrag(lcDragState DragState)

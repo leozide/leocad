@@ -15,6 +15,7 @@ public:
 	virtual void SaveEndState(const lcModel* Model) = 0;
 	virtual void LoadStartState(lcModel* Model) const = 0;
 	virtual void LoadEndState(lcModel* Model) const = 0;
+	virtual bool StateChanged() const = 0;
 
 	virtual bool CanMergeWith(const lcModelAction* Other) const
 	{
@@ -55,8 +56,7 @@ public:
 	void SaveEndState(const lcModel* Model) override;
 	void LoadStartState(lcModel* Model) const override;
 	void LoadEndState(lcModel* Model) const override;
-
-	bool StateChanged() const;
+	bool StateChanged() const override;
 
 protected:
 	static void SaveState(lcModelActionSelectionState& State, const lcModel* Model);
@@ -101,8 +101,8 @@ public:
 	void SaveEndState(const lcModel* Model) override;
 	void LoadStartState(lcModel* Model) const override;
 	void LoadEndState(lcModel* Model) const override;
-	
-	bool StateChanged() const;
+	bool StateChanged() const override;
+
 	bool CanMergeWith(const lcModelAction* Other) const override;
 	void MergeWith(lcModelAction* Other) override;
 
@@ -125,8 +125,7 @@ public:
 	void SaveEndState(const lcModel* Model) override;
 	void LoadStartState(lcModel* Model) const override;
 	void LoadEndState(lcModel* Model) const override;
-
-	bool StateChanged() const;
+	bool StateChanged() const override;
 
 protected:
 	static void SaveState(lcModelProperties& State, const lcModel* Model);

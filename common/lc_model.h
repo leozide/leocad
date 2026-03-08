@@ -410,6 +410,7 @@ protected:
 	void EndActionSequence(const QString& Description);
 	void DiscardActionSequence();
 	void RevertActionSequence();
+	void RemoveFirstUndoIfUnchanged();
 	const lcModelHistoryEntry* GetFirstUndoChange() const;
 
 	void SaveCheckpoint(const QString& Description);

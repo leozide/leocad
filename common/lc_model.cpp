@@ -2020,6 +2020,21 @@ void lcModel::SetSaved()
 	mSavedHistory = GetFirstUndoChange();
 }
 
+void lcModel::RemoveFirstUndoIfUnchanged()
+{
+	if (mUndoHistory.empty())
+		return;
+
+	for (const std::unique_ptr<lcModelAction>& ModelAction : mUndoHistory.front()->ModelActions)
+		if (ModelAction->StateChanged())
+			return;
+
+	mUndoHistory.erase(mUndoHistory.begin());
+
+	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
+}
+
 const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
 {
 	for (const std::unique_ptr<lcModelHistoryEntry>& UndoEntry : mUndoHistory)
@@ -3492,6 +3507,8 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	{
 		EndObjectEditAction();
 		EndActionSequence(tr("Move"));
+
+		RemoveFirstUndoIfUnchanged();
 	}
 
 	UpdateAllViews();
@@ -3676,6 +3693,8 @@ void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool
 	{
 		EndObjectEditAction();
 		EndActionSequence(tr("Rotate"));
+
+		RemoveFirstUndoIfUnchanged();
 	}
 
 	UpdateAllViews();
@@ -3904,6 +3923,8 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	EndObjectEditAction();
 	EndActionSequence(lcObject::GetCheckpointString(PropertyId));
 
+	RemoveFirstUndoIfUnchanged();
+
 	gMainWindow->UpdateSelectedObjects(false);
 
 	// todo: fix hacky timeline update
@@ -3921,6 +3942,8 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 
 void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 {
+	// todo: right clicking or pressing esc while dragging the spinbox doesn't cancel
+
 	if (!Accept)
 	{
 		RevertActionSequence();

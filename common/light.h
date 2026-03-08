@@ -82,8 +82,6 @@ public:
 	static QString GetAreaShapeString(lcLightAreaShape LightAreaShape);
 	static QStringList GetAreaShapeStrings();
 
-	void CopyProperties(const lcLight& Other);
-
 	bool IsPointLight() const
 	{
 		return mLightType == lcLightType::Point;

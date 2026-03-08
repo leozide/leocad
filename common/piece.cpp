@@ -67,28 +67,6 @@ lcPiece::~lcPiece()
 	delete mMesh;
 }
 
-void lcPiece::CopyProperties(const lcPiece& Other)
-{
-	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
-
-	mPosition = Other.mPosition;
-	mRotation = Other.mRotation;
-
-	mColorIndex = Other.mColorIndex;
-	mColorCode = Other.mColorCode;
-
-	mStepShow = Other.mStepShow;
-	mStepHide = Other.mStepHide;
-
-	mPivotPointValid = Other.mPivotPointValid;
-	mPivotMatrix = Other.mPivotMatrix;
-
-	mControlPoints = Other.mControlPoints;
-	mTrainTrackConnections = Other.mTrainTrackConnections;
-
-	UpdateMesh();
-}
-
 void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();

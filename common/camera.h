@@ -69,8 +69,6 @@ public:
 	static QStringList GetCameraProjectionStrings();
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
-	void CopyProperties(const lcCamera& Other);
-
 	QString GetName() const override
 	{
 		return mName;

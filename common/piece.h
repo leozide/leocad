@@ -67,8 +67,6 @@ public:
 	lcPiece& operator=(const lcPiece&) = delete;
 	lcPiece& operator=(lcPiece&&) = delete;
 
-	void CopyProperties(const lcPiece& Other);
-
 	quint32 GetAllowedTransforms() const override;
 	lcVector3 GetSectionPosition(quint32 Section) const override;
 

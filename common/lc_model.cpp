@@ -1950,6 +1950,13 @@ void lcModel::EndActionSequence(const QString& Description)
 	if (mActionSequence.empty())
 		return;
 	
+	if (mIsPreview)
+	{
+		mActionSequence.clear();
+		
+		return;
+	}
+	
 	bool CanMerge = false;
 
 	if (mActionSequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front()->ModelActions.size() == 1)
@@ -2042,29 +2049,6 @@ const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
 			return UndoEntry.get();
 	
 	return nullptr;
-}
-
-void lcModel::SaveCheckpoint(const QString& )
-{
-	/*
-	lcModelHistoryEntry* ModelHistoryEntry = new lcModelHistoryEntry();
-
-	ModelHistoryEntry->Description = Description;
-
-	QTextStream Stream(&ModelHistoryEntry->File);
-	SaveLDraw(Stream, false, 0);
-
-	mUndoHistory.insert(mUndoHistory.begin(), ModelHistoryEntry);
-	for (lcModelHistoryEntry* Entry : mRedoHistory)
-		delete Entry;
-	mRedoHistory.clear();
-
-	if (!Description.isEmpty())
-	{
-		gMainWindow->UpdateModified(IsModified());
-		gMainWindow->UpdateUndoRedo(mUndoHistory.size() > 1 ? mUndoHistory[0]->Description : QString(), !mRedoHistory.empty() ? mRedoHistory[0]->Description : QString());
-	}
-	*/
 }
 
 void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply)
@@ -3236,7 +3220,10 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 {
 	if (!Model)
 		return;
-
+	
+	BeginActionSequence();
+	BeginObjectEditAction(lcModelActionEditMerge::None);
+	
 	std::vector<lcPiece*> Pieces;
 	lcPiece* ModelPiece = nullptr;
 	lcStep FirstStep = LC_STEP_MAX;
@@ -3266,7 +3253,14 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		else
 			PieceIndex++;
 	}
+	
+	if (Pieces.empty())
+	{
+		DiscardActionSequence();
 
+		return;
+	}
+	
 	lcVector3 ModelCenter = (Min + Max) / 2.0f;
 	ModelCenter.z += (Min.z - Max.z) / 2.0f;
 
@@ -3285,11 +3279,14 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		ModelPiece->Initialize(lcMatrix44Translation(ModelCenter), FirstStep);
 		ModelPiece->UpdatePosition(mCurrentStep);
 	}
-
-	SaveCheckpoint(tr("New Model"));
+	
+	EndObjectEditAction();
+	
 	gMainWindow->UpdateTimeline(false, false);
 
 	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	
+	EndActionSequence(tr("Move to Model"));
 }
 
 void lcModel::InlineSelectedModels()
@@ -3943,85 +3940,12 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 {
 	// todo: right clicking or pressing esc while dragging the spinbox doesn't cancel
+	// we need to handle the shortcut override and undo the last undo history if it matches the property
 
 	if (!Accept)
 	{
 		RevertActionSequence();
 		return;
-	}
-
-	switch (PropertyId)
-	{
-	case lcObjectPropertyId::PieceId:
-	case lcObjectPropertyId::PieceColor:
-	case lcObjectPropertyId::PieceStepShow:
-	case lcObjectPropertyId::PieceStepHide:
-	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraProjection:
-		break;
-
-	case lcObjectPropertyId::CameraFOV:
-	case lcObjectPropertyId::CameraNear:
-	case lcObjectPropertyId::CameraFar:
-		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
-		break;
-
-	case lcObjectPropertyId::CameraPositionX:
-	case lcObjectPropertyId::CameraPositionY:
-	case lcObjectPropertyId::CameraPositionZ:
-	case lcObjectPropertyId::CameraTargetX:
-	case lcObjectPropertyId::CameraTargetY:
-	case lcObjectPropertyId::CameraTargetZ:
-	case lcObjectPropertyId::CameraUpX:
-	case lcObjectPropertyId::CameraUpY:
-	case lcObjectPropertyId::CameraUpZ:
-		SaveCheckpoint(tr("Move"));
-		break;
-
-	case lcObjectPropertyId::LightName:
-	case lcObjectPropertyId::LightType:
-	case lcObjectPropertyId::LightColor:
-		break;
-
-	case lcObjectPropertyId::LightBlenderPower:
-	case lcObjectPropertyId::LightPOVRayPower:
-		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
-		break;
-
-	case lcObjectPropertyId::LightCastShadow:
-		break;
-
-	case lcObjectPropertyId::LightPOVRayFadeDistance:
-	case lcObjectPropertyId::LightPOVRayFadePower:
-	case lcObjectPropertyId::LightBlenderRadius:
-	case lcObjectPropertyId::LightBlenderAngle:
-	case lcObjectPropertyId::LightAreaSizeX:
-	case lcObjectPropertyId::LightAreaSizeY:
-	case lcObjectPropertyId::LightSpotConeAngle:
-	case lcObjectPropertyId::LightSpotPenumbraAngle:
-	case lcObjectPropertyId::LightPOVRaySpotTightness:
-		SaveCheckpoint(lcObject::GetCheckpointString(PropertyId));
-		break;
-
-	case lcObjectPropertyId::LightAreaShape:
-	case lcObjectPropertyId::LightPOVRayAreaGridX:
-	case lcObjectPropertyId::LightPOVRayAreaGridY:
-		break;
-
-	case lcObjectPropertyId::ObjectPositionX:
-	case lcObjectPropertyId::ObjectPositionY:
-	case lcObjectPropertyId::ObjectPositionZ:
-		SaveCheckpoint(tr("Move"));
-		break;
-
-	case lcObjectPropertyId::ObjectRotationX:
-	case lcObjectPropertyId::ObjectRotationY:
-	case lcObjectPropertyId::ObjectRotationZ:
-		SaveCheckpoint(tr("Rotate"));
-		break;
-
-	case lcObjectPropertyId::Count:
-		break;
 	}
 }
 
@@ -5428,12 +5352,22 @@ void lcModel::LookAt(lcCamera* Camera)
 
 void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 {
+	if (!Camera->IsSimple())
+	{
+		BeginActionSequence();
+		BeginObjectEditAction(lcModelActionEditMerge::KeyboardMoveCamera);
+	}
+	
 	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
+	
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();
 
 	if (!Camera->IsSimple())
-		SaveCheckpoint(tr("Moving Camera"));
+	{
+		EndObjectEditAction();
+		EndActionSequence(tr("Move"));
+	}
 }
 
 void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix)
@@ -5477,14 +5411,24 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 
 void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
+	if (!Camera->IsSimple())
+	{
+		BeginActionSequence();
+		BeginObjectEditAction(lcModelActionEditMerge::KeyboardZoom);
+	}
+	
 	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
 
 	if (!mIsPreview)
 		gMainWindow->UpdateSelectedObjects(false);
+	
 	UpdateAllViews();
 
 	if (!Camera->IsSimple())
-		SaveCheckpoint(tr("Zoom"));
+	{
+		EndObjectEditAction();
+		EndActionSequence(tr("Zoom"));
+	}
 }
 
 void lcModel::ShowPropertiesDialog()
@@ -5684,8 +5628,6 @@ void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
 
 	mCurrentStep = LC_STEP_MAX;
 	CalculateStep(LC_STEP_MAX);
-
-	SaveCheckpoint(QString());
 }
 
 void lcModel::UpdateInterface()

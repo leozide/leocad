@@ -413,7 +413,6 @@ protected:
 	void RemoveFirstUndoIfUnchanged();
 	const lcModelHistoryEntry* GetFirstUndoChange() const;
 
-	void SaveCheckpoint(const QString& Description);
 	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply);
 
 	QString GetGroupName(const QString& Prefix);

@@ -1935,9 +1935,11 @@ void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>
 	
 	if (SelectionChanged)
 		gMainWindow->UpdateSelectedObjects(true);
-
-	UpdateAllViews();
+	
+	gMainWindow->UpdateCurrentStep();
 	gMainWindow->UpdateTimeline(true, false);
+	
+	UpdateAllViews();	
 }
 
 void lcModel::BeginActionSequence()
@@ -2049,64 +2051,6 @@ const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
 			return UndoEntry.get();
 	
 	return nullptr;
-}
-
-void lcModel::LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply)
-{
-	if (!CheckPoint->ModelActions.empty())
-	{
-		RunActionSequence(CheckPoint->ModelActions, Apply);
-
-		return;
-	}
-
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::vector<PieceInfo*> LoadedInfos;
-
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-	{
-		PieceInfo* Info = Piece->mPieceInfo;
-		Library->LoadPieceInfo(Info, true, true);
-		LoadedInfos.push_back(Info);
-	}
-
-	// Remember the current step
-	const lcStep CurrentStep = mCurrentStep;
-
-	// Remember the camera names
-	std::vector<lcView*> Views = lcView::GetModelViews(this);
-	std::vector<QString> CameraNames(Views.size());
-
-	for (size_t ViewIndex = 0; ViewIndex < Views.size(); ViewIndex++)
-	{
-		lcCamera* Camera = Views[ViewIndex]->GetCamera();
-
-		if (!Camera->IsSimple())
-			CameraNames[ViewIndex] = Camera->GetName();
-	}
-
-	DeleteModel();
-
-	QBuffer Buffer(&CheckPoint->File);
-	Buffer.open(QIODevice::ReadOnly);
-	LoadLDraw(Buffer, lcGetActiveProject());
-
-	// Reset the current step
-	mCurrentStep = CurrentStep;
-	CalculateStep(CurrentStep);
-
-	// Reset the cameras
-	for (size_t ViewIndex = 0; ViewIndex < Views.size() && ViewIndex < CameraNames.size(); ViewIndex++)
-		if (!CameraNames[ViewIndex].isEmpty())
-			Views[ViewIndex]->SetCamera(CameraNames[ViewIndex]);
-
-	gMainWindow->UpdateTimeline(true, false);
-	gMainWindow->UpdateCurrentStep();
-	gMainWindow->UpdateSelectedObjects(true);
-	UpdateAllViews();
-
-	for (PieceInfo* Info : LoadedInfos)
-		Library->ReleasePieceInfo(Info);
 }
 
 void lcModel::SetActive(bool Active)
@@ -4827,7 +4771,7 @@ void lcModel::UndoAction()
 
 	std::unique_ptr<lcModelHistoryEntry> Undo = std::move(mUndoHistory.front());
 
-	LoadCheckPoint(Undo.get(), false);
+	RunActionSequence(Undo->ModelActions, false);
 
 	mUndoHistory.erase(mUndoHistory.begin());
 	mRedoHistory.insert(mRedoHistory.begin(), std::move(Undo));
@@ -4843,7 +4787,7 @@ void lcModel::RedoAction()
 
 	std::unique_ptr<lcModelHistoryEntry> Redo = std::move(mRedoHistory.front());
 
-	LoadCheckPoint(Redo.get(), true);
+	RunActionSequence(Redo->ModelActions, true);
 
 	mRedoHistory.erase(mRedoHistory.begin());
 	mUndoHistory.insert(mUndoHistory.begin(), std::move(Redo));

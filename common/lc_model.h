@@ -112,7 +112,6 @@ public:
 struct lcModelHistoryEntry
 {
 	std::vector<std::unique_ptr<lcModelAction>> ModelActions;
-	QByteArray File;
 	QString Description;
 };
 
@@ -412,8 +411,6 @@ protected:
 	void RevertActionSequence();
 	void RemoveFirstUndoIfUnchanged();
 	const lcModelHistoryEntry* GetFirstUndoChange() const;
-
-	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint, bool Apply);
 
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();

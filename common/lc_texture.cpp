@@ -176,9 +176,13 @@ bool lcTexture::Load(const QString& FileName, int Flags)
 
 	if (!Image.FileLoad(FileName))
 		return false;
-
+	
+	mLoading = true;
+	
 	SetImage(std::move(Image), Flags);
 
+	mLoading = false;
+	
 	return true;
 }
 
@@ -188,9 +192,13 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 
 	if (!Image.FileLoad(File))
 		return false;
-
+	
+	mLoading = true;
+	
 	SetImage(std::move(Image), Flags);
-
+	
+	mLoading = false;
+	
 	return true;
 }
 

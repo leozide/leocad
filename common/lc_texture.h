@@ -67,7 +67,7 @@ public:
 
 	bool NeedsUpload() const
 	{
-		return mTexture == 0 && !mImages.empty();
+		return !mLoading && mTexture == 0 && !mImages.empty();
 	}
 
 	int GetFlags() const
@@ -99,6 +99,7 @@ protected:
 	QAtomicInt mRefCount;
 	std::vector<Image> mImages;
 	int mFlags;
+	bool mLoading = false;
 };
 
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);

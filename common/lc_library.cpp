@@ -236,7 +236,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 
 		if (TextureFile.isFile())
 		{
-			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
+			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_MIPMAPS);
 
 			if (Texture)
 			{
@@ -425,7 +425,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				if ((ZipFileType == lcZipFileType::Official && !memcmp(Name, "LDRAW/PARTS/TEXTURES/", 21)) ||
 					(ZipFileType == lcZipFileType::Unofficial && !memcmp(Name, "PARTS/TEXTURES/", 15)))
 				{
-					lcTexture* Texture = new lcTexture();
+					lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 					mTextures.push_back(Texture);
 
 					*Dst = 0;
@@ -652,7 +652,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				continue;
 			*Dst = 0;
 
-			lcTexture* Texture = new lcTexture();
+			lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 			mTextures.push_back(Texture);
 
 			strncpy(Texture->mName, Name, sizeof(Texture->mName));

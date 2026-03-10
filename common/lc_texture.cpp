@@ -32,11 +32,9 @@ void lcReleaseTexture(lcTexture* Texture)
 		delete Texture;
 }
 
-lcTexture::lcTexture()
+lcTexture::lcTexture(int Flags)
+    : mFlags(Flags)
 {
-	mTexture = 0;
-	mRefCount = 0;
-	mTemporary = false;
 }
 
 lcTexture::~lcTexture()

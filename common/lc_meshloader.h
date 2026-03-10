@@ -41,13 +41,17 @@ enum class lcMeshLoaderMaterialType
 	Spherical
 };
 
-struct lcMeshLoaderMaterial
+struct lcMeshLoaderTextureParams
 {
 	lcMeshLoaderMaterialType Type = lcMeshLoaderMaterialType::Solid;
-	quint32 Color = 16;
 	lcVector3 Points[3] = {};
 	float Angles[2] = {};
-	char Name[256] = {};
+	char Name[LC_MAXPATH] = {};
+};
+
+struct lcMeshLoaderMaterial : public lcMeshLoaderTextureParams
+{
+	quint32 Color = 16;
 };
 
 class lcMeshLoaderSection
@@ -71,24 +75,8 @@ struct lcMeshLoaderFinalSection
 	char Name[256];
 };
 
-struct lcMeshLoaderTextureMap
+struct lcMeshLoaderTextureMap : public lcMeshLoaderTextureParams
 {
-	union lcTextureMapParams
-	{
-		lcTextureMapParams()
-		{
-		}
-
-		struct lcTextureMapSphericalParams
-		{
-		} Spherical;
-	} Params;
-
-	lcMeshLoaderMaterialType Type;
-	lcVector3 Points[3];
-	float Angles[2];
-	char Name[LC_MAXPATH];
-
 	bool Fallback = false;
 	bool Next = false;
 };
@@ -182,7 +170,7 @@ public:
 	void AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
 
 	lcMeshLoaderMaterial* GetMaterial(quint32 ColorCode);
-	lcMeshLoaderMaterial* GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureMap& TextureMap);
+	lcMeshLoaderMaterial* GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureParams& TextureMap);
 
 	std::array<lcMeshLoaderTypeData, LC_NUM_MESHDATA_TYPES> mData;
 	bool mHasTextures;

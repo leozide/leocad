@@ -369,11 +369,16 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
-			lcMeshLoaderTextureMap DstTextureMap = *TextureMap;
-
+			lcMeshLoaderTextureParams DstTextureMap;
+			
+			if (TextureMap)
+				DstTextureMap = *TextureMap;
+			else
+				DstTextureMap = *SrcSection->mMaterial;
+			
 			for (lcVector3& Point : DstTextureMap.Points)
 				Point = lcMul31(Point, Transform);
-
+			
 			DstSection = AddSection(PrimitiveType, mMeshData->GetTexturedMaterial(ColorCode, DstTextureMap));
 		}
 		else if (TextureMap && SrcSection->mPrimitiveType == LC_MESH_TRIANGLES)
@@ -452,7 +457,12 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
-			lcMeshLoaderTextureMap DstTextureMap = *TextureMap;
+			lcMeshLoaderTextureParams DstTextureMap;
+			
+			if (TextureMap)
+				DstTextureMap = *TextureMap;
+			else
+				DstTextureMap = *SrcSection->mMaterial;
 
 			for (lcVector3& Point : DstTextureMap.Points)
 				Point = lcMul31(Point, Transform);
@@ -553,7 +563,7 @@ lcMeshLoaderMaterial* lcLibraryMeshData::GetMaterial(quint32 ColorCode)
 	return Material;
 }
 
-lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureMap& TextureMap)
+lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureParams& TextureMap)
 {
 	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
 	{

@@ -21,7 +21,7 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 		return QT_TRANSLATE_NOOP("Checkpoint", "Change Piece");
 
 	case lcObjectPropertyId::PieceColor:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Chang Piece Color");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Change Piece Color");
 
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:

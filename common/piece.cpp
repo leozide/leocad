@@ -959,7 +959,7 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mHidden = State.Hidden;
 	mFileLine = State.FileLine;
 	mID = State.PieceId;
-	mGroup = (State.GroupIndex < Groups.size()) ? Groups[State.GroupIndex].get() : nullptr;;
+	mGroup = (State.GroupIndex < Groups.size()) ? Groups[State.GroupIndex].get() : nullptr;
 	mColorIndex = State.ColorIndex;
 	mColorCode = State.ColorCode;
 	mStepShow = State.StepShow;

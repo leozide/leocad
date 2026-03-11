@@ -66,15 +66,15 @@ void lcGroup::CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups)
 lcGroupHistoryState lcGroup::GetHistoryState(const lcModel* Model) const
 {
 	lcGroupHistoryState State;
-	
+
 	State.Id = mId;
 	State.ParentIndex = ~0U;
 	State.Name = mName;
-	
+
 	if (mGroup)
 	{
 		const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-		
+
 		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
 		{
 			if (Groups[GroupIndex].get() == mGroup)
@@ -84,14 +84,14 @@ lcGroupHistoryState lcGroup::GetHistoryState(const lcModel* Model) const
 			}
 		}
 	}
-	
+
 	return State;
 }
 
 void lcGroup::SetHistoryState(const lcGroupHistoryState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	
+
 	mId = State.Id;
 	mName = State.Name;
 	mGroup = (State.ParentIndex < Groups.size()) ? Groups[State.ParentIndex].get() : nullptr;

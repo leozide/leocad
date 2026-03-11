@@ -21,12 +21,12 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 	QOpenGLContext* Context = Widget->context();
 	QOpenGLFunctions* Functions = Context->functions();
 	QSurfaceFormat Format = Context->format();
-	
+
 	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
 
 	const QString QtVersionFormat = tr("Qt Version %1 (compiled with %2)\n\n");
 	const QString QtVersion = QtVersionFormat.arg(qVersion(), QT_VERSION_STR);
-	
+
 	const QString VersionFormat = tr("OpenGL Version %1 (GLSL %2)\n%3 - %4\n\n");
 	const QString GLVersion(reinterpret_cast<const char*>(Functions->glGetString(GL_VERSION)));
 	const QString ShaderVersion(reinterpret_cast<const char*>(Functions->glGetString(GL_SHADING_LANGUAGE_VERSION)));

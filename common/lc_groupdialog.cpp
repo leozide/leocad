@@ -25,7 +25,7 @@ void lcGroupDialog::accept()
 		QMessageBox::information(this, "LeoCAD", tr("Name cannot be empty."));
 		return;
 	}
-	
+
 	for (const std::unique_ptr<lcGroup>& Group : mGroups)
 	{
 		if (Group->mName == Name)
@@ -33,8 +33,8 @@ void lcGroupDialog::accept()
 			QMessageBox::information(this, "LeoCAD", tr("A group with this name already exists."));
 			return;
 		}
-	}	
-	
+	}
+
 	mName = Name;
 
 	QDialog::accept();

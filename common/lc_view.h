@@ -263,7 +263,7 @@ public:
 	void ShowContextMenu() const;
 	bool CloseFindReplaceDialog();
 	void ShowFindReplaceWidget(bool Replace);
-	
+
 	float GetUIScale() const;
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;

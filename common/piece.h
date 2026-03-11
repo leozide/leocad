@@ -21,7 +21,7 @@ struct lcPieceControlPoint
 {
 	lcMatrix44 Transform;
 	float Scale;
-	
+
 	bool operator==(const lcPieceControlPoint& Other) const
 	{
 		return Transform == Other.Transform && Scale == Other.Scale;
@@ -44,7 +44,7 @@ struct lcPieceHistoryState
 	std::vector<lcPieceControlPoint> ControlPoints;
 	lcObjectProperty<lcVector3> Position;
 	lcObjectProperty<lcMatrix33> Rotation;
-	
+
 	bool operator==(const lcPieceHistoryState& Other) const
 	{
 		return Id == Other.Id && Hidden == Other.Hidden && FileLine == Other.FileLine && PieceId == Other.PieceId &&

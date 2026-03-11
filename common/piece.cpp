@@ -918,7 +918,7 @@ void lcPiece::RemoveKeyFrames()
 lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 {
 	lcPieceHistoryState State;
-	
+
 	State.Id = mId;
 	State.Hidden = mHidden;
 	State.FileLine = mFileLine;
@@ -933,9 +933,9 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 	State.ControlPoints = mControlPoints;
 	State.Position = mPosition;
 	State.Rotation = mRotation;
-	
+
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	
+
 	if (mGroup)
 	{
 		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
@@ -947,14 +947,14 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 			}
 		}
 	}
-	
+
 	return State;
 }
 
 void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	
+
 	mId = State.Id;
 	mHidden = State.Hidden;
 	mFileLine = State.FileLine;
@@ -969,13 +969,13 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mControlPoints = State.ControlPoints;
 	mPosition = State.Position;
 	mRotation = State.Rotation;
-	
+
 	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
-	
+
 	SetPieceInfo(Info, mID, true, false);
-	
+
 	UpdateMesh();
-	
+
 	//	std::vector<bool> mTrainTrackConnections;
 }
 

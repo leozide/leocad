@@ -9,7 +9,7 @@ class lcQImageDialog;
 class lcQImageDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	lcQImageDialog(QWidget* Parent);
 	~lcQImageDialog();

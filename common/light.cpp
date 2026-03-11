@@ -496,7 +496,7 @@ void lcLight::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, 
 		WorldMatrix.Orthonormalize();
 
 		SetRotation(WorldMatrix, Step, AddKey);
-			
+
 		mWorldMatrix = lcMatrix44(WorldMatrix, mWorldMatrix.GetTranslation());
 	}
 }
@@ -1250,7 +1250,7 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 
 	case lcObjectPropertyId::LightColor:
 		return SetColor(Value.value<lcVector3>(), Step, AddKey);
-		
+
 	case lcObjectPropertyId::LightBlenderPower:
 		return SetBlenderPower(Value.toFloat(), Step, AddKey);
 
@@ -1514,7 +1514,7 @@ void lcLight::RemoveKeyFrames()
 lcLightHistoryState lcLight::GetHistoryState([[maybe_unused]] const lcModel* Model) const
 {
 	lcLightHistoryState State;
-	
+
 	State.Id = mId;
 	State.Hidden = mHidden;
 	State.Name = mName;

@@ -23,7 +23,7 @@ public:
 		return devicePixelRatio();
 #endif
 	}
-	
+
 protected:
 	void initializeGL() override;
 	void resizeGL(int Width, int Height) override;

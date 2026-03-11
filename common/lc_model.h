@@ -135,10 +135,10 @@ public:
 	{
 		return mActive;
 	}
-	
+
 	bool IsModified() const;
 	void SetSaved();
-	
+
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
@@ -225,12 +225,12 @@ public:
 	void ShowNextStep();
 	void InsertStep(lcStep Step);
 	void RemoveStep(lcStep Step);
-	
+
 	template<typename StateType, typename ObjectType>
 	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
 	void LoadHistoryState(const lcModelHistoryState& HistoryState);
 	void SetModelProperties(const lcModelProperties& ModelProperties);
-	
+
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
 	void DeleteSelectedObjects();
@@ -266,7 +266,7 @@ public:
 	bool LoadInventory(const QByteArray& Inventory);
 	int SplitMPD(QIODevice& Device);
 	void Merge(std::unique_ptr<lcModel> Other);
-	
+
 	void SetMinifig(const lcMinifig& Minifig);
 	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
 
@@ -314,7 +314,7 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
-	
+
 	void ClearSelection();
 	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
 	void FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
@@ -391,7 +391,7 @@ public:
 
 protected:
 	void DeleteModel();
-	
+
 	void RecordSelectionAction(std::function<void()> Callback);
 	void RecordClearSelectionAction();
 	void RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
@@ -416,7 +416,7 @@ protected:
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
 	void RemoveCameraFromViews(lcCamera* Camera);
-	
+
 	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const;
 	void DeselectAllObjects();
 	void SetFocusedObject(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);

@@ -52,7 +52,7 @@ struct lcLightHistoryState
 	lcObjectProperty<float> AreaSizeY;
 	lcObjectProperty<int> POVRayAreaGridX;
 	lcObjectProperty<int> POVRayAreaGridY;
-	
+
 	bool operator==(const lcLightHistoryState& Other) const
 	{
 		return Id == Other.Id && Hidden == Other.Hidden && Name == Other.Name && LightType == Other.LightType &&
@@ -365,7 +365,7 @@ protected:
 	lcObjectProperty<float> mAreaSizeY = lcObjectProperty<float>(250.0f);
 	lcObjectProperty<int> mPOVRayAreaGridX = lcObjectProperty<int>(2);
 	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
-	
+
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
 	lcMatrix44 mWorldMatrix;
 

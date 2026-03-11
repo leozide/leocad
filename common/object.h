@@ -90,35 +90,35 @@ public:
 	{
 		return mObjectType;
 	}
-	
+
 	lcObjectId GetId() const
 	{
 		return mId;
 	}
-	
+
 	bool IsSelected() const
 	{
 		return mSelected;
 	}
-	
+
 	void SetSelected(bool Selected)
 	{
 		mSelected = Selected;
-		
+
 		if (!Selected)
 			mFocusedSection = LC_OBJECT_SECTION_INVALID;
 	}
-	
+
 	bool IsFocused() const
 	{
 		return mFocusedSection != LC_OBJECT_SECTION_INVALID;
 	}
-	
+
 	bool IsFocused(quint32 Section) const
 	{
 		return mFocusedSection == Section;
 	}
-	
+
 	void SetFocused(quint32 Section, bool Focused)
 	{
 		if (Focused)
@@ -129,12 +129,12 @@ public:
 		else
 			mFocusedSection = LC_OBJECT_SECTION_INVALID;
 	}
-	
+
 	quint32 GetFocusSection() const
 	{
 		return mFocusedSection;
 	}
-	
+
 	virtual void UpdatePosition(lcStep Step) = 0;
 	virtual quint32 GetAllowedTransforms() const = 0;
 	virtual lcVector3 GetSectionPosition(quint32 Section) const = 0;
@@ -151,12 +151,12 @@ public:
 
 private:
 	lcObjectType mObjectType;
-	
+
 protected:
 	bool mHidden = false;
 	bool mSelected = false;
 	quint32 mFocusedSection = LC_OBJECT_SECTION_INVALID;
 	lcObjectId mId = static_cast<lcObjectId>(0);
-	
+
 	static lcObjectId mNextId;
 };

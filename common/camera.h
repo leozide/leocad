@@ -43,7 +43,7 @@ struct lcCameraHistoryState
 	lcObjectProperty<lcVector3> TargetPosition;
 	lcObjectProperty<lcVector3> UpVector;
 	QString Name;
-	
+
 	bool operator==(const lcCameraHistoryState& Other) const
 	{
 		return Id == Other.Id && Hidden == Other.Hidden && Simple == Other.Simple && Fovy == Other.Fovy &&

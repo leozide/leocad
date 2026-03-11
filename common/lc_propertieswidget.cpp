@@ -469,7 +469,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 {
 	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
-		
+
 	if (Widget)
 	{
 		QSignalBlocker Blocker(Widget);
@@ -1083,7 +1083,7 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 	PieceInfo* Info = Partial ? nullptr : static_cast<PieceInfo*>(Value.value<void*>());
 
 	std::tie(Value, Partial) = GetUpdateValue(lcObjectPropertyId::PieceColor);
-	
+
 	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
 	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Info, std::vector<std::pair<PieceInfo*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
@@ -1314,7 +1314,7 @@ void lcPropertiesWidget::SetPiece(const std::vector<lcObject*>& Selection, lcObj
 
 	if (!Model)
 		return;
-	
+
 	Model->GetMoveRotateTransform(Position, RelativeRotation);
 
 	UpdateFloat(lcObjectPropertyId::ObjectPositionX, Position[0]);

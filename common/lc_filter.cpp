@@ -107,41 +107,41 @@ bool lcFilter::Match(const char* String) const
 }
 
 // Copyright 2018 IBM Corporation
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Compares two text strings.  Accepts '?' as a single-character wildcard.  
-// For each '*' wildcard, seeks out a matching sequence of any characters 
-// beyond it.  Otherwise compares the strings a character at a time. 
+// Compares two text strings.  Accepts '?' as a single-character wildcard.
+// For each '*' wildcard, seeks out a matching sequence of any characters
+// beyond it.  Otherwise compares the strings a character at a time.
 //
 bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
 {
     const char* WildSequence;  // Points to prospective wild string match after '*'
     const char* TameSequence;  // Points to prospective tame string match
- 
+
 	auto NotEquals=[](char a, char b)
 	{
 			 // Lowercase the characters to be compared.
                 if (a >= 'A' && a <= 'Z')
                     a += ('a' - 'A');
- 
+
                 if (b >= 'A' && b <= 'Z')
                     b += ('a' - 'A');
 
 		return a != b;
 	};
 
-    // Find a first wildcard, if one exists, and the beginning of any  
+    // Find a first wildcard, if one exists, and the beginning of any
     // prospectively matching sequence after it.
     do
     {
@@ -157,7 +157,7 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
                         return true;   // "ab" matches "ab*".
                     }
                 }
- 
+
                 return false;          // "abcd" doesn't match "abc".
             }
             else
@@ -172,12 +172,12 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
             {
                 continue;
             }
- 
+
             if (!*Wild)
             {
                 return true;           // "abc*" matches "abcd".
             }
- 
+
             // Search for the next prospective match.
             if (*Wild != '?')
             {
@@ -189,7 +189,7 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
                     }
                 }
             }
- 
+
             // Keep fallback positions for retry in case of incomplete match.
             WildSequence = Wild;
             TameSequence = Tame;
@@ -199,11 +199,11 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
         {
             return false;              // "abc" doesn't match "abd".
         }
- 
+
         ++Wild;                       // Everything's a match, so far.
         ++Tame;
     } while (true);
- 
+
     // Find any further wildcards and any further matching sequences.
     do
     {
@@ -214,17 +214,17 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
             {
                 continue;
             }
- 
+
             if (!*Wild)
             {
                 return true;           // "ab*c*" matches "abcd".
             }
- 
+
             if (!*Tame)
             {
                 return false;          // "*bcd*" doesn't match "abc".
             }
- 
+
             // Search for the next prospective match.
             if (*Wild != '?')
             {
@@ -236,7 +236,7 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
                     }
                 }
             }
- 
+
             // Keep the new fallback positions.
             WildSequence = Wild;
             TameSequence = Tame;
@@ -248,16 +248,16 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
             {
                 return false;          // "*bcd" doesn't match "abc".
             }
- 
+
             // A fine time for questions.
             while (*WildSequence == '?')
             {
                 ++WildSequence;
                 ++TameSequence;
             }
- 
+
             Wild = WildSequence;
- 
+
             // Fall back, but never so far again.
             while (NotEquals(*Wild, *(++TameSequence)))
             {
@@ -266,10 +266,10 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
                     return false;      // "*a*b" doesn't match "ac".
                 }
             }
- 
+
             Tame = TameSequence;
         }
- 
+
         // Another check for the end, at the end.
         if (!*Tame)
         {
@@ -282,7 +282,7 @@ bool lcFilter::FastWildCompare(const char* Tame, const char* Wild)
                 return false;          // "*bc" doesn't match "abcd".
             }
         }
- 
+
         ++Wild;                       // Everything's still a match.
         ++Tame;
     } while (true);

@@ -101,7 +101,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 		ui->ConditionalLinesCheckBox->setChecked(false);
 		ui->ConditionalLinesCheckBox->setEnabled(false);
 	}
-	
+
 	lcViewWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
 	QOpenGLContext* Context = Widget->context();
 	QOpenGLFunctions* Functions = Context->functions();
@@ -912,7 +912,7 @@ void lcQPreferencesDialog::updateCommandList()
 
 		qsizetype pos = identifier.indexOf(QLatin1Char('.'));
 		qsizetype subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
-		
+
 		if (subPos == -1)
 			subPos = pos;
 

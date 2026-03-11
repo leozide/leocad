@@ -422,7 +422,7 @@ QString lcGetColorToolTip(int ColorIndex)
 
 	QPainter Painter(&Image);
 	Painter.setPen(Qt::darkGray);
-	
+
 	if (Color->Code != LC_COLOR_NOCOLOR)
 		Painter.drawRect(0, 0, Image.width() - 1, Image.height() - 1);
 	else

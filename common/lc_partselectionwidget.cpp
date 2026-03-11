@@ -249,7 +249,7 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 	for (const auto& [Info, Description] : Parts)
 	{
 		lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
-		
+
 		Entry.Info = Info;
 		Entry.Description = Description;
 
@@ -299,7 +299,7 @@ void lcPartSelectionListModel::SetFilter(const QString& FilterString)
 
 			Visible = (mPartDescriptionFilter && Description.contains(FilterRx)) || (mFileNameFilter && QString(Info->mFileName).contains(FilterRx));
 		}
-			
+
 		mListView->setRowHidden((int)PartIdx, !Visible);
 	}
 }
@@ -662,7 +662,7 @@ void lcPartSelectionListView::SetCurrentPart(PieceInfo* Info)
 	{
 		setCurrentIndex(Index);
 		scrollTo(Index, QAbstractItemView::EnsureVisible);
-	}	
+	}
 }
 
 void lcPartSelectionListView::SetNoIcons()
@@ -771,13 +771,13 @@ void lcPartSelectionListView::SetIconSize(int Size)
 {
 	setIconSize(QSize(Size, Size));
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
-	
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 	float DeviceScale = devicePixelRatioF();
 #else
 	float DeviceScale = devicePixelRatio();
 #endif
-	
+
 	mListModel->SetIconSize(Size, DeviceScale);
 	UpdateViewMode();
 
@@ -990,18 +990,18 @@ void lcPartSelectionWidget::SetCategory(lcPartCategoryType Type, int Index)
 	{
 		QTreeWidgetItem* Item = mCategoriesWidget->topLevelItem(Row);
 		lcPartCategoryType ItemType = static_cast<lcPartCategoryType>(Item->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt());
-		
+
 		if (ItemType != Type)
 			continue;
-		
+
 		if (Type == lcPartCategoryType::Palette || Type == lcPartCategoryType::Category)
 		{
 			int ItemIndex = Item->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
-			
+
 			if (ItemIndex != Index)
 				continue;
 		}
-		
+
 		mCategoriesWidget->setCurrentItem(Item);
 		break;
 	}

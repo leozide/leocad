@@ -121,7 +121,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 		IconName = ":/resources/part_flexible.png";
 	else if (Info->GetTrainTrackInfo())
 		IconName = ":/resources/part_traintrack.png";
-	
+
 	if (IconName)
 	{
 		QPainter Painter(&Image);
@@ -146,11 +146,11 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 		Painter.drawImage(QPoint(0, 0), Icon);
 		Painter.end();
 	}
-	
+
 	Image.setDevicePixelRatio(Thumbnail.DeviceScale);
-	
+
 	float ScaledSize = Thumbnail.Size * Thumbnail.DeviceScale;
-	
+
 	Thumbnail.Pixmap = QPixmap::fromImage(Image).scaled(ScaledSize, ScaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	mLibrary->ReleasePieceInfo(Info);

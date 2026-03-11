@@ -351,7 +351,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
 		lcVector3 Position[4];
-		
+
 		Position[0] = lcMul31(DataVertex.Position[0], Transform);
 		Position[1] = lcMul31(DataVertex.Position[1], Transform);
 		Position[2] = lcMul31(DataVertex.Position[2], Transform);
@@ -370,15 +370,15 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
 			lcMeshLoaderTextureParams DstTextureMap;
-			
+
 			if (TextureMap)
 				DstTextureMap = *TextureMap;
 			else
 				DstTextureMap = *SrcSection->mMaterial;
-			
+
 			for (lcVector3& Point : DstTextureMap.Points)
 				Point = lcMul31(Point, Transform);
-			
+
 			DstSection = AddSection(PrimitiveType, mMeshData->GetTexturedMaterial(ColorCode, DstTextureMap));
 		}
 		else if (TextureMap && SrcSection->mPrimitiveType == LC_MESH_TRIANGLES)
@@ -458,7 +458,7 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
 			lcMeshLoaderTextureParams DstTextureMap;
-			
+
 			if (TextureMap)
 				DstTextureMap = *TextureMap;
 			else

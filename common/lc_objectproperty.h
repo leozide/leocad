@@ -68,12 +68,12 @@ class lcObjectProperty
 {
 public:
 	lcObjectProperty() = default;
-	
+
 	explicit lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{
 	}
-	
+
 	operator const T& () const
 	{
 		return mValue;

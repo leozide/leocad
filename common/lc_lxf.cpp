@@ -185,7 +185,7 @@ bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, s
 				Pieces.push_back(Piece);
 				NumBrickPieces++;
 			}
-		
+
 			if (NumBrickPieces > 1)
 			{
 				std::vector<lcPiece*> Group;

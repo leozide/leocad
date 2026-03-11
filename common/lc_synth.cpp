@@ -1187,7 +1187,7 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	char Line[256];
 	const int NumEdgeParts = 6;
 
-	lcMatrix33 EdgeTransforms[6] = 
+	lcMatrix33 EdgeTransforms[6] =
 	{
 		lcMatrix33(lcVector3(-1.0f, 0.0f, 0.0f), lcVector3(0.0f, -5.0f, 0.0f), lcVector3(0.0f, 0.0f,  1.0f)),
 		lcMatrix33(lcVector3( 0.0f, 1.0f, 0.0f), lcVector3(1.0f,  0.0f, 0.0f), lcVector3(0.0f, 0.0f, -1.0f)),
@@ -1282,7 +1282,7 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
 		const int Indices[] = { 1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26 };
-	
+
 		for (int VertexIdx = 0; VertexIdx < 12; VertexIdx++)
 		{
 			*IndexBuffer++ = BaseLinesVertex + Indices[VertexIdx];

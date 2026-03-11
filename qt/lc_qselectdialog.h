@@ -9,7 +9,7 @@ class lcQSelectDialog;
 class lcQSelectDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	lcQSelectDialog(QWidget* Parent, lcModel* Model);
 	~lcQSelectDialog();

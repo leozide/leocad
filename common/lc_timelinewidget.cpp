@@ -247,7 +247,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem = topLevelItem(Step - 1);
 		PieceItemIndex = 0;
 	}
-	
+
 	UpdateCurrentStepItem();
 
 	blockSignals(Blocked);
@@ -553,10 +553,10 @@ void lcTimelineWidget::ItemSelectionChanged()
 	}
 
 	Model->SetSelectionAndFocus(Selection, CurrentPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
-	
+
 	mIgnoreUpdates = false;
 	blockSignals(Blocked);
-	
+
 	UpdateSelection();
 }
 

@@ -515,7 +515,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 		else if (TrackTool == lcTrackTool::RotateTrainTrackLeft)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
-	
+
 			if (CanAdd)
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 

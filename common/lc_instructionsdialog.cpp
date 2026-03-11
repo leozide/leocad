@@ -291,7 +291,7 @@ lcInstructionsPropertiesWidget::lcInstructionsPropertiesWidget(QWidget* Parent, 
 	QWidget* CentralWidget = new QWidget(this);
 	setWidget(CentralWidget);
 	setWindowTitle(tr("Properties"));
-	
+
 	QGridLayout* Layout = new QGridLayout(CentralWidget);
 	Layout->setContentsMargins(0, 0, 0, 0);
 
@@ -343,7 +343,7 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 		Pixmap.fill(Color);
 		ColorButton->setIcon(Pixmap);
 	};
-	
+
 	UpdateButton();
 
 	connect(ColorButton, &QToolButton::clicked, [this, Type, UpdateButton]()
@@ -651,7 +651,7 @@ void lcInstructionsDialog::Print(QPrinter* Printer)
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
 				{
 					delete Scene;
-					
+
 					return;
 				}
 

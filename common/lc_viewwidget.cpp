@@ -78,7 +78,7 @@ void lcViewWidget::initializeGL()
 void lcViewWidget::resizeGL(int Width, int Height)
 {
 	const float Scale = GetDeviceScale();
-	
+
 	mView->SetSize(Width * Scale, Height * Scale);
 }
 

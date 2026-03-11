@@ -175,7 +175,7 @@ bool lcRenderDialog::PromptCancel()
 {
 	if (!mProcess)
 		return true;
-	
+
 	if (QMessageBox::question(this, tr("Cancel Render"), tr("Are you sure you want to cancel the current render?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return false;
 

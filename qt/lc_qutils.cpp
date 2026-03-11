@@ -152,14 +152,14 @@ void lcQTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize,
 {
 	Q_UNUSED(OldSize)
 
-	if (LogicalIndex == mColumnToStretch) 
-	{ 
-		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent()); 
- 
-		if (HeaderView->isVisible()) 
-			mInteractiveResize = true; 
- 
-		mStretchWidth = NewSize; 
+	if (LogicalIndex == mColumnToStretch)
+	{
+		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent());
+
+		if (HeaderView->isVisible())
+			mInteractiveResize = true;
+
+		mStretchWidth = NewSize;
 	}
 }
 

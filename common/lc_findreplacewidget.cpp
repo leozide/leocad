@@ -56,21 +56,21 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		ReplaceColorPicker = new lcColorPicker(this, true);
 		ReplaceColorPicker->setToolTip(tr("Replacement Color"));
 		Layout->addWidget(ReplaceColorPicker, 1, 1);
-		
+
 		QPixmap Pixmap(1, 1);
 		Pixmap.fill(QColor::fromRgba64(0, 0, 0, 0));
-		
+
 		mReplacePartButton = new lcElidableToolButton(this);
 		mReplacePartButton->setToolTip(tr("Replacement Part"));
-		
+
 		QSizePolicy PieceButtonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		PieceButtonSizePolicy.setHorizontalStretch(2);
 		PieceButtonSizePolicy.setVerticalStretch(0);
 		mReplacePartButton->setSizePolicy(PieceButtonSizePolicy);
-		
+
 		mReplacePartButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		mReplacePartButton->setIcon(Pixmap);
-		
+
 		Layout->addWidget(mReplacePartButton, 1, 2);
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
@@ -166,7 +166,7 @@ void lcFindReplaceWidget::ReplaceButtonClicked()
 
 	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Params.ReplacePieceInfo, std::vector<std::pair<PieceInfo*, std::string>>(),
                 gDefaultColor, mReplacePartButton, mReplacePartButton->mapToGlobal(mReplacePartButton->rect().bottomLeft()));
-	
+
 	if (!Result.has_value())
 		return;
 

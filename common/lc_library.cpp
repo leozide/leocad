@@ -1281,7 +1281,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 	{
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
-		
+
 		snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 		PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 		if (PieceFile.Open(QIODevice::ReadOnly))
@@ -1355,7 +1355,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			lcDiskFile IncludeFile;
 			char FileName[LC_MAXPATH];
 			bool Found = false;
-			
+
 			snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 			IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			Found = IncludeFile.Open(QIODevice::ReadOnly);
@@ -1530,7 +1530,7 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
 		lcMemFile TextureFile;
-		
+
 		snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Texture->mName);
 
 		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))

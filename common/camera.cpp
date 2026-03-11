@@ -160,7 +160,7 @@ bool lcCamera::SetProjection(lcCameraProjection CameraProjection)
 
 	if (GetProjection() == CameraProjection)
 		return false;
-	
+
 	mProjection = CameraProjection;
 
 	return true;
@@ -427,7 +427,7 @@ void lcCamera::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance)
 	{
 		mTargetPosition.ChangeKey(mTargetPosition + Distance, Step, AddKey);
 	}
-	
+
 	if (FocusSection == LC_CAMERA_SECTION_UPVECTOR)
 	{
 		mUpVector.ChangeKey(lcNormalize(mUpVector + Distance), Step, AddKey);
@@ -472,7 +472,7 @@ void lcCamera::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix
 	SetTargetPosition(Center + Distance, Step, AddKey);
 
 	lcVector3 UpVector = mUpVector;
-	
+
 	UpVector = lcMul(UpVector, WorldToLocalMatrix);
 	UpVector = lcMul(UpVector, NewLocalToWorldMatrix);
 
@@ -565,7 +565,7 @@ void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 	*CurVert++ = 0.0f; *CurVert++ = 0.0f; *CurVert++ = -Length;
 	*CurVert++ = 0.0f; *CurVert++ = 25.0f; *CurVert++ = 0.0f;
 
-	const GLushort Indices[40 + 24 + 24 + 4 + 16] = 
+	const GLushort Indices[40 + 24 + 24 + 4 + 16] =
 	{
 		0, 1, 1, 2, 2, 3, 3, 0,
 		4, 5, 5, 6, 6, 7, 7, 4,
@@ -924,7 +924,7 @@ void lcCamera::RemoveKeyFrames()
 lcCameraHistoryState lcCamera::GetHistoryState([[maybe_unused]] const lcModel* Model) const
 {
 	lcCameraHistoryState State;
-	
+
 	State.Id = mId;
 	State.Hidden = mHidden;
 	State.Simple = mSimple;
@@ -936,7 +936,7 @@ lcCameraHistoryState lcCamera::GetHistoryState([[maybe_unused]] const lcModel* M
 	State.TargetPosition = mTargetPosition;
 	State.UpVector = mUpVector;
 	State.Name = mName;
-	
+
 	return State;
 }
 
@@ -1082,7 +1082,7 @@ void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey)
 {
 	lcVector3 Position, TargetPosition;
-	
+
 	if (GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
@@ -1096,28 +1096,28 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 			MaxX = lcMax(MaxX, Point.x);
 			MaxY = lcMax(MaxY, Point.y);
 		}
-		
+
 		float Width = fabsf(MaxX - MinX);
 		float Height = fabsf(MaxY - MinY);
 
 		const lcVector3 ViewCenter = lcMul30(Center, mWorldView);
-		
+
 		float OffsetX = (fabsf(MaxX - ViewCenter.x) - fabsf(ViewCenter.x - MinX)) / 2.0f;
 		float OffsetY = (fabsf(MaxY - ViewCenter.y) - fabsf(ViewCenter.y - MinY)) / 2.0f;
 		lcVector3 ViewOffset(OffsetX, OffsetY, 0.0f);
-		
+
 		lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
 		ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
-		
+
 		lcVector3 WorldOffset = lcMul30(ViewOffset, ViewWorldMatrix);
-		
+
 		if (Width > Height * AspectRatio)
 			Height = Width / AspectRatio;
 
 		const float f = Height / (m_fovy * (LC_PI / 180.0f));
 
 		const lcVector3 FrontVector(mTargetPosition - mPosition);
-		
+
 		TargetPosition = Center + WorldOffset;
 		Position = TargetPosition - lcNormalize(FrontVector) * f;
 	}
@@ -1142,7 +1142,7 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey)
 {
 	lcVector3 NewPosition;
-	
+
 	if (GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float MinX = FLT_MAX, MaxX = -FLT_MAX, MinY = FLT_MAX, MaxY = -FLT_MAX;
@@ -1202,7 +1202,7 @@ void lcCamera::Zoom(float Distance, lcStep Step, bool AddKey)
 		AddKey = false;
 
 	mPosition.ChangeKey(mPosition + FrontVector, Step, AddKey);
-	
+
 	if (GetProjection() != lcCameraProjection::Orthographic)
 		mTargetPosition.ChangeKey(mTargetPosition + FrontVector, Step, AddKey);
 

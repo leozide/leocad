@@ -268,10 +268,10 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 		SetActiveModel(mModels.back().get(), true);
 
 		lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
-		
+
 		if (ActiveView)
 			ActiveView->GetCamera()->SetViewpoint(lcViewpoint::Home);
-		
+
 		if (gMainWindow)
 			gMainWindow->UpdateTitle();
 	}
@@ -1182,7 +1182,7 @@ bool Project::Export3DStudio(const QString& FileName)
 
 			File.WriteU16(0x4130); // CHK_MSH_MAT_GROUP
 			File.WriteU32(6 + MaterialNameLength + 1 + 2 + 2 * Section->NumIndices / 3);
-			
+
 			snprintf(MaterialName, sizeof(MaterialName), "Material%03d", MaterialIndex);
 			File.WriteBuffer(MaterialName, MaterialNameLength + 1);
 
@@ -1900,7 +1900,7 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 	float FloorDiffuse = POVRayOptions.FloorDiffuse;
 	const char* FloorLocation;
 	const char* FloorAxis;
-	
+
 	if (POVRayOptions.FloorAxis == 0)
 	{
 		FloorAxis = "x";

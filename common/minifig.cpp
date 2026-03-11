@@ -154,7 +154,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			int Flags;
 
 			if (sscanf(NameEnd, "%d %g %g %g %g %g %g %g %g %g %g %g %g",
-					   &Flags, &Mat[0], &Mat[1], &Mat[2], &Mat[3], &Mat[4], &Mat[5], &Mat[6], 
+					   &Flags, &Mat[0], &Mat[1], &Mat[2], &Mat[3], &Mat[4], &Mat[5], &Mat[6],
 					   &Mat[7], &Mat[8], &Mat[9], &Mat[10], &Mat[11]) != 13)
 				continue;
 

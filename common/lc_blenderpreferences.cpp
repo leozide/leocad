@@ -2720,7 +2720,7 @@ void lcBlenderPreferences::SaveSettings()
 	lcSetProfileString(LC_PROFILE_BLENDER_VERSION, Value);
 
 	const QString BlenderConfigDir = QString("%1/Blender/addons/%2/config").arg(gAddonPreferences->mDataDir, LC_BLENDER_ADDON_RENDER_FOLDER);
-	
+
 	Value = lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH);
 	if (!Value.contains(LC_BLENDER_ADDON_RENDER_FOLDER))
 	{

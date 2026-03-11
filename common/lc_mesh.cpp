@@ -297,7 +297,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 		{
 			const lcVertex* Verts = GetVertexData();
 			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
-		
+
 			if (NumSections > 1)
 				File.WriteLine(" mesh {\n");
 

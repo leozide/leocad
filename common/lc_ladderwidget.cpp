@@ -40,7 +40,7 @@ void lcLadderWidget::Show()
 
 	if (Position.y() + HalfHeight > Desktop.bottom())
 		Position.setY(Desktop.bottom() - HalfHeight);
-	
+
 	move(Position);
 
 	mLastMousePositionX = mapFromGlobal(QCursor::pos()).x();
@@ -97,7 +97,7 @@ void lcLadderWidget::UpdateMousePosition()
 	{
 		int CellHeight = height() / static_cast<int>(mSteps.size());
 		int CurrentStep = MousePosition.y() / CellHeight;
-	
+
 		if (CurrentStep != mCurrentStep)
 		{
 			mCurrentStep = CurrentStep;

@@ -10,7 +10,7 @@ class lcModelAction
 public:
 	lcModelAction() = default;
 	virtual ~lcModelAction() = default;
-	
+
 	virtual void SaveStartState(const lcModel* Model) = 0;
 	virtual void SaveEndState(const lcModel* Model) = 0;
 	virtual void LoadStartState(lcModel* Model) const = 0;
@@ -51,7 +51,7 @@ class lcModelActionSelection : public lcModelAction
 public:
 	lcModelActionSelection() = default;
 	virtual ~lcModelActionSelection() = default;
-	
+
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;
 	void LoadStartState(lcModel* Model) const override;
@@ -61,7 +61,7 @@ public:
 protected:
 	static void SaveState(lcModelActionSelectionState& State, const lcModel* Model);
 	static void LoadState(const lcModelActionSelectionState& State, lcModel* Model);
-	
+
 	lcModelActionSelectionState mStartState;
 	lcModelActionSelectionState mEndState;
 };
@@ -98,7 +98,7 @@ class lcModelActionObjectEdit: public lcModelAction
 public:
 	lcModelActionObjectEdit(lcModelActionEditMerge ModelActionEditMerge);
 	virtual ~lcModelActionObjectEdit();
-	
+
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;
 	void LoadStartState(lcModel* Model) const override;
@@ -111,7 +111,7 @@ public:
 protected:
 	static void SaveState(lcModelHistoryState& State, const lcModel* Model);
 	static void LoadState(const lcModelHistoryState& State, lcModel* Model);
-	
+
 	lcModelHistoryState mStartState;
 	lcModelHistoryState mEndState;
 	lcModelActionEditMerge mMerge;

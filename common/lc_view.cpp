@@ -267,7 +267,7 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 
 	double ImageLeft, ImageRight, ImageBottom, ImageTop, Near, Far;
 	double AspectRatio = (double)ImageWidth / (double)ImageHeight;
-	
+
 	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
@@ -300,7 +300,7 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 	double Right = Left + (ImageRight - ImageLeft) * CurrentTileWidth / ImageWidth;
 	double Bottom = ImageBottom + (ImageTop - ImageBottom) * (CurrentRow * mHeight) / ImageHeight;
 	double Top = Bottom + (ImageTop - ImageBottom) * CurrentTileHeight / ImageHeight;
-	
+
 	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 		return lcMatrix44Ortho(Left, Right, Bottom, Top, Near, Far);
 	else
@@ -807,7 +807,7 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 {
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	GLint MaxTexture;
-	
+
 	Context->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 	MaxTexture = qMin(MaxTexture, 2048);
 
@@ -1153,7 +1153,7 @@ void lcView::DrawViewport() const
 	float Scale = GetUIScale();
 	float Width = mWidth / Scale;
 	float Height = mHeight / Scale;
-	
+
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, Width, 0.0f, Height, -1.0f, 1.0f));
@@ -1268,7 +1268,7 @@ void lcView::DrawAxes() const
 		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f) / Scale);
 		break;
 	}
-	
+
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
@@ -1523,18 +1523,18 @@ void lcView::DrawGrid()
 
 		if (Preferences.mDrawGridLines)
 			VertexBufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3 * sizeof(float);
-		
+
 		float* Verts = nullptr;
-		
+
 		if (VertexBufferSize)
 		{
 			Verts = static_cast<float*>(malloc(VertexBufferSize));
-			
+
 			if (!Verts)
     			return;
-		
+
             float* CurVert = Verts;
-    
+
             if (Preferences.mDrawGridStuds)
             {
                 float Left = MinX * 20.0f * Spacing;
@@ -1544,36 +1544,36 @@ void lcView::DrawGrid()
                 float Z = 0;
                 float U = (MaxX - MinX) * Spacing;
                 float V = (MaxY - MinY) * Spacing;
-    
+
                 *CurVert++ = Left;
                 *CurVert++ = Top;
                 *CurVert++ = Z;
                 *CurVert++ = 0.0f;
                 *CurVert++ = V;
-    
+
                 *CurVert++ = Right;
                 *CurVert++ = Top;
                 *CurVert++ = Z;
                 *CurVert++ = U;
                 *CurVert++ = V;
-    
+
                 *CurVert++ = Left;
                 *CurVert++ = Bottom;
                 *CurVert++ = Z;
                 *CurVert++ = 0.0f;
                 *CurVert++ = 0.0f;
-    
+
                 *CurVert++ = Right;
                 *CurVert++ = Bottom;
                 *CurVert++ = Z;
                 *CurVert++ = U;
                 *CurVert++ = 0.0f;
             }
-    
+
             if (Preferences.mDrawGridLines)
             {
                 float LineSpacing = Spacing * 20.0f;
-    
+
                 for (int Step = MinX; Step < MaxX + 1; Step++)
                 {
                     *CurVert++ = Step * LineSpacing;
@@ -1583,7 +1583,7 @@ void lcView::DrawGrid()
                     *CurVert++ = MaxY * LineSpacing;
                     *CurVert++ = 0.0f;
                 }
-    
+
                 for (int Step = MinY; Step < MaxY + 1; Step++)
                 {
                     *CurVert++ = MinX * LineSpacing;
@@ -1726,7 +1726,7 @@ float lcView::GetOverlayScale() const
 	lcVector3 Point = UnprojectPoint(ScreenPos);
 
 	lcVector3 Dist(Point - WorldMatrix.GetTranslation());
-	
+
 	return Dist.Length() * 5.0f * GetUIScale();
 }
 
@@ -1896,7 +1896,7 @@ void lcView::SetCameraProjection(lcCameraProjection CameraProjection)
 	else
 	{
 		lcModel* ActiveModel = GetActiveModel();
-		
+
 		if (ActiveModel)
 			ActiveModel->SetCameraProjection(mCamera, CameraProjection);
 	}
@@ -2571,10 +2571,10 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 	case lcTrackTool::Camera:
         {
             ActiveModel->InsertCameraToolClicked(GetCameraLightInsertPosition());
-            
+
             if ((mMouseModifiers & Qt::ControlModifier) == 0)
                 gMainWindow->SetTool(lcTool::Select);
-            
+
             mToolClicked = true;
             UpdateTrackTool();
         }

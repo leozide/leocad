@@ -110,7 +110,7 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 		lcPiece* Piece = Pieces[PieceIndex].get();
 
 		Piece->SetSelected(State.PieceSelection[PieceIndex]);
-	
+
 		if (State.FocusObjectType == lcObjectType::Piece && State.FocusIndex == PieceIndex)
 			Piece->SetFocused(State.FocusSection, true);
 		else
@@ -122,7 +122,7 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 		lcCamera* Camera = Cameras[CameraIndex].get();
 
 		Camera->SetSelected(State.CameraSelection[CameraIndex]);
-	
+
 		if (State.FocusObjectType == lcObjectType::Camera && State.FocusIndex == CameraIndex)
 			Camera->SetFocused(State.FocusSection, true);
 		else
@@ -134,7 +134,7 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 		lcLight* Light = Lights[LightIndex].get();
 
 		Light->SetSelected(State.LightSelection[LightIndex]);
-	
+
 		if (State.FocusObjectType == lcObjectType::Light && State.FocusIndex == LightIndex)
 			Light->SetFocused(State.FocusSection, true);
 		else
@@ -159,22 +159,22 @@ lcModelActionObjectEdit::~lcModelActionObjectEdit()
 void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-	
+
 	for (const std::unique_ptr<lcGroup>& Group : Groups)
 		State.Groups.emplace_back(Group->GetHistoryState(Model));
-	
+
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-	
+
 	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
 		State.Pieces.emplace_back(Piece->GetHistoryState(Model));
-	
+
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-	
+
 	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
 		State.Cameras.emplace_back(Camera->GetHistoryState(Model));
-	
+
 	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-	
+
 	for (const std::unique_ptr<lcLight>& Light : Lights)
 		State.Lights.emplace_back(Light->GetHistoryState(Model));
 }

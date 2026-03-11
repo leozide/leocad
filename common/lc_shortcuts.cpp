@@ -173,7 +173,7 @@ bool lcMouseShortcuts::Save(const QString& FileName)
 		return false;
 
 	QTextStream Stream(&File);
-	
+
 	for (const QString& Shortcut : std::as_const(Shortcuts))
 		Stream << Shortcut << QLatin1String("\n");
 

@@ -283,7 +283,7 @@ public:
 	void WriteQString(const QString& String)
 	{
 		QByteArray Data = String.toUtf8();
-		WriteU32(Data.size());
+		WriteU32(static_cast<quint32>(Data.size()));
 		WriteBuffer(Data, Data.size());
 	}
 
@@ -459,7 +459,7 @@ class lcMemFile : public lcFile
 {
 public:
 	lcMemFile();
-	~lcMemFile();
+	virtual ~lcMemFile();
 
 	lcMemFile(const lcMemFile&) = delete;
 	lcMemFile(lcMemFile&&) = delete;
@@ -498,9 +498,9 @@ public:
 	{
 	}
 
-	~lcDiskFile()
+	virtual ~lcDiskFile()
 	{
-		Close();
+		lcDiskFile::Close();
 	}
 
 	lcDiskFile(const lcDiskFile&) = delete;

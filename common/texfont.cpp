@@ -175,6 +175,8 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	while (*Text)
 	{
 		int ch = *Text;
+		float Right = Left + mGlyphs[ch].width;
+		float Bottom = Top - mFontHeight;
 
 		*CurVert++ = Left;
 		*CurVert++ = Top;
@@ -183,24 +185,24 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 		*CurVert++ = mGlyphs[ch].top;
 
 		*CurVert++ = Left;
-		*CurVert++ = Top - mFontHeight;
+		*CurVert++ = Bottom;
 		*CurVert++ = Z;
 		*CurVert++ = mGlyphs[ch].left;
 		*CurVert++ = mGlyphs[ch].bottom;
 
-		*CurVert++ = Left + mGlyphs[ch].width;
-		*CurVert++ = Top - mFontHeight;
+		*CurVert++ = Right;
+		*CurVert++ = Bottom;
 		*CurVert++ = Z;
 		*CurVert++ = mGlyphs[ch].right;
 		*CurVert++ = mGlyphs[ch].bottom;
 
-		*CurVert++ = Left + mGlyphs[ch].width;
-		*CurVert++ = Top - mFontHeight;
+		*CurVert++ = Right;
+		*CurVert++ = Bottom;
 		*CurVert++ = Z;
 		*CurVert++ = mGlyphs[ch].right;
 		*CurVert++ = mGlyphs[ch].bottom;
 
-		*CurVert++ = Left + mGlyphs[ch].width;
+		*CurVert++ = Right;
 		*CurVert++ = Top;
 		*CurVert++ = Z;
 		*CurVert++ = mGlyphs[ch].right;
@@ -212,7 +214,7 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 		*CurVert++ = mGlyphs[ch].left;
 		*CurVert++ = mGlyphs[ch].top;
 
-		Left += mGlyphs[ch].width;
+		Left = Right;
 		Text++;
 	}
 

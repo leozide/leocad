@@ -5,6 +5,7 @@
 #include "lc_commands.h"
 
 struct lcInsertPieceInfo;
+enum class lcCameraProjection;
 
 enum class lcDragState
 {
@@ -252,7 +253,7 @@ public:
 	void SetCamera(const QString& CameraName);
 	void SetCameraIndex(size_t CameraIndex);
 
-	void SetProjection(bool Ortho);
+	void SetCameraProjection(lcCameraProjection CameraProjection);
 	void LookAt();
 	void MoveCamera(const lcVector3& Direction);
 	void Zoom(float Amount);
@@ -263,6 +264,7 @@ public:
 	bool CloseFindReplaceDialog();
 	void ShowFindReplaceWidget(bool Replace);
 
+	float GetUIScale() const;
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
@@ -319,7 +321,6 @@ protected:
 	lcViewWidget* mWidget = nullptr;
 	int mWidth = 1;
 	int mHeight = 1;
-	bool mDeleteContext = true;
 	lcViewType mViewType;
 
 	int mMouseX = 0;

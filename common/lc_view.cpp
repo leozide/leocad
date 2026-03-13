@@ -9,7 +9,6 @@
 #include "lc_texture.h"
 #include "piece.h"
 #include "pieceinf.h"
-#include "lc_synth.h"
 #include "lc_traintrack.h"
 #include "lc_scene.h"
 #include "lc_context.h"
@@ -75,8 +74,7 @@ lcView::~lcView()
 	if (mLastFocusedView == this)
 		mLastFocusedView = nullptr;
 
-	if (mDeleteContext)
-		delete mContext;
+	delete mContext;
 }
 
 std::vector<lcView*> lcView::GetModelViews(const lcModel* Model)
@@ -251,7 +249,7 @@ lcMatrix44 lcView::GetProjectionMatrix() const
 {
 	float AspectRatio = (float)mWidth / (float)mHeight;
 
-	if (mCamera->IsOrtho())
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
 		float OrthoWidth = OrthoHeight * AspectRatio;
@@ -270,7 +268,7 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 	double ImageLeft, ImageRight, ImageBottom, ImageTop, Near, Far;
 	double AspectRatio = (double)ImageWidth / (double)ImageHeight;
 
-	if (mCamera->IsOrtho())
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 	{
 		float OrthoHeight = mCamera->GetOrthoHeight() / 2.0f;
 		float OrthoWidth = OrthoHeight * AspectRatio;
@@ -303,7 +301,7 @@ lcMatrix44 lcView::GetTileProjectionMatrix(int CurrentRow, int CurrentColumn, in
 	double Bottom = ImageBottom + (ImageTop - ImageBottom) * (CurrentRow * mHeight) / ImageHeight;
 	double Top = Bottom + (ImageTop - ImageBottom) * CurrentTileHeight / ImageHeight;
 
-	if (mCamera->IsOrtho())
+	if (mCamera->GetProjection() == lcCameraProjection::Orthographic)
 		return lcMatrix44Ortho(Left, Right, Bottom, Top, Near, Far);
 	else
 		return lcMatrix44Frustum(Left, Right, Bottom, Top, Near, Far);
@@ -807,9 +805,10 @@ void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep 
 
 bool lcView::BeginRenderToImage(int Width, int Height)
 {
+	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	GLint MaxTexture;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 
+	Context->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
 	MaxTexture = qMin(MaxTexture, 2048);
 
 	const int Samples = QSurfaceFormat::defaultFormat().samples();
@@ -1151,9 +1150,13 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 
 void lcView::DrawViewport() const
 {
+	float Scale = GetUIScale();
+	float Width = mWidth / Scale;
+	float Height = mHeight / Scale;
+
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, Width, 0.0f, Height, -1.0f, 1.0f));
 	mContext->SetLineWidth(1.0f);
 
 	mContext->SetDepthWrite(false);
@@ -1166,7 +1169,7 @@ void lcView::DrawViewport() const
 	else
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mInactiveViewColor));
 
-	float Verts[8] = { 0.0f, 0.0f, mWidth - 1.0f, 0.0f, mWidth - 1.0f, mHeight - 1.0f, 0.0f, mHeight - 1.0f };
+	float Verts[8] = { 0.0f, 0.0f, Width - 1.0f, 0.0f, Width - 1.0f, Height - 1.0f, 0.0f, Height - 1.0f };
 
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormatPosition(2);
@@ -1182,7 +1185,7 @@ void lcView::DrawViewport() const
 
 		mContext->EnableColorBlend(true);
 
-		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
+		gTexFont.PrintText(mContext, 3.0f, (float)Height - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
 
 		mContext->EnableColorBlend(false);
 	}
@@ -1244,26 +1247,28 @@ void lcView::DrawAxes() const
 	};
 
 	lcMatrix44 TranslationMatrix;
+	float Scale = GetUIScale();
 
 	switch (Preferences.mAxisIconLocation)
 	{
 	default:
 	case lcAxisIconLocation::BottomLeft:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(32, 32, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, 32, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::BottomRight:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, 32, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, 32, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::TopLeft:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(32, mHeight - 36, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(32, mHeight - 36, 0.0f) / Scale);
 		break;
 
 	case lcAxisIconLocation::TopRight:
-		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f));
+		TranslationMatrix = lcMatrix44Translation(lcVector3(mWidth - 36, mHeight - 36, 0.0f) / Scale);
 		break;
 	}
+
 	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
@@ -1271,7 +1276,7 @@ void lcView::DrawAxes() const
 	mContext->SetMaterial(lcMaterialType::UnlitVertexColor);
 	mContext->SetWorldMatrix(lcMatrix44Identity());
 	mContext->SetViewMatrix(lcMul(WorldViewMatrix, TranslationMatrix));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth, 0, mHeight, -50, 50));
+	mContext->SetProjectionMatrix(lcMatrix44Ortho(0, mWidth / Scale, 0, mHeight / Scale, -50, 50));
 
 	mContext->SetVertexBufferPointer(Verts);
 	mContext->SetVertexFormat(0, 3, 0, 0, 4, false);
@@ -1519,69 +1524,76 @@ void lcView::DrawGrid()
 		if (Preferences.mDrawGridLines)
 			VertexBufferSize += 2 * (MaxX - MinX + MaxY - MinY + 2) * 3 * sizeof(float);
 
-		float* Verts = (float*)malloc(VertexBufferSize);
-		if (!Verts)
-			return;
-		float* CurVert = Verts;
+		float* Verts = nullptr;
 
-		if (Preferences.mDrawGridStuds)
+		if (VertexBufferSize)
 		{
-			float Left = MinX * 20.0f * Spacing;
-			float Right = MaxX * 20.0f * Spacing;
-			float Top = MinY * 20.0f * Spacing;
-			float Bottom = MaxY * 20.0f * Spacing;
-			float Z = 0;
-			float U = (MaxX - MinX) * Spacing;
-			float V = (MaxY - MinY) * Spacing;
+			Verts = static_cast<float*>(malloc(VertexBufferSize));
 
-			*CurVert++ = Left;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = V;
+			if (!Verts)
+    			return;
 
-			*CurVert++ = Right;
-			*CurVert++ = Top;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = V;
+            float* CurVert = Verts;
 
-			*CurVert++ = Left;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = 0.0f;
-			*CurVert++ = 0.0f;
+            if (Preferences.mDrawGridStuds)
+            {
+                float Left = MinX * 20.0f * Spacing;
+                float Right = MaxX * 20.0f * Spacing;
+                float Top = MinY * 20.0f * Spacing;
+                float Bottom = MaxY * 20.0f * Spacing;
+                float Z = 0;
+                float U = (MaxX - MinX) * Spacing;
+                float V = (MaxY - MinY) * Spacing;
 
-			*CurVert++ = Right;
-			*CurVert++ = Bottom;
-			*CurVert++ = Z;
-			*CurVert++ = U;
-			*CurVert++ = 0.0f;
-		}
+                *CurVert++ = Left;
+                *CurVert++ = Top;
+                *CurVert++ = Z;
+                *CurVert++ = 0.0f;
+                *CurVert++ = V;
 
-		if (Preferences.mDrawGridLines)
-		{
-			float LineSpacing = Spacing * 20.0f;
+                *CurVert++ = Right;
+                *CurVert++ = Top;
+                *CurVert++ = Z;
+                *CurVert++ = U;
+                *CurVert++ = V;
 
-			for (int Step = MinX; Step < MaxX + 1; Step++)
-			{
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MinY * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = MaxY * LineSpacing;
-				*CurVert++ = 0.0f;
-			}
+                *CurVert++ = Left;
+                *CurVert++ = Bottom;
+                *CurVert++ = Z;
+                *CurVert++ = 0.0f;
+                *CurVert++ = 0.0f;
 
-			for (int Step = MinY; Step < MaxY + 1; Step++)
-			{
-				*CurVert++ = MinX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
-				*CurVert++ = MaxX * LineSpacing;
-				*CurVert++ = Step * LineSpacing;
-				*CurVert++ = 0.0f;
-			}
+                *CurVert++ = Right;
+                *CurVert++ = Bottom;
+                *CurVert++ = Z;
+                *CurVert++ = U;
+                *CurVert++ = 0.0f;
+            }
+
+            if (Preferences.mDrawGridLines)
+            {
+                float LineSpacing = Spacing * 20.0f;
+
+                for (int Step = MinX; Step < MaxX + 1; Step++)
+                {
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = MinY * LineSpacing;
+                    *CurVert++ = 0.0f;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = MaxY * LineSpacing;
+                    *CurVert++ = 0.0f;
+                }
+
+                for (int Step = MinY; Step < MaxY + 1; Step++)
+                {
+                    *CurVert++ = MinX * LineSpacing;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = 0.0f;
+                    *CurVert++ = MaxX * LineSpacing;
+                    *CurVert++ = Step * LineSpacing;
+                    *CurVert++ = 0.0f;
+                }
+            }
 		}
 
 		mGridSettings[0] = MinX;
@@ -1692,6 +1704,11 @@ lcTrackTool lcView::GetOverrideTrackTool(Qt::MouseButton Button) const
 	return TrackToolFromTool[static_cast<int>(OverrideTool)];
 }
 
+float lcView::GetUIScale() const
+{
+	return mWidget ? mWidget->GetDeviceScale() : 1.0f;
+}
+
 float lcView::GetOverlayScale() const
 {
 	lcVector3 OverlayCenter;
@@ -1709,7 +1726,8 @@ float lcView::GetOverlayScale() const
 	lcVector3 Point = UnprojectPoint(ScreenPos);
 
 	lcVector3 Dist(Point - WorldMatrix.GetTranslation());
-	return Dist.Length() * 5.0f;
+
+	return Dist.Length() * 5.0f * GetUIScale();
 }
 
 void lcView::BeginDrag(lcDragState DragState)
@@ -1868,18 +1886,19 @@ void lcView::SetCameraIndex(size_t CameraIndex)
 	Redraw();
 }
 
-void lcView::SetProjection(bool Ortho)
+void lcView::SetCameraProjection(lcCameraProjection CameraProjection)
 {
 	if (mCamera->IsSimple())
 	{
-		mCamera->SetOrtho(Ortho);
+		mCamera->SetProjection(CameraProjection);
 		Redraw();
 	}
 	else
 	{
 		lcModel* ActiveModel = GetActiveModel();
+
 		if (ActiveModel)
-			ActiveModel->SetCameraOrthographic(mCamera, Ortho);
+			ActiveModel->SetCameraProjection(mCamera, CameraProjection);
 	}
 }
 
@@ -2276,7 +2295,7 @@ void lcView::StartPanGesture()
 	lcModel* ActiveModel = GetActiveModel();
 
 	StartPan(mWidth / 2, mHeight / 2);
-	ActiveModel->BeginMouseTool();
+	ActiveModel->BeginMouseTool(lcTool::Pan, this);
 }
 
 void lcView::UpdatePanGesture(int dx, int dy)
@@ -2336,7 +2355,7 @@ void lcView::EndPanGesture(bool Accept)
 {
 	lcModel* ActiveModel = GetActiveModel();
 
-	ActiveModel->EndMouseTool(lcTool::Pan, Accept);
+	ActiveModel->EndMouseTool(lcTool::Pan, this, Accept);
 }
 
 void lcView::StartTracking(lcTrackButton TrackButton)
@@ -2355,22 +2374,13 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 		case lcTool::SpotLight:
 		case lcTool::DirectionalLight:
 		case lcTool::AreaLight:
-			break;
-
 		case lcTool::Camera:
-		{
-			lcVector3 Position = GetCameraLightInsertPosition();
-			lcVector3 Target = Position + lcVector3(0.1f, 0.1f, 0.1f);
-			ActiveModel->BeginCameraTool(Position, Target);
-		}
-		break;
-
 		case lcTool::Select:
 			break;
 
 		case lcTool::Move:
 		case lcTool::Rotate:
-			ActiveModel->BeginMouseTool();
+			ActiveModel->BeginMouseTool(Tool, this);
 			break;
 
 		case lcTool::Eraser:
@@ -2380,13 +2390,13 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 
 	    case lcTool::Pan:
 		    StartPan(mMouseX, mMouseY);
-			ActiveModel->BeginMouseTool();
+			ActiveModel->BeginMouseTool(Tool, this);
 		    break;
 
 	    case lcTool::Zoom:
 		case lcTool::RotateView:
 		case lcTool::Roll:
-			ActiveModel->BeginMouseTool();
+			ActiveModel->BeginMouseTool(Tool, this);
 			break;
 
 		case lcTool::ZoomRegion:
@@ -2411,13 +2421,10 @@ void lcView::StopTracking(bool Accept)
 	{
 	case lcTool::Insert:
 	case lcTool::PointLight:
-		break;
-
 	case lcTool::SpotLight:
 	case lcTool::DirectionalLight:
 	case lcTool::AreaLight:
 	case lcTool::Camera:
-		ActiveModel->EndMouseTool(Tool, Accept);
 		break;
 
 	case lcTool::Select:
@@ -2426,17 +2433,17 @@ void lcView::StopTracking(bool Accept)
 			std::vector<lcObject*> Objects = FindObjectsInBox(mMouseDownX, mMouseDownY, mMouseX, mMouseY);
 
 			if (mMouseModifiers & Qt::ControlModifier)
-				ActiveModel->AddToSelection(Objects, true, true);
+				ActiveModel->AddToSelection(Objects);
 			else if (mMouseModifiers & Qt::ShiftModifier)
 				ActiveModel->RemoveFromSelection(Objects);
 			else
-				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, true);
+				ActiveModel->SetSelectionAndFocus(Objects, nullptr, 0, gMainWindow->GetSelectionMode());
 		}
 		break;
 
 	case lcTool::Move:
 	case lcTool::Rotate:
-		ActiveModel->EndMouseTool(Tool, Accept);
+		ActiveModel->EndMouseTool(Tool, this, Accept);
 		break;
 
 	case lcTool::Eraser:
@@ -2448,7 +2455,7 @@ void lcView::StopTracking(bool Accept)
 	case lcTool::Pan:
 	case lcTool::RotateView:
 	case lcTool::Roll:
-		ActiveModel->EndMouseTool(Tool, Accept);
+		ActiveModel->EndMouseTool(Tool, this, Accept);
 		break;
 
 	case lcTool::ZoomRegion:
@@ -2477,7 +2484,7 @@ void lcView::StopTracking(bool Accept)
 			if (lcLineSegmentPlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLineSegmentPlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLineSegmentPlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
 			{
 				float AspectRatio = (float)mWidth / (float)mHeight;
-				ActiveModel->ZoomRegionToolClicked(mCamera, AspectRatio, Points[0], Target, Corners);
+				ActiveModel->ZoomRegionToolClicked(this, AspectRatio, Points[0], Target, Corners);
 			}
 		}
 		break;
@@ -2499,7 +2506,7 @@ void lcView::CancelTrackingOrClearSelection()
 	{
 		lcModel* ActiveModel = GetActiveModel();
 		if (ActiveModel)
-			ActiveModel->ClearSelection(true);
+			ActiveModel->ClearSelection();
 	}
 }
 
@@ -2562,7 +2569,15 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		break;
 
 	case lcTrackTool::Camera:
-		StartTracking(TrackButton);
+        {
+            ActiveModel->InsertCameraToolClicked(GetCameraLightInsertPosition());
+
+            if ((mMouseModifiers & Qt::ControlModifier) == 0)
+                gMainWindow->SetTool(lcTool::Select);
+
+            mToolClicked = true;
+            UpdateTrackTool();
+        }
 		break;
 
 	case lcTrackTool::Select:
@@ -2570,11 +2585,14 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 			if (mMouseModifiers & Qt::ControlModifier)
-				ActiveModel->FocusOrDeselectObject(ObjectSection);
+				ActiveModel->FocusOrDeselectObject(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 			else if (mMouseModifiers & Qt::ShiftModifier)
-				ActiveModel->RemoveFromSelection(ObjectSection);
+		    {
+			    if (ObjectSection.Object)
+				    ActiveModel->RemoveFromSelection({ ObjectSection.Object });
+		    }
 			else
-				ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+				ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 
 			StartTracking(TrackButton);
 		}
@@ -2640,7 +2658,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			ObjectSection.Object = Focus;
 			ObjectSection.Section = mTrackToolSection;
 
-			ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+			ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 		}
 		break;
 
@@ -2734,11 +2752,14 @@ void lcView::OnLeftButtonDoubleClick()
 	lcObjectSection ObjectSection = FindObjectUnderPointer(false, false);
 
 	if (mMouseModifiers & Qt::ControlModifier)
-		ActiveModel->FocusOrDeselectObject(ObjectSection);
+		ActiveModel->FocusOrDeselectObject(ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 	else if (mMouseModifiers & Qt::ShiftModifier)
-		ActiveModel->RemoveFromSelection(ObjectSection);
+	{
+		if (ObjectSection.Object)
+			ActiveModel->RemoveFromSelection({ ObjectSection.Object });
+	}
 	else
-		ActiveModel->ClearSelectionAndSetFocus(ObjectSection, true);
+		ActiveModel->SetSelectionAndFocus(std::vector<lcObject*>(), ObjectSection.Object, ObjectSection.Section, gMainWindow->GetSelectionMode());
 }
 
 void lcView::OnMiddleButtonDown()
@@ -2854,10 +2875,7 @@ void lcView::OnMouseMove()
 	case lcTrackTool::SpotLight:
 	case lcTrackTool::DirectionalLight:
 	case lcTrackTool::AreaLight:
-		break;
-
 	case lcTrackTool::Camera:
-		ActiveModel->UpdateCameraTool(GetCameraLightInsertPosition());
 		break;
 
 	case lcTrackTool::Select:

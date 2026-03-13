@@ -16,7 +16,7 @@ lcMemFile::lcMemFile()
 
 lcMemFile::~lcMemFile()
 {
-	Close();
+	lcMemFile::Close();
 }
 
 void lcMemFile::Seek(qint64 Offset, int From)

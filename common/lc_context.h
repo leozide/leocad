@@ -1,7 +1,6 @@
 #pragma once
 
 #include "lc_math.h"
-#include "lc_colors.h"
 #include "lc_mesh.h"
 
 class lcVertexBuffer
@@ -105,7 +104,7 @@ struct lcVertexAttribState
 	GLuint VertexBufferObject = 0;
 };
 
-class lcContext : protected QOpenGLFunctions
+class lcContext : public QOpenGLFunctions
 {
 public:
 	lcContext();

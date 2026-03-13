@@ -207,6 +207,7 @@ SOURCES += \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
+	common/lc_modelaction.cpp \
 	common/lc_modellistdialog.cpp \
 	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
@@ -218,6 +219,7 @@ SOURCES += \
 	common/lc_propertieswidget.cpp \
 	common/lc_scene.cpp \
 	common/lc_shortcuts.cpp \
+	common/lc_string.cpp \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
@@ -229,7 +231,6 @@ SOURCES += \
 	common/lc_viewsphere.cpp \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
-	qt/system.cpp \
 	qt/qtmain.cpp \
 	qt/lc_qeditgroupsdialog.cpp \
 	qt/lc_qselectdialog.cpp \
@@ -286,6 +287,7 @@ HEADERS += \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_modelaction.h \
 	common/lc_modellistdialog.h \
 	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \
@@ -296,6 +298,7 @@ HEADERS += \
 	common/lc_propertieswidget.h \
 	common/lc_scene.h \
 	common/lc_shortcuts.h \
+	common/lc_string.h \
 	common/lc_stringcache.h \
 	common/lc_synth.h \
 	common/lc_texture.h \

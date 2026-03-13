@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_category.h"
-#include "lc_file.h"
+#include "lc_string.h"
 #include "lc_profile.h"
 
 std::vector<lcLibraryCategory> gCategories;
@@ -106,7 +106,7 @@ bool lcLoadCategories(const QByteArray& Buffer, std::vector<lcLibraryCategory>& 
 
 	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
 	{
-		int Equals = Line.indexOf('=');
+		qsizetype Equals = Line.indexOf('=');
 
 		if (Equals == -1)
 			continue;
@@ -261,7 +261,7 @@ bool lcMatchCategory(const char* PieceName, const char* Expression)
 	if (!Word[0])
 		return false;
 
-	const char* Result = strcasestr(PieceName, Word);
+	const char* Result = lcstrcasestr(PieceName, Word);
 
 	if (!Result)
 		return false;

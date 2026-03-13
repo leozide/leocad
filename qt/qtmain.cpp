@@ -27,7 +27,7 @@
 static TCHAR gMinidumpPath[_MAX_PATH];
 
 static LONG WINAPI lcSehHandler(PEXCEPTION_POINTERS exceptionPointers)
-{ 
+{
 	if (IsDebuggerPresent())
 		return EXCEPTION_CONTINUE_SEARCH;
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 #ifdef LC_LDRAW_LIBRARY_PATH
 	LibraryPaths += qMakePair(QString::fromLatin1(LC_LDRAW_LIBRARY_PATH), false);
 #endif
-	
+
 	setlocale(LC_NUMERIC, "C");
 
 	lcStartupMode StartupMode = Application.Initialize(LibraryPaths);

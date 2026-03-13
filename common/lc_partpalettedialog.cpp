@@ -127,7 +127,7 @@ void lcPartPaletteDialog::on_ImportButton_clicked()
 	QByteArray Inventory = Dialog.GetSetInventory();
 	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
 	QJsonObject Root = Document.object();
-	QJsonArray Parts = Root["results"].toArray();
+	const QJsonArray Parts = Root["results"].toArray();
 
 	for (const QJsonValue& Part : Parts)
 	{

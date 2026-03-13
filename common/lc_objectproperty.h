@@ -7,7 +7,7 @@ enum class lcObjectPropertyId
 	PieceStepShow,
 	PieceStepHide,
 	CameraName,
-	CameraType,
+	CameraProjection,
 	CameraFOV,
 	CameraNear,
 	CameraFar,
@@ -67,6 +67,8 @@ template<typename T>
 class lcObjectProperty
 {
 public:
+	lcObjectProperty() = default;
+
 	explicit lcObjectProperty(const T& DefaultValue)
 		: mValue(DefaultValue)
 	{

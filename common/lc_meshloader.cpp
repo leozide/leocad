@@ -5,6 +5,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_texture.h"
+#include "lc_string.h"
 
 static void lcCheckTexCoordsWrap(const lcVector4& Plane2, const lcVector3 (&Positions)[3], lcVector2 (&TexCoords)[3])
 {
@@ -350,7 +351,7 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
 		lcVector3 Position[4];
-		
+
 		Position[0] = lcMul31(DataVertex.Position[0], Transform);
 		Position[1] = lcMul31(DataVertex.Position[1], Transform);
 		Position[2] = lcMul31(DataVertex.Position[2], Transform);
@@ -368,7 +369,12 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
-			lcMeshLoaderTextureMap DstTextureMap = *TextureMap;
+			lcMeshLoaderTextureParams DstTextureMap;
+
+			if (TextureMap)
+				DstTextureMap = *TextureMap;
+			else
+				DstTextureMap = *SrcSection->mMaterial;
 
 			for (lcVector3& Point : DstTextureMap.Points)
 				Point = lcMul31(Point, Transform);
@@ -451,7 +457,12 @@ void lcMeshLoaderTypeData::AddMeshDataNoDuplicateCheck(const lcMeshLoaderTypeDat
 
 		if (SrcSection->mMaterial->Type != lcMeshLoaderMaterialType::Solid)
 		{
-			lcMeshLoaderTextureMap DstTextureMap = *TextureMap;
+			lcMeshLoaderTextureParams DstTextureMap;
+
+			if (TextureMap)
+				DstTextureMap = *TextureMap;
+			else
+				DstTextureMap = *SrcSection->mMaterial;
 
 			for (lcVector3& Point : DstTextureMap.Points)
 				Point = lcMul31(Point, Transform);
@@ -552,7 +563,7 @@ lcMeshLoaderMaterial* lcLibraryMeshData::GetMaterial(quint32 ColorCode)
 	return Material;
 }
 
-lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureMap& TextureMap)
+lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureParams& TextureMap)
 {
 	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
 	{
@@ -589,7 +600,7 @@ lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, 
 	Material->Points[2] = TextureMap.Points[2];
 	Material->Angles[0] = TextureMap.Angles[0];
 	Material->Angles[1] = TextureMap.Angles[1];
-	strcpy(Material->Name, TextureMap.Name);
+	lcstrcpy(Material->Name, TextureMap.Name);
 
 	return Material;
 }
@@ -831,7 +842,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 			FinalSection.PrimitiveType = Section->mPrimitiveType;
 			FinalSection.Color = Section->mMaterial->Color;
-			strcpy(FinalSection.Name, Section->mMaterial->Name);
+			lcstrcpy(FinalSection.Name, Section->mMaterial->Name);
 		};
 
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
@@ -1370,7 +1381,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s", &LineType, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], OriginalFileName);
 
 			char FileName[LC_MAXPATH];
-			strcpy(FileName, OriginalFileName);
+			lcstrcpy(FileName, OriginalFileName);
 
 			char* Ch;
 			for (Ch = FileName; *Ch; Ch++)

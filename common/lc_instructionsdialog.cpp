@@ -81,7 +81,7 @@ void lcInstructionsPageWidget::StepSettingsChanged(lcModel* Model, lcStep Step)
 {
 	QGraphicsScene* Scene = scene();
 
-	QList<QGraphicsItem*> Items = Scene->items();
+	const QList<QGraphicsItem*> Items = Scene->items();
 
 	for (QGraphicsItem* Item : Items)
 	{
@@ -291,7 +291,7 @@ lcInstructionsPropertiesWidget::lcInstructionsPropertiesWidget(QWidget* Parent, 
 	QWidget* CentralWidget = new QWidget(this);
 	setWidget(CentralWidget);
 	setWindowTitle(tr("Properties"));
-	
+
 	QGridLayout* Layout = new QGridLayout(CentralWidget);
 	Layout->setContentsMargins(0, 0, 0, 0);
 
@@ -343,7 +343,7 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 		Pixmap.fill(Color);
 		ColorButton->setIcon(Pixmap);
 	};
-	
+
 	UpdateButton();
 
 	connect(ColorButton, &QToolButton::clicked, [this, Type, UpdateButton]()
@@ -649,7 +649,11 @@ void lcInstructionsDialog::Print(QPrinter* Printer)
 			for (int PageCopy = 0; PageCopy < PageCopies; PageCopy++)
 			{
 				if (Printer->printerState() == QPrinter::Aborted || Printer->printerState() == QPrinter::Error)
+				{
+					delete Scene;
+
 					return;
+				}
 
 				if (!FirstPage)
 					Printer->newPage();

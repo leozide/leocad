@@ -122,7 +122,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 	}
 	else
 	{
-		QString ModelPath = QString("%1/%2").arg(QDir::currentPath()).arg(PartType);
+		QString ModelPath = QString("%1/%2").arg(QDir::currentPath(), PartType);
 
 		if (!mLoader->Load(ModelPath, false))
 			return false;

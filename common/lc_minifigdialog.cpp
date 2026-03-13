@@ -4,7 +4,6 @@
 #include "lc_viewwidget.h"
 #include "lc_colorpicker.h"
 #include "minifig.h"
-#include "lc_application.h"
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_view.h"
@@ -135,6 +134,14 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	mMinifigWizard->Calculate();
 	mView->GetCamera()->SetViewpoint(lcVector3(0.0f, -270.0f, 90.0f));
 	mView->ZoomExtents();
+
+	ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setFocus();
+
+	connect(ui->TemplateComboBox, &QComboBox::currentTextChanged, this, &lcMinifigDialog::TemplateComboBoxCurrentTextChanged);
+	connect(ui->TemplateSaveButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateSaveButtonClicked);
+	connect(ui->TemplateDeleteButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateDeleteButtonClicked);
+	connect(ui->TemplateImportButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateImportButtonClicked);
+	connect(ui->TemplateExportButton, &QPushButton::clicked, this, &lcMinifigDialog::TemplateExportButtonClicked);
 }
 
 lcMinifigDialog::~lcMinifigDialog()
@@ -175,7 +182,7 @@ void lcMinifigDialog::UpdateTemplateCombo()
 	ui->TemplateComboBox->setCurrentText(CurrentName);
 }
 
-void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& TemplateName)
+void lcMinifigDialog::TemplateComboBoxCurrentTextChanged(const QString& TemplateName)
 {
 	const auto& Templates = mMinifigWizard->GetTemplates();
 	const auto& Position = Templates.find(TemplateName);
@@ -189,7 +196,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 	UpdateTemplateCombo();
 
 	const lcMinifigTemplate& Template = Position->second;
-	
+
 	mView->MakeCurrent();
 
 	mMinifigWizard->LoadTemplate(TemplateName);
@@ -234,7 +241,7 @@ void lcMinifigDialog::on_TemplateComboBox_currentIndexChanged(const QString& Tem
 	mView->Redraw();
 }
 
-void lcMinifigDialog::on_TemplateSaveButton_clicked()
+void lcMinifigDialog::TemplateSaveButtonClicked()
 {
 	QString CurrentName = mCurrentTemplateName;
 	bool Ok;
@@ -280,7 +287,7 @@ void lcMinifigDialog::on_TemplateSaveButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateDeleteButton_clicked()
+void lcMinifigDialog::TemplateDeleteButtonClicked()
 {
 	if (mCurrentTemplateName.isEmpty() || mCurrentTemplateName == MinifigWizard::GetDefaultTemplateName())
 		return;
@@ -299,7 +306,7 @@ void lcMinifigDialog::on_TemplateDeleteButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateImportButton_clicked()
+void lcMinifigDialog::TemplateImportButtonClicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 
@@ -320,7 +327,7 @@ void lcMinifigDialog::on_TemplateImportButton_clicked()
 	UpdateTemplateCombo();
 }
 
-void lcMinifigDialog::on_TemplateExportButton_clicked()
+void lcMinifigDialog::TemplateExportButtonClicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
 
@@ -359,7 +366,7 @@ void lcMinifigDialog::PieceButtonClicked()
 	if (Search == mPieceButtons.end())
 		return;
 
-	int ItemIndex = std::distance(mPieceButtons.begin(), Search);
+	int ItemIndex = static_cast<int>(std::distance(mPieceButtons.begin(), Search));
 	PieceInfo* CurrentInfo = mMinifigWizard->mMinifig.Parts[ItemIndex];
 
 	QPoint Position = PieceButton->mapToGlobal(PieceButton->rect().bottomLeft());
@@ -380,7 +387,7 @@ void lcMinifigDialog::PieceButtonClicked()
 		return;
 
 	PieceInfo* NewPiece = Result.value();
-	
+
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
@@ -411,7 +418,9 @@ void lcMinifigDialog::ColorChanged(int Index)
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
-	mMinifigWizard->SetColorIndex(std::distance(mColorPickers.begin(), Search), Index);
+	int ItemIndex = static_cast<int>(std::distance(mColorPickers.begin(), Search));
+
+	mMinifigWizard->SetColorIndex(ItemIndex, Index);
 	mView->Redraw();
 }
 
@@ -425,6 +434,8 @@ void lcMinifigDialog::AngleChanged(double Value)
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
-	mMinifigWizard->SetAngle(std::distance(mSpinBoxes.begin(), Search), Value);
+	int ItemIndex = static_cast<int>(std::distance(mSpinBoxes.begin(), Search));
+
+	mMinifigWizard->SetAngle(ItemIndex, Value);
 	mView->Redraw();
 }

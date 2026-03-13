@@ -2,7 +2,9 @@
 #include "lc_file.h"
 #include "lc_library.h"
 #include "lc_mainwindow.h"
+#include "lc_string.h"
 #include "pieceinf.h"
+#include "lc_colors.h"
 
 static QJsonDocument lcLoadBrickLinkMapping()
 {
@@ -84,7 +86,7 @@ void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList
 		for (const auto& ColorIt : PartIt.second)
 		{
 			char FileName[LC_PIECE_NAME_LEN];
-			strcpy(FileName, Info->mFileName);
+			lcstrcpy(FileName, Info->mFileName);
 			char* Ext = strchr(FileName, '.');
 			if (Ext)
 				*Ext = 0;
@@ -109,15 +111,15 @@ void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList
 	{
 		BrickLinkFile.WriteLine("  <ITEM>\n");
 		BrickLinkFile.WriteLine("    <ITEMTYPE>P</ITEMTYPE>\n");
-		sprintf(Line, "    <ITEMID>%s</ITEMID>\n", Item.second.mId.c_str());
+		snprintf(Line, sizeof(Line), "    <ITEMID>%s</ITEMID>\n", Item.second.mId.c_str());
 		BrickLinkFile.WriteLine(Line);
 
-		sprintf(Line, "    <MINQTY>%d</MINQTY>\n", Item.second.mCount);
+		snprintf(Line, sizeof(Line), "    <MINQTY>%d</MINQTY>\n", Item.second.mCount);
 		BrickLinkFile.WriteLine(Line);
 
 		if (Item.second.mColor)
 		{
-			sprintf(Line, "    <COLOR>%d</COLOR>\n", Item.second.mColor);
+			snprintf(Line, sizeof(Line), "    <COLOR>%d</COLOR>\n", Item.second.mColor);
 			BrickLinkFile.WriteLine(Line);
 		}
 

@@ -8,6 +8,7 @@ struct lcPartThumbnail
 	PieceInfo* Info;
 	int ColorIndex;
 	int Size;
+	float DeviceScale;
 	int ReferenceCount;
 };
 
@@ -24,7 +25,7 @@ public:
 	lcThumbnailManager(lcPiecesLibrary* Library);
 	~lcThumbnailManager();
 
-	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size);
+	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale);
 	void ReleaseThumbnail(lcPartThumbnailId ThumbnailId);
 
 signals:

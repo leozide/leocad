@@ -2,6 +2,7 @@
 #include "lc_findreplacewidget.h"
 #include "lc_colorpicker.h"
 #include "lc_mainwindow.h"
+#include "lc_partselectionpopup.h"
 #include "pieceinf.h"
 #include "piece.h"
 #include "lc_model.h"
@@ -37,8 +38,8 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	Layout->addWidget(FindNextButton, 0, 3);
 
 	QToolButton* FindAllButton = new QToolButton(this);
-	FindAllButton ->setAutoRaise(true);
-	FindAllButton ->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_ALL]);
+	FindAllButton->setAutoRaise(true);
+	FindAllButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_ALL]);
 	Layout->addWidget(FindAllButton, 0, 4);
 
 	connect(FindColorPicker, &lcColorPicker::ColorChanged, this, &lcFindReplaceWidget::FindColorIndexChanged);
@@ -56,9 +57,21 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		ReplaceColorPicker->setToolTip(tr("Replacement Color"));
 		Layout->addWidget(ReplaceColorPicker, 1, 1);
 
-		mReplacePartComboBox = new QComboBox(this);
-		mReplacePartComboBox->setToolTip(tr("Replacement Part"));
-		Layout->addWidget(mReplacePartComboBox, 1, 2);
+		QPixmap Pixmap(1, 1);
+		Pixmap.fill(QColor::fromRgba64(0, 0, 0, 0));
+
+		mReplacePartButton = new lcElidableToolButton(this);
+		mReplacePartButton->setToolTip(tr("Replacement Part"));
+
+		QSizePolicy PieceButtonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+		PieceButtonSizePolicy.setHorizontalStretch(2);
+		PieceButtonSizePolicy.setVerticalStretch(0);
+		mReplacePartButton->setSizePolicy(PieceButtonSizePolicy);
+
+		mReplacePartButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		mReplacePartButton->setIcon(Pixmap);
+
+		Layout->addWidget(mReplacePartButton, 1, 2);
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
 		ReplaceNextButton->setAutoRaise(true);
@@ -71,15 +84,10 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		Layout->addWidget(ReplaceAllButton, 1, 4);
 
 		connect(ReplaceColorPicker, &lcColorPicker::ColorChanged, this, &lcFindReplaceWidget::ReplaceColorIndexChanged);
-		connect(mReplacePartComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &lcFindReplaceWidget::ReplaceActivated);
-
-		mReplacePartComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-		mReplacePartComboBox->setMinimumContentsLength(1);
-
-		mReplacePartComboBox->setModel(new lcPieceIdStringModel(gMainWindow->GetActiveModel(), mReplacePartComboBox));
+		connect(mReplacePartButton, &lcElidableToolButton::clicked, this, &lcFindReplaceWidget::ReplaceButtonClicked);
 
 		ReplaceColorPicker->SetCurrentColor(lcGetColorIndex(LC_COLOR_NOCOLOR));
-		mReplacePartComboBox->setCurrentIndex(0);
+		mReplacePartButton->setText(tr("None"));
 	}
 
 	QToolButton* CloseButton = new QToolButton(this);
@@ -152,9 +160,16 @@ void lcFindReplaceWidget::ReplaceColorIndexChanged(int ColorIndex)
 	Params.ReplaceColorIndex = ColorIndex;
 }
 
-void lcFindReplaceWidget::ReplaceActivated(int Index)
+void lcFindReplaceWidget::ReplaceButtonClicked()
 {
 	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-	Params.ReplacePieceInfo = (PieceInfo*)mReplacePartComboBox->itemData(Index).value<void*>();
+	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Params.ReplacePieceInfo, std::vector<std::pair<PieceInfo*, std::string>>(),
+                gDefaultColor, mReplacePartButton, mReplacePartButton->mapToGlobal(mReplacePartButton->rect().bottomLeft()));
+
+	if (!Result.has_value())
+		return;
+
+	Params.ReplacePieceInfo = Result.value();
+	mReplacePartButton->setText(Result.value()->m_strDescription);
 }

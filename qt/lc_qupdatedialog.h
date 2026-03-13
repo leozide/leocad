@@ -14,7 +14,7 @@ void lcDoInitialUpdateCheck();
 class lcQUpdateDialog : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
 	explicit lcQUpdateDialog(QWidget* Parent, bool InitialUpdate);
 	~lcQUpdateDialog();

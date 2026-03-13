@@ -15,7 +15,6 @@ public:
 
 	QSize sizeHint() const override;
 
-protected:
 	float GetDeviceScale() const
 	{
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
@@ -25,6 +24,7 @@ protected:
 #endif
 	}
 
+protected:
 	void initializeGL() override;
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;

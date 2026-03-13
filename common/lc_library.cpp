@@ -16,8 +16,7 @@
 #include "project.h"
 #include "lc_profile.h"
 #include "lc_meshloader.h"
-#include <ctype.h>
-#include <locale.h>
+#include "lc_string.h"
 #include <zlib.h>
 #include <QtConcurrent>
 
@@ -129,8 +128,8 @@ void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 	Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
 
 	char PieceName[LC_PIECE_NAME_LEN];
-	strcpy(PieceName, Info->mFileName);
-	strupr(PieceName);
+	lcstrcpy(PieceName, Info->mFileName);
+	lcstrupr(PieceName);
 
 	mPieces[PieceName] = Info;
 }
@@ -237,7 +236,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 
 		if (TextureFile.isFile())
 		{
-			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV);
+			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_MIPMAPS);
 
 			if (Texture)
 			{
@@ -426,7 +425,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				if ((ZipFileType == lcZipFileType::Official && !memcmp(Name, "LDRAW/PARTS/TEXTURES/", 21)) ||
 					(ZipFileType == lcZipFileType::Unofficial && !memcmp(Name, "PARTS/TEXTURES/", 15)))
 				{
-					lcTexture* Texture = new lcTexture();
+					lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 					mTextures.push_back(Texture);
 
 					*Dst = 0;
@@ -653,7 +652,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				continue;
 			*Dst = 0;
 
-			lcTexture* Texture = new lcTexture();
+			lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 			mTextures.push_back(Texture);
 
 			strncpy(Texture->mName, Name, sizeof(Texture->mName));
@@ -761,7 +760,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 				if (FileTime == CachedFileTime)
 				{
-					strcpy(Info->m_strDescription, Description);
+					lcstrcpy(Info->m_strDescription, Description);
 					return;
 				}
 			}
@@ -769,7 +768,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 		if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
 		{
-			strcpy(Info->m_strDescription, "Unknown");
+			lcstrcpy(Info->m_strDescription, "Unknown");
 			return;
 		}
 
@@ -1283,14 +1282,14 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		sprintf(FileName, "parts/%s", Info->mFileName);
+		snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 		PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 		if (PieceFile.Open(QIODevice::ReadOnly))
 			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
 		if (mHasUnofficial && !Loaded)
 		{
-			sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
+			snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
@@ -1357,13 +1356,13 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			char FileName[LC_MAXPATH];
 			bool Found = false;
 
-			sprintf(FileName, "parts/%s", Info->mFileName);
+			snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
 			IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			Found = IncludeFile.Open(QIODevice::ReadOnly);
 
 			if (mHasUnofficial && !Found)
 			{
-				sprintf(FileName, "unofficial/parts/%s", Info->mFileName);
+				snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
 				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 				Found = IncludeFile.Open(QIODevice::ReadOnly);
 			}
@@ -1383,7 +1382,7 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const char* Folder, lcZipFileType ZipFileType)
 			{
 				char IncludeFileName[LC_MAXPATH];
-				sprintf(IncludeFileName, Folder, PieceName);
+				snprintf(IncludeFileName, sizeof(IncludeFileName), Folder, PieceName);
 				return mZipFiles[static_cast<int>(ZipFileType)]->ExtractFile(IncludeFileName, IncludeFile);
 			};
 
@@ -1532,11 +1531,11 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 	{
 		lcMemFile TextureFile;
 
-		sprintf(FileName, "ldraw/parts/textures/%s.png", Texture->mName);
+		snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Texture->mName);
 
 		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))
 		{
-			sprintf(FileName, "parts/textures/%s.png", Texture->mName);
+			snprintf(FileName, sizeof(FileName), "parts/textures/%s.png", Texture->mName);
 
 			if (!mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || !mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile))
 				return false;
@@ -1668,9 +1667,9 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
 			{
 				char Name[LC_PIECE_NAME_LEN];
-				strcpy(Name, "8/");
-				strcat(Name, Primitive->mName);
-				strupr(Name);
+				lcstrcpy(Name, "8/");
+				lcstrcat(Name, Primitive->mName);
+				lcstrupr(Name);
 
 				LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo, because the low stud gets added as shared
 			}
@@ -1769,9 +1768,9 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 
 			// Find the parent of this patterned piece.
 			char ParentName[LC_PIECE_NAME_LEN];
-			strcpy(ParentName, Info->mFileName);
+			lcstrcpy(ParentName, Info->mFileName);
 			*strchr(ParentName, 'P') = '\0';
-			strcat(ParentName, ".dat");
+			lcstrcat(ParentName, ".dat");
 
 			Parent = FindPiece(ParentName, nullptr, false, false);
 

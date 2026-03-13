@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_objectproperty.h"
+#include "lc_math.h"
 
 class lcCollapsibleWidgetButton;
 class lcKeyFrameWidget;
@@ -20,7 +21,7 @@ protected slots:
 	void BoolChanged();
 	void FloatEditingFinished();
 	void FloatEditingCanceled();
-	void FloatChanged(const QString& TextValue);
+	void FloatChanged(double Value);
 	void IntegerChanged();
 	void StepNumberChanged();
 	void StringChanged();
@@ -114,7 +115,7 @@ protected:
 	void UpdatePieceColor(lcObjectPropertyId PropertyId);
 	void UpdatePieceId(lcObjectPropertyId PropertyId);
 
-	void ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging);
+	void ChangeFloatValue(lcObjectPropertyId PropertyId, float Value);
 
 	void SetEmpty();
 	void SetPiece(const std::vector<lcObject*>& Selection, lcObject* Focus);
@@ -131,6 +132,7 @@ protected:
 	std::vector<lcObject*> mSelection;
 	lcObject* mFocusObject = nullptr;
 	bool mDisableUpdates = false;
+	std::optional<lcVector3> mLastRotation;
 
 	std::array<PropertyWidgets, static_cast<int>(lcObjectPropertyId::Count)> mPropertyWidgets = {};
 	std::array<CategoryWidgets, static_cast<int>(CategoryIndex::Count)> mCategoryWidgets = {};

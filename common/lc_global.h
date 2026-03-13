@@ -3,6 +3,7 @@
 
 #ifdef __cplusplus
 
+#define QT_NO_DEPRECATED_WARNINGS
 #include <QtGlobal>
 #include <QtWidgets>
 #include <QtConcurrent>
@@ -48,15 +49,8 @@ class QPrinter;
 #define LC_ARRAY_COUNT(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 #define LC_ARRAY_SIZE_CHECK(a,s) static_assert(LC_ARRAY_COUNT(a) == static_cast<int>(s), QT_STRINGIFY(a) " size mismatch.")
 
-#if !defined(EGL_VERSION_1_0) && !defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0) && !defined(QT_OPENGL_ES)
-#ifdef Q_OS_MACOS
-#define LC_FIXED_FUNCTION 0
-#else
-#define LC_FIXED_FUNCTION 1
-#endif
-#else
+#if defined(EGL_VERSION_1_0) || defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0) || defined(QT_OPENGL_ES)
 #define LC_OPENGLES 1
-#define LC_FIXED_FUNCTION 0
 #endif
 
 // Old defines and declarations.
@@ -65,12 +59,6 @@ class QPrinter;
 
 typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
-
-#ifdef Q_OS_WIN
-char* strcasestr(const char *s, const char *find);
-#else
-char* strupr(char* string);
-#endif
 
 // Version number.
 #define LC_VERSION_MAJOR 25
@@ -88,6 +76,7 @@ class lcLight;
 enum class lcLightType;
 enum class lcLightAreaShape;
 class lcGroup;
+class lcModelAction;
 class PieceInfo;
 typedef std::map<const PieceInfo*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;

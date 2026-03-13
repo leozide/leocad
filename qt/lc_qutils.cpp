@@ -4,8 +4,7 @@
 #include "lc_library.h"
 #include "lc_model.h"
 #include "pieceinf.h"
-#include "lc_partselectionwidget.h"
-#include "lc_mainwindow.h"
+#include "lc_string.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -15,7 +14,7 @@
 QString lcFormatValue(float Value, int Precision)
 {
 	QString String = QString::number(Value, 'f', Precision);
-	const int Dot = String.indexOf('.');
+	const qsizetype Dot = String.indexOf('.');
 
 	if (Dot != -1)
 	{
@@ -153,14 +152,14 @@ void lcQTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize,
 {
 	Q_UNUSED(OldSize)
 
-	if (LogicalIndex == mColumnToStretch) 
-	{ 
-		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent()); 
- 
-		if (HeaderView->isVisible()) 
-			mInteractiveResize = true; 
- 
-		mStretchWidth = NewSize; 
+	if (LogicalIndex == mColumnToStretch)
+	{
+		QHeaderView* HeaderView = qobject_cast<QHeaderView*>(parent());
+
+		if (HeaderView->isVisible())
+			mInteractiveResize = true;
+
+		mStretchWidth = NewSize;
 	}
 }
 
@@ -238,7 +237,7 @@ std::vector<bool> lcPieceIdStringModel::GetFilteredRows(const QString& FilterTex
 	{
 		const PieceInfo* Info = mSortedPieces[PieceInfoIndex];
 
-		FilteredRows[PieceInfoIndex] = (strcasestr(Info->m_strDescription, Text.c_str()) || strcasestr(Info->mFileName, Text.c_str()));
+		FilteredRows[PieceInfoIndex] = (lcstrcasestr(Info->m_strDescription, Text.c_str()) || lcstrcasestr(Info->mFileName, Text.c_str()));
 	}
 
 	return FilteredRows;

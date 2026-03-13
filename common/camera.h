@@ -3,19 +3,6 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_CAMERA_HIDDEN            0x0001
-#define LC_CAMERA_SIMPLE            0x0002
-#define LC_CAMERA_ORTHO             0x0004
-#define LC_CAMERA_POSITION_SELECTED 0x0010
-#define LC_CAMERA_POSITION_FOCUSED  0x0020
-#define LC_CAMERA_TARGET_SELECTED   0x0040
-#define LC_CAMERA_TARGET_FOCUSED    0x0080
-#define LC_CAMERA_UPVECTOR_SELECTED 0x0100
-#define LC_CAMERA_UPVECTOR_FOCUSED  0x0200
-
-#define LC_CAMERA_SELECTION_MASK    (LC_CAMERA_POSITION_SELECTED | LC_CAMERA_TARGET_SELECTED | LC_CAMERA_UPVECTOR_SELECTED)
-#define LC_CAMERA_FOCUS_MASK        (LC_CAMERA_POSITION_FOCUSED | LC_CAMERA_TARGET_FOCUSED | LC_CAMERA_UPVECTOR_FOCUSED)
-
 enum class lcViewpoint
 {
 	Front,
@@ -28,7 +15,7 @@ enum class lcViewpoint
 	Count
 };
 
-enum class lcCameraType
+enum class lcCameraProjection
 {
 	Perspective,
 	Orthographic,
@@ -37,26 +24,49 @@ enum class lcCameraType
 
 enum lcCameraSection : quint32
 {
-	LC_CAMERA_SECTION_INVALID = ~0U,
+	LC_CAMERA_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
 	LC_CAMERA_SECTION_POSITION = 0,
 	LC_CAMERA_SECTION_TARGET,
 	LC_CAMERA_SECTION_UPVECTOR
 };
 
+struct lcCameraHistoryState
+{
+	lcObjectId Id;
+	bool Hidden;
+	bool Simple;
+	float Fovy;
+	float NearPlane;
+	float FarPlane;
+	lcCameraProjection Projection;
+	lcObjectProperty<lcVector3> Position;
+	lcObjectProperty<lcVector3> TargetPosition;
+	lcObjectProperty<lcVector3> UpVector;
+	QString Name;
+
+	bool operator==(const lcCameraHistoryState& Other) const
+	{
+		return Id == Other.Id && Hidden == Other.Hidden && Simple == Other.Simple && Fovy == Other.Fovy &&
+            NearPlane == Other.NearPlane && FarPlane == Other.FarPlane && Projection == Other.Projection &&
+            Position == Other.Position && TargetPosition == Other.TargetPosition && UpVector == Other.UpVector && Name == Other.Name;
+	}
+};
+
 class lcCamera : public lcObject
 {
 public:
+	lcCamera();
 	lcCamera(bool Simple);
-	lcCamera(float ex, float ey, float ez, float tx, float ty, float tz);
-	~lcCamera();
+	lcCamera(bool Simple, const lcVector3& Position, const lcVector3& TargetPosition);
+	virtual ~lcCamera();
 
 	lcCamera(const lcCamera&) = delete;
 	lcCamera(lcCamera&&) = delete;
 	lcCamera& operator=(const lcCamera&) = delete;
 	lcCamera& operator=(lcCamera&&) = delete;
 
-	static QString GetCameraTypeString(lcCameraType CameraType);
-	static QStringList GetCameraTypeStrings();
+	static QString GetCameraProjectionString(lcCameraProjection CameraProjection);
+	static QStringList GetCameraProjectionStrings();
 	static lcViewpoint GetViewpoint(const QString& ViewpointName);
 
 	QString GetName() const override
@@ -69,152 +79,18 @@ public:
 
 	bool IsSimple() const
 	{
-		return (mState & LC_CAMERA_SIMPLE) != 0;
+		return mSimple;
 	}
 
-	lcCameraType GetCameraType() const
+	lcCameraProjection GetProjection() const
 	{
-		return ((mState & LC_CAMERA_ORTHO) == 0) ? lcCameraType::Perspective : lcCameraType::Orthographic;
+		return mProjection;
 	}
 
-	bool SetCameraType(lcCameraType CameraType);
-
-	bool IsOrtho() const
-	{
-		return (mState & LC_CAMERA_ORTHO) != 0;
-	}
-
-	void SetOrtho(bool Ortho)
-	{
-		if (Ortho)
-			mState |= LC_CAMERA_ORTHO;
-		else
-			mState &= ~LC_CAMERA_ORTHO;
-	}
-
-	bool IsSelected() const override
-	{
-		return (mState & LC_CAMERA_SELECTION_MASK) != 0;
-	}
-
-	bool IsSelected(quint32 Section) const override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			return (mState & LC_CAMERA_POSITION_SELECTED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			return (mState & LC_CAMERA_TARGET_SELECTED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			return (mState & LC_CAMERA_UPVECTOR_SELECTED) != 0;
-			break;
-		}
-		return false;
-	}
-
-	void SetSelected(bool Selected) override
-	{
-		if (Selected)
-			mState |= LC_CAMERA_SELECTION_MASK;
-		else
-			mState &= ~(LC_CAMERA_SELECTION_MASK | LC_CAMERA_FOCUS_MASK);
-	}
-
-	void SetSelected(quint32 Section, bool Selected) override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			if (Selected)
-				mState |= LC_CAMERA_POSITION_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_POSITION_SELECTED | LC_CAMERA_POSITION_FOCUSED);
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			if (Selected)
-				mState |= LC_CAMERA_TARGET_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_TARGET_SELECTED | LC_CAMERA_TARGET_FOCUSED);
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			if (Selected)
-				mState |= LC_CAMERA_UPVECTOR_SELECTED;
-			else
-				mState &= ~(LC_CAMERA_UPVECTOR_SELECTED | LC_CAMERA_UPVECTOR_FOCUSED);
-			break;
-		}
-	}
-
-	bool IsFocused() const override
-	{
-		return (mState & LC_CAMERA_FOCUS_MASK) != 0;
-	}
-
-	bool IsFocused(quint32 Section) const override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			return (mState & LC_CAMERA_POSITION_FOCUSED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			return (mState & LC_CAMERA_TARGET_FOCUSED) != 0;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			return (mState & LC_CAMERA_UPVECTOR_FOCUSED) != 0;
-			break;
-		}
-		return false;
-	}
-
-	void SetFocused(quint32 Section, bool Focus) override
-	{
-		switch (Section)
-		{
-		case LC_CAMERA_SECTION_POSITION:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_POSITION_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_POSITION_FOCUSED;
-			break;
-
-		case LC_CAMERA_SECTION_TARGET:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_TARGET_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_TARGET_FOCUSED;
-			break;
-
-		case LC_CAMERA_SECTION_UPVECTOR:
-			if (Focus)
-				mState |= LC_CAMERA_SELECTION_MASK | LC_CAMERA_UPVECTOR_FOCUSED;
-			else
-				mState &= ~LC_CAMERA_UPVECTOR_FOCUSED;
-			break;
-		}
-	}
-
-	quint32 GetFocusSection() const override
-	{
-		if (mState & LC_CAMERA_POSITION_FOCUSED)
-			return LC_CAMERA_SECTION_POSITION;
-
-		if (mState & LC_CAMERA_TARGET_FOCUSED)
-			return LC_CAMERA_SECTION_TARGET;
-
-		if (mState & LC_CAMERA_UPVECTOR_FOCUSED)
-			return LC_CAMERA_SECTION_UPVECTOR;
-
-		return LC_CAMERA_SECTION_INVALID;
-	}
+	bool SetProjection(lcCameraProjection CameraProjection);
+	bool SetFOV(float Fovy);
+	bool SetNearPlane(float NearPlane);
+	bool SetFarPlane(float FarPlane);
 
 	quint32 GetAllowedTransforms() const override
 	{
@@ -267,19 +143,18 @@ public:
 
 public:
 	bool IsVisible() const
-		{ return (mState & LC_CAMERA_HIDDEN) == 0; }
+	{
+		return !mHidden;
+	}
 
 	bool IsHidden() const
 	{
-		return (mState & LC_CAMERA_HIDDEN) != 0;
+		return mHidden;
 	}
 
 	void SetHidden(bool Hidden)
 	{
-		if (Hidden)
-			mState |= LC_CAMERA_HIDDEN;
-		else
-			mState &= ~LC_CAMERA_HIDDEN;
+		mHidden = Hidden;
 	}
 
 	void SetPosition(const lcVector3& Position, lcStep Step, bool AddKey)
@@ -316,6 +191,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
+	lcCameraHistoryState GetHistoryState(const lcModel* Model) const;
+	void SetHistoryState(const lcCameraHistoryState& State, const lcModel* Model);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
@@ -343,9 +220,9 @@ public:
 	void GetAngles(float& Latitude, float& Longitude, float& Distance) const;
 	void SetAngles(float Latitude, float Longitude, float Distance);
 
-	float m_fovy;
-	float m_zNear;
-	float m_zFar;
+	float m_fovy = 30.0f;
+	float m_zNear = 25.0f;
+	float m_zFar = 50000;
 
 	lcMatrix44 mWorldView;
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
@@ -353,8 +230,7 @@ public:
 	lcObjectProperty<lcVector3> mUpVector = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));
 
 protected:
-	void Initialize();
-
 	QString mName;
-	quint32 mState;
+	bool mSimple = true;
+	lcCameraProjection mProjection = lcCameraProjection::Perspective;
 };

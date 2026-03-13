@@ -4,6 +4,13 @@
 #include "lc_commands.h"
 
 enum class lcObjectPropertyId;
+enum class lcCameraProjection;
+struct lcModelHistoryState;
+class lcModelAction;
+class lcModelActionSelection;
+class lcModelActionObjectEdit;
+class lcModelActionProperties;
+enum class lcModelActionEditMerge;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -65,6 +72,11 @@ public:
 		return true;
 	}
 
+	bool operator!=(const lcModelProperties& Properties) const
+	{
+		return !(*this == Properties);
+	}
+
 	void SaveLDraw(QTextStream& Stream) const;
 	bool ParseLDrawHeader(QString Line, bool FirstLine);
 	void ParseLDrawLine(QTextStream& Stream);
@@ -99,7 +111,7 @@ public:
 
 struct lcModelHistoryEntry
 {
-	QByteArray File;
+	std::vector<std::unique_ptr<lcModelAction>> ModelActions;
 	QString Description;
 };
 
@@ -119,15 +131,13 @@ public:
 		return mProject;
 	}
 
-	bool IsModified() const
-	{
-		return mSavedHistory != mUndoHistory[0];
-	}
-
 	bool IsActive() const
 	{
 		return mActive;
 	}
+
+	bool IsModified() const;
+	void SetSaved();
 
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
@@ -216,11 +226,16 @@ public:
 	void InsertStep(lcStep Step);
 	void RemoveStep(lcStep Step);
 
+	template<typename StateType, typename ObjectType>
+	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
+	void LoadHistoryState(const lcModelHistoryState& HistoryState);
+	void SetModelProperties(const lcModelProperties& ModelProperties);
+
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
-	void DeleteAllCameras();
+	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
-	void RemoveSelectedPiecesKeyFrames();
+	void RemoveSelectedObjectsKeyFrames();
 	void InsertControlPoint();
 	void RemoveFocusedControlPoint();
 	void FocusNextTrainTrack();
@@ -249,16 +264,7 @@ public:
 	bool LoadLDD(const QString& FileData);
 	bool LoadInventory(const QByteArray& Inventory);
 	int SplitMPD(QIODevice& Device);
-	void Merge(lcModel* Other);
-
-	void SetSaved()
-	{
-		if (mUndoHistory.empty())
-			SaveCheckpoint(QString());
-
-		if (!mIsPreview)
-			mSavedHistory = mUndoHistory[0];
-	}
+	void Merge(std::unique_ptr<lcModel> Other);
 
 	void SetMinifig(const lcMinifig& Minifig);
 	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
@@ -307,18 +313,14 @@ public:
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
-	std::vector<lcObject*> GetSelectionModePieces(const lcPiece* SelectedPiece) const;
 
-	void FocusOrDeselectObject(const lcObjectSection& ObjectSection);
-	void ClearSelection(bool UpdateInterface);
-	void ClearSelectionAndSetFocus(lcObject* Object, quint32 Section, bool EnableSelectionMode);
-	void ClearSelectionAndSetFocus(const lcObjectSection& ObjectSection, bool EnableSelectionMode);
-	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, bool EnableSelectionMode);
-	void AddToSelection(const std::vector<lcObject*>& Objects, bool EnableSelectionMode, bool UpdateInterface);
-	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
-	void RemoveFromSelection(const lcObjectSection& ObjectSection);
+	void ClearSelection();
+	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
+	void FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
-	void InvertSelection();
+	void InvertPieceSelection();
+	void AddToSelection(const std::vector<lcObject*>& Objects);
+	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
@@ -339,12 +341,11 @@ public:
 		return mMouseToolDistance;
 	}
 
-	void BeginMouseTool();
-	void EndMouseTool(lcTool Tool, bool Accept);
+	void BeginMouseTool(lcTool Tool, lcView* View);
+	void EndMouseTool(lcTool Tool, lcView* View, bool Accept);
 	void InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms);
+	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
-	void BeginCameraTool(const lcVector3& Position, const lcVector3& Target);
-	void UpdateCameraTool(const lcVector3& Position);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
 	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag);
@@ -356,33 +357,30 @@ public:
 	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
 	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
-	void ZoomRegionToolClicked(lcCamera* Camera, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
+	void ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
 	void Zoom(lcCamera* Camera, float Amount);
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove)
+	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge)
 	{
-		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Update, Checkpoint, FirstMove);
+		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Checkpoint, FirstMove, ModelActionEditMerge);
 	}
 
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Update, bool Checkpoint, bool FirstMove);
-	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Update, bool Checkpoint);
-	void ScaleSelectedPieces(const float Scale, bool Update, bool Checkpoint);
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge);
+	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelActionEditMerge ModelActionEditMerge);
+	void ScaleSelectedPieces(const float Scale);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
 	void SetSelectedPiecesColorIndex(int ColorIndex);
 	void SetSelectedPiecesStepShow(lcStep Step);
 	void SetSelectedPiecesStepHide(lcStep Step);
 
-	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value, bool AddUndo);
+	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
 	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
-	void SetCameraOrthographic(lcCamera* Camera, bool Ortho);
-	void SetCameraFOV(lcCamera* Camera, float FOV, bool Checkpoint);
-	void SetCameraZNear(lcCamera* Camera, float ZNear, bool Checkpoint);
-	void SetCameraZFar(lcCamera* Camera, float ZFar, bool Checkpoint);
+	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);
 
 	void ShowPropertiesDialog();
 	void ShowSelectByNameDialog();
@@ -392,18 +390,39 @@ public:
 
 protected:
 	void DeleteModel();
-	void DeleteHistory();
-	void SaveCheckpoint(const QString& Description);
-	void LoadCheckPoint(lcModelHistoryEntry* CheckPoint);
+
+	void RecordSelectionAction(std::function<void()> Callback);
+	void RecordClearSelectionAction();
+	void RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void RecordSelectAllPiecesAction();
+	void RecordInvertPieceSelectionAction();
+	void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
+	void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
+	void BeginObjectEditAction(lcModelActionEditMerge ModelActionEditMerge);
+	void EndObjectEditAction();
+	void RecordModelPropertiesAction(const lcModelProperties& ModelProperties);
+
+	void RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
+	void BeginActionSequence();
+	void EndActionSequence(const QString& Description);
+	void DiscardActionSequence();
+	void RevertActionSequence();
+	void RemoveFirstUndoIfUnchanged();
+	const lcModelHistoryEntry* GetFirstUndoChange() const;
 
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();
 	bool RemoveSelectedObjects();
+	void RemoveCameraFromViews(lcCamera* Camera);
 
+	std::vector<lcObject*> GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const;
+	void DeselectAllObjects();
+	void SetFocusedObject(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void SetObjectsSelected(const std::vector<lcObject*>& Objects, bool Selected);
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
-	void AddPiece(lcPiece* Piece);
-	void InsertPiece(lcPiece* Piece, size_t Index);
+	size_t AddPiece(lcPiece* Piece);
 
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
@@ -422,9 +441,10 @@ protected:
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
 
-	lcModelHistoryEntry* mSavedHistory;
-	std::vector<lcModelHistoryEntry*> mUndoHistory;
-	std::vector<lcModelHistoryEntry*> mRedoHistory;
+	std::vector<std::unique_ptr<lcModelAction>> mActionSequence;
+	const lcModelHistoryEntry* mSavedHistory = nullptr;
+	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
+	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;
 
 	Q_DECLARE_TR_FUNCTIONS(lcModel);
 };

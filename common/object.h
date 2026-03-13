@@ -10,6 +10,8 @@ enum class lcObjectType
 	Light
 };
 
+enum class lcObjectId : uint32_t;
+
 struct lcObjectSection
 {
 	lcObject* Object = nullptr;
@@ -55,6 +57,8 @@ struct lcObjectBoxTest
 #define LC_OBJECT_TRANSFORM_SCALE_Z   0x400
 #define LC_OBJECT_TRANSFORM_SCALE_XYZ (LC_OBJECT_TRANSFORM_SCALE_X | LC_OBJECT_TRANSFORM_SCALE_Y | LC_OBJECT_TRANSFORM_SCALE_Z)
 
+#define LC_OBJECT_SECTION_INVALID 0xffffffff
+
 class lcObject
 {
 public:
@@ -87,14 +91,49 @@ public:
 		return mObjectType;
 	}
 
-	virtual bool IsSelected() const = 0;
-	virtual bool IsSelected(quint32 Section) const = 0;
-	virtual void SetSelected(bool Selected) = 0;
-	virtual void SetSelected(quint32 Section, bool Selected) = 0;
-	virtual bool IsFocused() const = 0;
-	virtual bool IsFocused(quint32 Section) const = 0;
-	virtual void SetFocused(quint32 Section, bool Focused) = 0;
-	virtual quint32 GetFocusSection() const = 0;
+	lcObjectId GetId() const
+	{
+		return mId;
+	}
+
+	bool IsSelected() const
+	{
+		return mSelected;
+	}
+
+	void SetSelected(bool Selected)
+	{
+		mSelected = Selected;
+
+		if (!Selected)
+			mFocusedSection = LC_OBJECT_SECTION_INVALID;
+	}
+
+	bool IsFocused() const
+	{
+		return mFocusedSection != LC_OBJECT_SECTION_INVALID;
+	}
+
+	bool IsFocused(quint32 Section) const
+	{
+		return mFocusedSection == Section;
+	}
+
+	void SetFocused(quint32 Section, bool Focused)
+	{
+		if (Focused)
+		{
+			mFocusedSection = Section;
+			mSelected = true;
+		}
+		else
+			mFocusedSection = LC_OBJECT_SECTION_INVALID;
+	}
+
+	quint32 GetFocusSection() const
+	{
+		return mFocusedSection;
+	}
 
 	virtual void UpdatePosition(lcStep Step) = 0;
 	virtual quint32 GetAllowedTransforms() const = 0;
@@ -112,4 +151,12 @@ public:
 
 private:
 	lcObjectType mObjectType;
+
+protected:
+	bool mHidden = false;
+	bool mSelected = false;
+	quint32 mFocusedSection = LC_OBJECT_SECTION_INVALID;
+	lcObjectId mId = static_cast<lcObjectId>(0);
+
+	static lcObjectId mNextId;
 };

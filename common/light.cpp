@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_math.h"
-#include "lc_colors.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -20,6 +19,11 @@
 static const std::array<QLatin1String, static_cast<int>(lcLightType::Count)> gLightTypes = { QLatin1String("POINT"), QLatin1String("SPOT"), QLatin1String("DIRECTIONAL"), QLatin1String("AREA") };
 static const std::array<QLatin1String, static_cast<int>(lcLightAreaShape::Count)> gLightAreaShapes = { QLatin1String("RECTANGLE"), QLatin1String("SQUARE"), QLatin1String("DISK"), QLatin1String("ELLIPSE") };
 
+lcLight::lcLight()
+    : lcObject(lcObjectType::Light)
+{
+}
+
 lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 	: lcObject(lcObjectType::Light), mLightType(LightType)
 {
@@ -28,7 +32,7 @@ lcLight::lcLight(const lcVector3& Position, lcLightType LightType)
 
 	mPosition.SetValue(Position);
 
-	UpdatePosition(1);
+	lcLight::UpdatePosition(1);
 }
 
 QString lcLight::GetLightTypeString(lcLightType LightType)
@@ -492,7 +496,7 @@ void lcLight::MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance, 
 		WorldMatrix.Orthonormalize();
 
 		SetRotation(WorldMatrix, Step, AddKey);
-			
+
 		mWorldMatrix = lcMatrix44(WorldMatrix, mWorldMatrix.GetTranslation());
 	}
 }
@@ -883,7 +887,7 @@ void lcLight::SetupLightMatrix(lcContext* Context) const
 	const lcPreferences& Preferences = lcGetPreferences();
 	const float LineWidth = Preferences.mLineWidth;
 
-	if (IsSelected(LC_LIGHT_SECTION_POSITION))
+	if (IsSelected())
 	{
 		const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
 		const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);
@@ -1044,7 +1048,7 @@ void lcLight::DrawTarget(lcContext* Context) const
 	const lcPreferences& Preferences = lcGetPreferences();
 	const float LineWidth = Preferences.mLineWidth;
 
-	if (IsSelected(LC_LIGHT_SECTION_TARGET))
+	if (IsSelected())
 	{
 		const lcVector4 SelectedColor = lcVector4FromColor(Preferences.mObjectSelectedColor);
 		const lcVector4 FocusedColor = lcVector4FromColor(Preferences.mObjectFocusedColor);
@@ -1132,7 +1136,7 @@ QVariant lcLight::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1223,7 +1227,7 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1246,7 +1250,7 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 
 	case lcObjectPropertyId::LightColor:
 		return SetColor(Value.value<lcVector3>(), Step, AddKey);
-		
+
 	case lcObjectPropertyId::LightBlenderPower:
 		return SetBlenderPower(Value.toFloat(), Step, AddKey);
 
@@ -1314,7 +1318,7 @@ bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1405,7 +1409,7 @@ bool lcLight::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -1505,4 +1509,60 @@ void lcLight::RemoveKeyFrames()
 	mPOVRayPower.RemoveAllKeys();
 	mPOVRayFadeDistance.RemoveAllKeys();
 	mPOVRayFadePower.RemoveAllKeys();
+}
+
+lcLightHistoryState lcLight::GetHistoryState([[maybe_unused]] const lcModel* Model) const
+{
+	lcLightHistoryState State;
+
+	State.Id = mId;
+	State.Hidden = mHidden;
+	State.Name = mName;
+	State.LightType = mLightType;
+	State.CastShadow = mCastShadow;
+	State.Position = mPosition;
+	State.Rotation = mRotation;
+	State.Color = mColor;
+	State.BlenderPower = mBlenderPower;
+	State.BlenderRadius = mBlenderRadius;
+	State.BlenderAngle = mBlenderAngle;
+	State.POVRayPower = mPOVRayPower;
+	State.POVRayFadeDistance = mPOVRayFadeDistance;
+	State.POVRayFadePower = mPOVRayFadePower;
+	State.SpotConeAngle = mSpotConeAngle;
+	State.SpotPenumbraAngle = mSpotPenumbraAngle;
+	State.POVRaySpotTightness = mPOVRaySpotTightness;
+	State.AreaShape = mAreaShape;
+	State.AreaSizeX = mAreaSizeX;
+	State.AreaSizeY = mAreaSizeY;
+	State.POVRayAreaGridX = mPOVRayAreaGridX;
+	State.POVRayAreaGridY = mPOVRayAreaGridY;
+
+	return State;
+}
+
+void lcLight::SetHistoryState(const lcLightHistoryState& State, [[maybe_unused]] const lcModel* Model)
+{
+	mId = State.Id;
+	mHidden = State.Hidden;
+	mName = State.Name;
+	mLightType = State.LightType;
+	mCastShadow = State.CastShadow;
+	mPosition = State.Position;
+	mRotation = State.Rotation;
+	mColor = State.Color;
+	mBlenderPower = State.BlenderPower;
+	mBlenderRadius = State.BlenderRadius;
+	mBlenderAngle = State.BlenderAngle;
+	mPOVRayPower = State.POVRayPower;
+	mPOVRayFadeDistance = State.POVRayFadeDistance;
+	mPOVRayFadePower = State.POVRayFadePower;
+	mSpotConeAngle = State.SpotConeAngle;
+	mSpotPenumbraAngle = State.SpotPenumbraAngle;
+	mPOVRaySpotTightness = State.POVRaySpotTightness;
+	mAreaShape = State.AreaShape;
+	mAreaSizeX = State.AreaSizeX;
+	mAreaSizeY = State.AreaSizeY;
+	mPOVRayAreaGridX = State.POVRayAreaGridX;
+	mPOVRayAreaGridY = State.POVRayAreaGridY;
 }

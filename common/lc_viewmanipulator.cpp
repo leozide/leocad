@@ -515,7 +515,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 		else if (TrackTool == lcTrackTool::RotateTrainTrackLeft)
 		{
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 96, GL_UNSIGNED_SHORT, (108 + 360 + 12) * 2);
-	
+
 			if (CanAdd)
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, (108 + 360 + 12 + 192) * 2);
 
@@ -890,7 +890,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->EnableColorBlend(true);
 
 		char buf[32];
-		sprintf(buf, "[%.2f]", fabsf(Angle));
+		snprintf(buf, sizeof(buf), "[%.2f]", fabsf(Angle));
 
 		int cx, cy;
 		gTexFont.GetStringDimensions(&cx, &cy, buf);
@@ -1165,7 +1165,6 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButto
 		{
 			NewTrackTool = TrainTrackTool;
 			NewTrackSection = TrainTrackSection;
-			ClosestIntersectionDistance = TrainDistance;
 		}
 	}
 

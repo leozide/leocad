@@ -11,6 +11,7 @@
 #include "lc_view.h"
 #include "camera.h"
 #include "lc_previewwidget.h"
+#include "lc_colors.h"
 
 #ifdef Q_OS_WIN
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
@@ -1058,7 +1059,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				ActiveView->SetCamera(Options.CameraName);
 			else
 			{
-				ActiveView->SetProjection(Options.Orthographic);
+				ActiveView->SetCameraProjection(Options.Orthographic ? lcCameraProjection::Orthographic : lcCameraProjection::Perspective);
 
 				if (Options.SetFoV)
 					ActiveView->GetCamera()->m_fovy = Options.FoV;

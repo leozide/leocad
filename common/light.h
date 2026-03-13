@@ -3,12 +3,9 @@
 #include "object.h"
 #include "lc_math.h"
 
-#define LC_LIGHT_HIDDEN            0x0001
-#define LC_LIGHT_DISABLED          0x0002
-
 enum lcLightSection : quint32
 {
-	LC_LIGHT_SECTION_INVALID = ~0U,
+	LC_LIGHT_SECTION_INVALID = LC_OBJECT_SECTION_INVALID,
 	LC_LIGHT_SECTION_POSITION = 0,
 	LC_LIGHT_SECTION_TARGET
 };
@@ -31,9 +28,47 @@ enum class lcLightAreaShape
 	Count
 };
 
+struct lcLightHistoryState
+{
+	lcObjectId Id;
+	bool Hidden;
+	QString Name;
+	lcLightType LightType;
+	bool CastShadow;
+	lcObjectProperty<lcVector3> Position;
+	lcObjectProperty<lcMatrix33> Rotation;
+	lcObjectProperty<lcVector3> Color;
+	lcObjectProperty<float> BlenderPower;
+	lcObjectProperty<float> BlenderRadius;
+	lcObjectProperty<float> BlenderAngle;
+	lcObjectProperty<float> POVRayPower;
+	lcObjectProperty<float> POVRayFadeDistance;
+	lcObjectProperty<float> POVRayFadePower;
+	lcObjectProperty<float> SpotConeAngle;
+	lcObjectProperty<float> SpotPenumbraAngle;
+	lcObjectProperty<float> POVRaySpotTightness;
+	lcLightAreaShape AreaShape;
+	lcObjectProperty<float> AreaSizeX;
+	lcObjectProperty<float> AreaSizeY;
+	lcObjectProperty<int> POVRayAreaGridX;
+	lcObjectProperty<int> POVRayAreaGridY;
+
+	bool operator==(const lcLightHistoryState& Other) const
+	{
+		return Id == Other.Id && Hidden == Other.Hidden && Name == Other.Name && LightType == Other.LightType &&
+            CastShadow == Other.CastShadow && Position == Other.Position && Rotation == Other.Rotation && Color == Other.Color &&
+            BlenderPower == Other.BlenderPower && BlenderRadius == Other.BlenderRadius && BlenderAngle == Other.BlenderAngle &&
+            POVRayPower == Other.POVRayPower && POVRayFadeDistance == Other.POVRayFadeDistance && POVRayFadePower == Other.POVRayFadePower &&
+            SpotConeAngle == Other.SpotConeAngle && SpotPenumbraAngle == Other.SpotPenumbraAngle &&
+            POVRaySpotTightness == Other.POVRaySpotTightness && AreaShape == Other.AreaShape && AreaSizeX == Other.AreaSizeX &&
+            AreaSizeY == Other.AreaSizeY && POVRayAreaGridX == Other.POVRayAreaGridX && POVRayAreaGridY == Other.POVRayAreaGridY;
+	}
+};
+
 class lcLight : public lcObject
 {
 public:
+	lcLight();
 	lcLight(const lcVector3& Position, lcLightType LightType);
 	virtual ~lcLight() = default;
 
@@ -73,62 +108,6 @@ public:
 	}
 
 	bool SetLightType(lcLightType LightType);
-
-	bool IsSelected() const override
-	{
-		return mSelected;
-	}
-
-	bool IsSelected(quint32 Section) const override
-	{
-		Q_UNUSED(Section);
-
-		return mSelected;
-	}
-
-	void SetSelected(bool Selected) override
-	{
-		mSelected = Selected;
-
-		if (!Selected)
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
-	void SetSelected(quint32 Section, bool Selected) override
-	{
-		Q_UNUSED(Section);
-
-		mSelected = Selected;
-
-		if (!Selected)
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
-	bool IsFocused() const override
-	{
-		return mFocusedSection != LC_LIGHT_SECTION_INVALID;
-	}
-
-	bool IsFocused(quint32 Section) const override
-	{
-		return mFocusedSection == Section;
-	}
-
-	void SetFocused(quint32 Section, bool Focused) override
-	{
-		if (Focused)
-		{
-			mFocusedSection = Section;
-			mSelected = true;
-		}
-		else
-			mFocusedSection = LC_LIGHT_SECTION_INVALID;
-	}
-
-	quint32 GetFocusSection() const override
-	{
-		return mFocusedSection;
-	}
 
 	quint32 GetAllowedTransforms() const override
 	{
@@ -218,13 +197,15 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
+	lcLightHistoryState GetHistoryState(const lcModel* Model) const;
+	void SetHistoryState(const lcLightHistoryState& State, const lcModel* Model);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
 	bool IsVisible() const
 	{
-		return (mState & LC_LIGHT_HIDDEN) == 0;
+		return !mHidden;
 	}
 
 	bool SetColor(const lcVector3& Color, lcStep Step, bool AddKey);
@@ -385,9 +366,6 @@ protected:
 	lcObjectProperty<int> mPOVRayAreaGridX = lcObjectProperty<int>(2);
 	lcObjectProperty<int> mPOVRayAreaGridY = lcObjectProperty<int>(2);
 
-	quint32 mState = 0;
-	bool mSelected = false;
-	quint32 mFocusedSection = LC_LIGHT_SECTION_INVALID;
 	lcVector3 mTargetMovePosition = lcVector3(0.0f, 0.0f, 0.0f);
 	lcMatrix44 mWorldMatrix;
 

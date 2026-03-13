@@ -20,7 +20,7 @@
 class lcTexture
 {
 public:
-	lcTexture();
+	lcTexture(int Flags = 0);
 	~lcTexture();
 
 	lcTexture(const lcTexture&) = delete;
@@ -67,7 +67,7 @@ public:
 
 	bool NeedsUpload() const
 	{
-		return mTexture == 0 && !mImages.empty();
+		return !mLoading && mTexture == 0 && !mImages.empty();
 	}
 
 	int GetFlags() const
@@ -89,16 +89,17 @@ public:
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN];
 	QString mFileName;
-	GLuint mTexture;
+	GLuint mTexture = 0;
 
 protected:
 	bool Load();
 	bool LoadImages();
 
-	bool mTemporary;
-	QAtomicInt mRefCount;
+	bool mTemporary = false;
+	QAtomicInt mRefCount = 0;
 	std::vector<Image> mImages;
-	int mFlags;
+	int mFlags = 0;
+	bool mLoading = false;
 };
 
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);

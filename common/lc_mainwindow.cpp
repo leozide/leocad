@@ -24,6 +24,7 @@
 #include "lc_library.h"
 #include "lc_colors.h"
 #include "lc_previewwidget.h"
+#include "lc_modelaction.h"
 
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>
@@ -2232,7 +2233,7 @@ void lcMainWindow::ProjectionMenuAboutToShow()
 
 	if (ActiveView)
 	{
-		if (ActiveView->GetCamera()->IsOrtho())
+		if (ActiveView->GetCamera()->GetProjection() == lcCameraProjection::Orthographic)
 			mActions[LC_VIEW_PROJECTION_ORTHO]->setChecked(true);
 		else
 			mActions[LC_VIEW_PROJECTION_PERSPECTIVE]->setChecked(true);
@@ -2784,12 +2785,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_SELECT_NONE:
 		if (ActiveModel)
-			ActiveModel->ClearSelection(true);
+			ActiveModel->ClearSelection();
 		break;
 
 	case LC_EDIT_SELECT_INVERT:
 		if (ActiveModel)
-			ActiveModel->InvertSelection();
+			ActiveModel->InvertPieceSelection();
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:
@@ -2885,12 +2886,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_PROJECTION_PERSPECTIVE:
 		if (ActiveView)
-			ActiveView->SetProjection(false);
+			ActiveView->SetCameraProjection(lcCameraProjection::Perspective);
 		break;
 
 	case LC_VIEW_PROJECTION_ORTHO:
 		if (ActiveView)
-			ActiveView->SetProjection(true);
+			ActiveView->SetCameraProjection(lcCameraProjection::Orthographic);
 		break;
 
 	case LC_VIEW_TOGGLE_VIEW_SPHERE:
@@ -2936,7 +2937,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_REMOVE_KEY_FRAMES:
 		if (ActiveModel)
-			ActiveModel->RemoveSelectedPiecesKeyFrames();
+			ActiveModel->RemoveSelectedObjectsKeyFrames();
 		break;
 
 	case LC_PIECE_CONTROL_POINT_INSERT:
@@ -2966,62 +2967,62 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_MOVE_PLUSX:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true, true);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), true, false, true, true, lcModelActionEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(-lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, true);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), true, false, true, lcModelActionEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:

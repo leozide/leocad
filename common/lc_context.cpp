@@ -52,10 +52,6 @@ lcContext::lcContext()
 	mColorBlend = false;
 	mCullFace = false;
 	mLineWidth = 1.0f;
-#if LC_FIXED_FUNCTION
-	mMatrixMode = GL_MODELVIEW;
-	mTextureEnabled = false;
-#endif
 
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
@@ -417,24 +413,6 @@ void lcContext::SetDefaultState()
 		DisableVertexAttrib(lcProgramAttrib::Color);
 		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		glVertexPointer(3, GL_FLOAT, 0, nullptr);
-		glNormalPointer(GL_BYTE, 0, nullptr);
-		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
-		glColorPointer(4, GL_FLOAT, 0, nullptr);
-
-		mNormalEnabled = false;
-		mTexCoordEnabled = false;
-		mColorEnabled = false;
-#endif
-	}
 
 	mVertexBufferObject = 0;
 	mIndexBufferObject = 0;
@@ -466,17 +444,6 @@ void lcContext::SetDefaultState()
 	{
 		glUseProgram(0);
 		mMaterialType = lcMaterialType::Count;
-	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		glMatrixMode(GL_MODELVIEW);
-		mMatrixMode = GL_MODELVIEW;
-		glShadeModel(GL_FLAT);
-
-		glDisable(GL_TEXTURE_2D);
-		mTextureEnabled = false;
-#endif
 	}
 }
 
@@ -512,49 +479,6 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
 		mHighlightParamsDirty = true;
-	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		switch (MaterialType)
-		{
-		case lcMaterialType::UnlitTextureModulate:
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-			if (!mTextureEnabled)
-			{
-				glEnable(GL_TEXTURE_2D);
-				mTextureEnabled = true;
-			}
-			break;
-
-		case lcMaterialType::FakeLitTextureDecal:
-		case lcMaterialType::UnlitTextureDecal:
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-
-			if (!mTextureEnabled)
-			{
-				glEnable(GL_TEXTURE_2D);
-				mTextureEnabled = true;
-			}
-			break;
-
-		case lcMaterialType::UnlitColor:
-		case lcMaterialType::UnlitColorConditional:
-		case lcMaterialType::UnlitVertexColor:
-		case lcMaterialType::FakeLitColor:
-			if (mTextureEnabled)
-			{
-				glDisable(GL_TEXTURE_2D);
-				mTextureEnabled = false;
-			}
-			break;
-
-		case lcMaterialType::UnlitViewSphere:
-		case lcMaterialType::Count:
-			break;
-		}
-#endif
 	}
 }
 
@@ -981,24 +905,6 @@ void lcContext::ClearVertexBuffer()
 		DisableVertexAttrib(lcProgramAttrib::Color);
 		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		if (mNormalEnabled)
-			glDisableClientState(GL_NORMAL_ARRAY);
-
-		if (mTexCoordEnabled)
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-		if (mColorEnabled)
-			glDisableClientState(GL_COLOR_ARRAY);
-
-		glVertexPointer(3, GL_FLOAT, 0, nullptr);
-		glNormalPointer(GL_BYTE, 0, nullptr);
-		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
-		glColorPointer(4, GL_FLOAT, 0, nullptr);
-#endif
-	}
 }
 
 void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
@@ -1088,34 +994,6 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 		DisableVertexAttrib(lcProgramAttrib::TexCoord);
 		DisableVertexAttrib(lcProgramAttrib::Color);
 	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		if (mVertexBufferOffset != mVertexBufferPointer)
-		{
-			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
-			mVertexBufferOffset = VertexBufferPointer;
-		}
-
-		if (mNormalEnabled)
-		{
-			glDisableClientState(GL_NORMAL_ARRAY);
-			mNormalEnabled = false;
-		}
-
-		if (mTexCoordEnabled)
-		{
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			mTexCoordEnabled = false;
-		}
-
-		if (mColorEnabled)
-		{
-			glDisableClientState(GL_COLOR_ARRAY);
-			mColorEnabled = false;
-		}
-#endif
-	}
 }
 
 void lcContext::SetVertexFormatConditional(int BufferOffset)
@@ -1177,70 +1055,6 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 		}
 		else
 			DisableVertexAttrib(lcProgramAttrib::Color);
-	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		if (mVertexBufferOffset != VertexBufferPointer)
-		{
-			glVertexPointer(PositionSize, GL_FLOAT, VertexSize, VertexBufferPointer);
-			mVertexBufferOffset = VertexBufferPointer;
-		}
-
-		int Offset = PositionSize * sizeof(float);
-
-		if (NormalSize && EnableNormals)
-		{
-			glNormalPointer(GL_BYTE, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mNormalEnabled)
-			{
-				glEnableClientState(GL_NORMAL_ARRAY);
-				mNormalEnabled = true;
-			}
-		}
-		else if (mNormalEnabled)
-		{
-			glDisableClientState(GL_NORMAL_ARRAY);
-			mNormalEnabled = false;
-		}
-
-		Offset += NormalSize * sizeof(quint32);
-
-		if (TexCoordSize)
-		{
-			glTexCoordPointer(TexCoordSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mTexCoordEnabled)
-			{
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				mTexCoordEnabled = true;
-			}
-
-			Offset += 2 * sizeof(float);
-		}
-		else if (mTexCoordEnabled)
-		{
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			mTexCoordEnabled = false;
-		}
-
-		if (ColorSize)
-		{
-			glColorPointer(ColorSize, GL_FLOAT, VertexSize, VertexBufferPointer + Offset);
-
-			if (!mColorEnabled)
-			{
-				glEnableClientState(GL_COLOR_ARRAY);
-				mColorEnabled = true;
-			}
-		}
-		else if (mColorEnabled)
-		{
-			glDisableClientState(GL_COLOR_ARRAY);
-			mColorEnabled = false;
-		}
-#endif
 	}
 }
 
@@ -1379,37 +1193,6 @@ void lcContext::FlushState()
 			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0].GetFloats());
 			mHighlightParamsDirty = false;
 		}
-	}
-	else
-	{
-#if LC_FIXED_FUNCTION
-		glColor4fv(mColor.GetFloats());
-
-		if (mWorldMatrixDirty || mViewMatrixDirty)
-		{
-			if (mMatrixMode != GL_MODELVIEW)
-			{
-				glMatrixMode(GL_MODELVIEW);
-				mMatrixMode = GL_MODELVIEW;
-			}
-
-			glLoadMatrixf(lcMul(mWorldMatrix, mViewMatrix).GetFloats());
-			mWorldMatrixDirty = false;
-			mViewMatrixDirty = false;
-		}
-
-		if (mProjectionMatrixDirty)
-		{
-			if (mMatrixMode != GL_PROJECTION)
-			{
-				glMatrixMode(GL_PROJECTION);
-				mMatrixMode = GL_PROJECTION;
-			}
-
-			glLoadMatrixf(mProjectionMatrix.GetFloats());
-			mProjectionMatrixDirty = false;
-		}
-#endif
 	}
 }
 

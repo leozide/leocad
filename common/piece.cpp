@@ -15,25 +15,29 @@
 #include "lc_qutils.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
+#include "lc_string.h"
+#include "lc_model.h"
 
 constexpr float LC_PIECE_CONTROL_POINT_SIZE = 10.0f;
+
+lcPiece::lcPiece()
+    : lcObject(lcObjectType::Piece)
+{
+}
 
 lcPiece::lcPiece(PieceInfo* Info)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Info, QString(), true);
+	SetPieceInfo(Info, QString(), true, true);
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
-	mStepShow = 1;
-	mStepHide = LC_STEP_MAX;
-	mGroup = nullptr;
 	mPivotMatrix = lcMatrix44Identity();
 }
 
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Other.mPieceInfo, Other.mID, true);
+	SetPieceInfo(Other.mPieceInfo, Other.mID, true, true);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
 	mColorIndex = Other.mColorIndex;
@@ -63,7 +67,7 @@ lcPiece::~lcPiece()
 	delete mMesh;
 }
 
-void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
+void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
@@ -78,16 +82,20 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait)
 	else
 		mID.clear();
 
-	mControlPoints.clear();
-	delete mMesh;
-	mMesh = nullptr;
-
-	const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
-
-	if (SynthInfo)
+	if (UpdateSynthInfo)
 	{
-		SynthInfo->GetDefaultControlPoints(mControlPoints);
-		UpdateMesh();
+		mControlPoints.clear();
+
+		delete mMesh;
+		mMesh = nullptr;
+
+		const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
+
+		if (SynthInfo)
+		{
+			SynthInfo->GetDefaultControlPoints(mControlPoints);
+			UpdateMesh();
+		}
 	}
 }
 
@@ -98,7 +106,7 @@ bool lcPiece::SetPieceId(PieceInfo* Info)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	Library->ReleasePieceInfo(mPieceInfo);
-	SetPieceInfo(Info, QString(), true);
+	SetPieceInfo(Info, QString(), true, true);
 
 	return true;
 }
@@ -310,10 +318,10 @@ bool lcPiece::FileLoad(lcFile& file)
 	}
 	else
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
-	strcat(name, ".dat");
+	lcstrcat(name, ".dat");
 
 	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
-	SetPieceInfo(pInfo, QString(), true);
+	SetPieceInfo(pInfo, QString(), true, true);
 
 	// 11 (0.77)
 	if (version < 11)
@@ -679,7 +687,7 @@ QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -739,7 +747,7 @@ bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -792,7 +800,7 @@ bool lcPiece::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -851,7 +859,7 @@ bool lcPiece::SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFr
 	case lcObjectPropertyId::PieceStepShow:
 	case lcObjectPropertyId::PieceStepHide:
 	case lcObjectPropertyId::CameraName:
-	case lcObjectPropertyId::CameraType:
+	case lcObjectPropertyId::CameraProjection:
 	case lcObjectPropertyId::CameraFOV:
 	case lcObjectPropertyId::CameraNear:
 	case lcObjectPropertyId::CameraFar:
@@ -905,6 +913,70 @@ void lcPiece::RemoveKeyFrames()
 {
 	mPosition.RemoveAllKeys();
 	mRotation.RemoveAllKeys();
+}
+
+lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
+{
+	lcPieceHistoryState State;
+
+	State.Id = mId;
+	State.Hidden = mHidden;
+	State.FileLine = mFileLine;
+	State.PieceId = mID;
+	State.GroupIndex = ~0U;
+	State.ColorIndex = mColorIndex;
+	State.ColorCode = mColorCode;
+	State.StepShow = mStepShow;
+	State.StepHide = mStepHide;
+	State.PivotMatrix = mPivotMatrix;
+	State.PivotPointValid = mPivotPointValid;
+	State.ControlPoints = mControlPoints;
+	State.Position = mPosition;
+	State.Rotation = mRotation;
+
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+
+	if (mGroup)
+	{
+		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
+		{
+			if (mGroup == Groups[GroupIndex].get())
+			{
+				State.GroupIndex = static_cast<uint32_t>(GroupIndex);
+				break;
+			}
+		}
+	}
+
+	return State;
+}
+
+void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model)
+{
+	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
+
+	mId = State.Id;
+	mHidden = State.Hidden;
+	mFileLine = State.FileLine;
+	mID = State.PieceId;
+	mGroup = (State.GroupIndex < Groups.size()) ? Groups[State.GroupIndex].get() : nullptr;
+	mColorIndex = State.ColorIndex;
+	mColorCode = State.ColorCode;
+	mStepShow = State.StepShow;
+	mStepHide = State.StepHide;
+	mPivotMatrix = State.PivotMatrix;
+	mPivotPointValid = State.PivotPointValid;
+	mControlPoints = State.ControlPoints;
+	mPosition = State.Position;
+	mRotation = State.Rotation;
+
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
+
+	SetPieceInfo(Info, mID, true, false);
+
+	UpdateMesh();
+
+	//	std::vector<bool> mTrainTrackConnections;
 }
 
 void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const

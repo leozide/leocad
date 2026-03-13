@@ -1,5 +1,7 @@
 #pragma once
 
+class lcElidableToolButton;
+
 class lcFindReplaceWidget : public QWidget
 {
 	Q_OBJECT
@@ -12,9 +14,9 @@ protected slots:
 	void FindTextEdited(const QString& Text);
 	void FindActivated(int Index);
 	void ReplaceColorIndexChanged(int ColorIndex);
-	void ReplaceActivated(int Index);
+	void ReplaceButtonClicked();
 
 protected:
 	QComboBox* mFindPartComboBox = nullptr;
-	QComboBox* mReplacePartComboBox = nullptr;
+	lcElidableToolButton* mReplacePartButton = nullptr;
 };

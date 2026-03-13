@@ -12,6 +12,7 @@
 #include "lc_category.h"
 #include "lc_traintrack.h"
 #include "lc_filter.h"
+#include "lc_colors.h"
 
 Q_DECLARE_METATYPE(QList<int>)
 
@@ -245,10 +246,10 @@ void lcPartSelectionListModel::SetCustomParts(const std::vector<std::pair<PieceI
 	ReleaseThumbnails();
 	mParts.clear();
 
-	for (auto [Info, Description] : Parts)
+	for (const auto& [Info, Description] : Parts)
 	{
 		lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
-		
+
 		Entry.Info = Info;
 		Entry.Description = Description;
 
@@ -298,7 +299,7 @@ void lcPartSelectionListModel::SetFilter(const QString& FilterString)
 
 			Visible = (mPartDescriptionFilter && Description.contains(FilterRx)) || (mFileNameFilter && QString(Info->mFileName).contains(FilterRx));
 		}
-			
+
 		mListView->setRowHidden((int)PartIdx, !Visible);
 	}
 }
@@ -398,7 +399,7 @@ void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 
 	int ColorIndex = mParts[PartIndex].ColorIndex == -1 ? mColorIndex : mParts[PartIndex].ColorIndex;
 
-	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize);
+	auto [ThumbnailId, Thumbnail] = lcGetPiecesLibrary()->GetThumbnailManager()->RequestThumbnail(Info, ColorIndex, mIconSize, mDeviceScale);
 
 	mParts[PartIndex].ThumbnailId = ThumbnailId;
 
@@ -485,12 +486,13 @@ void lcPartSelectionListModel::SetPartDescriptionFilter(bool Option)
 	SetFilter(mFilterString);
 }
 
-void lcPartSelectionListModel::SetIconSize(int Size)
+void lcPartSelectionListModel::SetIconSize(int Size, float DeviceScale)
 {
-	if (Size == mIconSize)
+	if (Size == mIconSize && DeviceScale == mDeviceScale)
 		return;
 
 	mIconSize = Size;
+	mDeviceScale = DeviceScale;
 
 	beginResetModel();
 
@@ -660,7 +662,7 @@ void lcPartSelectionListView::SetCurrentPart(PieceInfo* Info)
 	{
 		setCurrentIndex(Index);
 		scrollTo(Index, QAbstractItemView::EnsureVisible);
-	}	
+	}
 }
 
 void lcPartSelectionListView::SetNoIcons()
@@ -769,7 +771,14 @@ void lcPartSelectionListView::SetIconSize(int Size)
 {
 	setIconSize(QSize(Size, Size));
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
-	mListModel->SetIconSize(Size);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+	float DeviceScale = devicePixelRatioF();
+#else
+	float DeviceScale = devicePixelRatio();
+#endif
+
+	mListModel->SetIconSize(Size, DeviceScale);
 	UpdateViewMode();
 
 	int Width = Size + 2 * frameWidth() + 6;
@@ -977,7 +986,25 @@ void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)
 
 void lcPartSelectionWidget::SetCategory(lcPartCategoryType Type, int Index)
 {
-	mPartsWidget->SetCategory(Type, Index);
+	for (int Row = 0; Row < mCategoriesWidget->topLevelItemCount(); Row++)
+	{
+		QTreeWidgetItem* Item = mCategoriesWidget->topLevelItem(Row);
+		lcPartCategoryType ItemType = static_cast<lcPartCategoryType>(Item->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt());
+
+		if (ItemType != Type)
+			continue;
+
+		if (Type == lcPartCategoryType::Palette || Type == lcPartCategoryType::Category)
+		{
+			int ItemIndex = Item->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
+
+			if (ItemIndex != Index)
+				continue;
+		}
+
+		mCategoriesWidget->setCurrentItem(Item);
+		break;
+	}
 }
 
 void lcPartSelectionWidget::SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex)
@@ -1269,7 +1296,7 @@ void lcPartSelectionWidget::LoadPartPalettes()
 		lcPartPalette Palette;
 		Palette.Name = ElementIt.key();
 
-		QJsonArray Parts = ElementIt.value().toArray();
+		const QJsonArray Parts = ElementIt.value().toArray();
 
 		for (const QJsonValue& Part : Parts)
 			Palette.Parts.emplace_back(Part.toString().toStdString());

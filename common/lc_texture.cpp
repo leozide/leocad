@@ -4,6 +4,7 @@
 #include "lc_library.h"
 #include "image.h"
 #include "lc_glextensions.h"
+#include "lc_string.h"
 
 lcTexture* gGridTexture;
 
@@ -18,7 +19,7 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 	}
 	else
 	{
-		strcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
+		lcstrcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
 		Texture->SetTemporary(true);
 	}
 
@@ -31,11 +32,9 @@ void lcReleaseTexture(lcTexture* Texture)
 		delete Texture;
 }
 
-lcTexture::lcTexture()
+lcTexture::lcTexture(int Flags)
+    : mFlags(Flags)
 {
-	mTexture = 0;
-	mRefCount = 0;
-	mTemporary = false;
 }
 
 lcTexture::~lcTexture()
@@ -176,7 +175,11 @@ bool lcTexture::Load(const QString& FileName, int Flags)
 	if (!Image.FileLoad(FileName))
 		return false;
 
+	mLoading = true;
+
 	SetImage(std::move(Image), Flags);
+
+	mLoading = false;
 
 	return true;
 }
@@ -188,7 +191,11 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 	if (!Image.FileLoad(File))
 		return false;
 
+	mLoading = true;
+
 	SetImage(std::move(Image), Flags);
+
+	mLoading = false;
 
 	return true;
 }

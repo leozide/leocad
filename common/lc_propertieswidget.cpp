@@ -12,6 +12,7 @@
 #include "lc_colorpicker.h"
 #include "lc_qutils.h"
 #include "lc_partselectionpopup.h"
+#include "lc_modelaction.h"
 
 lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	: QWidget(Parent)
@@ -203,7 +204,7 @@ void lcPropertiesWidget::BoolChanged()
 		return;
 
 	const bool Value = Widget->isChecked();
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateBool(lcObjectPropertyId PropertyId)
@@ -280,16 +281,15 @@ void lcPropertiesWidget::FloatEditingCanceled()
 	Model->EndPropertyEdit(PropertyId, false);
 }
 
-void lcPropertiesWidget::FloatChanged(const QString& TextValue)
+void lcPropertiesWidget::FloatChanged(double Value)
 {
 	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
 	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
-	float Value = lcParseValueLocalized(TextValue);
 
-	ChangeFloatValue(PropertyId, Value, true);
+	ChangeFloatValue(PropertyId, Value);
 }
 
-void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float Value, bool Dragging)
+void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float Value)
 {
 	if (PropertyId == lcObjectPropertyId::Count)
 		return;
@@ -321,13 +321,15 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 	}
 	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
 	{
 		lcVector3 InitialRotation(0.0f, 0.0f, 0.0f);
 
-		if (Piece)
+		if (mLastRotation)
+			InitialRotation = mLastRotation.value();
+		else if (Piece)
 			InitialRotation = lcMatrix44ToEulerAngles(Piece->mModelWorld) * LC_RTOD;
 		else if (Light)
 			InitialRotation = lcMatrix44ToEulerAngles(Light->GetWorldMatrix()) * LC_RTOD;
@@ -341,14 +343,11 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
 			Rotation[2] = Value;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, !Dragging);
-	}
-	else if (Piece || Light)
-	{
-		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, !Dragging);
-	}
+		Model->RotateSelectedObjects(Rotation - InitialRotation, true, false, true, lcModelActionEditMerge::PropertiesRotate);
 
-	if (PropertyId == lcObjectPropertyId::CameraPositionX || PropertyId == lcObjectPropertyId::CameraPositionY || PropertyId == lcObjectPropertyId::CameraPositionZ)
+		mLastRotation = Rotation;
+	}
+	else if (PropertyId == lcObjectPropertyId::CameraPositionX || PropertyId == lcObjectPropertyId::CameraPositionY || PropertyId == lcObjectPropertyId::CameraPositionZ)
 	{
 		quint32 FocusSection = LC_CAMERA_SECTION_INVALID;
 		lcVector3 Start;
@@ -377,7 +376,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -414,7 +413,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -451,7 +450,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, false, false, true, !Dragging, true);
+		Model->MoveSelectedObjects(Distance, false, false, true, true, lcModelActionEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -459,20 +458,9 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 			Camera->SetFocused(FocusSection, true);
 		}
 	}
-	else if (Camera)
+	else
 	{
-		if (PropertyId == lcObjectPropertyId::CameraFOV)
-		{
-			Model->SetCameraFOV(Camera, Value, !Dragging);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraNear)
-		{
-			Model->SetCameraZNear(Camera, Value, !Dragging);
-		}
-		else if (PropertyId == lcObjectPropertyId::CameraFar)
-		{
-			Model->SetCameraZFar(Camera, Value, !Dragging);
-		}
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 	}
 
 	mDisableUpdates = false;
@@ -481,7 +469,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 {
 	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(mPropertyWidgets[static_cast<int>(PropertyId)].Editor);
-		
+
 	if (Widget)
 	{
 		QSignalBlocker Blocker(Widget);
@@ -493,7 +481,7 @@ void lcPropertiesWidget::UpdateFloat(lcObjectPropertyId PropertyId, float Value)
 		case lcObjectPropertyId::PieceStepShow:
 		case lcObjectPropertyId::PieceStepHide:
 		case lcObjectPropertyId::CameraName:
-		case lcObjectPropertyId::CameraType:
+		case lcObjectPropertyId::CameraProjection:
 			break;
 
 		case lcObjectPropertyId::CameraFOV:
@@ -580,9 +568,9 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 	connect(Widget, &lcDoubleSpinBox::EditingFinished, this, &lcPropertiesWidget::FloatEditingFinished);
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-	connect(Widget, QOverload<const QString&>::of(&lcDoubleSpinBox::valueChanged), this, &lcPropertiesWidget::FloatChanged);
+	connect(Widget, QOverload<double>::of(&lcDoubleSpinBox::valueChanged), this, &lcPropertiesWidget::FloatChanged);
 #else
-	connect(Widget, &lcDoubleSpinBox::textChanged, this, &lcPropertiesWidget::FloatChanged);
+	connect(Widget, &lcDoubleSpinBox::valueChanged, this, &lcPropertiesWidget::FloatChanged);
 #endif
 
 	mLayout->addWidget(Widget, mLayoutRow, 2);
@@ -612,7 +600,7 @@ void lcPropertiesWidget::IntegerChanged()
 		return;
 
 	const int Value = LineEdit->text().toInt();
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId)
@@ -745,7 +733,7 @@ void lcPropertiesWidget::StringChanged()
 		return;
 
 	QString Value = LineEdit->text();
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateString(lcObjectPropertyId PropertyId)
@@ -809,7 +797,7 @@ void lcPropertiesWidget::StringListChanged(int Value)
 	if (!Model)
 		return;
 
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value, true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
 void lcPropertiesWidget::UpdateStringList(lcObjectPropertyId PropertyId)
@@ -911,7 +899,7 @@ void lcPropertiesWidget::ColorChanged(QColor Color)
 		return;
 
 	const lcVector3 FloatColor = lcVector3FromQColor(Color);
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(FloatColor), true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<lcVector3>(FloatColor));
 }
 
 void lcPropertiesWidget::UpdateColor(lcObjectPropertyId PropertyId)
@@ -977,7 +965,7 @@ void lcPropertiesWidget::PieceColorChanged(int ColorIndex)
 	if (!Model)
 		return;
 
-	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, ColorIndex, true);
+	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, ColorIndex);
 }
 
 void lcPropertiesWidget::PieceColorButtonClicked()
@@ -1095,7 +1083,7 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 	PieceInfo* Info = Partial ? nullptr : static_cast<PieceInfo*>(Value.value<void*>());
 
 	std::tie(Value, Partial) = GetUpdateValue(lcObjectPropertyId::PieceColor);
-	
+
 	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
 	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Info, std::vector<std::pair<PieceInfo*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
@@ -1108,7 +1096,7 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 		if (!Model || !Info)
 			return;
 
-		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info), true);
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
 	}
 }
 
@@ -1159,13 +1147,13 @@ void lcPropertiesWidget::CreateWidgets()
 	AddCategory(CategoryIndex::Camera, tr("Camera"));
 
 	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
-	AddStringListProperty(lcObjectPropertyId::CameraType, tr("Type"), tr("Camera type"), false, lcCamera::GetCameraTypeStrings());
+	AddStringListProperty(lcObjectPropertyId::CameraProjection, tr("Projection"), tr("Camera projection"), false, lcCamera::GetCameraProjectionStrings());
 
 	AddSpacing();
 
 	AddFloatProperty(lcObjectPropertyId::CameraFOV, tr("FOV"), tr("Field of view in degrees"), false, 0.1f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.001f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.001f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraNear, tr("Near"), tr("Near clipping distance"), false, 0.1f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::CameraFar, tr("Far"), tr("Far clipping distance"), false, 0.1f, FLT_MAX);
 
 	AddSpacing();
 
@@ -1324,8 +1312,10 @@ void lcPropertiesWidget::SetPiece(const std::vector<lcObject*>& Selection, lcObj
 	lcMatrix33 RelativeRotation;
 	lcModel* Model = gMainWindow->GetActiveModel();
 
-	if (Model)
-		Model->GetMoveRotateTransform(Position, RelativeRotation);
+	if (!Model)
+		return;
+
+	Model->GetMoveRotateTransform(Position, RelativeRotation);
 
 	UpdateFloat(lcObjectPropertyId::ObjectPositionX, Position[0]);
 	UpdateFloat(lcObjectPropertyId::ObjectPositionY, Position[1]);
@@ -1412,7 +1402,7 @@ void lcPropertiesWidget::SetCamera(const std::vector<lcObject*>& Selection, lcOb
 	}
 
 	UpdateString(lcObjectPropertyId::CameraName);
-	UpdateStringList(lcObjectPropertyId::CameraType);
+	UpdateStringList(lcObjectPropertyId::CameraProjection);
 
 	UpdateFloat(lcObjectPropertyId::CameraFOV, FoV);
 	UpdateFloat(lcObjectPropertyId::CameraNear, ZNear);
@@ -1573,6 +1563,7 @@ void lcPropertiesWidget::Update(const std::vector<lcObject*>& Selection, lcObjec
 	if (mDisableUpdates)
 		return;
 
+	mLastRotation.reset();
 	mFocusObject = nullptr;
 	mSelection.clear();
 

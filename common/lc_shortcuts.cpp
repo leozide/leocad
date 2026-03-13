@@ -107,7 +107,7 @@ bool lcKeyboardShortcuts::Load(QTextStream& Stream)
 
 	for (QString Line = Stream.readLine(); !Line.isNull(); Line = Stream.readLine())
 	{
-		int Equals = Line.indexOf('=');
+		qsizetype Equals = Line.indexOf('=');
 
 		if (Equals == -1)
 			continue;
@@ -174,7 +174,7 @@ bool lcMouseShortcuts::Save(const QString& FileName)
 
 	QTextStream Stream(&File);
 
-	for (const QString& Shortcut : Shortcuts)
+	for (const QString& Shortcut : std::as_const(Shortcuts))
 		Stream << Shortcut << QLatin1String("\n");
 
 	Stream.flush();
@@ -231,7 +231,7 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 
 	for (const QString& FullShortcut : FullShortcuts)
 	{
-		int Equals = FullShortcut.indexOf('=');
+		qsizetype Equals = FullShortcut.indexOf('=');
 
 		if (Equals == -1)
 			continue;
@@ -246,7 +246,7 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 		if (ToolIdx == static_cast<int>(lcTool::Count))
 			continue;
 
-		QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
+		const QStringList Shortcuts = FullShortcut.mid(Equals + 1).split(',');
 		bool AddedShortcut = false;
 
 		for (const QString& Shortcut : Shortcuts)

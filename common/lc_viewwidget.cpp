@@ -63,7 +63,7 @@ void lcViewWidget::SetView(lcView* View)
 
 void lcViewWidget::UpdateMousePosition()
 {
-	QPoint MousePosition = mapFromGlobal( QCursor::pos() );
+	QPoint MousePosition = mapFromGlobal(QCursor::pos());
 	float DeviceScale = GetDeviceScale();
 
 	mView->SetMousePosition(MousePosition.x() * DeviceScale, mView->GetHeight() - MousePosition.y() * DeviceScale - 1);
@@ -77,11 +77,8 @@ void lcViewWidget::initializeGL()
 
 void lcViewWidget::resizeGL(int Width, int Height)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
-	const float Scale = devicePixelRatioF();
-#else
-	const int Scale = devicePixelRatio();
-#endif
+	const float Scale = GetDeviceScale();
+
 	mView->SetSize(Width * Scale, Height * Scale);
 }
 

@@ -464,6 +464,11 @@ inline bool operator==(const lcMatrix33& a, const lcMatrix33& b)
 	return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2];
 }
 
+inline bool operator==(const lcMatrix44& a, const lcMatrix44& b)
+{
+	return a.r[0] == b.r[0] && a.r[1] == b.r[1] && a.r[2] == b.r[2] && a.r[3] == b.r[3];
+}
+
 #ifndef QT_NO_DEBUG
 
 inline QDebug operator<<(QDebug Debug, const lcVector2& v)
@@ -521,9 +526,33 @@ inline QDataStream& operator<<(QDataStream& Stream, const lcVector4& v)
 	return Stream;
 }
 
-inline QDataStream& operator >> (QDataStream& Stream, lcVector4& v)
+inline QDataStream& operator>>(QDataStream& Stream, lcVector4& v)
 {
 	Stream >> v.x >> v.y >> v.z >> v.w;
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcMatrix33& m)
+{
+	Stream << m[0] << m[1] << m[2];
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcMatrix33& m)
+{
+	Stream >> m[0] >> m[1] >> m[2];
+	return Stream;
+}
+
+inline QDataStream& operator<<(QDataStream& Stream, const lcMatrix44& m)
+{
+	Stream << m[0] << m[1] << m[2] << m[3];
+	return Stream;
+}
+
+inline QDataStream& operator>>(QDataStream& Stream, lcMatrix44& m)
+{
+	Stream >> m[0] >> m[1] >> m[2] >> m[3];
 	return Stream;
 }
 

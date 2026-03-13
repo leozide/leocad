@@ -256,9 +256,15 @@ bool lcMouseShortcuts::Load(const QStringList& FullShortcuts)
 			if (KeySequence.isEmpty())
 				continue;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+			QKeyCombination ShortcutKey = KeySequence[0];
+			Qt::KeyboardModifiers Modifiers = ShortcutKey.keyboardModifiers();
+			Qt::MouseButton Button = (Qt::MouseButton)(1 << (ShortcutKey.key() - Qt::Key_0 - 1));
+#else
 			int ShortcutKey = KeySequence[0];
 			Qt::KeyboardModifiers Modifiers = (Qt::KeyboardModifier)(ShortcutKey & Qt::KeyboardModifierMask);
 			Qt::MouseButton Button = (Qt::MouseButton)(1 << ((ShortcutKey & ~Qt::KeyboardModifierMask) - Qt::Key_0 - 1));
+#endif
 
 			if (!AddedShortcut)
 			{

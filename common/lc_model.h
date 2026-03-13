@@ -250,7 +250,6 @@ public:
 	void InlineSelectedModels();
 
 	lcGroup* AddGroup(const QString& Prefix, lcGroup* Parent);
-	void AddGroup(std::unique_ptr<lcGroup> Group, size_t GroupIndex);
 	lcGroup* GetGroup(const QString& Name, bool CreateIfMissing);
 	void RemoveGroup(lcGroup* Group);
 	void GroupSelection();

@@ -2175,11 +2175,6 @@ lcGroup* lcModel::AddGroup(const QString& Prefix, lcGroup* Parent)
 	return Group;
 }
 
-void lcModel::AddGroup(std::unique_ptr<lcGroup> Group, size_t GroupIndex)
-{
-	mGroups.insert(mGroups.begin() + GroupIndex, std::move(Group));
-}
-
 lcGroup* lcModel::GetGroup(const QString& Name, bool CreateIfMissing)
 {
 	for (const std::unique_ptr<lcGroup>& Group : mGroups)

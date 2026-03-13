@@ -1,39 +1,39 @@
 #include "lc_global.h"
-#include "lc_modelaction.h"
+#include "lc_modelhistory.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
 #include "group.h"
 
-void lcModelActionSelection::SaveStartState(const lcModel* Model)
+void lcModelHistorySelect::SaveStartState(const lcModel* Model)
 {
 	SaveState(mStartState, Model);
 }
 
-void lcModelActionSelection::SaveEndState(const lcModel* Model)
+void lcModelHistorySelect::SaveEndState(const lcModel* Model)
 {
 	SaveState(mEndState, Model);
 }
 
-void lcModelActionSelection::LoadStartState(lcModel* Model) const
+void lcModelHistorySelect::LoadStartState(lcModel* Model) const
 {
 	LoadState(mStartState, Model);
 }
 
-void lcModelActionSelection::LoadEndState(lcModel* Model) const
+void lcModelHistorySelect::LoadEndState(lcModel* Model) const
 {
 	LoadState(mEndState, Model);
 }
 
-bool lcModelActionSelection::StateChanged() const
+bool lcModelHistorySelect::StateChanged() const
 {
 	return mStartState != mEndState;
 }
 
-void lcModelActionSelection::SaveState(lcModelActionSelectionState& State, const lcModel* Model)
+void lcModelHistorySelect::SaveState(lcModelHistorySelectState& State, const lcModel* Model)
 {
-	State = lcModelActionSelectionState();
+	State = lcModelHistorySelectState();
 
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
 	State.PieceSelection.resize(Pieces.size(), false);
@@ -96,7 +96,7 @@ void lcModelActionSelection::SaveState(lcModelActionSelectionState& State, const
 	}
 }
 
-void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State, lcModel* Model)
+void lcModelHistorySelect::LoadState(const lcModelHistorySelectState& State, lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
@@ -142,21 +142,21 @@ void lcModelActionSelection::LoadState(const lcModelActionSelectionState& State,
 	}
 }
 
-bool operator!=(const lcModelHistoryState& a, const lcModelHistoryState& b)
+bool operator!=(const lcModelHistoryEditState& a, const lcModelHistoryEditState& b)
 {
 	return a.Groups != b.Groups || a.Pieces != b.Pieces || a.Cameras != b.Cameras || a.Lights != b.Lights;
 }
 
-lcModelActionObjectEdit::lcModelActionObjectEdit(lcModelActionEditMerge ModelActionEditMerge)
-	: mMerge(ModelActionEditMerge)
+lcModelHistoryEdit::lcModelHistoryEdit(lcModelHistoryEditMerge ModelHistoryEditMerge)
+	: mMerge(ModelHistoryEditMerge)
 {
 }
 
-lcModelActionObjectEdit::~lcModelActionObjectEdit()
+lcModelHistoryEdit::~lcModelHistoryEdit()
 {
 }
 
-void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcModel* Model)
+void lcModelHistoryEdit::SaveState(lcModelHistoryEditState& State, const lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
 
@@ -179,82 +179,82 @@ void lcModelActionObjectEdit::SaveState(lcModelHistoryState& State, const lcMode
 		State.Lights.emplace_back(Light->GetHistoryState(Model));
 }
 
-void lcModelActionObjectEdit::LoadState(const lcModelHistoryState& State, lcModel* Model)
+void lcModelHistoryEdit::LoadState(const lcModelHistoryEditState& State, lcModel* Model)
 {
-	Model->LoadHistoryState(State);
+	Model->LoadEditHistoryState(State);
 }
 
-void lcModelActionObjectEdit::SaveStartState(const lcModel* Model)
-{
-	SaveState(mStartState, Model);
-}
-
-void lcModelActionObjectEdit::SaveEndState(const lcModel* Model)
-{
-	SaveState(mEndState, Model);
-}
-
-void lcModelActionObjectEdit::LoadStartState(lcModel* Model) const
-{
-	LoadState(mStartState, Model);
-}
-
-void lcModelActionObjectEdit::LoadEndState(lcModel* Model) const
-{
-	LoadState(mEndState, Model);
-}
-
-bool lcModelActionObjectEdit::StateChanged() const
-{
-	return mStartState != mEndState;
-}
-
-bool lcModelActionObjectEdit::CanMergeWith(const lcModelAction* Other) const
-{
-	const lcModelActionObjectEdit* OtherModelActionEdit = dynamic_cast<const lcModelActionObjectEdit*>(Other);
-
-	return OtherModelActionEdit && mMerge != lcModelActionEditMerge::None && mMerge == OtherModelActionEdit->mMerge;
-}
-
-void lcModelActionObjectEdit::MergeWith(lcModelAction* Other)
-{
-	lcModelActionObjectEdit* OtherModelActionEdit = dynamic_cast<lcModelActionObjectEdit*>(Other);
-
-	if (OtherModelActionEdit)
-		mEndState = std::move(OtherModelActionEdit->mEndState);
-}
-
-void lcModelActionProperties::SaveStartState(const lcModel* Model)
+void lcModelHistoryEdit::SaveStartState(const lcModel* Model)
 {
 	SaveState(mStartState, Model);
 }
 
-void lcModelActionProperties::SaveEndState(const lcModel* Model)
+void lcModelHistoryEdit::SaveEndState(const lcModel* Model)
 {
 	SaveState(mEndState, Model);
 }
 
-void lcModelActionProperties::LoadStartState(lcModel* Model) const
+void lcModelHistoryEdit::LoadStartState(lcModel* Model) const
 {
 	LoadState(mStartState, Model);
 }
 
-void lcModelActionProperties::LoadEndState(lcModel* Model) const
+void lcModelHistoryEdit::LoadEndState(lcModel* Model) const
 {
 	LoadState(mEndState, Model);
 }
 
-bool lcModelActionProperties::StateChanged() const
+bool lcModelHistoryEdit::StateChanged() const
 {
 	return mStartState != mEndState;
 }
 
-void lcModelActionProperties::SaveState(lcModelProperties& State, const lcModel* Model)
+bool lcModelHistoryEdit::CanMergeWith(const lcModelHistory* Other) const
+{
+	const lcModelHistoryEdit* OtherModelHistoryEdit = dynamic_cast<const lcModelHistoryEdit*>(Other);
+
+	return OtherModelHistoryEdit && mMerge != lcModelHistoryEditMerge::None && mMerge == OtherModelHistoryEdit->mMerge;
+}
+
+void lcModelHistoryEdit::MergeWith(lcModelHistory* Other)
+{
+	lcModelHistoryEdit* OtherModelHistoryEdit = dynamic_cast<lcModelHistoryEdit*>(Other);
+
+	if (OtherModelHistoryEdit)
+		mEndState = std::move(OtherModelHistoryEdit->mEndState);
+}
+
+void lcModelHistoryProperties::SaveStartState(const lcModel* Model)
+{
+	SaveState(mStartState, Model);
+}
+
+void lcModelHistoryProperties::SaveEndState(const lcModel* Model)
+{
+	SaveState(mEndState, Model);
+}
+
+void lcModelHistoryProperties::LoadStartState(lcModel* Model) const
+{
+	LoadState(mStartState, Model);
+}
+
+void lcModelHistoryProperties::LoadEndState(lcModel* Model) const
+{
+	LoadState(mEndState, Model);
+}
+
+bool lcModelHistoryProperties::StateChanged() const
+{
+	return mStartState != mEndState;
+}
+
+void lcModelHistoryProperties::SaveState(lcModelProperties& State, const lcModel* Model)
 {
 	State = Model->GetProperties();
 }
 
-void lcModelActionProperties::LoadState(const lcModelProperties& State, lcModel* Model)
+void lcModelHistoryProperties::LoadState(const lcModelProperties& State, lcModel* Model)
 {
-	Model->SetModelProperties(State);
+	Model->LoadModelPropertiesState(State);
 }

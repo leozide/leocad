@@ -110,7 +110,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		mIsModel = Info->IsModel();
 		mDescription = Info->m_strDescription;
 
-		mModel->SelectAllPieces();
+		mModel->SelectAllPiecesAction();
 		mModel->DeleteSelectedObjects();
 
 		Library->LoadPieceInfo(Info, false, true);

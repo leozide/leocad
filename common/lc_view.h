@@ -242,7 +242,7 @@ public:
 	void UpdatePanGesture(int dx, int dy);
 	void EndPanGesture(bool Accept);
 	void StartOrbitTracking();
-	void CancelTrackingOrClearSelection();
+	void CancelTrackingOrClearSelectionAction();
 
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);

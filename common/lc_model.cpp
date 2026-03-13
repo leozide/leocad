@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_model.h"
-#include "lc_modelaction.h"
+#include "lc_modelhistory.h"
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
@@ -1168,13 +1168,13 @@ void lcModel::Cut()
 
 	Copy();
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	RemoveSelectedObjects();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Cut"));
+	EndEditHistory();
+	EndHistorySequence(tr("Cut"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -1224,21 +1224,21 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	if (PastedPieces.empty())
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	Merge(std::move(Model));
 
 	CalculateStep(mCurrentStep);
 
-	EndObjectEditAction();
+	EndEditHistory();
 
 	if (SelectedObjects.size() == 1)
-		RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), SelectedObjects.front(), LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+		SetSelectionAndFocus(std::vector<lcObject*>(), SelectedObjects.front(), LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 	else
-		RecordSetSelectionAndFocusAction(SelectedObjects, nullptr, 0, lcSelectionMode::Single);
+		SetSelectionAndFocus(SelectedObjects, nullptr, 0, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Paste"));
+	EndHistorySequence(tr("Paste"));
 
 	gMainWindow->UpdateTimeline(false, false);
 }
@@ -1251,8 +1251,8 @@ void lcModel::DuplicateSelectedPieces()
 		return;
 	}
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcObject*> NewPieces;
 	lcPiece* Focus = nullptr;
@@ -1309,11 +1309,11 @@ void lcModel::DuplicateSelectedPieces()
 			NewPiece->SetGroup(GetNewGroup(Group));
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(NewPieces, Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(NewPieces, Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Duplicate"));
+	EndHistorySequence(tr("Duplicate"));
 
 	gMainWindow->UpdateTimeline(false, false);
 }
@@ -1735,33 +1735,33 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
 }
 
-void lcModel::RecordSelectionAction(std::function<void()> Callback)
+void lcModel::AddSelectionHistory(std::function<void()> Callback)
 {
-	std::unique_ptr<lcModelActionSelection> ModelActionSelection = std::make_unique<lcModelActionSelection>();
+	std::unique_ptr<lcModelHistorySelect> ModelHistorySelect = std::make_unique<lcModelHistorySelect>();
 
-	ModelActionSelection->SaveStartState(this);
+	ModelHistorySelect->SaveStartState(this);
 
 	Callback();
 
-	ModelActionSelection->SaveEndState(this);
+	ModelHistorySelect->SaveEndState(this);
 
-	if (ModelActionSelection->StateChanged())
-		mActionSequence.emplace_back(std::move(ModelActionSelection));
+	if (ModelHistorySelect->StateChanged())
+		mHistorySequence.emplace_back(std::move(ModelHistorySelect));
 }
 
-void lcModel::RecordClearSelectionAction()
+void lcModel::ClearSelection()
 {
-	RecordSelectionAction([this](){ DeselectAllObjects(); });
+	AddSelectionHistory([this](){ DeselectAllObjects(); });
 }
 
-void lcModel::RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
+void lcModel::SetFocus(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
 {
-	RecordSelectionAction([this, FocusObject, FocusSection, SelectionMode](){ SetFocusedObject(FocusObject, FocusSection, SelectionMode); });
+	AddSelectionHistory([this, FocusObject, FocusSection, SelectionMode](){ SetFocusedObject(FocusObject, FocusSection, SelectionMode); });
 }
 
-void lcModel::RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
+void lcModel::SetSelectionAndFocus(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode)
 {
-	RecordSelectionAction([this, &Objects, FocusObject, FocusSection, SelectionMode]()
+	AddSelectionHistory([this, &Objects, FocusObject, FocusSection, SelectionMode]()
 	{
 		DeselectAllObjects();
 		SetObjectsSelected(Objects, true);
@@ -1769,9 +1769,9 @@ void lcModel::RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Obj
 	});
 }
 
-void lcModel::RecordSelectAllPiecesAction()
+void lcModel::SelectAllPieces()
 {
-	RecordSelectionAction([this]()
+	AddSelectionHistory([this]()
 	{
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 			if (Piece->IsVisible(mCurrentStep))
@@ -1779,9 +1779,9 @@ void lcModel::RecordSelectAllPiecesAction()
 	});
 }
 
-void lcModel::RecordInvertPieceSelectionAction()
+void lcModel::InvertPieceSelection()
 {
-	RecordSelectionAction([this]()
+	AddSelectionHistory([this]()
 	{
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 			if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
@@ -1789,14 +1789,14 @@ void lcModel::RecordInvertPieceSelectionAction()
 	});
 }
 
-void lcModel::RecordAddToSelectionAction(const std::vector<lcObject*>& Objects)
+void lcModel::AddToSelection(const std::vector<lcObject*>& Objects)
 {
-	RecordSelectionAction([this, &Objects](){ SetObjectsSelected(Objects, true); });
+	AddSelectionHistory([this, &Objects](){ SetObjectsSelected(Objects, true); });
 }
 
-void lcModel::RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects)
+void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects)
 {
-	RecordSelectionAction([this, &Objects](){ SetObjectsSelected(Objects, false); });
+	AddSelectionHistory([this, &Objects](){ SetObjectsSelected(Objects, false); });
 }
 
 template<typename StateType, typename ObjectType>
@@ -1838,7 +1838,7 @@ void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates,
 		Objects[ObjectIndex]->SetHistoryState(ObjectStates[ObjectIndex], this);
 }
 
-void lcModel::LoadHistoryState(const lcModelHistoryState& HistoryState)
+void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 {
 	LoadObjectHistoryState(HistoryState.Groups, mGroups);
 	LoadObjectHistoryState(HistoryState.Pieces, mPieces);
@@ -1846,32 +1846,32 @@ void lcModel::LoadHistoryState(const lcModelHistoryState& HistoryState)
 	LoadObjectHistoryState(HistoryState.Lights, mLights);
 }
 
-void lcModel::BeginObjectEditAction(lcModelActionEditMerge ModelActionEditMerge)
+void lcModel::BeginEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge)
 {
-	std::unique_ptr<lcModelActionObjectEdit> ModelActionObjectEdit = std::make_unique<lcModelActionObjectEdit>(ModelActionEditMerge);
+	std::unique_ptr<lcModelHistoryEdit> ModelHistoryEdit = std::make_unique<lcModelHistoryEdit>(ModelHistoryEditMerge);
 
-	ModelActionObjectEdit->SaveStartState(this);
+	ModelHistoryEdit->SaveStartState(this);
 
-	mActionSequence.emplace_back(std::move(ModelActionObjectEdit));
+	mHistorySequence.emplace_back(std::move(ModelHistoryEdit));
 }
 
-void lcModel::EndObjectEditAction()
+void lcModel::EndEditHistory()
 {
-	if (mActionSequence.empty())
+	if (mHistorySequence.empty())
 		return;
 
-	lcModelActionObjectEdit* ModelActionObjectEdit = dynamic_cast<lcModelActionObjectEdit*>(mActionSequence.back().get());
+	lcModelHistoryEdit* ModelHistoryEdit = dynamic_cast<lcModelHistoryEdit*>(mHistorySequence.back().get());
 
-	if (!ModelActionObjectEdit)
+	if (!ModelHistoryEdit)
 		return;
 
-	ModelActionObjectEdit->SaveEndState(this);
+	ModelHistoryEdit->SaveEndState(this);
 
-	if (!ModelActionObjectEdit->StateChanged())
-		mActionSequence.pop_back();
+	if (!ModelHistoryEdit->StateChanged())
+		mHistorySequence.pop_back();
 }
 
-void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
+void lcModel::LoadModelPropertiesState(const lcModelProperties& ModelProperties)
 {
 	mProperties = ModelProperties;
 
@@ -1879,55 +1879,55 @@ void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
 		gMainWindow->GetPreviewWidget()->UpdatePreview();
 }
 
-void lcModel::RecordModelPropertiesAction(const lcModelProperties& ModelProperties)
+void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
 {
-	std::unique_ptr<lcModelActionProperties> ModelActionProperties = std::make_unique<lcModelActionProperties>();
-	ModelActionProperties->SaveStartState(this);
+	std::unique_ptr<lcModelHistoryProperties> ModelHistoryProperties = std::make_unique<lcModelHistoryProperties>();
+	ModelHistoryProperties->SaveStartState(this);
 
-	SetModelProperties(ModelProperties);
+	LoadModelPropertiesState(ModelProperties);
 
-	ModelActionProperties->SaveEndState(this);
+	ModelHistoryProperties->SaveEndState(this);
 
-	if (ModelActionProperties->StateChanged())
-		mActionSequence.emplace_back(std::move(ModelActionProperties));
+	if (ModelHistoryProperties->StateChanged())
+		mHistorySequence.emplace_back(std::move(ModelHistoryProperties));
 }
 
-void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply)
+void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence, bool Apply)
 {
 	bool SelectionChanged = false;
 
-	auto RunAction=[this, &SelectionChanged](const lcModelAction* ModelAction, bool Apply)
+	auto RunAction=[this, &SelectionChanged](const lcModelHistory* ModelHistory, bool Apply)
 	{
-		if (!ModelAction)
+		if (!ModelHistory)
 			return;
 
 		if (Apply)
-			ModelAction->LoadEndState(this);
+			ModelHistory->LoadEndState(this);
 		else
-			ModelAction->LoadStartState(this);
+			ModelHistory->LoadStartState(this);
 
-		if (dynamic_cast<const lcModelActionSelection*>(ModelAction))
+		if (dynamic_cast<const lcModelHistorySelect*>(ModelHistory))
 		{
 			SelectionChanged = true;
 		}
-		else if (dynamic_cast<const lcModelActionObjectEdit*>(ModelAction))
+		else if (dynamic_cast<const lcModelHistoryEdit*>(ModelHistory))
 		{
 			SetCurrentStep(mCurrentStep);
 		}
-		else if (dynamic_cast<const lcModelActionProperties*>(ModelAction))
+		else if (dynamic_cast<const lcModelHistoryProperties*>(ModelHistory))
 		{
 		}
 	};
 
 	if (Apply)
 	{
-		for (auto ModelAction = ActionSequence.begin(); ModelAction != ActionSequence.end(); ++ModelAction)
-			RunAction(ModelAction->get(), true);
+		for (auto ModelHistory = HistorySequence.begin(); ModelHistory != HistorySequence.end(); ++ModelHistory)
+			RunAction(ModelHistory->get(), true);
 	}
 	else
 	{
-		for (auto ModelAction = ActionSequence.rbegin(); ModelAction != ActionSequence.rend(); ++ModelAction)
-			RunAction(ModelAction->get(), false);
+		for (auto ModelHistory = HistorySequence.rbegin(); ModelHistory != HistorySequence.rend(); ++ModelHistory)
+			RunAction(ModelHistory->get(), false);
 	}
 
 	if (SelectionChanged)
@@ -1939,46 +1939,46 @@ void lcModel::RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>
 	UpdateAllViews();
 }
 
-void lcModel::BeginActionSequence()
+void lcModel::BeginHistorySequence()
 {
-	mActionSequence.clear();
+	mHistorySequence.clear();
 }
 
-void lcModel::EndActionSequence(const QString& Description)
+void lcModel::EndHistorySequence(const QString& Description)
 {
-	if (mActionSequence.empty())
+	if (mHistorySequence.empty())
 		return;
 
 	if (mIsPreview)
 	{
-		mActionSequence.clear();
+		mHistorySequence.clear();
 
 		return;
 	}
 
 	bool CanMerge = false;
 
-	if (mActionSequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front()->ModelActions.size() == 1)
-		CanMerge = mActionSequence.front()->CanMergeWith(mUndoHistory.front()->ModelActions.front().get());
+	if (mHistorySequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front()->HistorySequence.size() == 1)
+		CanMerge = mHistorySequence.front()->CanMergeWith(mUndoHistory.front()->HistorySequence.front().get());
 
 	if (!CanMerge)
 	{
 		std::unique_ptr<lcModelHistoryEntry> ModelHistoryEntry = std::make_unique<lcModelHistoryEntry>(lcModelHistoryEntry());
 
 		ModelHistoryEntry->Description = Description;
-		ModelHistoryEntry->ModelActions = std::move(mActionSequence);
+		ModelHistoryEntry->HistorySequence = std::move(mHistorySequence);
 
 		mUndoHistory.insert(mUndoHistory.begin(), std::move(ModelHistoryEntry));
 	}
 	else
 	{
-		lcModelActionObjectEdit* ModelActionEdit = dynamic_cast<lcModelActionObjectEdit*>(mActionSequence.front().get());
+		lcModelHistoryEdit* ModelHistoryEdit = dynamic_cast<lcModelHistoryEdit*>(mHistorySequence.front().get());
 		lcModelHistoryEntry* LastHistoryEntry = mUndoHistory.front().get();
-		lcModelActionObjectEdit* LastModelActionEdit = dynamic_cast<lcModelActionObjectEdit*>(LastHistoryEntry->ModelActions.front().get());
+		lcModelHistoryEdit* LastModelHistoryEdit = dynamic_cast<lcModelHistoryEdit*>(LastHistoryEntry->HistorySequence.front().get());
 
-		LastModelActionEdit->MergeWith(ModelActionEdit);
+		LastModelHistoryEdit->MergeWith(ModelHistoryEdit);
 
-		mActionSequence.clear();
+		mHistorySequence.clear();
 	}
 
 	mRedoHistory.clear();
@@ -1986,9 +1986,9 @@ void lcModel::EndActionSequence(const QString& Description)
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 
-	for (const std::unique_ptr<lcModelAction>& ModelAction : mUndoHistory.front()->ModelActions)
+	for (const std::unique_ptr<lcModelHistory>& ModelHistory : mUndoHistory.front()->HistorySequence)
 	{
-		if (dynamic_cast<const lcModelActionSelection*>(ModelAction.get()))
+		if (dynamic_cast<const lcModelHistorySelect*>(ModelHistory.get()))
 		{
 			gMainWindow->UpdateSelectedObjects(true);
 			break;
@@ -1999,16 +1999,16 @@ void lcModel::EndActionSequence(const QString& Description)
 	gMainWindow->UpdateTimeline(true, false);
 }
 
-void lcModel::DiscardActionSequence()
+void lcModel::DiscardHistorySequence()
 {
-	mActionSequence.clear();
+	mHistorySequence.clear();
 }
 
-void lcModel::RevertActionSequence()
+void lcModel::RevertHistorySequence()
 {
-	RunActionSequence(mActionSequence, false);
+	RunHistorySequence(mHistorySequence, false);
 
-	mActionSequence.clear();
+	mHistorySequence.clear();
 }
 
 bool lcModel::IsModified() const
@@ -2031,8 +2031,8 @@ void lcModel::RemoveFirstUndoIfUnchanged()
 	if (mUndoHistory.empty())
 		return;
 
-	for (const std::unique_ptr<lcModelAction>& ModelAction : mUndoHistory.front()->ModelActions)
-		if (ModelAction->StateChanged())
+	for (const std::unique_ptr<lcModelHistory>& ModelHistory : mUndoHistory.front()->HistorySequence)
+		if (ModelHistory->StateChanged())
 			return;
 
 	mUndoHistory.erase(mUndoHistory.begin());
@@ -2044,7 +2044,7 @@ void lcModel::RemoveFirstUndoIfUnchanged()
 const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
 {
 	for (const std::unique_ptr<lcModelHistoryEntry>& UndoEntry : mUndoHistory)
-		if (UndoEntry->ModelActions.size() != 1 || !dynamic_cast<lcModelActionSelection*>(UndoEntry->ModelActions.front().get()))
+		if (UndoEntry->HistorySequence.size() != 1 || !dynamic_cast<lcModelHistorySelect*>(UndoEntry->HistorySequence.front().get()))
 			return UndoEntry.get();
 
 	return nullptr;
@@ -2125,8 +2125,8 @@ lcStep lcModel::GetLastStep() const
 
 void lcModel::InsertStep(lcStep Step)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->InsertTime(Step, 1);
@@ -2138,16 +2138,16 @@ void lcModel::InsertStep(lcStep Step)
 		Light->InsertTime(Step, 1);
 
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Insert Step"));
+	EndEditHistory();
+	EndHistorySequence(tr("Insert Step"));
 
 	SetCurrentStep(mCurrentStep);
 }
 
 void lcModel::RemoveStep(lcStep Step)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->RemoveTime(Step, 1);
@@ -2158,8 +2158,8 @@ void lcModel::RemoveStep(lcStep Step)
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		Light->RemoveTime(Step, 1);
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Remove Step"));
+	EndEditHistory();
+	EndHistorySequence(tr("Remove Step"));
 
 	SetCurrentStep(mCurrentStep);
 }
@@ -2218,8 +2218,8 @@ void lcModel::GroupSelection()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcGroup* NewGroup = GetGroup(Dialog.mName, true);
 
@@ -2236,8 +2236,8 @@ void lcModel::GroupSelection()
 		}
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Group"));
+	EndEditHistory();
+	EndHistorySequence(tr("Group"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
@@ -2252,8 +2252,8 @@ void lcModel::UngroupSelection()
 
 	std::set<lcGroup*> SelectedGroups;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2278,7 +2278,7 @@ void lcModel::UngroupSelection()
 
 	if (SelectedGroups.empty())
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		QMessageBox::information(gMainWindow, tr("Ungroup Selection"), tr("No groups selected."));
 
@@ -2302,8 +2302,8 @@ void lcModel::UngroupSelection()
 
 	RemoveEmptyGroups();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Ungroup"));
+	EndEditHistory();
+	EndHistorySequence(tr("Ungroup"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
@@ -2325,8 +2325,8 @@ void lcModel::AddSelectedPiecesToGroup()
 	if (!Group)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2339,8 +2339,8 @@ void lcModel::AddSelectedPiecesToGroup()
 
 	RemoveEmptyGroups();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Group"));
+	EndEditHistory();
+	EndHistorySequence(tr("Group"));
 
 	gMainWindow->UpdateSelectedObjects(false);
 }
@@ -2363,15 +2363,15 @@ void lcModel::RemoveFocusPieceFromGroup()
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
 	RemoveEmptyGroups();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Ungroup"));
+	EndEditHistory();
+	EndHistorySequence(tr("Ungroup"));
 }
 
 void lcModel::ShowEditGroupsDialog()
@@ -2381,8 +2381,8 @@ void lcModel::ShowEditGroupsDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::function<void(const lcQEditGroupsDialog::GroupInfo&, lcGroup*)> UpdateGroups=[this, &UpdateGroups](const lcQEditGroupsDialog::GroupInfo& GroupInfo, lcGroup* ParentGroup)
 	{
@@ -2414,17 +2414,17 @@ void lcModel::ShowEditGroupsDialog()
 
 	RemoveEmptyGroups();
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	if (mActionSequence.empty())
+	if (mHistorySequence.empty())
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 		return;
 	}
 
-	RecordClearSelectionAction();
+	ClearSelection();
 
-	EndActionSequence(tr("Edit Groups"));
+	EndHistorySequence(tr("Edit Groups"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
@@ -2617,8 +2617,8 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 		AddPiece(Piece);
 	};
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	if (Last)
 	{
@@ -2661,16 +2661,16 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 
 	if (!Piece)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return nullptr;
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Add Piece"));
+	EndHistorySequence(tr("Add Piece"));
 
 	gMainWindow->UpdateTimeline(false, false);
 
@@ -2733,9 +2733,9 @@ void lcModel::FocusNextTrainTrack()
 		ConnectionIndex = (ConnectionIndex + 1) % TrainTrackInfo->GetConnections().size();
 	}
 
-	BeginActionSequence();
-	RecordSetFocusAction(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	SetFocus(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
+	EndHistorySequence(tr("Selection"));
 }
 
 void lcModel::FocusPreviousTrainTrack()
@@ -2760,9 +2760,9 @@ void lcModel::FocusPreviousTrainTrack()
 		ConnectionIndex = (ConnectionIndex + static_cast<int>(TrainTrackInfo->GetConnections().size()) - 1) % TrainTrackInfo->GetConnections().size();
 	}
 
-	BeginActionSequence();
-	RecordSetFocusAction(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	SetFocus(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + ConnectionIndex, lcSelectionMode::Single);
+	EndHistorySequence(tr("Selection"));
 }
 
 void lcModel::RotateFocusedTrainTrack(int Direction)
@@ -2815,20 +2815,20 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 	if (!Transform)
 		return;
 
-	BeginActionSequence();
+	BeginHistorySequence();
 
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	FocusPiece->SetPosition(Transform.value().GetTranslation(), mCurrentStep, gMainWindow->GetAddKeys());
 	FocusPiece->SetRotation(lcMatrix33(Transform.value()), mCurrentStep, gMainWindow->GetAddKeys());
 	FocusPiece->UpdatePosition(mCurrentStep);
 
-	EndObjectEditAction();
+	EndEditHistory();
 
 	if ((FocusSection != LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_POSITION) || !TracksConnected)
-		RecordSetFocusAction(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + NewConnectionIndex, lcSelectionMode::Single);
+		SetFocus(FocusPiece, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + NewConnectionIndex, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Rotate"));
+	EndHistorySequence(tr("Rotate"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
@@ -2896,20 +2896,20 @@ void lcModel::DeleteSelectedObjects()
 		return;
 	}
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = RemoveSelectedObjects();
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Delete"));
+	EndEditHistory();
+	EndHistorySequence(tr("Delete"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -2918,21 +2918,21 @@ void lcModel::DeleteSelectedObjects()
 
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
 			Piece->ResetPivotPoint();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Reset Pivot Point"));
+	EndEditHistory();
+	EndHistorySequence(tr("Reset Pivot Point"));
 }
 
 void lcModel::RemoveSelectedObjectsKeyFrames()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
@@ -2946,8 +2946,8 @@ void lcModel::RemoveSelectedObjectsKeyFrames()
 		if (Light->IsSelected())
 			Light->RemoveKeyFrames();
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Remove Key Frames"));
+	EndEditHistory();
+	EndHistorySequence(tr("Remove Key Frames"));
 }
 
 void lcModel::InsertControlPoint()
@@ -2961,20 +2961,20 @@ void lcModel::InsertControlPoint()
 
 	gMainWindow->GetActiveView()->GetRayUnderPointer(Start, End);
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = Piece->InsertControlPoint(Start, End);
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Add Control Point"));
+	EndEditHistory();
+	EndHistorySequence(tr("Add Control Point"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
@@ -2986,28 +2986,28 @@ void lcModel::RemoveFocusedControlPoint()
 	if (!Piece)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = Piece->RemoveFocusedControlPoint();
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Remove Control Point"));
+	EndEditHistory();
+	EndHistorySequence(tr("Remove Control Point"));
 
 	gMainWindow->UpdateSelectedObjects(true);
 }
 
 void lcModel::ShowSelectedPiecesEarlier()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcPiece*> MovedPieces;
 
@@ -3035,7 +3035,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 
 	if (MovedPieces.empty())
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
@@ -3046,8 +3046,8 @@ void lcModel::ShowSelectedPiecesEarlier()
 		AddPiece(Piece);
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Show Earlier"));
+	EndEditHistory();
+	EndHistorySequence(tr("Show Earlier"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -3055,8 +3055,8 @@ void lcModel::ShowSelectedPiecesEarlier()
 
 void lcModel::ShowSelectedPiecesLater()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcPiece*> MovedPieces;
 
@@ -3085,7 +3085,7 @@ void lcModel::ShowSelectedPiecesLater()
 
 	if (MovedPieces.empty())
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
@@ -3096,8 +3096,8 @@ void lcModel::ShowSelectedPiecesLater()
 		AddPiece(Piece);
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Show Later"));
+	EndEditHistory();
+	EndHistorySequence(tr("Show Later"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(false);
@@ -3108,8 +3108,8 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 	if (PieceSteps.size() != mPieces.size())
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -3133,15 +3133,15 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 
 	if (Modified)
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Change Step"));
+		EndEditHistory();
+		EndHistorySequence(tr("Change Step"));
 
 		gMainWindow->UpdateTimeline(false, false);
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 	else
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 	}
 }
 
@@ -3157,8 +3157,8 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	if (!Model)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcPiece*> Pieces;
 	lcPiece* ModelPiece = nullptr;
@@ -3192,7 +3192,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 	if (Pieces.empty())
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
@@ -3216,19 +3216,19 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		ModelPiece->UpdatePosition(mCurrentStep);
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
 	gMainWindow->UpdateTimeline(false, false);
 
-	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(std::vector<lcObject*>(), ModelPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Move to Model"));
+	EndHistorySequence(tr("Move to Model"));
 }
 
 void lcModel::InlineSelectedModels()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcObject*> NewPieces;
 	bool Modified = false;
@@ -3278,16 +3278,16 @@ void lcModel::InlineSelectedModels()
 	{
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No models selected."));
 
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(NewPieces, nullptr, 0, lcSelectionMode::Single);
+	SetSelectionAndFocus(NewPieces, nullptr, 0, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Inline Model"));
+	EndHistorySequence(tr("Inline Model"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateInUseCategory();
@@ -3354,12 +3354,12 @@ bool lcModel::RemoveSelectedObjects()
 	return RemovedPiece || RemovedCamera || RemovedLight;
 }
 
-void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge)
+void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelHistoryEditMerge ModelHistoryEditMerge)
 {
 	if (Checkpoint)
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(ModelActionEditMerge);
+		BeginHistorySequence();
+		BeginEditHistory(ModelHistoryEditMerge);
 	}
 
 	bool Moved = false;
@@ -3431,15 +3431,15 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	if (!Moved)
 	{
 		if (Checkpoint)
-			DiscardActionSequence();
+			DiscardHistorySequence();
 
 		return;
 	}
 
 	if (Checkpoint)
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Move"));
+		EndEditHistory();
+		EndHistorySequence(tr("Move"));
 
 		RemoveFirstUndoIfUnchanged();
 	}
@@ -3448,15 +3448,15 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	gMainWindow->UpdateSelectedObjects(false);
 }
 
-void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelActionEditMerge ModelActionEditMerge)
+void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelHistoryEditMerge ModelHistoryEditMerge)
 {
 	if (Angles.LengthSquared() < 0.001f)
 		return;
 
 	if (Checkpoint)
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(ModelActionEditMerge);
+		BeginHistorySequence();
+		BeginEditHistory(ModelHistoryEditMerge);
 	}
 
 	lcMatrix33 RotationMatrix = lcMatrix33Identity();
@@ -3617,15 +3617,15 @@ void lcModel::RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool
 	if (!Rotated)
 	{
 		if (Checkpoint)
-			DiscardActionSequence();
+			DiscardHistorySequence();
 
 		return;
 	}
 
 	if (Checkpoint)
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Rotate"));
+		EndEditHistory();
+		EndHistorySequence(tr("Rotate"));
 
 		RemoveFirstUndoIfUnchanged();
 	}
@@ -3658,19 +3658,19 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 	switch (TransformType)
 	{
 	case lcTransformType::AbsoluteTranslation:
-		MoveSelectedObjects(Transform, false, false, true, true, lcModelActionEditMerge::None);
+		MoveSelectedObjects(Transform, false, false, true, true, lcModelHistoryEditMerge::None);
 		break;
 
 	case lcTransformType::RelativeTranslation:
-		MoveSelectedObjects(Transform, true, false, true, true, lcModelActionEditMerge::None);
+		MoveSelectedObjects(Transform, true, false, true, true, lcModelHistoryEditMerge::None);
 		break;
 
 	case lcTransformType::AbsoluteRotation:
-		RotateSelectedObjects(Transform, false, false, true, lcModelActionEditMerge::None);
+		RotateSelectedObjects(Transform, false, false, true, lcModelHistoryEditMerge::None);
 		break;
 
 	case lcTransformType::RelativeRotation:
-		RotateSelectedObjects(Transform, true, false, true, lcModelActionEditMerge::None);
+		RotateSelectedObjects(Transform, true, false, true, lcModelHistoryEditMerge::None);
 		break;
 
 	case lcTransformType::Count:
@@ -3680,8 +3680,8 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 
 void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -3693,21 +3693,21 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 
 	if (Modified)
 	{
-		EndObjectEditAction();
-		EndActionSequence(KeyFrame ? tr("Add KeyFrame") : tr("Remove KeyFrame"));
+		EndEditHistory();
+		EndHistorySequence(KeyFrame ? tr("Add KeyFrame") : tr("Remove KeyFrame"));
 
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 	else
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 	}
 }
 
 void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -3722,15 +3722,15 @@ void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 
 	if (Modified)
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Paint"));
+		EndEditHistory();
+		EndHistorySequence(tr("Paint"));
 
 		gMainWindow->UpdateSelectedObjects(false);
 		gMainWindow->UpdateTimeline(false, true);
 	}
 	else
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 	}
 }
 
@@ -3757,8 +3757,8 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	if (MovedPieces.empty())
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (lcPiece* Piece : MovedPieces)
 	{
@@ -3766,8 +3766,8 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 		AddPiece(Piece);
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Set Show Step"));
+	EndEditHistory();
+	EndHistorySequence(tr("Set Show Step"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(false);
@@ -3777,8 +3777,8 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 {
 	bool Modified = false;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -3792,13 +3792,13 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Set Hide Step"));
+	EndEditHistory();
+	EndHistorySequence(tr("Set Hide Step"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(false);
@@ -3811,8 +3811,8 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::None);
 	}
 
 	Camera->SetProjection(CameraProjection);
@@ -3820,8 +3820,8 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Change Projection"));
+		EndEditHistory();
+		EndHistorySequence(tr("Change Projection"));
 	}
 
 	UpdateAllViews();
@@ -3830,8 +3830,8 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 
 void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(static_cast<lcModelActionEditMerge>(static_cast<uint32_t>(lcModelActionEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+	BeginHistorySequence();
+	BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
 
 	bool Modified = false;
 
@@ -3848,13 +3848,13 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(lcObject::GetCheckpointString(PropertyId));
+	EndEditHistory();
+	EndHistorySequence(lcObject::GetCheckpointString(PropertyId));
 
 	RemoveFirstUndoIfUnchanged();
 
@@ -3880,7 +3880,7 @@ void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 
 	if (!Accept)
 	{
-		RevertActionSequence();
+		RevertHistorySequence();
 		return;
 	}
 }
@@ -4344,65 +4344,65 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 	}
 }
 
-void lcModel::ClearSelection()
+void lcModel::ClearSelectionAction()
 {
-	BeginActionSequence();
-	RecordClearSelectionAction();
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	ClearSelection();
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::SetSelectionAndFocus(const std::vector<lcObject*>& Objects, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode)
+void lcModel::SetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode)
 {
-	BeginActionSequence();
-	RecordSetSelectionAndFocusAction(Objects, Focus, Section, SelectionMode);
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	SetSelectionAndFocus(Objects, Focus, Section, SelectionMode);
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode)
+void lcModel::FocusOrDeselectObjectAction(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode)
 {
-	BeginActionSequence();
+	BeginHistorySequence();
 
 	if (Object)
 	{
 		if (!Object->IsFocused(Section))
-			RecordSetFocusAction(Object, Section, SelectionMode);
+			SetFocus(Object, Section, SelectionMode);
 		else
-			RecordSetFocusAction(nullptr, ~0U, SelectionMode);
+			SetFocus(nullptr, ~0U, SelectionMode);
 	}
 	else
 	{
-		RecordSetFocusAction(nullptr, 0, SelectionMode);
+		SetFocus(nullptr, 0, SelectionMode);
 	}
 
-	EndActionSequence(tr("Selection"));
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::SelectAllPieces()
+void lcModel::SelectAllPiecesAction()
 {
-	BeginActionSequence();
-	RecordSelectAllPiecesAction();
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	SelectAllPieces();
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::InvertPieceSelection()
+void lcModel::InvertPieceSelectionAction()
 {
-	BeginActionSequence();
-	RecordInvertPieceSelectionAction();
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	InvertPieceSelection();
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::AddToSelection(const std::vector<lcObject*>& Objects)
+void lcModel::AddToSelectionAction(const std::vector<lcObject*>& Objects)
 {
-	BeginActionSequence();
-	RecordAddToSelectionAction(Objects);
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	AddToSelection(Objects);
+	EndHistorySequence(tr("Selection"));
 }
 
-void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects)
+void lcModel::RemoveFromSelectionAction(const std::vector<lcObject*>& Objects)
 {
-	BeginActionSequence();
-	RecordRemoveFromSelectionAction(Objects);
-	EndActionSequence(tr("Selection"));
+	BeginHistorySequence();
+	RemoveFromSelection(Objects);
+	EndHistorySequence(tr("Selection"));
 }
 
 std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const
@@ -4505,8 +4505,8 @@ void lcModel::SelectGroup(lcGroup* TopGroup, bool Select)
 
 void lcModel::HideSelectedPieces()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -4522,16 +4522,16 @@ void lcModel::HideSelectedPieces()
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordClearSelectionAction();
+	ClearSelection();
 
-	EndActionSequence(tr("Hide Pieces"));
+	EndHistorySequence(tr("Hide Pieces"));
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -4539,8 +4539,8 @@ void lcModel::HideSelectedPieces()
 
 void lcModel::HideUnselectedPieces()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -4556,13 +4556,13 @@ void lcModel::HideUnselectedPieces()
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Hide Pieces"));
+	EndEditHistory();
+	EndHistorySequence(tr("Hide Pieces"));
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -4570,8 +4570,8 @@ void lcModel::HideUnselectedPieces()
 
 void lcModel::UnhideSelectedPieces()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -4587,13 +4587,13 @@ void lcModel::UnhideSelectedPieces()
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Unhide Pieces"));
+	EndEditHistory();
+	EndHistorySequence(tr("Unhide Pieces"));
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -4601,8 +4601,8 @@ void lcModel::UnhideSelectedPieces()
 
 void lcModel::UnhideAllPieces()
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	bool Modified = false;
 
@@ -4618,13 +4618,13 @@ void lcModel::UnhideAllPieces()
 
 	if (!Modified)
 	{
-		DiscardActionSequence();
+		DiscardHistorySequence();
 
 		return;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Unhide Pieces"));
+	EndEditHistory();
+	EndHistorySequence(tr("Unhide Pieces"));
 
 	gMainWindow->UpdateTimeline(false, true);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -4666,8 +4666,8 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 	size_t StartIndex = mPieces.size() - 1;
 	int ReplacedCount = 0;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	if (!FindAll)
 	{
@@ -4738,22 +4738,22 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 			break;
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
 	if (FindAll)
-		RecordSetSelectionAndFocusAction(Selection, nullptr, 0, lcSelectionMode::Single);
+		SetSelectionAndFocus(Selection, nullptr, 0, lcSelectionMode::Single);
 	else
-		RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+		SetSelectionAndFocus(std::vector<lcObject*>(), Focus, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
 	if (ReplacedCount)
 	{
-		EndActionSequence(tr("Replace Piece(s)", "", ReplacedCount));
+		EndHistorySequence(tr("Replace Piece(s)", "", ReplacedCount));
 
 		gMainWindow->UpdateSelectedObjects(false);
 		gMainWindow->UpdateTimeline(false, true);
 	}
 	else
-		EndActionSequence(tr("Selection"));
+		EndHistorySequence(tr("Selection"));
 }
 
 void lcModel::UndoAction()
@@ -4763,7 +4763,7 @@ void lcModel::UndoAction()
 
 	std::unique_ptr<lcModelHistoryEntry> Undo = std::move(mUndoHistory.front());
 
-	RunActionSequence(Undo->ModelActions, false);
+	RunHistorySequence(Undo->HistorySequence, false);
 
 	mUndoHistory.erase(mUndoHistory.begin());
 	mRedoHistory.insert(mRedoHistory.begin(), std::move(Undo));
@@ -4779,7 +4779,7 @@ void lcModel::RedoAction()
 
 	std::unique_ptr<lcModelHistoryEntry> Redo = std::move(mRedoHistory.front());
 
-	RunActionSequence(Redo->ModelActions, true);
+	RunHistorySequence(Redo->HistorySequence, true);
 
 	mRedoHistory.erase(mRedoHistory.begin());
 	mUndoHistory.insert(mUndoHistory.begin(), std::move(Redo));
@@ -4803,8 +4803,8 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 
 		case lcTool::Move:
 		case lcTool::Rotate:
-			BeginActionSequence();
-			BeginObjectEditAction(lcModelActionEditMerge::None);
+			BeginHistorySequence();
+			BeginEditHistory(lcModelHistoryEditMerge::None);
 			break;
 
 		case lcTool::Eraser:
@@ -4818,8 +4818,8 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Roll:
 			if (!View->GetCamera()->IsSimple())
 			{
-				BeginActionSequence();
-				BeginObjectEditAction(lcModelActionEditMerge::None);
+				BeginHistorySequence();
+				BeginEditHistory(lcModelHistoryEditMerge::None);
 			}
 			break;
 
@@ -4838,7 +4838,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 {
 	if (!Accept)
 	{
-		RevertActionSequence();
+		RevertHistorySequence();
 		return;
 	}
 
@@ -4856,13 +4856,13 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		break;
 
 	case lcTool::Move:
-		EndObjectEditAction();
-		EndActionSequence(tr("Move"));
+		EndEditHistory();
+		EndHistorySequence(tr("Move"));
 		break;
 
 	case lcTool::Rotate:
-		EndObjectEditAction();
-		EndActionSequence(tr("Rotate"));
+		EndEditHistory();
+		EndHistorySequence(tr("Rotate"));
 		break;
 
 	case lcTool::Eraser:
@@ -4873,32 +4873,32 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	case lcTool::Zoom:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction();
-			EndActionSequence(tr("Zoom"));
+			EndEditHistory();
+			EndHistorySequence(tr("Zoom"));
 		}
 		break;
 
 	case lcTool::Pan:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction();
-			EndActionSequence(tr("Pan"));
+			EndEditHistory();
+			EndHistorySequence(tr("Pan"));
 		}
 		break;
 
 	case lcTool::RotateView:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction();
-			EndActionSequence(tr("Orbit"));
+			EndEditHistory();
+			EndHistorySequence(tr("Orbit"));
 		}
 		break;
 
 	case lcTool::Roll:
 		if (!Camera->IsSimple())
 		{
-			EndObjectEditAction();
-			EndActionSequence(tr("Roll"));
+			EndEditHistory();
+			EndHistorySequence(tr("Roll"));
 		}
 		break;
 
@@ -4915,8 +4915,8 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 	if (PieceInfoTransforms.empty())
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcPiece* Piece = nullptr;
 
@@ -4931,11 +4931,11 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 		AddPiece(Piece);
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Add Piece"));
+	EndHistorySequence(tr("Add Piece"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateInUseCategory();
@@ -4945,19 +4945,19 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 
 void lcModel::InsertCameraToolClicked(const lcVector3& Position)
 {
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcCamera* Camera = new lcCamera(false, Position, GetSelectionOrModelCenter());
 
 	Camera->CreateName(mCameras);
 	mCameras.emplace_back(Camera);
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Camera, LC_CAMERA_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(std::vector<lcObject*>(), Camera, LC_CAMERA_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Add Camera"));
+	EndHistorySequence(tr("Add Camera"));
 }
 
 void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType LightType)
@@ -4986,19 +4986,19 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 		return;
 	}
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcLight* Light = new lcLight(Position, LightType);
 
 	Light->CreateName(mLights);
 	mLights.emplace_back(Light);
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(std::vector<lcObject*>(), Light, LC_LIGHT_SECTION_POSITION, lcSelectionMode::Single);
+	SetSelectionAndFocus(std::vector<lcObject*>(), Light, LC_LIGHT_SECTION_POSITION, lcSelectionMode::Single);
 
-	EndActionSequence(ActionName);
+	EndHistorySequence(ActionName);
 }
 
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag)
@@ -5006,7 +5006,7 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 	const lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
-	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, false, mMouseToolFirstMove, lcModelActionEditMerge::None);
+	MoveSelectedObjects(PieceDistance, ObjectDistance, AllowRelative, AlternateButtonDrag, false, mMouseToolFirstMove, lcModelHistoryEditMerge::None);
 
 	mMouseToolDistance = Distance;
 	mMouseToolFirstMove = false;
@@ -5089,7 +5089,7 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 void lcModel::UpdateRotateTool(const lcVector3& Angles, bool AlternateButtonDrag)
 {
 	const lcVector3 Delta = SnapRotation(Angles) - SnapRotation(mMouseToolDistance);
-	RotateSelectedObjects(Delta, true, AlternateButtonDrag, false, lcModelActionEditMerge::None);
+	RotateSelectedObjects(Delta, true, AlternateButtonDrag, false, lcModelHistoryEditMerge::None);
 
 	mMouseToolDistance = Angles;
 	mMouseToolFirstMove = false;
@@ -5108,8 +5108,8 @@ void lcModel::EraserToolClicked(lcObject* Object)
 	if (!Object)
 		return;
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	switch (Object->GetType())
 	{
@@ -5158,8 +5158,8 @@ void lcModel::EraserToolClicked(lcObject* Object)
 		break;
 	}
 
-	EndObjectEditAction();
-	EndActionSequence(tr("Delete"));
+	EndEditHistory();
+	EndHistorySequence(tr("Delete"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
@@ -5174,13 +5174,13 @@ void lcModel::PaintToolClicked(lcObject* Object)
 
 	if (Piece->GetColorIndex() != gMainWindow->mColorIndex)
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::None);
 
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
-		EndObjectEditAction();
-		EndActionSequence(tr("Paint"));
+		EndEditHistory();
+		EndHistorySequence(tr("Paint"));
 
 		gMainWindow->UpdateSelectedObjects(false);
 		gMainWindow->UpdateTimeline(false, true);
@@ -5238,16 +5238,16 @@ void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVec
 
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::None);
 	}
 
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Zoom"));
+		EndEditHistory();
+		EndHistorySequence(tr("Zoom"));
 	}
 
 	gMainWindow->UpdateSelectedObjects(false);
@@ -5270,8 +5270,8 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::None);
 	}
 
 	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5281,8 +5281,8 @@ void lcModel::LookAt(lcCamera* Camera)
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Look At"));
+		EndEditHistory();
+		EndHistorySequence(tr("Look At"));
 	}
 }
 
@@ -5290,8 +5290,8 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 {
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::KeyboardMoveCamera);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::KeyboardMoveCamera);
 	}
 
 	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5301,8 +5301,8 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Move"));
+		EndEditHistory();
+		EndHistorySequence(tr("Move"));
 	}
 }
 
@@ -5327,8 +5327,8 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::None);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::None);
 	}
 
 	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
@@ -5340,8 +5340,8 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Zoom Extents"));
+		EndEditHistory();
+		EndHistorySequence(tr("Zoom Extents"));
 	}
 }
 
@@ -5349,8 +5349,8 @@ void lcModel::Zoom(lcCamera* Camera, float Amount)
 {
 	if (!Camera->IsSimple())
 	{
-		BeginActionSequence();
-		BeginObjectEditAction(lcModelActionEditMerge::KeyboardZoom);
+		BeginHistorySequence();
+		BeginEditHistory(lcModelHistoryEditMerge::KeyboardZoom);
 	}
 
 	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5362,8 +5362,8 @@ void lcModel::Zoom(lcCamera* Camera, float Amount)
 
 	if (!Camera->IsSimple())
 	{
-		EndObjectEditAction();
-		EndActionSequence(tr("Zoom"));
+		EndEditHistory();
+		EndHistorySequence(tr("Zoom"));
 	}
 }
 
@@ -5383,9 +5383,9 @@ void lcModel::ShowPropertiesDialog()
 	if (mProperties == Options.Properties)
 		return;
 
-	BeginActionSequence();
-	RecordModelPropertiesAction(Options.Properties);
-	EndActionSequence(tr("Change Model Properties"));
+	BeginHistorySequence();
+	SetModelProperties(Options.Properties);
+	EndHistorySequence(tr("Change Model Properties"));
 }
 
 void lcModel::ShowSelectByNameDialog()
@@ -5401,7 +5401,7 @@ void lcModel::ShowSelectByNameDialog()
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
-	SetSelectionAndFocus(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
+	SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
 }
 
 void lcModel::ShowArrayDialog()
@@ -5425,8 +5425,8 @@ void lcModel::ShowArrayDialog()
 		return;
 	}
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	std::vector<lcObject*> NewPieces;
 
@@ -5476,11 +5476,11 @@ void lcModel::ShowArrayDialog()
 		AddPiece(Piece);
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordAddToSelectionAction(NewPieces);
+	AddToSelection(NewPieces);
 
-	EndActionSequence(tr("Piece Array"));
+	EndHistorySequence(tr("Piece Array"));
 
 	gMainWindow->UpdateTimeline(false, false);
 }
@@ -5494,8 +5494,8 @@ void lcModel::ShowMinifigDialog()
 
 	gMainWindow->GetActiveView()->MakeCurrent();
 
-	BeginActionSequence();
-	BeginObjectEditAction(lcModelActionEditMerge::None);
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
 	std::vector<lcObject*> Pieces;
@@ -5519,11 +5519,11 @@ void lcModel::ShowMinifigDialog()
 		Pieces.emplace_back(Piece);
 	}
 
-	EndObjectEditAction();
+	EndEditHistory();
 
-	RecordSetSelectionAndFocusAction(Pieces, nullptr, 0, lcSelectionMode::Single);
+	SetSelectionAndFocus(Pieces, nullptr, 0, lcSelectionMode::Single);
 
-	EndActionSequence(tr("Add Minifig"));
+	EndHistorySequence(tr("Add Minifig"));
 
 	gMainWindow->UpdateTimeline(false, false);
 }

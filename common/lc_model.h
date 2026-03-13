@@ -5,12 +5,12 @@
 
 enum class lcObjectPropertyId;
 enum class lcCameraProjection;
-struct lcModelHistoryState;
-class lcModelAction;
-class lcModelActionSelection;
-class lcModelActionObjectEdit;
-class lcModelActionProperties;
-enum class lcModelActionEditMerge;
+struct lcModelHistoryEditState;
+class lcModelHistory;
+class lcModelHistorySelect;
+class lcModelHistoryEdit;
+class lcModelHistoryProperties;
+enum class lcModelHistoryEditMerge;
 
 #define LC_SEL_NO_PIECES                0x0001 // No pieces in model
 #define LC_SEL_PIECE                    0x0002 // At least 1 piece selected
@@ -111,7 +111,7 @@ public:
 
 struct lcModelHistoryEntry
 {
-	std::vector<std::unique_ptr<lcModelAction>> ModelActions;
+	std::vector<std::unique_ptr<lcModelHistory>> HistorySequence;
 	QString Description;
 };
 
@@ -228,8 +228,8 @@ public:
 
 	template<typename StateType, typename ObjectType>
 	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
-	void LoadHistoryState(const lcModelHistoryState& HistoryState);
-	void SetModelProperties(const lcModelProperties& ModelProperties);
+	void LoadEditHistoryState(const lcModelHistoryEditState& HistoryState);
+	void LoadModelPropertiesState(const lcModelProperties& ModelProperties);
 
 	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
@@ -314,13 +314,13 @@ public:
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
 	void GetSelectionInformation(int* Flags, std::vector<lcObject*>& Selection, lcObject** Focus) const;
 
-	void ClearSelection();
-	void SetSelectionAndFocus(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
-	void FocusOrDeselectObject(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
-	void SelectAllPieces();
-	void InvertPieceSelection();
-	void AddToSelection(const std::vector<lcObject*>& Objects);
-	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
+	void ClearSelectionAction();
+	void SetSelectionAndFocusAction(const std::vector<lcObject*>& Selection, lcObject* Focus, quint32 Section, lcSelectionMode SelectionMode);
+	void FocusOrDeselectObjectAction(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
+	void SelectAllPiecesAction();
+	void InvertPieceSelectionAction();
+	void AddToSelectionAction(const std::vector<lcObject*>& Objects);
+	void RemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
 
 	void HideSelectedPieces();
 	void HideUnselectedPieces();
@@ -363,13 +363,13 @@ public:
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
 	void Zoom(lcCamera* Camera, float Amount);
 
-	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge)
+	void MoveSelectedObjects(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelHistoryEditMerge ModelHistoryEditMerge)
 	{
-		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Checkpoint, FirstMove, ModelActionEditMerge);
+		MoveSelectedObjects(Distance, Distance, AllowRelative, AlternateButtonDrag, Checkpoint, FirstMove, ModelHistoryEditMerge);
 	}
 
-	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelActionEditMerge ModelActionEditMerge);
-	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelActionEditMerge ModelActionEditMerge);
+	void MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector3& ObjectDistance, bool AllowRelative, bool AlternateButtonDrag, bool Checkpoint, bool FirstMove, lcModelHistoryEditMerge ModelHistoryEditMerge);
+	void RotateSelectedObjects(const lcVector3& Angles, bool Relative, bool RotatePivotPoint, bool Checkpoint, lcModelHistoryEditMerge ModelHistoryEditMerge);
 	void ScaleSelectedPieces(const float Scale);
 	void TransformSelectedObjects(lcTransformType TransformType, const lcVector3& Transform);
 	void SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame);
@@ -391,23 +391,23 @@ public:
 protected:
 	void DeleteModel();
 
-	void RecordSelectionAction(std::function<void()> Callback);
-	void RecordClearSelectionAction();
-	void RecordSetFocusAction(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
-	void RecordSetSelectionAndFocusAction(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
-	void RecordSelectAllPiecesAction();
-	void RecordInvertPieceSelectionAction();
-	void RecordAddToSelectionAction(const std::vector<lcObject*>& Objects);
-	void RecordRemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
-	void BeginObjectEditAction(lcModelActionEditMerge ModelActionEditMerge);
-	void EndObjectEditAction();
-	void RecordModelPropertiesAction(const lcModelProperties& ModelProperties);
+	void AddSelectionHistory(std::function<void()> Callback);
+	void ClearSelection();
+	void SetFocus(lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void SetSelectionAndFocus(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
+	void SelectAllPieces();
+	void InvertPieceSelection();
+	void AddToSelection(const std::vector<lcObject*>& Objects);
+	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
+	void BeginEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge);
+	void EndEditHistory();
+	void SetModelProperties(const lcModelProperties& ModelProperties);
 
-	void RunActionSequence(const std::vector<std::unique_ptr<lcModelAction>>& ActionSequence, bool Apply);
-	void BeginActionSequence();
-	void EndActionSequence(const QString& Description);
-	void DiscardActionSequence();
-	void RevertActionSequence();
+	void RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence, bool Apply);
+	void BeginHistorySequence();
+	void EndHistorySequence(const QString& Description);
+	void DiscardHistorySequence();
+	void RevertHistorySequence();
 	void RemoveFirstUndoIfUnchanged();
 	const lcModelHistoryEntry* GetFirstUndoChange() const;
 
@@ -441,7 +441,7 @@ protected:
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
 
-	std::vector<std::unique_ptr<lcModelAction>> mActionSequence;
+	std::vector<std::unique_ptr<lcModelHistory>> mHistorySequence;
 	const lcModelHistoryEntry* mSavedHistory = nullptr;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;

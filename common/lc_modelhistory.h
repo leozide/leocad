@@ -5,11 +5,11 @@
 enum class lcObjectType;
 enum class lcSelectionMode;
 
-class lcModelAction
+class lcModelHistory
 {
 public:
-	lcModelAction() = default;
-	virtual ~lcModelAction() = default;
+	lcModelHistory() = default;
+	virtual ~lcModelHistory() = default;
 
 	virtual void SaveStartState(const lcModel* Model) = 0;
 	virtual void SaveEndState(const lcModel* Model) = 0;
@@ -17,20 +17,20 @@ public:
 	virtual void LoadEndState(lcModel* Model) const = 0;
 	virtual bool StateChanged() const = 0;
 
-	virtual bool CanMergeWith(const lcModelAction* Other) const
+	virtual bool CanMergeWith(const lcModelHistory* Other) const
 	{
 		Q_UNUSED(Other);
 
 		return false;
 	}
 
-	virtual void MergeWith(lcModelAction* Other)
+	virtual void MergeWith(lcModelHistory* Other)
 	{
 		Q_UNUSED(Other);
 	}
 };
 
-struct lcModelActionSelectionState
+struct lcModelHistorySelectState
 {
 	std::vector<bool> PieceSelection;
 	std::vector<bool> CameraSelection;
@@ -39,18 +39,18 @@ struct lcModelActionSelectionState
 	uint32_t FocusSection = ~0U;
 	lcObjectType FocusObjectType = static_cast<lcObjectType>(~0);
 
-	bool operator!=(const lcModelActionSelectionState& Other) const
+	bool operator!=(const lcModelHistorySelectState& Other) const
 	{
 		return PieceSelection != Other.PieceSelection || CameraSelection != Other.CameraSelection || LightSelection != Other.LightSelection ||
 			FocusIndex != Other.FocusIndex || FocusSection != Other.FocusSection || FocusObjectType != Other.FocusObjectType;
 	}
 };
 
-class lcModelActionSelection : public lcModelAction
+class lcModelHistorySelect : public lcModelHistory
 {
 public:
-	lcModelActionSelection() = default;
-	virtual ~lcModelActionSelection() = default;
+	lcModelHistorySelect() = default;
+	virtual ~lcModelHistorySelect() = default;
 
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;
@@ -59,11 +59,11 @@ public:
 	bool StateChanged() const override;
 
 protected:
-	static void SaveState(lcModelActionSelectionState& State, const lcModel* Model);
-	static void LoadState(const lcModelActionSelectionState& State, lcModel* Model);
+	static void SaveState(lcModelHistorySelectState& State, const lcModel* Model);
+	static void LoadState(const lcModelHistorySelectState& State, lcModel* Model);
 
-	lcModelActionSelectionState mStartState;
-	lcModelActionSelectionState mEndState;
+	lcModelHistorySelectState mStartState;
+	lcModelHistorySelectState mEndState;
 };
 
 struct lcGroupHistoryState;
@@ -71,7 +71,7 @@ struct lcPieceHistoryState;
 struct lcCameraHistoryState;
 struct lcLightHistoryState;
 
-struct lcModelHistoryState
+struct lcModelHistoryEditState
 {
 	std::vector<lcGroupHistoryState> Groups;
 	std::vector<lcPieceHistoryState> Pieces;
@@ -79,9 +79,9 @@ struct lcModelHistoryState
 	std::vector<lcLightHistoryState> Lights;
 };
 
-bool operator!=(const lcModelHistoryState& a, const lcModelHistoryState& b);
+bool operator!=(const lcModelHistoryEditState& a, const lcModelHistoryEditState& b);
 
-enum class lcModelActionEditMerge
+enum class lcModelHistoryEditMerge
 {
 	None,
 	KeyboardMove,
@@ -93,11 +93,11 @@ enum class lcModelActionEditMerge
 	PropertiesEdit = 0x40000000
 };
 
-class lcModelActionObjectEdit: public lcModelAction
+class lcModelHistoryEdit : public lcModelHistory
 {
 public:
-	lcModelActionObjectEdit(lcModelActionEditMerge ModelActionEditMerge);
-	virtual ~lcModelActionObjectEdit();
+	lcModelHistoryEdit(lcModelHistoryEditMerge ModelHistoryEditMerge);
+	virtual ~lcModelHistoryEdit();
 
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;
@@ -105,23 +105,23 @@ public:
 	void LoadEndState(lcModel* Model) const override;
 	bool StateChanged() const override;
 
-	bool CanMergeWith(const lcModelAction* Other) const override;
-	void MergeWith(lcModelAction* Other) override;
+	bool CanMergeWith(const lcModelHistory* Other) const override;
+	void MergeWith(lcModelHistory* Other) override;
 
 protected:
-	static void SaveState(lcModelHistoryState& State, const lcModel* Model);
-	static void LoadState(const lcModelHistoryState& State, lcModel* Model);
+	static void SaveState(lcModelHistoryEditState& State, const lcModel* Model);
+	static void LoadState(const lcModelHistoryEditState& State, lcModel* Model);
 
-	lcModelHistoryState mStartState;
-	lcModelHistoryState mEndState;
-	lcModelActionEditMerge mMerge;
+	lcModelHistoryEditState mStartState;
+	lcModelHistoryEditState mEndState;
+	lcModelHistoryEditMerge mMerge;
 };
 
-class lcModelActionProperties : public lcModelAction
+class lcModelHistoryProperties : public lcModelHistory
 {
 public:
-	lcModelActionProperties() = default;
-	virtual ~lcModelActionProperties() = default;
+	lcModelHistoryProperties() = default;
+	virtual ~lcModelHistoryProperties() = default;
 
 	void SaveStartState(const lcModel* Model) override;
 	void SaveEndState(const lcModel* Model) override;

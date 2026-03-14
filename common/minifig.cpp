@@ -45,8 +45,14 @@ MinifigWizard::MinifigWizard()
 		Template.ColorCodes[PartIndex] = ColorCodes[PartIndex];
 		Template.Angles[PartIndex] = 0.0f;
 	}
-
-	memset(&mMinifig, 0, sizeof(mMinifig));
+	
+	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
+	{
+		mMinifig.Parts[PartIndex] = nullptr;
+		mMinifig.ColorIndices[PartIndex] = gDefaultColor;
+		mMinifig.Angles[PartIndex] = 0.0f;
+		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
+	}
 }
 
 MinifigWizard::~MinifigWizard()

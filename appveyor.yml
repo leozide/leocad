@@ -110,7 +110,7 @@ for:
         - image: macos
 
     before_build:
-      - export PATH=$HOME/Qt/6.6/macos64/bin:$PATH
+      - export PATH=$HOME/Qt/6.6/macos/bin:$PATH
       - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
       - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT

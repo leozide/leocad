@@ -44,7 +44,7 @@ for:
     - windeployqt appdir\leocad.exe
     - copy tools\setup\leocad.nsi .
     - copy tools\setup\setup.ico .
-    - 'copy "%VCToolsRedistDir%\vcredist_x64.exe" appdir'
+    - 'copy "%VCINSTALLDIR%Redist\MSVC\v143\vcredist_x64.exe" appdir'
     - '"C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DX64 "/XOutFile LeoCAD-Windows-%VERSION%.exe" leocad.nsi'
     - set TRAVIS_TAG=%APPVEYOR_REPO_TAG_NAME%
     - set TRAVIS_REPO_SLUG=%APPVEYOR_REPO_NAME%
@@ -128,7 +128,7 @@ for:
       - macdeployqt LeoCAD.app -dmg
       - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
       - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt' 
-      - 'export REMOTE=$(awk -F"\"" "/\"sha\"[[:space:]]*:/ { print $(NF-1); exit }" Documents/master.json)'
+      - 'export REMOTE=$(awk -F"\"" "/\"sha\"[[:space:]]*:/ { print $(NF-1); exit }" repo.txt)'
       - export LOCAL=$(git rev-parse HEAD)
       - export UPLOADTOOL_ISPRERELEASE=1
       - if [[ "$REMOTE" != "$LOCAL" ]]; then echo "Build no longer current. $REMOTE vs $LOCAL - aborting upload."; exit 0; fi;

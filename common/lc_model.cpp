@@ -1985,6 +1985,7 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 	gMainWindow->UpdateModified(IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
+	gMainWindow->UpdateTimeline(true, false);
 
 	for (const std::unique_ptr<lcModelHistory>& ModelHistory : mUndoHistory.front()->HistorySequence)
 	{
@@ -1996,7 +1997,6 @@ void lcModel::EndHistorySequence(const QString& Description)
 	}
 
 	UpdateAllViews();
-	gMainWindow->UpdateTimeline(true, false);
 }
 
 void lcModel::DiscardHistorySequence()

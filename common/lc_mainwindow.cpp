@@ -3196,15 +3196,15 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_VIEW_TIME_INSERT_BEFORE:
-		lcGetActiveModel()->InsertStep(lcGetActiveModel()->GetCurrentStep());
+		lcGetActiveModel()->InsertStepAction(lcGetActiveModel()->GetCurrentStep());
 		break;
 
 	case LC_VIEW_TIME_INSERT_AFTER:
-		lcGetActiveModel()->InsertStep(lcGetActiveModel()->GetCurrentStep() + 1);
+		lcGetActiveModel()->InsertStepAction(lcGetActiveModel()->GetCurrentStep() + 1);
 		break;
 
 	case LC_VIEW_TIME_DELETE:
-		lcGetActiveModel()->RemoveStep(lcGetActiveModel()->GetCurrentStep());
+		lcGetActiveModel()->RemoveStepAction(lcGetActiveModel()->GetCurrentStep());
 		break;
 
 	case LC_VIEW_VIEWPOINT_FRONT:

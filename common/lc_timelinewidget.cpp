@@ -326,7 +326,7 @@ void lcTimelineWidget::InsertStepBefore()
 	if (Step == -1)
 		return;
 
-	gMainWindow->GetActiveModel()->InsertStep(Step + 1);
+	gMainWindow->GetActiveModel()->InsertStepAction(Step + 1);
 }
 
 void lcTimelineWidget::InsertStepAfter()
@@ -344,7 +344,7 @@ void lcTimelineWidget::InsertStepAfter()
 	if (Step == -1)
 		return;
 
-	gMainWindow->GetActiveModel()->InsertStep(Step + 2);
+	gMainWindow->GetActiveModel()->InsertStepAction(Step + 2);
 }
 
 void lcTimelineWidget::RemoveStep()
@@ -362,7 +362,7 @@ void lcTimelineWidget::RemoveStep()
 	if (Step == -1)
 		return;
 
-	gMainWindow->GetActiveModel()->RemoveStep(Step + 1);
+	gMainWindow->GetActiveModel()->RemoveStepAction(Step + 1);
 }
 
 void lcTimelineWidget::MoveSelection()
@@ -419,26 +419,9 @@ void lcTimelineWidget::MoveSelectionBefore()
 
 	Step++;
 
-	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
-
-	gMainWindow->GetActiveModel()->InsertStep(Step);
-
-	CurrentItem = topLevelItem(Step - 1);
-
-	for (QTreeWidgetItem* PieceItem : SelectedItems)
-	{
-		QTreeWidgetItem* Parent = PieceItem->parent();
-
-		if (!Parent)
-			continue;
-
-		int ChildIndex = Parent->indexOfChild(PieceItem);
-		CurrentItem->addChild(Parent->takeChild(ChildIndex));
-	}
-
-	UpdateModel();
-
 	lcModel* Model = gMainWindow->GetActiveModel();
+
+	Model->InsertStepAndMoveSelectedPieces(Step);
 
 	if (Step > static_cast<int>(Model->GetCurrentStep()))
 		Model->SetCurrentStep(Step);
@@ -461,34 +444,9 @@ void lcTimelineWidget::MoveSelectionAfter()
 
 	Step += 2;
 
-	const QList<QTreeWidgetItem*> SelectedItems = selectedItems();
-
-	gMainWindow->GetActiveModel()->InsertStep(Step);
-
-	for (int TopLevelItemIdx = topLevelItemCount(); TopLevelItemIdx < Step; TopLevelItemIdx++)
-	{
-		QTreeWidgetItem* StepItem = new QTreeWidgetItem(this, QStringList(tr("Step %1").arg(TopLevelItemIdx + 1)));
-		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
-		addTopLevelItem(StepItem);
-		StepItem->setExpanded(true);
-	}
-
-	CurrentItem = topLevelItem(Step - 1);
-
-	for (QTreeWidgetItem* PieceItem : SelectedItems)
-	{
-		QTreeWidgetItem* Parent = PieceItem->parent();
-
-		if (!Parent)
-			continue;
-
-		int ChildIndex = Parent->indexOfChild(PieceItem);
-		CurrentItem->addChild(Parent->takeChild(ChildIndex));
-	}
-
-	UpdateModel();
-
 	lcModel* Model = gMainWindow->GetActiveModel();
+
+	Model->InsertStepAndMoveSelectedPieces(Step);
 
 	if (Step > static_cast<int>(Model->GetCurrentStep()))
 		Model->SetCurrentStep(Step);

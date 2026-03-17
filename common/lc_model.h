@@ -223,8 +223,8 @@ public:
 	void ShowLastStep();
 	void ShowPreviousStep();
 	void ShowNextStep();
-	void InsertStep(lcStep Step);
-	void RemoveStep(lcStep Step);
+	void InsertStepAction(lcStep Step);
+	void RemoveStepAction(lcStep Step);
 
 	template<typename StateType, typename ObjectType>
 	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
@@ -243,6 +243,7 @@ public:
 	void RotateFocusedTrainTrack(int Direction);
 	void ShowSelectedPiecesEarlier();
 	void ShowSelectedPiecesLater();
+	void InsertStepAndMoveSelectedPieces(lcStep Step);
 	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);
 	void RenamePiece(PieceInfo* Info);
 
@@ -423,6 +424,7 @@ protected:
 	void SelectGroup(lcGroup* TopGroup, bool Select);
 
 	size_t AddPiece(lcPiece* Piece);
+	void InsertStep(lcStep Step);
 
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;

@@ -2125,9 +2125,6 @@ lcStep lcModel::GetLastStep() const
 
 void lcModel::InsertStep(lcStep Step)
 {
-	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
-
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->InsertTime(Step, 1);
 
@@ -2136,7 +2133,14 @@ void lcModel::InsertStep(lcStep Step)
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		Light->InsertTime(Step, 1);
+}
 
+void lcModel::InsertStepAction(lcStep Step)
+{
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
+
+	InsertStep(Step);
 
 	EndEditHistory();
 	EndHistorySequence(tr("Insert Step"));
@@ -2144,7 +2148,7 @@ void lcModel::InsertStep(lcStep Step)
 	SetCurrentStep(mCurrentStep);
 }
 
-void lcModel::RemoveStep(lcStep Step)
+void lcModel::RemoveStepAction(lcStep Step)
 {
 	BeginHistorySequence();
 	BeginEditHistory(lcModelHistoryEditMerge::None);
@@ -3098,6 +3102,45 @@ void lcModel::ShowSelectedPiecesLater()
 
 	EndEditHistory();
 	EndHistorySequence(tr("Show Later"));
+
+	gMainWindow->UpdateTimeline(false, false);
+	gMainWindow->UpdateSelectedObjects(false);
+}
+
+void lcModel::InsertStepAndMoveSelectedPieces(lcStep Step)
+{
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
+
+	InsertStep(Step);
+
+	std::vector<lcPiece*> MovedPieces;
+
+	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
+	{
+		lcPiece* Piece = PieceIt->get();
+
+		if (Piece->IsSelected())
+		{
+			Piece->SetStepShow(Step);
+
+			MovedPieces.emplace_back(PieceIt->release());
+			PieceIt = mPieces.erase(PieceIt);
+
+			continue;
+		}
+
+		PieceIt++;
+	}
+
+	for (lcPiece* Piece : MovedPieces)
+	{
+		Piece->SetFileLine(-1);
+		AddPiece(Piece);
+	}
+
+	EndEditHistory();
+	EndHistorySequence(tr("Show Pieces"));
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(false);

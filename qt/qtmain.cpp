@@ -128,12 +128,15 @@ static void lcInitializeSurfaceFormat(int argc, char* argv[])
 	QCoreApplication Application(argc, argv);
 	const lcCommandLineOptions Options = lcApplication::ParseCommandLineOptions();
 
+	QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+	Format.setDepthBufferSize(24);
+	Format.setStencilBufferSize(8);
+	Format.setRenderableType(QSurfaceFormat::OpenGL);
+
 	if (Options.ParseOK && Options.AASamples > 1)
-	{
-		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
 		Format.setSamples(Options.AASamples);
-		QSurfaceFormat::setDefaultFormat(Format);
-	}
+
+	QSurfaceFormat::setDefaultFormat(Format);
 }
 
 int main(int argc, char *argv[])
@@ -145,7 +148,9 @@ int main(int argc, char *argv[])
 
 	lcInitializeSurfaceFormat(argc, argv);
 
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#endif
 
 	lcApplication Application(argc, argv);
 

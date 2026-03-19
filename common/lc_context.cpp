@@ -12,7 +12,6 @@
 #include "lc_viewmanipulator.h"
 #include "lc_stringcache.h"
 #include "lc_partselectionwidget.h"
-#include <QOpenGLFunctions_3_2_Core>
 
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)
@@ -52,6 +51,7 @@ lcContext::lcContext()
 	mColorBlend = false;
 	mCullFace = false;
 	mLineWidth = 1.0f;
+	mVertexArrayObject = 0;
 
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
@@ -176,12 +176,15 @@ void lcContext::CreateShaderPrograms()
 	const char* ShaderPrefix =
 	{
 #ifndef LC_OPENGLES
-"#version 110\n"
+"#version 330 core\n"
 "#define mediump\n"
-"#define LC_VERTEX_INPUT attribute\n"
-"#define LC_VERTEX_OUTPUT varying\n"
-"#define LC_PIXEL_INPUT varying\n"
-"#define LC_PIXEL_OUTPUT\n"
+"#define texture2D texture\n"
+"#define textureCube texture\n"
+"#define LC_VERTEX_INPUT in\n"
+"#define LC_VERTEX_OUTPUT out\n"
+"#define LC_PIXEL_INPUT in\n"
+"#define gl_FragColor FragColor\n"
+"#define LC_PIXEL_OUTPUT out vec4 FragColor;\n"
 "#define LC_SHADER_PRECISION\n"
 #else
 "#version 300 es\n"

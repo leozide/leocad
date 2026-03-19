@@ -173,40 +173,58 @@ void lcContext::DestroyOffscreenContext()
 
 void lcContext::CreateShaderPrograms()
 {
-	const char* ShaderPrefix =
-	{
+	const char* ShaderPrefix;
+
 #ifndef LC_OPENGLES
-"#version 330 core\n"
-"#define mediump\n"
-"#define texture2D texture\n"
-"#define textureCube texture\n"
-"#define LC_VERTEX_INPUT in\n"
-"#define LC_VERTEX_OUTPUT out\n"
-"#define LC_PIXEL_INPUT in\n"
-"#define gl_FragColor FragColor\n"
-"#define LC_PIXEL_OUTPUT out vec4 FragColor;\n"
-"#define LC_SHADER_PRECISION\n"
+	const QSurfaceFormat Format = QOpenGLContext::currentContext()->format();
+	const bool UseModernShaders = Format.majorVersion() > 3 || (Format.majorVersion() == 3 && Format.minorVersion() >= 3);
+
+	const char* ModernShaderPrefix =
+		"#version 330 core\n"
+		"#define mediump\n"
+		"#define texture2D texture\n"
+		"#define textureCube texture\n"
+		"#define LC_VERTEX_INPUT in\n"
+		"#define LC_VERTEX_OUTPUT out\n"
+		"#define LC_PIXEL_INPUT in\n"
+		"#define gl_FragColor FragColor\n"
+		"#define LC_PIXEL_OUTPUT out vec4 FragColor;\n"
+		"#define LC_SHADER_PRECISION\n";
+
+	const char* LegacyShaderPrefix =
+		"#version 110\n"
+		"#define mediump\n"
+		"#define LC_VERTEX_INPUT attribute\n"
+		"#define LC_VERTEX_OUTPUT varying\n"
+		"#define LC_PIXEL_INPUT varying\n"
+		"#define LC_PIXEL_OUTPUT\n"
+		"#define LC_SHADER_PRECISION\n";
+
+	ShaderPrefix = UseModernShaders ? ModernShaderPrefix : LegacyShaderPrefix;
 #else
-"#version 300 es\n"
-"#define texture2D texture\n"
-"#define LC_VERTEX_INPUT in\n"
-"#define LC_VERTEX_OUTPUT out\n"
-"#define LC_PIXEL_INPUT in mediump\n"
-"#define gl_FragColor FragColor\n"
-"#define LC_PIXEL_OUTPUT out mediump vec4 gl_FragColor;\n"
-"#define LC_SHADER_PRECISION mediump\n"
+	ShaderPrefix =
+		"#version 300 es\n"
+		"#define texture2D texture\n"
+		"#define LC_VERTEX_INPUT in\n"
+		"#define LC_VERTEX_OUTPUT out\n"
+		"#define LC_PIXEL_INPUT in mediump\n"
+		"#define gl_FragColor FragColor\n"
+		"#define LC_PIXEL_OUTPUT out mediump vec4 gl_FragColor;\n"
+		"#define LC_SHADER_PRECISION mediump\n";
 #endif
 
-"#define LC_PIXEL_FAKE_LIGHTING \\\n"
-"		LC_SHADER_PRECISION vec3 Normal = normalize(PixelNormal); \\\n"
-"		LC_SHADER_PRECISION vec3 LightDirection = normalize(PixelPosition - LightPosition); \\\n"
-"		LC_SHADER_PRECISION vec3 VertexToEye = normalize(EyePosition - PixelPosition); \\\n"
-"		LC_SHADER_PRECISION vec3 LightReflect = normalize(reflect(-LightDirection, Normal)); \\\n"
-"		LC_SHADER_PRECISION float Specular = abs(dot(VertexToEye, LightReflect)); \\\n"
-"		Specular = min(pow(Specular, 8.0), 1.0) * 0.25; \\\n"
-"		LC_SHADER_PRECISION vec3 SpecularColor = vec3(Specular, Specular, Specular); \\\n"
-"		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n"
-	};
+	const char* FakeLightingDefine =
+		"#define LC_PIXEL_FAKE_LIGHTING \\\n"
+		"		LC_SHADER_PRECISION vec3 Normal = normalize(PixelNormal); \\\n"
+		"		LC_SHADER_PRECISION vec3 LightDirection = normalize(PixelPosition - LightPosition); \\\n"
+		"		LC_SHADER_PRECISION vec3 VertexToEye = normalize(EyePosition - PixelPosition); \\\n"
+		"		LC_SHADER_PRECISION vec3 LightReflect = normalize(reflect(-LightDirection, Normal)); \\\n"
+		"		LC_SHADER_PRECISION float Specular = abs(dot(VertexToEye, LightReflect)); \\\n"
+		"		Specular = min(pow(Specular, 8.0), 1.0) * 0.25; \\\n"
+		"		LC_SHADER_PRECISION vec3 SpecularColor = vec3(Specular, Specular, Specular); \\\n"
+		"		LC_SHADER_PRECISION float Diffuse = min(abs(dot(Normal, LightDirection)) * 0.6 + 0.65, 1.0);\n";
+
+	const QByteArray ShaderHeader = QByteArray(ShaderPrefix) + FakeLightingDefine;
 
 	const char* const VertexShaders[] =
 	{
@@ -236,14 +254,14 @@ void lcContext::CreateShaderPrograms()
 
 	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
 
-	const auto LoadShader = [this, ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	const auto LoadShader = [this, &ShaderHeader](const char* FileName, GLuint ShaderType) -> GLuint
 	{
 		QFile ShaderFile(FileName);
 
 		if (!ShaderFile.open(QIODevice::ReadOnly))
 			return 0;
 
-		QByteArray Data = ShaderPrefix + ShaderFile.readAll();
+		QByteArray Data = ShaderHeader + ShaderFile.readAll();
 		const char* Source = Data.constData();
 
 		const GLuint Shader = glCreateShader(ShaderType);

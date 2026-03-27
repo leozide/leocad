@@ -2793,7 +2793,7 @@
         <location filename="../common/project.cpp" line="1763"/>
         <location filename="../common/project.cpp" line="1809"/>
         <source>Could not find LGEO files in folder &apos;%1&apos;.</source>
-        <translation>在文件夹 &apos;%1&apos; 中找不到 LGEO 文件。</translation>
+        <translation>在文件夹 &apos;%1&apos; 中找不到 LEGO 文件。</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="2034"/>
@@ -6729,7 +6729,7 @@ Anisotropic: %5
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="295"/>
         <source>&amp;LGEO Library:</source>
-        <translation>LGEO 库:</translation>
+        <translation>LEGO 库:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="322"/>

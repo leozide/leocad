@@ -131,7 +131,9 @@ static void lcInitializeSurfaceFormat(int argc, char* argv[])
 	QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
 	Format.setDepthBufferSize(24);
 	Format.setStencilBufferSize(8);
+#ifndef LC_OPENGLES
 	Format.setRenderableType(QSurfaceFormat::OpenGL);
+#endif
 
 	if (Options.ParseOK && Options.AASamples > 1)
 		Format.setSamples(Options.AASamples);

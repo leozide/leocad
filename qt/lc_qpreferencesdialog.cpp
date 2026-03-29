@@ -16,7 +16,7 @@
 
 static const char* gLanguageLocales[] =
 {
-	"", "cs_CZ", "de_DE", "en_US", "fr_FR", "pt_PT", "es_ES"
+    "", "cs_CZ", "de_DE", "en_US", "fr_FR", "pt_PT", "es_ES", "zh_CN"
 };
 
 lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options)

@@ -7837,49 +7837,49 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQUpdateDialog</name>
+    <name>lcUpdateDialog</name>
     <message>
-        <location filename="../qt/lc_qupdatedialog.ui" line="14"/>
+        <location filename="../common/lc_updatedialog.ui" line="14"/>
         <source>LeoCAD Updates</source>
         <translation>Mises à jour LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="37"/>
+        <location filename="../common/lc_updatedialog.cpp" line="37"/>
         <source>Connecting to update server...</source>
         <translation>Connexion au serveur de mise à jour…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="108"/>
+        <location filename="../common/lc_updatedialog.cpp" line="108"/>
         <source>&lt;p&gt;There&apos;s a newer version of LeoCAD available for download (%1.%2.%3).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il y a une nouvelle version de LeoCAD disponible au téléchargement (%1.%2.%3).&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="110"/>
+        <location filename="../common/lc_updatedialog.cpp" line="110"/>
         <source>&lt;p&gt;You are using the latest LeoCAD version.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Vous utilisez la dernière version de LeoCAD.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="118"/>
+        <location filename="../common/lc_updatedialog.cpp" line="118"/>
         <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il y a de nouvelle pièces disponibles.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="122"/>
+        <location filename="../common/lc_updatedialog.cpp" line="122"/>
         <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Il n’y a pas de nouvelle pièces disponibles en ce moment.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="127"/>
+        <location filename="../common/lc_updatedialog.cpp" line="127"/>
         <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; to download.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="133"/>
+        <location filename="../common/lc_updatedialog.cpp" line="133"/>
         <source>Error parsing update information.</source>
         <translation>Erreur à la lecture des informations de mise à jour.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qupdatedialog.cpp" line="138"/>
+        <location filename="../common/lc_updatedialog.cpp" line="138"/>
         <source>Error connecting to the update server.</source>
         <translation>Erreur à la connexion au serveur de mise à jour.</translation>
     </message>

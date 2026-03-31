@@ -8,7 +8,7 @@
 #include "lc_viewwidget.h"
 #include "lc_colorlist.h"
 #include "lc_qutils.h"
-#include "lc_qupdatedialog.h"
+#include "lc_updatedialog.h"
 #include "lc_aboutdialog.h"
 #include "lc_setsdatabasedialog.h"
 #include "lc_qhtmldialog.h"
@@ -1299,7 +1299,7 @@ void lcMainWindow::Print(QPrinter* Printer)
 
 void lcMainWindow::ShowUpdatesDialog()
 {
-	lcQUpdateDialog Dialog(this, false);
+	lcUpdateDialog Dialog(this, false);
 	Dialog.exec();
 }
 

@@ -227,6 +227,7 @@ SOURCES += \
 	common/lc_thumbnailmanager.cpp \
 	common/lc_timelinewidget.cpp \
 	common/lc_traintrack.cpp \
+	common/lc_updatedialog.cpp \
 	common/lc_view.cpp \
 	common/lc_viewmanipulator.cpp \
 	common/lc_viewsphere.cpp \
@@ -238,7 +239,6 @@ SOURCES += \
 	qt/lc_qhtmldialog.cpp \
 	qt/lc_qpreferencesdialog.cpp \
 	qt/lc_qimagedialog.cpp \
-	qt/lc_qupdatedialog.cpp \
 	qt/lc_qutils.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp
@@ -306,6 +306,7 @@ HEADERS += \
 	common/lc_thumbnailmanager.h \
 	common/lc_timelinewidget.h \
 	common/lc_traintrack.h \
+	common/lc_updatedialog.h \
 	common/lc_view.h \
 	common/lc_viewmanipulator.h \
 	common/lc_viewsphere.h \
@@ -316,20 +317,11 @@ HEADERS += \
 	qt/lc_qhtmldialog.h \
 	qt/lc_qpreferencesdialog.h \
 	qt/lc_qimagedialog.h \
-	qt/lc_qupdatedialog.h \
 	qt/lc_qutils.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h
 FORMS += \
-	qt/lc_qselectdialog.ui \
-	qt/lc_qpropertiesdialog.ui \
-	qt/lc_qhtmldialog.ui \
-	qt/lc_qpreferencesdialog.ui \
-	qt/lc_qimagedialog.ui \
-	qt/lc_qupdatedialog.ui \
-	qt/lc_renderdialog.ui \
-	qt/lc_setsdatabasedialog.ui \
 	common/lc_aboutdialog.ui \
 	common/lc_arraydialog.ui \
 	common/lc_categorydialog.ui \
@@ -338,7 +330,15 @@ FORMS += \
 	common/lc_minifigdialog.ui \
 	common/lc_modellistdialog.ui \
 	common/lc_pagesetupdialog.ui \
-	common/lc_partpalettedialog.ui
+	common/lc_partpalettedialog.ui \
+	common/lc_updatedialog.ui \
+	qt/lc_qselectdialog.ui \
+	qt/lc_qpropertiesdialog.ui \
+	qt/lc_qhtmldialog.ui \
+	qt/lc_qpreferencesdialog.ui \
+	qt/lc_qimagedialog.ui \
+	qt/lc_renderdialog.ui \
+	qt/lc_setsdatabasedialog.ui
 OTHER_FILES +=
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc
 

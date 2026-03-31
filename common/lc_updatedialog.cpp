@@ -1,6 +1,6 @@
 #include "lc_global.h"
 #include "lc_updatedialog.h"
-#include "ui_lc_qupdatedialog.h"
+#include "ui_lc_updatedialog.h"
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_profile.h"

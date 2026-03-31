@@ -48,7 +48,7 @@ win32-msvc* {
 	LIBS += -ladvapi32 -lshell32 -lopengl32 -luser32
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
-	LIBS += -lz -lopengl32
+	LIBS += -lz
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 }
 

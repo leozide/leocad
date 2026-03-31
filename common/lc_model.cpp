@@ -18,7 +18,7 @@
 #include "lc_qselectdialog.h"
 #include "lc_minifigdialog.h"
 #include "lc_groupdialog.h"
-#include "lc_qeditgroupsdialog.h"
+#include "lc_editgroupsdialog.h"
 #include "lc_qpropertiesdialog.h"
 #include "lc_qutils.h"
 #include "lc_lxf.h"
@@ -2380,7 +2380,7 @@ void lcModel::RemoveFocusPieceFromGroup()
 
 void lcModel::ShowEditGroupsDialog()
 {
-	lcQEditGroupsDialog Dialog(gMainWindow, this);
+	lcEditGroupsDialog Dialog(gMainWindow, this);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
@@ -2388,7 +2388,7 @@ void lcModel::ShowEditGroupsDialog()
 	BeginHistorySequence();
 	BeginEditHistory(lcModelHistoryEditMerge::None);
 
-	std::function<void(const lcQEditGroupsDialog::GroupInfo&, lcGroup*)> UpdateGroups=[this, &UpdateGroups](const lcQEditGroupsDialog::GroupInfo& GroupInfo, lcGroup* ParentGroup)
+	std::function<void(const lcEditGroupsDialog::GroupInfo&, lcGroup*)> UpdateGroups=[this, &UpdateGroups](const lcEditGroupsDialog::GroupInfo& GroupInfo, lcGroup* ParentGroup)
 	{
 		lcGroup* Group = GroupInfo.Group;
 
@@ -2401,16 +2401,16 @@ void lcModel::ShowEditGroupsDialog()
 		Group->mName = GroupInfo.Name;
 		Group->mGroup = ParentGroup;
 
-		for (const lcQEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
+		for (const lcEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
 			UpdateGroups(ChildGroupInfo, Group);
 
 		for (lcPiece* Piece : GroupInfo.ChildPieces)
 			Piece->SetGroup(Group);
 	};
 
-	lcQEditGroupsDialog::GroupInfo GroupInfo = Dialog.GetGroups();
+	lcEditGroupsDialog::GroupInfo GroupInfo = Dialog.GetGroups();
 
-	for (const lcQEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
+	for (const lcEditGroupsDialog::GroupInfo& ChildGroupInfo : GroupInfo.ChildGroups)
 		UpdateGroups(ChildGroupInfo, nullptr);
 
 	for (lcPiece* Piece : GroupInfo.ChildPieces)

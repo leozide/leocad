@@ -191,6 +191,7 @@ SOURCES += \
 	common/lc_context.cpp \
 	common/lc_doublespinbox.cpp \
 	common/lc_edgecolordialog.cpp \
+	common/lc_editgroupsdialog.cpp \
 	common/lc_file.cpp \
 	common/lc_filter.cpp \
 	common/lc_findreplacewidget.cpp \
@@ -232,7 +233,6 @@ SOURCES += \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
 	qt/qtmain.cpp \
-	qt/lc_qeditgroupsdialog.cpp \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qhtmldialog.cpp \
@@ -269,6 +269,7 @@ HEADERS += \
 	common/lc_context.h \
 	common/lc_doublespinbox.h \
 	common/lc_edgecolordialog.h \
+	common/lc_editgroupsdialog.h \
 	common/lc_file.h \
 	common/lc_filter.h \
 	common/lc_findreplacewidget.h \
@@ -310,7 +311,6 @@ HEADERS += \
 	common/lc_viewsphere.h \
 	common/lc_viewwidget.h \
 	common/lc_zipfile.h \
-	qt/lc_qeditgroupsdialog.h \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
 	qt/lc_qhtmldialog.h \
@@ -322,7 +322,6 @@ HEADERS += \
 	qt/lc_setsdatabasedialog.h \
 	common/lc_partpalettedialog.h
 FORMS += \
-	qt/lc_qeditgroupsdialog.ui \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
 	qt/lc_qhtmldialog.ui \
@@ -334,6 +333,7 @@ FORMS += \
 	common/lc_aboutdialog.ui \
 	common/lc_arraydialog.ui \
 	common/lc_categorydialog.ui \
+	common/lc_editgroupsdialog.ui \
 	common/lc_groupdialog.ui \
 	common/lc_minifigdialog.ui \
 	common/lc_modellistdialog.ui \

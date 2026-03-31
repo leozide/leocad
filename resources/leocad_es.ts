@@ -6274,19 +6274,19 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQEditGroupsDialog</name>
+    <name>lcEditGroupsDialog</name>
     <message>
-        <location filename="../qt/lc_qeditgroupsdialog.ui" line="14"/>
+        <location filename="../common/lc_editgroupsdialog.ui" line="14"/>
         <source>Edit Groups</source>
         <translation>Editar grupos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="20"/>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="20"/>
         <source>New Group</source>
         <translation>Nuevo grupo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qeditgroupsdialog.cpp" line="59"/>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="59"/>
         <source>Group #</source>
         <translation>Grupo #</translation>
     </message>

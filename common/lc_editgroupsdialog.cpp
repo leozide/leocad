@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qeditgroupsdialog.h"
-#include "ui_lc_qeditgroupsdialog.h"
+#include "lc_editgroupsdialog.h"
+#include "ui_lc_editgroupsdialog.h"
 #include "lc_model.h"
 #include "piece.h"
 #include "group.h"
@@ -24,7 +24,7 @@ public:
 
 		QString Text = LineEdit->text().trimmed();
 
-		lcQEditGroupsDialog* Dialog = qobject_cast<lcQEditGroupsDialog*>(parent());
+		lcEditGroupsDialog* Dialog = qobject_cast<lcEditGroupsDialog*>(parent());
 
 		if (Dialog && !Dialog->CanRenameGroup(Text))
 			return;
@@ -33,16 +33,16 @@ public:
 	}
 };
 
-lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const lcModel* Model)
+lcEditGroupsDialog::lcEditGroupsDialog(QWidget* Parent, const lcModel* Model)
     : QDialog(Parent), mModel(Model)
 {
-	ui = new Ui::lcQEditGroupsDialog;
+	ui = new Ui::lcEditGroupsDialog;
 
 	ui->setupUi(this);
 
 	QPushButton* NewGroup = ui->buttonBox->addButton(tr("&New Group"), QDialogButtonBox::ActionRole);
 
-	connect(NewGroup, &QPushButton::clicked, this, &lcQEditGroupsDialog::NewGroupClicked);
+	connect(NewGroup, &QPushButton::clicked, this, &lcEditGroupsDialog::NewGroupClicked);
 
 	PopulateTree();
 
@@ -50,12 +50,12 @@ lcQEditGroupsDialog::lcQEditGroupsDialog(QWidget* Parent, const lcModel* Model)
 	ui->treeWidget->expandAll();
 }
 
-lcQEditGroupsDialog::~lcQEditGroupsDialog()
+lcEditGroupsDialog::~lcEditGroupsDialog()
 {
 	delete ui;
 }
 
-bool lcQEditGroupsDialog::CanRenameGroup(const QString& Text) const
+bool lcEditGroupsDialog::CanRenameGroup(const QString& Text) const
 {
 	if (Text.isEmpty())
 		return false;
@@ -79,7 +79,7 @@ bool lcQEditGroupsDialog::CanRenameGroup(const QString& Text) const
 	return ScanGroups(ui->treeWidget->invisibleRootItem());
 }
 
-void lcQEditGroupsDialog::NewGroupClicked()
+void lcEditGroupsDialog::NewGroupClicked()
 {
 	QTreeWidgetItem* CurrentItem = ui->treeWidget->currentItem();
 
@@ -126,9 +126,9 @@ void lcQEditGroupsDialog::NewGroupClicked()
 	GroupItem->setExpanded(true);
 }
 
-lcQEditGroupsDialog::GroupInfo lcQEditGroupsDialog::GetGroupInfo(QTreeWidgetItem* ParentItem) const
+lcEditGroupsDialog::GroupInfo lcEditGroupsDialog::GetGroupInfo(QTreeWidgetItem* ParentItem) const
 {
-	lcQEditGroupsDialog::GroupInfo GroupInfo;
+	lcEditGroupsDialog::GroupInfo GroupInfo;
 
 	GroupInfo.Name = ParentItem->text(0);
 
@@ -153,12 +153,12 @@ lcQEditGroupsDialog::GroupInfo lcQEditGroupsDialog::GetGroupInfo(QTreeWidgetItem
 	return GroupInfo;
 }
 
-lcQEditGroupsDialog::GroupInfo lcQEditGroupsDialog::GetGroups() const
+lcEditGroupsDialog::GroupInfo lcEditGroupsDialog::GetGroups() const
 {
 	return GetGroupInfo(ui->treeWidget->invisibleRootItem());
 }
 
-void lcQEditGroupsDialog::PopulateTree()
+void lcEditGroupsDialog::PopulateTree()
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = mModel->GetGroups();
 	std::unordered_map<lcGroup*, QTreeWidgetItem*> AddedGroups;

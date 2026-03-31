@@ -1,16 +1,16 @@
 #pragma once
 
 namespace Ui {
-class lcQEditGroupsDialog;
+class lcEditGroupsDialog;
 }
 
-class lcQEditGroupsDialog : public QDialog
+class lcEditGroupsDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQEditGroupsDialog(QWidget* Parent, const lcModel* Model);
-	virtual ~lcQEditGroupsDialog();
+	lcEditGroupsDialog(QWidget* Parent, const lcModel* Model);
+	virtual ~lcEditGroupsDialog();
 
 	struct GroupInfo
 	{
@@ -36,6 +36,6 @@ protected:
 	GroupInfo GetGroupInfo(QTreeWidgetItem* ParentItem) const;
 	void PopulateTree();
 
-	Ui::lcQEditGroupsDialog* ui = nullptr;
+	Ui::lcEditGroupsDialog* ui = nullptr;
 	const lcModel* mModel = nullptr;
 };

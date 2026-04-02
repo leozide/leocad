@@ -32,6 +32,14 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	delete ui->povrayLayout;
 #endif
 
+	ui->Language->addItem("\u010cesky");
+	ui->Language->addItem("Deutsch");
+	ui->Language->addItem("English");
+	ui->Language->addItem("Fran\u00e7ais");
+	ui->Language->addItem("Portugu\u00eas");
+	ui->Language->addItem("Espa\u00f1ol");
+	ui->Language->addItem("\u7b80\u4f53\u4e2d\u6587");
+
 	connect(ui->BackgroundSolidColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->BackgroundGradient1ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->BackgroundGradient2ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);

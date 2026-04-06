@@ -50,36 +50,6 @@
               <string>Default</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>Czech</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Deutsch </string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>English</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Français</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Português</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Español</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="2" column="1">

@@ -343,5 +343,5 @@ OTHER_FILES +=
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc
 
 !win32 {
-        TRANSLATIONS = resources/leocad_cs.ts resources/leocad_de.ts resources/leocad_es.ts resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_ru.ts resources/leocad_uk.ts resources/leocad_zh_CN.ts
+	TRANSLATIONS = resources/leocad_cs.ts resources/leocad_de.ts resources/leocad_es.ts resources/leocad_fr.ts resources/leocad_pt.ts resources/leocad_ru.ts resources/leocad_uk.ts resources/leocad_zh_CN.ts
 }

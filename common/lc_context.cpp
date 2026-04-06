@@ -12,7 +12,6 @@
 #include "lc_viewmanipulator.h"
 #include "lc_stringcache.h"
 #include "lc_partselectionwidget.h"
-#include <QOpenGLFunctions_3_2_Core>
 
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)

@@ -87,6 +87,30 @@ void lcViewWidget::paintGL()
 	mView->OnDraw();
 }
 
+bool lcViewWidget::event(QEvent* Event)
+{
+	if (Event->type() == QEvent::NativeGesture)
+	{
+		QNativeGestureEvent* GestureEvent = static_cast<QNativeGestureEvent*>(Event);
+
+		switch (GestureEvent->gestureType())
+		{
+		case Qt::ZoomNativeGesture:
+			mView->Zoom(GestureEvent->value() * 100.0f);
+			break;
+			
+		case Qt::SmartZoomNativeGesture:
+			mView->ZoomExtents();
+			break;
+
+		default:
+			break;		
+		}
+	}
+
+	return QWidget::event(Event);
+}
+
 void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
 {
 	if (mView)

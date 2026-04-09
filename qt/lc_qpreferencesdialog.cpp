@@ -64,6 +64,7 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	connect(ui->ControlPointColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->ControlPointFocusedColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->categoriesTree, &QTreeWidget::itemSelectionChanged, this, &lcQPreferencesDialog::updateParts);
+	connect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcQPreferencesDialog::CategoriesDropped);
 	ui->shortcutEdit->installEventFilter(this);
 	connect(ui->commandList, &QTreeWidget::currentItemChanged, this, &lcQPreferencesDialog::commandChanged);
 	connect(ui->mouseTree, &QTreeWidget::currentItemChanged, this, &lcQPreferencesDialog::MouseTreeItemChanged);
@@ -689,6 +690,7 @@ void lcQPreferencesDialog::updateCategories()
 {
 	QTreeWidgetItem* CategoryItem;
 	QTreeWidget* CategoriesTree = ui->categoriesTree;
+	QSignalBlocker Blocker(CategoriesTree->model());
 
 	CategoriesTree->clear();
 
@@ -696,10 +698,12 @@ void lcQPreferencesDialog::updateCategories()
 	{
 		CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(mOptions->Categories[CategoryIndex].Name));
 		CategoryItem->setData(0, CategoryRole, QVariant(CategoryIndex));
+		CategoryItem->setFlags(CategoryItem->flags() & ~Qt::ItemFlag::ItemIsDropEnabled);
 	}
 
 	CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(tr("Unassigned")));
 	CategoryItem->setData(0, CategoryRole, QVariant(-1));
+	CategoryItem->setFlags(CategoryItem->flags() & ~Qt::ItemFlag::ItemIsDropEnabled);
 }
 
 void lcQPreferencesDialog::updateParts()
@@ -755,6 +759,27 @@ void lcQPreferencesDialog::updateParts()
 
 	tree->resizeColumnToContents(0);
 	tree->resizeColumnToContents(1);
+}
+
+void lcQPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int First, int Last)
+{
+	std::vector<lcLibraryCategory> Categories;
+
+	for (int Row = 0; Row < ui->categoriesTree->topLevelItemCount(); Row++)
+	{
+		QTreeWidgetItem* CategoryItem = ui->categoriesTree->topLevelItem(Row);
+		size_t CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
+
+		if (CategoryIndex >= 0 && CategoryIndex < mOptions->Categories.size())
+		{
+			Categories.emplace_back(mOptions->Categories[CategoryIndex]);
+			CategoryItem->setData(0, CategoryRole, Row);
+		}
+	}
+
+	mOptions->CategoriesModified = true;
+	mOptions->CategoriesDefault = false;
+	mOptions->Categories = std::move(Categories);
 }
 
 void lcQPreferencesDialog::on_newCategory_clicked()

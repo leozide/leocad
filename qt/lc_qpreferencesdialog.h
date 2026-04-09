@@ -81,6 +81,7 @@ public slots:
 	void on_ViewSphereSizeCombo_currentIndexChanged(int Index);
 	void on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index);
 	void updateParts();
+	void CategoriesDropped(const QModelIndex& Parent, int First, int Last);
 	void on_newCategory_clicked();
 	void on_editCategory_clicked();
 	void on_deleteCategory_clicked();

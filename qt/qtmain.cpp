@@ -156,7 +156,11 @@ int main(int argc, char *argv[])
 		Locale = QLocale(Language);
 
 	QTranslator QtTranslator;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	if (QtTranslator.load(Locale, "qt", "_", QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+#else
 	if (QtTranslator.load(Locale, "qt", "_", QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+#endif
 		Application.installTranslator(&QtTranslator);
 #ifdef Q_OS_WIN
 	else if (QtTranslator.load(Locale, "qt", "_", qApp->applicationDirPath() + "/translations"))
@@ -164,7 +168,11 @@ int main(int argc, char *argv[])
 #endif
 
 	QTranslator QtBaseTranslator;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	if (QtBaseTranslator.load("qtbase_" + Locale.name(), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+#else
 	if (QtBaseTranslator.load("qtbase_" + Locale.name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+#endif
 		Application.installTranslator(&QtBaseTranslator);
 #ifdef Q_OS_WIN
 	else if (QtBaseTranslator.load("qtbase_" + Locale.name(), qApp->applicationDirPath() + "/translations"))

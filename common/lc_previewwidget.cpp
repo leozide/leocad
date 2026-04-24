@@ -20,7 +20,7 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	mLockAction->setCheckable(true);
 	mLockAction->setChecked(false);
 	mLockAction->setShortcut(tr("Ctrl+L"));
-	connect(mLockAction, SIGNAL(triggered()), this, SLOT(SetPreviewLock()));
+	connect(mLockAction, &QAction::triggered, this, &lcPreviewDockWidget::SetPreviewLock);
 	SetPreviewLock();
 
 	mLabel = new QLabel();

@@ -865,7 +865,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	mFilterCaseAction->setToolTip(tr("Match Case"));
 	mFilterCaseAction->setCheckable(true);
 	mFilterCaseAction->setChecked(false);
-	connect(mFilterCaseAction, SIGNAL(triggered()), this, SLOT(FilterCaseTriggered()));
+	connect(mFilterCaseAction, &QAction::triggered, this, &lcPartSelectionWidget::FilterCaseTriggered);
 
 	QToolButton* FilterCaseButton = new QToolButton();
 	FilterCaseButton->setDefaultAction(mFilterCaseAction);
@@ -900,7 +900,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 
 	QMenu* OptionsMenu = new QMenu(this);
 	OptionsButton->setMenu(OptionsMenu);
-	connect(OptionsMenu, SIGNAL(aboutToShow()), this, SLOT(OptionsMenuAboutToShow()));
+	connect(OptionsMenu, &QMenu::aboutToShow, this, &lcPartSelectionWidget::OptionsMenuAboutToShow);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget, this);
 	PartsLayout->addWidget(mPartsWidget);

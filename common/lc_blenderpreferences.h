@@ -105,8 +105,8 @@ private slots:
 	void ColorButtonClicked(bool);
 	void SetModelSize(bool = false);
 	void ValidateColourScheme(int);
-	void SettingChanged(int = -1);
-	void SettingChanged(const QString&);
+	void SettingIndexChanged(int = -1);
+	void SettingTextChanged(const QString&);
 	void PathChanged();
 	bool PromptAccept();
 	void Update();

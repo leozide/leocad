@@ -115,11 +115,11 @@ void lcMainWindow::CreateWidgets()
 	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 	setCentralWidget(mModelTabWidget);
 
-	connect(mModelTabWidget->tabBar(), SIGNAL(tabCloseRequested(int)), this, SLOT(ModelTabClosed(int)));
-	connect(mModelTabWidget->tabBar(), SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(ModelTabContextMenuRequested(const QPoint&)));
-	connect(mModelTabWidget, SIGNAL(currentChanged(int)), this, SLOT(ModelTabChanged(int)));
+	connect(mModelTabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &lcMainWindow::ModelTabClosed);
+	connect(mModelTabWidget->tabBar(), &QTabBar::customContextMenuRequested, this, &lcMainWindow::ModelTabContextMenuRequested);
+	connect(mModelTabWidget, &QTabWidget::currentChanged, this, &lcMainWindow::ModelTabChanged);
 
-	connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(ClipboardChanged()));
+	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &lcMainWindow::ClipboardChanged);
 	ClipboardChanged();
 
 	QSettings Settings;
@@ -138,7 +138,7 @@ void lcMainWindow::CreateActions()
 	{
 		QAction* Action = new QAction(qApp->translate("Menu", gCommands[CommandIdx].MenuName), this);
 		Action->setStatusTip(qApp->translate("Status", gCommands[CommandIdx].StatusText));
-		connect(Action, SIGNAL(triggered()), this, SLOT(ActionTriggered()));
+		connect(Action, &QAction::triggered, this, &lcMainWindow::ActionTriggered);
 		addAction(Action);
 		mActions[CommandIdx] = Action;
 	}
@@ -541,7 +541,7 @@ void lcMainWindow::CreateMenus()
 	ViewMenu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 	ViewMenu->addSeparator();
 	QMenu* ToolBarsMenu = ViewMenu->addMenu(tr("T&oolbars"));
-	connect(ToolBarsMenu, SIGNAL(aboutToShow()), this, SLOT(UpdateDockWidgetActions()));
+	connect(ToolBarsMenu, &QMenu::aboutToShow, this, &lcMainWindow::UpdateDockWidgetActions);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PARTS]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_COLORS]);
 	ToolBarsMenu->addAction(mActions[LC_VIEW_TOOLBAR_PROPERTIES]);
@@ -736,7 +736,7 @@ void lcMainWindow::CreateToolBars()
 	mColorButton->setToolTip(tr("Change Selection Color"));
 	ColorButtonLayout->addWidget(mColorButton);
 
-	connect(mColorButton, SIGNAL(clicked()), this, SLOT(ColorButtonClicked()));
+	connect(mColorButton, &QToolButton::clicked, this, &lcMainWindow::ColorButtonClicked);
 
 	ColorLayout->addWidget(mColorList);
 
@@ -775,9 +775,9 @@ void lcMainWindow::CreateToolBars()
 
 	PropertiesLayout->addWidget(TransformWidget);
 
-	connect(mTransformXEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
-	connect(mTransformYEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
-	connect(mTransformZEdit, SIGNAL(returnPressed()), mActions[LC_EDIT_TRANSFORM], SIGNAL(triggered()));
+	connect(mTransformXEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
+	connect(mTransformYEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
+	connect(mTransformZEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 
 	mPropertiesToolBar->setWidget(PropertiesWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPropertiesToolBar);
@@ -797,10 +797,10 @@ void lcMainWindow::CreateToolBars()
 	tabifyDockWidget(mPropertiesToolBar, mTimelineToolBar);
 	tabifyDockWidget(mTimelineToolBar, mPreviewToolBar);
 
-	connect(mPropertiesToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
-	connect(mTimelineToolBar,   SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
-	connect(mPartsToolBar,      SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
-	connect(mColorsToolBar,     SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
+	connect(mPropertiesToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
+	connect(mTimelineToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
+	connect(mPartsToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
+	connect(mColorsToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
 
 	mPartsToolBar->raise();
 }
@@ -809,7 +809,7 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 {
 	lcView* NewView = new lcView(lcViewType::View, Model);
 
-	connect(NewView, SIGNAL(FocusReceived()), this, SLOT(ViewFocusReceived()));
+	connect(NewView, &lcView::FocusReceived, this, &lcMainWindow::ViewFocusReceived);
 
 	AddView(NewView);
 
@@ -834,7 +834,7 @@ void lcMainWindow::CreatePreviewWidget()
 	mPreviewToolBar->setWidget(mPreviewWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPreviewToolBar);
 
-	connect(mPreviewToolBar, SIGNAL(topLevelChanged(bool)), this, SLOT(EnableWindowFlags(bool)));
+	connect(mPreviewToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
 }
 
 void lcMainWindow::TogglePreviewWidget(bool Visible)
@@ -1939,7 +1939,7 @@ void lcMainWindow::TogglePrintPreview()
 	Printer.setFromTo(1, PageCount + 1);
 
 	QPrintPreviewDialog Preview(&Printer, this);
-	connect(&Preview, SIGNAL(paintRequested(QPrinter*)), SLOT(Print(QPrinter*)));
+	connect(&Preview, &QPrintPreviewDialog::paintRequested, this, &lcMainWindow::Print);
 	Preview.exec();
 #endif
 }

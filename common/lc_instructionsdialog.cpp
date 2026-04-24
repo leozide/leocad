@@ -189,7 +189,7 @@ lcInstructionsPageListWidget::lcInstructionsPageListWidget(QWidget* Parent, lcIn
 	PageSetupButton->setText(tr("Page Setup"));
 	ButtonsLayout->addWidget(PageSetupButton);
 
-	connect(PageSetupButton, SIGNAL(clicked()), this, SLOT(ShowPageSetupDialog()));
+	connect(PageSetupButton, &QToolButton::clicked, this, &lcInstructionsPageListWidget::ShowPageSetupDialog);
 
 	ButtonsLayout->addStretch(1);
 
@@ -570,14 +570,14 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
 		mPageListWidget->mThumbnailsWidget->addItem(QString(tr("Page %1")).arg(PageNumber + 1));
 
-	connect(mPageListWidget->mThumbnailsWidget, SIGNAL(currentRowChanged(int)), this, SLOT(CurrentThumbnailChanged(int)));
+	connect(mPageListWidget->mThumbnailsWidget, &QListWidget::currentRowChanged, this, &lcInstructionsDialog::CurrentThumbnailChanged);
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
 
 	connect(mPrintAction, &QAction::triggered, this, &lcInstructionsDialog::ShowPrintDialog);
-	connect(mVerticalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
-	connect(mHorizontalPageAction, SIGNAL(toggled(bool)), this, SLOT(UpdatePageSettings()));
-	connect(mRowsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
-	connect(mColumnsSpinBox, SIGNAL(valueChanged(int)), this, SLOT(UpdatePageSettings()));
+	connect(mVerticalPageAction, &QAction::toggled, this, &lcInstructionsDialog::UpdatePageSettings);
+	connect(mHorizontalPageAction, &QAction::toggled, this, &lcInstructionsDialog::UpdatePageSettings);
+	connect(mRowsSpinBox, &QSpinBox::valueChanged, this, &lcInstructionsDialog::UpdatePageSettings);
+	connect(mColumnsSpinBox, &QSpinBox::valueChanged, this, &lcInstructionsDialog::UpdatePageSettings);
 }
 
 void lcInstructionsDialog::ShowPrintDialog()

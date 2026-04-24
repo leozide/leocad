@@ -32,7 +32,7 @@ lcUpdateDialog::lcUpdateDialog(QWidget* Parent, bool InitialUpdate)
 {
 	ui->setupUi(this);
 
-	connect(this, SIGNAL(finished(int)), this, SLOT(finished(int)));
+	connect(this, &QDialog::finished, this, &lcUpdateDialog::finished);
 
 	ui->status->setText(tr("Connecting to update server..."));
 

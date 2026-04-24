@@ -26,7 +26,6 @@
 #include "lc_http.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
-#include "lc_qutils.h"
 #include "project.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -288,26 +287,26 @@ lcBlenderPreferencesDialog::lcBlenderPreferencesDialog(int Width, int Height, do
 	mApplyButton->setToolTip(tr("Apply addon paths and settings preferences"));
 	mApplyButton->setEnabled(false);
 	ButtonBox->addButton(mApplyButton, QDialogButtonBox::ActionRole);
-	connect(mApplyButton,SIGNAL(clicked()), this, SLOT(accept()));
+	connect(mApplyButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::accept);
 
 	mPathsButton = new QPushButton(tr("Hide Paths"), ButtonBox);
 	mPathsButton->setToolTip(tr("Hide addon path preferences dialog"));
 	ButtonBox->addButton(mPathsButton,QDialogButtonBox::ActionRole);
-	connect(mPathsButton,SIGNAL(clicked()), this, SLOT(ShowPathsGroup()));
+	connect(mPathsButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ShowPathsGroup);
 
 	mResetButton = new QPushButton(tr("Reset"), ButtonBox);
 	mResetButton->setEnabled(false);
 	mResetButton->setToolTip(tr("Reset addon paths and settings preferences"));
 	ButtonBox->addButton(mResetButton,QDialogButtonBox::ActionRole);
-	connect(mResetButton,SIGNAL(clicked()), this, SLOT(ResetSettings()));
+	connect(mResetButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ResetSettings);
 
 	ButtonBox->addButton(QDialogButtonBox::Cancel);
-	connect(ButtonBox,SIGNAL(rejected()), this, SLOT(reject()));
+	connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcBlenderPreferencesDialog::reject);
 
 	if (!QFileInfo(lcGetProfileString(LC_PROFILE_BLENDER_LDRAW_CONFIG_PATH)).isReadable() && !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty())
 		mApplyButton->setEnabled(true);
 
-	connect(mPreferences,SIGNAL(SettingChangedSig(bool)), this, SLOT(EnableButton(bool)));
+	connect(mPreferences, &lcBlenderPreferences::SettingChangedSig, this, &lcBlenderPreferencesDialog::EnableButton);
 
 	Layout->addWidget(ButtonBox);
 
@@ -440,12 +439,12 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	QLineEdit* PathLineEdit = new QLineEdit(BlenderExeBox);
 	mExeGridLayout->addWidget(PathLineEdit,1,1);
 	mPathLineEditList << PathLineEdit;
-	connect(PathLineEdit, SIGNAL(editingFinished()), this, SLOT(ConfigureBlenderAddon()));
+	connect(PathLineEdit, &QLineEdit::editingFinished, this, [this]() { ConfigureBlenderAddon(); });
 
 	QPushButton* PathBrowseButton = new QPushButton(tr("Browse..."), BlenderExeBox);
 	mExeGridLayout->addWidget(PathBrowseButton,1,2);
 	mPathBrowseButtonList << PathBrowseButton;
-	connect(PathBrowseButton, SIGNAL(clicked(bool)), this, SLOT(BrowseBlender(bool)));
+	connect(PathBrowseButton, &QPushButton::clicked, this, &lcBlenderPreferences::BrowseBlender);
 
 	QGroupBox* BlenderAddonVersionBox = new QGroupBox(tr("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR),mContent);
 	mForm->addRow(BlenderAddonVersionBox);
@@ -475,13 +474,13 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mAddonUpdateButton = new QPushButton(tr("Update"), BlenderAddonVersionBox);
 	mAddonUpdateButton->setToolTip(tr("Update %1 Blender LDraw addon").arg(LC_PRODUCTNAME_STR));
 	mAddonGridLayout->addWidget(mAddonUpdateButton,1,2);
-	connect(mAddonUpdateButton, SIGNAL(clicked(bool)), this, SLOT(UpdateBlenderAddon()));
+	connect(mAddonUpdateButton, &QPushButton::clicked, this, &lcBlenderPreferences::UpdateBlenderAddon);
 
 	mAddonStdOutButton = new QPushButton(tr("Output..."), BlenderAddonVersionBox);
 	mAddonStdOutButton->setToolTip(tr("Open the standrd output log"));
 	mAddonStdOutButton->setEnabled(false);
 	mAddonGridLayout->addWidget(mAddonStdOutButton,1,3);
-	connect(mAddonStdOutButton, SIGNAL(clicked(bool)), this, SLOT(GetStandardOutput()));
+	connect(mAddonStdOutButton, &QPushButton::clicked, this, &lcBlenderPreferences::GetStandardOutput);
 
 	mModulesBox = new QGroupBox(tr("Enabled Addon Modules"),mContent);
 	QHBoxLayout* ModulesLayout = new QHBoxLayout(mModulesBox);
@@ -491,12 +490,12 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mImportActBox = new QCheckBox(tr("LDraw Import TN"),mModulesBox);
 	mImportActBox->setToolTip(tr("Enable addon import module (adapted from LDraw Import by Toby Nelson) in Blender"));
 	ModulesLayout->addWidget(mImportActBox);
-	connect(mImportActBox, SIGNAL(clicked(bool)), this, SLOT(EnableImportModule()));
+	connect(mImportActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mImportMMActBox = new QCheckBox(tr("LDraw Import MM"),mModulesBox);
 	mImportMMActBox->setToolTip(tr("Enable addon import module (adapted from LDraw Import by Matthew Morrison) in Blender"));
 	ModulesLayout->addWidget(mImportMMActBox);
-	connect(mImportMMActBox, SIGNAL(clicked(bool)), this, SLOT(EnableImportModule()));
+	connect(mImportMMActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mRenderActBox = new QCheckBox(tr("%1 Image Render").arg(LC_PRODUCTNAME_STR), mModulesBox);
 	mRenderActBox->setToolTip(tr("Addon image render module in Blender"));
@@ -658,8 +657,8 @@ void lcBlenderPreferences::InitPathsAndSettings()
 
 		if (IsVisible)
 		{
-			connect(PathBrowseButton, SIGNAL(clicked(bool)), this, SLOT (BrowseBlender(bool)));
-			connect(PathLineEdit, SIGNAL(editingFinished()), this, SLOT (PathChanged()));
+			connect(PathBrowseButton, &QPushButton::clicked, this, &lcBlenderPreferences::BrowseBlender);
+			connect(PathLineEdit, &QLineEdit::editingFinished, this, &lcBlenderPreferences::PathChanged);
 		}
 	}
 
@@ -694,9 +693,9 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			CheckBox->setChecked(mBlenderSettings[LblIdx].value.toInt());
 			CheckBox->setToolTip(mBlenderSettings[LblIdx].tooltip);
 			if (LblIdx == LBL_CROP_IMAGE)
-				connect(CheckBox, SIGNAL(toggled(bool)), this, SLOT (SetModelSize(bool)));
+				connect(CheckBox, &QCheckBox::toggled, this, &lcBlenderPreferences::SetModelSize);
 			else
-				connect(CheckBox, SIGNAL(clicked()), this, SLOT (SettingChanged()));
+				connect(CheckBox, &QCheckBox::clicked, this, [this]() { SettingIndexChanged(); });
 			mCheckBoxList << CheckBox;
 			mSettingsSubform->addRow(Label,CheckBox);
 		}
@@ -706,7 +705,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			LineEdit->setProperty("ControlID",QVariant(LblIdx));
 			if (LblIdx == LBL_IMAGE_WIDTH || LblIdx == LBL_IMAGE_HEIGHT)
 			{
-				connect(LineEdit, SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+				connect(LineEdit, &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 				LineEdit->setValidator(new QIntValidator(16, LC_RENDER_IMAGE_MAX_SIZE));
 			}
 			else if(LblIdx == LBL_DEFAULT_COLOUR)
@@ -714,7 +713,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 				LineEdit->setReadOnly(true);
 				LineEdit->setStyleSheet("Text-align:left");
 				mDefaultColourEditAction = LineEdit->addAction(QIcon(), QLineEdit::TrailingPosition);
-				connect(mDefaultColourEditAction, SIGNAL(triggered(bool)), this, SLOT (ColorButtonClicked(bool)));
+				connect(mDefaultColourEditAction, &QAction::triggered, this, &lcBlenderPreferences::ColorButtonClicked);
 			}
 			else
 			{
@@ -725,7 +724,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 					LineEdit->setValidator(new QIntValidator(1,1000));
 				else
 					LineEdit->setValidator(new QDoubleValidator(0.01,100.0,2));
-				connect(LineEdit, SIGNAL(textEdited(const QString&)), this, SLOT (SettingChanged(const QString&)));
+				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettings[LblIdx].tooltip);
 			mLineEditList << LineEdit;
@@ -747,9 +746,9 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			int CurrentIndex = int(ComboBox->findData(QVariant::fromValue(Value)));
 			ComboBox->setCurrentIndex(CurrentIndex);
 			if (LblIdx == LBL_COLOUR_SCHEME)
-				connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT (ValidateColourScheme(int)));
+				connect(ComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcBlenderPreferences::ValidateColourScheme);
 			else
-				connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT (SettingChanged(int)));
+				connect(ComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcBlenderPreferences::SettingIndexChanged);
 			mComboBoxList << ComboBox;
 			ComboBoxItemsIndex++;
 			mSettingsSubform->addRow(Label,ComboBox);
@@ -807,8 +806,8 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 
 		if (IsVisible)
 		{
-			connect(PathBrowseButton, SIGNAL(clicked(bool)), this, SLOT (BrowseBlender(bool)));
-			connect(PathLineEdit, SIGNAL(editingFinished()), this, SLOT (PathChanged()));
+			connect(PathBrowseButton, &QPushButton::clicked, this, &lcBlenderPreferences::BrowseBlender);
+			connect(PathLineEdit, &QLineEdit::editingFinished, this, &lcBlenderPreferences::PathChanged);
 		}
 	}
 
@@ -843,9 +842,9 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			CheckBox->setChecked(mBlenderSettingsMM[LblIdx].value.toInt());
 			CheckBox->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
 			if (LblIdx == LBL_CROP_IMAGE_MM)
-				connect(CheckBox, SIGNAL(toggled(bool)), this, SLOT (SetModelSize(bool)));
+				connect(CheckBox, &QCheckBox::toggled, this, &lcBlenderPreferences::SetModelSize);
 			else
-				connect(CheckBox, SIGNAL(clicked()), this, SLOT (SettingChanged()));
+				connect(CheckBox, &QCheckBox::clicked, this, [this]() { SettingIndexChanged(); });
 			mCheckBoxList << CheckBox;
 			mSettingsSubform->addRow(Label,CheckBox);
 		}
@@ -855,7 +854,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			LineEdit->setProperty("ControlID",QVariant(LblIdx));
 			if (LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{
-				connect(LineEdit, SIGNAL(textChanged(const QString&)), this, SLOT  (SizeChanged(const QString&)));
+				connect(LineEdit, &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 				LineEdit->setValidator(new QIntValidator(16, LC_RENDER_IMAGE_MAX_SIZE));
 			}
 			else
@@ -871,7 +870,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 					LineEdit->setValidator(new QDoubleValidator(0.0,10.0,1));
 				else
 					LineEdit->setValidator(new QIntValidator(1, LC_RENDER_IMAGE_MAX_SIZE));
-				connect(LineEdit, SIGNAL(textEdited(const QString&)), this, SLOT (SettingChanged(const QString&)));
+				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
 			mLineEditList << LineEdit;
@@ -891,9 +890,9 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			int CurrentIndex = int(ComboBox->findData(QVariant::fromValue(Value)));
 			ComboBox->setCurrentIndex(CurrentIndex);
 			if (LblIdx == LBL_COLOUR_SCHEME_MM)
-				connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT (ValidateColourScheme(int)));
+				connect(ComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcBlenderPreferences::ValidateColourScheme);
 			else
-				connect(ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT  (SettingChanged(int)));
+				connect(ComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &lcBlenderPreferences::SettingIndexChanged);
 			mComboBoxList << ComboBox;
 			ComboBoxItemsIndex++;
 			mSettingsSubform->addRow(Label,ComboBox);
@@ -912,12 +911,11 @@ void lcBlenderPreferences::UpdateBlenderAddon()
 {
 	mAddonUpdateButton->setEnabled(false);
 
-	disconnect(mPathLineEditList[PATH_BLENDER], SIGNAL(editingFinished()), this, SLOT (ConfigureBlenderAddon()));
+	disconnect(mPathLineEditList[PATH_BLENDER], &QLineEdit::editingFinished, this, nullptr);
 
-	ConfigureBlenderAddon(sender() == mPathBrowseButtonList[PATH_BLENDER],
-						  sender() == mAddonUpdateButton);
+	ConfigureBlenderAddon(sender() == mPathBrowseButtonList[PATH_BLENDER], sender() == mAddonUpdateButton);
 
-	connect(mPathLineEditList[PATH_BLENDER], SIGNAL(editingFinished()), this, SLOT (ConfigureBlenderAddon()));
+	connect(mPathLineEditList[PATH_BLENDER], &QLineEdit::editingFinished, this, [this]() { ConfigureBlenderAddon(); });
 }
 
 void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpdate, bool ModuleChange)
@@ -986,7 +984,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			QString ProcessAction = tr("addon install");
 			if (Action == PR_INSTALL)
 			{
-				connect(mProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(ReadStdOut()));
+				connect(mProcess, &QProcess::readyReadStandardOutput, this, [this]() { ReadStdOut(); });
 				const QString& LdrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
 				QStringList SystemEnvironment = QProcess::systemEnvironment();
 				SystemEnvironment.prepend("LDRAW_DIRECTORY=" + LdrawLibPath);
@@ -996,7 +994,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			else
 			{
 				ProcessAction = tr("test");
-				disconnect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
+				disconnect(&mUpdateTimer, &QTimer::timeout, this, &lcBlenderPreferences::Update);
 			}
 
 			mProcess->setWorkingDirectory(BlenderDir);
@@ -1040,7 +1038,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 					while (QTime::currentTime() < Waiting)
 						QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 				}
-				connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
+				connect(&mUpdateTimer, &QTimer::timeout, this, &lcBlenderPreferences::Update);
 				const QString StdOut = QString(mProcess->readAllStandardOutput());
 				if (!StdOut.contains(BlenderTestString))
 				{
@@ -1075,7 +1073,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			return PR_OK;
 		};
 
-		connect(&mUpdateTimer, SIGNAL(timeout()), this, SLOT(Update()));
+		connect(&mUpdateTimer, &QTimer::timeout, this, &lcBlenderPreferences::Update);
 		mUpdateTimer.start(500);
 
 		QDir ConfigDir(BlenderConfigDir);
@@ -1411,7 +1409,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 	auto GetBlenderAddonVersionMatch = [&]()
 	{
 		lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
-		connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
+		connect(HttpManager, &lcHttpManager::DownloadFinished, gAddonPreferences, &lcBlenderPreferences::DownloadFinished);
 		gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_LATEST_URL));
 		while (gAddonPreferences->mHttpReply)
 			QApplication::processEvents();
@@ -1549,7 +1547,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 	BlenderAddonValidated = false;
 	lcHttpManager* HttpManager = new lcHttpManager(gAddonPreferences);
-	connect(HttpManager, SIGNAL(DownloadFinished(lcHttpReply*)), gAddonPreferences, SLOT(DownloadFinished(lcHttpReply*)));
+	connect(HttpManager, &lcHttpManager::DownloadFinished, gAddonPreferences, &lcBlenderPreferences::DownloadFinished);
 	gAddonPreferences->mHttpReply = HttpManager->DownloadFile(QLatin1String(LC_BLENDER_ADDON_URL));
 	while (gAddonPreferences->mHttpReply)
 		QApplication::processEvents();
@@ -1761,7 +1759,7 @@ void lcBlenderPreferences::ShowResult()
 		ShowMessage(this, Message);
 }
 
-void lcBlenderPreferences::SettingChanged(const QString& Value)
+void lcBlenderPreferences::SettingTextChanged(const QString& Value)
 {
 	bool Change = false;
 
@@ -1783,7 +1781,7 @@ void lcBlenderPreferences::SettingChanged(const QString& Value)
 	}
 }
 
-void lcBlenderPreferences::SettingChanged(int Index)
+void lcBlenderPreferences::SettingIndexChanged(int Index)
 {
 	int LblIdx = -1;
 	bool Change = false;
@@ -2371,8 +2369,8 @@ void lcBlenderPreferences::ResetSettings()
 	QDialogButtonBox ButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
 							   Qt::Horizontal, Dialog);
 	Layout->addWidget(&ButtonBox);
-	connect(&ButtonBox, SIGNAL(accepted()), Dialog, SLOT(accept()));
-	connect(&ButtonBox, SIGNAL(rejected()), Dialog, SLOT(reject()));
+	connect(&ButtonBox, &QDialogButtonBox::accepted, Dialog, &QDialog::accept);
+	connect(&ButtonBox, &QDialogButtonBox::rejected, Dialog, &QDialog::reject);
 
 	if (Dialog->exec() == QDialog::Accepted)
 	{
@@ -2395,8 +2393,8 @@ void lcBlenderPreferences::ResetSettings()
 
 	if (mImportActBox->isChecked())
 	{
-		disconnect(mLineEditList[CTL_IMAGE_HEIGHT_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-		disconnect(mLineEditList[CTL_IMAGE_WIDTH_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+		disconnect(mLineEditList[CTL_IMAGE_HEIGHT_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+		disconnect(mLineEditList[CTL_IMAGE_WIDTH_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
 		for (int LblIdx = 0; LblIdx < NumSettings(); LblIdx++)
 		{
@@ -2442,13 +2440,13 @@ void lcBlenderPreferences::ResetSettings()
 			mPathLineEditList[LblIdx]->setText(Paths[LblIdx].value);
 		}
 
-		connect(mLineEditList[CTL_IMAGE_HEIGHT_EDIT],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-		connect(mLineEditList[CTL_IMAGE_WIDTH_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+		connect(mLineEditList[CTL_IMAGE_HEIGHT_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+		connect(mLineEditList[CTL_IMAGE_WIDTH_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 	}
 	else if (mImportMMActBox->isChecked())
 	{
-		disconnect(mLineEditList[CTL_RESOLUTION_HEIGHT_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-		disconnect(mLineEditList[CTL_RESOLUTION_WIDTH_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+		disconnect(mLineEditList[CTL_RESOLUTION_HEIGHT_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+		disconnect(mLineEditList[CTL_RESOLUTION_WIDTH_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
 		for (int LblIdx = 0; LblIdx < NumSettingsMM(); LblIdx++)
 		{
@@ -2492,8 +2490,8 @@ void lcBlenderPreferences::ResetSettings()
 			mPathLineEditList[LblIdx]->setText(Paths[LblIdx].value);
 		}
 
-		connect(mLineEditList[CTL_RESOLUTION_HEIGHT_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-		connect(mLineEditList[CTL_RESOLUTION_WIDTH_EDIT], SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+		connect(mLineEditList[CTL_RESOLUTION_HEIGHT_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+		connect(mLineEditList[CTL_RESOLUTION_WIDTH_EDIT], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 	}
 
 	emit SettingChangedSig(true);
@@ -2900,7 +2898,7 @@ void lcBlenderPreferences::ColorButtonClicked(bool)
 
 	QWidget* Parent = mLineEditList[CTL_DEFAULT_COLOUR_EDIT];
 	lcColorPickerPopup* Popup = new lcColorPickerPopup(Parent, ColorIndex);
-	connect(Popup, SIGNAL(selected(int)), SLOT(SetDefaultColor(int)));
+	connect(Popup, &lcColorPickerPopup::Selected, this, &lcBlenderPreferences::SetDefaultColor);
 	Popup->setMinimumSize(300, 200);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -3015,25 +3013,25 @@ void lcBlenderPreferences::SizeChanged(const QString& Value)
 	{
 		if (sender() == mLineEditList[Width_Edit])
 		{
-			disconnect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+			disconnect(mLineEditList[Height_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
 			const QString Height = QString::number(qRound(double(mImageHeight * NewValue / mImageWidth)));
 			mLineEditList[Height_Edit]->setText(Height);
 
 			Change = Settings[Height_Edit].value != Height;
 
-			connect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+			connect(mLineEditList[Height_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 		}
 		else if (sender() == mLineEditList[Height_Edit])
 		{
-			disconnect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+			disconnect(mLineEditList[Width_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
 			const QString Width = QString::number(qRound(double(NewValue * mImageWidth / mImageHeight)));
 			mLineEditList[Width_Edit]->setText(Width);
 
 			Change = Settings[Height_Edit].value != Width;
 
-			connect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+			connect(mLineEditList[Width_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 		}
 
 		// Change is provided here for consistency only as ImageWidth,
@@ -3131,8 +3129,8 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 		}
 	}
 
-	disconnect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-	disconnect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+	disconnect(mLineEditList[Width_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+	disconnect(mLineEditList[Height_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
 	const QString Width = QString::number(CropImage ? ImageWidth : mImageWidth);
 	const QString Height = QString::number(CropImage ? ImageHeight : mImageHeight);
@@ -3143,8 +3141,8 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 	if (Update)
 		SettingsModified(true);
 
-	connect(mLineEditList[Height_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
-	connect(mLineEditList[Width_Edit],SIGNAL(textChanged(const QString&)), this, SLOT (SizeChanged(const QString&)));
+	connect(mLineEditList[Height_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
+	connect(mLineEditList[Width_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 }
 
 void lcBlenderPreferences::ValidateColourScheme(int Index)

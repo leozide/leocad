@@ -78,7 +78,7 @@ lcHttpReply* lcHttpManager::DownloadFile(const QString& Url)
 lcHttpManager::lcHttpManager(QObject* Owner)
 	: QNetworkAccessManager(Owner)
 {
-	connect(this, SIGNAL(finished(QNetworkReply*)), this, SLOT(Finished(QNetworkReply*)));
+	connect(this, &QNetworkAccessManager::finished, this, &lcHttpManager::Finished);
 }
 
 lcHttpReply* lcHttpManager::lcHttpManager::DownloadFile(const QString& Url)

@@ -333,7 +333,7 @@ void lcRenderDialog::RenderPOVRay()
 
 	lcRenderProcess* Process = new lcRenderProcess(this);
 #ifdef Q_OS_LINUX
-	connect(Process, SIGNAL(readyReadStandardError()), this, SLOT(ReadStdErr()));
+	connect(Process, &QProcess::readyReadStandardError, this, &lcRenderDialog::ReadStdErr);
 #endif
 	QStringList POVEnv = QProcess::systemEnvironment();
 	POVEnv.prepend("POV_IGNORE_SYSCONF_MSG=1");
@@ -469,7 +469,7 @@ void lcRenderDialog::RenderBlender()
 
 	mProcess = new lcRenderProcess(this);
 
-	connect(mProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(ReadStdOut()));
+	connect(mProcess, &QProcess::readyReadStandardOutput, this, &lcRenderDialog::ReadStdOut);
 
 	const QString LDrawLibPath = QFileInfo(lcGetProfileString(LC_PROFILE_PARTS_LIBRARY)).absolutePath();
 	QStringList SystemEnvironment = QProcess::systemEnvironment();

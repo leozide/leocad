@@ -20,9 +20,9 @@ lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 
 	invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
 
-	connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), SLOT(CurrentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
-	connect(this, SIGNAL(itemSelectionChanged()), SLOT(ItemSelectionChanged()));
-	connect(this, SIGNAL(customContextMenuRequested(QPoint)), SLOT(CustomMenuRequested(QPoint)));
+	connect(this, &QTreeWidget::currentItemChanged, this, &lcTimelineWidget::CurrentItemChanged);
+	connect(this, &QTreeWidget::itemSelectionChanged, this, &lcTimelineWidget::ItemSelectionChanged);
+	connect(this, &QWidget::customContextMenuRequested, this, &lcTimelineWidget::CustomMenuRequested);
 }
 
 lcTimelineWidget::~lcTimelineWidget()

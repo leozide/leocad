@@ -576,8 +576,8 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	connect(mPrintAction, &QAction::triggered, this, &lcInstructionsDialog::ShowPrintDialog);
 	connect(mVerticalPageAction, &QAction::toggled, this, &lcInstructionsDialog::UpdatePageSettings);
 	connect(mHorizontalPageAction, &QAction::toggled, this, &lcInstructionsDialog::UpdatePageSettings);
-	connect(mRowsSpinBox, &QSpinBox::valueChanged, this, &lcInstructionsDialog::UpdatePageSettings);
-	connect(mColumnsSpinBox, &QSpinBox::valueChanged, this, &lcInstructionsDialog::UpdatePageSettings);
+	connect(mRowsSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &lcInstructionsDialog::UpdatePageSettings);
+	connect(mColumnsSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &lcInstructionsDialog::UpdatePageSettings);
 }
 
 void lcInstructionsDialog::ShowPrintDialog()

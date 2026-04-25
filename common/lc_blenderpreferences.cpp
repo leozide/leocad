@@ -26,6 +26,7 @@
 #include "lc_http.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
+#include "lc_qutils.h"
 #include "project.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)

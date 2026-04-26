@@ -333,7 +333,7 @@ void lcRenderDialog::RenderPOVRay()
 
 	lcRenderProcess* Process = new lcRenderProcess(this);
 #ifdef Q_OS_LINUX
-	connect(Process, &QProcess::readyReadStandardError, this, &lcRenderDialog::ReadStdErr);
+	connect(Process, &QProcess::readyReadStandardError, this, [this]() { bool Error; ReadStdErr(Error); });
 #endif
 	QStringList POVEnv = QProcess::systemEnvironment();
 	POVEnv.prepend("POV_IGNORE_SYSCONF_MSG=1");

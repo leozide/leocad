@@ -768,9 +768,9 @@ void lcQPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int Firs
 	for (int Row = 0; Row < ui->categoriesTree->topLevelItemCount(); Row++)
 	{
 		QTreeWidgetItem* CategoryItem = ui->categoriesTree->topLevelItem(Row);
-		size_t CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
+		int CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
 
-		if (CategoryIndex >= 0 && CategoryIndex < mOptions->Categories.size())
+		if (CategoryIndex >= 0 && CategoryIndex < static_cast<int>(mOptions->Categories.size()))
 		{
 			Categories.emplace_back(mOptions->Categories[CategoryIndex]);
 			CategoryItem->setData(0, CategoryRole, Row);

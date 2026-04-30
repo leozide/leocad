@@ -40,6 +40,45 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	ui->Language->addItem("Espa\u00f1ol");
 	ui->Language->addItem("\u7b80\u4f53\u4e2d\u6587");
 
+	connect(ui->partsLibraryBrowse, &QPushButton::clicked, this, &lcQPreferencesDialog::PartsLibraryBrowseClicked);
+	connect(ui->partsArchiveBrowse, &QPushButton::clicked, this, &lcQPreferencesDialog::PartsArchiveBrowseClicked);
+	connect(ui->ColorConfigBrowseButton, &QPushButton::clicked, this, &lcQPreferencesDialog::ColorConfigBrowseButtonClicked);
+	connect(ui->MinifigSettingsBrowseButton, &QPushButton::clicked, this, &lcQPreferencesDialog::MinifigSettingsBrowseButtonClicked);
+	connect(ui->povrayExecutableBrowse, &QPushButton::clicked, this, &lcQPreferencesDialog::PovrayExecutableBrowseClicked);
+	connect(ui->lgeoPathBrowse, &QPushButton::clicked, this, &lcQPreferencesDialog::LgeoPathBrowseClicked);
+	connect(ui->ColorTheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcQPreferencesDialog::ColorThemeCurrentIndexChanged);
+	connect(ui->AutomateEdgeColor, &QCheckBox::toggled, this, &lcQPreferencesDialog::AutomateEdgeColorToggled);
+	connect(ui->BlenderAddonSettingsButton, &QPushButton::clicked, this, &lcQPreferencesDialog::BlenderAddonSettingsButtonClicked);
+	connect(ui->studStyleCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcQPreferencesDialog::StudStyleComboCurrentIndexChanged);
+	connect(ui->antiAliasing, &QCheckBox::toggled, this, &lcQPreferencesDialog::AntiAliasingToggled);
+	connect(ui->edgeLines, &QCheckBox::toggled, this, &lcQPreferencesDialog::EdgeLinesToggled);
+	connect(ui->ConditionalLinesCheckBox, &QCheckBox::toggled, this, &lcQPreferencesDialog::ConditionalLinesCheckBoxToggled);
+	connect(ui->LineWidthSlider, QOverload<int>::of(&QSlider::valueChanged), this, &lcQPreferencesDialog::LineWidthSliderValueChanged);
+	connect(ui->MeshLODSlider, QOverload<int>::of(&QSlider::valueChanged), this, &lcQPreferencesDialog::MeshLODSliderValueChanged);
+	connect(ui->FadeSteps, &QCheckBox::toggled, this, &lcQPreferencesDialog::FadeStepsToggled);
+	connect(ui->HighlightNewParts, &QCheckBox::toggled, this, &lcQPreferencesDialog::HighlightNewPartsToggled);
+	connect(ui->gridStuds, &QCheckBox::toggled, this, &lcQPreferencesDialog::GridStudsToggled);
+	connect(ui->gridLines, &QCheckBox::toggled, this, &lcQPreferencesDialog::GridLinesToggled);
+	connect(ui->ViewSphereSizeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcQPreferencesDialog::ViewSphereSizeComboCurrentIndexChanged);
+	connect(ui->PreviewViewSphereSizeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcQPreferencesDialog::PreviewViewSphereSizeComboCurrentIndexChanged);
+	connect(ui->newCategory, &QPushButton::clicked, this, &lcQPreferencesDialog::NewCategoryClicked);
+	connect(ui->editCategory, &QPushButton::clicked, this, &lcQPreferencesDialog::EditCategoryClicked);
+	connect(ui->deleteCategory, &QPushButton::clicked, this, &lcQPreferencesDialog::DeleteCategoryClicked);
+	connect(ui->importCategories, &QPushButton::clicked, this, &lcQPreferencesDialog::ImportCategoriesClicked);
+	connect(ui->exportCategories, &QPushButton::clicked, this, &lcQPreferencesDialog::ExportCategoriesClicked);
+	connect(ui->resetCategories, &QPushButton::clicked, this, &lcQPreferencesDialog::ResetCategoriesClicked);
+	connect(ui->shortcutAssign, &QPushButton::clicked, this, &lcQPreferencesDialog::ShortcutAssignClicked);
+	connect(ui->shortcutRemove, &QPushButton::clicked, this, &lcQPreferencesDialog::ShortcutRemoveClicked);
+	connect(ui->shortcutsImport, &QPushButton::clicked, this, &lcQPreferencesDialog::ShortcutsImportClicked);
+	connect(ui->shortcutsExport, &QPushButton::clicked, this, &lcQPreferencesDialog::ShortcutsExportClicked);
+	connect(ui->shortcutsReset, &QPushButton::clicked, this, &lcQPreferencesDialog::ShortcutsResetClicked);
+	connect(ui->KeyboardFilterEdit, &QLineEdit::textEdited, this, &lcQPreferencesDialog::KeyboardFilterEditTextEdited);
+	connect(ui->mouseAssign, &QPushButton::clicked, this, &lcQPreferencesDialog::MouseAssignClicked);
+	connect(ui->mouseRemove, &QPushButton::clicked, this, &lcQPreferencesDialog::MouseRemoveClicked);
+	connect(ui->MouseImportButton, &QPushButton::clicked, this, &lcQPreferencesDialog::MouseImportButtonClicked);
+	connect(ui->MouseExportButton, &QPushButton::clicked, this, &lcQPreferencesDialog::MouseExportButtonClicked);
+	connect(ui->mouseReset, &QPushButton::clicked, this, &lcQPreferencesDialog::MouseResetClicked);
+
 	connect(ui->BackgroundSolidColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->BackgroundGradient1ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
 	connect(ui->BackgroundGradient2ColorButton, &QToolButton::clicked, this, &lcQPreferencesDialog::ColorButtonClicked);
@@ -243,18 +282,18 @@ lcQPreferencesDialog::lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogO
 	SetButtonPixmap(mOptions->Preferences.mControlPointColor, ui->ControlPointColorButton);
 	SetButtonPixmap(mOptions->Preferences.mControlPointFocusedColor, ui->ControlPointFocusedColorButton);
 
-	on_studStyleCombo_currentIndexChanged(ui->studStyleCombo->currentIndex());
-	on_antiAliasing_toggled();
-	on_AutomateEdgeColor_toggled();
-	on_edgeLines_toggled();
-	on_LineWidthSlider_valueChanged();
-	on_MeshLODSlider_valueChanged();
-	on_FadeSteps_toggled();
-	on_HighlightNewParts_toggled();
-	on_gridStuds_toggled();
-	on_gridLines_toggled();
-	on_ViewSphereSizeCombo_currentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
-	on_PreviewViewSphereSizeCombo_currentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
+	StudStyleComboCurrentIndexChanged(ui->studStyleCombo->currentIndex());
+	AntiAliasingToggled();
+	AutomateEdgeColorToggled();
+	EdgeLinesToggled();
+	LineWidthSliderValueChanged();
+	MeshLODSliderValueChanged();
+	FadeStepsToggled();
+	HighlightNewPartsToggled();
+	GridStudsToggled();
+	GridLinesToggled();
+	ViewSphereSizeComboCurrentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
+	PreviewViewSphereSizeComboCurrentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
 
 	updateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
@@ -369,7 +408,7 @@ void lcQPreferencesDialog::accept()
 	QDialog::accept();
 }
 
-void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
+void lcQPreferencesDialog::PartsLibraryBrowseClicked()
 {
 	QString result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), ui->partsLibrary->text());
 
@@ -377,7 +416,7 @@ void lcQPreferencesDialog::on_partsLibraryBrowse_clicked()
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_partsArchiveBrowse_clicked()
+void lcQPreferencesDialog::PartsArchiveBrowseClicked()
 {
 	QString result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
 
@@ -385,7 +424,7 @@ void lcQPreferencesDialog::on_partsArchiveBrowse_clicked()
 		ui->partsLibrary->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_BlenderAddonSettingsButton_clicked()
+void lcQPreferencesDialog::BlenderAddonSettingsButtonClicked()
 {
 	int Width = 1280;
 	int Height = 720;
@@ -402,7 +441,7 @@ void lcQPreferencesDialog::on_BlenderAddonSettingsButton_clicked()
 	Q_UNUSED(Scale)
 }
 
-void lcQPreferencesDialog::on_ColorConfigBrowseButton_clicked()
+void lcQPreferencesDialog::ColorConfigBrowseButtonClicked()
 {
 	QString Result = QFileDialog::getOpenFileName(this, tr("Select Color Configuration File"), ui->ColorConfigEdit->text(), tr("Settings Files (*.ldr);;All Files (*.*)"));
 
@@ -410,7 +449,7 @@ void lcQPreferencesDialog::on_ColorConfigBrowseButton_clicked()
 		ui->ColorConfigEdit->setText(QDir::toNativeSeparators(Result));
 }
 
-void lcQPreferencesDialog::on_MinifigSettingsBrowseButton_clicked()
+void lcQPreferencesDialog::MinifigSettingsBrowseButtonClicked()
 {
 	QString Result = QFileDialog::getOpenFileName(this, tr("Select Minifig Settings File"), ui->MinifigSettingsEdit->text(), tr("Settings Files (*.ini);;All Files (*.*)"));
 
@@ -418,7 +457,7 @@ void lcQPreferencesDialog::on_MinifigSettingsBrowseButton_clicked()
 		ui->MinifigSettingsEdit->setText(QDir::toNativeSeparators(Result));
 }
 
-void lcQPreferencesDialog::on_povrayExecutableBrowse_clicked()
+void lcQPreferencesDialog::PovrayExecutableBrowseClicked()
 {
 #ifdef Q_OS_WIN
 	QString filter(tr("Executable Files (*.exe);;All Files (*.*)"));
@@ -432,7 +471,7 @@ void lcQPreferencesDialog::on_povrayExecutableBrowse_clicked()
 		ui->povrayExecutable->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
+void lcQPreferencesDialog::LgeoPathBrowseClicked()
 {
 	QString result = QFileDialog::getExistingDirectory(this, tr("Open LGEO Folder"), ui->lgeoPath->text());
 
@@ -440,7 +479,7 @@ void lcQPreferencesDialog::on_lgeoPathBrowse_clicked()
 		ui->lgeoPath->setText(QDir::toNativeSeparators(result));
 }
 
-void lcQPreferencesDialog::on_ColorTheme_currentIndexChanged(int Index)
+void lcQPreferencesDialog::ColorThemeCurrentIndexChanged(int Index)
 {
 	Q_UNUSED(Index);
 
@@ -594,12 +633,12 @@ void lcQPreferencesDialog::ColorButtonClicked()
 	((QToolButton*)Button)->setIcon(pix);
 }
 
-void lcQPreferencesDialog::on_antiAliasing_toggled()
+void lcQPreferencesDialog::AntiAliasingToggled()
 {
 	ui->antiAliasingSamples->setEnabled(ui->antiAliasing->isChecked());
 }
 
-void lcQPreferencesDialog::on_edgeLines_toggled()
+void lcQPreferencesDialog::EdgeLinesToggled()
 {
 	const bool Enable = ui->edgeLines->isChecked() || ui->ConditionalLinesCheckBox->isChecked();
 
@@ -607,7 +646,7 @@ void lcQPreferencesDialog::on_edgeLines_toggled()
 	ui->LineWidthLabel->setEnabled(Enable);
 }
 
-void lcQPreferencesDialog::on_ConditionalLinesCheckBox_toggled()
+void lcQPreferencesDialog::ConditionalLinesCheckBoxToggled()
 {
 	const bool Enable = ui->edgeLines->isChecked() || ui->ConditionalLinesCheckBox->isChecked();
 
@@ -615,55 +654,55 @@ void lcQPreferencesDialog::on_ConditionalLinesCheckBox_toggled()
 	ui->LineWidthLabel->setEnabled(Enable);
 }
 
-void lcQPreferencesDialog::on_LineWidthSlider_valueChanged()
+void lcQPreferencesDialog::LineWidthSliderValueChanged()
 {
 	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	ui->LineWidthLabel->setText(QString::number(Value));
 }
 
-void lcQPreferencesDialog::on_MeshLODSlider_valueChanged()
+void lcQPreferencesDialog::MeshLODSliderValueChanged()
 {
 	float Value = ui->MeshLODSlider->value() * mMeshLODMultiplier;
 	ui->MeshLODLabel->setText(QString::number(static_cast<int>(Value)));
 }
 
-void lcQPreferencesDialog::on_FadeSteps_toggled()
+void lcQPreferencesDialog::FadeStepsToggled()
 {
 	ui->FadeStepsColor->setEnabled(ui->FadeSteps->isChecked());
 }
 
-void lcQPreferencesDialog::on_HighlightNewParts_toggled()
+void lcQPreferencesDialog::HighlightNewPartsToggled()
 {
 	ui->HighlightNewPartsColor->setEnabled(ui->HighlightNewParts->isChecked());
 }
 
-void lcQPreferencesDialog::on_gridStuds_toggled()
+void lcQPreferencesDialog::GridStudsToggled()
 {
 	ui->gridStudColor->setEnabled(ui->gridStuds->isChecked());
 }
 
-void lcQPreferencesDialog::on_gridLines_toggled()
+void lcQPreferencesDialog::GridLinesToggled()
 {
 	ui->gridLineColor->setEnabled(ui->gridLines->isChecked());
 	ui->gridLineSpacing->setEnabled(ui->gridLines->isChecked());
 }
 
-void lcQPreferencesDialog::on_PreviewViewSphereSizeCombo_currentIndexChanged(int Index)
+void lcQPreferencesDialog::PreviewViewSphereSizeComboCurrentIndexChanged(int Index)
 {
 	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0);
 }
 
-void lcQPreferencesDialog::on_ViewSphereSizeCombo_currentIndexChanged(int Index)
+void lcQPreferencesDialog::ViewSphereSizeComboCurrentIndexChanged(int Index)
 {
 	ui->ViewSphereLocationCombo->setEnabled(Index != 0);
 }
 
-void lcQPreferencesDialog::on_AutomateEdgeColor_toggled()
+void lcQPreferencesDialog::AutomateEdgeColorToggled()
 {
 	ui->AutomateEdgeColorButton->setEnabled(ui->AutomateEdgeColor->isChecked());
 }
 
-void lcQPreferencesDialog::on_studStyleCombo_currentIndexChanged(int index)
+void lcQPreferencesDialog::StudStyleComboCurrentIndexChanged(int index)
 {
 	ui->HighContrastButton->setEnabled(lcIsHighContrast(static_cast<lcStudStyle>(index)));
 }
@@ -782,7 +821,7 @@ void lcQPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int Firs
 	mOptions->Categories = std::move(Categories);
 }
 
-void lcQPreferencesDialog::on_newCategory_clicked()
+void lcQPreferencesDialog::NewCategoryClicked()
 {
 	lcLibraryCategory category;
 
@@ -798,7 +837,7 @@ void lcQPreferencesDialog::on_newCategory_clicked()
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(static_cast<int>(mOptions->Categories.size()) - 1));
 }
 
-void lcQPreferencesDialog::on_editCategory_clicked()
+void lcQPreferencesDialog::EditCategoryClicked()
 {
 	QList<QTreeWidgetItem*> selectedItems = ui->categoriesTree->selectedItems();
 
@@ -822,7 +861,7 @@ void lcQPreferencesDialog::on_editCategory_clicked()
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(categoryIndex));
 }
 
-void lcQPreferencesDialog::on_deleteCategory_clicked()
+void lcQPreferencesDialog::DeleteCategoryClicked()
 {
 	QList<QTreeWidgetItem*> selectedItems = ui->categoriesTree->selectedItems();
 
@@ -846,7 +885,7 @@ void lcQPreferencesDialog::on_deleteCategory_clicked()
 	updateCategories();
 }
 
-void lcQPreferencesDialog::on_importCategories_clicked()
+void lcQPreferencesDialog::ImportCategoriesClicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -865,7 +904,7 @@ void lcQPreferencesDialog::on_importCategories_clicked()
 	mOptions->CategoriesDefault = false;
 }
 
-void lcQPreferencesDialog::on_exportCategories_clicked()
+void lcQPreferencesDialog::ExportCategoriesClicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -879,7 +918,7 @@ void lcQPreferencesDialog::on_exportCategories_clicked()
 	}
 }
 
-void lcQPreferencesDialog::on_resetCategories_clicked()
+void lcQPreferencesDialog::ResetCategoriesClicked()
 {
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default categories?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
@@ -1028,7 +1067,7 @@ void lcQPreferencesDialog::commandChanged(QTreeWidgetItem *current)
 	ui->shortcutEdit->setText(key.toString(QKeySequence::NativeText));
 }
 
-void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
+void lcQPreferencesDialog::KeyboardFilterEditTextEdited(const QString& Text)
 {
 	if (Text.isEmpty())
 	{
@@ -1061,7 +1100,7 @@ void lcQPreferencesDialog::on_KeyboardFilterEdit_textEdited(const QString& Text)
 	}
 }
 
-void lcQPreferencesDialog::on_shortcutAssign_clicked()
+void lcQPreferencesDialog::ShortcutAssignClicked()
 {
 	QTreeWidgetItem* CurrentItem = ui->commandList->currentItem();
 
@@ -1129,14 +1168,14 @@ void lcQPreferencesDialog::on_shortcutAssign_clicked()
 	mOptions->KeyboardShortcutsDefault = false;
 }
 
-void lcQPreferencesDialog::on_shortcutRemove_clicked()
+void lcQPreferencesDialog::ShortcutRemoveClicked()
 {
 	ui->shortcutEdit->setText(QString());
 
-	on_shortcutAssign_clicked();
+	ShortcutAssignClicked();
 }
 
-void lcQPreferencesDialog::on_shortcutsImport_clicked()
+void lcQPreferencesDialog::ShortcutsImportClicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -1156,7 +1195,7 @@ void lcQPreferencesDialog::on_shortcutsImport_clicked()
 	mOptions->KeyboardShortcutsDefault = false;
 }
 
-void lcQPreferencesDialog::on_shortcutsExport_clicked()
+void lcQPreferencesDialog::ShortcutsExportClicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -1170,7 +1209,7 @@ void lcQPreferencesDialog::on_shortcutsExport_clicked()
 	}
 }
 
-void lcQPreferencesDialog::on_shortcutsReset_clicked()
+void lcQPreferencesDialog::ShortcutsResetClicked()
 {
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default keyboard shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
@@ -1230,7 +1269,7 @@ void lcQPreferencesDialog::UpdateMouseTreeItem(int ItemIndex)
 		new QTreeWidgetItem(ui->mouseTree, QStringList() << tr(gToolNames[ItemIndex]) << Shortcut1 << Shortcut2);
 }
 
-void lcQPreferencesDialog::on_mouseAssign_clicked()
+void lcQPreferencesDialog::MouseAssignClicked()
 {
 	QTreeWidgetItem* Current = ui->mouseTree->currentItem();
 
@@ -1308,7 +1347,7 @@ void lcQPreferencesDialog::on_mouseAssign_clicked()
 	UpdateMouseTreeItem(ItemIndex);
 }
 
-void lcQPreferencesDialog::on_mouseRemove_clicked()
+void lcQPreferencesDialog::MouseRemoveClicked()
 {
 	QTreeWidgetItem* Current = ui->mouseTree->currentItem();
 
@@ -1328,7 +1367,7 @@ void lcQPreferencesDialog::on_mouseRemove_clicked()
 	MouseTreeItemChanged(Current);
 }
 
-void lcQPreferencesDialog::on_MouseImportButton_clicked()
+void lcQPreferencesDialog::MouseImportButtonClicked()
 {
 	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -1349,7 +1388,7 @@ void lcQPreferencesDialog::on_MouseImportButton_clicked()
 	mOptions->MouseShortcutsDefault = false;
 }
 
-void lcQPreferencesDialog::on_MouseExportButton_clicked()
+void lcQPreferencesDialog::MouseExportButtonClicked()
 {
 	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
@@ -1360,7 +1399,7 @@ void lcQPreferencesDialog::on_MouseExportButton_clicked()
 		QMessageBox::warning(this, "LeoCAD", tr("Error saving mouse shortcuts file."));
 }
 
-void lcQPreferencesDialog::on_mouseReset_clicked()
+void lcQPreferencesDialog::MouseResetClicked()
 {
 	if (QMessageBox::question(this, "LeoCAD", tr("Are you sure you want to load the default mouse shortcuts?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;

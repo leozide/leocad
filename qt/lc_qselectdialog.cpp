@@ -12,10 +12,13 @@ lcQSelectDialog::lcQSelectDialog(QWidget* Parent, lcModel* Model)
 {
 	ui->setupUi(this);
 
+	connect(ui->selectAll, &QPushButton::clicked, this, &lcQSelectDialog::SelectAllClicked);
+	connect(ui->selectNone, &QPushButton::clicked, this, &lcQSelectDialog::SelectNoneClicked);
+	connect(ui->selectInvert, &QPushButton::clicked, this, &lcQSelectDialog::SelectInvertClicked);
+	connect(ui->treeWidget, &QTreeWidget::itemChanged, this, &lcQSelectDialog::ItemChanged);
+
 	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr, Model);
 	ui->treeWidget->expandAll();
-
-	connect(ui->treeWidget, &QTreeWidget::itemChanged, this, &lcQSelectDialog::itemChanged);
 }
 
 lcQSelectDialog::~lcQSelectDialog()
@@ -53,7 +56,7 @@ void lcQSelectDialog::accept()
 	QDialog::accept();
 }
 
-void lcQSelectDialog::on_selectAll_clicked()
+void lcQSelectDialog::SelectAllClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -77,7 +80,7 @@ void lcQSelectDialog::on_selectAll_clicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::on_selectNone_clicked()
+void lcQSelectDialog::SelectNoneClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -101,7 +104,7 @@ void lcQSelectDialog::on_selectNone_clicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::on_selectInvert_clicked()
+void lcQSelectDialog::SelectInvertClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -125,7 +128,7 @@ void lcQSelectDialog::on_selectInvert_clicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::itemChanged(QTreeWidgetItem *item, int column)
+void lcQSelectDialog::ItemChanged(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(column);
 

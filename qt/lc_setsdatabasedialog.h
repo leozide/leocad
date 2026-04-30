@@ -29,7 +29,7 @@ public:
 
 public slots:
 	void DownloadFinished(lcHttpReply* Reply);
-	void on_SearchButton_clicked();
+	void SearchButtonClicked();
 	void accept() override;
 	void Finished(int Result);
 

@@ -69,7 +69,9 @@ public:
 
 public slots:
 	void reject() override;
-	void on_OutputBrowseButton_clicked();
+
+private slots:
+	void OutputBrowseButtonClicked();
 	void Update();
 
 protected slots:

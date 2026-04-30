@@ -11,6 +11,8 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 {
 	ui->setupUi(this);
 
+	connect(ui->fileNameBrowse, &QPushButton::clicked, this, &lcQImageDialog::FileNameBrowseClicked);
+
 	ui->width->setValidator(new QIntValidator(1, 32768, this));
 	ui->height->setValidator(new QIntValidator(1, 32768, this));
 	ui->firstStep->setValidator(new QIntValidator(this));
@@ -112,7 +114,7 @@ void lcQImageDialog::accept()
 	QDialog::accept();
 }
 
-void lcQImageDialog::on_fileNameBrowse_clicked()
+void lcQImageDialog::FileNameBrowseClicked()
 {
 	QString result = QFileDialog::getSaveFileName(this, tr("Save Image File"), ui->fileName->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
 

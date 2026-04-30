@@ -25,15 +25,17 @@ public:
 
 public slots:
 	void accept() override;
-	void on_NewModel_clicked();
-	void on_DeleteModel_clicked();
-	void on_RenameModel_clicked();
-	void on_ExportModel_clicked();
-	void on_DuplicateModel_clicked();
-	void on_MoveUp_clicked();
-	void on_MoveDown_clicked();
-	void on_ModelList_itemDoubleClicked(QListWidgetItem* Item);
-	void on_ModelList_itemSelectionChanged();
+
+private slots:
+	void NewModelClicked();
+	void DeleteModelClicked();
+	void RenameModelClicked();
+	void ExportModelClicked();
+	void DuplicateModelClicked();
+	void MoveUpClicked();
+	void MoveDownClicked();
+	void ModelListItemDoubleClicked(QListWidgetItem* Item);
+	void ModelListItemSelectionChanged();
 
 private:
 	QListWidgetItem* mActiveModelItem;

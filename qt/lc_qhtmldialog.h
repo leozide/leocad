@@ -17,7 +17,9 @@ public:
 
 public slots:
 	void accept() override;
-	void on_outputFolderBrowse_clicked();
+
+private slots:
+	void OutputFolderBrowseClicked();
 
 private:
 	lcHTMLExportOptions* mOptions;

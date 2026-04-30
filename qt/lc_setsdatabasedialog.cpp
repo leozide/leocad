@@ -15,6 +15,7 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	connect(ui->SetsTree, &QTreeWidget::itemDoubleClicked, this, &lcSetsDatabaseDialog::accept);
 	connect(this, &QDialog::finished, this, &lcSetsDatabaseDialog::Finished);
 	connect(mHttpManager, &lcHttpManager::DownloadFinished, this, &lcSetsDatabaseDialog::DownloadFinished);
+	connect(ui->SearchButton, &QPushButton::clicked, this, &lcSetsDatabaseDialog::SearchButtonClicked);
 
 	mKeyListReply = mHttpManager->DownloadFile(QLatin1String("https://www.leocad.org/rebrickable.json"));
 }
@@ -46,7 +47,7 @@ bool lcSetsDatabaseDialog::eventFilter(QObject* Object, QEvent* Event)
 		if (Key == Qt::Key_Return || Key == Qt::Key_Enter)
 		{
 			KeyEvent->accept();
-			on_SearchButton_clicked();
+			SearchButtonClicked();
 			return true;
 		}
 	}
@@ -105,7 +106,7 @@ void lcSetsDatabaseDialog::Finished(int Result)
 	}
 }
 
-void lcSetsDatabaseDialog::on_SearchButton_clicked()
+void lcSetsDatabaseDialog::SearchButtonClicked()
 {
 	QString Keyword = ui->SearchEdit->text();
 

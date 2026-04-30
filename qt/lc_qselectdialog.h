@@ -23,10 +23,12 @@ public:
 
 public slots:
 	void accept() override;
-	void on_selectAll_clicked();
-	void on_selectNone_clicked();
-	void on_selectInvert_clicked();
-	void itemChanged(QTreeWidgetItem *item, int column);
+
+private slots:
+	void SelectAllClicked();
+	void SelectNoneClicked();
+	void SelectInvertClicked();
+	void ItemChanged(QTreeWidgetItem *item, int column);
 
 private:
 	Ui::lcQSelectDialog *ui;

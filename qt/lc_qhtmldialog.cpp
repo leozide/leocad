@@ -8,6 +8,8 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 {
     ui->setupUi(this);
 
+	connect(ui->outputFolderBrowse, &QPushButton::clicked, this, &lcQHTMLDialog::OutputFolderBrowseClicked);
+
 	ui->stepWidth->setValidator(new QIntValidator(0, 2048, ui->stepWidth));
 	ui->stepHeight->setValidator(new QIntValidator(0, 2048, ui->stepHeight));
 
@@ -61,7 +63,7 @@ void lcQHTMLDialog::accept()
 	QDialog::accept();
 }
 
-void lcQHTMLDialog::on_outputFolderBrowse_clicked()
+void lcQHTMLDialog::OutputFolderBrowseClicked()
 {
 	QString result = QFileDialog::getExistingDirectory(this, tr("Select Output Folder"), ui->outputFolder->text());
 

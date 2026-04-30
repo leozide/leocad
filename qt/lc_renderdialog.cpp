@@ -68,6 +68,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 	connect(mSettingsButton, &QPushButton::clicked, this, &lcRenderDialog::SettingsButtonClicked);
 	connect(mLogButton, &QPushButton::clicked, this, &lcRenderDialog::LogButtonClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &lcRenderDialog::reject);
+	connect(ui->OutputBrowseButton, &QPushButton::clicked, this, &lcRenderDialog::OutputBrowseButtonClicked);
 
 	if (mDialogMode == lcRenderDialogMode::RenderPOVRay)
 	{
@@ -795,7 +796,7 @@ void lcRenderDialog::ShowResult()
 	WriteStdOut();
 }
 
-void lcRenderDialog::on_OutputBrowseButton_clicked()
+void lcRenderDialog::OutputBrowseButtonClicked()
 {
 	const QString Result = QFileDialog::getSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
 

@@ -22,7 +22,9 @@ public:
 
 public slots:
 	void accept() override;
-	void on_fileNameBrowse_clicked();
+
+private slots:
+	void FileNameBrowseClicked();
 
 private:
 	Ui::lcQImageDialog *ui;

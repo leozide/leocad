@@ -9,6 +9,14 @@ lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPale
 {
     ui->setupUi(this);
 
+	connect(ui->NewButton, &QPushButton::clicked, this, &lcPartPaletteDialog::NewButtonClicked);
+	connect(ui->DeleteButton, &QPushButton::clicked, this, &lcPartPaletteDialog::DeleteButtonClicked);
+	connect(ui->RenameButton, &QPushButton::clicked, this, &lcPartPaletteDialog::RenameButtonClicked);
+	connect(ui->ImportButton, &QPushButton::clicked, this, &lcPartPaletteDialog::ImportButtonClicked);
+	connect(ui->MoveUpButton, &QPushButton::clicked, this, &lcPartPaletteDialog::MoveUpButtonClicked);
+	connect(ui->MoveDownButton, &QPushButton::clicked, this, &lcPartPaletteDialog::MoveDownButtonClicked);
+	connect(ui->PaletteList, QOverload<int>::of(&QListWidget::currentRowChanged), this, &lcPartPaletteDialog::PaletteListCurrentRowChanged);
+
 	for (const lcPartPalette& Palette : PartPalettes)
 	{
 		QListWidgetItem* Item = new QListWidgetItem(Palette.Name);
@@ -61,7 +69,7 @@ void lcPartPaletteDialog::accept()
 	QDialog::accept();
 }
 
-void lcPartPaletteDialog::on_NewButton_clicked()
+void lcPartPaletteDialog::NewButtonClicked()
 {
 	bool Ok = false;
 
@@ -77,7 +85,7 @@ void lcPartPaletteDialog::on_NewButton_clicked()
 	UpdateButtons();
 }
 
-void lcPartPaletteDialog::on_DeleteButton_clicked()
+void lcPartPaletteDialog::DeleteButtonClicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->PaletteList->selectedItems();
 
@@ -94,7 +102,7 @@ void lcPartPaletteDialog::on_DeleteButton_clicked()
 	UpdateButtons();
 }
 
-void lcPartPaletteDialog::on_RenameButton_clicked()
+void lcPartPaletteDialog::RenameButtonClicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->PaletteList->selectedItems();
 
@@ -113,7 +121,7 @@ void lcPartPaletteDialog::on_RenameButton_clicked()
 		SelectedItems[0]->setText(Name);
 }
 
-void lcPartPaletteDialog::on_ImportButton_clicked()
+void lcPartPaletteDialog::ImportButtonClicked()
 {
 	lcSetsDatabaseDialog Dialog(this);
 
@@ -147,7 +155,7 @@ void lcPartPaletteDialog::on_ImportButton_clicked()
 	UpdateButtons();
 }
 
-void lcPartPaletteDialog::on_MoveUpButton_clicked()
+void lcPartPaletteDialog::MoveUpButtonClicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->PaletteList->selectedItems();
 
@@ -166,7 +174,7 @@ void lcPartPaletteDialog::on_MoveUpButton_clicked()
 	UpdateButtons();
 }
 
-void lcPartPaletteDialog::on_MoveDownButton_clicked()
+void lcPartPaletteDialog::MoveDownButtonClicked()
 {
 	QList<QListWidgetItem*>	SelectedItems = ui->PaletteList->selectedItems();
 
@@ -182,7 +190,7 @@ void lcPartPaletteDialog::on_MoveDownButton_clicked()
 	UpdateButtons();
 }
 
-void lcPartPaletteDialog::on_PaletteList_currentRowChanged(int CurrentRow)
+void lcPartPaletteDialog::PaletteListCurrentRowChanged(int CurrentRow)
 {
 	Q_UNUSED(CurrentRow);
 

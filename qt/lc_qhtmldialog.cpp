@@ -3,12 +3,12 @@
 #include "ui_lc_qhtmldialog.h"
 #include "project.h"
 
-lcQHTMLDialog::lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
-	: QDialog(Parent), ui(new Ui::lcQHTMLDialog)
+lcHTMLDialog::lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
+	: QDialog(Parent), ui(new Ui::lcHTMLDialog)
 {
     ui->setupUi(this);
 
-	connect(ui->outputFolderBrowse, &QPushButton::clicked, this, &lcQHTMLDialog::OutputFolderBrowseClicked);
+	connect(ui->outputFolderBrowse, &QPushButton::clicked, this, &lcHTMLDialog::OutputFolderBrowseClicked);
 
 	ui->stepWidth->setValidator(new QIntValidator(0, 2048, ui->stepWidth));
 	ui->stepHeight->setValidator(new QIntValidator(0, 2048, ui->stepHeight));
@@ -34,12 +34,12 @@ lcQHTMLDialog::lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 	ui->partsAtTheEnd->setChecked(mOptions->PartsListEnd);
 }
 
-lcQHTMLDialog::~lcQHTMLDialog()
+lcHTMLDialog::~lcHTMLDialog()
 {
     delete ui;
 }
 
-void lcQHTMLDialog::accept()
+void lcHTMLDialog::accept()
 {
 	QString pathName = ui->outputFolder->text();
 
@@ -63,7 +63,7 @@ void lcQHTMLDialog::accept()
 	QDialog::accept();
 }
 
-void lcQHTMLDialog::OutputFolderBrowseClicked()
+void lcHTMLDialog::OutputFolderBrowseClicked()
 {
 	QString result = QFileDialog::getExistingDirectory(this, tr("Select Output Folder"), ui->outputFolder->text());
 

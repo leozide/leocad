@@ -36,8 +36,8 @@ public:
 	bool mLast;
 };
 
-lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options)
-	: QDialog(Parent), mOptions(Options), ui(new Ui::lcQPropertiesDialog)
+lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options)
+	: QDialog(Parent), mOptions(Options), ui(new Ui::lcPropertiesDialog)
 {
 	ui->setupUi(this);
 
@@ -140,12 +140,12 @@ lcQPropertiesDialog::lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOpti
 	PartsTable->setItem((int)InfoTotals.size(), ColorCount + 1, Item);
 }
 
-lcQPropertiesDialog::~lcQPropertiesDialog()
+lcPropertiesDialog::~lcPropertiesDialog()
 {
 	delete ui;
 }
 
-void lcQPropertiesDialog::accept()
+void lcPropertiesDialog::accept()
 {
 	mOptions->Properties.mDescription = ui->DescriptionEdit->text();
 	mOptions->Properties.mAuthor = ui->AuthorEdit->text();

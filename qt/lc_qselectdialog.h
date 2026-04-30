@@ -3,16 +3,16 @@
 #include <QDialog>
 
 namespace Ui {
-class lcQSelectDialog;
+class lcSelectDialog;
 }
 
-class lcQSelectDialog : public QDialog
+class lcSelectDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQSelectDialog(QWidget* Parent, lcModel* Model);
-	~lcQSelectDialog();
+	lcSelectDialog(QWidget* Parent, lcModel* Model);
+	~lcSelectDialog();
 
 	std::vector<lcObject*> mObjects;
 
@@ -31,7 +31,7 @@ private slots:
 	void ItemChanged(QTreeWidgetItem *item, int column);
 
 private:
-	Ui::lcQSelectDialog *ui;
+	Ui::lcSelectDialog *ui;
 
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model);
 };

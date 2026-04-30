@@ -3,16 +3,16 @@
 #include <QDialog>
 
 namespace Ui {
-class lcQImageDialog;
+class lcImageDialog;
 }
 
-class lcQImageDialog : public QDialog
+class lcImageDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQImageDialog(QWidget* Parent);
-	~lcQImageDialog();
+	lcImageDialog(QWidget* Parent);
+	~lcImageDialog();
 
 	QString mFileName;
 	int mWidth;
@@ -27,6 +27,6 @@ private slots:
 	void FileNameBrowseClicked();
 
 private:
-	Ui::lcQImageDialog *ui;
+	Ui::lcImageDialog *ui;
 };
 

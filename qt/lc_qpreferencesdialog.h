@@ -35,16 +35,16 @@ struct lcPreferencesDialogOptions
 
 namespace Ui
 {
-class lcQPreferencesDialog;
+class lcPreferencesDialog;
 }
 
-class lcQPreferencesDialog : public QDialog
+class lcPreferencesDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options);
-	~lcQPreferencesDialog();
+	lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options);
+	~lcPreferencesDialog();
 
 	lcPreferencesDialogOptions* mOptions;
 
@@ -105,7 +105,7 @@ private slots:
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
 
 private:
-	Ui::lcQPreferencesDialog *ui;
+	Ui::lcPreferencesDialog *ui;
 
 	void updateCategories();
 	void updateCommandList();

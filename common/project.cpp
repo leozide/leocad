@@ -2603,7 +2603,7 @@ bool Project::ExportWavefront(const QString& FileName)
 
 void Project::SaveImage()
 {
-	lcQImageDialog Dialog(gMainWindow);
+	lcImageDialog Dialog(gMainWindow);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

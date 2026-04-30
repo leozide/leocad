@@ -11,16 +11,16 @@ struct lcPropertiesDialogOptions
 
 namespace Ui
 {
-class lcQPropertiesDialog;
+class lcPropertiesDialog;
 }
 
-class lcQPropertiesDialog : public QDialog
+class lcPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcQPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options);
-	~lcQPropertiesDialog();
+	lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOptions* Options);
+	~lcPropertiesDialog();
 
 	lcPropertiesDialogOptions* mOptions;
 
@@ -28,6 +28,6 @@ public slots:
 	void accept() override;
 
 private:
-	Ui::lcQPropertiesDialog* ui;
+	Ui::lcPropertiesDialog* ui;
 };
 

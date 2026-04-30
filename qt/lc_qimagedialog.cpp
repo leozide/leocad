@@ -6,12 +6,12 @@
 #include "lc_model.h"
 #include "lc_profile.h"
 
-lcQImageDialog::lcQImageDialog(QWidget* Parent)
-	: QDialog(Parent), ui(new Ui::lcQImageDialog)
+lcImageDialog::lcImageDialog(QWidget* Parent)
+	: QDialog(Parent), ui(new Ui::lcImageDialog)
 {
 	ui->setupUi(this);
 
-	connect(ui->fileNameBrowse, &QPushButton::clicked, this, &lcQImageDialog::FileNameBrowseClicked);
+	connect(ui->fileNameBrowse, &QPushButton::clicked, this, &lcImageDialog::FileNameBrowseClicked);
 
 	ui->width->setValidator(new QIntValidator(1, 32768, this));
 	ui->height->setValidator(new QIntValidator(1, 32768, this));
@@ -34,12 +34,12 @@ lcQImageDialog::lcQImageDialog(QWidget* Parent)
 	ui->rangeCurrent->setChecked(true);
 }
 
-lcQImageDialog::~lcQImageDialog()
+lcImageDialog::~lcImageDialog()
 {
 	delete ui;
 }
 
-void lcQImageDialog::accept()
+void lcImageDialog::accept()
 {
 	QString fileName = ui->fileName->text();
 
@@ -114,7 +114,7 @@ void lcQImageDialog::accept()
 	QDialog::accept();
 }
 
-void lcQImageDialog::FileNameBrowseClicked()
+void lcImageDialog::FileNameBrowseClicked()
 {
 	QString result = QFileDialog::getSaveFileName(this, tr("Save Image File"), ui->fileName->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
 

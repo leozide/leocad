@@ -7,26 +7,26 @@
 #include "light.h"
 #include "group.h"
 
-lcQSelectDialog::lcQSelectDialog(QWidget* Parent, lcModel* Model)
-	: QDialog(Parent), ui(new Ui::lcQSelectDialog)
+lcSelectDialog::lcSelectDialog(QWidget* Parent, lcModel* Model)
+	: QDialog(Parent), ui(new Ui::lcSelectDialog)
 {
 	ui->setupUi(this);
 
-	connect(ui->selectAll, &QPushButton::clicked, this, &lcQSelectDialog::SelectAllClicked);
-	connect(ui->selectNone, &QPushButton::clicked, this, &lcQSelectDialog::SelectNoneClicked);
-	connect(ui->selectInvert, &QPushButton::clicked, this, &lcQSelectDialog::SelectInvertClicked);
-	connect(ui->treeWidget, &QTreeWidget::itemChanged, this, &lcQSelectDialog::ItemChanged);
+	connect(ui->selectAll, &QPushButton::clicked, this, &lcSelectDialog::SelectAllClicked);
+	connect(ui->selectNone, &QPushButton::clicked, this, &lcSelectDialog::SelectNoneClicked);
+	connect(ui->selectInvert, &QPushButton::clicked, this, &lcSelectDialog::SelectInvertClicked);
+	connect(ui->treeWidget, &QTreeWidget::itemChanged, this, &lcSelectDialog::ItemChanged);
 
 	AddChildren(ui->treeWidget->invisibleRootItem(), nullptr, Model);
 	ui->treeWidget->expandAll();
 }
 
-lcQSelectDialog::~lcQSelectDialog()
+lcSelectDialog::~lcSelectDialog()
 {
 	delete ui;
 }
 
-void lcQSelectDialog::accept()
+void lcSelectDialog::accept()
 {
 	mObjects.clear();
 
@@ -56,7 +56,7 @@ void lcQSelectDialog::accept()
 	QDialog::accept();
 }
 
-void lcQSelectDialog::SelectAllClicked()
+void lcSelectDialog::SelectAllClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -80,7 +80,7 @@ void lcQSelectDialog::SelectAllClicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::SelectNoneClicked()
+void lcSelectDialog::SelectNoneClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -104,7 +104,7 @@ void lcQSelectDialog::SelectNoneClicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::SelectInvertClicked()
+void lcSelectDialog::SelectInvertClicked()
 {
 	ui->treeWidget->blockSignals(true);
 
@@ -128,7 +128,7 @@ void lcQSelectDialog::SelectInvertClicked()
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::ItemChanged(QTreeWidgetItem *item, int column)
+void lcSelectDialog::ItemChanged(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(column);
 
@@ -171,7 +171,7 @@ void lcQSelectDialog::ItemChanged(QTreeWidgetItem *item, int column)
 	ui->treeWidget->blockSignals(false);
 }
 
-void lcQSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model)
+void lcSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model)
 {
 	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
 

@@ -5419,7 +5419,7 @@ void lcModel::ShowPropertiesDialog()
 
 	GetPartsList(gDefaultColor, true, false, Options.PartsList);
 
-	lcQPropertiesDialog Dialog(gMainWindow, &Options);
+	lcPropertiesDialog Dialog(gMainWindow, &Options);
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
@@ -5439,7 +5439,7 @@ void lcModel::ShowSelectByNameDialog()
 		return;
 	}
 
-	lcQSelectDialog Dialog(gMainWindow, this);
+	lcSelectDialog Dialog(gMainWindow, this);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

@@ -6076,7 +6076,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQHTMLDialog</name>
+    <name>lcHTMLDialog</name>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
         <source>HTML Options</source>
@@ -6191,7 +6191,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQImageDialog</name>
+    <name>lcImageDialog</name>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="14"/>
         <source>Save Image</source>
@@ -6449,7 +6449,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQPreferencesDialog</name>
+    <name>lcPreferencesDialog</name>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="14"/>
         <source>Preferences</source>
@@ -7509,7 +7509,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQPropertiesDialog</name>
+    <name>lcPropertiesDialog</name>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="14"/>
         <source>Properties</source>
@@ -7738,7 +7738,7 @@ Anisotropic: %5
     </message>
 </context>
 <context>
-    <name>lcQSelectDialog</name>
+    <name>lcSelectDialog</name>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="14"/>
         <source>Select Objects</source>

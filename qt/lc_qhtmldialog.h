@@ -4,16 +4,16 @@
 class lcHTMLExportOptions;
 
 namespace Ui {
-class lcQHTMLDialog;
+class lcHTMLDialog;
 }
 
-class lcQHTMLDialog : public QDialog
+class lcHTMLDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit lcQHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options);
-	~lcQHTMLDialog();
+	explicit lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options);
+	~lcHTMLDialog();
 
 public slots:
 	void accept() override;
@@ -23,6 +23,6 @@ private slots:
 
 private:
 	lcHTMLExportOptions* mOptions;
-	Ui::lcQHTMLDialog *ui;
+	Ui::lcHTMLDialog *ui;
 };
 

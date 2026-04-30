@@ -1313,7 +1313,7 @@ void lcMainWindow::ShowHTMLDialog()
 {
 	lcHTMLExportOptions Options(lcGetActiveProject());
 
-	lcQHTMLDialog Dialog(this, &Options);
+	lcHTMLDialog Dialog(this, &Options);
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 

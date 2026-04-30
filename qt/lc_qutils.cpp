@@ -138,17 +138,17 @@ bool lcRunElevatedProcess(const LPCWSTR ExeName, const LPCWSTR Arguments, const 
 #endif
 
 // Resize all columns to content except for one stretching column. (taken from QT creator)
-lcQTreeWidgetColumnStretcher::lcQTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
+lcTreeWidgetColumnStretcher::lcTreeWidgetColumnStretcher(QTreeWidget *treeWidget, int columnToStretch)
 	: QObject(treeWidget->header()), mColumnToStretch(columnToStretch), mInteractiveResize(false), mStretchWidth(0)
 {
 	parent()->installEventFilter(this);
-	connect(treeWidget->header(), &QHeaderView::sectionResized, this, &lcQTreeWidgetColumnStretcher::SectionResized);
+	connect(treeWidget->header(), &QHeaderView::sectionResized, this, &lcTreeWidgetColumnStretcher::SectionResized);
 
 	QHideEvent fake;
-	lcQTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
+	lcTreeWidgetColumnStretcher::eventFilter(parent(), &fake);
 }
 
-void lcQTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize, int NewSize)
+void lcTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize, int NewSize)
 {
 	Q_UNUSED(OldSize)
 
@@ -163,7 +163,7 @@ void lcQTreeWidgetColumnStretcher::SectionResized(int LogicalIndex, int OldSize,
 	}
 }
 
-bool lcQTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
+bool lcTreeWidgetColumnStretcher::eventFilter(QObject* Object, QEvent* Event)
 {
 	if (Object == parent())
 	{

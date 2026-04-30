@@ -6230,7 +6230,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQHTMLDialog</name>
+    <name>lcHTMLDialog</name>
     <message>
         <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
         <source>HTML Options</source>
@@ -6345,7 +6345,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQImageDialog</name>
+    <name>lcImageDialog</name>
     <message>
         <location filename="../qt/lc_qimagedialog.ui" line="14"/>
         <source>Save Image</source>
@@ -6643,7 +6643,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQPreferencesDialog</name>
+    <name>lcPreferencesDialog</name>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="14"/>
         <source>Preferences</source>
@@ -7711,7 +7711,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQPropertiesDialog</name>
+    <name>lcPropertiesDialog</name>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="14"/>
         <source>Properties</source>
@@ -7952,7 +7952,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
 </context>
 <context>
-    <name>lcQSelectDialog</name>
+    <name>lcSelectDialog</name>
     <message>
         <location filename="../qt/lc_qselectdialog.ui" line="14"/>
         <source>Select Objects</source>

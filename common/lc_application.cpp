@@ -1307,7 +1307,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.MouseShortcutsModified = false;
 	Options.MouseShortcutsDefault = false;
 
-	lcQPreferencesDialog Dialog(gMainWindow, &Options);
+	lcPreferencesDialog Dialog(gMainWindow, &Options);
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 

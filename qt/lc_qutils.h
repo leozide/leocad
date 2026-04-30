@@ -19,12 +19,12 @@ bool lcRunElevatedProcess(const LPCWSTR ExeName, const LPCWSTR Arguments, const 
 
 #endif
 
-class lcQTreeWidgetColumnStretcher : public QObject
+class lcTreeWidgetColumnStretcher : public QObject
 {
 	Q_OBJECT
 
 public:
-	lcQTreeWidgetColumnStretcher(QTreeWidget* TreeWidget, int ColumnToStretch);
+	lcTreeWidgetColumnStretcher(QTreeWidget* TreeWidget, int ColumnToStretch);
 
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 

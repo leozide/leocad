@@ -9,7 +9,7 @@ class lcPreviewDockWidget : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit lcPreviewDockWidget(QMainWindow* Parent = nullptr);
+	explicit lcPreviewDockWidget(QMainWindow* Parent);
 
 	bool SetCurrentPiece(const QString& PartType, int ColorCode);
 	void ClearPreview();

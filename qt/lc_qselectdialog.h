@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 namespace Ui {
 class lcSelectDialog;
 }
@@ -31,7 +29,7 @@ private slots:
 	void ItemChanged(QTreeWidgetItem *item, int column);
 
 private:
-	Ui::lcSelectDialog *ui;
+	Ui::lcSelectDialog* ui;
 
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model);
 };

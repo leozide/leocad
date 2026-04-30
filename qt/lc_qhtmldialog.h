@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDialog>
 class lcHTMLExportOptions;
 
 namespace Ui {
@@ -13,7 +12,7 @@ class lcHTMLDialog : public QDialog
 
 public:
 	explicit lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options);
-	~lcHTMLDialog();
+	virtual ~lcHTMLDialog();
 
 public slots:
 	void accept() override;
@@ -23,6 +22,6 @@ private slots:
 
 private:
 	lcHTMLExportOptions* mOptions;
-	Ui::lcHTMLDialog *ui;
+	Ui::lcHTMLDialog* ui;
 };
 

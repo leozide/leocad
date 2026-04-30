@@ -2,8 +2,6 @@
 
 #ifndef LC_DISABLE_RENDER_DIALOG
 
-#include <QDialog>
-
 namespace Ui {
 class lcRenderDialog;
 }
@@ -13,7 +11,7 @@ class lcRenderProcess : public QProcess
 	Q_OBJECT
 
 public:
-	explicit lcRenderProcess(QObject* parent = nullptr)
+	explicit lcRenderProcess(QObject* parent)
 		: QProcess(parent)
 	{
 	}
@@ -25,7 +23,7 @@ class lcRenderPreviewWidget : public QWidget
 	Q_OBJECT
 
 public:
-	lcRenderPreviewWidget(QWidget* Parent)
+	explicit lcRenderPreviewWidget(QWidget* Parent)
 		: QWidget(Parent)
 	{
 	}

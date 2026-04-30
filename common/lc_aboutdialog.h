@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 namespace Ui {
 class lcAboutDialog;
 }
@@ -12,7 +10,7 @@ class lcAboutDialog : public QDialog
 
 public:
 	explicit lcAboutDialog(QWidget* Parent);
-	~lcAboutDialog();
+	virtual ~lcAboutDialog();
 
 private:
 	Ui::lcAboutDialog* ui;

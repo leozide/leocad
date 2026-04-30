@@ -105,7 +105,7 @@ private slots:
 	void MouseTreeItemChanged(QTreeWidgetItem* Current);
 
 private:
-	Ui::lcPreferencesDialog *ui;
+	Ui::lcPreferencesDialog* ui;
 
 	void updateCategories();
 	void updateCommandList();

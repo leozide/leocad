@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 namespace Ui {
 class lcGroupDialog;
 }
@@ -12,7 +10,7 @@ class lcGroupDialog : public QDialog
 
 public:
 	explicit lcGroupDialog(QWidget* Parent, const QString& Name, const std::vector<std::unique_ptr<lcGroup>>& Groups);
-	~lcGroupDialog();
+	virtual ~lcGroupDialog();
 
 	QString mName;
 
@@ -21,5 +19,5 @@ public slots:
 
 private:
 	const std::vector<std::unique_ptr<lcGroup>>& mGroups;
-	Ui::lcGroupDialog *ui;
+	Ui::lcGroupDialog* ui;
 };

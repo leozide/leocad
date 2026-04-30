@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 class lcHttpReply;
 class lcHttpManager;
 
@@ -15,7 +13,7 @@ class lcSetsDatabaseDialog : public QDialog
 
 public:
 	explicit lcSetsDatabaseDialog(QWidget* Parent);
-	~lcSetsDatabaseDialog();
+	virtual ~lcSetsDatabaseDialog();
 
 	QString GetSetName() const;
 	QString GetSetDescription() const;

@@ -12,7 +12,7 @@ class lcArrayDialog : public QDialog
 
 public:
 	lcArrayDialog(QWidget* Parent);
-	~lcArrayDialog();
+	virtual ~lcArrayDialog();
 
 	int mCounts[3];
 	lcVector3 mOffsets[3];
@@ -22,6 +22,6 @@ public slots:
 	void accept() override;
 
 private:
-	Ui::lcArrayDialog *ui;
+	Ui::lcArrayDialog* ui;
 };
 

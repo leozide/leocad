@@ -17,6 +17,6 @@ public slots:
 	void accept() override;
 
 private:
-	Ui::lcPageSetupDialog *ui;
+	Ui::lcPageSetupDialog* ui;
 	lcInstructionsPageSetup* mPageSetup;
 };

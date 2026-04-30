@@ -1,19 +1,3 @@
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QComboBox>
-#include <QDialogButtonBox>
-#include <QLabel>
-#include <QProgressBar>
-#include <QProcess>
-#include <QTimer>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <zlib.h>
 
 #include "lc_blenderpreferences.h"

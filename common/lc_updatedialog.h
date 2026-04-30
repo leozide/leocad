@@ -25,7 +25,7 @@ public slots:
 	void finished(int result);
 
 private:
-	Ui::lcUpdateDialog *ui;
+	Ui::lcUpdateDialog* ui;
 
 	lcHttpManager* mHttpManager;
 	QByteArray mVersionData;

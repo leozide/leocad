@@ -826,7 +826,7 @@ void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode, bool ShowP
 
 void lcMainWindow::CreatePreviewWidget()
 {
-	mPreviewWidget  = new lcPreviewDockWidget();
+	mPreviewWidget  = new lcPreviewDockWidget(this);
 
 	mPreviewToolBar = new QDockWidget(tr("Preview"), this);
 	mPreviewToolBar->setWindowTitle(tr("Preview"));

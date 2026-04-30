@@ -1,27 +1,10 @@
 #pragma once
 
-#include <QWidget>
-#include <QDialog>
-#include "qtimer.h"
-
 #define LC_UNIX_SHELL                  "/bin/sh"
 #define LC_WINDOWS_SHELL               "cmd.exe"
 #define LC_BLENDER_ADDON_BLEND_FILE    "leocad.blend"
 #define LC_BLENDER_ADDON_IMPORT_MODULE "TN"
 #define LC_BLENDER_ADDON_RENDER_FOLDER "io_scene_render_ldraw"
-
-class QFormLayout;
-class QGridLayout;
-class QLabel;
-class QGroupBox;
-class QLineEdit;
-class QCheckBox;
-class QComboBox;
-class QPushButton;
-class QScrollArea;
-class QProgressBar;
-class QProcess;
-class QTimer;
 
 class lcHttpReply;
 class lcBlenderPreferences;
@@ -29,10 +12,9 @@ class lcBlenderPreferences;
 class lcBlenderPreferencesDialog : public QDialog
 {
 	Q_OBJECT
+	
 public:
-
 	explicit lcBlenderPreferencesDialog(int Width, int Height, double Scale, QWidget* Parent = nullptr);
-
 	virtual ~lcBlenderPreferencesDialog();
 
 	static bool  GetBlenderPreferences(int& Width, int& Height, double& Scale, QWidget* Parent = nullptr);

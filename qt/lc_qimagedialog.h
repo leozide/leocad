@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 namespace Ui {
 class lcImageDialog;
 }
@@ -27,6 +25,6 @@ private slots:
 	void FileNameBrowseClicked();
 
 private:
-	Ui::lcImageDialog *ui;
+	Ui::lcImageDialog* ui;
 };
 

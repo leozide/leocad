@@ -329,6 +329,7 @@ protected:
 	void ShowInstructionsDialog();
 	void ShowPrintDialog();
 	void ShowImageDialog();
+	void ShowSelectDialog();
 	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);

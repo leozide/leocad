@@ -8085,22 +8085,22 @@ Anisotropic: %5
 <context>
     <name>lcSelectDialog</name>
     <message>
-        <location filename="../qt/lc_qselectdialog.ui" line="14"/>
+        <location filename="../common/lc_selectdialog.ui" line="14"/>
         <source>Select Objects</source>
         <translation>Seleccionar objetos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qselectdialog.ui" line="34"/>
+        <location filename="../common/lc_selectdialog.ui" line="34"/>
         <source>All</source>
         <translation>Todos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qselectdialog.ui" line="41"/>
+        <location filename="../common/lc_selectdialog.ui" line="41"/>
         <source>None</source>
         <translation>Ninguno</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qselectdialog.ui" line="48"/>
+        <location filename="../common/lc_selectdialog.ui" line="48"/>
         <source>Invert</source>
         <translation>Invertir</translation>
     </message>

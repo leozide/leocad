@@ -384,7 +384,6 @@ public:
 	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);
 
 	void ShowPropertiesDialog();
-	void ShowSelectByNameDialog();
 	void ShowArrayDialog();
 	void ShowMinifigDialog();
 	void UpdateInterface();

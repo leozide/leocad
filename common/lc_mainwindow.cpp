@@ -10,6 +10,7 @@
 #include "lc_qutils.h"
 #include "lc_updatedialog.h"
 #include "lc_aboutdialog.h"
+#include "lc_selectdialog.h"
 #include "lc_setsdatabasedialog.h"
 #include "lc_htmldialog.h"
 #include "lc_renderdialog.h"
@@ -1382,6 +1383,27 @@ void lcMainWindow::ShowImageDialog()
 	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
 	
 	lcGetActiveProject()->SaveImage(Options);
+}
+
+void lcMainWindow::ShowSelectDialog()
+{
+	lcModel* ActiveModel = GetActiveModel();
+	
+	if (!ActiveModel)
+		return;
+	
+	if (ActiveModel->GetPieces().empty() && ActiveModel->GetCameras().empty() && ActiveModel->GetLights().empty())
+	{
+		QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to select."));
+		return;
+	}
+
+	lcSelectDialog Dialog(this, ActiveModel);
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	ActiveModel->SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
 }
 
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
@@ -2818,8 +2840,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:
-		if (ActiveModel)
-			ActiveModel->ShowSelectByNameDialog();
+		ShowSelectDialog();
 		break;
 
 	case LC_EDIT_SELECTION_SINGLE:

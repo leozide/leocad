@@ -15,7 +15,6 @@
 #include "lc_view.h"
 #include "minifig.h"
 #include "lc_arraydialog.h"
-#include "lc_qselectdialog.h"
 #include "lc_minifigdialog.h"
 #include "lc_groupdialog.h"
 #include "lc_editgroupsdialog.h"
@@ -5429,22 +5428,6 @@ void lcModel::ShowPropertiesDialog()
 	BeginHistorySequence();
 	SetModelProperties(Options.Properties);
 	EndHistorySequence(tr("Change Model Properties"));
-}
-
-void lcModel::ShowSelectByNameDialog()
-{
-	if (mPieces.empty() && mCameras.empty() && mLights.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to select."));
-		return;
-	}
-
-	lcSelectDialog Dialog(gMainWindow, this);
-
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
-
-	SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
 }
 
 void lcModel::ShowArrayDialog()

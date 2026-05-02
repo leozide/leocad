@@ -5836,32 +5836,32 @@
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
+        <location filename="../common/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>关于 LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
+        <location filename="../common/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD 版本 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
+        <location filename="../common/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD 是一个用于创建虚拟乐高模型的免费应用程序。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
+        <location filename="../common/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>系统信息</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD 版本 %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -5892,19 +5892,19 @@ Stencil Buffer: %5 bits
         <translation type="vanished">双缓冲</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation>LeoCAD 持续构建版 %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
         <translation>Qt 版本 %1 (compiled with %2)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -5917,7 +5917,7 @@ Stencil Buffer: %3 bits
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -5932,24 +5932,24 @@ Anisotropic: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>支持</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>不支持</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>支持 (最大 %1)</translation>
     </message>
@@ -5957,27 +5957,27 @@ Anisotropic: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="14"/>
+        <location filename="../common/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>阵列</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="22"/>
+        <location filename="../common/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>尺寸</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="65"/>
+        <location filename="../common/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>偏移量</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="101"/>
+        <location filename="../common/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>旋转角度</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
+        <location filename="../common/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>阵列为空。</translation>
     </message>
@@ -5985,37 +5985,37 @@ Anisotropic: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="14"/>
+        <location filename="../common/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>类别</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="22"/>
+        <location filename="../common/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>名称:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="35"/>
+        <location filename="../common/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>关键词:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
+        <location filename="../common/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>编辑类别</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
+        <location filename="../common/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>新建类别</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
+        <location filename="../common/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>名称不能为空。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
+        <location filename="../common/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>关键词不能为空。</translation>
     </message>
@@ -6060,17 +6060,17 @@ Anisotropic: %5
 <context>
     <name>lcGroupDialog</name>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
+        <location filename="../common/lc_groupdialog.ui" line="14"/>
         <source>Group</source>
         <translation>组</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
+        <location filename="../common/lc_groupdialog.ui" line="22"/>
         <source>Name</source>
         <translation>名称</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.cpp" line="26"/>
+        <location filename="../common/lc_groupdialog.cpp" line="26"/>
         <source>Name cannot be empty.</source>
         <translation>名称不能为空。</translation>
     </message>
@@ -6078,77 +6078,77 @@ Anisotropic: %5
 <context>
     <name>lcHTMLDialog</name>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
+        <location filename="../common/lc_htmldialog.ui" line="20"/>
         <source>HTML Options</source>
         <translation>HTML 选项</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="32"/>
+        <location filename="../common/lc_htmldialog.ui" line="32"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="40"/>
+        <location filename="../common/lc_htmldialog.ui" line="40"/>
         <source>Output folder:</source>
         <translation>输出文件夹:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="53"/>
+        <location filename="../common/lc_htmldialog.ui" line="53"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="62"/>
+        <location filename="../common/lc_htmldialog.ui" line="62"/>
         <source>Transparent image background</source>
         <translation>透明图像背景</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="129"/>
+        <location filename="../common/lc_htmldialog.ui" line="129"/>
         <source>Width:</source>
         <translation>宽度:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
+        <location filename="../common/lc_htmldialog.ui" line="149"/>
         <source>Height:</source>
         <translation>高度:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="122"/>
+        <location filename="../common/lc_htmldialog.ui" line="122"/>
         <source>Index page</source>
         <translation>索引页面</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="72"/>
+        <location filename="../common/lc_htmldialog.ui" line="72"/>
         <source>Models</source>
         <translation>模型</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
+        <location filename="../common/lc_htmldialog.ui" line="78"/>
         <source>All Models</source>
         <translation>所有模型</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="85"/>
+        <location filename="../common/lc_htmldialog.ui" line="85"/>
         <source>Current Model and Submodels</source>
         <translation>当前模型和子模型</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="92"/>
+        <location filename="../common/lc_htmldialog.ui" line="92"/>
         <source>Current Model Only</source>
         <translation>仅当前模型</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
+        <location filename="../common/lc_htmldialog.ui" line="102"/>
         <source>Steps</source>
         <translation>步骤</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="108"/>
+        <location filename="../common/lc_htmldialog.ui" line="108"/>
         <source>Single Page</source>
         <translation>单页</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="115"/>
+        <location filename="../common/lc_htmldialog.ui" line="115"/>
         <source>One Step per Page</source>
         <translation>每步一页</translation>
     </message>
@@ -6157,17 +6157,17 @@ Anisotropic: %5
         <translation type="vanished">高亮新零件</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="172"/>
+        <location filename="../common/lc_htmldialog.ui" line="172"/>
         <source>Parts List</source>
         <translation>零件列表</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="178"/>
+        <location filename="../common/lc_htmldialog.ui" line="178"/>
         <source>At the end</source>
         <translation>末尾</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="185"/>
+        <location filename="../common/lc_htmldialog.ui" line="185"/>
         <source>After each step</source>
         <translation>每步之后</translation>
     </message>
@@ -6180,12 +6180,12 @@ Anisotropic: %5
         <translation type="vanished">创建图片</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="46"/>
+        <location filename="../common/lc_htmldialog.cpp" line="46"/>
         <source>Output folder cannot be empty.</source>
         <translation>输出文件夹不能为空。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="66"/>
+        <location filename="../common/lc_htmldialog.cpp" line="66"/>
         <source>Select Output Folder</source>
         <translation>选择输出文件夹</translation>
     </message>

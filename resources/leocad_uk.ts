@@ -5908,37 +5908,37 @@ Please visit https://www.leocad.org for information on how to download and insta
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
+        <location filename="../common/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>Про LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
+        <location filename="../common/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD Версія 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
+        <location filename="../common/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD є вільною програмою для створення віртуальних моделей LEGO.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
+        <location filename="../common/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Системна інформація</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation>LeoCAD Continuous Build %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD Версія %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
@@ -5947,7 +5947,7 @@ Please visit https://www.leocad.org for information on how to download and insta
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -5958,7 +5958,7 @@ Please visit https://www.leocad.org for information on how to download and insta
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -5967,7 +5967,7 @@ Stencil Buffer: %3 bits
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -6011,24 +6011,24 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>Supported</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>Not supported</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>Supported (max %1)</translation>
     </message>
@@ -6036,27 +6036,27 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="14"/>
+        <location filename="../common/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>Масив</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="22"/>
+        <location filename="../common/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>Розміри</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="65"/>
+        <location filename="../common/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>Відступи</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="101"/>
+        <location filename="../common/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>Обертання</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
+        <location filename="../common/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>Масив порожній.</translation>
     </message>
@@ -6064,37 +6064,37 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="14"/>
+        <location filename="../common/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>Категорія</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="22"/>
+        <location filename="../common/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>Назва:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="35"/>
+        <location filename="../common/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>Ключові слова:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
+        <location filename="../common/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>Редагувати категорію</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
+        <location filename="../common/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>Нова категорія</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
+        <location filename="../common/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>Назва не може бути порожньою.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
+        <location filename="../common/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>Ключові слова не можуть бути порожніми.</translation>
     </message>
@@ -6139,17 +6139,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcGroupDialog</name>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
+        <location filename="../common/lc_groupdialog.ui" line="14"/>
         <source>Group</source>
         <translation>Група</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
+        <location filename="../common/lc_groupdialog.ui" line="22"/>
         <source>Name</source>
         <translation>Назва</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.cpp" line="26"/>
+        <location filename="../common/lc_groupdialog.cpp" line="26"/>
         <source>Name cannot be empty.</source>
         <translation>Назва не може бути порожньою.</translation>
     </message>
@@ -6157,77 +6157,77 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcHTMLDialog</name>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
+        <location filename="../common/lc_htmldialog.ui" line="20"/>
         <source>HTML Options</source>
         <translation>Налаштування HTML</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="32"/>
+        <location filename="../common/lc_htmldialog.ui" line="32"/>
         <source>General</source>
         <translation>Основне</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="40"/>
+        <location filename="../common/lc_htmldialog.ui" line="40"/>
         <source>Output folder:</source>
         <translation>Вихідна тека:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="53"/>
+        <location filename="../common/lc_htmldialog.ui" line="53"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="62"/>
+        <location filename="../common/lc_htmldialog.ui" line="62"/>
         <source>Transparent image background</source>
         <translation>Прозорий фон для зображень</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="72"/>
+        <location filename="../common/lc_htmldialog.ui" line="72"/>
         <source>Models</source>
         <translation>Моделі</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
+        <location filename="../common/lc_htmldialog.ui" line="78"/>
         <source>All Models</source>
         <translation>Усі моделі</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="85"/>
+        <location filename="../common/lc_htmldialog.ui" line="85"/>
         <source>Current Model and Submodels</source>
         <translation>Поточна модель і підмоделі</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="92"/>
+        <location filename="../common/lc_htmldialog.ui" line="92"/>
         <source>Current Model Only</source>
         <translation>Лише поточна модель</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
+        <location filename="../common/lc_htmldialog.ui" line="102"/>
         <source>Steps</source>
         <translation>Кроки</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="108"/>
+        <location filename="../common/lc_htmldialog.ui" line="108"/>
         <source>Single Page</source>
         <translation>Єдина сторінка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="115"/>
+        <location filename="../common/lc_htmldialog.ui" line="115"/>
         <source>One Step per Page</source>
         <translation>Один крок на сторінку</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="122"/>
+        <location filename="../common/lc_htmldialog.ui" line="122"/>
         <source>Index page</source>
         <translation>Індексна сторінка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="129"/>
+        <location filename="../common/lc_htmldialog.ui" line="129"/>
         <source>Width:</source>
         <translation>Ширина:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
+        <location filename="../common/lc_htmldialog.ui" line="149"/>
         <source>Height:</source>
         <translation>Висота:</translation>
     </message>
@@ -6236,7 +6236,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="vanished">Підсвічувати нові блоки</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="172"/>
+        <location filename="../common/lc_htmldialog.ui" line="172"/>
         <source>Parts List</source>
         <translation>Список блоків</translation>
     </message>
@@ -6245,7 +6245,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="vanished">Колір:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="185"/>
+        <location filename="../common/lc_htmldialog.ui" line="185"/>
         <source>After each step</source>
         <translation>Після кожного кроку</translation>
     </message>
@@ -6254,17 +6254,17 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="vanished">Створювати зображення</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="178"/>
+        <location filename="../common/lc_htmldialog.ui" line="178"/>
         <source>At the end</source>
         <translation>У кінці</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="46"/>
+        <location filename="../common/lc_htmldialog.cpp" line="46"/>
         <source>Output folder cannot be empty.</source>
         <translation>Вихідна теки не може бути порожньою.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="66"/>
+        <location filename="../common/lc_htmldialog.cpp" line="66"/>
         <source>Select Output Folder</source>
         <translation>Обрати вихідну теку</translation>
     </message>

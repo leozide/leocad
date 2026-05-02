@@ -5919,32 +5919,32 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="14"/>
+        <location filename="../common/lc_aboutdialog.ui" line="14"/>
         <source>About LeoCAD</source>
         <translation>À propos de LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="42"/>
+        <location filename="../common/lc_aboutdialog.ui" line="42"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD Version 0.00.0</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="49"/>
+        <location filename="../common/lc_aboutdialog.ui" line="49"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD est une application libre pour créer les modèles LEGO virtuels.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.ui" line="73"/>
+        <location filename="../common/lc_aboutdialog.ui" line="73"/>
         <source>System Information</source>
         <translation>Informations système</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="18"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="18"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD Version %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="28"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="28"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -5975,19 +5975,19 @@ Stencil Buffer: %5 bits
         <translation type="vanished">double tampon</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="16"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="16"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="26"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="26"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="30"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="30"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -5996,7 +5996,7 @@ Stencil Buffer: %3 bits
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="33"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="33"/>
         <source>Buffers: %1
 Shaders: %2
 Framebuffers: %3
@@ -6006,24 +6006,24 @@ Anisotropic: %5
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
         <source>Supported</source>
         <translation>Pris en charge</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="34"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="35"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="36"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="37"/>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="34"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="35"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="37"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Not supported</source>
         <translation>Non pris en charge</translation>
     </message>
     <message>
-        <location filename="../qt/lc_aboutdialog.cpp" line="38"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Supported (max %1)</source>
         <translation>Pris en charge (maximum %1)</translation>
     </message>
@@ -6031,27 +6031,27 @@ Anisotropic: %5
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="14"/>
+        <location filename="../common/lc_arraydialog.ui" line="14"/>
         <source>Array</source>
         <translation>Arrangement</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="22"/>
+        <location filename="../common/lc_arraydialog.ui" line="22"/>
         <source>Dimensions</source>
         <translation>Dimensions</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="65"/>
+        <location filename="../common/lc_arraydialog.ui" line="65"/>
         <source>Offsets</source>
         <translation>Décalages</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.ui" line="101"/>
+        <location filename="../common/lc_arraydialog.ui" line="101"/>
         <source>Rotations</source>
         <translation>Rotations</translation>
     </message>
     <message>
-        <location filename="../qt/lc_arraydialog.cpp" line="74"/>
+        <location filename="../common/lc_arraydialog.cpp" line="74"/>
         <source>Array is empty.</source>
         <translation>L’arrangement est vide.</translation>
     </message>
@@ -6059,37 +6059,37 @@ Anisotropic: %5
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="14"/>
+        <location filename="../common/lc_categorydialog.ui" line="14"/>
         <source>Category</source>
         <translation>Catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="22"/>
+        <location filename="../common/lc_categorydialog.ui" line="22"/>
         <source>Name:</source>
         <translation>Nom :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.ui" line="35"/>
+        <location filename="../common/lc_categorydialog.ui" line="35"/>
         <source>Keywords:</source>
         <translation>Mots clés :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="15"/>
+        <location filename="../common/lc_categorydialog.cpp" line="15"/>
         <source>Edit Category</source>
         <translation>Éditer la catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="17"/>
+        <location filename="../common/lc_categorydialog.cpp" line="17"/>
         <source>New Category</source>
         <translation>Nouvelle catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="34"/>
+        <location filename="../common/lc_categorydialog.cpp" line="34"/>
         <source>Name cannot be empty.</source>
         <translation>Le nom ne peut pas être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_categorydialog.cpp" line="42"/>
+        <location filename="../common/lc_categorydialog.cpp" line="42"/>
         <source>Keywords cannot be empty.</source>
         <translation>Le champ mots clés ne peut pas être vide.</translation>
     </message>
@@ -6134,17 +6134,17 @@ Anisotropic: %5
 <context>
     <name>lcGroupDialog</name>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="14"/>
+        <location filename="../common/lc_groupdialog.ui" line="14"/>
         <source>Group</source>
         <translation>Groupe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.ui" line="22"/>
+        <location filename="../common/lc_groupdialog.ui" line="22"/>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qgroupdialog.cpp" line="26"/>
+        <location filename="../common/lc_groupdialog.cpp" line="26"/>
         <source>Name cannot be empty.</source>
         <translation>Le nom ne peut pas être vide.</translation>
     </message>
@@ -6152,77 +6152,77 @@ Anisotropic: %5
 <context>
     <name>lcHTMLDialog</name>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="20"/>
+        <location filename="../common/lc_htmldialog.ui" line="20"/>
         <source>HTML Options</source>
         <translation>Options HTML</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="32"/>
+        <location filename="../common/lc_htmldialog.ui" line="32"/>
         <source>General</source>
         <translation>Général</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="40"/>
+        <location filename="../common/lc_htmldialog.ui" line="40"/>
         <source>Output folder:</source>
         <translation>Dossier cible :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="53"/>
+        <location filename="../common/lc_htmldialog.ui" line="53"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="62"/>
+        <location filename="../common/lc_htmldialog.ui" line="62"/>
         <source>Transparent image background</source>
         <translation>Fond d’image transparent</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="129"/>
+        <location filename="../common/lc_htmldialog.ui" line="129"/>
         <source>Width:</source>
         <translation>Largeur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="149"/>
+        <location filename="../common/lc_htmldialog.ui" line="149"/>
         <source>Height:</source>
         <translation>Hauteur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="122"/>
+        <location filename="../common/lc_htmldialog.ui" line="122"/>
         <source>Index page</source>
         <translation>Page d’index</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="72"/>
+        <location filename="../common/lc_htmldialog.ui" line="72"/>
         <source>Models</source>
         <translation>Modèles</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="78"/>
+        <location filename="../common/lc_htmldialog.ui" line="78"/>
         <source>All Models</source>
         <translation>Tous les modèles</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="85"/>
+        <location filename="../common/lc_htmldialog.ui" line="85"/>
         <source>Current Model and Submodels</source>
         <translation>Modèle courant et ses sous-modèles</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="92"/>
+        <location filename="../common/lc_htmldialog.ui" line="92"/>
         <source>Current Model Only</source>
         <translation>Modèle courant seulement</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="102"/>
+        <location filename="../common/lc_htmldialog.ui" line="102"/>
         <source>Steps</source>
         <translation>Étapes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="108"/>
+        <location filename="../common/lc_htmldialog.ui" line="108"/>
         <source>Single Page</source>
         <translation>Une seule page</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="115"/>
+        <location filename="../common/lc_htmldialog.ui" line="115"/>
         <source>One Step per Page</source>
         <translation>Une étape par page</translation>
     </message>
@@ -6231,17 +6231,17 @@ Anisotropic: %5
         <translation type="vanished">Mettre en évidence les nouvelles pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="172"/>
+        <location filename="../common/lc_htmldialog.ui" line="172"/>
         <source>Parts List</source>
         <translation>Liste de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="178"/>
+        <location filename="../common/lc_htmldialog.ui" line="178"/>
         <source>At the end</source>
         <translation>À la fin</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.ui" line="185"/>
+        <location filename="../common/lc_htmldialog.ui" line="185"/>
         <source>After each step</source>
         <translation>Après chaque étape</translation>
     </message>
@@ -6254,12 +6254,12 @@ Anisotropic: %5
         <translation type="vanished">Créer les images</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="46"/>
+        <location filename="../common/lc_htmldialog.cpp" line="46"/>
         <source>Output folder cannot be empty.</source>
         <translation>Le champ dossier cible ne peut être vide.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qhtmldialog.cpp" line="66"/>
+        <location filename="../common/lc_htmldialog.cpp" line="66"/>
         <source>Select Output Folder</source>
         <translation>Sélectionner le dossier cible</translation>
     </message>

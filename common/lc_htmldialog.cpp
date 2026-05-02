@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qhtmldialog.h"
-#include "ui_lc_qhtmldialog.h"
+#include "lc_htmldialog.h"
+#include "ui_lc_htmldialog.h"
 #include "project.h"
 
 lcHTMLDialog::lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)

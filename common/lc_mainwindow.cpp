@@ -11,7 +11,7 @@
 #include "lc_updatedialog.h"
 #include "lc_aboutdialog.h"
 #include "lc_setsdatabasedialog.h"
-#include "lc_qhtmldialog.h"
+#include "lc_htmldialog.h"
 #include "lc_renderdialog.h"
 #include "lc_instructionsdialog.h"
 #include "lc_profile.h"

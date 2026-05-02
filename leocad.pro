@@ -199,6 +199,7 @@ SOURCES += \
 	common/lc_groupdialog.cpp \
 	common/lc_htmldialog.cpp \
 	common/lc_http.cpp \
+	common/lc_imagedialog.cpp \
 	common/lc_instructions.cpp \
 	common/lc_instructionsdialog.cpp \
 	common/lc_keyframewidget.cpp \
@@ -238,7 +239,6 @@ SOURCES += \
 	qt/lc_qselectdialog.cpp \
 	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qpreferencesdialog.cpp \
-	qt/lc_qimagedialog.cpp \
 	qt/lc_qutils.cpp \
 	qt/lc_renderdialog.cpp \
 	qt/lc_setsdatabasedialog.cpp
@@ -278,6 +278,7 @@ HEADERS += \
 	common/lc_groupdialog.h \
 	common/lc_htmldialog.h \
 	common/lc_http.h \
+	common/lc_imagedialog.h \
 	common/lc_instructions.h \
 	common/lc_instructionsdialog.h \
 	common/lc_keyframewidget.h \
@@ -316,7 +317,6 @@ HEADERS += \
 	qt/lc_qselectdialog.h \
 	qt/lc_qpropertiesdialog.h \
 	qt/lc_qpreferencesdialog.h \
-	qt/lc_qimagedialog.h \
 	qt/lc_qutils.h \
 	qt/lc_renderdialog.h \
 	qt/lc_setsdatabasedialog.h \
@@ -328,6 +328,7 @@ FORMS += \
 	common/lc_editgroupsdialog.ui \
 	common/lc_groupdialog.ui \
 	common/lc_htmldialog.ui \
+	common/lc_imagedialog.ui \
 	common/lc_minifigdialog.ui \
 	common/lc_modellistdialog.ui \
 	common/lc_pagesetupdialog.ui \
@@ -336,7 +337,6 @@ FORMS += \
 	qt/lc_qselectdialog.ui \
 	qt/lc_qpropertiesdialog.ui \
 	qt/lc_qpreferencesdialog.ui \
-	qt/lc_qimagedialog.ui \
 	qt/lc_renderdialog.ui \
 	qt/lc_setsdatabasedialog.ui
 OTHER_FILES +=

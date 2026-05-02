@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_qimagedialog.h"
-#include "ui_lc_qimagedialog.h"
+#include "lc_imagedialog.h"
+#include "ui_lc_imagedialog.h"
 #include "project.h"
 
 lcImageDialog::lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options)

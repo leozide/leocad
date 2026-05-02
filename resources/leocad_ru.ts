@@ -6347,112 +6347,112 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcImageDialog</name>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="14"/>
+        <location filename="../common/lc_imagedialog.ui" line="14"/>
         <source>Save Image</source>
         <translation>Сохранение изображения</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="24"/>
+        <location filename="../common/lc_imagedialog.ui" line="24"/>
         <source>File name:</source>
         <translation>Имя файла:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="37"/>
+        <location filename="../common/lc_imagedialog.ui" line="37"/>
         <source>...</source>
         <translation>…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="48"/>
+        <location filename="../common/lc_imagedialog.ui" line="48"/>
         <source>Dimensions</source>
         <translation>Размеры</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="54"/>
+        <location filename="../common/lc_imagedialog.ui" line="54"/>
         <source>Width:</source>
         <translation>Ширина:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="80"/>
+        <location filename="../common/lc_imagedialog.ui" line="80"/>
         <source>Height:</source>
         <translation>Высота:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="109"/>
+        <location filename="../common/lc_imagedialog.ui" line="109"/>
         <source>Step Range</source>
         <translation>Диапазон шагов</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="115"/>
+        <location filename="../common/lc_imagedialog.ui" line="115"/>
         <source>All Steps</source>
         <translation>Все шаги</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="122"/>
+        <location filename="../common/lc_imagedialog.ui" line="122"/>
         <source>Current Step</source>
         <translation>Текущий шаг</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="131"/>
+        <location filename="../common/lc_imagedialog.ui" line="131"/>
         <source>Custom Range</source>
         <translation>Другой диапазон</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="138"/>
+        <location filename="../common/lc_imagedialog.ui" line="138"/>
         <source>From:</source>
         <translation>с:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="161"/>
+        <location filename="../common/lc_imagedialog.ui" line="161"/>
         <source>To:</source>
         <translation>по:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
+        <location filename="../common/lc_imagedialog.cpp" line="46"/>
+        <location filename="../common/lc_imagedialog.cpp" line="54"/>
+        <location filename="../common/lc_imagedialog.cpp" line="62"/>
+        <location filename="../common/lc_imagedialog.cpp" line="84"/>
+        <location filename="../common/lc_imagedialog.cpp" line="92"/>
+        <location filename="../common/lc_imagedialog.cpp" line="98"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
+        <location filename="../common/lc_imagedialog.cpp" line="46"/>
         <source>Output File cannot be empty.</source>
         <translation>Файл вывода не может быть пустым.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
+        <location filename="../common/lc_imagedialog.cpp" line="54"/>
         <source>Please enter a width between 1 and 32768.</source>
         <translation>Введите ширину от 1 до 32768.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
+        <location filename="../common/lc_imagedialog.cpp" line="62"/>
         <source>Please enter a height between 1 and 32768.</source>
         <translation>Введите высоту от 1 до 32768.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
+        <location filename="../common/lc_imagedialog.cpp" line="84"/>
         <source>First step must be between 1 and %1.</source>
         <translation>Первый шаг должен находится в диапазоне между 1 и %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
+        <location filename="../common/lc_imagedialog.cpp" line="92"/>
         <source>Last step must be between 1 and %1.</source>
         <translation>Последний шаг должен находится в диапазоне между 1 и %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
+        <location filename="../common/lc_imagedialog.cpp" line="98"/>
         <source>Last step must be greater than first step.</source>
         <translation>Последний шаг должен быть больше первого шага.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
+        <location filename="../common/lc_imagedialog.cpp" line="117"/>
         <source>Save Image File</source>
         <translation>Сохранение файла изображения</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
+        <location filename="../common/lc_imagedialog.cpp" line="117"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Поддерживаемые файлы изображений (*.bmp *.png *.jpg);;Файлы BMP (*.bmp);;Файлы PNG (*.png);;Файлы JPEG (*.jpg);;Все файлы (*.*)</translation>
     </message>
@@ -6507,52 +6507,52 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcModelListDialog</name>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
+        <location filename="../common/lc_modellistdialog.ui" line="14"/>
         <source>Submodels</source>
         <translation>Подмодели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="31"/>
+        <location filename="../common/lc_modellistdialog.ui" line="31"/>
         <source>&amp;New...</source>
         <translation>&amp;Создать…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="38"/>
+        <location filename="../common/lc_modellistdialog.ui" line="38"/>
         <source>D&amp;elete...</source>
         <translation>У&amp;далить…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="45"/>
+        <location filename="../common/lc_modellistdialog.ui" line="45"/>
         <source>&amp;Rename...</source>
         <translation>&amp;Переименовать…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="52"/>
+        <location filename="../common/lc_modellistdialog.ui" line="52"/>
         <source>Export...</source>
         <translation>Экспортировать…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="59"/>
+        <location filename="../common/lc_modellistdialog.ui" line="59"/>
         <source>Duplicate...</source>
         <translation>Дублировать…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="66"/>
+        <location filename="../common/lc_modellistdialog.ui" line="66"/>
         <source>Move &amp;Up</source>
         <translation>Переместить в&amp;верх</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="73"/>
+        <location filename="../common/lc_modellistdialog.ui" line="73"/>
         <source>Move &amp;Down</source>
         <translation>Переместить в&amp;низ</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="80"/>
+        <location filename="../common/lc_modellistdialog.ui" line="80"/>
         <source>Set Active</source>
         <translation>Активировать</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="113"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="113"/>
         <source>New Submodel</source>
         <translation>Новая подмодель</translation>
     </message>
@@ -6561,74 +6561,74 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="vanished">Помилка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="127"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
         <source>The model cannot be empty.</source>
         <translation>Модель не может быть пустой.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="141"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="141"/>
         <source>Are you sure you want to delete the submodel &apos;%1&apos;?</source>
         <translation>Удалить подмодель «%1»?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="127"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="135"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="145"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="145"/>
         <source>Delete Submodel</source>
         <translation>Удаление подмодели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="135"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="165"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="189"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="248"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="248"/>
         <source>No submodel selected.</source>
         <translation>Подмодель не выбрана.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="143"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="143"/>
         <source>Are you sure you want to delete %1 submodels?</source>
         <translation>Удалить подмодели в количестве %1 шт.?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="165"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="176"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="176"/>
         <source>Rename Submodel</source>
         <translation>Переименование подмодели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
         <source>Export Submodel</source>
         <translation>Экспорт подмодели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="204"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="204"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
         <source>Nothing to export.</source>
         <translation>Экспортировать нечего.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="211"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Export Model</source>
         <translation>Экспорт модели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="222"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="222"/>
         <source>Select Export Folder</source>
         <translation>Выбор папки экспорта</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="248"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="266"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="248"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="266"/>
         <source>Duplicate Submodel</source>
         <translation>Дублирование подмодели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="263"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="263"/>
         <source>Copy of </source>
         <translation>Копия </translation>
     </message>
@@ -6637,7 +6637,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="vanished">Зберегти модель</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="211"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Supported Files (*.ldr *.dat);;All Files (*.*)</source>
         <translation>Поддерживаемые файлы (*.ldr *.dat);;Вси файлы (*.*)</translation>
     </message>

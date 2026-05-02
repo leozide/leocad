@@ -6446,112 +6446,112 @@ Anisotropic: %5
 <context>
     <name>lcImageDialog</name>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="14"/>
+        <location filename="../common/lc_imagedialog.ui" line="14"/>
         <source>Save Image</source>
         <translation>Guardar imagen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="24"/>
+        <location filename="../common/lc_imagedialog.ui" line="24"/>
         <source>File name:</source>
         <translation>Nombre de archivo:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="48"/>
+        <location filename="../common/lc_imagedialog.ui" line="48"/>
         <source>Dimensions</source>
         <translation>Dimensiones</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="109"/>
+        <location filename="../common/lc_imagedialog.ui" line="109"/>
         <source>Step Range</source>
         <translation>Intervalo de pasos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="115"/>
+        <location filename="../common/lc_imagedialog.ui" line="115"/>
         <source>All Steps</source>
         <translation>Todos los pasos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="122"/>
+        <location filename="../common/lc_imagedialog.ui" line="122"/>
         <source>Current Step</source>
         <translation>Paso actual</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="131"/>
+        <location filename="../common/lc_imagedialog.ui" line="131"/>
         <source>Custom Range</source>
         <translation>Intervalo personalizado</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="138"/>
+        <location filename="../common/lc_imagedialog.ui" line="138"/>
         <source>From:</source>
         <translation>Desde:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="161"/>
+        <location filename="../common/lc_imagedialog.ui" line="161"/>
         <source>To:</source>
         <translation>Hasta:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="54"/>
+        <location filename="../common/lc_imagedialog.ui" line="54"/>
         <source>Width:</source>
         <translation>Ancho:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="80"/>
+        <location filename="../common/lc_imagedialog.ui" line="80"/>
         <source>Height:</source>
         <translation>Alto:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.ui" line="37"/>
+        <location filename="../common/lc_imagedialog.ui" line="37"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
+        <location filename="../common/lc_imagedialog.cpp" line="46"/>
         <source>Output File cannot be empty.</source>
         <translation>El archivo de salida no puede estar vacío.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="46"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
-        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
+        <location filename="../common/lc_imagedialog.cpp" line="46"/>
+        <location filename="../common/lc_imagedialog.cpp" line="54"/>
+        <location filename="../common/lc_imagedialog.cpp" line="62"/>
+        <location filename="../common/lc_imagedialog.cpp" line="84"/>
+        <location filename="../common/lc_imagedialog.cpp" line="92"/>
+        <location filename="../common/lc_imagedialog.cpp" line="98"/>
         <source>Error</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="84"/>
+        <location filename="../common/lc_imagedialog.cpp" line="84"/>
         <source>First step must be between 1 and %1.</source>
         <translation>El primer paso debe estar entre 1 y %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="92"/>
+        <location filename="../common/lc_imagedialog.cpp" line="92"/>
         <source>Last step must be between 1 and %1.</source>
         <translation>El último paso debe estar entre 1 y %1.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
+        <location filename="../common/lc_imagedialog.cpp" line="117"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Archivos de imágenes soportados (*.bmp *.png *.jpg);;Archivos BMP (*.bmp);;Archivos PNG (*.png);;Archivos JPEG (*.jpg);;Todos los archivos (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="98"/>
+        <location filename="../common/lc_imagedialog.cpp" line="98"/>
         <source>Last step must be greater than first step.</source>
         <translation>El último paso debe ser mayor que el primero.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="54"/>
+        <location filename="../common/lc_imagedialog.cpp" line="54"/>
         <source>Please enter a width between 1 and 32768.</source>
         <translation>Por favor, introduce un ancho entre 1 y 32768.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="62"/>
+        <location filename="../common/lc_imagedialog.cpp" line="62"/>
         <source>Please enter a height between 1 and 32768.</source>
         <translation>Por favor, introduce un alto entre 1 y 32768.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qimagedialog.cpp" line="117"/>
+        <location filename="../common/lc_imagedialog.cpp" line="117"/>
         <source>Save Image File</source>
         <translation>Guardar imagen</translation>
     </message>
@@ -6606,52 +6606,52 @@ Anisotropic: %5
 <context>
     <name>lcModelListDialog</name>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="14"/>
+        <location filename="../common/lc_modellistdialog.ui" line="14"/>
         <source>Submodels</source>
         <translation>Submodelos</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="31"/>
+        <location filename="../common/lc_modellistdialog.ui" line="31"/>
         <source>&amp;New...</source>
         <translation>&amp;Nuevo...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="38"/>
+        <location filename="../common/lc_modellistdialog.ui" line="38"/>
         <source>D&amp;elete...</source>
         <translation>Bo&amp;rrar...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="45"/>
+        <location filename="../common/lc_modellistdialog.ui" line="45"/>
         <source>&amp;Rename...</source>
         <translation>&amp;Renombrar...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="52"/>
+        <location filename="../common/lc_modellistdialog.ui" line="52"/>
         <source>Export...</source>
         <translation>Exportar...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="59"/>
+        <location filename="../common/lc_modellistdialog.ui" line="59"/>
         <source>Duplicate...</source>
         <translation>Duplicar...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="66"/>
+        <location filename="../common/lc_modellistdialog.ui" line="66"/>
         <source>Move &amp;Up</source>
         <translation>Mover arr&amp;iba</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="73"/>
+        <location filename="../common/lc_modellistdialog.ui" line="73"/>
         <source>Move &amp;Down</source>
         <translation>Mover aba&amp;jo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.ui" line="80"/>
+        <location filename="../common/lc_modellistdialog.ui" line="80"/>
         <source>Set Active</source>
         <translation>Definir activo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="113"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="113"/>
         <source>New Submodel</source>
         <translation>Nuevo submodelo</translation>
     </message>
@@ -6660,74 +6660,74 @@ Anisotropic: %5
         <translation type="vanished">Error</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="127"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
         <source>The model cannot be empty.</source>
         <translation>El modelo no puede estar vacío.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="141"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="141"/>
         <source>Are you sure you want to delete the submodel &apos;%1&apos;?</source>
         <translation>¿Seguro que quieres borrar el submodelo &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="127"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="135"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="145"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="145"/>
         <source>Delete Submodel</source>
         <translation>Borrar submodelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="135"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="165"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="189"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="248"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="248"/>
         <source>No submodel selected.</source>
         <translation>No hay ningún submodelo seleccionado.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="143"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="143"/>
         <source>Are you sure you want to delete %1 submodels?</source>
         <translation>¿Seguro que quieres borrar %1 submodelos?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="165"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="176"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="176"/>
         <source>Rename Submodel</source>
         <translation>Renombrar submodelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
         <source>Export Submodel</source>
         <translation>Exportar submodelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="204"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
         <source>LeoCAD</source>
         <translation>LeoCAD</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="204"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
         <source>Nothing to export.</source>
         <translation>Nada que exportar.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="211"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Export Model</source>
         <translation>Exportar modelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="222"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="222"/>
         <source>Select Export Folder</source>
         <translation>Seleccionar Carpeta de Exportación</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="248"/>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="266"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="248"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="266"/>
         <source>Duplicate Submodel</source>
         <translation>Duplicar submodelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="263"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="263"/>
         <source>Copy of </source>
         <translation>Copia de </translation>
     </message>
@@ -6736,7 +6736,7 @@ Anisotropic: %5
         <translation type="vanished">Guardar modelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qmodellistdialog.cpp" line="211"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Supported Files (*.ldr *.dat);;All Files (*.*)</source>
         <translation>Archivos soportados (*.ldr *.dat);;Todos los archivos (*.*)</translation>
     </message>

@@ -14,7 +14,7 @@
 #include "lc_htmldialog.h"
 #include "lc_renderdialog.h"
 #include "lc_instructionsdialog.h"
-#include "lc_qimagedialog.h"
+#include "lc_imagedialog.h"
 #include "lc_profile.h"
 #include "lc_view.h"
 #include "project.h"

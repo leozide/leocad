@@ -27,6 +27,15 @@ public:
 	bool PartsListEnd;
 };
 
+struct lcImageDialogOptions
+{
+	QString FilePath;
+	int Width;
+	int Height;
+	int Start;
+	int End;
+};
+
 class Project
 {
 public:
@@ -83,7 +92,7 @@ public:
 	bool ImportLDD(const QString& FileName);
 	bool ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description);
 
-	void SaveImage();
+	void SaveImage(const lcImageDialogOptions& Options);
 	bool ExportCurrentStep(const QString& FileName);
 	bool ExportModel(const QString& FileName, lcModel* Model) const;
 	bool Export3DStudio(const QString& FileName);

@@ -328,6 +328,7 @@ protected:
 	void ShowRenderDialog(lcRenderDialogMode RenderDialogMode);
 	void ShowInstructionsDialog();
 	void ShowPrintDialog();
+	void ShowImageDialog();
 	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);

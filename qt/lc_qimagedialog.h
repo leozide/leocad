@@ -4,20 +4,16 @@ namespace Ui {
 class lcImageDialog;
 }
 
+struct lcImageDialogOptions;
+
 class lcImageDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	lcImageDialog(QWidget* Parent);
-	~lcImageDialog();
-
-	QString mFileName;
-	int mWidth;
-	int mHeight;
-	int mStart;
-	int mEnd;
-
+	lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options);
+	virtual ~lcImageDialog();
+	
 public slots:
 	void accept() override;
 
@@ -25,6 +21,7 @@ private slots:
 	void FileNameBrowseClicked();
 
 private:
+	lcImageDialogOptions* mOptions;
 	Ui::lcImageDialog* ui;
 };
 

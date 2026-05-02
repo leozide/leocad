@@ -1,13 +1,10 @@
 #include "lc_global.h"
 #include "lc_qimagedialog.h"
 #include "ui_lc_qimagedialog.h"
-#include "lc_application.h"
 #include "project.h"
-#include "lc_model.h"
-#include "lc_profile.h"
 
-lcImageDialog::lcImageDialog(QWidget* Parent)
-	: QDialog(Parent), ui(new Ui::lcImageDialog)
+lcImageDialog::lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options)
+    : QDialog(Parent), mOptions(Options), ui(new Ui::lcImageDialog)
 {
 	ui->setupUi(this);
 
@@ -18,19 +15,11 @@ lcImageDialog::lcImageDialog(QWidget* Parent)
 	ui->firstStep->setValidator(new QIntValidator(this));
 	ui->lastStep->setValidator(new QIntValidator(this));
 
-	Project* Project = lcGetActiveProject();
-	lcModel* Model = Project->GetActiveModel();
-	mWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-	mHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	mStart = Model->GetCurrentStep();
-	mEnd = Model->GetLastStep();
-	mFileName = Project->GetImageFileName(false);
-
-	ui->fileName->setText(mFileName);
-	ui->width->setText(QString::number(mWidth));
-	ui->height->setText(QString::number(mHeight));
-	ui->firstStep->setText(QString::number(mStart));
-	ui->lastStep->setText(QString::number(mEnd));
+	ui->fileName->setText(mOptions->FilePath);
+	ui->width->setText(QString::number(mOptions->Width));
+	ui->height->setText(QString::number(mOptions->Height));
+	ui->firstStep->setText(QString::number(mOptions->Start));
+	ui->lastStep->setText(QString::number(mOptions->End));
 	ui->rangeCurrent->setChecked(true);
 }
 
@@ -41,75 +30,72 @@ lcImageDialog::~lcImageDialog()
 
 void lcImageDialog::accept()
 {
-	QString fileName = ui->fileName->text();
+	QString FilePath = ui->fileName->text();
 
-	if (fileName.isEmpty())
+	if (FilePath.isEmpty())
 	{
 		QMessageBox::information(this, tr("Error"), tr("Output File cannot be empty."));
 		return;
 	}
 
-	int width = ui->width->text().toInt();
+	int Width = ui->width->text().toInt();
 
-	if (width < 1 || width > 32768)
+	if (Width < 1 || Width > 32768)
 	{
 		QMessageBox::information(this, tr("Error"), tr("Please enter a width between 1 and 32768."));
 		return;
 	}
 
-	int height = ui->height->text().toInt();
+	int Height = ui->height->text().toInt();
 
-	if (height < 1 || height > 32768)
+	if (Height < 1 || Height > 32768)
 	{
 		QMessageBox::information(this, tr("Error"), tr("Please enter a height between 1 and 32768."));
 		return;
 	}
 
-	int start = mStart, end = mStart;
+	int Start = mOptions->Start, End = mOptions->Start;
 
 	if (ui->rangeAll->isChecked())
 	{
-		start = 1;
-		end = mEnd;
+		Start = 1;
+		End = mOptions->End;
 	}
 	else if (ui->rangeCurrent->isChecked())
 	{
-		start = mStart;
-		end = mStart;
+		Start = mOptions->Start;
+		End = mOptions->Start;
 	}
 	else if (ui->rangeCustom->isChecked())
 	{
-		start = ui->firstStep->text().toInt();
+		Start = ui->firstStep->text().toInt();
 
-		if (start < 1 || start > mEnd)
+		if (Start < 1 || Start > mOptions->End)
 		{
-			QMessageBox::information(this, tr("Error"), tr("First step must be between 1 and %1.").arg(QString::number(mEnd)));
+			QMessageBox::information(this, tr("Error"), tr("First step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;
 		}
 
-		end = ui->lastStep->text().toInt();
+		End = ui->lastStep->text().toInt();
 
-		if (end < 1 || end > mEnd)
+		if (End < 1 || End > mOptions->End)
 		{
-			QMessageBox::information(this, tr("Error"), tr("Last step must be between 1 and %1.").arg(QString::number(mEnd)));
+			QMessageBox::information(this, tr("Error"), tr("Last step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;
 		}
 
-		if (end < start)
+		if (End < Start)
 		{
 			QMessageBox::information(this, tr("Error"), tr("Last step must be greater than first step."));
 			return;
 		}
 	}
 
-	mFileName = fileName;
-	mWidth = width;
-	mHeight = height;
-	mStart = start;
-	mEnd = end;
-
-	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, mWidth);
-	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, mHeight);
+	mOptions->FilePath = FilePath;
+	mOptions->Width = Width;
+	mOptions->Height = Height;
+	mOptions->Start = Start;
+	mOptions->End = End;
 
 	QDialog::accept();
 }

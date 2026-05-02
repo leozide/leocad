@@ -14,7 +14,6 @@
 #include "lc_profile.h"
 #include "lc_file.h"
 #include "lc_zipfile.h"
-#include "lc_qimagedialog.h"
 #include "lc_modellistdialog.h"
 #include "lc_bricklink.h"
 #include "lc_string.h"
@@ -2601,22 +2600,18 @@ bool Project::ExportWavefront(const QString& FileName)
 	return true;
 }
 
-void Project::SaveImage()
+void Project::SaveImage(const lcImageDialogOptions& Options)
 {
-	lcImageDialog Dialog(gMainWindow);
-
-	if (Dialog.exec() != QDialog::Accepted)
-		return;
-
-	QString Extension = QFileInfo(Dialog.mFileName).suffix();
+	QString FilePath = Options.FilePath;
+	QString Extension = QFileInfo(FilePath).suffix();
 
 	if (!Extension.isEmpty())
-		lcSetProfileString(LC_PROFILE_IMAGE_EXTENSION, Dialog.mFileName.right(Extension.length() + 1));
+		lcSetProfileString(LC_PROFILE_IMAGE_EXTENSION, FilePath.right(Extension.length() + 1));
 
-	if (Dialog.mStart != Dialog.mEnd)
-		Dialog.mFileName = Dialog.mFileName.insert(Dialog.mFileName.length() - Extension.length() - 1, QLatin1String("%1"));
+	if (Options.Start != Options.End)
+		FilePath = FilePath.insert(FilePath.length() - Extension.length() - 1, QLatin1String("%1"));
 
-	mActiveModel->SaveStepImages(Dialog.mFileName, Dialog.mStart != Dialog.mEnd, false, Dialog.mWidth, Dialog.mHeight, Dialog.mStart, Dialog.mEnd);
+	mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End);
 }
 
 void Project::UpdatePieceInfo(PieceInfo* Info) const

@@ -14,6 +14,7 @@
 #include "lc_htmldialog.h"
 #include "lc_renderdialog.h"
 #include "lc_instructionsdialog.h"
+#include "lc_qimagedialog.h"
 #include "lc_profile.h"
 #include "lc_view.h"
 #include "project.h"
@@ -1360,6 +1361,29 @@ void lcMainWindow::ShowPrintDialog()
 #endif
 }
 
+void lcMainWindow::ShowImageDialog()
+{
+	lcImageDialogOptions Options;
+	Project* Project = lcGetActiveProject();
+	lcModel* Model = Project->GetActiveModel();
+	
+	Options.Width = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	Options.Height = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	Options.Start = Model->GetCurrentStep();
+	Options.End = Model->GetLastStep();
+	Options.FilePath = Project->GetImageFileName(false);
+	
+	lcImageDialog Dialog(this, &Options);
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+	
+	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
+	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
+	
+	lcGetActiveProject()->SaveImage(Options);
+}
+
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 {
 	lcGetPreferences().mShadingMode = ShadingMode;
@@ -2639,7 +2663,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_SAVE_IMAGE:
-		lcGetActiveProject()->SaveImage();
+		ShowImageDialog();
 		break;
 
 	case LC_FILE_IMPORT_LDD:

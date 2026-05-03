@@ -8246,82 +8246,82 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
 <context>
     <name>lcSetsDatabaseDialog</name>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="14"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="14"/>
         <source>Sets Database</source>
         <translation>Nastav databázi</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="22"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="22"/>
         <source>Set Name or Number</source>
         <translation>Nastavit název nebo číslo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="29"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="29"/>
         <source>Search</source>
         <translation>Vyhledat</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="51"/>
         <source>Number</source>
         <translation>Číslo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="56"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
         <source>Name</source>
         <translation>Název</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="61"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="61"/>
         <source>Year</source>
         <translation>Rok</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="66"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
         <source>Parts</source>
         <translation>Části</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="74"/>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
         <translation>Nastaví databázi poskytovanou &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="62"/>
         <source>Please select a set from the list.</source>
         <translation>Vyberte sadu ze seznamu.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="69"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="69"/>
         <source>Downloading</source>
         <translation>Stahování</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="70"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="70"/>
         <source>Downloading set inventory</source>
         <translation>Stahování inventáře</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="114"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="114"/>
         <source>Keyword cannot be empty.</source>
         <translation>Klíčové slovo nemůže být prázdné.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="119"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="119"/>
         <source>Searching</source>
         <translation>Vyhledávání</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="120"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="120"/>
         <source>Connecting to server</source>
         <translation>Připojování k serveru</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="178"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="178"/>
         <source>Error connecting to server.</source>
         <translation>Při připojování k serveru došlo k chybě.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="225"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="225"/>
         <source>Error downloading set inventory.</source>
         <translation>Při stahování inventáře došlo k chybě.</translation>
     </message>

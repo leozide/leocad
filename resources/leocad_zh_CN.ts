@@ -7934,82 +7934,82 @@ Anisotropic: %5
 <context>
     <name>lcSetsDatabaseDialog</name>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="14"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="14"/>
         <source>Sets Database</source>
         <translation>套装数据库</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="22"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="22"/>
         <source>Set Name or Number</source>
         <translation>套装名称或编号</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="29"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="29"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="51"/>
         <source>Number</source>
         <translation>编号</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="56"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
         <source>Name</source>
         <translation>名称</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="61"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="61"/>
         <source>Year</source>
         <translation>年份</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="66"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
         <source>Parts</source>
         <translation>零件数</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="74"/>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
         <translation>套装数据库由 &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt; 提供</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="62"/>
         <source>Please select a set from the list.</source>
         <translation>请从列表中选择一个套装。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="69"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="69"/>
         <source>Downloading</source>
         <translation>下载中</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="70"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="70"/>
         <source>Downloading set inventory</source>
         <translation>正在下载套装清单</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="114"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="114"/>
         <source>Keyword cannot be empty.</source>
         <translation>关键词不能为空。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="119"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="119"/>
         <source>Searching</source>
         <translation>搜索中</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="120"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="120"/>
         <source>Connecting to server</source>
         <translation>正在连接服务器</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="178"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="178"/>
         <source>Error connecting to server.</source>
         <translation>连接服务器时出错。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="225"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="225"/>
         <source>Error downloading set inventory.</source>
         <translation>下载套装清单时出错。</translation>
     </message>

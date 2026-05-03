@@ -222,6 +222,7 @@ SOURCES += \
 	common/lc_propertieswidget.cpp \
 	common/lc_scene.cpp \
 	common/lc_selectdialog.cpp \
+	common/lc_setsdatabasedialog.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_string.cpp \
 	common/lc_stringcache.cpp \
@@ -240,8 +241,7 @@ SOURCES += \
 	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qpreferencesdialog.cpp \
 	qt/lc_qutils.cpp \
-	qt/lc_renderdialog.cpp \
-	qt/lc_setsdatabasedialog.cpp
+	qt/lc_renderdialog.cpp
 HEADERS += \
 	common/camera.h \
 	common/group.h \
@@ -302,6 +302,7 @@ HEADERS += \
 	common/lc_propertieswidget.h \
 	common/lc_scene.h \
 	common/lc_selectdialog.h \
+	common/lc_setsdatabasedialog.h \
 	common/lc_shortcuts.h \
 	common/lc_string.h \
 	common/lc_stringcache.h \
@@ -319,8 +320,7 @@ HEADERS += \
 	qt/lc_qpropertiesdialog.h \
 	qt/lc_qpreferencesdialog.h \
 	qt/lc_qutils.h \
-	qt/lc_renderdialog.h \
-	qt/lc_setsdatabasedialog.h
+	qt/lc_renderdialog.h
 FORMS += \
 	common/lc_aboutdialog.ui \
 	common/lc_arraydialog.ui \
@@ -334,11 +334,11 @@ FORMS += \
 	common/lc_pagesetupdialog.ui \
 	common/lc_partpalettedialog.ui \
 	common/lc_selectdialog.ui \
+	common/lc_setsdatabasedialog.ui \
 	common/lc_updatedialog.ui \
 	qt/lc_qpropertiesdialog.ui \
 	qt/lc_qpreferencesdialog.ui \
-	qt/lc_renderdialog.ui \
-	qt/lc_setsdatabasedialog.ui
+	qt/lc_renderdialog.ui
 OTHER_FILES +=
 RESOURCES += leocad.qrc resources/stylesheet/stylesheet.qrc
 

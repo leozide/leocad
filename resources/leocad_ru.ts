@@ -8148,82 +8148,82 @@ GL_EXT_texture_filter_anisotropic extension: %5
 <context>
     <name>lcSetsDatabaseDialog</name>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="14"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="14"/>
         <source>Sets Database</source>
         <translation>Каталог наборов</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="22"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="22"/>
         <source>Set Name or Number</source>
         <translation>Укажите номер или имя набора</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="29"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="29"/>
         <source>Search</source>
         <translation>Поиск</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="51"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="51"/>
         <source>Number</source>
         <translation>Номер</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="56"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="61"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="61"/>
         <source>Year</source>
         <translation>Год</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="66"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
         <source>Parts</source>
         <translation>Деталей</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.ui" line="74"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="74"/>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
         <translation>Каталог наборов предоставлен &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="62"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="62"/>
         <source>Please select a set from the list.</source>
         <translation>Выберите набор из списка.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="69"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="69"/>
         <source>Downloading</source>
         <translation>Загрузка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="70"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="70"/>
         <source>Downloading set inventory</source>
         <translation>Загрузка инвентаря набора</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="114"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="114"/>
         <source>Keyword cannot be empty.</source>
         <translation>Ключевое слово не может быть пустым.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="119"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="119"/>
         <source>Searching</source>
         <translation>Поиск</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="120"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="120"/>
         <source>Connecting to server</source>
         <translation>Соединение с сервером</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="178"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="178"/>
         <source>Error connecting to server.</source>
         <translation>Ошибка соединения с сервером.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_setsdatabasedialog.cpp" line="225"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="225"/>
         <source>Error downloading set inventory.</source>
         <translation>Ошибка загрузки инвентаря набора.</translation>
     </message>

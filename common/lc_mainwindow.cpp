@@ -1047,7 +1047,7 @@ void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
 	mModelTabWidgetContextMenuIndex = mModelTabWidget->tabBar()->tabAt(Point);
 
 	if (mModelTabWidget->count() > 1)
-		Menu->addAction(tr("Close Other Tabs"), this, SLOT(ModelTabCloseOtherTabs()));
+		Menu->addAction(tr("Close Other Tabs"), this, &lcMainWindow::ModelTabCloseOtherTabs);
 	if (mModelTabWidgetContextMenuIndex == mModelTabWidget->currentIndex())
 		Menu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 

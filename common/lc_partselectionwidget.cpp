@@ -576,7 +576,7 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 	if (!Palettes.empty())
 	{
 		for (const lcPartPalette& Palette : Palettes)
-			SetMenu->addAction(Palette.Name, mPartSelectionWidget, SLOT(AddToPalette()));
+			SetMenu->addAction(Palette.Name, mPartSelectionWidget, &lcPartSelectionWidget::AddToPalette);
 	}
 	else
 	{
@@ -584,7 +584,7 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 		Action->setEnabled(false);
 	}
 
-	QAction* RemoveAction = Menu->addAction(tr("Remove from Palette"), mPartSelectionWidget, SLOT(RemoveFromPalette()));
+	QAction* RemoveAction = Menu->addAction(tr("Remove from Palette"), mPartSelectionWidget, &lcPartSelectionWidget::RemoveFromPalette);
 	RemoveAction->setEnabled(mCategoryType == lcPartCategoryType::Palette);
 
 	Menu->exec(viewport()->mapToGlobal(Pos));
@@ -1150,7 +1150,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
-	Menu->addAction(tr("Edit Palettes..."), this, SLOT(EditPartPalettes()));
+	Menu->addAction(tr("Edit Palettes..."), this, &lcPartSelectionWidget::EditPartPalettes);
 
 	Menu->addSeparator();
 

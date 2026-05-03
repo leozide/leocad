@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "light.h"
 #include "group.h"
+#include "project.h"
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "lc_library.h"
@@ -1045,34 +1046,21 @@ bool lcModel::LoadLDD(const QString& FileData)
 	return true;
 }
 
-bool lcModel::LoadInventory(const QByteArray& Inventory)
+bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 {
-	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
-	QJsonObject Root = Document.object();
-	const QJsonArray Parts = Root["results"].toArray();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	for (const QJsonValue& Part : Parts)
+	for (const lcSetInventoryItem& SetInventoryItem : SetInventory)
 	{
-		QJsonObject PartObject = Part.toObject();
-		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
-		QJsonArray PartIDArray = PartObject["part"].toObject()["external_ids"].toObject()["LDraw"].toArray();
-		if (!PartIDArray.isEmpty())
-			PartID = PartIDArray.first().toString().toLatin1();
-		int Quantity = PartObject["quantity"].toInt();
-		int ColorCode = 16;
-		QJsonArray ColorArray = PartObject["color"].toObject()["external_ids"].toObject()["LDraw"].toObject()["ext_ids"].toArray();
-		if (!ColorArray.isEmpty())
-			ColorCode = ColorArray.first().toInt();
-
-		PieceInfo* Info = Library->FindPiece(PartID + ".dat", nullptr, true, false);
+		PieceInfo* Info = Library->FindPiece(SetInventoryItem.PartID + ".dat", nullptr, true, false);
+		int Quantity = SetInventoryItem.Quantity;
 
 		while (Quantity--)
 		{
 			lcPiece* Piece = new lcPiece(nullptr);
 			Piece->SetPieceInfo(Info, QString(), false, true);
 			Piece->Initialize(lcMatrix44Identity(), 1);
-			Piece->SetColorCode(ColorCode);
+			Piece->SetColorCode(SetInventoryItem.ColorCode);
 			AddPiece(Piece);
 		}
 	}

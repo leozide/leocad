@@ -5,6 +5,7 @@
 
 enum class lcObjectPropertyId;
 enum class lcCameraProjection;
+struct lcSetInventoryItem;
 struct lcModelHistoryEditState;
 class lcModelHistory;
 class lcModelHistorySelect;
@@ -263,7 +264,7 @@ public:
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
-	bool LoadInventory(const QByteArray& Inventory);
+	bool LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory);
 	int SplitMPD(QIODevice& Device);
 	void Merge(std::unique_ptr<lcModel> Other);
 

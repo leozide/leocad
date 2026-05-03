@@ -3,6 +3,7 @@
 #include "ui_lc_partpalettedialog.h"
 #include "lc_partselectionwidget.h"
 #include "lc_setsdatabasedialog.h"
+#include "project.h"
 
 lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPalette>& PartPalettes)
 	: QDialog(Parent), ui(new Ui::lcPartPaletteDialog), mPartPalettes(PartPalettes)
@@ -132,20 +133,11 @@ void lcPartPaletteDialog::ImportButtonClicked()
 	Palette->Name = Dialog.GetSetDescription();
 	mImportedPalettes.push_back(Palette);
 
-	QByteArray Inventory = Dialog.GetSetInventory();
-	QJsonDocument Document = QJsonDocument::fromJson(Inventory);
-	QJsonObject Root = Document.object();
-	const QJsonArray Parts = Root["results"].toArray();
+	std::vector<lcSetInventoryItem> Inventory = Dialog.GetSetInventory();
 
-	for (const QJsonValue& Part : Parts)
+	for (const lcSetInventoryItem& Item : Inventory)
 	{
-		QJsonObject PartObject = Part.toObject();
-		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
-		QJsonArray PartIDArray = PartObject["part"].toObject()["external_ids"].toObject()["LDraw"].toArray();
-		if (!PartIDArray.isEmpty())
-			PartID = PartIDArray.first().toString().toLatin1();
-
-		Palette->Parts.push_back(PartID.toUpper().toStdString() + ".DAT");
+		Palette->Parts.push_back(Item.PartID.toUpper().toStdString() + ".DAT");
 	}
 
 	QListWidgetItem* Item = new QListWidgetItem(Palette->Name);

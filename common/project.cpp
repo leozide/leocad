@@ -603,14 +603,14 @@ bool Project::ImportLDD(const QString& FileName)
 	return true;
 }
 
-bool Project::ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description)
+bool Project::ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description)
 {
-	if (Inventory.isEmpty())
+	if (SetInventory.empty())
 		return false;
 
 	std::unique_ptr<lcModel> NewModel(new lcModel(Name, this, false));
 
-	if (!NewModel->LoadInventory(Inventory))
+	if (!NewModel->LoadInventory(SetInventory))
 		return false;
 
 	NewModel->SetSaved();

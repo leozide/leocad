@@ -36,6 +36,13 @@ struct lcImageDialogOptions
 	int End;
 };
 
+struct lcSetInventoryItem
+{
+	QByteArray PartID;
+	int Quantity;
+	int ColorCode;
+};
+
 class Project
 {
 public:
@@ -90,7 +97,7 @@ public:
 	bool Save(QTextStream& Stream);
 	void Merge(Project* Other);
 	bool ImportLDD(const QString& FileName);
-	bool ImportInventory(const QByteArray& Inventory, const QString& Name, const QString& Description);
+	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
 	void SaveImage(const lcImageDialogOptions& Options);
 	bool ExportCurrentStep(const QString& FileName);

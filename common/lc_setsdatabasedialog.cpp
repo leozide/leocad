@@ -2,6 +2,7 @@
 #include "lc_setsdatabasedialog.h"
 #include "ui_lc_setsdatabasedialog.h"
 #include "lc_http.h"
+#include "project.h"
 
 lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
 	: QDialog(Parent),
@@ -35,6 +36,40 @@ QString lcSetsDatabaseDialog::GetSetDescription() const
 {
 	QTreeWidgetItem* Current = ui->SetsTree->currentItem();
 	return Current ? Current->text(1) : QString();
+}
+
+std::vector<lcSetInventoryItem> lcSetsDatabaseDialog::GetSetInventory() const
+{
+	std::vector<lcSetInventoryItem> Inventory;
+
+	if (mInventory.isEmpty())
+		return Inventory;
+
+	QJsonDocument Document = QJsonDocument::fromJson(mInventory);
+	QJsonObject Root = Document.object();
+	const QJsonArray Parts = Root["results"].toArray();
+
+	for (const QJsonValue& Part : Parts)
+	{
+		QJsonObject PartObject = Part.toObject();
+		QByteArray PartID = PartObject["part"].toObject()["part_num"].toString().toLatin1();
+		QJsonArray PartIDArray = PartObject["part"].toObject()["external_ids"].toObject()["LDraw"].toArray();
+		
+		if (!PartIDArray.isEmpty())
+			PartID = PartIDArray.first().toString().toLatin1();
+
+		int Quantity = PartObject["quantity"].toInt();
+		int ColorCode = 16;
+		
+		QJsonArray ColorArray = PartObject["color"].toObject()["external_ids"].toObject()["LDraw"].toObject()["ext_ids"].toArray();
+		
+		if (!ColorArray.isEmpty())
+			ColorCode = ColorArray.first().toInt();
+
+		Inventory.push_back({ PartID, Quantity, ColorCode });
+	}
+
+	return Inventory;
 }
 
 bool lcSetsDatabaseDialog::eventFilter(QObject* Object, QEvent* Event)

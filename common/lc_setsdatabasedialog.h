@@ -2,6 +2,7 @@
 
 class lcHttpReply;
 class lcHttpManager;
+struct lcSetInventoryItem;
 
 namespace Ui {
 class lcSetsDatabaseDialog;
@@ -17,11 +18,7 @@ public:
 
 	QString GetSetName() const;
 	QString GetSetDescription() const;
-
-	QByteArray GetSetInventory() const
-	{
-		return mInventory;
-	}
+	std::vector<lcSetInventoryItem> GetSetInventory() const;
 
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 

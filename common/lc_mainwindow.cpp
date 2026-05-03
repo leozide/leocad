@@ -2531,8 +2531,9 @@ void lcMainWindow::ImportInventory()
 		return;
 
 	Project* NewProject = new Project();
-
-	if (NewProject->ImportInventory(Dialog.GetSetInventory(), Dialog.GetSetName(), Dialog.GetSetDescription()))
+	std::vector<lcSetInventoryItem> SetInventory = Dialog.GetSetInventory();
+	
+	if (NewProject->ImportInventory(SetInventory, Dialog.GetSetName(), Dialog.GetSetDescription()))
 	{
 		gApplication->SetProject(NewProject);
 		lcView::UpdateProjectViews(NewProject);

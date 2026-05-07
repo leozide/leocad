@@ -189,6 +189,16 @@ lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
 
 lcModel::~lcModel()
 {
+	if (!mPreviewInsertPieceInfo.empty())
+	{
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+		for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+			Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
+
+		mPreviewInsertPieceInfo.clear();
+	}
+
 	if (mPieceInfo)
 	{
 		if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
@@ -2878,6 +2888,21 @@ void lcModel::UpdateSelectedPiecesTrainTrackConnections()
 	}
 }
 
+void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo)
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
+		Library->LoadPieceInfo(InfoTransform.Info, true, true);
+
+	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
+
+	mPreviewInsertPieceInfo = std::move(PreviewInsertPieceInfo);
+
+	UpdateAllViews();
+}
+
 void lcModel::DeleteSelectedObjects()
 {
 	if (mIsPreview)
@@ -4940,26 +4965,35 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	}
 }
 
-void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms)
+bool lcModel::InsertPieceToolClicked(std::optional<lcMatrix44> Transform)
 {
-	if (PieceInfoTransforms.empty())
-		return;
+	if (mPreviewInsertPieceInfo.empty())
+		return false;
 
 	BeginHistorySequence();
 	BeginEditHistory(lcModelHistoryEditMerge::None);
 
 	lcPiece* Piece = nullptr;
 
-	for (const lcInsertPieceInfo& PieceInfoTransform : PieceInfoTransforms)
+	for (const lcInsertPieceInfo& InsertPieceInfo : mPreviewInsertPieceInfo)
 	{
-		Piece = new lcPiece(PieceInfoTransform.Info);
+		Piece = new lcPiece(InsertPieceInfo.Info);
 
-		Piece->Initialize(PieceInfoTransform.Transform, mCurrentStep);
-		Piece->SetColorIndex(PieceInfoTransform.ColorIndex);
+		lcMatrix44 PieceTransform;
+
+		if (Transform.has_value())
+			PieceTransform = lcMul(InsertPieceInfo.Transform, Transform.value());
+		else
+			PieceTransform = InsertPieceInfo.Transform;
+
+		Piece->Initialize(PieceTransform, mCurrentStep);
+		Piece->SetColorIndex(InsertPieceInfo.ColorIndex);
 		Piece->UpdatePosition(mCurrentStep);
 
 		AddPiece(Piece);
 	}
+
+	SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>());
 
 	EndEditHistory();
 
@@ -4971,6 +5005,8 @@ void lcModel::InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& Piece
 	gMainWindow->UpdateInUseCategory();
 
 	UpdateTrainTrackConnections(Piece, false);
+
+	return true;
 }
 
 void lcModel::InsertCameraToolClicked(const lcVector3& Position)

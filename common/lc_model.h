@@ -278,6 +278,12 @@ public:
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
 	void UpdateSelectedPiecesTrainTrackConnections();
+	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);
+
+	const std::vector<lcInsertPieceInfo>& GetPreviewInsertPieceInfo() const
+	{
+		return mPreviewInsertPieceInfo;
+	}
 
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
@@ -345,7 +351,7 @@ public:
 
 	void BeginMouseTool(lcTool Tool, lcView* View);
 	void EndMouseTool(lcTool Tool, lcView* View, bool Accept);
-	void InsertPieceToolClicked(const std::vector<lcInsertPieceInfo>& PieceInfoTransforms);
+	bool InsertPieceToolClicked(std::optional<lcMatrix44> Transform);
 	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
@@ -436,6 +442,7 @@ protected:
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
 	bool mMouseToolFirstMove;
+	std::vector<lcInsertPieceInfo> mPreviewInsertPieceInfo;
 
 	std::vector<std::unique_ptr<lcPiece>> mPieces;
 	std::vector<std::unique_ptr<lcCamera>> mCameras;

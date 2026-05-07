@@ -802,6 +802,10 @@ void lcPreferencesDialog::updateParts()
 
 void lcPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int First, int Last)
 {
+	Q_UNUSED(Parent);
+	Q_UNUSED(First);
+	Q_UNUSED(Last);
+
 	std::vector<lcLibraryCategory> Categories;
 
 	for (int Row = 0; Row < ui->categoriesTree->topLevelItemCount(); Row++)

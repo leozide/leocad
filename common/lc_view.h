@@ -233,6 +233,7 @@ public:
 	void OnForwardButtonDown();
 	void OnForwardButtonUp();
 	void OnMouseMove();
+	void OnMouseLeave();
 	void OnMouseWheel(float Direction);
 	void BeginDrag(lcDragState DragState);
 	void EndDrag(bool Accept);
@@ -357,8 +358,6 @@ protected:
 	lcMatrix44 mActiveSubmodelTransform;
 
 	lcCamera* mCamera = nullptr;
-
-	std::vector<lcInsertPieceInfo> mPreviewInsertPieceInfo;
 
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];

@@ -301,6 +301,13 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 	WheelEvent->accept();
 }
 
+void lcViewWidget::leaveEvent(QEvent* Event)
+{
+	mView->OnMouseLeave();
+
+	QOpenGLWidget::leaveEvent(Event);
+}
+
 void lcViewWidget::dragEnterEvent(QDragEnterEvent* DragEnterEvent)
 {
 	const QMimeData* MimeData = DragEnterEvent->mimeData();

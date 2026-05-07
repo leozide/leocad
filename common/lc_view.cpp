@@ -51,16 +51,6 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 lcView::~lcView()
 {
-	if (!mPreviewInsertPieceInfo.empty())
-	{
-		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-		for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
-
-		mPreviewInsertPieceInfo.clear();
-	}
-
 	mContext->DestroyVertexBuffer(mGridBuffer);
 
 	if (gMainWindow && mViewType == lcViewType::View)
@@ -497,15 +487,7 @@ void lcView::UpdatePiecePreview()
 		}
 	}
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	for (lcInsertPieceInfo& InfoTransform : InsertPieceInfo)
-		Library->LoadPieceInfo(InfoTransform.Info, true, true);
-
-	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
-
-	mPreviewInsertPieceInfo = std::move(InsertPieceInfo);
+	mModel->SetPreviewInsertPieceInfo(std::move(InsertPieceInfo));
 }
 
 std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, PieceInfo* Info, lcPiece* MovingPiece) const
@@ -898,11 +880,11 @@ void lcView::OnDraw()
 
 	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
-	if (DrawInterface && mTrackTool == lcTrackTool::Insert)
-	{
-		UpdatePiecePreview();
+	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
 
-		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+	if (DrawInsertPreview)
+	{
+		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mModel->GetPreviewInsertPieceInfo())
 			PreviewPieceInfoTransform.Info->AddRenderMeshes(mScene.get(), PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
 	}
 
@@ -1473,10 +1455,11 @@ void lcView::DrawGrid()
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	bool GridSizeValid = mModel->GetVisiblePiecesBoundingBox(Min, Max);
+	bool DrawInsertPreview = std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
 
-	if (mTrackTool == lcTrackTool::Insert)
+	if (DrawInsertPreview)
 	{
-		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : mPreviewInsertPieceInfo)
+		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : mModel->GetPreviewInsertPieceInfo())
 		{
 			lcVector3 Points[8];
 			lcGetBoxCorners(PreviewInsertPieceInfo.Info->GetBoundingBox(), Points);
@@ -1748,10 +1731,8 @@ void lcView::EndDrag(bool Accept)
 			break;
 
 		case lcDragState::Piece:
-			{
-				if (!mPreviewInsertPieceInfo.empty())
-					ActiveModel->InsertPieceToolClicked(mPreviewInsertPieceInfo);
-			} break;
+			ActiveModel->InsertPieceToolClicked(std::nullopt);
+			break;
 
 		case lcDragState::Color:
 			ActiveModel->PaintToolClicked(FindObjectUnderPointer(true, false).Object);
@@ -1761,6 +1742,8 @@ void lcView::EndDrag(bool Accept)
 
 	mDragState = lcDragState::None;
 	UpdateTrackTool();
+
+	ActiveModel->SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>());
 	ActiveModel->UpdateAllViews();
 }
 
@@ -2535,14 +2518,13 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		{
 			UpdatePiecePreview();
 
-			if (mPreviewInsertPieceInfo.empty())
-				break;
+			std::optional<lcMatrix44> Transform;
 
 			if (GetActiveModel() != mModel)
-				for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-					PreviewPieceInfoTransform.Transform = lcMul(PreviewPieceInfoTransform.Transform, lcMatrix44AffineInverse(mActiveSubmodelTransform));
+				Transform = lcMatrix44AffineInverse(mActiveSubmodelTransform);
 
-			ActiveModel->InsertPieceToolClicked(mPreviewInsertPieceInfo);
+			if (!ActiveModel->InsertPieceToolClicked(Transform))
+				break;
 
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
@@ -2859,7 +2841,10 @@ void lcView::OnMouseMove()
 		UpdateTrackTool();
 
 		if (mTrackTool == lcTrackTool::Insert)
+		{
+			UpdatePiecePreview();
 			ActiveModel->UpdateAllViews();
+		}
 
 		return;
 	}
@@ -3156,6 +3141,21 @@ void lcView::OnMouseMove()
 
 	case lcTrackTool::Count:
 		break;
+	}
+}
+
+void lcView::OnMouseLeave()
+{
+	if (mTrackTool == lcTrackTool::Insert)
+	{
+		mTrackTool = lcTrackTool::None;
+
+		UpdateCursor();
+
+		lcModel* ActiveModel = GetActiveModel();
+
+		if (ActiveModel)
+			ActiveModel->UpdateAllViews();
 	}
 }
 

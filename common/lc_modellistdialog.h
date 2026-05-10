@@ -32,8 +32,6 @@ private slots:
 	void RenameModelClicked();
 	void ExportModelClicked();
 	void DuplicateModelClicked();
-	void MoveUpClicked();
-	void MoveDownClicked();
 	void ModelListItemDoubleClicked(QListWidgetItem* Item);
 	void ModelListItemSelectionChanged();
 

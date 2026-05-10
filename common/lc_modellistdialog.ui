@@ -61,20 +61,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="MoveUp">
-         <property name="text">
-          <string>Move &amp;Up</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="MoveDown">
-         <property name="text">
-          <string>Move &amp;Down</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="SetActiveModel">
          <property name="text">
           <string>Set Active</string>
@@ -117,8 +103,6 @@
   <tabstop>RenameModel</tabstop>
   <tabstop>ExportModel</tabstop>
   <tabstop>DuplicateModel</tabstop>
-  <tabstop>MoveUp</tabstop>
-  <tabstop>MoveDown</tabstop>
   <tabstop>SetActiveModel</tabstop>
  </tabstops>
  <resources/>

@@ -23,10 +23,11 @@ lcModelListDialog::lcModelListDialog(QWidget* Parent, const std::vector<std::uni
 	connect(ui->RenameModel, &QPushButton::clicked, this, &lcModelListDialog::RenameModelClicked);
 	connect(ui->ExportModel, &QPushButton::clicked, this, &lcModelListDialog::ExportModelClicked);
 	connect(ui->DuplicateModel, &QPushButton::clicked, this, &lcModelListDialog::DuplicateModelClicked);
-	connect(ui->MoveUp, &QPushButton::clicked, this, &lcModelListDialog::MoveUpClicked);
-	connect(ui->MoveDown, &QPushButton::clicked, this, &lcModelListDialog::MoveDownClicked);
 	connect(ui->ModelList, &QListWidget::itemDoubleClicked, this, &lcModelListDialog::ModelListItemDoubleClicked);
 	connect(ui->ModelList, &QListWidget::itemSelectionChanged, this, &lcModelListDialog::ModelListItemSelectionChanged);
+
+	ui->ModelList->setDefaultDropAction(Qt::DropAction::MoveAction);
+	ui->ModelList->setDragDropMode(QAbstractItemView::DragDropMode::InternalMove);
 
 	lcModel* ActiveModel = lcGetActiveProject()->GetActiveModel();
 	int ActiveModelIndex = -1;
@@ -87,26 +88,6 @@ void lcModelListDialog::UpdateButtons()
 
 	ui->DeleteModel->setEnabled(ModelCount > 1);
 	ui->SetActiveModel->setEnabled(ui->ModelList->currentItem() != nullptr);
-
-	bool MoveUp = false;
-	bool MoveDown = false;
-
-	for (int Row = 0; Row < ui->ModelList->count(); Row++)
-	{
-		QListWidgetItem* Item = ui->ModelList->item(Row);
-
-		if (!Item->isSelected())
-			continue;
-
-		if (Row > 0 && !ui->ModelList->item(Row - 1)->isSelected())
-			MoveUp = true;
-
-		if (Row < ModelCount - 1 && !ui->ModelList->item(Row + 1)->isSelected())
-			MoveDown = true;
-	}
-
-	ui->MoveUp->setEnabled(MoveUp);
-	ui->MoveDown->setEnabled(MoveDown);
 }
 
 void lcModelListDialog::accept()
@@ -293,52 +274,6 @@ void lcModelListDialog::DuplicateModelClicked()
 		ui->ModelList->addItem(Item);
 	}
 
-	UpdateButtons();
-}
-
-void lcModelListDialog::MoveUpClicked()
-{
-	bool Blocked = ui->ModelList->blockSignals(true);
-
-	for (int Row = 1; Row < ui->ModelList->count(); Row++)
-	{
-		QListWidgetItem* Item = ui->ModelList->item(Row);
-
-		if (!Item->isSelected())
-			continue;
-
-		if (ui->ModelList->item(Row - 1)->isSelected())
-			continue;
-
-		ui->ModelList->takeItem(Row);
-		ui->ModelList->insertItem(Row - 1, Item);
-		Item->setSelected(true);
-	}
-
-	ui->ModelList->blockSignals(Blocked);
-	UpdateButtons();
-}
-
-void lcModelListDialog::MoveDownClicked()
-{
-	bool Blocked = ui->ModelList->blockSignals(true);
-
-	for (int Row = ui->ModelList->count() - 2; Row >= 0; Row--)
-	{
-		QListWidgetItem* Item = ui->ModelList->item(Row);
-
-		if (!Item->isSelected())
-			continue;
-
-		if (ui->ModelList->item(Row + 1)->isSelected())
-			continue;
-
-		ui->ModelList->takeItem(Row);
-		ui->ModelList->insertItem(Row + 1, Item);
-		Item->setSelected(true);
-	}
-
-	ui->ModelList->blockSignals(Blocked);
 	UpdateButtons();
 }
 

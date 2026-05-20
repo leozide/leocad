@@ -214,7 +214,6 @@ public:
 	void RemoveAllModelTabs();
 	void CloseCurrentModelTab();
 	void SetCurrentModelTab(lcModel* Model);
-	void ResetCameras();
 	void AddView(lcView* View);
 	void RemoveView(lcView* View);
 
@@ -238,7 +237,7 @@ public:
 	void NewProject();
 	bool OpenProject(const QString& FileName);
 	void OpenRecentProject(int RecentFileIndex);
-	void MergeProject();
+	void ShowMergeDialog();
 	void ImportLDD();
 	void ImportInventory();
 	bool SaveProject(const QString& FileName);

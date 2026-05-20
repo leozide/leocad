@@ -2468,37 +2468,47 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	return false;
 }
 
-void lcMainWindow::MergeProject()
+void lcMainWindow::ShowMergeDialog()
 {
-	QString LoadFileName = lcGetActiveProject()->GetFileName();
+	QString InitialFolder = lcGetActiveProject()->GetFileName();
 
-	if (LoadFileName.isEmpty())
-		LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+	if (InitialFolder.isEmpty())
+		InitialFolder = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
+	else
+		InitialFolder = QFileInfo(InitialFolder).absolutePath();
 
-	LoadFileName = QFileDialog::getOpenFileName(this, tr("Merge Model"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+	QStringList LoadFileNames = QFileDialog::getOpenFileNames(this, tr("Merge Model"), InitialFolder, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
 
-	if (LoadFileName.isEmpty())
+	if (LoadFileNames.isEmpty())
 		return;
 
-	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileName).absolutePath());
+	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileNames.first()).absolutePath());
 
-	Project* NewProject = new Project();
+	std::vector<std::unique_ptr<Project>> ProjectsToMerge;
 
-	if (NewProject->Load(LoadFileName, true))
+	for (const QString& LoadFileName : LoadFileNames)
 	{
-		size_t ModelCount = NewProject->GetModels().size();
+		std::unique_ptr<Project>& NewProject = ProjectsToMerge.emplace_back(std::make_unique<Project>());
 
-		lcGetActiveProject()->Merge(NewProject);
-
-		if (ModelCount == 1)
-			QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 submodel."));
-		else
-			QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(ModelCount));
-
-		UpdateModels();
+		if (!NewProject->Load(LoadFileName, true))
+			return;
 	}
 
-	delete NewProject;
+	size_t ModelCount = 0;
+
+	for (const std::unique_ptr<Project>& ProjectToMerge : ProjectsToMerge)
+	{
+		ModelCount += ProjectToMerge->GetModels().size();
+
+		lcGetActiveProject()->Merge(ProjectToMerge.get());
+	}
+
+	if (ModelCount == 1)
+		QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 submodel."));
+	else
+		QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(ModelCount));
+
+	UpdateModels();
 }
 
 void lcMainWindow::ImportLDD()
@@ -2674,7 +2684,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_MERGE:
-		MergeProject();
+		ShowMergeDialog();
 		break;
 
 	case LC_FILE_SAVE:

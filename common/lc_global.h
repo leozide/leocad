@@ -43,10 +43,6 @@ class QPrinter;
 #define QT_STRINGIFY(x) QT_STRINGIFY2(x)
 #endif
 
-#ifdef QT_NO_PROCESS
-#define LC_DISABLE_RENDER_DIALOG
-#endif
-
 #define LC_ARRAY_COUNT(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 #define LC_ARRAY_SIZE_CHECK(a,s) static_assert(LC_ARRAY_COUNT(a) == static_cast<int>(s), QT_STRINGIFY(a) " size mismatch.")
 

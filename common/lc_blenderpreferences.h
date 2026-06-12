@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef LC_DISABLE_BLENDER
+
 #define LC_UNIX_SHELL                  "/bin/sh"
 #define LC_WINDOWS_SHELL               "cmd.exe"
 #define LC_BLENDER_ADDON_BLEND_FILE    "leocad.blend"
@@ -438,3 +440,5 @@ private:
 };
 
 extern class lcBlenderPreferences* gAddonPreferences;
+
+#endif // !LC_DISABLE_BLENDER

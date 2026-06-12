@@ -1,5 +1,4 @@
-#include <zlib.h>
-
+#include "lc_global.h"
 #include "lc_blenderpreferences.h"
 #include "lc_application.h"
 #include "lc_mainwindow.h"
@@ -12,6 +11,9 @@
 #include "lc_file.h"
 #include "lc_qutils.h"
 #include "project.h"
+#include <zlib.h>
+
+#ifndef LC_DISABLE_BLENDER
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 using Qt::SkipEmptyParts;
@@ -3861,3 +3863,5 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 
 	return Ok;
 }
+
+#endif // !LC_DISABLE_BLENDER

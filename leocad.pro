@@ -164,6 +164,11 @@ macx {
 	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
+ios {
+	DEFINES += LC_DISABLE_RENDER_DIALOG=1
+	DEFINES += LC_DISABLE_BLENDER=1
+}
+
 SOURCES += \
 	common/camera.cpp \
 	common/group.cpp \

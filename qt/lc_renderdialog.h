@@ -1,5 +1,19 @@
 #pragma once
 
+enum class lcPOVRayRenderQuality
+{
+	Low,
+	Medium,
+	High
+};
+
+enum class lcRenderDialogMode
+{
+	RenderPOVRay,
+	RenderBlender,
+	OpenInBlender
+};
+
 #ifndef LC_DISABLE_RENDER_DIALOG
 
 namespace Ui {
@@ -41,20 +55,6 @@ protected:
 
 	QImage mImage;
 	QImage mScaledImage;
-};
-
-enum class lcRenderDialogMode
-{
-	RenderPOVRay,
-	RenderBlender,
-	OpenInBlender
-};
-
-enum class lcPOVRayRenderQuality
-{
-	Low,
-	Medium,
-	High
 };
 
 class lcRenderDialog : public QDialog
@@ -114,6 +114,17 @@ protected:
 	QString mDataPath;
 
 	Ui::lcRenderDialog* ui;
+};
+
+#else
+
+class lcRenderPreviewWidget : public QWidget
+{
+public:
+	explicit lcRenderPreviewWidget(QWidget* Parent)
+	    : QWidget(Parent)
+	{
+	}
 };
 
 #endif // LC_DISABLE_RENDER_DIALOG

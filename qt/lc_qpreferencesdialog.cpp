@@ -426,6 +426,7 @@ void lcPreferencesDialog::PartsArchiveBrowseClicked()
 
 void lcPreferencesDialog::BlenderAddonSettingsButtonClicked()
 {
+#ifndef LC_DISABLE_BLENDER
 	int Width = 1280;
 	int Height = 720;
 	double Scale = 1.0f;
@@ -435,10 +436,7 @@ void lcPreferencesDialog::BlenderAddonSettingsButtonClicked()
 		Height,
 		Scale,
 		this);
-
-	Q_UNUSED(Width)
-	Q_UNUSED(Height)
-	Q_UNUSED(Scale)
+#endif // !LC_BLENDER_DISABLED
 }
 
 void lcPreferencesDialog::ColorConfigBrowseButtonClicked()

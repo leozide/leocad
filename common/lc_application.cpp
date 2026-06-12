@@ -937,11 +937,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	if (Options.Exit)
 		return lcStartupMode::Success;
 
+#ifndef Q_OS_IOS
 	if (!lcContext::InitializeRenderer())
 	{
 		StdErr << tr("Error creating OpenGL context.\n");
 		return lcStartupMode::Error;
 	}
+#endif
 
 	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
 
@@ -1250,6 +1252,15 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 		gMainWindow->UpdateRecentFiles();
+		
+#ifdef Q_OS_IOS
+		if (!lcContext::InitializeRenderer())
+		{
+			StdErr << tr("Error creating OpenGL context.\n");
+			return lcStartupMode::Error;
+		}
+#endif
+		
 		gMainWindow->show();
 
 #ifdef Q_OS_WIN

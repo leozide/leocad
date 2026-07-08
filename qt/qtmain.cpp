@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName(QLatin1String("LeoCAD Software"));
 	QCoreApplication::setApplicationName(QLatin1String("LeoCAD"));
 	QCoreApplication::setApplicationVersion(QLatin1String(LC_VERSION_TEXT));
+	QGuiApplication::setDesktopFileName(QLatin1String("leocad"));
 
 	lcInitializeSurfaceFormat(argc, argv);
 

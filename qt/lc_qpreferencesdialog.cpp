@@ -1121,7 +1121,9 @@ void lcPreferencesDialog::ShortcutAssignClicked()
 	{
 		for (uint ExistingIndex = 0; ExistingIndex < LC_ARRAY_COUNT(Shortcuts); ExistingIndex++)
 		{
-			if (NewShortcut == Shortcuts[ExistingIndex] && ExistingIndex != ShortcutIndex)
+			QKeySequence Sequence(Shortcuts[ExistingIndex]);
+			
+			if (NewShortcut == Sequence.toString(QKeySequence::NativeText) && ExistingIndex != ShortcutIndex)
 			{
 				QString ActionText = qApp->translate("Menu", gCommands[ExistingIndex].MenuName).remove('&').remove(QLatin1String("..."));
 				QString QuestionText = tr("The shortcut '%1' is already assigned to '%2'. Do you want to replace it?").arg(NewShortcut, ActionText);

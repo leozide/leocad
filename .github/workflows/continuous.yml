@@ -32,6 +32,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
+        version: '6.11.*'
         cache: 'true'
     - name: Cache Library
       uses: actions/cache@v3

@@ -164,19 +164,6 @@ macx {
 	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
-# AGL is not included since 26.0 and Qt5 isn't going to be fixed.
-macx {
-	# QMAKE_MAC_SDK examples: "macosx26.0", "macosx26", "macosx27.1"
-	SDK_TAG        = $$QMAKE_MAC_SDK
-	SDK_VER_STR    = $$replace(SDK_TAG, "macosx", "")
-	SDK_VER_MAJOR  = $$section(SDK_VER_STR, ., 0, 0)
-
-	greaterThan(SDK_VER_MAJOR, 25) {
-		QMAKE_LIBS_OPENGL -= -framework AGL
-		LIBS -= -framework AGL
-	}
-}
-
 ios {
 	DEFINES += LC_DISABLE_RENDER_DIALOG=1
 	DEFINES += LC_DISABLE_BLENDER=1

@@ -15,6 +15,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4  
       with:
+        version: '5.15.*'
         cache: 'true'
     - name: Get number of CPU cores
       uses: SimenB/github-actions-cpu-cores@v1
@@ -29,7 +30,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3  
+      uses: jurplel/install-qt-action@v4
       with:
         cache: 'true'
     - name: Cache Library

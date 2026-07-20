@@ -56,11 +56,9 @@ jobs:
       run: |
         wget https://github.com/leozide/povray/releases/download/continuous/povray
         chmod +x povray
-        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt
-        echo < repo.txt
-        echo export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
-        export REMOTE=$(grep -Po '(?<=: \")(([a-z0-9])\w+)(?=\")' -m 1 repo.txt)
-        echo $REMOTE        
+        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master | jq -r '.sha' > remote.txt
+        REMOTE=$(cat remote.txt)
+        echo "REMOTE=$REMOTE"        
     - name: Get number of CPU cores
       uses: SimenB/github-actions-cpu-cores@v1
       id: cpu-cores

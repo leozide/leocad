@@ -5,7 +5,7 @@
 		{
 			"Description": "Train Track  9V Point Right",
 			"IDs": [ "75541c01-f1.dat", "75541c01-f2.dat" ],
-			"HiddenIDs": [ " 75541-f1.dat", " 75541-f2.dat" ],
+			"HiddenIDs": [ "75541-f1.dat", "75541-f2.dat" ],
 			"Color": 7,
 			"Connections":
 			[
@@ -260,7 +260,7 @@
 		},
 		{
 			"Description": "Train Track 12V Slotted Point Left",
-			"IDs": [ "73697ac01.dat", "73697ac02.dat", "73697ac03.dat", "73697ac04.dat" ],
+			"IDs": [ "73696c01.dat", "73696c02.dat", "73696c03.dat", "73696c04.dat" ],
 			"Color": 7,
 			"Connections":
 			[
@@ -283,7 +283,7 @@
 		},
 		{
 			"Description": "Train Track 12V Slotted Point Right",
-			"IDs": [ "73696ac01.dat", "73696ac02.dat", "73696ac03.dat", "73696ac04.dat" ],
+			"IDs": [ "73697c01.dat", "73697c02.dat", "73697c03.dat", "73697c04.dat" ],
 			"Color": 7,
 			"Connections":
 			[

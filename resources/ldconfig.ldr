@@ -1,16 +1,9 @@
 0 LDraw.org Configuration File
 0 Name: LDConfig.ldr
 0 Author: LDraw.org
-0 !LDRAW_ORG Configuration UPDATE 2025-08-04
+0 !LDRAW_ORG Configuration UPDATE 2026-05-29
 
-0 // Last update: Added Regular Colours 10022, 296, 315, 316
-0 // Last update: Added Modulex Category with 41 New Colours (Range 30000-31002)
-0 // Last update: Added Fluorescent Paint Colours with 2 New Colours (332, 333)
-0 // Last update: Added 13 (regular) Rubber Colours (10028, 10092, 10084, 10326, 10212, 10005, 10003, 10085, 10288, 10151, 10191, 10330, 10008)
-0 // Last update: Added 8 Rubber Metallic Colours (10135, 10137, 10147, 10148, 10150, 10189, 10200, 10297)
-0 // Last update: Added 2 Rubber Transparent Colours (10057, 10079)
-0 // Last update: Added 9 Canvas Colours (20006, 20007, 20019, 20022, 20028, 20071, 20072, 20320, 20335)
-0 // Last update: Updated some Reference Comments
+0 // Last update: Changed Opal_Trans_Green to Opal_Trans_Bright_Green
 
 0 // * LDraw and BrickLink mostly share naming conventions for their colours.
 0 // * Where possible LEGO colour numbers were used.
@@ -35,7 +28,6 @@
 0 //   points and 20 degree. 
 
 0 // Colour definitions
-
 0 // LDraw Solid Colours
 0                              // LEGOID  26 - Black
 0 !COLOUR Black                                                 CODE     0   VALUE #1B2A34   EDGE #808080
@@ -67,7 +59,7 @@
 0 !COLOUR Pink                                                  CODE    13   VALUE #F6A9BB   EDGE #333333
 0                              // LEGOID  24 - Bright Yellow
 0 !COLOUR Yellow                                                CODE    14   VALUE #FAC80A   EDGE #333333
-0                              // LEGOID   1/426 - White
+0                              // LEGOID   1 / 426 - White
 0 !COLOUR White                                                 CODE    15   VALUE #F4F4F4   EDGE #333333
 0                              // LEGOID   6 - Light Green
 0 !COLOUR Light_Green                                           CODE    17   VALUE #ADD9A8   EDGE #333333
@@ -163,11 +155,11 @@
 0 !COLOUR Light_Lilac                                           CODE   220   VALUE #9195CA   EDGE #333333
 0                              // LEGOID 225 - Warm Yellowish Orange
 0 !COLOUR Warm_Yellowish_Orange                                 CODE   225   VALUE #FAA964   EDGE #333333
-0                              // LEGOID 226/427 - Cool Yellow
+0                              // LEGOID 226 / 427 - Cool Yellow
 0 !COLOUR Bright_Light_Yellow                                   CODE   226   VALUE #FFEC6C   EDGE #333333
 0                              // LEGOID 232 - Dove Blue
 0 !COLOUR Sky_Blue                                              CODE   232   VALUE #77C9D8   EDGE #333333
-0                              // LEGOID 140/428 - Earth Blue
+0                              // LEGOID 140 / 428 - Earth Blue
 0 !COLOUR Dark_Blue                                             CODE   272   VALUE #19325A   EDGE #333333
 0                              // LEGOID 141 - Earth Green
 0 !COLOUR Dark_Green                                            CODE   288   VALUE #00451A   EDGE #808080
@@ -217,6 +209,10 @@
 0 !COLOUR Umber_Brown                                           CODE   423   VALUE #543F33   EDGE #333333
 0                              // LEGOID 424 - Ochre Yellow 
 0 !COLOUR Ochre_Yellow                                          CODE   424   VALUE #DD9E47   EDGE #333333
+0                              // LEGOID  430 - Warm Pink
+0 !COLOUR Warm_Pink                                             CODE   430   VALUE #F79B9B   EDGE #333333
+0                              // LEGOID  431 - Blue Violet
+0 !COLOUR Bright_Blue_Violet                                    CODE   431   VALUE #665EA7   EDGE #333333
 0                              // LEGOID   4 - Brick Red
 0 !COLOUR Fabuland_Brown                                        CODE   450   VALUE #D27744   EDGE #333333
 0                              // LEGOID 105 - Bright Yellowish Orange
@@ -225,14 +221,12 @@
 0 !COLOUR Dark_Orange                                           CODE   484   VALUE #91501C   EDGE #333333
 0                              // LEGOID 103 - Light Grey
 0 !COLOUR Very_Light_Grey                                       CODE   503   VALUE #BCB4A5   EDGE #333333
-0                              // LEGOID  12 - Light Orange Brown (OBSOLETE)
-0 !COLOUR Light_Orange_Brown                                    CODE   507   VALUE #FA9C1C   EDGE #333333
 0                              // LEGOID  13 - Red Orange
 0 !COLOUR Fabuland_Red                                          CODE   508   VALUE #C65127   EDGE #333333
 0                              // LEGOID  19 - Light Brown
 0 !COLOUR Fabuland_Orange                                       CODE   509   VALUE #CF8A47   EDGE #333333
 0                              // LEGOID  14 - Pastel Green
-0 !COLOUR Fabuland_Lime                                         CODE   510   VALUE #78FC78   EDGE #333333
+0 !COLOUR Fabuland_Lime                                         CODE   510   VALUE #ACE35A   EDGE #333333
 0                              // LEGOID  15 - Lemon
 0 !COLOUR Lemon                                                 CODE 10015   VALUE #FFF230   EDGE #333333
 0                              // LEGOID  17 - Rose
@@ -242,20 +236,22 @@
 
 
 0 // LDraw Transparent Colours
+0                              // LEGOID 109 / 355 - Trans Black IR
+0 !COLOUR Trans_Black_IR_Lens                                   CODE    32   VALUE #000000   EDGE #333333   ALPHA 245
 0                              // LEGOID  43 - Transparent Blue
-0 !COLOUR Trans_Dark_Blue                                       CODE  33   VALUE #0020A0   EDGE #000B38   ALPHA 128
+0 !COLOUR Trans_Dark_Blue                                       CODE    33   VALUE #0020A0   EDGE #000B38   ALPHA 128
 0                              // LEGOID  48 - Transparent Green
-0 !COLOUR Trans_Green                                           CODE  34   VALUE #237841   EDGE #174F2B   ALPHA 128
+0 !COLOUR Trans_Green                                           CODE    34   VALUE #237841   EDGE #174F2B   ALPHA 128
 0                              // LEGOID 311 - Transparent Bright Green 
-0 !COLOUR Trans_Bright_Green                                    CODE  35   VALUE #56E646   EDGE #27AF18   ALPHA 128
+0 !COLOUR Trans_Bright_Green                                    CODE    35   VALUE #56E646   EDGE #27AF18   ALPHA 128
 0                              // LEGOID  41 - Transparent Red
-0 !COLOUR Trans_Red                                             CODE  36   VALUE #C91A09   EDGE #660D05   ALPHA 128
+0 !COLOUR Trans_Red                                             CODE    36   VALUE #C91A09   EDGE #660D05   ALPHA 128
 0                              // LEGOID 113 - Transparent Medium Reddish Violet
-0 !COLOUR Trans_Dark_Pink                                       CODE  37   VALUE #DF6695   EDGE #B9275F   ALPHA 128
+0 !COLOUR Trans_Dark_Pink                                       CODE    37   VALUE #DF6695   EDGE #B9275F   ALPHA 128
 0                              // LEGOID  47 - Transparent Fluorescent Reddish Orange
-0 !COLOUR Trans_Neon_Orange                                     CODE  38   VALUE #FF800D   EDGE #A85100   ALPHA 128
+0 !COLOUR Trans_Neon_Orange                                     CODE    38   VALUE #FF800D   EDGE #A85100   ALPHA 128
 0                              // LEGOID 229 - Transparent Light Bluish Green
-0 !COLOUR Trans_Very_Light_Blue                                 CODE  39   VALUE #C1DFF0   EDGE #6FB4DC   ALPHA 128
+0 !COLOUR Trans_Very_Light_Blue                                 CODE    39   VALUE #C1DFF0   EDGE #6FB4DC   ALPHA 128
 0                              // LEGOID 111 - Transparent Brown 
 0 !COLOUR Trans_Brown                                           CODE    40   VALUE #635F52   EDGE #2A2823   ALPHA 128
 0                              // LEGOID 143 - Transparent Fluorescent Blue
@@ -278,8 +274,6 @@
 0 !COLOUR Trans_Neon_Yellow                                     CODE    54   VALUE #DAB000   EDGE #755E00   ALPHA 128
 0                              // LEGOID 182 - Trans Bright Orange
 0 !COLOUR Trans_Orange                                          CODE    57   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128
-0                              // LEGOID 109 / 355 - Trans Black IR
-0 !COLOUR Trans_Black_IR_Lens                                   CODE    32   VALUE #000000   EDGE #333333   ALPHA 210
 0                              // LEGOID 158 - Transparent Fluorescent Red
 0 !COLOUR Trans_Neon_Red                                        CODE   158   VALUE #F18EBB   EDGE #E63384   ALPHA 128
 0                              // LEGOID 227 - Transparent Bright Yellowish Green
@@ -296,6 +290,8 @@
 0 !COLOUR Trans_Light_Blue_Violet                               CODE   293  VALUE #6BABE4    EDGE #247BC6   ALPHA 128
 0                              // LEGOID 375 - Transparent Black
 0 !COLOUR Trans_Black                                           CODE 10375  VALUE #212121    EDGE #545454   ALPHA 128
+0 !COLOUR Trans_White                                           CODE 11015  VALUE #F4F4F4    EDGE #C1C1C1   ALPHA 174
+0 !COLOUR Trans_Tan                                             CODE 11019  VALUE #D7BA8C    EDGE #BC8D41   ALPHA 128
 
 
 0 // LDraw Chrome Plated Colours
@@ -366,90 +362,95 @@
 
 0 // LDraw Metallic Paint Colours
 0                              // LEGOID 298 / 336 - Cool Silver Drum Lacq / Silver Ink
-0 !COLOUR Metallic_Silver                                       CODE  80   VALUE #767676   EDGE #333333                               METAL
+0 !COLOUR Metallic_Silver                                       CODE    80   VALUE #767676   EDGE #333333                               METAL
 0                              // LEGO Gr.Metal / BricksetID 910 - Metallic Green
-0 !COLOUR Metallic_Green                                        CODE  81   VALUE #C2C06F   EDGE #333333                               METAL
+0 !COLOUR Metallic_Green                                        CODE    81   VALUE #C2C06F   EDGE #333333                               METAL
 0                              // LEGOID 299 / 335 - Warm Gold Drum Lacq / Gold Ink
-0 !COLOUR Metallic_Gold                                         CODE  82   VALUE #DBAC34   EDGE #333333                               METAL
+0 !COLOUR Metallic_Gold                                         CODE    82   VALUE #DBAC34   EDGE #333333                               METAL
 0                              // LEGOID 337 - Titanium
-0 !COLOUR Metallic_Dark_Grey                                    CODE  87   VALUE #3E3C39   EDGE #333333                               METAL
+0 !COLOUR Metallic_Dark_Grey                                    CODE    87   VALUE #3E3C39   EDGE #333333                               METAL
 0                              // LEGOID 300 / 334 - Copper Drum Lacq / Copper Ink
-0 !COLOUR Metallic_Copper                                       CODE 300   VALUE #C27F53   EDGE #333333                               METAL
+0 !COLOUR Metallic_Copper                                       CODE   300   VALUE #C27F53   EDGE #333333                               METAL
 0                              // LEGOID 344 - Cyan Metallic Ink
-0 !COLOUR Metallic_Light_Blue                                   CODE 10045 VALUE #97CBD9   EDGE #333333                               METAL
-0                              // BricksetID 911 - Metallic Pink
-0 !COLOUR Metallic_Pink                                         CODE 10046 VALUE #AD659A   EDGE #333333                               METAL
+0 !COLOUR Metallic_Light_Blue                                   CODE 10045   VALUE #97CBD9   EDGE #333333                               METAL
+0                              // BricksetID 911 - Metallic Pink (Clikits)
+0 !COLOUR Metallic_Pink                                         CODE 10046   VALUE #AD659A   EDGE #333333                               METAL
 0                              // LEGOID 345 - Magenta Metallic Ink
-0 !COLOUR Metallic_Light_Pink                                   CODE 10049 VALUE #FECCCF   EDGE #333333                               METAL
+0 !COLOUR Metallic_Light_Pink                                   CODE 10049   VALUE #FECCCF   EDGE #333333                               METAL
 
 
 0 // LDraw Fluorescent Paint Colours
 0                              // LEGOID 332 - Fluorescent Red Ink
-0 !COLOUR Fluorescent_Red_Ink                                   CODE   332 VALUE #D06D4F   EDGE #333333
+0 !COLOUR Fluorescent_Red_Ink                                   CODE   332   VALUE #D06D4F   EDGE #333333
 0                              // LEGOID 333 - Fluorescent Green Ink
-0 !COLOUR Fluorescent_Green_Ink                                 CODE   333 VALUE #DBEA7A   EDGE #333333
+0 !COLOUR Fluorescent_Green_Ink                                 CODE   333   VALUE #DBEA7A   EDGE #333333
 
 
 0 // LDraw Milky Colours
+0                              // LEGOID 50 - Phosphorescent White
+0 !COLOUR Glow_In_Dark_Opaque                                   CODE    21   VALUE #E0FFB0   EDGE #B8FF4D   ALPHA 245   LUMINANCE 15
 0                              // LEGOID  20 - Nature
-0 !COLOUR Milky_White                                           CODE  79   VALUE #EEEEEE   EDGE #BABABA   ALPHA 240
-0                              // LEGOID 294 - Phosphorescent Green
-0 !COLOUR Glow_In_Dark_Opaque                                   CODE  21   VALUE #E0FFB0   EDGE #B8FF4D   ALPHA 240   LUMINANCE 15
-0                              // LEGOID  50 - Phosphorescent White
-0 !COLOUR Glow_In_Dark_Trans                                    CODE 294   VALUE #BDC6AD   EDGE #8D9D72   ALPHA 240   LUMINANCE 15
+0 !COLOUR Milky_White                                           CODE    79   VALUE #EEEEEE   EDGE #BABABA   ALPHA 240
+0                              // LEGOID 294 - Phosphorescent Green 
+0 !COLOUR Glow_In_Dark_Trans                                    CODE   294   VALUE #BDC6AD   EDGE #8D9D72   ALPHA 200   LUMINANCE 15
 0                              // LEGOID 329 - White Glow
-0 !COLOUR Glow_In_Dark_White                                    CODE 329   VALUE #F5F3D7   EDGE #E0DA85   ALPHA 240   LUMINANCE 15
+0 !COLOUR Glow_In_Dark_White                                    CODE   329   VALUE #F5F3D7   EDGE #E0DA85   ALPHA 245   LUMINANCE 15
 
 
 0 // LDraw Glitter Colours
 0                              // LEGOID 114 - Transparent Medium Reddish-Violet w. Glitter 2%
-0 !COLOUR Glitter_Trans_Dark_Pink                               CODE 114   VALUE #DF6695   EDGE #B9275F   ALPHA 128                   MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0 !COLOUR Glitter_Trans_Dark_Pink                               CODE   114   VALUE #DF6695   EDGE #B9275F   ALPHA 128                   MATERIAL GLITTER VALUE #B92790 FRACTION 0.17 VFRACTION 0.2 SIZE 1
 0                              // LEGOID 117 - Transparent Glitter
-0 !COLOUR Glitter_Trans_Clear                                   CODE 117   VALUE #EEEEEE   EDGE #BABABA   ALPHA 128                   MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.08 VFRACTION 0.1 SIZE 1
+0 !COLOUR Glitter_Trans_Clear                                   CODE   117   VALUE #EEEEEE   EDGE #BABABA   ALPHA 128                   MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.08 VFRACTION 0.1 SIZE 1
 0                              // LEGOID 129 - Transparent Bright Bluish Violet w. Glitter 2%
-0 !COLOUR Glitter_Trans_Purple                                  CODE 129   VALUE #640061   EDGE #000000   ALPHA 128                   MATERIAL GLITTER VALUE #8F00CC FRACTION 0.03 VFRACTION 0.4 SIZE 1
+0 !COLOUR Glitter_Trans_Purple                                  CODE   129   VALUE #640061   EDGE #000000   ALPHA 128                   MATERIAL GLITTER VALUE #8F00CC FRACTION 0.03 VFRACTION 0.4 SIZE 1
 0                              // LEGOID 302 - Transparent Light Blue with Glitter 2%
-0 !COLOUR Glitter_Trans_Light_Blue                              CODE 302   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   MATERIAL GLITTER VALUE #59DEBF FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0 !COLOUR Glitter_Trans_Light_Blue                              CODE   302   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 128                   MATERIAL GLITTER VALUE #59DEBF FRACTION 0.17 VFRACTION 0.2 SIZE 1
 0                              // LEGOID 339 - Transparent Fluorescent Green with Glitter 2%
-0 !COLOUR Glitter_Trans_Neon_Green                              CODE 339   VALUE #C0FF00   EDGE #739900   ALPHA 128                   MATERIAL GLITTER VALUE #998C00 FRACTION 0.17 VFRACTION 0.2 SIZE 1 
+0 !COLOUR Glitter_Trans_Neon_Green                              CODE   339   VALUE #C0FF00   EDGE #739900   ALPHA 128                   MATERIAL GLITTER VALUE #998C00 FRACTION 0.17 VFRACTION 0.2 SIZE 1 
 0                              // LEGOID 341 - Transparent Bright Orange with Glitter 2%
-0 !COLOUR Glitter_Trans_Orange                                  CODE 341   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   MATERIAL GLITTER VALUE #9E2A0A FRACTION 0.17 VFRACTION 0.2 SIZE 1
-0                              // LEGOID 360 - Transparent Clear Opal
-0 !COLOUR Opal_Trans_Clear                                      CODE 360   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 240   LUMINANCE 5     MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
-0                              // LEGOID 362 - Transparent Blue Opal
-0 !COLOUR Opal_Trans_Light_Blue                                 CODE 362   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #59DEBF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
-0                              // LEGOID 363 - Transparent Brown Opal
-0 !COLOUR Opal_Trans_Black                                      CODE 363   VALUE #635F52   EDGE #2A2823   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #7781C9 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
-0                              // LEGOID 364 - Transparent Medium Reddish Violet Opal
-0 !COLOUR Opal_Trans_Dark_Pink                                  CODE 364   VALUE #DF6695   EDGE #B9275F   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B92790 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
-0                              // LEGOID 365 - Transparent Violet Opal
-0 !COLOUR Opal_Trans_Purple                                     CODE 365   VALUE #671F81   EDGE #441456   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #2F1456 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
-0                              // LEGOID 367 - Transparent Green Opal
-0 !COLOUR Opal_Trans_Green                                      CODE 367   VALUE #237841   EDGE #174F2B   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #0B270B FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0 !COLOUR Glitter_Trans_Orange                                  CODE   341   VALUE #F08F1C   EDGE #9E5C0A   ALPHA 128                   MATERIAL GLITTER VALUE #9E2A0A FRACTION 0.17 VFRACTION 0.2 SIZE 1
 0                              // LEGOID 351 - Transparent Bright Green with Glitter 2%
-0 !COLOUR Glitter_Trans_Bright_Green                            CODE 10351 VALUE #56E646   EDGE #27AF18   ALPHA 128                   MATERIAL GLITTER VALUE #59AF18 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+0 !COLOUR Glitter_Trans_Bright_Green                            CODE 10351   VALUE #56E646   EDGE #27AF18   ALPHA 128                   MATERIAL GLITTER VALUE #59AF18 FRACTION 0.17 VFRACTION 0.2 SIZE 1
+
+
+0 // LDraw Opalescent Colours
+0                              // LEGOID 360 - Transparent Clear Opal
+0 !COLOUR Opal_Trans_Clear                                      CODE   360   VALUE #FCFCFC   EDGE #C9C9C9   ALPHA 240   LUMINANCE 5     MATERIAL GLITTER VALUE #FFFFFF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 362 - Transparent Blue Opal
+0 !COLOUR Opal_Trans_Light_Blue                                 CODE   362   VALUE #AEE9EF   EDGE #59D1DE   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #59DEBF FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 363 - Transparent Brown Opal
+0 !COLOUR Opal_Trans_Black                                      CODE   363   VALUE #635F52   EDGE #2A2823   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #7781C9 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 364 - Transparent Medium Reddish Violet Opal
+0 !COLOUR Opal_Trans_Dark_Pink                                  CODE   364   VALUE #DF6695   EDGE #B9275F   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B92790 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 365 - Transparent Violet Opal
+0 !COLOUR Opal_Trans_Purple                                     CODE   365   VALUE #671F81   EDGE #441456   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #2F1456 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 367 - Transparent Green Opal
+0 !COLOUR Opal_Trans_Bright_Green                               CODE   367   VALUE #56E646   EDGE #27AF18   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #0B270B FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0                              // LEGOID 376 - Transparent Yellow Opalescence
+0 !COLOUR Opal_Trans_Yellow                                     CODE   376   VALUE #F5CD2F   EDGE #B49208   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #B45908 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
 0                              // LEGOID 366 - Transparent Blue Opal 
-0 !COLOUR Opal_Trans_Dark_Blue                                  CODE 10366 VALUE #0020A0   EDGE #000B38   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #001D38 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
+0 !COLOUR Opal_Trans_Dark_Blue                                  CODE 10366   VALUE #0020A0   EDGE #000B38   ALPHA 200   LUMINANCE 5     MATERIAL GLITTER VALUE #001D38 FRACTION 0.8 VFRACTION 0.6 MINSIZE 0.02 MAXSIZE 0.1
 
 
 0 // LDraw Speckle Colours
 0                               // LEGOID 306 - Copper, Diffuse
-0 !COLOUR Speckle_Black_Copper                                  CODE  75   VALUE #000000   EDGE #AB6038                               MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
-0 !COLOUR Speckle_Dark_Bluish_Grey_Silver                       CODE  76   VALUE #635F61   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0 !COLOUR Speckle_Black_Copper                                  CODE  75     VALUE #000000   EDGE #AB6038                               MATERIAL SPECKLE VALUE #AB6038 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0 !COLOUR Speckle_Dark_Bluish_Grey_Silver                       CODE  76     VALUE #635F61   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
 0                               // LEGOID 304 - Cool Silver, Diffuse
-0 !COLOUR Speckle_Black_Silver                                  CODE 132   VALUE #000000   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0 !COLOUR Speckle_Black_Silver                                  CODE 132     VALUE #000000   EDGE #898788                               MATERIAL SPECKLE VALUE #898788 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
 0                               // LEGOID 305 - Warm Gold Diffuse
-0 !COLOUR Speckle_Black_Gold                                    CODE 133   VALUE #000000   EDGE #DBAC34                               MATERIAL SPECKLE VALUE #DBAC34 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
+0 !COLOUR Speckle_Black_Gold                                    CODE 133     VALUE #000000   EDGE #DBAC34                               MATERIAL SPECKLE VALUE #DBAC34 FRACTION 0.4 MINSIZE 1 MAXSIZE 3
 
 
 0 // LDraw Modulex Colours
-0                              // MODULEXID  0/10 - Clear
+0                              // MODULEXID  0 / 10 - Clear
 0 !COLOUR Modulex_Clear                                         CODE 30000   VALUE #FCFCFC   EDGE #C9C9C9      ALPHA 128
-0                              // MODULEXID  1/31 - White
+0                              // MODULEXID  1 / 31 - White
 0 !COLOUR Modulex_White                                         CODE 30001   VALUE #F4F4F4   EDGE #333333
 0                              // MODULEXID  2 - Grey
 0 !COLOUR Modulex_Light_Grey                                    CODE 30002   VALUE #8A928D   EDGE #333333
-0                              // MODULEXID  3/57 - Black
+0                              // MODULEXID  3 / 57 - Black
 0 !COLOUR Modulex_Black                                         CODE 30003   VALUE #34434D   EDGE #333333
 0                              // MODULEXID  4 - Terracotta
 0 !COLOUR Modulex_Terracotta                                    CODE 30004   VALUE #D27744   EDGE #333333
@@ -471,7 +472,7 @@
 0 !COLOUR Modulex_Orange                                        CODE 30012   VALUE #D86D2C   EDGE #333333
 0                              // MODULEXID  13 - Red
 0 !COLOUR Modulex_Red                                           CODE 30013   VALUE #C65127   EDGE #333333
-0                              // MODULEXID 14 - Pastel Green
+0                              // MODULEXID  14 - Pastel Green
 0 !COLOUR Modulex_Pastel_Green                                  CODE 30014   VALUE #78FC78   EDGE #333333
 0                              // MODULEXID  15 - Lemon
 0 !COLOUR Modulex_Lemon                                         CODE 30015   VALUE #FFF230   EDGE #333333
@@ -615,6 +616,10 @@
 0 !COLOUR Canvas_Cream                                          CODE 20500 VALUE #F8F3E4   EDGE #333333                               MATERIAL FABRIC CANVAS
 
 
+0 // LDraw Obsolete Colours
+0 !COLOUR Obsolete_Light_Orange_Brown                           CODE  507  VALUE #FA9C1C   EDGE #333333
+
+
 0 // LDraw Internal Common Material Colours
 0 !COLOUR Main_Colour                                           CODE  16   VALUE #FFFF80   EDGE #333333
 0 !COLOUR Edge_Colour                                           CODE  24   VALUE #7F7F7F   EDGE #333333
@@ -647,7 +652,7 @@
 0 !AVATAR CATEGORY "Container" DESCRIPTION "Container" PART 1 0 0  0 1 0  0 0 1 "61780.dat"
 0 !AVATAR CATEGORY "Conveyor" DESCRIPTION "Conveyor" PART 1 0 0  0 1 0  0 0 1 "92713c01.dat"
 0 !AVATAR CATEGORY "Crane" DESCRIPTION "Crane" PART 1 0 0  0 1 0  0 0 1 "30395.dat"
-0 !AVATAR CATEGORY "Cylinder" DESCRIPTION "Cylinder" PART 1 0 0  0 1 0  0 0 1 "30367b.dat"
+0 !AVATAR CATEGORY "Cylinder" DESCRIPTION "Cylinder" PART 1 0 0  0 1 0  0 0 1 "3062b.dat"
 
 0 !AVATAR CATEGORY "Dish" DESCRIPTION "Dish" PART 1 0 0  0 1 0  0 0 1 "3960.dat"
 0 !AVATAR CATEGORY "Door" DESCRIPTION "Door" PART 1 0 0  0 1 0  0 0 1 "3861a.dat"
@@ -660,12 +665,13 @@
 0 !AVATAR CATEGORY "Figure" DESCRIPTION "Figure" PART 1 0 0  0 1 0  0 0 1 "92198c01.dat"
 0 !AVATAR CATEGORY "Figure Accessory" DESCRIPTION "Figure Accessory" PART 1 0 0  0 1 0  0 0 1 "11245.dat"
 0 !AVATAR CATEGORY "Flag" DESCRIPTION "Flag" PART 1 0 0  0 1 0  0 0 1 "3596.dat"
+0 !AVATAR CATEGORY "Flexible" DESCRIPTION "Flexible" PART 1 0 0  0 1 0  0 0 1 "92338-f1.dat"
 0 !AVATAR CATEGORY "Forklift" DESCRIPTION "Forklift" PART 1 0 0  0 1 0  0 0 1 "3430c00-f1.dat"
-0 !AVATAR CATEGORY "Freestyle" DESCRIPTION "Freestyle" PART 1 0 0  0 1 0  0 0 1 "3004.dat"
+0 !AVATAR CATEGORY "Freestyle" DESCRIPTION "Freestyle" PART 1 0 0  0 1 0  0 0 1 "6243p01.dat"
 
 0 !AVATAR CATEGORY "Garage" DESCRIPTION "Garage" PART 1 0 0  0 1 0  0 0 1 "822bc02.dat"
 0 !AVATAR CATEGORY "Glass" DESCRIPTION "Glass" PART 1 0 0  0 1 0  0 0 1 "4036.dat"
-0 !AVATAR CATEGORY "Grab" DESCRIPTION "Grab" PART 1 0 0  0 1 0  0 0 1 "3004.dat"
+0 !AVATAR CATEGORY "Grab" DESCRIPTION "Grab" PART 1 0 0  0 1 0  0 0 1 "3492c02.dat"
 
 0 !AVATAR CATEGORY "Helper" DESCRIPTION "Helper" PART 1 0 0  0 1 0  0 0 1 "helper2druler100ldu.dat"
 0 !AVATAR CATEGORY "Hinge" DESCRIPTION "Hinge" PART 1 0 0  0 1 0  0 0 1 "3937c01.dat"
@@ -673,7 +679,7 @@
 0 !AVATAR CATEGORY "Hose" DESCRIPTION "Hose" PART 1 0 0  0 1 0  0 0 1 "73590a.dat"
 
 0 !AVATAR CATEGORY "Ladder" DESCRIPTION "Ladder" PART 1 0 0  0 1 0  0 0 1 "11299.dat"
-0 !AVATAR CATEGORY "Lever" DESCRIPTION "Lever" PART 1 0 0  0 1 0  0 0 1 "3004.dat"
+0 !AVATAR CATEGORY "Lever" DESCRIPTION "Lever" PART 1 0 0  0 1 0  0 0 1 "73587p01.dat"
 
 0 !AVATAR CATEGORY "Magnet" DESCRIPTION "Magnet" PART 1 0 0  0 1 0  0 0 1 "735.dat"
 0 !AVATAR CATEGORY "Minifig" DESCRIPTION "Minifig" PART 1 0 0  0 1 0  0 0 1 "973.dat"
@@ -682,7 +688,9 @@
 0 !AVATAR CATEGORY "Minifig Headwear" DESCRIPTION "Minifig Headwear" PART 1 0 0  0 1 0  0 0 1 "30138.dat"
 0 !AVATAR CATEGORY "Minifig Hipwear" DESCRIPTION "Minifig Hipwear" PART 1 0 0  0 1 0  0 0 1 "24782.dat"
 0 !AVATAR CATEGORY "Minifig Neckwear" DESCRIPTION "Minifig Neckwear" PART 1 0 0  0 1 0  0 0 1 "2587.dat"
+0 !AVATAR CATEGORY "Modulex" DESCRIPTION "Modulex" PART 1 0 0  0 1 0  0 0 1 "u7006.dat"
 0 !AVATAR CATEGORY "Monorail" DESCRIPTION "Monorail" PART 1 0 0  0 1 0  0 0 1 "2684c01.dat"
+0 !AVATAR CATEGORY "Mursten" DESCRIPTION "Mursten" PART 1 0 0  0 1 0  0 0 1 "u8003c.dat"
 
 0 !AVATAR CATEGORY "Panel" DESCRIPTION "Panel" PART 1 0 0  0 1 0  0 0 1 "6231.dat"
 0 !AVATAR CATEGORY "Plane" DESCRIPTION "Plane" PART 1 0 0  0 1 0  0 0 1 "87613.dat"
@@ -691,12 +699,14 @@
 0 !AVATAR CATEGORY "Platform" DESCRIPTION "Platform" PART 1 0 0  0 1 0  0 0 1 "2642.dat"
 0 !AVATAR CATEGORY "Propeller" DESCRIPTION "Propeller" PART 1 0 0  0 1 0  0 0 1 "15211.dat"
 
+0 !AVATAR CATEGORY "Quatro" DESCRIPTION "Quatro" PART 1 0 0  0 1 0  0 0 1 "48287.dat"
+
 0 !AVATAR CATEGORY "Rack" DESCRIPTION "Rack" PART 1 0 0  0 1 0  0 0 1 "2426c02.dat"
 0 !AVATAR CATEGORY "Roadsign" DESCRIPTION "Roadsign" PART 1 0 0  0 1 0  0 0 1 "3350.dat"
 0 !AVATAR CATEGORY "Rock" DESCRIPTION "Rock" PART 1 0 0  0 1 0  0 0 1 "42284.dat"
 
 0 !AVATAR CATEGORY "Scala" DESCRIPTION "Scala" PART 1 0 0  0 1 0  0 0 1 "33086.dat"
-0 !AVATAR CATEGORY "Screw" DESCRIPTION "Screw" PART 1 0 0  0 1 0  0 0 1 "3004.dat"
+0 !AVATAR CATEGORY "Screw" DESCRIPTION "Screw" PART 1 0 0  0 1 0  0 0 1 "u9013.dat"
 0 !AVATAR CATEGORY "Sheet Cardboard" DESCRIPTION "Sheet Cardboard" PART 1 0 0  0 1 0  0 0 1 "u572p02.dat"
 0 !AVATAR CATEGORY "Sheet Fabric" DESCRIPTION "Sheet Fabric" PART 1 0 0  0 1 0  0 0 1 "u9494p01c01.dat"
 0 !AVATAR CATEGORY "Sheet Plastic" DESCRIPTION "Sheet Plastic" PART 1 0 0  0 1 0  0 0 1 "u66.dat"
@@ -704,6 +714,7 @@
 0 !AVATAR CATEGORY "Sphere" DESCRIPTION "Sphere" PART 1 0 0  0 1 0  0 0 1 "98107.dat"
 0 !AVATAR CATEGORY "Staircase" DESCRIPTION "Staircase" PART 1 0 0  0 1 0  0 0 1 "4784.dat"
 0 !AVATAR CATEGORY "Sticker" DESCRIPTION "Sticker" PART 1 0 0  0 1 0  0 0 1 "192425a.dat"
+0 !AVATAR CATEGORY "Sticker Shortcut" DESCRIPTION "Sticker Shortcut" PART 1 0 0  0 1 0  0 0 1 "4215ad04.dat"
 0 !AVATAR CATEGORY "String" DESCRIPTION "String" PART 1 0 0  0 1 0  0 0 1 "76384.dat"
 0 !AVATAR CATEGORY "Support" DESCRIPTION "Support" PART 1 0 0  0 1 0  0 0 1 "2580.dat"
 

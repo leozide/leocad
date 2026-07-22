@@ -515,28 +515,71 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 				return { TrainTracks, true };
 		}
 
-		lcVector3 Position = ObjectRayTest.PieceInfoRayTest.Plane;
+		// ObjectRayTest.PieceInfoRayTest.Plane identifies the face of the piece under
+		// the mouse: it is zero except on the hit-face axis. The hit-face axis is used
+		// to offset the new piece so it sits against that face, while the two in-face
+		// axes follow the actual cursor position on the surface (instead of always
+		// snapping to the target's origin, which left odd-sized parts half a stud off
+		// even-sized parts - see issue #1020).
+		const lcVector3 Plane = ObjectRayTest.PieceInfoRayTest.Plane;
+		const lcVector3 LocalHit = lcMul31(ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance, lcMatrix44AffineInverse(ObjectRayTest.PieceInfoRayTest.Transform));
 
-		if (Position.x > 0.0f)
-			Position.x += fabsf(Info->GetBoundingBox().Min.x);
-		else if (Position.x < 0.0f)
-			Position.x -= fabsf(Info->GetBoundingBox().Max.x);
-		else if (Position.y > 0.0f)
-			Position.y += fabsf(Info->GetBoundingBox().Min.y);
-		else if (Position.y < 0.0f)
-			Position.y -= fabsf(Info->GetBoundingBox().Max.y);
-		else if (Position.z > 0.0f)
-			Position.z += fabsf(Info->GetBoundingBox().Min.z);
-		else if (Position.z < 0.0f)
-			Position.z -= fabsf(Info->GetBoundingBox().Max.z);
+		const lcBoundingBox InfoBox = Info->GetBoundingBox();
+		const lcBoundingBox TargetBox = MousePiece->mPieceInfo->GetBoundingBox();
+		const float SnapXY = gMainWindow->GetMoveXYSnap();
+		const float SnapZ = gMainWindow->GetMoveZSnap();
 
-		if (gMainWindow->GetRelativeTransform())
-			Position = lcMul31(ActiveModel->SnapPosition(Position), ObjectRayTest.PieceInfoRayTest.Transform);
+		// Snap a coordinate to the nearest multiple of Snap, offset by Phase. The
+		// rounding matches lcModel::SnapPosition so vertical stacking is unchanged.
+		auto SnapAxis = [](float Value, float Snap, float Phase) -> float
+		{
+			if (Snap == 0.0f)
+				return Value;
+			const float Offset = Value - Phase;
+			int i = (int)(Offset / Snap);
+			const float Leftover = Offset - Snap * i;
+			if (Leftover > Snap / 2)
+				i++;
+			else if (Leftover < -Snap / 2)
+				i--;
+			return Snap * i + Phase;
+		};
+
+		// Snap an in-face coordinate to the stud grid. The grid is phased by half a
+		// stud when the inserted piece and the target piece have a different stud-count
+		// parity on this axis, so the inserted piece's studs line up with the target's.
+		// A finer snap (e.g. half stud) still reaches the positions between studs.
+		auto SnapStud = [&SnapAxis, SnapXY](float Hit, float InfoSize, float TargetSize) -> float
+		{
+			const int InfoStuds = lcMax(1, (int)floorf(InfoSize / 20.0f + 0.5f));
+			const int TargetStuds = lcMax(1, (int)floorf(TargetSize / 20.0f + 0.5f));
+			const float Phase = ((InfoStuds ^ TargetStuds) & 1) ? 10.0f : 0.0f;
+			return SnapAxis(Hit, SnapXY, Phase);
+		};
+
+		lcVector3 Position = LocalHit;
+
+		if (Plane.x != 0.0f)
+		{
+			Position.x = SnapAxis(Plane.x + ((Plane.x > 0.0f) ? fabsf(InfoBox.Min.x) : -fabsf(InfoBox.Max.x)), SnapXY, 0.0f);
+			Position.y = SnapStud(LocalHit.y, InfoBox.Max.y - InfoBox.Min.y, TargetBox.Max.y - TargetBox.Min.y);
+			Position.z = SnapAxis(LocalHit.z, SnapZ, 0.0f);
+		}
+		else if (Plane.y != 0.0f)
+		{
+			Position.y = SnapAxis(Plane.y + ((Plane.y > 0.0f) ? fabsf(InfoBox.Min.y) : -fabsf(InfoBox.Max.y)), SnapXY, 0.0f);
+			Position.x = SnapStud(LocalHit.x, InfoBox.Max.x - InfoBox.Min.x, TargetBox.Max.x - TargetBox.Min.x);
+			Position.z = SnapAxis(LocalHit.z, SnapZ, 0.0f);
+		}
 		else
-			Position = ActiveModel->SnapPosition(lcMul31(Position, ObjectRayTest.PieceInfoRayTest.Transform));
+		{
+			Position.z = SnapAxis(Plane.z + ((Plane.z > 0.0f) ? fabsf(InfoBox.Min.z) : -fabsf(InfoBox.Max.z)), SnapZ, 0.0f);
+			Position.x = SnapStud(LocalHit.x, InfoBox.Max.x - InfoBox.Min.x, TargetBox.Max.x - TargetBox.Min.x);
+			Position.y = SnapStud(LocalHit.y, InfoBox.Max.y - InfoBox.Min.y, TargetBox.Max.y - TargetBox.Min.y);
+		}
 
 		lcMatrix44 WorldMatrix = ObjectRayTest.PieceInfoRayTest.Transform;
-		WorldMatrix.SetTranslation(Position);
+		WorldMatrix.SetTranslation(lcMul31(Position, ObjectRayTest.PieceInfoRayTest.Transform));
 
 		return { { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } }, false };
 	}

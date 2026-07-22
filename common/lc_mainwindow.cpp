@@ -458,6 +458,7 @@ void lcMainWindow::CreateMenus()
 	mToolsMenu->addAction(mActions[LC_EDIT_ACTION_ZOOM_REGION]);
 
 	QMenu* FileMenu = menuBar()->addMenu(tr("&File"));
+	connect(FileMenu, &QMenu::aboutToShow, this, &lcMainWindow::FileMenuAboutToShow);
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
 	FileMenu->addAction(mActions[LC_FILE_OPEN]);
 	FileMenu->addAction(mActions[LC_FILE_MERGE]);
@@ -2015,8 +2016,6 @@ void lcMainWindow::AddRecentFile(const QString& FileName)
 		mRecentFiles[FileIdx] = mRecentFiles[FileIdx - 1];
 
 	mRecentFiles[0] = SavedName;
-
-	UpdateRecentFiles();
 }
 
 void lcMainWindow::RemoveRecentFile(int FileIndex)
@@ -2025,8 +2024,6 @@ void lcMainWindow::RemoveRecentFile(int FileIndex)
 		mRecentFiles[FileIdx] = mRecentFiles[FileIdx + 1];
 
 	mRecentFiles[LC_MAX_RECENT_FILES - 1].clear();
-
-	UpdateRecentFiles();
 }
 
 void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
@@ -2242,6 +2239,25 @@ void lcMainWindow::ViewFocusReceived()
 	SetActiveView(qobject_cast<lcView*>(sender()));
 }
 
+void lcMainWindow::FileMenuAboutToShow()
+{
+	for (int ActionIdx = LC_FILE_RECENT_FIRST; ActionIdx <= LC_FILE_RECENT_LAST; ActionIdx++)
+	{
+		int FileIdx = ActionIdx - LC_FILE_RECENT_FIRST;
+		QAction* Action = mActions[ActionIdx];
+
+		if (!mRecentFiles[FileIdx].isEmpty())
+		{
+			Action->setText(QString("&%1 %2").arg(QString::number(FileIdx + 1), QDir::toNativeSeparators(mRecentFiles[FileIdx])));
+			Action->setVisible(true);
+		}
+		else
+			Action->setVisible(false);
+	}
+
+	mActionFileRecentSeparator->setVisible(!mRecentFiles[0].isEmpty());
+}
+
 void lcMainWindow::CameraMenuAboutToShow()
 {
 	const std::vector<std::unique_ptr<lcCamera>>& Cameras = lcGetActiveModel()->GetCameras();
@@ -2380,25 +2396,6 @@ void lcMainWindow::UpdateTitle()
 void lcMainWindow::UpdateModified(bool Modified)
 {
 	setWindowModified(Modified);
-}
-
-void lcMainWindow::UpdateRecentFiles()
-{
-	for (int ActionIdx = LC_FILE_RECENT_FIRST; ActionIdx <= LC_FILE_RECENT_LAST; ActionIdx++)
-	{
-		int FileIdx = ActionIdx - LC_FILE_RECENT_FIRST;
-		QAction* Action = mActions[ActionIdx];
-
-		if (!mRecentFiles[FileIdx].isEmpty())
-		{
-			Action->setText(QString("&%1 %2").arg(QString::number(FileIdx + 1), QDir::toNativeSeparators(mRecentFiles[FileIdx])));
-			Action->setVisible(true);
-		}
-		else
-			Action->setVisible(false);
-	}
-
-	mActionFileRecentSeparator->setVisible(!mRecentFiles[0].isEmpty());
 }
 
 void lcMainWindow::UpdateShortcuts()

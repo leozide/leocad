@@ -1251,7 +1251,6 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	{
 		gMainWindow->SetColorIndex(lcGetColorIndex(7));
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
-		gMainWindow->UpdateRecentFiles();
 		
 #ifdef Q_OS_IOS
 		if (!lcContext::InitializeRenderer())

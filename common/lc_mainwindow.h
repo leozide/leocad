@@ -273,7 +273,6 @@ public:
 	void UpdateCategories();
 	void UpdateTitle();
 	void UpdateModified(bool Modified);
-	void UpdateRecentFiles();
 	void UpdateShortcuts();
 
 	lcVector3 GetTransformAmount();
@@ -289,6 +288,7 @@ public slots:
 	void SetCurrentPieceInfo(PieceInfo* Info);
 
 protected slots:
+	void FileMenuAboutToShow();
 	void CameraMenuAboutToShow();
 	void ProjectionMenuAboutToShow();
 	void ViewFocusReceived();

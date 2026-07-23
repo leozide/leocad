@@ -58,6 +58,16 @@ public:
 		return mDrawInterface;
 	}
 
+	void SetDrawInsertPreview(bool DrawInsertPreview)
+	{
+		mDrawInsertPreview = DrawInsertPreview;
+	}
+	
+	bool GetDrawInsertPreview() const
+	{
+		return mDrawInsertPreview;
+	}
+
 	void SetShadingMode(lcShadingMode ShadingMode)
 	{
 		mShadingMode = ShadingMode;
@@ -102,18 +112,19 @@ protected:
 
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
-	lcPiece* mActiveSubmodelInstance;
+	lcPiece* mActiveSubmodelInstance = nullptr;
 	lcShadingMode mShadingMode;
-	bool mDrawInterface;
-	bool mAllowLOD;
+	bool mDrawInterface = false;
+	bool mDrawInsertPreview = false;
+	bool mAllowLOD = true;
 	float mMeshLODDistance;
 
 	lcVector4 mFadeColor;
 	lcVector4 mHighlightColor;
-	bool mHasFadedParts;
-	bool mTranslucentFade;
+	bool mHasFadedParts = false;
+	bool mTranslucentFade = false;
 
-	std::function<void()> mPreTranslucentCallback;
+	std::function<void()> mPreTranslucentCallback = nullptr;
 	std::vector<lcRenderMesh> mRenderMeshes;
 	std::vector<int> mOpaqueMeshes;
 	std::vector<lcTranslucentMeshInstance> mTranslucentMeshes;

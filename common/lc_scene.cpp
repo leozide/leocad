@@ -10,13 +10,8 @@
 
 lcScene::lcScene()
 {
-	mActiveSubmodelInstance = nullptr;
-	mDrawInterface = false;
 	mShadingMode = lcShadingMode::DefaultLights;
-	mAllowLOD = true;
 	mMeshLODDistance = 250.0f;
-	mHasFadedParts = false;
-	mPreTranslucentCallback = nullptr;
 }
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)

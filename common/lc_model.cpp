@@ -1352,6 +1352,12 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 			if (Light->IsVisible())
 				Scene->AddInterfaceObject(Light.get());
 	}
+	
+	if (Scene->GetDrawInsertPreview())
+	{
+		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
+	}
 }
 
 void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
@@ -1365,6 +1371,12 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
 		}
+	}
+	
+	if (Scene->GetDrawInsertPreview())
+	{
+		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
+			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
 	}
 }
 
@@ -4965,7 +4977,7 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	}
 }
 
-bool lcModel::InsertPieceToolClicked(std::optional<lcMatrix44> Transform)
+bool lcModel::InsertPieceToolClicked()
 {
 	if (mPreviewInsertPieceInfo.empty())
 		return false;
@@ -4979,14 +4991,7 @@ bool lcModel::InsertPieceToolClicked(std::optional<lcMatrix44> Transform)
 	{
 		Piece = new lcPiece(InsertPieceInfo.Info);
 
-		lcMatrix44 PieceTransform;
-
-		if (Transform.has_value())
-			PieceTransform = lcMul(InsertPieceInfo.Transform, Transform.value());
-		else
-			PieceTransform = InsertPieceInfo.Transform;
-
-		Piece->Initialize(PieceTransform, mCurrentStep);
+		Piece->Initialize(InsertPieceInfo.Transform, mCurrentStep);
 		Piece->SetColorIndex(InsertPieceInfo.ColorIndex);
 		Piece->UpdatePosition(mCurrentStep);
 

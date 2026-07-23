@@ -351,7 +351,7 @@ public:
 
 	void BeginMouseTool(lcTool Tool, lcView* View);
 	void EndMouseTool(lcTool Tool, lcView* View, bool Accept);
-	bool InsertPieceToolClicked(std::optional<lcMatrix44> Transform);
+	bool InsertPieceToolClicked();
 	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);

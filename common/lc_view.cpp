@@ -479,15 +479,9 @@ void lcView::UpdatePiecePreview()
 	if (PreviewInfo)
 	{
 		std::tie(InsertPieceInfo, IsConnection) = GetMouseInsertPieceInfo(false, true, PreviewInfo, nullptr);
-
-		if (GetActiveModel() != mModel)
-		{
-			for (lcInsertPieceInfo& InfoTransform : InsertPieceInfo)
-				InfoTransform.Transform = lcMul(InfoTransform.Transform, mActiveSubmodelTransform);
-		}
 	}
 
-	mModel->SetPreviewInsertPieceInfo(std::move(InsertPieceInfo));
+	GetActiveModel()->SetPreviewInsertPieceInfo(std::move(InsertPieceInfo));
 }
 
 std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, PieceInfo* Info, lcPiece* MovingPiece) const
@@ -877,16 +871,11 @@ void lcView::OnDraw()
 
 	mScene->SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
 	mScene->SetDrawInterface(DrawInterface);
-
-	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
-
+	
 	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
-
-	if (DrawInsertPreview)
-	{
-		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mModel->GetPreviewInsertPieceInfo())
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(mScene.get(), PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
-	}
+	mScene->SetDrawInsertPreview(DrawInsertPreview);
+	
+	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
 
 	if (DrawInterface)
 		mScene->SetPreTranslucentCallback([this]() { DrawGrid(); });
@@ -1731,7 +1720,7 @@ void lcView::EndDrag(bool Accept)
 			break;
 
 		case lcDragState::Piece:
-			ActiveModel->InsertPieceToolClicked(std::nullopt);
+			ActiveModel->InsertPieceToolClicked();
 			break;
 
 		case lcDragState::Color:
@@ -2518,12 +2507,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 		{
 			UpdatePiecePreview();
 
-			std::optional<lcMatrix44> Transform;
-
-			if (GetActiveModel() != mModel)
-				Transform = lcMatrix44AffineInverse(mActiveSubmodelTransform);
-
-			if (!ActiveModel->InsertPieceToolClicked(Transform))
+			if (!ActiveModel->InsertPieceToolClicked())
 				break;
 
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)

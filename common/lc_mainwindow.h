@@ -15,23 +15,6 @@ class lcTimelineWidget;
 class lcElidedLabel;
 enum class lcRenderDialogMode;
 
-#define LC_MAX_RECENT_FILES 4
-
-class lcTabBar : public QTabBar
-{
-public:
-	lcTabBar(QWidget* Parent = nullptr)
-		: QTabBar(Parent), mMousePressTab(-1)
-	{
-	}
-
-protected:
-	void mousePressEvent(QMouseEvent* Event) override;
-	void mouseReleaseEvent(QMouseEvent* Event) override;
-
-	int mMousePressTab;
-};
-
 class lcModelTabWidget : public QWidget
 {
 	Q_OBJECT
@@ -246,9 +229,6 @@ public:
 	void SetModelFromSelection();
 	void HandleCommand(lcCommandId CommandId);
 
-	void AddRecentFile(const QString& FileName);
-	void RemoveRecentFile(int FileIndex);
-
 	void SplitHorizontal();
 	void SplitVertical();
 	void RemoveActiveView();
@@ -277,9 +257,10 @@ public:
 
 	lcVector3 GetTransformAmount();
 
-	QString mRecentFiles[LC_MAX_RECENT_FILES];
+	bool eventFilter(QObject* Object, QEvent* Event) override;
+
 	int mColorIndex;
-	QAction* mActions[LC_NUM_COMMANDS];
+	QAction* mActions[LC_NUM_COMMANDS] = {};
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
@@ -332,6 +313,8 @@ protected:
 	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);
+	void AddRecentFile(const QString& FileName);
+	void RemoveRecentFile(size_t FileIndex);
 
 	lcModelTabWidget* GetTabWidgetForModel(const lcModel* Model) const
 	{
@@ -349,54 +332,56 @@ protected:
 	QTimer mGamepadTimer;
 	QDateTime mLastGamepadUpdate;
 
-	bool mAddKeys;
+	bool mAddKeys = false;
 	lcTool mTool;
 	lcTransformType mTransformType;
-	bool mMoveSnapEnabled;
-	bool mAngleSnapEnabled;
+	bool mMoveSnapEnabled = true;
+	bool mAngleSnapEnabled = true;
 	int mMoveXYSnapIndex;
 	int mMoveZSnapIndex;
 	int mAngleSnapIndex;
-	bool mRelativeTransform;
-	bool mLocalTransform;
-	PieceInfo* mCurrentPieceInfo;
+	bool mRelativeTransform = true;
+	bool mLocalTransform = false;
+	PieceInfo* mCurrentPieceInfo = nullptr;
 	lcSelectionMode mSelectionMode;
-	int mModelTabWidgetContextMenuIndex;
+	int mMousePressTabIndex = -1;
 
-	QAction* mActionFileRecentSeparator;
+	QAction* mActionFileRecentSeparator = nullptr;
 
-	QTabWidget* mModelTabWidget;
-	QToolBar* mStandardToolBar;
-	QToolBar* mToolsToolBar;
-	QToolBar* mTimeToolBar;
-	QDockWidget* mPreviewToolBar;
-	QDockWidget* mPartsToolBar;
-	QDockWidget* mColorsToolBar;
-	QDockWidget* mPropertiesToolBar;
-	QDockWidget* mTimelineToolBar;
+	QTabWidget* mModelTabWidget = nullptr;
+	QToolBar* mStandardToolBar = nullptr;
+	QToolBar* mToolsToolBar = nullptr;
+	QToolBar* mTimeToolBar = nullptr;
+	QDockWidget* mPreviewToolBar = nullptr;
+	QDockWidget* mPartsToolBar = nullptr;
+	QDockWidget* mColorsToolBar = nullptr;
+	QDockWidget* mPropertiesToolBar = nullptr;
+	QDockWidget* mTimelineToolBar = nullptr;
 
-	lcPartSelectionWidget* mPartSelectionWidget;
-	lcColorList* mColorList;
-	QToolButton* mColorButton;
-	lcPropertiesWidget* mPropertiesWidget;
-	lcTimelineWidget* mTimelineWidget;
-	QLineEdit* mTransformXEdit;
-	QLineEdit* mTransformYEdit;
-	QLineEdit* mTransformZEdit;
-	lcPreviewDockWidget* mPreviewWidget;
+	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
+	lcColorList* mColorList = nullptr;
+	QToolButton* mColorButton = nullptr;
+	lcPropertiesWidget* mPropertiesWidget = nullptr;
+	lcTimelineWidget* mTimelineWidget = nullptr;
+	QLineEdit* mTransformXEdit = nullptr;
+	QLineEdit* mTransformYEdit = nullptr;
+	QLineEdit* mTransformZEdit = nullptr;
+	lcPreviewDockWidget* mPreviewWidget = nullptr;
 
-	lcElidedLabel* mStatusBarLabel;
-	QLabel* mStatusPositionLabel;
-	QLabel* mStatusSnapLabel;
-	QLabel* mStatusTimeLabel;
+	lcElidedLabel* mStatusBarLabel = nullptr;
+	QLabel* mStatusPositionLabel = nullptr;
+	QLabel* mStatusSnapLabel = nullptr;
+	QLabel* mStatusTimeLabel = nullptr;
 
-	QMenu* mTransformMenu;
-	QMenu* mToolsMenu;
-	QMenu* mViewpointMenu;
-	QMenu* mCameraMenu;
-	QMenu* mProjectionMenu;
-	QMenu* mShadingMenu;
-	QMenu* mSelectionModeMenu;
+	QMenu* mTransformMenu = nullptr;
+	QMenu* mToolsMenu = nullptr;
+	QMenu* mViewpointMenu = nullptr;
+	QMenu* mCameraMenu = nullptr;
+	QMenu* mProjectionMenu = nullptr;
+	QMenu* mShadingMenu = nullptr;
+	QMenu* mSelectionModeMenu = nullptr;
+
+	std::array<QString, 4> mRecentFiles;
 };
 
 extern class lcMainWindow* gMainWindow;

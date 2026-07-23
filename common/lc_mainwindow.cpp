@@ -35,46 +35,19 @@
 lcMainWindow* gMainWindow;
 #define LC_TAB_LAYOUT_VERSION 0x0001
 
-void lcTabBar::mousePressEvent(QMouseEvent* Event)
-{
-	if (Event->button() == Qt::MiddleButton)
-		mMousePressTab = tabAt(Event->pos());
-	else
-		QTabBar::mousePressEvent(Event);
-}
-
-void lcTabBar::mouseReleaseEvent(QMouseEvent* Event)
-{
-	if (Event->button() == Qt::MiddleButton && tabAt(Event->pos()) == mMousePressTab)
-		tabCloseRequested(mMousePressTab);
-	else
-		QTabBar::mouseReleaseEvent(Event);
-}
-
 lcMainWindow::lcMainWindow()
 {
-	memset(mActions, 0, sizeof(mActions));
-
 	mTransformType = lcTransformType::RelativeTranslation;
 
 	mColorIndex = lcGetColorIndex(7);
 	mTool = lcTool::Select;
-	mAddKeys = false;
-	mMoveSnapEnabled = true;
-	mAngleSnapEnabled = true;
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
-	mRelativeTransform = true;
-	mLocalTransform = false;
-	mCurrentPieceInfo = nullptr;
 	mSelectionMode = lcSelectionMode::Single;
-	mModelTabWidget = nullptr;
-	mPreviewToolBar = nullptr;
-	mPreviewWidget = nullptr;
 
-	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		mRecentFiles[FileIdx] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx));
+	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
+		mRecentFiles[FileIndex] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIndex));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	connect(&mGamepadTimer, &QTimer::timeout, this, &lcMainWindow::UpdateGamepads);
@@ -94,8 +67,8 @@ lcMainWindow::~lcMainWindow()
 		mCurrentPieceInfo = nullptr;
 	}
 
-	for (int FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIdx), mRecentFiles[FileIdx]);
+	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
+		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIndex), mRecentFiles[FileIndex]);
 
 	gMainWindow = nullptr;
 }
@@ -112,6 +85,7 @@ void lcMainWindow::CreateWidgets()
 	CreateStatusBar();
 
 	mModelTabWidget = new QTabWidget();
+	mModelTabWidget->tabBar()->installEventFilter(this);
 	mModelTabWidget->tabBar()->setMovable(true);
 	mModelTabWidget->tabBar()->setTabsClosable(true);
 	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -840,6 +814,32 @@ void lcMainWindow::CreatePreviewWidget()
 	connect(mPreviewToolBar, &QDockWidget::topLevelChanged, this, &lcMainWindow::EnableWindowFlags);
 }
 
+bool lcMainWindow::eventFilter(QObject* Object, QEvent* Event)
+{
+	QTabBar* TabBar = mModelTabWidget->tabBar();
+
+	if (Object == TabBar)
+	{
+		if (Event->type() == QEvent::MouseButtonPress)
+		{
+			QMouseEvent* MouseEvent = static_cast<QMouseEvent*>(Event);
+			mMousePressTabIndex = -1;
+
+			if (MouseEvent->button() == Qt::MiddleButton)
+				mMousePressTabIndex = TabBar->tabAt(MouseEvent->pos());
+		}
+		else if (Event->type() == QEvent::MouseButtonRelease)
+		{
+			QMouseEvent* MouseEvent = static_cast<QMouseEvent*>(Event);
+
+			if (MouseEvent->button() == Qt::MiddleButton && TabBar->tabAt(MouseEvent->pos()) == mMousePressTabIndex)
+				TabBar->tabCloseRequested(mMousePressTabIndex);
+		}
+	}
+
+	return QMainWindow::eventFilter(Object, Event);
+}
+
 void lcMainWindow::TogglePreviewWidget(bool Visible)
 {
 	if (mPreviewToolBar)
@@ -1045,11 +1045,11 @@ void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
 {
 	QMenu* Menu = new QMenu;
 
-	mModelTabWidgetContextMenuIndex = mModelTabWidget->tabBar()->tabAt(Point);
+	mMousePressTabIndex = mModelTabWidget->tabBar()->tabAt(Point);
 
 	if (mModelTabWidget->count() > 1)
 		Menu->addAction(tr("Close Other Tabs"), this, &lcMainWindow::ModelTabCloseOtherTabs);
-	if (mModelTabWidgetContextMenuIndex == mModelTabWidget->currentIndex())
+	if (mMousePressTabIndex == mModelTabWidget->currentIndex())
 		Menu->addAction(mActions[LC_VIEW_RESET_VIEWS]);
 
 	Menu->exec(QCursor::pos());
@@ -1058,11 +1058,11 @@ void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
 
 void lcMainWindow::ModelTabCloseOtherTabs()
 {
-	if (mModelTabWidgetContextMenuIndex == -1)
+	if (mMousePressTabIndex == -1)
 		return;
 
-	while (mModelTabWidget->count() - 1 > mModelTabWidgetContextMenuIndex)
-		delete mModelTabWidget->widget(mModelTabWidgetContextMenuIndex + 1);
+	while (mModelTabWidget->count() - 1 > mMousePressTabIndex)
+		delete mModelTabWidget->widget(mMousePressTabIndex + 1);
 
 	while (mModelTabWidget->count() > 1)
 		delete mModelTabWidget->widget(0);
@@ -2004,26 +2004,27 @@ void lcMainWindow::ToggleFullScreen()
 void lcMainWindow::AddRecentFile(const QString& FileName)
 {
 	QString SavedName = FileName;
-	int FileIdx;
+	int MaxRecentFiles = static_cast<int>(mRecentFiles.size());
+	int FileIndex;
 
 	QFileInfo FileInfo(FileName);
 
-	for (FileIdx = 0; FileIdx < LC_MAX_RECENT_FILES; FileIdx++)
-		if (QFileInfo(mRecentFiles[FileIdx]) == FileInfo)
+	for (FileIndex = 0; FileIndex < MaxRecentFiles; FileIndex++)
+		if (QFileInfo(mRecentFiles[FileIndex]) == FileInfo)
 			break;
 
-	for (FileIdx = lcMin(FileIdx, LC_MAX_RECENT_FILES - 1); FileIdx > 0; FileIdx--)
-		mRecentFiles[FileIdx] = mRecentFiles[FileIdx - 1];
+	for (FileIndex = lcMin(FileIndex, MaxRecentFiles - 1); FileIndex > 0; FileIndex--)
+		mRecentFiles[FileIndex] = mRecentFiles[FileIndex - 1];
 
 	mRecentFiles[0] = SavedName;
 }
 
-void lcMainWindow::RemoveRecentFile(int FileIndex)
+void lcMainWindow::RemoveRecentFile(size_t FileIndex)
 {
-	for (int FileIdx = FileIndex; FileIdx < LC_MAX_RECENT_FILES - 1; FileIdx++)
-		mRecentFiles[FileIdx] = mRecentFiles[FileIdx + 1];
+	for (; FileIndex < mRecentFiles.size() - 1; FileIndex++)
+		mRecentFiles[FileIndex] = mRecentFiles[FileIndex + 1];
 
-	mRecentFiles[LC_MAX_RECENT_FILES - 1].clear();
+	mRecentFiles[mRecentFiles.size() - 1].clear();
 }
 
 void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)

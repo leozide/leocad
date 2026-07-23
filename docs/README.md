@@ -19,6 +19,12 @@ rendering.
   Download the latest LeoCAD-Windows.exe to your computer, double click on
   the icon to launch the installer and follow the instructions.
 
+## LeoCAD for macOS
+
+  Download the latest LeoCAD-macOS.dmg to your computer, double click on
+  the icon to open the archive, copy LeoCAD.app to your Applications folder
+  and then launch it from there.
+
 ## LeoCAD for Linux
 
 There are multiple ways to install LeoCAD on Linux.
@@ -50,17 +56,11 @@ There are multiple ways to install LeoCAD on Linux.
   instructions. More information on how to compile your own executable is
   available in the Documentation section of https://www.leocad.org
 
-## LeoCAD for macOS
 
-  Download the latest LeoCAD-macOS.dmg to your computer, double click on
-  the icon to open the archive, copy LeoCAD.app to your Applications folder
-  and then launch it from there.
+# Online Resources
 
 New users should read the online tutorial located at
 https://www.leocad.org/docs/tutorial1.html to learn how to use LeoCAD.
-
-
-# Online Resources
 
 - Website:
   https://www.leocad.org

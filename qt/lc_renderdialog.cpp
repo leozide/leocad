@@ -6,7 +6,6 @@
 #include "lc_profile.h"
 #include "lc_blenderpreferences.h"
 #include "lc_model.h"
-#include "lc_qutils.h"
 
 #ifndef LC_DISABLE_RENDER_DIALOG
 
@@ -234,26 +233,26 @@ void lcRenderDialog::RenderPOVRay()
 	ui->RenderProgress->setValue(ui->RenderProgress->minimum());
 	ui->RenderProgress->setFormat(tr("Exporting Model"));
 
-	QFuture<std::pair<bool, QString>> exportThread = QtConcurrent::run([FileName]()
+	QFuture<lcResult<void>> ExportThread = QtConcurrent::run([FileName]()
 	{
 		return lcGetActiveProject()->ExportPOVRay(FileName);
 	});
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
-	while (!exportThread.isFinished())
+	while (!ExportThread.isFinished())
 		QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
 	QGuiApplication::restoreOverrideCursor();
 
 	ui->RenderProgress->setFormat("%p%");
 
-	auto [Success, ErrorMessage] = exportThread.result();
+	lcResult<void> ExportResult = ExportThread.result();
 
-	if (!Success)
+	if (!ExportResult)
 	{
-		if (!ErrorMessage.isEmpty())
-			QMessageBox::information(this, tr("Render Error"), ErrorMessage);
+		if (!ExportResult.error().isEmpty())
+			QMessageBox::information(this, tr("Render Error"), ExportResult.error());
 
 		return;
 	}
@@ -382,7 +381,10 @@ void lcRenderDialog::RenderBlender()
 	lcModel* Model = lcGetActiveProject()->GetActiveModel();
 	const QString ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Step_%2.ldr").arg(QFileInfo(Model->GetProperties().mFileName).baseName()).arg(Model->GetCurrentStep())).absoluteFilePath();
 
-	lcGetActiveProject()->ExportCurrentStep(ModelFileName);
+	lcResult<void> ExportResult = lcGetActiveProject()->ExportCurrentStep(ModelFileName);
+
+	if (!ExportResult)
+		QMessageBox::warning(this, tr("Error"), ExportResult.error());
 
 	ui->RenderProgress->setFormat("%p%");
 	QApplication::processEvents();

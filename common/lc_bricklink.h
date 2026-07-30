@@ -1,3 +1,5 @@
 #pragma once
 
-void lcExportBrickLink(const QString& FileName, const lcPartsList& PartsList);
+#include "lc_result.h"
+
+lcResult<void> lcExportBrickLink(const QString& FileName, const lcPartsList& PartsList);

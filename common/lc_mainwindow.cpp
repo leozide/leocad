@@ -1321,15 +1321,15 @@ void lcMainWindow::ShowHTMLDialog()
 		return;
 
 	Options.SaveDefaults();
-	lcGetActiveProject()->ExportHTML(Options);
+	ShowResultMessageBox(lcGetActiveProject()->ExportHTML(Options));
 }
 
 void lcMainWindow::ShowExportPOVRayDialog()
 {
-	auto [Success, ErrorMessage] = lcGetActiveProject()->ExportPOVRay(QString());
+	lcResult<void> ExportResult = lcGetActiveProject()->ExportPOVRay(QString());
 
-	if (!Success && !ErrorMessage.isEmpty())
-		QMessageBox::warning(this, tr("POV-Ray Export" ), ErrorMessage);
+	if (!ExportResult && !ExportResult.error().isEmpty())
+		QMessageBox::warning(this, tr("POV-Ray Export" ), ExportResult.error());
 }
 
 void lcMainWindow::ShowRenderDialog(lcRenderDialogMode RenderDialogMode)
@@ -1405,6 +1405,12 @@ void lcMainWindow::ShowSelectDialog()
 		return;
 
 	ActiveModel->SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
+}
+
+void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result)
+{
+	if (!Result && !Result.error().isEmpty())
+		QMessageBox::information(this, tr("LeoCAD"), Result.error());
 }
 
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
@@ -2483,8 +2489,8 @@ void lcMainWindow::ShowMergeDialog()
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(LoadFileNames.first()).absolutePath());
 
 	std::vector<std::unique_ptr<Project>> ProjectsToMerge;
-
-	for (const QString& LoadFileName : LoadFileNames)
+	
+	for (const QString& LoadFileName : std::as_const(LoadFileNames))
 	{
 		std::unique_ptr<Project>& NewProject = ProjectsToMerge.emplace_back(std::make_unique<Project>());
 
@@ -2706,11 +2712,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_3DS:
-		lcGetActiveProject()->Export3DStudio(QString());
+		ShowResultMessageBox(lcGetActiveProject()->Export3DStudio(QString()));
 		break;
 
 	case LC_FILE_EXPORT_COLLADA:
-		lcGetActiveProject()->ExportCOLLADA(QString());
+		ShowResultMessageBox(lcGetActiveProject()->ExportCOLLADA(QString()));
 		break;
 
 	case LC_FILE_EXPORT_HTML:
@@ -2718,11 +2724,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_BRICKLINK:
-		lcGetActiveProject()->ExportBrickLink();
+		ShowResultMessageBox(lcGetActiveProject()->ExportBrickLink());
 		break;
 
 	case LC_FILE_EXPORT_CSV:
-		lcGetActiveProject()->ExportCSV(QString());
+		ShowResultMessageBox(lcGetActiveProject()->ExportCSV(QString()));
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:
@@ -2730,7 +2736,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_WAVEFRONT:
-		lcGetActiveProject()->ExportWavefront(QString());
+		ShowResultMessageBox(lcGetActiveProject()->ExportWavefront(QString()));
 		break;
 
 	case LC_FILE_RENDER_POVRAY:

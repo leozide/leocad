@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_application.h"
+#include "lc_result.h"
 
 #define LC_HTML_SINGLEPAGE    0x01
 #define LC_HTML_INDEX         0x02
@@ -100,15 +101,15 @@ public:
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
 	void SaveImage(const lcImageDialogOptions& Options);
-	bool ExportCurrentStep(const QString& FileName);
+	lcResult<void> ExportCurrentStep(const QString& FileName);
 	bool ExportModel(const QString& FileName, lcModel* Model) const;
-	bool Export3DStudio(const QString& FileName);
-	void ExportBrickLink();
-	bool ExportCOLLADA(const QString& FileName);
-	bool ExportCSV(const QString& FileName);
-	void ExportHTML(const lcHTMLExportOptions& Options);
-	std::pair<bool, QString> ExportPOVRay(const QString& FileName);
-	bool ExportWavefront(const QString& FileName);
+	lcResult<void> Export3DStudio(const QString& FileName);
+	lcResult<void> ExportBrickLink();
+	lcResult<void> ExportCOLLADA(const QString& FileName);
+	lcResult<void> ExportCSV(const QString& FileName);
+	lcResult<void> ExportHTML(const lcHTMLExportOptions& Options);
+	lcResult<void> ExportPOVRay(const QString& FileName);
+	lcResult<void> ExportWavefront(const QString& FileName);
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 

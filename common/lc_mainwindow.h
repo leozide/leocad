@@ -2,6 +2,7 @@
 
 #include "lc_application.h"
 #include "lc_shortcuts.h"
+#include "lc_result.h"
 #include "lc_commands.h"
 #include "lc_model.h"
 
@@ -310,6 +311,7 @@ protected:
 	void ShowPrintDialog();
 	void ShowImageDialog();
 	void ShowSelectDialog();
+	void ShowResultMessageBox(const lcResult<void>& Result);
 	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);

@@ -46,10 +46,12 @@ win32-msvc* {
 	INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
 	QMAKE_LFLAGS += /INCREMENTAL
 	LIBS += -ladvapi32 -lshell32 -lopengl32 -luser32
+	QMAKE_CXXFLAGS += /we4834
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+	QMAKE_CXXFLAGS += -Werror=unused-result
 }
 
 isEmpty(QMAKE_LRELEASE) {
@@ -252,6 +254,7 @@ HEADERS += \
 	common/group.h \
 	common/image.h \
 	common/lc_modelhistory.h \
+	common/lc_result.h \
 	common/light.h \
 	common/minifig.h \
 	common/object.h \

@@ -1156,9 +1156,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".obj";
 			}
+			
+			lcResult<void> ExportResult = mProject->ExportWavefront(FileName);
 
-			if (mProject->ExportWavefront(FileName))
+			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
+			else if (!ExportResult.error().isEmpty())
+				StdErr << ExportResult.error();
 		}
 
 		if (Options.Save3DS)
@@ -1181,9 +1185,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".3ds";
 			}
-
-			if (mProject->Export3DStudio(FileName))
+			
+			lcResult<void> ExportResult = mProject->Export3DStudio(FileName);
+			
+			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
+			else if (!ExportResult.error().isEmpty())
+				StdErr << ExportResult.error();
 		}
 
 		if (Options.SaveCOLLADA)
@@ -1206,9 +1214,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".dae";
 			}
+			
+			lcResult<void> ExportResult = mProject->ExportCOLLADA(FileName);
 
-			if (mProject->ExportCOLLADA(FileName))
+			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
+			else if (!ExportResult.error().isEmpty())
+			    StdErr << ExportResult.error();
 		}
 
 		if (Options.SaveCSV)
@@ -1231,9 +1243,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				FileName = FileName.left(FileName.length() - Extension.length() - 1);
 				FileName += ".csv";
 			}
-
-			if (mProject->ExportCSV(FileName))
+			
+			lcResult<void> ExportResult = mProject->ExportCSV(FileName);
+			
+			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
+			else if (!ExportResult.error().isEmpty())
+				StdErr << ExportResult.error();
 		}
 
 		if (Options.SaveHTML)
@@ -1243,7 +1259,12 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			if (!Options.SaveHTMLName.isEmpty())
 				HTMLOptions.PathName = Options.SaveHTMLName;
 
-			mProject->ExportHTML(HTMLOptions);
+			lcResult<void> ExportResult = mProject->ExportHTML(HTMLOptions);
+			
+			if (ExportResult)
+				StdOut << tr("Saved '%1'.\n").arg(HTMLOptions.PathName);
+			else if (!ExportResult.error().isEmpty())
+				StdErr << ExportResult.error();
 		}
 	}
 

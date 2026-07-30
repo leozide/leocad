@@ -650,15 +650,12 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	return ModelParts;
 }
 
-bool Project::ExportCurrentStep(const QString& FileName)
+lcResult<void> Project::ExportCurrentStep(const QString& FileName)
 {
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-		return false;
-	}
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 	QStringList Models;
 
@@ -749,8 +746,8 @@ bool Project::ExportCurrentStep(const QString& FileName)
 	File.close();
 
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(FileName).absolutePath());
-
-	return true;
+	
+	return lcResult<void>();
 }
 
 bool Project::ExportModel(const QString& FileName, lcModel* Model) const
@@ -795,28 +792,22 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
 }
 
-bool Project::Export3DStudio(const QString& FileName)
+lcResult<void> Project::Export3DStudio(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return false;
-	}
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(FileName, "3ds", tr("Export 3D Studio"), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return false;
+		return lcUnexpected(QString());
 
 	lcDiskFile File(SaveFileName);
 
 	if (!File.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	long M3DStart = File.GetPosition();
 	File.WriteU16(0x4D4D); // CHK_M3DMAGIC
@@ -1232,11 +1223,11 @@ bool Project::Export3DStudio(const QString& FileName)
 	File.Seek(M3DStart + 2, SEEK_SET);
 	File.WriteU32(M3DEnd - M3DStart);
 	File.Seek(M3DEnd, SEEK_SET);
-
-	return true;
+	
+	return lcResult<void>();
 }
 
-void Project::ExportBrickLink()
+lcResult<void> Project::ExportBrickLink()
 {
 	lcPartsList PartsList;
 
@@ -1244,41 +1235,32 @@ void Project::ExportBrickLink()
 		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return;
-	}
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(QString(), "xml", tr("Export BrickLink"), tr("XML Files (*.xml);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return;
+		return lcUnexpected(QString());
 
-	lcExportBrickLink(SaveFileName, PartsList);
+	return lcExportBrickLink(SaveFileName, PartsList);
 }
 
-bool Project::ExportCOLLADA(const QString& FileName)
+lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return false;
-	}
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return false;
+		return lcUnexpected(QString());
 
 	QFile File(SaveFileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	QTextStream Stream(&File);
 
@@ -1525,11 +1507,11 @@ bool Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</scene>\r\n";
 
 	Stream << "</COLLADA>\r\n";
-
-	return true;
+	
+	return lcResult<void>();
 }
 
-bool Project::ExportCSV(const QString& FileName)
+lcResult<void> Project::ExportCSV(const QString& FileName)
 {
 	lcPartsList PartsList;
 
@@ -1537,24 +1519,18 @@ bool Project::ExportCSV(const QString& FileName)
 		mModels[0]->GetPartsList(gDefaultColor, true, false, PartsList);
 
 	if (PartsList.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return false;
-	}
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(FileName, "csv", tr("Export CSV"), tr("CSV Files (*.csv);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return false;
+		return lcUnexpected(QString());
 
 	lcDiskFile CSVFile(SaveFileName);
 	char Line[1024];
 
 	if (!CSVFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 
@@ -1571,8 +1547,8 @@ bool Project::ExportCSV(const QString& FileName)
 			CSVFile.WriteLine(Line);
 		}
 	}
-
-	return true;
+	
+	return lcResult<void>();
 }
 
 lcInstructions* Project::GetInstructions()
@@ -1583,7 +1559,7 @@ lcInstructions* Project::GetInstructions()
 	return mInstructions.get();
 }
 
-void Project::ExportHTML(const lcHTMLExportOptions& Options)
+lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 {
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
@@ -1641,10 +1617,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 			QFile File(FileName);
 
 			if (!File.open(QIODevice::WriteOnly))
-			{
-				QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-				return;
-			}
+				return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 			QTextStream Stream(&File);
 
@@ -1672,10 +1645,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				QFile File(FileName);
 
 				if (!File.open(QIODevice::WriteOnly))
-				{
-					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-					return;
-				}
+					return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 				QTextStream Stream(&File);
 
@@ -1697,10 +1667,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				QFile File(FileName);
 
 				if (!File.open(QIODevice::WriteOnly))
-				{
-					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-					return;
-				}
+					return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 				QTextStream Stream(&File);
 
@@ -1731,10 +1698,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 				QFile File(FileName);
 
 				if (!File.open(QIODevice::WriteOnly))
-				{
-					QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-					return;
-				}
+					return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 				QTextStream Stream(&File);
 
@@ -1763,10 +1727,7 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 		QFile File(FileName);
 
 		if (!File.open(QIODevice::WriteOnly))
-		{
-			QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-			return;
-		}
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 		QTextStream Stream(&File);
 
@@ -1803,24 +1764,26 @@ void Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
 	}
+	
+	return lcResult<void>();
 }
 
-std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
+lcResult<void> Project::ExportPOVRay(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
-		return { false, tr("Nothing to export.") };
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("pov"), tr("Export POV-Ray"), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return { false, QString() };
+		return lcUnexpected(QString());
 
 	lcDiskFile POVFile(SaveFileName);
 
 	if (!POVFile.Open(QIODevice::WriteOnly))
-		return { false, tr("Could not open file '%1' for writing.").arg(SaveFileName) };
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	enum
 	{
@@ -2225,7 +2188,7 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 		lcDiskFile TableFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_elements.lst")).absoluteFilePath());
 
 		if (!TableFile.Open(QIODevice::ReadOnly))
-			return { false, tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath) };
+			return lcUnexpected(tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
 
 		while (TableFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -2271,7 +2234,7 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 		lcDiskFile LgeoColorFile(QFileInfo(QDir(LGEOPath), QLatin1String("lg_colors.lst")).absoluteFilePath());
 
 		if (!LgeoColorFile.Open(QIODevice::ReadOnly))
-			return { false, tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath) };
+			return lcUnexpected(tr("Could not find LGEO files in folder '%1'.").arg(LGEOPath));
 
 		while (LgeoColorFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -2487,33 +2450,27 @@ std::pair<bool, QString> Project::ExportPOVRay(const QString& FileName)
 		snprintf(Line, sizeof(Line), "\n#include \"%s\"\n", POVRayOptions.FooterIncludeFile.toLatin1().constData());
 		POVFile.WriteLine(Line);
 	}
-
-	return { true, QString() };
+	
+	return lcResult<void>();
 }
 
-bool Project::ExportWavefront(const QString& FileName)
+lcResult<void> Project::ExportWavefront(const QString& FileName)
 {
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
-	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Nothing to export."));
-		return false;
-	}
+		return lcUnexpected(tr("Nothing to export."));
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 
 	if (SaveFileName.isEmpty())
-		return false;
+		return lcUnexpected(QString());
 
 	lcDiskFile OBJFile(SaveFileName);
 	char Line[1024];
 
 	if (!OBJFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return false;
-	}
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	quint32 vert = 1;
 
@@ -2526,13 +2483,12 @@ bool Project::ExportWavefront(const QString& FileName)
 	OBJFile.WriteLine(Line);
 
 	lcDiskFile MaterialFile(MaterialFileName);
+	
 	if (!MaterialFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not open file '%1' for writing.").arg(MaterialFileName));
-		return false;
-	}
+		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(MaterialFileName));
 
 	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
+	
 	for (const lcColor& Color : gColorList)
 	{
 		if (Color.Translucent)
@@ -2596,8 +2552,8 @@ bool Project::ExportWavefront(const QString& FileName)
 			vert += Mesh->mNumVertices;
 		}
 	}
-
-	return true;
+	
+	return lcResult<void>();
 }
 
 void Project::SaveImage(const lcImageDialogOptions& Options)

@@ -1,7 +1,8 @@
 #include "lc_global.h"
+#include "lc_bricklink.h"
 #include "lc_file.h"
 #include "lc_library.h"
-#include "lc_mainwindow.h"
+#include "lc_application.h"
 #include "lc_string.h"
 #include "pieceinf.h"
 #include "lc_colors.h"
@@ -59,7 +60,7 @@ public:
 	int mCount;
 };
 
-void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList)
+lcResult<void> lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList)
 {
 	QJsonDocument Document = lcLoadBrickLinkMapping();
 	QJsonObject Root = Document.object();
@@ -70,10 +71,7 @@ void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList
 	char Line[1024];
 
 	if (!BrickLinkFile.Open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, QObject::tr("LeoCAD"), QObject::tr("Could not open file '%1' for writing.").arg(SaveFileName));
-		return;
-	}
+		return lcUnexpected(QObject::tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
 	std::map<std::string, lcBrickLinkItem> Inventory;
 
@@ -127,4 +125,6 @@ void lcExportBrickLink(const QString& SaveFileName, const lcPartsList& PartsList
 	}
 
 	BrickLinkFile.WriteLine("</INVENTORY>\n");
+	
+	return lcResult<void>();
 }

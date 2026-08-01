@@ -82,7 +82,7 @@ private slots:
 	void GridLinesToggled();
 	void ViewSphereSizeComboCurrentIndexChanged(int Index);
 	void PreviewViewSphereSizeComboCurrentIndexChanged(int Index);
-	void updateParts();
+	void UpdateParts();
 	void CategoriesDropped(const QModelIndex& Parent, int First, int Last);
 	void NewCategoryClicked();
 	void EditCategoryClicked();
@@ -95,7 +95,7 @@ private slots:
 	void ShortcutsImportClicked();
 	void ShortcutsExportClicked();
 	void ShortcutsResetClicked();
-	void commandChanged(QTreeWidgetItem *current);
+	void CommandChanged(QTreeWidgetItem* Current);
 	void KeyboardFilterEditTextEdited(const QString& Text);
 	void MouseAssignClicked();
 	void MouseRemoveClicked();
@@ -107,11 +107,11 @@ private slots:
 private:
 	Ui::lcPreferencesDialog* ui;
 
-	void updateCategories();
-	void updateCommandList();
+	void UpdateCategories();
+	void UpdateCommandList();
 	void UpdateMouseTree();
 	void UpdateMouseTreeItem(int ItemIndex);
-	void setShortcutModified(QTreeWidgetItem *treeItem, bool modified);
+	void SetShortcutModified(QTreeWidgetItem* TreeItem, bool Modified);
 
 	float mLineWidthRange[2];
 	float mLineWidthGranularity;

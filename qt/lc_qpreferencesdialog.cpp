@@ -102,10 +102,10 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	connect(ui->LightColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ControlPointColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ControlPointFocusedColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
-	connect(ui->categoriesTree, &QTreeWidget::itemSelectionChanged, this, &lcPreferencesDialog::updateParts);
+	connect(ui->categoriesTree, &QTreeWidget::itemSelectionChanged, this, &lcPreferencesDialog::UpdateParts);
 	connect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcPreferencesDialog::CategoriesDropped);
 	ui->shortcutEdit->installEventFilter(this);
-	connect(ui->commandList, &QTreeWidget::currentItemChanged, this, &lcPreferencesDialog::commandChanged);
+	connect(ui->commandList, &QTreeWidget::currentItemChanged, this, &lcPreferencesDialog::CommandChanged);
 	connect(ui->mouseTree, &QTreeWidget::currentItemChanged, this, &lcPreferencesDialog::MouseTreeItemChanged);
 	connect(ui->HighContrastButton, &QToolButton::clicked, this, &lcPreferencesDialog::AutomateEdgeColor);
 	connect(ui->AutomateEdgeColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::AutomateEdgeColor);
@@ -295,12 +295,12 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ViewSphereSizeComboCurrentIndexChanged(ui->ViewSphereSizeCombo->currentIndex());
 	PreviewViewSphereSizeComboCurrentIndexChanged(ui->PreviewViewSphereSizeCombo->currentIndex());
 
-	updateCategories();
+	UpdateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(0));
 
-	updateCommandList();
+	UpdateCommandList();
 	new lcTreeWidgetColumnStretcher(ui->commandList, 0);
-	commandChanged(nullptr);
+	CommandChanged(nullptr);
 
 	UpdateMouseTree();
 	ui->mouseTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -723,7 +723,7 @@ void lcPreferencesDialog::AutomateEdgeColor()
 	}
 }
 
-void lcPreferencesDialog::updateCategories()
+void lcPreferencesDialog::UpdateCategories()
 {
 	QTreeWidgetItem* CategoryItem;
 	QTreeWidget* CategoriesTree = ui->categoriesTree;
@@ -743,33 +743,33 @@ void lcPreferencesDialog::updateCategories()
 	CategoryItem->setFlags(CategoryItem->flags() & ~Qt::ItemFlag::ItemIsDropEnabled);
 }
 
-void lcPreferencesDialog::updateParts()
+void lcPreferencesDialog::UpdateParts()
 {
-	lcPiecesLibrary *Library = lcGetPiecesLibrary();
-	QTreeWidget *tree = ui->partsTree;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QTreeWidget* Tree = ui->partsTree;
 
-	tree->clear();
+	Tree->clear();
 
-	QList<QTreeWidgetItem*> selectedItems = ui->categoriesTree->selectedItems();
+	QList<QTreeWidgetItem*> SelectedItems = ui->categoriesTree->selectedItems();
 
-	if (selectedItems.empty())
+	if (SelectedItems.empty())
 		return;
 
-	QTreeWidgetItem *categoryItem = selectedItems.first();
-	int categoryIndex = categoryItem->data(0, CategoryRole).toInt();
+	QTreeWidgetItem* CategoryItem = SelectedItems.first();
+	int CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
 
-	if (categoryIndex != -1)
+	if (CategoryIndex != -1)
 	{
 		std::vector<PieceInfo*> SingleParts, GroupedParts;
 
-		Library->GetCategoryEntries(mOptions->Categories[categoryIndex].Keywords.constData(), false, SingleParts, GroupedParts);
+		Library->GetCategoryEntries(mOptions->Categories[CategoryIndex].Keywords.constData(), false, SingleParts, GroupedParts);
 
 		for (PieceInfo* Info : SingleParts)
 		{
-			QStringList rowList(Info->m_strDescription);
-			rowList.append(Info->mFileName);
+			QStringList RowList(Info->m_strDescription);
+			RowList.append(Info->mFileName);
 
-			new QTreeWidgetItem(tree, rowList);
+			new QTreeWidgetItem(Tree, RowList);
 		}
 	}
 	else
@@ -778,24 +778,24 @@ void lcPreferencesDialog::updateParts()
 		{
 			PieceInfo* Info = PartIt.second;
 
-			for (categoryIndex = 0; categoryIndex < static_cast<int>(mOptions->Categories.size()); categoryIndex++)
+			for (CategoryIndex = 0; CategoryIndex < static_cast<int>(mOptions->Categories.size()); CategoryIndex++)
 			{
-				if (Library->PieceInCategory(Info, mOptions->Categories[categoryIndex].Keywords.constData()))
+				if (Library->PieceInCategory(Info, mOptions->Categories[CategoryIndex].Keywords.constData()))
 					break;
 			}
 
-			if (categoryIndex == static_cast<int>(mOptions->Categories.size()))
+			if (CategoryIndex == static_cast<int>(mOptions->Categories.size()))
 			{
-				QStringList rowList(Info->m_strDescription);
-				rowList.append(Info->mFileName);
+				QStringList RowList(Info->m_strDescription);
+				RowList.append(Info->mFileName);
 
-				new QTreeWidgetItem(tree, rowList);
+				new QTreeWidgetItem(Tree, RowList);
 			}
 		}
 	}
 
-	tree->resizeColumnToContents(0);
-	tree->resizeColumnToContents(1);
+	Tree->resizeColumnToContents(0);
+	Tree->resizeColumnToContents(1);
 }
 
 void lcPreferencesDialog::CategoriesDropped(const QModelIndex& Parent, int First, int Last)
@@ -835,32 +835,33 @@ void lcPreferencesDialog::NewCategoryClicked()
 	mOptions->CategoriesDefault = false;
 	mOptions->Categories.emplace_back(std::move(category));
 
-	updateCategories();
+	UpdateCategories();
 	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(static_cast<int>(mOptions->Categories.size()) - 1));
 }
 
 void lcPreferencesDialog::EditCategoryClicked()
 {
-	QList<QTreeWidgetItem*> selectedItems = ui->categoriesTree->selectedItems();
+	QList<QTreeWidgetItem*> SelectedItems = ui->categoriesTree->selectedItems();
 
-	if (selectedItems.empty())
+	if (SelectedItems.empty())
 		return;
 
-	QTreeWidgetItem *categoryItem = selectedItems.first();
-	int categoryIndex = categoryItem->data(0, CategoryRole).toInt();
+	QTreeWidgetItem* CategoryItem = SelectedItems.first();
+	int CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
 
-	if (categoryIndex == -1)
+	if (CategoryIndex == -1)
 		return;
 
-	lcCategoryDialog dialog(this, &mOptions->Categories[categoryIndex]);
-	if (dialog.exec() != QDialog::Accepted)
+	lcCategoryDialog Dialog(this, &mOptions->Categories[CategoryIndex]);
+	
+	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = false;
 
-	updateCategories();
-	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(categoryIndex));
+	UpdateCategories();
+	ui->categoriesTree->setCurrentItem(ui->categoriesTree->topLevelItem(CategoryIndex));
 }
 
 void lcPreferencesDialog::DeleteCategoryClicked()
@@ -870,21 +871,21 @@ void lcPreferencesDialog::DeleteCategoryClicked()
 	if (selectedItems.empty())
 		return;
 
-	QTreeWidgetItem *categoryItem = selectedItems.first();
-	int categoryIndex = categoryItem->data(0, CategoryRole).toInt();
+	QTreeWidgetItem* CategoryItem = selectedItems.first();
+	int CategoryIndex = CategoryItem->data(0, CategoryRole).toInt();
 
-	if (categoryIndex == -1)
+	if (CategoryIndex == -1)
 		return;
 
-	QString question = tr("Are you sure you want to delete the category '%1'?").arg(mOptions->Categories[categoryIndex].Name);
-	if (QMessageBox::question(this, "LeoCAD", question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+	QString Question = tr("Are you sure you want to delete the category '%1'?").arg(mOptions->Categories[CategoryIndex].Name);
+	if (QMessageBox::question(this, "LeoCAD", Question, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = false;
-	mOptions->Categories.erase(mOptions->Categories.begin() + categoryIndex);
+	mOptions->Categories.erase(mOptions->Categories.begin() + CategoryIndex);
 
-	updateCategories();
+	UpdateCategories();
 }
 
 void lcPreferencesDialog::ImportCategoriesClicked()
@@ -930,132 +931,134 @@ void lcPreferencesDialog::ResetCategoriesClicked()
 	mOptions->CategoriesModified = true;
 	mOptions->CategoriesDefault = true;
 
-	updateCategories();
+	UpdateCategories();
 }
 
-bool lcPreferencesDialog::eventFilter(QObject *object, QEvent *event)
+bool lcPreferencesDialog::eventFilter(QObject* Object, QEvent* Event)
 {
-	Q_UNUSED(object);
+	Q_UNUSED(Object);
 
-	if (event->type() == QEvent::KeyPress)
+	if (Event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+		QKeyEvent* KeyEvent = static_cast<QKeyEvent*>(Event);
 
-		int nextKey = keyEvent->key();
-		if (nextKey == Qt::Key_Control || nextKey == Qt::Key_Shift || nextKey == Qt::Key_Meta || nextKey == Qt::Key_Alt)
+		int NextKey = KeyEvent->key();
+		
+		if (NextKey == Qt::Key_Control || NextKey == Qt::Key_Shift || NextKey == Qt::Key_Meta || NextKey == Qt::Key_Alt)
 			return true;
 
-		Qt::KeyboardModifiers state = keyEvent->modifiers();
-		QString text = QKeySequence(nextKey).toString();
-		if ((state & Qt::ShiftModifier) && (text.isEmpty() || !text.at(0).isPrint() || text.at(0).isLetter() || text.at(0).isSpace()))
-			nextKey |= Qt::SHIFT;
-		if (state & Qt::ControlModifier)
-			nextKey |= Qt::CTRL;
-		if (state & Qt::MetaModifier)
-			nextKey |= Qt::META;
-		if (state & Qt::AltModifier)
-			nextKey |= Qt::ALT;
+		Qt::KeyboardModifiers State = KeyEvent->modifiers();
+		QString Text = QKeySequence(NextKey).toString();
+		
+		if ((State & Qt::ShiftModifier) && (Text.isEmpty() || !Text.at(0).isPrint() || Text.at(0).isLetter() || Text.at(0).isSpace()))
+			NextKey |= Qt::SHIFT;
+		if (State & Qt::ControlModifier)
+			NextKey |= Qt::CTRL;
+		if (State & Qt::MetaModifier)
+			NextKey |= Qt::META;
+		if (State & Qt::AltModifier)
+			NextKey |= Qt::ALT;
 
-		QKeySequence ks(nextKey);
-		ui->shortcutEdit->setText(ks.toString(QKeySequence::NativeText));
-		keyEvent->accept();
+		QKeySequence KeySequence(NextKey);
+		ui->shortcutEdit->setText(KeySequence.toString(QKeySequence::NativeText));
+		KeyEvent->accept();
 
 		return true;
 	}
 
-	if (event->type() == QEvent::Shortcut || event->type() == QEvent::KeyRelease || event->type() == QEvent::ShortcutOverride)
+	if (Event->type() == QEvent::Shortcut || Event->type() == QEvent::KeyRelease || Event->type() == QEvent::ShortcutOverride)
 	{
-		event->accept();
+		Event->accept();
 		return true;
 	}
 
-	return QDialog::eventFilter(object, event);
+	return QDialog::eventFilter(Object, Event);
 }
 
-void lcPreferencesDialog::updateCommandList()
+void lcPreferencesDialog::UpdateCommandList()
 {
 	ui->commandList->clear();
-	QMap<QString, QTreeWidgetItem*> sections;
+	QMap<QString, QTreeWidgetItem*> Sections;
 
-	for (unsigned int actionIdx = 0; actionIdx < LC_NUM_COMMANDS; actionIdx++)
+	for (unsigned int ActionIndex = 0; ActionIndex < LC_NUM_COMMANDS; ActionIndex++)
 	{
-		if (!gCommands[actionIdx].ID[0])
+		if (!gCommands[ActionIndex].ID[0])
 			continue;
 
-		const QString identifier = tr(gCommands[actionIdx].ID);
+		const QString Identifier = tr(gCommands[ActionIndex].ID);
 
-		qsizetype pos = identifier.indexOf(QLatin1Char('.'));
-		qsizetype subPos = identifier.indexOf(QLatin1Char('.'), pos + 1);
+		qsizetype Pos = Identifier.indexOf(QLatin1Char('.'));
+		qsizetype SubPos = Identifier.indexOf(QLatin1Char('.'), Pos + 1);
 
-		if (subPos == -1)
-			subPos = pos;
+		if (SubPos == -1)
+			SubPos = Pos;
 
-		const QString parentSection = identifier.left(pos);
+		const QString ParentSection = Identifier.left(Pos);
 
-		if (subPos != pos)
+		if (SubPos != Pos)
 		{
-			if (!sections.contains(parentSection))
+			if (!Sections.contains(ParentSection))
 			{
-				QTreeWidgetItem *categoryItem = new QTreeWidgetItem(ui->commandList, QStringList(parentSection));
-				QFont f = categoryItem->font(0);
-				f.setBold(true);
-				categoryItem->setFont(0, f);
-				sections.insert(parentSection, categoryItem);
-				ui->commandList->expandItem(categoryItem);
+				QTreeWidgetItem* CategoryItem = new QTreeWidgetItem(ui->commandList, QStringList(ParentSection));
+				QFont Font = CategoryItem->font(0);
+				Font.setBold(true);
+				CategoryItem->setFont(0, Font);
+				Sections.insert(ParentSection, CategoryItem);
+				ui->commandList->expandItem(CategoryItem);
 			}
 		}
 
-		const QString section = identifier.left(subPos);
-		const QString subId = identifier.mid(subPos + 1);
+		const QString Section = Identifier.left(SubPos);
+		const QString SubId = Identifier.mid(SubPos + 1);
 
-		if (!sections.contains(section))
+		if (!Sections.contains(Section))
 		{
-			QTreeWidgetItem *parent = sections[parentSection];
-			QTreeWidgetItem *categoryItem;
-			QString subSection;
+			QTreeWidgetItem* Parent = Sections[ParentSection];
+			QTreeWidgetItem* CategoryItem;
+			QString SubSection;
 
-			if (pos != subPos)
-				subSection = identifier.mid(pos + 1, subPos - pos - 1);
+			if (Pos != SubPos)
+				SubSection = Identifier.mid(Pos + 1, SubPos - Pos - 1);
 			else
-				subSection = section;
+				SubSection = Section;
 
-			if (parent)
-				categoryItem = new QTreeWidgetItem(parent, QStringList(subSection));
+			if (parent())
+				CategoryItem = new QTreeWidgetItem(Parent, QStringList(SubSection));
 			else
-				categoryItem = new QTreeWidgetItem(ui->commandList, QStringList(subSection));
+				CategoryItem = new QTreeWidgetItem(ui->commandList, QStringList(SubSection));
 
-			QFont f = categoryItem->font(0);
-			f.setBold(true);
-			categoryItem->setFont(0, f);
-			sections.insert(section, categoryItem);
-			ui->commandList->expandItem(categoryItem);
+			QFont Font = CategoryItem->font(0);
+			Font.setBold(true);
+			CategoryItem->setFont(0, Font);
+			Sections.insert(Section, CategoryItem);
+			ui->commandList->expandItem(CategoryItem);
 		}
 
-		QTreeWidgetItem *item = new QTreeWidgetItem;
-		QKeySequence sequence(mOptions->KeyboardShortcuts.mShortcuts[actionIdx]);
-		item->setText(0, qApp->translate("Menu", gCommands[actionIdx].MenuName).remove('&').remove(QLatin1String("...")));
-		item->setText(1, sequence.toString(QKeySequence::NativeText));
-		item->setData(0, Qt::UserRole, QVariant::fromValue(actionIdx));
+		QTreeWidgetItem* Item = new QTreeWidgetItem;
+		QKeySequence Sequence(mOptions->KeyboardShortcuts.mShortcuts[ActionIndex]);
+		Item->setText(0, qApp->translate("Menu", gCommands[ActionIndex].MenuName).remove('&').remove(QLatin1String("...")));
+		Item->setText(1, Sequence.toString(QKeySequence::NativeText));
+		Item->setData(0, Qt::UserRole, QVariant::fromValue(ActionIndex));
 
-		if (mOptions->KeyboardShortcuts.mShortcuts[actionIdx] != gCommands[actionIdx].DefaultShortcut)
-			setShortcutModified(item, true);
+		if (mOptions->KeyboardShortcuts.mShortcuts[ActionIndex] != gCommands[ActionIndex].DefaultShortcut)
+			SetShortcutModified(Item, true);
 
-		sections[section]->addChild(item);
+		Sections[Section]->addChild(Item);
 	}
 }
 
-void lcPreferencesDialog::setShortcutModified(QTreeWidgetItem *treeItem, bool modified)
+void lcPreferencesDialog::SetShortcutModified(QTreeWidgetItem* TreeItem, bool Modified)
 {
-	QFont font = treeItem->font(0);
-	font.setItalic(modified);
-	treeItem->setFont(0, font);
-	font.setBold(modified);
-	treeItem->setFont(1, font);
+	QFont Font = TreeItem->font(0);
+	Font.setItalic(Modified);
+	TreeItem->setFont(0, Font);
+	Font.setBold(Modified);
+	TreeItem->setFont(1, Font);
 }
 
-void lcPreferencesDialog::commandChanged(QTreeWidgetItem *current)
+void lcPreferencesDialog::CommandChanged(QTreeWidgetItem* Current)
 {
-	if (!current || !current->data(0, Qt::UserRole).isValid())
+	if (!Current || !Current->data(0, Qt::UserRole).isValid())
 	{
 		ui->shortcutEdit->setText(QString());
 		ui->shortcutGroup->setEnabled(false);
@@ -1064,8 +1067,8 @@ void lcPreferencesDialog::commandChanged(QTreeWidgetItem *current)
 
 	ui->shortcutGroup->setEnabled(true);
 
-	int shortcutIndex = qvariant_cast<int>(current->data(0, Qt::UserRole));
-	QKeySequence key(mOptions->KeyboardShortcuts.mShortcuts[shortcutIndex]);
+	int ShortcutIndex = qvariant_cast<int>(Current->data(0, Qt::UserRole));
+	QKeySequence key(mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex]);
 	ui->shortcutEdit->setText(key.toString(QKeySequence::NativeText));
 }
 
@@ -1157,7 +1160,7 @@ void lcPreferencesDialog::ShortcutAssignClicked()
 				if (ExistingItem)
 				{
 					ExistingItem->setText(1, QString());
-					setShortcutModified(ExistingItem, gCommands[ShortcutIndex].DefaultShortcut[0] != 0);
+					SetShortcutModified(ExistingItem, gCommands[ShortcutIndex].DefaultShortcut[0] != 0);
 				}
 			}
 		}
@@ -1166,7 +1169,7 @@ void lcPreferencesDialog::ShortcutAssignClicked()
 	mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] = NewShortcut;
 	CurrentItem->setText(1, NewShortcut);
 
-	setShortcutModified(CurrentItem, mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] != gCommands[ShortcutIndex].DefaultShortcut);
+	SetShortcutModified(CurrentItem, mOptions->KeyboardShortcuts.mShortcuts[ShortcutIndex] != gCommands[ShortcutIndex].DefaultShortcut);
 
 	mOptions->KeyboardShortcutsModified = true;
 	mOptions->KeyboardShortcutsDefault = false;
@@ -1219,7 +1222,7 @@ void lcPreferencesDialog::ShortcutsResetClicked()
 		return;
 
 	mOptions->KeyboardShortcuts.Reset();
-	updateCommandList();
+	UpdateCommandList();
 
 	mOptions->KeyboardShortcutsModified = true;
 	mOptions->KeyboardShortcutsDefault = true;

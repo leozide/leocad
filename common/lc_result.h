@@ -55,6 +55,12 @@ public:
 	{
 	}
 
+	lcResult(const lcResult& Other) = default;
+	lcResult& operator=(const lcResult& Other) = default;
+
+	lcResult(lcResult&& Other) = default;
+	lcResult& operator=(lcResult&& Other) = default;
+
 	~lcResult() = default;
 
 	bool has_value() const

@@ -3,6 +3,7 @@
 // We can't use std::expected because we only require C++17.
 
 #include <stdexcept>
+#include <variant>
 
 class lcUnexpected
 {
@@ -39,67 +40,26 @@ class [[nodiscard]] lcResult
 public:
 	template <typename U = T, typename = std::enable_if_t<!std::is_void_v<U> && std::is_convertible_v<U, T>>>
 	lcResult(U&& Value)
-	    : mHasValue(true)
+	    : mStorage(std::in_place_index<0>, std::forward<U>(Value))
 	{
-		::new (static_cast<void*>(&mValue)) internal_t(std::forward<U>(Value));
 	}
-	
+
 	template <typename U = T, typename = std::enable_if_t<std::is_void_v<U>>>
 	lcResult()
-	    : mHasValue(true)
+	    : mStorage(std::in_place_index<0>)
 	{
 	}
-	
-	lcResult(lcUnexpected Unexpected)
-	    : mHasValue(false)
+
+	lcResult(lcUnexpected&& Unexpected)
+	    : mStorage(std::in_place_index<1>, std::move(Unexpected))
 	{
-		::new (static_cast<void*>(&mUnexpected)) lcUnexpected(std::move(Unexpected.error()));
 	}
-	
-	~lcResult() noexcept
-	{
-		if (mHasValue)
-		{
-			if constexpr (!std::is_void_v<T>)
-				mValue.~internal_t();
-		}
-		else
-		{
-			mUnexpected.~lcUnexpected();
-		}
-	}
-	
-	lcResult(const lcResult& Other) :
-	    mHasValue(Other.mHasValue)
-	{
-		if (mHasValue)
-		{
-			if constexpr (!std::is_void_v<T>)
-				::new (static_cast<void*>(&mValue)) internal_t(Other.mValue);
-		}
-		else
-		{
-			::new (static_cast<void*>(&mUnexpected)) lcUnexpected(Other.mUnexpected);
-		}
-	}
-	
-	lcResult(lcResult&& Other) noexcept(std::is_nothrow_move_constructible_v<internal_t> && std::is_nothrow_move_constructible_v<lcUnexpected>) 
-	    : mHasValue(Other.mHasValue)
-	{
-		if (mHasValue)
-		{
-			if constexpr (!std::is_void_v<T>)
-				::new (static_cast<void*>(&mValue)) internal_t(std::move(Other.mValue));
-		}
-		else
-		{
-			::new (static_cast<void*>(&mUnexpected)) lcUnexpected(std::move(Other.mUnexpected));
-		}
-	}
-	
+
+	~lcResult() = default;
+
 	bool has_value() const
 	{
-		return mHasValue;
+		return mStorage.index() == 0;
 	}
 
 	explicit operator bool() const
@@ -107,28 +67,23 @@ public:
 		return has_value();
 	}
 
-	template <typename U = T, typename = std::enable_if_t<!std::is_void_v<U>>>
+	template <typename U = T, typename = std::enable_if_t<!std::is_void_v<U> && std::is_same_v<U, T>>>
 	constexpr const U& value() const
 	{
-		if (!mHasValue)
+		if (!has_value())
 			throw std::logic_error("bad lcResult access");
 		
-		return mValue;
+		return std::get<0>(mStorage);
 	}
 	
 	constexpr const QString& error() const
 	{
-		if (mHasValue)
+		if (mStorage.index() != 1)
 			throw std::logic_error("bad lcResult access");
 
-		return mUnexpected.error();
+		return std::get<1>(mStorage).error();
 	}
 
 protected:
-	union
-	{
-		internal_t mValue;
-		lcUnexpected mUnexpected;
-	};
-	bool mHasValue;
+	std::variant<internal_t, lcUnexpected> mStorage;
 };

@@ -102,7 +102,7 @@ public:
 
 	void SaveImage(const lcImageDialogOptions& Options);
 	lcResult<void> ExportCurrentStep(const QString& FileName);
-	bool ExportModel(const QString& FileName, lcModel* Model) const;
+	lcResult<void> ExportModel(const QString& FileName, lcModel* Model) const;
 	lcResult<void> Export3DStudio(const QString& FileName);
 	lcResult<void> ExportBrickLink();
 	lcResult<void> ExportCOLLADA(const QString& FileName);

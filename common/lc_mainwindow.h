@@ -311,7 +311,7 @@ protected:
 	void ShowPrintDialog();
 	void ShowImageDialog();
 	void ShowSelectDialog();
-	void ShowResultMessageBox(const lcResult<void>& Result);
+	void ShowResultMessageBox(const lcResult<void>& Result, const QString& Title);
 	void CreatePreviewWidget();
 
 	bool OpenProjectFile(const QString& FileName);

@@ -1315,13 +1315,13 @@ void lcMainWindow::ShowAboutDialog()
 void lcMainWindow::ShowHTMLDialog()
 {
 	lcHTMLExportOptions Options(lcGetActiveProject());
-
 	lcHTMLDialog Dialog(this, &Options);
+
 	if (Dialog.exec() != QDialog::Accepted)
 		return;
 
 	Options.SaveDefaults();
-	ShowResultMessageBox(lcGetActiveProject()->ExportHTML(Options));
+	ShowResultMessageBox(lcGetActiveProject()->ExportHTML(Options), tr("Export HTML"));
 }
 
 void lcMainWindow::ShowExportPOVRayDialog()
@@ -1407,10 +1407,10 @@ void lcMainWindow::ShowSelectDialog()
 	ActiveModel->SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
 }
 
-void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result)
+void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result, const QString& Title)
 {
 	if (!Result && !Result.error().isEmpty())
-		QMessageBox::information(this, tr("LeoCAD"), Result.error());
+		QMessageBox::information(this, Title, Result.error());
 }
 
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
@@ -2712,11 +2712,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_3DS:
-		ShowResultMessageBox(lcGetActiveProject()->Export3DStudio(QString()));
+		ShowResultMessageBox(lcGetActiveProject()->Export3DStudio(QString()), tr("Export 3DS"));
 		break;
 
 	case LC_FILE_EXPORT_COLLADA:
-		ShowResultMessageBox(lcGetActiveProject()->ExportCOLLADA(QString()));
+		ShowResultMessageBox(lcGetActiveProject()->ExportCOLLADA(QString()), tr("Export COLLADA"));
 		break;
 
 	case LC_FILE_EXPORT_HTML:
@@ -2724,11 +2724,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_BRICKLINK:
-		ShowResultMessageBox(lcGetActiveProject()->ExportBrickLink());
+		ShowResultMessageBox(lcGetActiveProject()->ExportBrickLink(), tr("Export BrickLink"));
 		break;
 
 	case LC_FILE_EXPORT_CSV:
-		ShowResultMessageBox(lcGetActiveProject()->ExportCSV(QString()));
+		ShowResultMessageBox(lcGetActiveProject()->ExportCSV(QString()), tr("Export CSV"));
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:
@@ -2736,7 +2736,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_WAVEFRONT:
-		ShowResultMessageBox(lcGetActiveProject()->ExportWavefront(QString()));
+		ShowResultMessageBox(lcGetActiveProject()->ExportWavefront(QString()), tr("Export Wavefront"));
 		break;
 
 	case LC_FILE_RENDER_POVRAY:

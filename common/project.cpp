@@ -750,21 +750,18 @@ lcResult<void> Project::ExportCurrentStep(const QString& FileName)
 	return lcResult<void>();
 }
 
-bool Project::ExportModel(const QString& FileName, lcModel* Model) const
+lcResult<void> Project::ExportModel(const QString& FileName, lcModel* Model) const
 {
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-		return false;
-	}
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 	QTextStream Stream(&File);
 
 	Model->SaveLDraw(Stream, false, 0);
-
-	return true;
+	
+	return lcResult<void>();
 }
 
 QString Project::GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const

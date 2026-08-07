@@ -334,12 +334,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if ((TrackTool == lcTrackTool::MoveX) || (TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveXZ))
 			{
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorXAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 			}
 			else if (TrackButton == lcTrackButton::None)
 			{
-				Context->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
+				Context->SetColor(mColorXAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 			}
 		}
@@ -348,12 +348,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if (((TrackTool == lcTrackTool::MoveY) || (TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
 			{
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorYAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 			}
 			else if (TrackButton == lcTrackButton::None)
 			{
-				Context->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorYAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 			}
 		}
@@ -362,12 +362,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if (((TrackTool == lcTrackTool::MoveZ) || (TrackTool == lcTrackTool::MoveXZ) || (TrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
 			{
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorZAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 			}
 			else if (TrackButton == lcTrackButton::None)
 			{
-				Context->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
+				Context->SetColor(mColorZAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 			}
 		}
@@ -378,9 +378,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_X)
 		{
 			if (TrackTool == lcTrackTool::RotateX)
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorXAxisSelected);
 			else
-				Context->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
+				Context->SetColor(mColorXAxis);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, 108 * 2);
 		}
@@ -388,9 +388,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Y)
 		{
 			if (TrackTool == lcTrackTool::RotateY)
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorYAxisSelected);
 			else
-				Context->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorYAxis);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 120) * 2);
 		}
@@ -398,9 +398,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Z)
 		{
 			if (TrackTool == lcTrackTool::RotateZ)
-				Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+				Context->SetColor(mColorZAxisSelected);
 			else
-				Context->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
+				Context->SetColor(mColorZAxis);
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 240) * 2);
 		}
@@ -763,7 +763,18 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	{
 		if (static_cast<int>(TrackTool) == static_cast<int>(lcTrackTool::RotateX) + PlaneIndex)
 		{
-			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
+			switch (PlaneIndex)
+			{
+			case 0:
+				Context->SetColor(mColorXAxisSelected);
+				break;
+			case 1:
+				Context->SetColor(mColorYAxisSelected);
+				break;
+			case 2:
+				Context->SetColor(mColorZAxisSelected);
+				break;
+			}
 		}
 		else
 		{
@@ -772,15 +783,15 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 			switch (PlaneIndex)
 			{
-				case 0:
-					Context->SetColor(200.0f / 255.0f, 40.0f / 255.0f, 60.0f / 255.0f, 1.0f);
-					break;
-				case 1:
-					Context->SetColor(120.0f / 255.0f, 200.0f / 255.0f, 20.0f / 255.0f, 1.0f);
-					break;
-				case 2:
-					Context->SetColor(60.0f / 255.0f, 120.0f / 255.0f, 240.0f / 255.0f, 1.0f);
-					break;
+			case 0:
+				Context->SetColor(mColorXAxis);
+				break;
+			case 1:
+				Context->SetColor(mColorYAxis);
+				break;
+			case 2:
+				Context->SetColor(mColorZAxis);
+				break;
 			}
 		}
 

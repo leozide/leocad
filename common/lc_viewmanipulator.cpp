@@ -607,6 +607,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 	const float OverlayScale = mView->GetOverlayScale();
 	const float OverlayRotateRadius = 2.0f;
+	const float OverlayRotateCameraRadius = 2.5f;
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
 	Context->SetViewMatrix(Camera->mWorldView);
@@ -614,8 +615,6 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	Context->SetLineWidth(1.0f);
 
 	Context->EnableDepthTest(false);
-
-	int j;
 
 	lcVector3 OverlayCenter;
 	lcMatrix33 RelativeRotation;
@@ -728,26 +727,27 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		lcMatrix44 Mat = lcMatrix44AffineInverse(Camera->mWorldView);
 		Mat.SetTranslation(WorldMatrix.GetTranslation());
 
-		lcVector3 Verts[32];
+		const float HalfWidth = OverlayScale * 0.025;
+		constexpr int SegmentCount = 48;
+		lcVector3 Verts[(SegmentCount + 1) * 2];
+		int NumVerts = 0;
 
-		for (j = 0; j < 32; j++)
+		for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
 		{
-			lcVector3 Pt;
+			const float Sin = sinf(LC_2PI * SegmentIndex / SegmentCount);
+			const float Cos = cosf(LC_2PI * SegmentIndex / SegmentCount);
 
-			Pt[0] = cosf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-			Pt[1] = sinf(LC_2PI * j / 32) * OverlayRotateRadius * OverlayScale;
-			Pt[2] = 0.0f;
-
-			Verts[j] = lcMul31(Pt, Mat);
+			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (OverlayRotateCameraRadius * OverlayScale - HalfWidth), Cos * (OverlayRotateCameraRadius * OverlayScale - HalfWidth), 0.0f), Mat);
+			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (OverlayRotateCameraRadius * OverlayScale + HalfWidth), Cos * (OverlayRotateCameraRadius * OverlayScale + HalfWidth), 0.0f), Mat);
 		}
 
-		Context->SetColor(0.1f, 0.1f, 0.1f, 1.0f);
+		Context->SetColor(200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f, 1.0f);
 		Context->SetWorldMatrix(lcMatrix44Identity());
 
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormatPosition(3);
 
-		Context->DrawPrimitives(GL_LINE_LOOP, 0, 32);
+		Context->DrawPrimitives(GL_TRIANGLE_STRIP, 0, NumVerts);
 	}
 
 	lcVector3 ViewDir = Camera->mTargetPosition - Camera->mPosition;
@@ -759,9 +759,9 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	Context->SetWorldMatrix(WorldMatrix);
 
 	// Draw each axis circle.
-	for (int i = 0; i < 3; i++)
+	for (int PlaneIndex = 0; PlaneIndex < 3; PlaneIndex++)
 	{
-		if (static_cast<int>(TrackTool) == static_cast<int>(lcTrackTool::RotateX) + i)
+		if (static_cast<int>(TrackTool) == static_cast<int>(lcTrackTool::RotateX) + PlaneIndex)
 		{
 			Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 		}
@@ -770,56 +770,87 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			if (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None)
 				continue;
 
-			switch (i)
+			switch (PlaneIndex)
 			{
 				case 0:
-					Context->SetColor(0.8f, 0.0f, 0.0f, 1.0f);
+					Context->SetColor(200.0f / 255.0f, 40.0f / 255.0f, 60.0f / 255.0f, 1.0f);
 					break;
 				case 1:
-					Context->SetColor(0.0f, 0.8f, 0.0f, 1.0f);
+					Context->SetColor(120.0f / 255.0f, 200.0f / 255.0f, 20.0f / 255.0f, 1.0f);
 					break;
 				case 2:
-					Context->SetColor(0.0f, 0.0f, 0.8f, 1.0f);
+					Context->SetColor(60.0f / 255.0f, 120.0f / 255.0f, 240.0f / 255.0f, 1.0f);
 					break;
 			}
 		}
 
-		lcVector3 Verts[64];
+		const float HalfWidth = OverlayScale * 0.05;
+		constexpr int SegmentCount = 32;
+		lcVector3 Verts[SegmentCount * 6];
 		int NumVerts = 0;
 
-		for (j = 0; j < 32; j++)
+		for (int SegmentIndex = 0; SegmentIndex < SegmentCount; SegmentIndex++)
 		{
-			lcVector3 v1, v2;
+			lcVector3 v1, v2, t1, t2;
+			const float Sin1 = sinf(LC_2PI * SegmentIndex / SegmentCount);
+			const float Cos1 = cosf(LC_2PI * SegmentIndex / SegmentCount);
+			const float Sin2 = sinf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
+			const float Cos2 = cosf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
 
-			switch (i)
+			switch (PlaneIndex)
 			{
-				case 0:
-					v1 = lcVector3(0.0f, cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32));
-					v2 = lcVector3(0.0f, cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32));
-					break;
+			case 0:
+				v1 = lcVector3(0.0f,  Cos1, Sin1);
+				v2 = lcVector3(0.0f,  Cos2, Sin2);
+				t1 = lcVector3(0.0f, -Sin1, Cos1);
+				t2 = lcVector3(0.0f, -Sin2, Cos2);
+				break;
 
-				case 1:
-					v1 = lcVector3(cosf(LC_2PI * j / 32), 0.0f, sinf(LC_2PI * j / 32));
-					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), 0.0f, sinf(LC_2PI * (j + 1) / 32));
-					break;
+			case 1:
+				v1 = lcVector3( Cos1, 0.0f, Sin1);
+				v2 = lcVector3( Cos2, 0.0f, Sin2);
+				t1 = lcVector3(-Sin1, 0.0f, Cos1);
+				t2 = lcVector3(-Sin2, 0.0f, Cos2);
+				break;
 
-				case 2:
-					v1 = lcVector3(cosf(LC_2PI * j / 32), sinf(LC_2PI * j / 32), 0.0f);
-					v2 = lcVector3(cosf(LC_2PI * (j + 1) / 32), sinf(LC_2PI * (j + 1) / 32), 0.0f);
-					break;
+			case 2:
+				v1 = lcVector3( Cos1, Sin1, 0.0f);
+				v2 = lcVector3( Cos2, Sin2, 0.0f);
+				t1 = lcVector3(-Sin1, Cos1, 0.0f);
+				t2 = lcVector3(-Sin2, Cos2, 0.0f);
+				break;
 			}
+
+			lcVector3 FrontVector(lcNormalize(Camera->mTargetPosition - Camera->mPosition));
+			FrontVector = lcMul(FrontVector, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
 
 			if (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None || lcDot(ViewDir, v1 + v2) <= 0.0f)
 			{
-				Verts[NumVerts++] = v1 * (OverlayRotateRadius * OverlayScale);
-				Verts[NumVerts++] = v2 * (OverlayRotateRadius * OverlayScale);
+				lcVector3 NodeCenter1 = v1 * (OverlayRotateRadius * OverlayScale);
+				lcVector3 NodeCenter2 = v2 * (OverlayRotateRadius * OverlayScale);
+
+				lcVector3 ScreenPerpendicular1 = lcNormalize(lcCross(FrontVector, t1));
+				lcVector3 Left1 = NodeCenter1 - (ScreenPerpendicular1 * HalfWidth);
+				lcVector3 Right1 = NodeCenter1 + (ScreenPerpendicular1 * HalfWidth);
+
+				lcVector3 ScreenPerpendicular2 = lcNormalize(lcCross(FrontVector, t2));
+				lcVector3 Left2 = NodeCenter2 - (ScreenPerpendicular2 * HalfWidth);
+				lcVector3 Right2 = NodeCenter2 + (ScreenPerpendicular2 * HalfWidth);
+
+				Verts[NumVerts++] = Left1;
+				Verts[NumVerts++] = Left2;
+				Verts[NumVerts++] = Right1;
+
+				Verts[NumVerts++] = Right1;
+				Verts[NumVerts++] = Left2;
+				Verts[NumVerts++] = Right2;
 			}
 		}
 
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormatPosition(3);
 
-		Context->DrawPrimitives(GL_LINES, 0, NumVerts);
+		Context->DrawPrimitives(GL_TRIANGLES, 0, NumVerts);
 	}
 
 	// Draw tangent vector.
@@ -1255,6 +1286,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 	const lcModel* ActiveModel = mView->GetActiveModel();
 	const float OverlayScale = mView->GetOverlayScale();
 	const float OverlayRotateRadius = 2.0f;
+	const float OverlayRotateCameraRadius = 2.5f;
 
 	lcVector3 OverlayCenter;
 	lcMatrix33 RelativeRotation;
@@ -1309,6 +1341,11 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 					return lcTrackTool::RotateZ;
 			}
 		}
+	}
+
+	if (lcSphereRayIntersection(OverlayCenter, OverlayRotateCameraRadius * OverlayScale, StartEnd[0], StartEnd[1], Intersection))
+	{
+		// todo: Rotate around camera axis
 	}
 
 	return lcTrackTool::RotateXYZ;

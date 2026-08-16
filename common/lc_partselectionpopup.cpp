@@ -60,6 +60,8 @@ std::optional<PieceInfo*> lcShowPartSelectionPopup(PieceInfo* InitialPart, const
 	lcPartSelectionPopup* Popup = new lcPartSelectionPopup(InitialPart, Menu.get());
 	lcPartSelectionWidget* PartSelectionWidget = Popup->GetPartSelectionWidget();
 
+	PartSelectionWidget->SetIsPopup(true);
+
 	if (CustomParts.empty())
 	{
 		PartSelectionWidget->SetCategory(lcPartCategoryType::AllParts, 0);

@@ -561,7 +561,7 @@ void lcPartSelectionListView::DoubleClicked(const QModelIndex& Index)
 
 void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 {
-	if (!mPartSelectionWidget)
+	if (!mPartSelectionWidget || mPartSelectionWidget->GetIsPopup())
 		return;
 
 	QMenu* Menu = new QMenu(this);
@@ -586,6 +586,12 @@ void lcPartSelectionListView::CustomContextMenuRequested(QPoint Pos)
 
 	QAction* RemoveAction = Menu->addAction(tr("Remove from Palette"), mPartSelectionWidget, &lcPartSelectionWidget::RemoveFromPalette);
 	RemoveAction->setEnabled(mCategoryType == lcPartCategoryType::Palette);
+
+	if (mContextInfo && mContextInfo->IsModel())
+	{
+		Menu->addSeparator();
+		Menu->addAction(tr("Open Submodel"), mPartSelectionWidget, &lcPartSelectionWidget::OpenSubmodel);
+	}
 
 	Menu->exec(viewport()->mapToGlobal(Pos));
 	delete Menu;
@@ -1150,7 +1156,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
-	Menu->addAction(tr("Edit Palettes..."), this, &lcPartSelectionWidget::EditPartPalettes);
+	Menu->addAction(tr("Edit Palettes..."), this, &lcPartSelectionWidget::EditPartPalettes)->setEnabled(!mIsPopup);
 
 	Menu->addSeparator();
 
@@ -1376,6 +1382,18 @@ void lcPartSelectionWidget::RemoveFromPalette()
 		mPartsWidget->SetCategory(lcPartCategoryType::Palette, SetIndex);
 		SavePartPalettes();
 	}
+}
+
+void lcPartSelectionWidget::OpenSubmodel()
+{
+	PieceInfo* Info = mPartsWidget->GetContextInfo();
+
+	if (!Info || !Info->IsModel())
+		return;
+	
+	lcModel* Model = Info->GetModel();
+
+	lcGetActiveProject()->SetActiveModel(Model, true);
 }
 
 void lcPartSelectionWidget::UpdateInUseCategory()

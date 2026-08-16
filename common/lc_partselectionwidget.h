@@ -278,6 +278,16 @@ public:
 	void SetCategory(lcPartCategoryType Type, int Index);
 	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
 
+	bool GetIsPopup() const
+	{
+		return mIsPopup;
+	}
+
+	void SetIsPopup(bool IsPopup)
+	{
+		mIsPopup = IsPopup;
+	}
+
 	int GetColorIndex() const
 	{
 		return mPartsWidget->GetListModel()->GetColorIndex();
@@ -316,6 +326,7 @@ signals:
 public slots:
 	void AddToPalette();
 	void RemoveFromPalette();
+	void OpenSubmodel();
 	void DockLocationChanged(Qt::DockWidgetArea Area);
 
 protected slots:
@@ -347,4 +358,5 @@ protected:
 	QSplitter* mSplitter = nullptr;
 	QTreeWidgetItem* mAllPartsCategoryItem = nullptr;
 	std::vector<lcPartPalette> mPartPalettes;
+	bool mIsPopup = false;
 };

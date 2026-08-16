@@ -708,6 +708,7 @@ void lcPreferencesDialog::StudStyleComboCurrentIndexChanged(int index)
 void lcPreferencesDialog::AutomateEdgeColor()
 {
 	lcAutomateEdgeColorDialog Dialog(this, sender() == ui->HighContrastButton);
+
 	if (Dialog.exec() == QDialog::Accepted)
 	{
 		mOptions->Preferences.mStudCylinderColorEnabled = Dialog.mStudCylinderColorEnabled;
@@ -727,7 +728,8 @@ void lcPreferencesDialog::UpdateCategories()
 {
 	QTreeWidgetItem* CategoryItem;
 	QTreeWidget* CategoriesTree = ui->categoriesTree;
-	QSignalBlocker Blocker(CategoriesTree->model());
+	
+	disconnect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcPreferencesDialog::CategoriesDropped);
 
 	CategoriesTree->clear();
 
@@ -741,6 +743,8 @@ void lcPreferencesDialog::UpdateCategories()
 	CategoryItem = new QTreeWidgetItem(CategoriesTree, QStringList(tr("Unassigned")));
 	CategoryItem->setData(0, CategoryRole, QVariant(-1));
 	CategoryItem->setFlags(CategoryItem->flags() & ~Qt::ItemFlag::ItemIsDropEnabled);
+	
+	connect(ui->categoriesTree->model(), &QAbstractItemModel::rowsInserted, this, &lcPreferencesDialog::CategoriesDropped);
 }
 
 void lcPreferencesDialog::UpdateParts()

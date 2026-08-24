@@ -1026,7 +1026,7 @@ void lcPreferencesDialog::UpdateCommandList()
 			else
 				SubSection = Section;
 
-			if (parent())
+			if (Parent)
 				CategoryItem = new QTreeWidgetItem(Parent, QStringList(SubSection));
 			else
 				CategoryItem = new QTreeWidgetItem(ui->commandList, QStringList(SubSection));

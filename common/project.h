@@ -94,7 +94,7 @@ public:
 	void ShowModelListDialog();
 
 	bool Load(const QString& FileName, bool ShowErrors);
-	bool Save(const QString& FileName);
+	lcResult<void> Save(const QString& FileName);
 	bool Save(QTextStream& Stream);
 	void Merge(Project* Other);
 	bool ImportLDD(const QString& FileName);

@@ -29,12 +29,12 @@
 void lcModelProperties::LoadDefaults()
 {
 	mAuthor = lcGetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME);
-	mAmbientColor = lcVector3FromColor(lcGetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
+	mAmbientColor = lcVector3FromColor(lcGetProfileUInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR));
 }
 
 void lcModelProperties::SaveDefaults()
 {
-	lcSetProfileInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
+	lcSetProfileUInt(LC_PROFILE_DEFAULT_AMBIENT_COLOR, lcColorFromVector3(mAmbientColor));
 }
 
 void lcModelProperties::SaveLDraw(QTextStream& Stream) const

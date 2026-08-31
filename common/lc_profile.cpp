@@ -9,50 +9,44 @@
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {
-	mType = LC_PROFILE_ENTRY_INT;
 	mSection = Section;
 	mKey = Key;
-	mDefault.IntValue = DefaultValue;
+	mDefault = DefaultValue;
 }
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, uint DefaultValue)
 {
-	mType = LC_PROFILE_ENTRY_INT;
 	mSection = Section;
 	mKey = Key;
-	mDefault.UIntValue = DefaultValue;
+	mDefault = DefaultValue;
 }
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, float DefaultValue)
 {
-	mType = LC_PROFILE_ENTRY_FLOAT;
 	mSection = Section;
 	mKey = Key;
-	mDefault.FloatValue = DefaultValue;
+	mDefault = DefaultValue;
 }
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const char* DefaultValue)
 {
-	mType = LC_PROFILE_ENTRY_STRING;
 	mSection = Section;
 	mKey = Key;
-	mDefault.StringValue = DefaultValue;
+	mDefault = QString(DefaultValue);
 }
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, const QStringList& /*StringList*/)
 {
-	mType = LC_PROFILE_ENTRY_STRINGLIST;
 	mSection = Section;
 	mKey = Key;
-	mDefault.IntValue = 0;
+	mDefault = QStringList();
 }
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key)
 {
-	mType = LC_PROFILE_ENTRY_BUFFER;
 	mSection = Section;
 	mKey = Key;
-	mDefault.IntValue = 0;
+	mDefault = QByteArray();
 }
 
 static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
@@ -125,7 +119,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                                      // LC_PROFILE_IMAGE_EXTENSION
 	lcProfileEntry("Settings", "PartsListIcons", 64),                                          // LC_PROFILE_PARTS_LIST_ICONS
 	lcProfileEntry("Settings", "PartsListNames", 0),                                           // LC_PROFILE_PARTS_LIST_NAMES
-	lcProfileEntry("Settings", "PartsListFixedColor", -1),                                     // LC_PROFILE_PARTS_LIST_FIXED_COLOR
+	lcProfileEntry("Settings", "PartsListFixedColor", -1),                                     // LC_PROFILE_PARTS_LIST_COLOR
+	lcProfileEntry("Settings", "PartsListColorLocked", false),                                // LC_PROFILE_PARTS_LIST_COLOR_LOCKED
 	lcProfileEntry("Settings", "PartsListDecorated", 1),                                       // LC_PROFILE_PARTS_LIST_DECORATED
 	lcProfileEntry("Settings", "PartsListAliases", 1),                                         // LC_PROFILE_PARTS_LIST_ALIASES
 	lcProfileEntry("Settings", "PartsListListMode", 0),                                        // LC_PROFILE_PARTS_LIST_LISTMODE
@@ -157,7 +152,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Blender", "AddonVersionCheck", 1),                                         // LC_PROFILE_BLENDER_ADDON_VERSION_CHECK
 	lcProfileEntry("Blender", "ImportModule", ""),                                             // LC_PROFILE_BLENDER_IMPORT_MODULE
 
-	lcProfileEntry("Settgins", "PreviewViewSphereEnabled", 0),                                    // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED
+	lcProfileEntry("Settings", "PreviewViewSphereEnabled", 0),                                    // LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "PreviewViewSphereSize", 75),                                      // LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE
 	lcProfileEntry("Settings", "PreviewViewSphereLocation", (int)lcViewSphereLocation::TopRight), // LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "DrawPreviewAxis", 0),                                             // LC_PROFILE_PREVIEW_DRAW_AXES
@@ -175,6 +170,11 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "AutomateEdgeColor", 0)                                         // LC_PROFILE_AUTOMATE_EDGE_COLOR
 };
 
+void lcProfileInit()
+{
+	gProfileEntries[LC_PROFILE_PROJECTS_PATH].mDefault = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+}
+
 void lcRemoveProfileKey(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
@@ -186,41 +186,46 @@ void lcRemoveProfileKey(LC_PROFILE_KEY Key)
 int lcGetProfileInt(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
+	int* DefaultInt = std::get_if<int>(&Entry.mDefault);
+	int DefaultValue = DefaultInt ? *DefaultInt : 0;
 
-	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.IntValue).toInt();
+	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toInt();
 }
 
 uint lcGetProfileUInt(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
+	uint* DefaultUInt = std::get_if<uint>(&Entry.mDefault);
+	uint DefaultValue = DefaultUInt ? *DefaultUInt : 0;
 
-	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.UIntValue).toUInt();
+	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toUInt();
 }
 
 float lcGetProfileFloat(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
+	float* DefaultFloat = std::get_if<float>(&Entry.mDefault);
+	float DefaultValue = DefaultFloat ? *DefaultFloat : 0.0f;
 
-	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.FloatValue).toFloat();
+	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toFloat();
 }
 
 QString lcGetProfileString(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
+	QString* DefaultString = std::get_if<QString>(&Entry.mDefault);
+	QString DefaultValue = DefaultString ? *DefaultString : QString();
 
-	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Entry.mDefault.StringValue).toString();
+	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toString();
 }
 
 QStringList lcGetProfileStringList(LC_PROFILE_KEY Key)
 {
 	lcProfileEntry& Entry = gProfileEntries[Key];
-	QSettings Settings;
+	QStringList* DefaultStringList = std::get_if<QStringList>(&Entry.mDefault);
+	QStringList DefaultValue = DefaultStringList ? *DefaultStringList : QStringList();
 
-	return Settings.value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), QStringList()).toStringList();
+	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toStringList();
 }
 
 QByteArray lcGetProfileBuffer(LC_PROFILE_KEY Key)

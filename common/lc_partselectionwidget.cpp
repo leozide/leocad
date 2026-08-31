@@ -52,16 +52,20 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mPartDescriptionFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_PART_DESCRIPTION_FILTER);
 	mPartFilterType = static_cast<lcPartFilterType>(lcGetProfileInt(LC_PROFILE_PARTS_LIST_PART_FILTER));
 
-	int ColorCode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
-	if (ColorCode == -1)
+	int ColorCodeInt = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
+	int LockedFlag = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED);
+
+	if (ColorCodeInt == -1 && LockedFlag == 0)
 	{
 		mColorIndex = gMainWindow->mColorIndex;
 		mColorLocked = false;
 	}
 	else
 	{
-		mColorIndex = lcGetColorIndex(ColorCode);
-		mColorLocked = true;
+		uint ColorCodeValue = (ColorCodeInt == -1) ? lcGetColorCode(gMainWindow->mColorIndex) : static_cast<uint>(ColorCodeInt);
+
+		mColorIndex = lcGetColorIndex(ColorCodeValue);
+		mColorLocked = (LockedFlag != 0) || (ColorCodeInt != -1);
 	}
 
 	connect(lcGetPiecesLibrary()->GetThumbnailManager(), &lcThumbnailManager::ThumbnailReady, this, &lcPartSelectionListModel::ThumbnailReady);
@@ -98,7 +102,16 @@ void lcPartSelectionListModel::ToggleColorLocked()
 	mColorLocked = !mColorLocked;
 
 	SetColorIndex(gMainWindow->mColorIndex);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR, mColorLocked ? lcGetColorCode(mColorIndex) : -1);
+	if (mColorLocked)
+	{
+		lcSetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR, lcGetColorCode(mColorIndex));
+		lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED, 1);
+	}
+	else
+	{
+		lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED, 0);
+		lcSetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR, 0);
+	}
 }
 
 void lcPartSelectionListModel::ToggleListMode()

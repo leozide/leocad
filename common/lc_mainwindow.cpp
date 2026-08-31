@@ -2555,6 +2555,7 @@ void lcMainWindow::ImportInventory()
 	else
 		delete NewProject;
 }
+
 bool lcMainWindow::SaveProject(const QString& FileName)
 {
 	QString SaveFileName = FileName;
@@ -2579,12 +2580,17 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
 	{
-		QMessageBox::warning(this, tr("Error"), tr("Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead."));
+		QMessageBox::warning(this, tr("Save Project"), tr("Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead."));
 		return false;
 	}
-
-	if (!Project->Save(SaveFileName))
+	
+	lcResult<void> SaveResult = Project->Save(SaveFileName);
+	
+	if (!SaveResult)
+	{
+		QMessageBox::warning(this, tr("Save Project"), SaveResult.error());
 		return false;
+	}
 
 	AddRecentFile(SaveFileName);
 	UpdateTitle();

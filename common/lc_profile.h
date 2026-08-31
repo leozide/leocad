@@ -72,6 +72,7 @@ enum LC_PROFILE_KEY
 	LC_PROFILE_PARTS_LIST_ICONS,
 	LC_PROFILE_PARTS_LIST_NAMES,
 	LC_PROFILE_PARTS_LIST_COLOR,
+	LC_PROFILE_PARTS_LIST_COLOR_LOCKED,
 	LC_PROFILE_PARTS_LIST_DECORATED,
 	LC_PROFILE_PARTS_LIST_ALIASES,
 	LC_PROFILE_PARTS_LIST_LISTMODE,
@@ -122,15 +123,6 @@ enum LC_PROFILE_KEY
 	LC_NUM_PROFILE_KEYS
 };
 
-enum LC_PROFILE_ENTRY_TYPE
-{
-	LC_PROFILE_ENTRY_INT,
-	LC_PROFILE_ENTRY_FLOAT,
-	LC_PROFILE_ENTRY_STRING,
-	LC_PROFILE_ENTRY_STRINGLIST,
-	LC_PROFILE_ENTRY_BUFFER
-};
-
 class lcProfileEntry
 {
 public:
@@ -141,20 +133,13 @@ public:
 	lcProfileEntry(const char* Section, const char* Key, const QStringList& StringList);
 	lcProfileEntry(const char* Section, const char* Key);
 
-	LC_PROFILE_ENTRY_TYPE mType;
+	QString mSection;
+	QString mKey;
 
-	const char* mSection;
-	const char* mKey;
-
-	union
-	{
-		int IntValue;
-		uint UIntValue;
-		float FloatValue;
-		const char* StringValue;
-	} mDefault;
+	std::variant<int, uint, float, QString, QStringList, QByteArray> mDefault;
 };
 
+void lcProfileInit();
 void lcRemoveProfileKey(LC_PROFILE_KEY Key);
 
 int lcGetProfileInt(LC_PROFILE_KEY Key);

@@ -22,6 +22,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 
 #if _MSC_VER
 #pragma warning(default : 4062) // enumerator 'identifier' in switch of enum 'enumeration' is not handled

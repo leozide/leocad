@@ -3,7 +3,6 @@
 // We can't use std::expected because we only require C++17.
 
 #include <stdexcept>
-#include <variant>
 
 class lcUnexpected
 {

@@ -490,17 +490,14 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	return true;
 }
 
-bool Project::Save(const QString& FileName)
+lcResult<void> Project::Save(const QString& FileName)
 {
 	SetFileName(QString());
 
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-	{
-		QMessageBox::warning(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-		return false;
-	}
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 	QTextStream Stream(&File);
 	bool Success = Save(Stream);
@@ -511,8 +508,8 @@ bool Project::Save(const QString& FileName)
 		SetFileName(FileName);
 		mModified = false;
 	}
-
-	return Success;
+	
+	return lcResult<void>();
 }
 
 bool Project::Save(QTextStream& Stream)

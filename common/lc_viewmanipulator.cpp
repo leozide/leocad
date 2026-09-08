@@ -632,7 +632,8 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	if (MouseToolDistance.LengthSquared() != 0.0f && (TrackButton != lcTrackButton::None))
 	{
 		lcVector4 Rotation;
-		float Angle, Step, Radius = (TrackTool == lcTrackTool::RotateCamera) ? OverlayRotateCameraRadius : OverlayRotateRadius;
+		const float Radius = (TrackTool == lcTrackTool::RotateCamera) ? OverlayRotateCameraRadius : OverlayRotateRadius;
+		int AxisIndex = 0;
 
 		HasAngle = true;
 
@@ -640,38 +641,26 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		{
 			case lcTrackTool::RotateX:
 				Context->SetColor(0.8f, 0.0f, 0.0f, 0.3f);
-				Angle = MouseToolDistance[0];
+				AxisIndex = 0;
 				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			case lcTrackTool::RotateY:
 				Context->SetColor(0.0f, 0.8f, 0.0f, 0.3f);
-				Angle = MouseToolDistance[1];
+				AxisIndex = 1;
 				Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			case lcTrackTool::RotateZ:
 				Context->SetColor(0.0f, 0.0f, 0.8f, 0.3f);
-				Angle = MouseToolDistance[2];
+				AxisIndex = 2;
 				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
 				break;
 			case lcTrackTool::RotateCamera:
-				Context->SetColor(0.9f, 0.9f, 0.9f, 0.3f);
-				Angle = MouseToolDistance[0];
+				Context->SetColor(mColorCamera[0], mColorCamera[1], mColorCamera[2], 0.3f);
 				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
 				break;
 			default:
 				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				Angle = 0.0f;
 				break;
-		}
-
-		if (Angle > 0.0f)
-		{
-			Step = 360.0f / 32;
-		}
-		else
-		{
-			Angle = -Angle;
-			Step = -360.0f / 32;
 		}
 
 		lcMatrix44 RotatedWorldMatrix;
@@ -696,61 +685,41 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->SetVertexFormatPosition(3);
 
 		float StartAngle;
+		const bool CameraDisc = TrackTool == lcTrackTool::RotateCamera;
+		const float SignedRotationAngle = MouseToolDistance[AxisIndex];
 		int i = 0;
 
-		if (TrackTool == lcTrackTool::RotateCamera)
-			StartAngle = 0.0f;
-		else
+		auto GetMouseAngle = [&](int MouseX, int MouseY)
 		{
 			lcVector3 MouseDownRay[2] =
 			{
-				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 0.0f),
-				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 1.0f)
+				lcVector3((float)MouseX, (float)MouseY, 0.0f),
+				lcVector3((float)MouseX, (float)MouseY, 1.0f)
 			};
 			mView->UnprojectPoints(MouseDownRay, 2);
 
 			const lcVector3 Center = RotatedWorldMatrix.GetTranslation();
-			const lcVector3 Normal = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), RotatedWorldMatrix));
+			const lcVector3 LocalNormal = TrackTool == lcTrackTool::RotateCamera ? lcVector3(0.0f, 0.0f, 1.0f) : lcVector3(1.0f, 0.0f, 0.0f);
+			const lcVector3 Normal = lcNormalize(lcMul30(LocalNormal, RotatedWorldMatrix));
 			const lcVector4 Plane(Normal, -lcDot(Normal, Center));
 			lcVector3 Intersection;
 
 			if (lcLineSegmentPlaneIntersection(&Intersection, MouseDownRay[0], MouseDownRay[1], Plane))
 			{
 				const lcVector3 LocalPoint = lcMul(Intersection - Center, lcMatrix33AffineInverse(lcMatrix33(RotatedWorldMatrix)));
-				StartAngle = -atan2f(LocalPoint[2], LocalPoint[1]) * LC_RTOD;
+				return (TrackTool == lcTrackTool::RotateCamera ? atan2f(LocalPoint[1], LocalPoint[0]) : -atan2f(LocalPoint[2], LocalPoint[1])) * LC_RTOD;
 			}
-			else
-				StartAngle = 0.0f;
-		}
-		
-		for (;;)
-		{
-			float VertexAngle;
 
-			if (TrackTool == lcTrackTool::RotateCamera)
-			{
-				VertexAngle = mView->GetCameraRotationStartAngle() * LC_RTOD - Step * i;
-				
-				if (Angle < 0.0f)
-				{
-					if (Step < 0)
-						VertexAngle += Angle;
-					else
-						VertexAngle -= Angle;
-				}
-			}
-			else
-			{
-				VertexAngle = Step * i - StartAngle;
-				
-				if (Angle < 0.0f)
-				{
-					if (Step > 0)
-						VertexAngle += Angle;
-					else
-						VertexAngle -= Angle;
-				}
-			}
+			return 0.0f;
+		};
+
+		StartAngle = TrackTool == lcTrackTool::RotateCamera ? mView->GetCameraRotationStartAngle() * LC_RTOD : GetMouseAngle(mView->GetMouseDownX(), mView->GetMouseDownY());
+		const float StartVectorAngle = CameraDisc ? StartAngle : -StartAngle;
+		const int SegmentCount = std::max(1, (int)ceilf(fabsf(SignedRotationAngle) / (360.0f / 32.0f)));
+
+		for (i = 0; i <= SegmentCount; i++)
+		{
+			const float VertexAngle = StartVectorAngle + (CameraDisc ? -1.0f : 1.0f) * SignedRotationAngle * i / SegmentCount;
 			
 			float x = cosf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
 			float y = sinf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
@@ -764,19 +733,52 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 				NumVerts = 2;
 			}
 
-			i++;
-			
-			if (Angle <= 0.0f)
-				break;
-			
-			if (Step > 0)
-				Angle -= Step;
-			else
-				Angle += Step;
 		}
 
 		if (NumVerts > 2)
 			Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
+
+		// Draw thin triangular lines for the mouse-down and current vectors.
+		const float VectorRadius = Radius * OverlayScale;
+		const float VectorWidth = OverlayScale * 0.035f;
+		auto DrawVector = [&](float VectorAngle)
+		{
+			const float AngleRadians = VectorAngle * LC_DTOR;
+			const float Cos = cosf(AngleRadians);
+			const float Sin = sinf(AngleRadians);
+			lcVector3 Direction = CameraDisc ? lcVector3(Cos, Sin, 0.0f) : lcVector3(0.0f, Cos, Sin);
+			lcVector3 Perpendicular = CameraDisc ? lcVector3(-Sin, Cos, 0.0f) : lcVector3(0.0f, -Sin, Cos);
+			Direction *= VectorRadius;
+			Perpendicular *= VectorWidth;
+			lcVector3 VectorVerts[6] =
+			{
+				Perpendicular, Direction + Perpendicular, Direction - Perpendicular,
+				Perpendicular, Direction - Perpendicular, -Perpendicular
+			};
+			Context->SetVertexBufferPointer(VectorVerts);
+			Context->SetVertexFormatPosition(3);
+			Context->DrawPrimitives(GL_TRIANGLES, 0, 6);
+		};
+
+		switch (TrackTool)
+		{
+		case lcTrackTool::RotateX:
+			Context->SetColor(mColorXAxisSelected);
+			break;
+		case lcTrackTool::RotateY:
+			Context->SetColor(mColorYAxisSelected);
+			break;
+		case lcTrackTool::RotateZ:
+			Context->SetColor(mColorZAxisSelected);
+			break;
+		default:
+			Context->SetColor(mColorCameraSelected);
+			break;
+		}
+
+		const float CurrentVectorAngle = CameraDisc ? StartVectorAngle - SignedRotationAngle : StartVectorAngle + SignedRotationAngle;
+		DrawVector(StartVectorAngle);
+		DrawVector(CurrentVectorAngle);
 
 		Context->EnableColorBlend(false);
 	}
@@ -802,9 +804,10 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		}
 
 		if (TrackTool == lcTrackTool::RotateCamera)
-			Context->SetColor(230.0f / 255.0f, 230.0f / 255.0f, 230.0f / 255.0f, 1.0f);
+			Context->SetColor(mColorCameraSelected);
 		else
-			Context->SetColor(200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f, 1.0f);
+			Context->SetColor(mColorCamera);
+
 		Context->SetWorldMatrix(lcMatrix44Identity());
 
 		Context->SetVertexBufferPointer(Verts);

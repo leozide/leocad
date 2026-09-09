@@ -152,6 +152,7 @@ unix:!macx {
 }
 
 macx {
+	QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
 	ICON = resources/leocad.icns
 	QMAKE_INFO_PLIST = qt/Info.plist
 

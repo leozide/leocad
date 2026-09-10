@@ -134,6 +134,14 @@ void lcViewWidget::keyPressEvent(QKeyEvent* KeyEvent)
 		mView->SetMouseModifiers(KeyEvent->modifiers());
 		mView->UpdateCursor();
 	}
+	else if (KeyEvent->key() == Qt::Key_Escape && mView->GetViewType() == lcViewType::View)
+	{
+		if (gMainWindow)
+			gMainWindow->SetTool(lcTool::Select);
+
+		KeyEvent->accept();
+		return;
+	}
 
 	QOpenGLWidget::keyPressEvent(KeyEvent);
 }

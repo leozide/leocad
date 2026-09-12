@@ -664,16 +664,7 @@ void lcRenderDialog::Update()
 	if (!mProcess)
 		return;
 
-	if (mProcess->state() == QProcess::NotRunning)
-	{
-#ifdef Q_OS_LINUX
-		QByteArray Output = mProcess->readAllStandardOutput();
-		mImage = QImage::fromData(Output);
-#endif
-
-		ShowResult();
-		CloseProcess();
-	}
+	const bool ProcessFinished = mProcess->state() == QProcess::NotRunning;
 
 	if (mDialogMode == lcRenderDialogMode::RenderPOVRay)
 	{
@@ -683,13 +674,28 @@ void lcRenderDialog::Update()
 			mOutputFile.setFileName(GetStdOutFileName());
 
 			if (!mOutputFile.open(QFile::ReadWrite))
+			{
+				if (ProcessFinished)
+				{
+					ShowResult();
+					CloseProcess();
+				}
+
 				return;
+			}
 
 			mOutputBuffer = mOutputFile.map(0, mOutputFile.size());
 
 			if (!mOutputBuffer)
 			{
 				mOutputFile.close();
+
+				if (ProcessFinished)
+				{
+					ShowResult();
+					CloseProcess();
+				}
+
 				return;
 			}
 		}
@@ -705,7 +711,7 @@ void lcRenderDialog::Update()
 
 		lcSharedMemoryHeader* Header = (lcSharedMemoryHeader*)mOutputBuffer;
 
-		if (Header->PixelsWritten == Header->PixelsRead)
+		if (Header->PixelsWritten == Header->PixelsRead && !ProcessFinished)
 			return;
 
 		int Width = Header->Width;
@@ -736,6 +742,17 @@ void lcRenderDialog::Update()
 
 		ui->preview->SetImage(mImage.scaled(mPreviewWidth, mPreviewHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 #endif
+	}
+
+	if (ProcessFinished)
+	{
+#ifdef Q_OS_LINUX
+		QByteArray Output = mProcess->readAllStandardOutput();
+		mImage = QImage::fromData(Output);
+#endif
+
+		ShowResult();
+		CloseProcess();
 	}
 }
 

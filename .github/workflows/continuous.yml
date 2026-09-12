@@ -50,11 +50,11 @@ jobs:
       id: cache-povray
       with:
         path: povray
-        key: povray-20.03
+        key: povray-build1
     - name: Download POV-Ray
       if: steps.cache-povray.outputs.cache-hit != 'true'
       run: |
-        wget https://github.com/leozide/povray/releases/download/continuous/povray
+        wget https://github.com/leozide/povray/releases/download/build1/povray
         chmod +x povray
         curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/leozide/leocad/commits/master | jq -r '.sha' > remote.txt
         REMOTE=$(cat remote.txt)

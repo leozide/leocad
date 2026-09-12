@@ -40,7 +40,7 @@ for:
     - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-25.08.zip -FileName library.zip
     - 7z e library.zip
     - copy library.bin appdir\\library.bin
-    - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe 
+    - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe
     - windeployqt appdir\leocad.exe
     - copy tools\setup\leocad.nsi .
     - copy tools\setup\setup.ico .
@@ -114,7 +114,7 @@ for:
       - export TRAVIS_TAG=$APPVEYOR_REPO_TAG_NAME
       - export TRAVIS_REPO_SLUG=$APPVEYOR_REPO_NAME
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
-      - appveyor DownloadFile https://github.com/leozide/povray/releases/download/continuous/povray
+      - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povray
       - chmod +x povray
       - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-25.08.zip -FileName library.zip
       - unzip library.zip

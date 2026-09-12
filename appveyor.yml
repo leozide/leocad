@@ -120,7 +120,7 @@ for:
       - unzip library.zip
      
     build_script:
-      - qmake PREFIX=/usr
+      - qmake PREFIX=/usr QMAKE_APPLE_DEVICE_ARCHS="x86_64 arm64"
       - make
     
     after_build:

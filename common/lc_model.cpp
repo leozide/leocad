@@ -2362,6 +2362,9 @@ void lcModel::RemoveFocusPieceFromGroup()
 {
 	bool Modified = false;
 
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (Piece->IsFocused())

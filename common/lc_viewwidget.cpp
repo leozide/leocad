@@ -108,7 +108,7 @@ bool lcViewWidget::event(QEvent* Event)
 		}
 	}
 
-	return QWidget::event(Event);
+	return QOpenGLWidget::event(Event);
 }
 
 void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)

@@ -939,6 +939,14 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	if (Options.Exit)
 		return lcStartupMode::Success;
 
+#ifdef Q_OS_IOS
+	if (Options.SaveImage)
+	{
+		StdErr << tr("Command line image export is not supported on iOS.\n");
+		return lcStartupMode::Error;
+	}
+#endif
+
 #ifndef Q_OS_IOS
 	if (!lcContext::InitializeRenderer())
 	{

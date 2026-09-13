@@ -39,6 +39,10 @@ protected:
 	lcMatrix44 GetRotationDiscWorldMatrix(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& WorldMatrix) const;
 	float GetRotationDiscStartAngle(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& DiscWorldMatrix) const;
 	void DrawTrackballHover(const lcMatrix44& WorldMatrix, float OverlayScale) const;
+	bool DrawRotationDisc(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const;
+	void DrawCameraRotationRing(lcTrackButton TrackButton, lcTrackTool TrackTool, const lcMatrix44& WorldMatrix, float OverlayScale) const;
+	void DrawAxisRotationRings(lcTrackButton TrackButton, lcTrackTool TrackTool, bool HasAngle, const lcMatrix44& WorldMatrix, float OverlayScale) const;
+	void DrawRotationText(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const;
 
 	lcView* mView = nullptr;
 

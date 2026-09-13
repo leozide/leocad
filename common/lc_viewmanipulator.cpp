@@ -717,6 +717,234 @@ void lcViewManipulator::DrawTrackballHover(const lcMatrix44& WorldMatrix, float 
 	Context->EnableColorBlend(false);
 }
 
+bool lcViewManipulator::DrawRotationDisc(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const
+{
+	if (MouseToolDistance.LengthSquared() == 0.0f || TrackButton == lcTrackButton::None || !RotationDisc)
+		return false;
+
+	lcContext* Context = mView->mContext;
+	const lcRotationDiscInfo& DiscInfo = *RotationDisc;
+	const float Radius = DiscInfo.Radius;
+	const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
+
+	Context->SetColor(DiscInfo.FillColor[0], DiscInfo.FillColor[1], DiscInfo.FillColor[2], 0.3f);
+	Context->SetWorldMatrix(RotatedWorldMatrix);
+	Context->EnableColorBlend(true);
+
+	lcVector3 Verts[33];
+	Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+	int NumVerts = 1;
+
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormatPosition(3);
+
+	const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
+	const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
+	const float SignedRotationAngle = MouseToolDistance[DiscInfo.AxisIndex];
+	const int SegmentCount = std::max(1, (int)ceilf(fabsf(SignedRotationAngle) / (360.0f / 32.0f)));
+
+	for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
+	{
+		const float VertexAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -1.0f : 1.0f) * SignedRotationAngle * SegmentIndex / SegmentCount;
+		const float x = cosf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
+		const float y = sinf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
+		Verts[NumVerts++] = DiscInfo.CameraFacing ? lcVector3(x, y, 0.0f) : lcVector3(0.0f, x, y);
+
+		if (NumVerts == 33)
+		{
+			Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
+			Verts[1] = Verts[32];
+			NumVerts = 2;
+		}
+	}
+
+	if (NumVerts > 2)
+		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
+
+	const float VectorRadius = Radius * OverlayScale;
+	const float VectorWidth = OverlayScale * 0.035f;
+	auto DrawVector = [&](float VectorAngle)
+	{
+		const float AngleRadians = VectorAngle * LC_DTOR;
+		const float Cos = cosf(AngleRadians);
+		const float Sin = sinf(AngleRadians);
+		lcVector3 Direction = DiscInfo.CameraFacing ? lcVector3(Cos, Sin, 0.0f) : lcVector3(0.0f, Cos, Sin);
+		lcVector3 Perpendicular = DiscInfo.CameraFacing ? lcVector3(-Sin, Cos, 0.0f) : lcVector3(0.0f, -Sin, Cos);
+		Direction *= VectorRadius;
+		Perpendicular *= VectorWidth;
+		const lcVector3 VectorVerts[6] =
+		{
+			Perpendicular, Direction + Perpendicular, Direction - Perpendicular,
+			Perpendicular, Direction - Perpendicular, -Perpendicular
+		};
+		Context->SetVertexBufferPointer(VectorVerts);
+		Context->SetVertexFormatPosition(3);
+		Context->DrawPrimitives(GL_TRIANGLES, 0, 6);
+	};
+
+	Context->SetColor(DiscInfo.HighlightColor);
+	DrawVector(StartVectorAngle);
+	DrawVector(StartVectorAngle + (DiscInfo.CameraFacing ? -1.0f : 1.0f) * SignedRotationAngle);
+	Context->EnableColorBlend(false);
+
+	return true;
+}
+
+void lcViewManipulator::DrawCameraRotationRing(lcTrackButton TrackButton, lcTrackTool TrackTool, const lcMatrix44& WorldMatrix, float OverlayScale) const
+{
+	if (gMainWindow->GetTool() != lcTool::Rotate || (TrackButton != lcTrackButton::None && TrackTool != lcTrackTool::RotateCamera))
+		return;
+
+	lcContext* Context = mView->mContext;
+	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	Mat.SetTranslation(WorldMatrix.GetTranslation());
+
+	const float HalfWidth = OverlayScale * 0.035f;
+	constexpr int SegmentCount = 48;
+	lcVector3 Verts[(SegmentCount + 1) * 2];
+	int NumVerts = 0;
+
+	for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
+	{
+		const float Sin = sinf(LC_2PI * SegmentIndex / SegmentCount);
+		const float Cos = cosf(LC_2PI * SegmentIndex / SegmentCount);
+		Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), 0.0f), Mat);
+		Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), 0.0f), Mat);
+	}
+
+	Context->SetColor(TrackTool == lcTrackTool::RotateCamera ? mColorCameraSelected : mColorCamera);
+	Context->SetWorldMatrix(lcMatrix44Identity());
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormatPosition(3);
+	Context->DrawPrimitives(GL_TRIANGLE_STRIP, 0, NumVerts);
+}
+
+void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrackTool TrackTool, bool HasAngle, const lcMatrix44& WorldMatrix, float OverlayScale) const
+{
+	const lcCamera* Camera = mView->GetCamera();
+	lcContext* Context = mView->mContext;
+	lcVector3 ViewDir = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
+	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(lcMatrix33(WorldMatrix));
+	ViewDir = lcMul(ViewDir, WorldToLocalMatrix);
+	const lcVector3 FrontVector = lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix);
+
+	Context->SetWorldMatrix(WorldMatrix);
+
+	for (int PlaneIndex = 0; PlaneIndex < 3; PlaneIndex++)
+	{
+		const bool Selected = static_cast<int>(TrackTool) == static_cast<int>(lcTrackTool::RotateX) + PlaneIndex;
+		if (!Selected && (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None))
+			continue;
+
+		switch (PlaneIndex)
+		{
+		case 0:
+			Context->SetColor(Selected ? mColorXAxisSelected : mColorXAxis);
+			break;
+		case 1:
+			Context->SetColor(Selected ? mColorYAxisSelected : mColorYAxis);
+			break;
+		case 2:
+			Context->SetColor(Selected ? mColorZAxisSelected : mColorZAxis);
+			break;
+		}
+
+		const float HalfWidth = OverlayScale * 0.035f;
+		constexpr int SegmentCount = 32;
+		lcVector3 Verts[SegmentCount * 6];
+		int NumVerts = 0;
+
+		for (int SegmentIndex = 0; SegmentIndex < SegmentCount; SegmentIndex++)
+		{
+			const float Sin1 = sinf(LC_2PI * SegmentIndex / SegmentCount);
+			const float Cos1 = cosf(LC_2PI * SegmentIndex / SegmentCount);
+			const float Sin2 = sinf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
+			const float Cos2 = cosf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
+			lcVector3 v1, v2, t1, t2;
+
+			switch (PlaneIndex)
+			{
+			case 0:
+				v1 = lcVector3(0.0f, Cos1, Sin1);
+				v2 = lcVector3(0.0f, Cos2, Sin2);
+				t1 = lcVector3(0.0f, -Sin1, Cos1);
+				t2 = lcVector3(0.0f, -Sin2, Cos2);
+				break;
+			case 1:
+				v1 = lcVector3(Cos1, 0.0f, Sin1);
+				v2 = lcVector3(Cos2, 0.0f, Sin2);
+				t1 = lcVector3(-Sin1, 0.0f, Cos1);
+				t2 = lcVector3(-Sin2, 0.0f, Cos2);
+				break;
+			case 2:
+				v1 = lcVector3(Cos1, Sin1, 0.0f);
+				v2 = lcVector3(Cos2, Sin2, 0.0f);
+				t1 = lcVector3(-Sin1, Cos1, 0.0f);
+				t2 = lcVector3(-Sin2, Cos2, 0.0f);
+				break;
+			}
+
+			if (gMainWindow->GetTool() == lcTool::Rotate && !HasAngle && TrackButton == lcTrackButton::None && lcDot(ViewDir, v1 + v2) > 0.0f)
+				continue;
+
+			const lcVector3 NodeCenter1 = v1 * (mOverlayRotateRadius * OverlayScale);
+			const lcVector3 NodeCenter2 = v2 * (mOverlayRotateRadius * OverlayScale);
+			const lcVector3 ScreenPerpendicular1 = lcNormalize(lcCross(FrontVector, t1));
+			const lcVector3 ScreenPerpendicular2 = lcNormalize(lcCross(FrontVector, t2));
+			const lcVector3 Left1 = NodeCenter1 - (ScreenPerpendicular1 * HalfWidth);
+			const lcVector3 Right1 = NodeCenter1 + (ScreenPerpendicular1 * HalfWidth);
+			const lcVector3 Left2 = NodeCenter2 - (ScreenPerpendicular2 * HalfWidth);
+			const lcVector3 Right2 = NodeCenter2 + (ScreenPerpendicular2 * HalfWidth);
+
+			Verts[NumVerts++] = Left1;
+			Verts[NumVerts++] = Left2;
+			Verts[NumVerts++] = Right1;
+			Verts[NumVerts++] = Right1;
+			Verts[NumVerts++] = Left2;
+			Verts[NumVerts++] = Right2;
+		}
+
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormatPosition(3);
+		Context->DrawPrimitives(GL_TRIANGLES, 0, NumVerts);
+	}
+}
+
+void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const
+{
+	if (TrackButton == lcTrackButton::None || !RotationDisc)
+		return;
+
+	lcContext* Context = mView->mContext;
+	const lcRotationDiscInfo& DiscInfo = *RotationDisc;
+	const float Angle = MouseToolDistance[DiscInfo.AxisIndex];
+	const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
+	const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
+	const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
+	const float MidAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -0.5f : 0.5f) * Angle;
+	const float Radius = DiscInfo.Radius * OverlayScale * 0.5f;
+	const float MidAngleRadians = MidAngle * LC_DTOR;
+	const lcVector3 TextPosition = DiscInfo.CameraFacing ? lcVector3(cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius, 0.0f) : lcVector3(0.0f, cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius);
+	const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
+	const float UIScale = mView->GetUIScale();
+
+	Context->SetMaterial(lcMaterialType::UnlitTextureModulate);
+	Context->SetWorldMatrix(lcMatrix44Identity());
+	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
+	Context->BindTexture2D(gTexFont.GetTexture());
+	Context->EnableColorBlend(true);
+
+	char Buffer[32];
+	snprintf(Buffer, sizeof(Buffer), "%.2f", fabsf(Angle));
+
+	int Width, Height;
+	gTexFont.GetStringDimensions(&Width, &Height, Buffer);
+	Context->SetColor(0.9f, 0.9f, 0.9f, 1.0f);
+	gTexFont.PrintText(Context, ScreenPos[0] / UIScale - (Width / 2), ScreenPos[1] / UIScale + (Height / 2), 0.0f, Buffer);
+	Context->EnableColorBlend(false);
+}
+
 void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool)
 {
 	const lcCamera* Camera = mView->GetCamera();
@@ -733,7 +961,6 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 	lcModel* ActiveModel = mView->GetActiveModel();
 	lcVector3 MouseToolDistance = ActiveModel->SnapRotation(ActiveModel->GetMouseToolDistance());
-	bool HasAngle = false;
 	lcMatrix44 WorldMatrix;
 	if (!GetRotationWorldMatrix(WorldMatrix))
 	{
@@ -741,273 +968,18 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		return;
 	}
 
-	// Show the trackball's active area while the pointer is inside it.
 	if (TrackButton == lcTrackButton::None && TrackTool == lcTrackTool::RotateTrackBall)
 		DrawTrackballHover(WorldMatrix, OverlayScale);
 
-	// Draw a disc showing the rotation amount.
 	const std::optional<lcRotationDiscInfo> RotationDisc = GetRotationDiscInfo(TrackTool);
-	if (MouseToolDistance.LengthSquared() != 0.0f && TrackButton != lcTrackButton::None && RotationDisc)
-	{
-		const lcRotationDiscInfo& DiscInfo = *RotationDisc;
-		HasAngle = true;
-		const float Radius = DiscInfo.Radius;
-		const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
 
-		Context->SetColor(DiscInfo.FillColor[0], DiscInfo.FillColor[1], DiscInfo.FillColor[2], 0.3f);
-		Context->SetWorldMatrix(RotatedWorldMatrix);
+	const bool HasAngle = DrawRotationDisc(TrackButton, MouseToolDistance, RotationDisc, WorldMatrix, OverlayScale);
 
-		Context->EnableColorBlend(true);
+	DrawCameraRotationRing(TrackButton, TrackTool, WorldMatrix, OverlayScale);
 
-		lcVector3 Verts[33];
-		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-		int NumVerts = 1;
+	DrawAxisRotationRings(TrackButton, TrackTool, HasAngle, WorldMatrix, OverlayScale);
 
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-
-		const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
-		const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
-		const float SignedRotationAngle = MouseToolDistance[DiscInfo.AxisIndex];
-		int i = 0;
-		const int SegmentCount = std::max(1, (int)ceilf(fabsf(SignedRotationAngle) / (360.0f / 32.0f)));
-
-		for (i = 0; i <= SegmentCount; i++)
-		{
-			const float VertexAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -1.0f : 1.0f) * SignedRotationAngle * i / SegmentCount;
-
-			float x = cosf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
-			float y = sinf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
-
-			Verts[NumVerts++] = DiscInfo.CameraFacing ? lcVector3(x, y, 0.0f) : lcVector3(0.0f, x, y);
-
-			if (NumVerts == 33)
-			{
-				Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
-				Verts[1] = Verts[32];
-				NumVerts = 2;
-			}
-
-		}
-
-		if (NumVerts > 2)
-			Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, NumVerts);
-
-		// Draw thin triangular lines for the mouse-down and current vectors.
-		const float VectorRadius = Radius * OverlayScale;
-		const float VectorWidth = OverlayScale * 0.035f;
-		auto DrawVector = [&](float VectorAngle)
-		{
-			const float AngleRadians = VectorAngle * LC_DTOR;
-			const float Cos = cosf(AngleRadians);
-			const float Sin = sinf(AngleRadians);
-			lcVector3 Direction = DiscInfo.CameraFacing ? lcVector3(Cos, Sin, 0.0f) : lcVector3(0.0f, Cos, Sin);
-			lcVector3 Perpendicular = DiscInfo.CameraFacing ? lcVector3(-Sin, Cos, 0.0f) : lcVector3(0.0f, -Sin, Cos);
-			Direction *= VectorRadius;
-			Perpendicular *= VectorWidth;
-			lcVector3 VectorVerts[6] =
-			{
-				Perpendicular, Direction + Perpendicular, Direction - Perpendicular,
-				Perpendicular, Direction - Perpendicular, -Perpendicular
-			};
-			Context->SetVertexBufferPointer(VectorVerts);
-			Context->SetVertexFormatPosition(3);
-			Context->DrawPrimitives(GL_TRIANGLES, 0, 6);
-		};
-
-		Context->SetColor(DiscInfo.HighlightColor);
-
-		const float CurrentVectorAngle = DiscInfo.CameraFacing ? StartVectorAngle - SignedRotationAngle : StartVectorAngle + SignedRotationAngle;
-		DrawVector(StartVectorAngle);
-		DrawVector(CurrentVectorAngle);
-
-		Context->EnableColorBlend(false);
-	}
-
-	// Draw the camera circle.
-	if (gMainWindow->GetTool() == lcTool::Rotate && (TrackButton == lcTrackButton::None || TrackTool == lcTrackTool::RotateCamera))
-	{
-		lcMatrix44 Mat = lcMatrix44AffineInverse(Camera->mWorldView);
-		Mat.SetTranslation(WorldMatrix.GetTranslation());
-
-		const float HalfWidth = OverlayScale * 0.035f;
-		constexpr int SegmentCount = 48;
-		lcVector3 Verts[(SegmentCount + 1) * 2];
-		int NumVerts = 0;
-
-		for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
-		{
-			const float Sin = sinf(LC_2PI * SegmentIndex / SegmentCount);
-			const float Cos = cosf(LC_2PI * SegmentIndex / SegmentCount);
-
-			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), 0.0f), Mat);
-			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), 0.0f), Mat);
-		}
-
-		if (TrackTool == lcTrackTool::RotateCamera)
-			Context->SetColor(mColorCameraSelected);
-		else
-			Context->SetColor(mColorCamera);
-
-		Context->SetWorldMatrix(lcMatrix44Identity());
-
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-
-		Context->DrawPrimitives(GL_TRIANGLE_STRIP, 0, NumVerts);
-	}
-
-	lcVector3 ViewDir = Camera->mTargetPosition - Camera->mPosition;
-	ViewDir.Normalize();
-
-	// Transform ViewDir to local space.
-	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(lcMatrix33(WorldMatrix));
-	ViewDir = lcMul(ViewDir, WorldToLocalMatrix);
-	const lcVector3 FrontVector = lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix);
-
-	Context->SetWorldMatrix(WorldMatrix);
-
-	// Draw each axis circle.
-	for (int PlaneIndex = 0; PlaneIndex < 3; PlaneIndex++)
-	{
-		if (static_cast<int>(TrackTool) == static_cast<int>(lcTrackTool::RotateX) + PlaneIndex)
-		{
-			switch (PlaneIndex)
-			{
-			case 0:
-				Context->SetColor(mColorXAxisSelected);
-				break;
-			case 1:
-				Context->SetColor(mColorYAxisSelected);
-				break;
-			case 2:
-				Context->SetColor(mColorZAxisSelected);
-				break;
-			}
-		}
-		else
-		{
-			if (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None)
-				continue;
-
-			switch (PlaneIndex)
-			{
-			case 0:
-				Context->SetColor(mColorXAxis);
-				break;
-			case 1:
-				Context->SetColor(mColorYAxis);
-				break;
-			case 2:
-				Context->SetColor(mColorZAxis);
-				break;
-			}
-		}
-
-		const float HalfWidth = OverlayScale * 0.035f;
-		constexpr int SegmentCount = 32;
-		lcVector3 Verts[SegmentCount * 6];
-		int NumVerts = 0;
-
-		for (int SegmentIndex = 0; SegmentIndex < SegmentCount; SegmentIndex++)
-		{
-			lcVector3 v1, v2, t1, t2;
-			const float Sin1 = sinf(LC_2PI * SegmentIndex / SegmentCount);
-			const float Cos1 = cosf(LC_2PI * SegmentIndex / SegmentCount);
-			const float Sin2 = sinf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
-			const float Cos2 = cosf(LC_2PI * (SegmentIndex + 1) / SegmentCount);
-
-			switch (PlaneIndex)
-			{
-			case 0:
-				v1 = lcVector3(0.0f,  Cos1, Sin1);
-				v2 = lcVector3(0.0f,  Cos2, Sin2);
-				t1 = lcVector3(0.0f, -Sin1, Cos1);
-				t2 = lcVector3(0.0f, -Sin2, Cos2);
-				break;
-
-			case 1:
-				v1 = lcVector3( Cos1, 0.0f, Sin1);
-				v2 = lcVector3( Cos2, 0.0f, Sin2);
-				t1 = lcVector3(-Sin1, 0.0f, Cos1);
-				t2 = lcVector3(-Sin2, 0.0f, Cos2);
-				break;
-
-			case 2:
-				v1 = lcVector3( Cos1, Sin1, 0.0f);
-				v2 = lcVector3( Cos2, Sin2, 0.0f);
-				t1 = lcVector3(-Sin1, Cos1, 0.0f);
-				t2 = lcVector3(-Sin2, Cos2, 0.0f);
-				break;
-			}
-
-			if (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None || lcDot(ViewDir, v1 + v2) <= 0.0f)
-			{
-				lcVector3 NodeCenter1 = v1 * (mOverlayRotateRadius * OverlayScale);
-				lcVector3 NodeCenter2 = v2 * (mOverlayRotateRadius * OverlayScale);
-
-				lcVector3 ScreenPerpendicular1 = lcNormalize(lcCross(FrontVector, t1));
-				lcVector3 Left1 = NodeCenter1 - (ScreenPerpendicular1 * HalfWidth);
-				lcVector3 Right1 = NodeCenter1 + (ScreenPerpendicular1 * HalfWidth);
-
-				lcVector3 ScreenPerpendicular2 = lcNormalize(lcCross(FrontVector, t2));
-				lcVector3 Left2 = NodeCenter2 - (ScreenPerpendicular2 * HalfWidth);
-				lcVector3 Right2 = NodeCenter2 + (ScreenPerpendicular2 * HalfWidth);
-
-				Verts[NumVerts++] = Left1;
-				Verts[NumVerts++] = Left2;
-				Verts[NumVerts++] = Right1;
-
-				Verts[NumVerts++] = Right1;
-				Verts[NumVerts++] = Left2;
-				Verts[NumVerts++] = Right2;
-			}
-		}
-
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-
-		Context->DrawPrimitives(GL_TRIANGLES, 0, NumVerts);
-	}
-
-	// Draw rotation and text.
-	if (TrackButton != lcTrackButton::None && RotationDisc)
-	{
-		const lcRotationDiscInfo& DiscInfo = *RotationDisc;
-		const float Angle = MouseToolDistance[DiscInfo.AxisIndex];
-		const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
-		Context->SetWorldMatrix(RotatedWorldMatrix);
-
-		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-
-		// Draw text.
-		const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
-		const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
-		const float MidAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -0.5f : 0.5f) * Angle;
-		const float Radius = DiscInfo.Radius * OverlayScale * 0.5f;
-		const float MidAngleRadians = MidAngle * LC_DTOR;
-		const lcVector3 TextPosition = DiscInfo.CameraFacing ? lcVector3(cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius, 0.0f) : lcVector3(0.0f, cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius);
-		const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
-		const float UIScale = mView->GetUIScale();
-
-		Context->SetMaterial(lcMaterialType::UnlitTextureModulate);
-		Context->SetWorldMatrix(lcMatrix44Identity());
-		Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
-		Context->BindTexture2D(gTexFont.GetTexture());
-		Context->EnableColorBlend(true);
-
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%.2f", fabsf(Angle));
-
-		int cx, cy;
-		gTexFont.GetStringDimensions(&cx, &cy, buf);
-
-		Context->SetColor(0.9f, 0.9f, 0.9f, 1.0f);
-		gTexFont.PrintText(Context, ScreenPos[0] / UIScale - (cx / 2), ScreenPos[1] / UIScale + (cy / 2), 0.0f, buf);
-
-		Context->EnableColorBlend(false);
-	}
+	DrawRotationText(TrackButton, MouseToolDistance, RotationDisc, WorldMatrix, OverlayScale);
 
 	Context->EnableDepthTest(true);
 }

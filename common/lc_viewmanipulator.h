@@ -2,6 +2,8 @@
 
 #include "lc_context.h"
 
+#include <optional>
+
 class lcViewManipulator
 {
 public:
@@ -17,10 +19,26 @@ public:
 	static void DestroyResources(lcContext* Context);
 
 protected:
+	struct lcRotationDiscInfo
+	{
+		int AxisIndex;
+		float Radius;
+		lcVector4 Rotation;
+		lcVector4 FillColor;
+		lcVector4 HighlightColor;
+		bool CameraFacing;
+	};
+
 	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTrackTool TrackTool, quint32 TrackToolSection);
 	std::tuple<lcTrackTool, quint32, float> UpdateSelectMoveTrainTrack(lcPiece* Piece, float OverlayScale, const lcVector3& Start, const lcVector3& End) const;
 
 	static bool IsTrackToolAllowed(lcTrackTool TrackTool, quint32 AllowedTransforms);
+	bool GetRotationWorldMatrix(lcMatrix44& WorldMatrix) const;
+	static lcTrackTool GetRotationAxis(const lcVector3& LocalIntersection, float Epsilon);
+	static std::optional<lcRotationDiscInfo> GetRotationDiscInfo(lcTrackTool TrackTool);
+	lcMatrix44 GetRotationDiscWorldMatrix(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& WorldMatrix) const;
+	float GetRotationDiscStartAngle(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& DiscWorldMatrix) const;
+	void DrawTrackballHover(const lcMatrix44& WorldMatrix, float OverlayScale) const;
 
 	lcView* mView = nullptr;
 
@@ -36,6 +54,9 @@ protected:
 	static constexpr lcVector4 mColorYAxisSelected = lcVector4(145.0f / 255.0f, 233.0f / 255.0f,  37.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorZAxisSelected = lcVector4(118.0f / 255.0f, 162.0f / 255.0f, 244.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorCameraSelected = lcVector4(230.0f / 255.0f, 230.0f / 255.0f, 230.0f / 255.0f, 255.0f / 255.0f);
+
+	static constexpr float mOverlayRotateRadius = 2.0f;
+	static constexpr float mOverlayRotateCameraRadius = 2.5f;
 
 	static constexpr int mMoveIndexStart = 0;
 	static constexpr int mMoveIndexCount = 36;

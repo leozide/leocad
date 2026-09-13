@@ -600,14 +600,129 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 	}
 }
 
+bool lcViewManipulator::GetRotationWorldMatrix(lcMatrix44& WorldMatrix) const
+{
+	lcVector3 OverlayCenter;
+	lcMatrix33 RelativeRotation;
+	lcModel* ActiveModel = mView->GetActiveModel();
+
+	if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
+		return false;
+
+	WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
+
+	if (ActiveModel != mView->GetModel())
+		WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
+
+	return true;
+}
+
+lcTrackTool lcViewManipulator::GetRotationAxis(const lcVector3& LocalIntersection, float Epsilon)
+{
+	const float dx = fabsf(LocalIntersection[0]);
+	const float dy = fabsf(LocalIntersection[1]);
+	const float dz = fabsf(LocalIntersection[2]);
+
+	if (dx < dy)
+	{
+		if (dx < dz)
+			return dx < Epsilon ? lcTrackTool::RotateX : lcTrackTool::None;
+
+		return dz < Epsilon ? lcTrackTool::RotateZ : lcTrackTool::None;
+	}
+
+	if (dy < dz)
+		return dy < Epsilon ? lcTrackTool::RotateY : lcTrackTool::None;
+
+	return dz < Epsilon ? lcTrackTool::RotateZ : lcTrackTool::None;
+}
+
+std::optional<lcViewManipulator::lcRotationDiscInfo> lcViewManipulator::GetRotationDiscInfo(lcTrackTool TrackTool)
+{
+	switch (TrackTool)
+	{
+	case lcTrackTool::RotateX:
+		return lcRotationDiscInfo{ 0, mOverlayRotateRadius, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), mColorXAxis, mColorXAxisSelected, false };
+
+	case lcTrackTool::RotateY:
+		return lcRotationDiscInfo{ 1, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, 0.0f, 1.0f), mColorYAxis, mColorYAxisSelected, false };
+
+	case lcTrackTool::RotateZ:
+		return lcRotationDiscInfo{ 2, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, -1.0f, 0.0f), mColorZAxis, mColorZAxisSelected, false };
+
+	case lcTrackTool::RotateCamera:
+		return lcRotationDiscInfo{ 0, mOverlayRotateCameraRadius, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), mColorCamera, mColorCameraSelected, true };
+
+	default:
+		return std::nullopt;
+	}
+}
+
+lcMatrix44 lcViewManipulator::GetRotationDiscWorldMatrix(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& WorldMatrix) const
+{
+	if (!DiscInfo.CameraFacing)
+		return lcMul(lcMatrix44FromAxisAngle(lcVector3(DiscInfo.Rotation[1], DiscInfo.Rotation[2], DiscInfo.Rotation[3]), DiscInfo.Rotation[0] * LC_DTOR), WorldMatrix);
+
+	lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	CameraWorldMatrix.SetTranslation(WorldMatrix.GetTranslation());
+	return CameraWorldMatrix;
+}
+
+float lcViewManipulator::GetRotationDiscStartAngle(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& DiscWorldMatrix) const
+{
+	if (DiscInfo.CameraFacing)
+		return mView->GetCameraRotationStartAngle() * LC_RTOD;
+
+	lcVector3 MouseDownRay[2] =
+	{
+		lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 0.0f),
+		lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 1.0f)
+	};
+	mView->UnprojectPoints(MouseDownRay, 2);
+
+	const lcVector3 Center = DiscWorldMatrix.GetTranslation();
+	const lcVector3 Normal = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), DiscWorldMatrix));
+	const lcVector4 Plane(Normal, -lcDot(Normal, Center));
+	lcVector3 Intersection;
+
+	if (!lcLineSegmentPlaneIntersection(&Intersection, MouseDownRay[0], MouseDownRay[1], Plane))
+		return 0.0f;
+
+	const lcVector3 LocalPoint = lcMul(Intersection - Center, lcMatrix33AffineInverse(lcMatrix33(DiscWorldMatrix)));
+	return -atan2f(LocalPoint[2], LocalPoint[1]) * LC_RTOD;
+}
+
+void lcViewManipulator::DrawTrackballHover(const lcMatrix44& WorldMatrix, float OverlayScale) const
+{
+	lcContext* Context = mView->mContext;
+	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	Mat.SetTranslation(WorldMatrix.GetTranslation());
+
+	constexpr int SegmentCount = 32;
+	lcVector3 Verts[SegmentCount + 2];
+	Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+
+	for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
+	{
+		const float Angle = LC_2PI * SegmentIndex / SegmentCount;
+		Verts[SegmentIndex + 1] = lcVector3(cosf(Angle) * mOverlayRotateRadius * OverlayScale, sinf(Angle) * mOverlayRotateRadius * OverlayScale, 0.0f);
+	}
+
+	Context->SetColor(mColorTrackball);
+	Context->SetWorldMatrix(Mat);
+	Context->EnableColorBlend(true);
+	Context->SetVertexBufferPointer(Verts);
+	Context->SetVertexFormatPosition(3);
+	Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, SegmentCount + 2);
+	Context->EnableColorBlend(false);
+}
+
 void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool)
 {
 	const lcCamera* Camera = mView->GetCamera();
 	lcContext* Context = mView->mContext;
 
 	const float OverlayScale = mView->GetOverlayScale();
-	const float OverlayRotateRadius = 2.0f;
-	const float OverlayRotateCameraRadius = 2.5f;
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
 	Context->SetViewMatrix(Camera->mWorldView);
@@ -616,88 +731,30 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 	Context->EnableDepthTest(false);
 
-	lcVector3 OverlayCenter;
-	lcMatrix33 RelativeRotation;
 	lcModel* ActiveModel = mView->GetActiveModel();
-	ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 	lcVector3 MouseToolDistance = ActiveModel->SnapRotation(ActiveModel->GetMouseToolDistance());
 	bool HasAngle = false;
-
-	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
-
-	if (ActiveModel != mView->GetModel())
-		WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
+	lcMatrix44 WorldMatrix;
+	if (!GetRotationWorldMatrix(WorldMatrix))
+	{
+		Context->EnableDepthTest(true);
+		return;
+	}
 
 	// Show the trackball's active area while the pointer is inside it.
 	if (TrackButton == lcTrackButton::None && TrackTool == lcTrackTool::RotateTrackBall)
-	{
-		lcMatrix44 Mat = lcMatrix44AffineInverse(Camera->mWorldView);
-		Mat.SetTranslation(WorldMatrix.GetTranslation());
-
-		constexpr int SegmentCount = 32;
-		lcVector3 Verts[SegmentCount + 2];
-		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
-
-		for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
-		{
-			const float Angle = LC_2PI * SegmentIndex / SegmentCount;
-			Verts[SegmentIndex + 1] = lcVector3(cosf(Angle) * OverlayRotateRadius * OverlayScale, sinf(Angle) * OverlayRotateRadius * OverlayScale, 0.0f);
-		}
-
-		Context->SetColor(mColorTrackball);
-		Context->SetWorldMatrix(Mat);
-		Context->EnableColorBlend(true);
-		Context->SetVertexBufferPointer(Verts);
-		Context->SetVertexFormatPosition(3);
-		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, SegmentCount + 2);
-		Context->EnableColorBlend(false);
-	}
+		DrawTrackballHover(WorldMatrix, OverlayScale);
 
 	// Draw a disc showing the rotation amount.
-	if (MouseToolDistance.LengthSquared() != 0.0f && (TrackButton != lcTrackButton::None))
+	const std::optional<lcRotationDiscInfo> RotationDisc = GetRotationDiscInfo(TrackTool);
+	if (MouseToolDistance.LengthSquared() != 0.0f && TrackButton != lcTrackButton::None && RotationDisc)
 	{
-		lcVector4 Rotation;
-		const float Radius = (TrackTool == lcTrackTool::RotateCamera) ? OverlayRotateCameraRadius : OverlayRotateRadius;
-		int AxisIndex = 0;
-
+		const lcRotationDiscInfo& DiscInfo = *RotationDisc;
 		HasAngle = true;
+		const float Radius = DiscInfo.Radius;
+		const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
 
-		switch (TrackTool)
-		{
-			case lcTrackTool::RotateX:
-				Context->SetColor(0.8f, 0.0f, 0.0f, 0.3f);
-				AxisIndex = 0;
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case lcTrackTool::RotateY:
-				Context->SetColor(0.0f, 0.8f, 0.0f, 0.3f);
-				AxisIndex = 1;
-				Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case lcTrackTool::RotateZ:
-				Context->SetColor(0.0f, 0.0f, 0.8f, 0.3f);
-				AxisIndex = 2;
-				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
-				break;
-			case lcTrackTool::RotateCamera:
-				Context->SetColor(mColorCamera[0], mColorCamera[1], mColorCamera[2], 0.3f);
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			default:
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				break;
-		}
-
-		lcMatrix44 RotatedWorldMatrix;
-
-		if (TrackTool == lcTrackTool::RotateCamera)
-		{
-			RotatedWorldMatrix = lcMatrix44AffineInverse(Camera->mWorldView);
-			RotatedWorldMatrix.SetTranslation(WorldMatrix.GetTranslation());
-		}
-		else
-			RotatedWorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
-
+		Context->SetColor(DiscInfo.FillColor[0], DiscInfo.FillColor[1], DiscInfo.FillColor[2], 0.3f);
 		Context->SetWorldMatrix(RotatedWorldMatrix);
 
 		Context->EnableColorBlend(true);
@@ -709,47 +766,20 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->SetVertexBufferPointer(Verts);
 		Context->SetVertexFormatPosition(3);
 
-		float StartAngle;
-		const bool CameraDisc = TrackTool == lcTrackTool::RotateCamera;
-		const float SignedRotationAngle = MouseToolDistance[AxisIndex];
+		const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
+		const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
+		const float SignedRotationAngle = MouseToolDistance[DiscInfo.AxisIndex];
 		int i = 0;
-
-		auto GetMouseAngle = [&](int MouseX, int MouseY)
-		{
-			lcVector3 MouseDownRay[2] =
-			{
-				lcVector3((float)MouseX, (float)MouseY, 0.0f),
-				lcVector3((float)MouseX, (float)MouseY, 1.0f)
-			};
-			mView->UnprojectPoints(MouseDownRay, 2);
-
-			const lcVector3 Center = RotatedWorldMatrix.GetTranslation();
-			const lcVector3 LocalNormal = TrackTool == lcTrackTool::RotateCamera ? lcVector3(0.0f, 0.0f, 1.0f) : lcVector3(1.0f, 0.0f, 0.0f);
-			const lcVector3 Normal = lcNormalize(lcMul30(LocalNormal, RotatedWorldMatrix));
-			const lcVector4 Plane(Normal, -lcDot(Normal, Center));
-			lcVector3 Intersection;
-
-			if (lcLineSegmentPlaneIntersection(&Intersection, MouseDownRay[0], MouseDownRay[1], Plane))
-			{
-				const lcVector3 LocalPoint = lcMul(Intersection - Center, lcMatrix33AffineInverse(lcMatrix33(RotatedWorldMatrix)));
-				return (TrackTool == lcTrackTool::RotateCamera ? atan2f(LocalPoint[1], LocalPoint[0]) : -atan2f(LocalPoint[2], LocalPoint[1])) * LC_RTOD;
-			}
-
-			return 0.0f;
-		};
-
-		StartAngle = TrackTool == lcTrackTool::RotateCamera ? mView->GetCameraRotationStartAngle() * LC_RTOD : GetMouseAngle(mView->GetMouseDownX(), mView->GetMouseDownY());
-		const float StartVectorAngle = CameraDisc ? StartAngle : -StartAngle;
 		const int SegmentCount = std::max(1, (int)ceilf(fabsf(SignedRotationAngle) / (360.0f / 32.0f)));
 
 		for (i = 0; i <= SegmentCount; i++)
 		{
-			const float VertexAngle = StartVectorAngle + (CameraDisc ? -1.0f : 1.0f) * SignedRotationAngle * i / SegmentCount;
+			const float VertexAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -1.0f : 1.0f) * SignedRotationAngle * i / SegmentCount;
 
 			float x = cosf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
 			float y = sinf(VertexAngle * LC_DTOR) * Radius * OverlayScale;
 
-			Verts[NumVerts++] = TrackTool == lcTrackTool::RotateCamera ? lcVector3(x, y, 0.0f) : lcVector3(0.0f, x, y);
+			Verts[NumVerts++] = DiscInfo.CameraFacing ? lcVector3(x, y, 0.0f) : lcVector3(0.0f, x, y);
 
 			if (NumVerts == 33)
 			{
@@ -771,8 +801,8 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			const float AngleRadians = VectorAngle * LC_DTOR;
 			const float Cos = cosf(AngleRadians);
 			const float Sin = sinf(AngleRadians);
-			lcVector3 Direction = CameraDisc ? lcVector3(Cos, Sin, 0.0f) : lcVector3(0.0f, Cos, Sin);
-			lcVector3 Perpendicular = CameraDisc ? lcVector3(-Sin, Cos, 0.0f) : lcVector3(0.0f, -Sin, Cos);
+			lcVector3 Direction = DiscInfo.CameraFacing ? lcVector3(Cos, Sin, 0.0f) : lcVector3(0.0f, Cos, Sin);
+			lcVector3 Perpendicular = DiscInfo.CameraFacing ? lcVector3(-Sin, Cos, 0.0f) : lcVector3(0.0f, -Sin, Cos);
 			Direction *= VectorRadius;
 			Perpendicular *= VectorWidth;
 			lcVector3 VectorVerts[6] =
@@ -785,23 +815,9 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			Context->DrawPrimitives(GL_TRIANGLES, 0, 6);
 		};
 
-		switch (TrackTool)
-		{
-		case lcTrackTool::RotateX:
-			Context->SetColor(mColorXAxisSelected);
-			break;
-		case lcTrackTool::RotateY:
-			Context->SetColor(mColorYAxisSelected);
-			break;
-		case lcTrackTool::RotateZ:
-			Context->SetColor(mColorZAxisSelected);
-			break;
-		default:
-			Context->SetColor(mColorCameraSelected);
-			break;
-		}
+		Context->SetColor(DiscInfo.HighlightColor);
 
-		const float CurrentVectorAngle = CameraDisc ? StartVectorAngle - SignedRotationAngle : StartVectorAngle + SignedRotationAngle;
+		const float CurrentVectorAngle = DiscInfo.CameraFacing ? StartVectorAngle - SignedRotationAngle : StartVectorAngle + SignedRotationAngle;
 		DrawVector(StartVectorAngle);
 		DrawVector(CurrentVectorAngle);
 
@@ -824,8 +840,8 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			const float Sin = sinf(LC_2PI * SegmentIndex / SegmentCount);
 			const float Cos = cosf(LC_2PI * SegmentIndex / SegmentCount);
 
-			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (OverlayRotateCameraRadius * OverlayScale - HalfWidth), Cos * (OverlayRotateCameraRadius * OverlayScale - HalfWidth), 0.0f), Mat);
-			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (OverlayRotateCameraRadius * OverlayScale + HalfWidth), Cos * (OverlayRotateCameraRadius * OverlayScale + HalfWidth), 0.0f), Mat);
+			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale - HalfWidth), 0.0f), Mat);
+			Verts[NumVerts++] = lcMul31(lcVector3(Sin * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), Cos * (mOverlayRotateCameraRadius * OverlayScale + HalfWidth), 0.0f), Mat);
 		}
 
 		if (TrackTool == lcTrackTool::RotateCamera)
@@ -845,7 +861,9 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	ViewDir.Normalize();
 
 	// Transform ViewDir to local space.
-	ViewDir = lcMul(ViewDir, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
+	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(lcMatrix33(WorldMatrix));
+	ViewDir = lcMul(ViewDir, WorldToLocalMatrix);
+	const lcVector3 FrontVector = lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix);
 
 	Context->SetWorldMatrix(WorldMatrix);
 
@@ -891,9 +909,6 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		lcVector3 Verts[SegmentCount * 6];
 		int NumVerts = 0;
 
-		lcVector3 FrontVector(lcNormalize(Camera->mTargetPosition - Camera->mPosition));
-		FrontVector = lcMul(FrontVector, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
-
 		for (int SegmentIndex = 0; SegmentIndex < SegmentCount; SegmentIndex++)
 		{
 			lcVector3 v1, v2, t1, t2;
@@ -928,8 +943,8 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 
 			if (gMainWindow->GetTool() != lcTool::Rotate || HasAngle || TrackButton != lcTrackButton::None || lcDot(ViewDir, v1 + v2) <= 0.0f)
 			{
-				lcVector3 NodeCenter1 = v1 * (OverlayRotateRadius * OverlayScale);
-				lcVector3 NodeCenter2 = v2 * (OverlayRotateRadius * OverlayScale);
+				lcVector3 NodeCenter1 = v1 * (mOverlayRotateRadius * OverlayScale);
+				lcVector3 NodeCenter2 = v2 * (mOverlayRotateRadius * OverlayScale);
 
 				lcVector3 ScreenPerpendicular1 = lcNormalize(lcCross(FrontVector, t1));
 				lcVector3 Left1 = NodeCenter1 - (ScreenPerpendicular1 * HalfWidth);
@@ -956,80 +971,22 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	}
 
 	// Draw rotation and text.
-	if (TrackButton != lcTrackButton::None && ((TrackTool == lcTrackTool::RotateX) || (TrackTool == lcTrackTool::RotateY) || (TrackTool == lcTrackTool::RotateZ) || (TrackTool == lcTrackTool::RotateCamera)))
+	if (TrackButton != lcTrackButton::None && RotationDisc)
 	{
-		lcVector4 Rotation;
-		float Angle;
-
-		switch (TrackTool)
-		{
-			case lcTrackTool::RotateX:
-				Angle = MouseToolDistance[0];
-				Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case lcTrackTool::RotateY:
-				Angle = MouseToolDistance[1];
-				Rotation = lcVector4(90.0f, 0.0f, 0.0f, 1.0f);
-				break;
-			case lcTrackTool::RotateZ:
-				Angle = MouseToolDistance[2];
-				Rotation = lcVector4(90.0f, 0.0f, -1.0f, 0.0f);
-				break;
-		    case lcTrackTool::RotateCamera:
-			    Angle = MouseToolDistance[0];
-			    Rotation = lcVector4(0.0f, 0.0f, 0.0f, 1.0f);
-			    break;
-			default:
-				Angle = 0.0f;
-				Rotation = lcVector4(0.0f, 0.0f, 1.0f, 0.0f);
-				break;
-		};
-
-		const bool CameraDisc = TrackTool == lcTrackTool::RotateCamera;
-		lcMatrix44 RotatedWorldMatrix;
-		if (CameraDisc)
-		{
-			RotatedWorldMatrix = lcMatrix44AffineInverse(Camera->mWorldView);
-			RotatedWorldMatrix.SetTranslation(WorldMatrix.GetTranslation());
-		}
-		else
-			RotatedWorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
+		const lcRotationDiscInfo& DiscInfo = *RotationDisc;
+		const float Angle = MouseToolDistance[DiscInfo.AxisIndex];
+		const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
 		Context->SetWorldMatrix(RotatedWorldMatrix);
 
 		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 
 		// Draw text.
-		float StartAngle;
-		if (CameraDisc)
-			StartAngle = mView->GetCameraRotationStartAngle() * LC_RTOD;
-		else
-		{
-			lcVector3 MouseDownRay[2] =
-			{
-				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 0.0f),
-				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 1.0f)
-			};
-			mView->UnprojectPoints(MouseDownRay, 2);
-
-			const lcVector3 Center = RotatedWorldMatrix.GetTranslation();
-			const lcVector3 Normal = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), RotatedWorldMatrix));
-			const lcVector4 Plane(Normal, -lcDot(Normal, Center));
-			lcVector3 Intersection;
-
-			if (lcLineSegmentPlaneIntersection(&Intersection, MouseDownRay[0], MouseDownRay[1], Plane))
-			{
-				const lcVector3 LocalPoint = lcMul(Intersection - Center, lcMatrix33AffineInverse(lcMatrix33(RotatedWorldMatrix)));
-				StartAngle = -atan2f(LocalPoint[2], LocalPoint[1]) * LC_RTOD;
-			}
-			else
-				StartAngle = 0.0f;
-		}
-
-		const float StartVectorAngle = CameraDisc ? StartAngle : -StartAngle;
-		const float MidAngle = StartVectorAngle + (CameraDisc ? -0.5f : 0.5f) * Angle;
-		const float Radius = (CameraDisc ? OverlayRotateCameraRadius : OverlayRotateRadius) * OverlayScale * 0.5f;
+		const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
+		const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
+		const float MidAngle = StartVectorAngle + (DiscInfo.CameraFacing ? -0.5f : 0.5f) * Angle;
+		const float Radius = DiscInfo.Radius * OverlayScale * 0.5f;
 		const float MidAngleRadians = MidAngle * LC_DTOR;
-		const lcVector3 TextPosition = CameraDisc ? lcVector3(cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius, 0.0f) : lcVector3(0.0f, cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius);
+		const lcVector3 TextPosition = DiscInfo.CameraFacing ? lcVector3(cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius, 0.0f) : lcVector3(0.0f, cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius);
 		const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
 		const float UIScale = mView->GetUIScale();
 
@@ -1403,22 +1360,11 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 
 lcTrackTool lcViewManipulator::UpdateRotate()
 {
-	const lcModel* ActiveModel = mView->GetActiveModel();
 	const float OverlayScale = mView->GetOverlayScale();
-	const float OverlayRotateRadius = 2.0f;
-	const float OverlayRotateCameraRadius = 2.5f;
-
-	lcVector3 OverlayCenter;
-	lcMatrix33 RelativeRotation;
-
-	if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
+	lcMatrix44 WorldMatrix;
+	if (!GetRotationWorldMatrix(WorldMatrix))
 		return lcTrackTool::None;
-
-	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
-
-	if (ActiveModel != mView->GetModel())
-		WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
-	OverlayCenter = WorldMatrix.GetTranslation();
+	const lcVector3 OverlayCenter = WorldMatrix.GetTranslation();
 
 	const int x = mView->GetMouseX();
 	const int y = mView->GetMouseY();
@@ -1426,42 +1372,17 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 	mView->UnprojectPoints(StartEnd, 2);
 
 	lcVector3 Intersection;
-
-	const bool TrackballHit = lcSphereRayIntersection(OverlayCenter, OverlayRotateRadius * OverlayScale, StartEnd[0], StartEnd[1], Intersection);
+	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
+	const lcVector3 LocalStart = lcMul31(StartEnd[0], InverseWorldMatrix);
+	const lcVector3 LocalEnd = lcMul31(StartEnd[1], InverseWorldMatrix);
+	lcVector3 LocalIntersection;
+	const bool TrackballHit = lcSphereRayIntersection(lcVector3(0.0f, 0.0f, 0.0f), mOverlayRotateRadius * OverlayScale, LocalStart, LocalEnd, LocalIntersection);
 	if (TrackballHit)
 	{
-		const lcVector3 LocalIntersection = lcMul(Intersection - OverlayCenter, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
 		const float Epsilon = 0.25f * OverlayScale;
-		const float dx = fabsf(LocalIntersection[0]);
-		const float dy = fabsf(LocalIntersection[1]);
-		const float dz = fabsf(LocalIntersection[2]);
-
-		if (dx < dy)
-		{
-			if (dx < dz)
-			{
-				if (dx < Epsilon)
-					return lcTrackTool::RotateX;
-			}
-			else
-			{
-				if (dz < Epsilon)
-					return lcTrackTool::RotateZ;
-			}
-		}
-		else
-		{
-			if (dy < dz)
-			{
-				if (dy < Epsilon)
-					return lcTrackTool::RotateY;
-			}
-			else
-			{
-				if (dz < Epsilon)
-					return lcTrackTool::RotateZ;
-			}
-		}
+		const lcTrackTool Axis = GetRotationAxis(LocalIntersection, Epsilon);
+		if (Axis != lcTrackTool::None)
+			return Axis;
 	}
 
 	// Test the camera-facing ring itself, rather than its bounding sphere, so the
@@ -1472,7 +1393,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, StartEnd[0], StartEnd[1], CameraPlane))
 	{
-		const float RingRadius = OverlayRotateCameraRadius * OverlayScale;
+		const float RingRadius = mOverlayRotateCameraRadius * OverlayScale;
 		const float HalfWidth = OverlayScale * 0.075f;
 		const float Distance = lcLength(Intersection - OverlayCenter);
 

@@ -1938,11 +1938,11 @@ lcCursor lcView::GetCursor() const
 		lcCursor::Move,             // lcTrackTool::MoveXZ
 		lcCursor::Move,             // lcTrackTool::MoveYZ
 		lcCursor::Move,             // lcTrackTool::MoveXYZ
-		lcCursor::Rotate,           // lcTrackTool::RotateX
-		lcCursor::Rotate,           // lcTrackTool::RotateY
-		lcCursor::Rotate,           // lcTrackTool::RotateZ
+		lcCursor::Default,          // lcTrackTool::RotateX
+		lcCursor::Default,          // lcTrackTool::RotateY
+		lcCursor::Default,          // lcTrackTool::RotateZ
 		lcCursor::Default,          // lcTrackTool::RotateTrackBall
-		lcCursor::Rotate,           // lcTrackTool::RotateCamera
+		lcCursor::Default,          // lcTrackTool::RotateCamera
 		lcCursor::Select,           // lcTrackTool::RotateTrainTrackRight
 		lcCursor::Select,           // lcTrackTool::RotateTrainTrackLeft
 		lcCursor::Select,           // lcTrackTool::InsertTrainTrack

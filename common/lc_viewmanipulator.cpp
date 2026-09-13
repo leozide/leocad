@@ -628,6 +628,31 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 	if (ActiveModel != mView->GetModel())
 		WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());
 
+	// Show the trackball's active area while the pointer is inside it.
+	if (TrackButton == lcTrackButton::None && TrackTool == lcTrackTool::RotateTrackBall)
+	{
+		lcMatrix44 Mat = lcMatrix44AffineInverse(Camera->mWorldView);
+		Mat.SetTranslation(WorldMatrix.GetTranslation());
+
+		constexpr int SegmentCount = 32;
+		lcVector3 Verts[SegmentCount + 2];
+		Verts[0] = lcVector3(0.0f, 0.0f, 0.0f);
+
+		for (int SegmentIndex = 0; SegmentIndex <= SegmentCount; SegmentIndex++)
+		{
+			const float Angle = LC_2PI * SegmentIndex / SegmentCount;
+			Verts[SegmentIndex + 1] = lcVector3(cosf(Angle) * OverlayRotateRadius * OverlayScale, sinf(Angle) * OverlayRotateRadius * OverlayScale, 0.0f);
+		}
+
+		Context->SetColor(mColorTrackball);
+		Context->SetWorldMatrix(Mat);
+		Context->EnableColorBlend(true);
+		Context->SetVertexBufferPointer(Verts);
+		Context->SetVertexFormatPosition(3);
+		Context->DrawPrimitives(GL_TRIANGLE_FAN, 0, SegmentCount + 2);
+		Context->EnableColorBlend(false);
+	}
+
 	// Draw a disc showing the rotation amount.
 	if (MouseToolDistance.LengthSquared() != 0.0f && (TrackButton != lcTrackButton::None))
 	{
@@ -861,7 +886,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			}
 		}
 
-			const float HalfWidth = OverlayScale * 0.035f;
+		const float HalfWidth = OverlayScale * 0.035f;
 		constexpr int SegmentCount = 32;
 		lcVector3 Verts[SegmentCount * 6];
 		int NumVerts = 0;
@@ -930,7 +955,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		Context->DrawPrimitives(GL_TRIANGLES, 0, NumVerts);
 	}
 
-	// Draw tangent arrow and text.
+	// Draw rotation and text.
 	if (TrackButton != lcTrackButton::None && ((TrackTool == lcTrackTool::RotateX) || (TrackTool == lcTrackTool::RotateY) || (TrackTool == lcTrackTool::RotateZ) || (TrackTool == lcTrackTool::RotateCamera)))
 	{
 		lcVector4 Rotation;
@@ -1387,7 +1412,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 	lcMatrix33 RelativeRotation;
 
 	if (!ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation))
-		return lcTrackTool::RotateTrackBall;
+		return lcTrackTool::None;
 
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
@@ -1402,7 +1427,8 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 
 	lcVector3 Intersection;
 
-	if (lcSphereRayIntersection(OverlayCenter, OverlayRotateRadius * OverlayScale, StartEnd[0], StartEnd[1], Intersection))
+	const bool TrackballHit = lcSphereRayIntersection(OverlayCenter, OverlayRotateRadius * OverlayScale, StartEnd[0], StartEnd[1], Intersection);
+	if (TrackballHit)
 	{
 		const lcVector3 LocalIntersection = lcMul(Intersection - OverlayCenter, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
 		const float Epsilon = 0.25f * OverlayScale;
@@ -1454,5 +1480,5 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 			return lcTrackTool::RotateCamera;
 	}
 
-	return lcTrackTool::RotateTrackBall;
+	return TrackballHit ? lcTrackTool::RotateTrackBall : lcTrackTool::None;
 }

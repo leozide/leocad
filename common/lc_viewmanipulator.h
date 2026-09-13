@@ -30,7 +30,8 @@ protected:
 	static constexpr lcVector4 mColorXAxis = lcVector4(200.0f / 255.0f,  40.0f / 255.0f,  60.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorYAxis = lcVector4(120.0f / 255.0f, 200.0f / 255.0f,  20.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorZAxis = lcVector4( 70.0f / 255.0f, 130.0f / 255.0f, 240.0f / 255.0f, 255.0f / 255.0f);
-	static constexpr lcVector4 mColorCamera = lcVector4(200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f, 255.0f / 255.0f);
+	static constexpr lcVector4 mColorCamera = lcVector4(190.0f / 255.0f, 190.0f / 255.0f, 190.0f / 255.0f, 255.0f / 255.0f);
+	static constexpr lcVector4 mColorTrackball = lcVector4(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f, 30.0f / 255.0f);
 	static constexpr lcVector4 mColorXAxisSelected = lcVector4(219.0f / 255.0f,  72.0f / 255.0f,  89.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorYAxisSelected = lcVector4(145.0f / 255.0f, 233.0f / 255.0f,  37.0f / 255.0f, 255.0f / 255.0f);
 	static constexpr lcVector4 mColorZAxisSelected = lcVector4(118.0f / 255.0f, 162.0f / 255.0f, 244.0f / 255.0f, 255.0f / 255.0f);

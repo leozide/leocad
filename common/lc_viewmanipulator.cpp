@@ -789,7 +789,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 		lcMatrix44 Mat = lcMatrix44AffineInverse(Camera->mWorldView);
 		Mat.SetTranslation(WorldMatrix.GetTranslation());
 
-		const float HalfWidth = OverlayScale * 0.025;
+		const float HalfWidth = OverlayScale * 0.035f;
 		constexpr int SegmentCount = 48;
 		lcVector3 Verts[(SegmentCount + 1) * 2];
 		int NumVerts = 0;
@@ -861,7 +861,7 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 			}
 		}
 
-		const float HalfWidth = OverlayScale * 0.05;
+			const float HalfWidth = OverlayScale * 0.035f;
 		constexpr int SegmentCount = 32;
 		lcVector3 Verts[SegmentCount * 6];
 		int NumVerts = 0;
@@ -960,29 +960,69 @@ void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackT
 				break;
 		};
 
-		lcMatrix44 RotatedWorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
+		const bool CameraDisc = TrackTool == lcTrackTool::RotateCamera;
+		lcMatrix44 RotatedWorldMatrix;
+		if (CameraDisc)
+		{
+			RotatedWorldMatrix = lcMatrix44AffineInverse(Camera->mWorldView);
+			RotatedWorldMatrix.SetTranslation(WorldMatrix.GetTranslation());
+		}
+		else
+			RotatedWorldMatrix = lcMul(lcMatrix44FromAxisAngle(lcVector3(Rotation[1], Rotation[2], Rotation[3]), Rotation[0] * LC_DTOR), WorldMatrix);
 		Context->SetWorldMatrix(RotatedWorldMatrix);
 
 		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
 
 		// Draw text.
-		lcVector3 ScreenPos = mView->ProjectPoint(WorldMatrix.GetTranslation());
+		float StartAngle;
+		if (CameraDisc)
+			StartAngle = mView->GetCameraRotationStartAngle() * LC_RTOD;
+		else
+		{
+			lcVector3 MouseDownRay[2] =
+			{
+				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 0.0f),
+				lcVector3((float)mView->GetMouseDownX(), (float)mView->GetMouseDownY(), 1.0f)
+			};
+			mView->UnprojectPoints(MouseDownRay, 2);
+
+			const lcVector3 Center = RotatedWorldMatrix.GetTranslation();
+			const lcVector3 Normal = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), RotatedWorldMatrix));
+			const lcVector4 Plane(Normal, -lcDot(Normal, Center));
+			lcVector3 Intersection;
+
+			if (lcLineSegmentPlaneIntersection(&Intersection, MouseDownRay[0], MouseDownRay[1], Plane))
+			{
+				const lcVector3 LocalPoint = lcMul(Intersection - Center, lcMatrix33AffineInverse(lcMatrix33(RotatedWorldMatrix)));
+				StartAngle = -atan2f(LocalPoint[2], LocalPoint[1]) * LC_RTOD;
+			}
+			else
+				StartAngle = 0.0f;
+		}
+
+		const float StartVectorAngle = CameraDisc ? StartAngle : -StartAngle;
+		const float MidAngle = StartVectorAngle + (CameraDisc ? -0.5f : 0.5f) * Angle;
+		const float Radius = (CameraDisc ? OverlayRotateCameraRadius : OverlayRotateRadius) * OverlayScale * 0.5f;
+		const float MidAngleRadians = MidAngle * LC_DTOR;
+		const lcVector3 TextPosition = CameraDisc ? lcVector3(cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius, 0.0f) : lcVector3(0.0f, cosf(MidAngleRadians) * Radius, sinf(MidAngleRadians) * Radius);
+		const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
+		const float UIScale = mView->GetUIScale();
 
 		Context->SetMaterial(lcMaterialType::UnlitTextureModulate);
 		Context->SetWorldMatrix(lcMatrix44Identity());
 		Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth(), 0.0f, mView->GetHeight(), -1.0f, 1.0f));
+		Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
 		Context->BindTexture2D(gTexFont.GetTexture());
 		Context->EnableColorBlend(true);
 
 		char buf[32];
-		snprintf(buf, sizeof(buf), "[%.2f]", fabsf(Angle));
+		snprintf(buf, sizeof(buf), "%.2f", fabsf(Angle));
 
 		int cx, cy;
 		gTexFont.GetStringDimensions(&cx, &cy, buf);
 
-		Context->SetColor(0.8f, 0.8f, 0.0f, 1.0f);
-		gTexFont.PrintText(Context, ScreenPos[0] - (cx / 2), ScreenPos[1] + (cy / 2), 0.0f, buf);
+		Context->SetColor(0.9f, 0.9f, 0.9f, 1.0f);
+		gTexFont.PrintText(Context, ScreenPos[0] / UIScale - (cx / 2), ScreenPos[1] / UIScale + (cy / 2), 0.0f, buf);
 
 		Context->EnableColorBlend(false);
 	}

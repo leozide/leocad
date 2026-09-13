@@ -385,7 +385,10 @@ void lcRenderDialog::RenderBlender()
 	lcResult<void> ExportResult = lcGetActiveProject()->ExportCurrentStep(ModelFileName);
 
 	if (!ExportResult)
+	{
 		QMessageBox::warning(this, tr("Error"), ExportResult.error());
+		return;
+	}
 
 	ui->RenderProgress->setFormat("%p%");
 	QApplication::processEvents();

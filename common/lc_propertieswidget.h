@@ -19,6 +19,7 @@ protected slots:
 	void CategoryStateChanged(bool Expanded);
 	void KeyFrameChanged();
 	void BoolChanged();
+	void FloatEditingStarted();
 	void FloatEditingFinished();
 	void FloatEditingCanceled();
 	void FloatChanged(double Value);

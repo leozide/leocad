@@ -3906,8 +3906,13 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 
 void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value)
 {
-	BeginHistorySequence();
-	BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+	const bool PropertyEditActive = mActivePropertyEdit == PropertyId;
+
+	if (!PropertyEditActive)
+	{
+		BeginHistorySequence();
+		BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+	}
 
 	bool Modified = false;
 
@@ -3924,15 +3929,19 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 
 	if (!Modified)
 	{
-		DiscardHistorySequence();
+		if (!PropertyEditActive)
+			DiscardHistorySequence();
 
 		return;
 	}
 
-	EndEditHistory();
-	EndHistorySequence(lcObject::GetCheckpointString(PropertyId));
+	if (!PropertyEditActive)
+	{
+		EndEditHistory();
+		EndHistorySequence(lcObject::GetCheckpointString(PropertyId));
 
-	RemoveFirstUndoIfUnchanged();
+		RemoveFirstUndoIfUnchanged();
+	}
 
 	gMainWindow->UpdateSelectedObjects(false);
 
@@ -3949,16 +3958,60 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	}
 }
 
+void lcModel::BeginPropertyEdit(lcObjectPropertyId PropertyId)
+{
+	if (mActivePropertyEdit != lcObjectPropertyId::Count)
+		EndPropertyEdit(mActivePropertyEdit, true);
+
+	mActivePropertyEdit = PropertyId;
+	BeginHistorySequence();
+	BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+}
+
 void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
 {
-	// todo: right clicking or pressing esc while dragging the spinbox doesn't cancel
-	// we need to handle the shortcut override and undo the last undo history if it matches the property
+	if (mActivePropertyEdit != PropertyId)
+		return;
+
+	mActivePropertyEdit = lcObjectPropertyId::Count;
 
 	if (!Accept)
 	{
 		RevertHistorySequence();
 		return;
 	}
+
+	EndEditHistory();
+
+	switch (PropertyId)
+	{
+	case lcObjectPropertyId::ObjectPositionX:
+	case lcObjectPropertyId::ObjectPositionY:
+	case lcObjectPropertyId::ObjectPositionZ:
+	case lcObjectPropertyId::CameraPositionX:
+	case lcObjectPropertyId::CameraPositionY:
+	case lcObjectPropertyId::CameraPositionZ:
+	case lcObjectPropertyId::CameraTargetX:
+	case lcObjectPropertyId::CameraTargetY:
+	case lcObjectPropertyId::CameraTargetZ:
+	case lcObjectPropertyId::CameraUpX:
+	case lcObjectPropertyId::CameraUpY:
+	case lcObjectPropertyId::CameraUpZ:
+		EndHistorySequence(tr("Move"));
+		break;
+
+	case lcObjectPropertyId::ObjectRotationX:
+	case lcObjectPropertyId::ObjectRotationY:
+	case lcObjectPropertyId::ObjectRotationZ:
+		EndHistorySequence(tr("Rotate"));
+		break;
+
+	default:
+		EndHistorySequence(lcObject::GetCheckpointString(PropertyId));
+		break;
+	}
+
+	RemoveFirstUndoIfUnchanged();
 }
 
 bool lcModel::AnyPiecesSelected() const

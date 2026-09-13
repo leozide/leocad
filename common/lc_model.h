@@ -2,8 +2,8 @@
 
 #include "lc_math.h"
 #include "lc_commands.h"
+#include "lc_objectproperty.h"
 
-enum class lcObjectPropertyId;
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
 struct lcModelHistoryEditState;
@@ -400,6 +400,7 @@ public:
 	void SetSelectedPiecesStepHide(lcStep Step);
 
 	void SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, QVariant Value);
+	void BeginPropertyEdit(lcObjectPropertyId PropertyId);
 	void EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept);
 
 	void SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraProjection);
@@ -465,6 +466,7 @@ protected:
 	QStringList mFileLines;
 
 	std::vector<std::unique_ptr<lcModelHistory>> mHistorySequence;
+	lcObjectPropertyId mActivePropertyEdit = lcObjectPropertyId::Count;
 	const lcModelHistoryEntry* mSavedHistory = nullptr;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;

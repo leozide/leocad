@@ -76,18 +76,22 @@ void lcDoubleSpinBox::ValueChanged()
 
 void lcDoubleSpinBox::CancelEditing()
 {
-	if (mModified)
-	{
-		emit EditingCanceled();
-	}
+	if (!mEditing)
+		return;
+
+	mEditing = false;
+	mModified = false;
+	emit EditingCanceled();
 }
 
 void lcDoubleSpinBox::FinishEditing()
 {
-	if (mModified)
-	{
-		emit EditingFinished();
-	}
+	if (!mEditing)
+		return;
+
+	mEditing = false;
+	mModified = false;
+	emit EditingFinished();
 }
 
 void lcDoubleSpinBox::ReturnPressed()
@@ -222,6 +226,7 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 
 		switch (KeyEvent->key())
 		{
+		case Qt::Key_Escape:
 		case Qt::Key_Up:
 		case Qt::Key_Down:
 		case Qt::Key_PageUp:
@@ -240,8 +245,11 @@ bool lcDoubleSpinBox::event(QEvent* Event)
 void lcDoubleSpinBox::focusInEvent(QFocusEvent* FocusEvent)
 {
 	mModified = false;
+	mEditing = true;
 
 	QDoubleSpinBox::focusInEvent(FocusEvent);
+
+	emit EditingStarted();
 }
 
 void lcDoubleSpinBox::focusOutEvent(QFocusEvent* FocusEvent)

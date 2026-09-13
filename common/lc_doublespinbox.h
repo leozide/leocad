@@ -23,6 +23,7 @@ public:
 	void focusOutEvent(QFocusEvent* FocusEvent) override;
 
 signals:
+	void EditingStarted();
 	void EditingCanceled();
 	void EditingFinished();
 
@@ -55,6 +56,7 @@ protected:
 	};
 
 	bool mModified = false;
+	bool mEditing = false;
 	double mLadderWidgetInitialValue = 0.0;
 	QPoint mLastPosition;
 	DragMode mDragMode = DragMode::None;

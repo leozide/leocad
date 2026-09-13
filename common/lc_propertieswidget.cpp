@@ -249,6 +249,20 @@ void lcPropertiesWidget::AddBoolProperty(lcObjectPropertyId PropertyId, const QS
 	mLayoutRow++;
 }
 
+void lcPropertiesWidget::FloatEditingStarted()
+{
+	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
+	lcObjectPropertyId PropertyId = GetEditorWidgetPropertyId(Widget);
+
+	if (PropertyId == lcObjectPropertyId::Count)
+		return;
+
+	lcModel* Model = gMainWindow->GetActiveModel();
+
+	if (Model)
+		Model->BeginPropertyEdit(PropertyId);
+}
+
 void lcPropertiesWidget::FloatEditingFinished()
 {
 	lcDoubleSpinBox* Widget = qobject_cast<lcDoubleSpinBox*>(sender());
@@ -321,7 +335,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = Position - Center;
 
-		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
+		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
 	}
 	else if (PropertyId == lcObjectPropertyId::ObjectRotationX || PropertyId == lcObjectPropertyId::ObjectRotationY || PropertyId == lcObjectPropertyId::ObjectRotationZ)
 	{
@@ -343,7 +357,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 		else if (PropertyId == lcObjectPropertyId::ObjectRotationZ)
 			Rotation[2] = Value;
 
-		Model->RotateSelectedObjects(Rotation - InitialRotation, lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::PropertiesRotate);
+		Model->RotateSelectedObjects(Rotation - InitialRotation, lcModelTransformFlag::Relative, lcModelHistoryEditMerge::PropertiesRotate);
 
 		mLastRotation = Rotation;
 	}
@@ -376,7 +390,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
+		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -413,7 +427,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
+		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -450,7 +464,7 @@ void lcPropertiesWidget::ChangeFloatValue(lcObjectPropertyId PropertyId, float V
 
 		lcVector3 Distance = End - Start;
 
-		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
+		Model->MoveSelectedObjects(Distance, lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::PropertiesMove);
 
 		if (Camera)
 		{
@@ -564,6 +578,7 @@ void lcPropertiesWidget::AddFloatProperty(lcObjectPropertyId PropertyId, const Q
 
 	Widget->setRange(Min, Max);
 
+	connect(Widget, &lcDoubleSpinBox::EditingStarted, this, &lcPropertiesWidget::FloatEditingStarted);
 	connect(Widget, &lcDoubleSpinBox::EditingCanceled, this, &lcPropertiesWidget::FloatEditingCanceled);
 	connect(Widget, &lcDoubleSpinBox::EditingFinished, this, &lcPropertiesWidget::FloatEditingFinished);
 

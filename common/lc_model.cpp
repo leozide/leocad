@@ -3817,6 +3817,9 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 {
 	std::vector<lcPiece*> MovedPieces;
 
+	BeginHistorySequence();
+	BeginEditHistory(lcModelHistoryEditMerge::None);
+
 	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
 		lcPiece* Piece = PieceIt->get();
@@ -3834,10 +3837,11 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	}
 
 	if (MovedPieces.empty())
-		return;
+	{
+		DiscardHistorySequence();
 
-	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+		return;
+	}
 
 	for (lcPiece* Piece : MovedPieces)
 	{

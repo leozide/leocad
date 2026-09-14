@@ -1898,8 +1898,9 @@ void lcModel::SetModelProperties(const lcModelProperties& ModelProperties)
 void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence, bool Apply)
 {
 	bool SelectionChanged = false;
+	bool EditChanged = false;
 
-	auto RunAction=[this, &SelectionChanged](const lcModelHistory* ModelHistory, bool Apply)
+	auto RunAction=[this, &SelectionChanged, &EditChanged](const lcModelHistory* ModelHistory, bool Apply)
 	{
 		if (!ModelHistory)
 			return;
@@ -1915,6 +1916,7 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 		}
 		else if (dynamic_cast<const lcModelHistoryEdit*>(ModelHistory))
 		{
+			EditChanged = true;
 			SetCurrentStep(mCurrentStep);
 		}
 		else if (dynamic_cast<const lcModelHistoryProperties*>(ModelHistory))
@@ -1932,6 +1934,9 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 		for (auto ModelHistory = HistorySequence.rbegin(); ModelHistory != HistorySequence.rend(); ++ModelHistory)
 			RunAction(ModelHistory->get(), false);
 	}
+
+	if (EditChanged)
+		gMainWindow->UpdateInUseCategory();
 
 	if (SelectionChanged)
 		gMainWindow->UpdateSelectedObjects(true);

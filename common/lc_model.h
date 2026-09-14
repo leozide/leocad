@@ -126,6 +126,7 @@ struct lcModelHistoryEntry
 {
 	std::vector<std::unique_ptr<lcModelHistory>> HistorySequence;
 	QString Description;
+	quint64 Revision = 0;
 };
 
 class lcModel
@@ -432,7 +433,7 @@ protected:
 	void DiscardHistorySequence();
 	void RevertHistorySequence();
 	void RemoveFirstUndoIfUnchanged();
-	const lcModelHistoryEntry* GetFirstUndoChange() const;
+	quint64 GetCurrentHistoryRevision() const;
 
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();
@@ -468,7 +469,8 @@ protected:
 
 	std::vector<std::unique_ptr<lcModelHistory>> mHistorySequence;
 	lcObjectPropertyId mActivePropertyEdit = lcObjectPropertyId::Count;
-	const lcModelHistoryEntry* mSavedHistory = nullptr;
+	quint64 mSavedHistoryRevision = 0;
+	quint64 mNextHistoryRevision = 1;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mUndoHistory;
 	std::vector<std::unique_ptr<lcModelHistoryEntry>> mRedoHistory;
 

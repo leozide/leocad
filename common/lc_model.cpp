@@ -1972,7 +1972,7 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 	bool CanMerge = false;
 
-	if (mHistorySequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front().get() != mSavedHistory && mUndoHistory.front()->HistorySequence.size() == 1)
+	if (mHistorySequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front()->Revision != mSavedHistoryRevision && mUndoHistory.front()->HistorySequence.size() == 1)
 		CanMerge = mHistorySequence.front()->CanMergeWith(mUndoHistory.front()->HistorySequence.front().get());
 
 	if (!CanMerge)
@@ -1980,6 +1980,7 @@ void lcModel::EndHistorySequence(const QString& Description)
 		std::unique_ptr<lcModelHistoryEntry> ModelHistoryEntry = std::make_unique<lcModelHistoryEntry>(lcModelHistoryEntry());
 
 		ModelHistoryEntry->Description = Description;
+		ModelHistoryEntry->Revision = mNextHistoryRevision++;
 		ModelHistoryEntry->HistorySequence = std::move(mHistorySequence);
 
 		mUndoHistory.insert(mUndoHistory.begin(), std::move(ModelHistoryEntry));
@@ -2027,17 +2028,12 @@ void lcModel::RevertHistorySequence()
 
 bool lcModel::IsModified() const
 {
-	const lcModelHistoryEntry* FirstModifyAction = GetFirstUndoChange();
-
-	if (!FirstModifyAction)
-		return mSavedHistory != nullptr;
-	else
-		return mSavedHistory != FirstModifyAction;
+	return GetCurrentHistoryRevision() != mSavedHistoryRevision;
 }
 
 void lcModel::SetSaved()
 {
-	mSavedHistory = GetFirstUndoChange();
+	mSavedHistoryRevision = GetCurrentHistoryRevision();
 }
 
 void lcModel::RemoveFirstUndoIfUnchanged()
@@ -2055,13 +2051,13 @@ void lcModel::RemoveFirstUndoIfUnchanged()
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 
-const lcModelHistoryEntry* lcModel::GetFirstUndoChange() const
+quint64 lcModel::GetCurrentHistoryRevision() const
 {
 	for (const std::unique_ptr<lcModelHistoryEntry>& UndoEntry : mUndoHistory)
 		if (UndoEntry->HistorySequence.size() != 1 || !dynamic_cast<lcModelHistorySelect*>(UndoEntry->HistorySequence.front().get()))
-			return UndoEntry.get();
+			return UndoEntry->Revision;
 
-	return nullptr;
+	return 0;
 }
 
 void lcModel::SetActive(bool Active)

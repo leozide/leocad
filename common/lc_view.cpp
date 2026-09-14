@@ -3105,7 +3105,10 @@ void lcView::OnMouseMove()
 
 			// The rings rotate with the current gizmo frame, so derive the displayed
 			// axis from the current transform before determining its screen direction.
-			const lcVector3 DisplayAxis = lcNormalize(lcMul30(Axis, WorldMatrix));
+			lcVector3 DisplayAxis = lcNormalize(lcMul30(Axis, WorldMatrix));
+			if (WorldMatrix.Determinant() < 0.0f)
+				DisplayAxis = -DisplayAxis;
+
 			const lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
 			const float AxisDirection = lcDot(DisplayAxis, CameraAxis) < 0.0f ? -1.0f : 1.0f;
 			ActiveModel->UpdateRotateTool(Axis, AxisDirection * mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, true);
@@ -3124,7 +3127,14 @@ void lcView::OnMouseMove()
 				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mCamera->mWorldView);
 				lcVector3 RotationAxis = lcNormalize(lcMul30(LocalAxis, CameraWorldMatrix));
 				if (ActiveModel != mModel)
-					RotationAxis = lcNormalize(lcMul30(RotationAxis, lcMatrix44AffineInverse(mActiveSubmodelTransform)));
+				{
+					const lcMatrix44 ActiveSubmodelInverse = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+					RotationAxis = lcNormalize(lcMul30(RotationAxis, ActiveSubmodelInverse));
+
+					if (ActiveSubmodelInverse.Determinant() < 0.0f)
+						RotationAxis = -RotationAxis;
+				}
+
 				const lcMatrix33 IncrementalRotation = lcMatrix33FromAxisAngle(RotationAxis, Angle);
 
 				const bool Snapping = gMainWindow->GetAngleSnap() != 0.0f;
@@ -3187,10 +3197,17 @@ void lcView::OnMouseMove()
 			mCameraRotationAngle += Angle;
 			mCameraRotationLastMouseAngle = MouseAngle;
 
-				lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
-				if (ActiveModel != mModel)
-					CameraAxis = lcNormalize(lcMul30(CameraAxis, lcMatrix44AffineInverse(mActiveSubmodelTransform)));
-				ActiveModel->UpdateRotateTool(CameraAxis, mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, false);
+			lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+			if (ActiveModel != mModel)
+			{
+				const lcMatrix44 ActiveSubmodelInverse = lcMatrix44AffineInverse(mActiveSubmodelTransform);
+				CameraAxis = lcNormalize(lcMul30(CameraAxis, ActiveSubmodelInverse));
+
+				if (ActiveSubmodelInverse.Determinant() < 0.0f)
+					CameraAxis = -CameraAxis;
+			}
+
+			ActiveModel->UpdateRotateTool(CameraAxis, mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, false);
 		}
 		break;
 

@@ -1991,7 +1991,7 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 	mRedoHistory.clear();
 
-	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateModified(mProject ? mProject->IsModified() : IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 	gMainWindow->UpdateTimeline(true, false);
 
@@ -2045,7 +2045,7 @@ void lcModel::RemoveFirstUndoIfUnchanged()
 
 	mUndoHistory.erase(mUndoHistory.begin());
 
-	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateModified(mProject ? mProject->IsModified() : IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 
@@ -4903,7 +4903,7 @@ void lcModel::UndoAction()
 	mUndoHistory.erase(mUndoHistory.begin());
 	mRedoHistory.insert(mRedoHistory.begin(), std::move(Undo));
 
-	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateModified(mProject ? mProject->IsModified() : IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 
@@ -4919,7 +4919,7 @@ void lcModel::RedoAction()
 	mRedoHistory.erase(mRedoHistory.begin());
 	mUndoHistory.insert(mUndoHistory.begin(), std::move(Redo));
 
-	gMainWindow->UpdateModified(IsModified());
+	gMainWindow->UpdateModified(mProject ? mProject->IsModified() : IsModified());
 	gMainWindow->UpdateUndoRedo(!mUndoHistory.empty() ? mUndoHistory.front()->Description : nullptr, !mRedoHistory.empty() ? mRedoHistory.front()->Description : nullptr);
 }
 

@@ -1812,34 +1812,28 @@ template<typename StateType, typename ObjectType>
 void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects)
 {
 	std::vector<std::unique_ptr<ObjectType>> NewObjects;
+	std::unordered_map<uint32_t, size_t> ObjectIndices;
 
 	NewObjects.reserve(ObjectStates.size());
+	ObjectIndices.reserve(Objects.size());
+
+	for (size_t ObjectIndex = 0; ObjectIndex < Objects.size(); ObjectIndex++)
+		ObjectIndices.emplace(static_cast<uint32_t>(Objects[ObjectIndex]->GetId()), ObjectIndex);
 
 	for (const StateType& ObjectState : ObjectStates)
 	{
-		auto ObjectId = ObjectState.Id;
-		bool Found = false;
+		const auto ObjectIt = ObjectIndices.find(static_cast<uint32_t>(ObjectState.Id));
 
-		for (auto ObjectIt = Objects.begin(); ObjectIt != Objects.end(); ++ObjectIt)
-		{
-			ObjectType* Object = ObjectIt->get();
-
-			if (Object->GetId() == ObjectId)
-			{
-				NewObjects.emplace_back(std::move(*ObjectIt));
-				Objects.erase(ObjectIt);
-				Found = true;
-				break;
-			}
-		}
-
-		if (!Found)
+		if (ObjectIt != ObjectIndices.end())
+			NewObjects.emplace_back(std::move(Objects[ObjectIt->second]));
+		else
 			NewObjects.emplace_back(new ObjectType());
 	}
 
 	if constexpr(std::is_same_v<ObjectType, lcCamera>)
 		for (const std::unique_ptr<lcCamera>& Camera : Objects)
-			RemoveCameraFromViews(Camera.get());
+			if (Camera)
+				RemoveCameraFromViews(Camera.get());
 
 	Objects = std::move(NewObjects);
 

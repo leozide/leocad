@@ -85,7 +85,7 @@ static void lcRegisterShellFileTypes()
 
 	GetModuleFileName(nullptr, LongModulePath, _MAX_PATH);
 	if (GetShortPathName(LongModulePath, ModulePath, _MAX_PATH) == 0)
-		lstrcpy(modulePath, longModulePath);
+		lstrcpy(ModulePath, LongModulePath);
 
 	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project"), REG_SZ, TEXT("LeoCAD Project"), lstrlen(TEXT("LeoCAD Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
 		return;

@@ -1166,7 +1166,7 @@ void lcModel::Cut()
 	Copy();
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	RemoveSelectedObjects();
 
@@ -1222,7 +1222,7 @@ void lcModel::Paste(bool PasteToCurrentStep)
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	Merge(std::move(Model));
 
@@ -1249,7 +1249,7 @@ void lcModel::DuplicateSelectedPieces()
 	}
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcObject*> NewPieces;
 	lcPiece* Focus = nullptr;
@@ -1849,9 +1849,15 @@ void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 	LoadObjectHistoryState(HistoryState.Lights, mLights);
 }
 
-void lcModel::BeginEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge)
+void lcModel::BeginEditHistory()
 {
-	std::unique_ptr<lcModelHistoryEdit> ModelHistoryEdit = std::make_unique<lcModelHistoryEdit>(ModelHistoryEditMerge);
+	BeginMergeableEditHistory(lcModelHistoryEditMerge::None, lcObjectPropertyId::Count);
+}
+
+void lcModel::BeginMergeableEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge, lcObjectPropertyId PropertyId)
+{
+	const lcModelHistoryEditMergeKey MergeKey = { ModelHistoryEditMerge, PropertyId, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false };
+	std::unique_ptr<lcModelHistoryEdit> ModelHistoryEdit = std::make_unique<lcModelHistoryEdit>(MergeKey);
 
 	ModelHistoryEdit->SaveStartState(this);
 
@@ -2146,7 +2152,7 @@ void lcModel::InsertStep(lcStep Step)
 void lcModel::InsertStepAction(lcStep Step)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	InsertStep(Step);
 
@@ -2159,7 +2165,7 @@ void lcModel::InsertStepAction(lcStep Step)
 void lcModel::RemoveStepAction(lcStep Step)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->RemoveTime(Step, 1);
@@ -2231,7 +2237,7 @@ void lcModel::GroupSelection()
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	lcGroup* NewGroup = GetGroup(Dialog.mName, true);
 
@@ -2265,7 +2271,7 @@ void lcModel::UngroupSelection()
 	std::set<lcGroup*> SelectedGroups;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2338,7 +2344,7 @@ void lcModel::AddSelectedPiecesToGroup()
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2362,7 +2368,7 @@ void lcModel::RemoveFocusPieceFromGroup()
 	bool Modified = false;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -2397,7 +2403,7 @@ void lcModel::ShowEditGroupsDialog()
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::function<void(const lcEditGroupsDialog::GroupInfo&, lcGroup*)> UpdateGroups=[this, &UpdateGroups](const lcEditGroupsDialog::GroupInfo& GroupInfo, lcGroup* ParentGroup)
 	{
@@ -2633,7 +2639,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 	};
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	if (Last)
 	{
@@ -2832,7 +2838,7 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 
 	BeginHistorySequence();
 
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	FocusPiece->SetPosition(Transform.value().GetTranslation(), mCurrentStep, gMainWindow->GetAddKeys());
 	FocusPiece->SetRotation(lcMatrix33(Transform.value()), mCurrentStep, gMainWindow->GetAddKeys());
@@ -2927,7 +2933,7 @@ void lcModel::DeleteSelectedObjects()
 	}
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = RemoveSelectedObjects();
 
@@ -2949,7 +2955,7 @@ void lcModel::DeleteSelectedObjects()
 void lcModel::ResetSelectedPiecesPivotPoint()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
@@ -2962,7 +2968,7 @@ void lcModel::ResetSelectedPiecesPivotPoint()
 void lcModel::RemoveSelectedObjectsKeyFrames()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected())
@@ -2992,7 +2998,7 @@ void lcModel::InsertControlPoint()
 	gMainWindow->GetActiveView()->GetRayUnderPointer(Start, End);
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = Piece->InsertControlPoint(Start, End);
 
@@ -3017,7 +3023,7 @@ void lcModel::RemoveFocusedControlPoint()
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = Piece->RemoveFocusedControlPoint();
 
@@ -3037,7 +3043,7 @@ void lcModel::RemoveFocusedControlPoint()
 void lcModel::ShowSelectedPiecesEarlier()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcPiece*> MovedPieces;
 
@@ -3086,7 +3092,7 @@ void lcModel::ShowSelectedPiecesEarlier()
 void lcModel::ShowSelectedPiecesLater()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcPiece*> MovedPieces;
 
@@ -3136,7 +3142,7 @@ void lcModel::ShowSelectedPiecesLater()
 void lcModel::InsertStepAndMoveSelectedPieces(lcStep Step)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	InsertStep(Step);
 
@@ -3178,7 +3184,7 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -3227,7 +3233,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcPiece*> Pieces;
 	lcPiece* ModelPiece = nullptr;
@@ -3297,7 +3303,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 void lcModel::InlineSelectedModels()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcObject*> NewPieces;
 	bool Modified = false;
@@ -3428,7 +3434,7 @@ void lcModel::MoveSelectedObjects(const lcVector3& PieceDistance, const lcVector
 	if (Flags.testFlag(lcModelTransformFlag::Checkpoint))
 	{
 		BeginHistorySequence();
-		BeginEditHistory(ModelHistoryEditMerge);
+		BeginMergeableEditHistory(ModelHistoryEditMerge, lcObjectPropertyId::Count);
 	}
 
 	bool Moved = false;
@@ -3541,7 +3547,7 @@ void lcModel::RotateSelectedObjects(const lcMatrix33& InputRotationMatrix, lcMod
 	if (Flags.testFlag(lcModelTransformFlag::Checkpoint))
 	{
 		BeginHistorySequence();
-		BeginEditHistory(ModelHistoryEditMerge);
+		BeginMergeableEditHistory(ModelHistoryEditMerge, lcObjectPropertyId::Count);
 	}
 
 	lcMatrix33 RotationMatrix = InputRotationMatrix;
@@ -3759,7 +3765,7 @@ void lcModel::TransformSelectedObjects(lcTransformType TransformType, const lcVe
 void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObjectPropertyId PropertyId, bool KeyFrame)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -3785,7 +3791,7 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 void lcModel::SetSelectedPiecesColorIndex(int ColorIndex)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -3817,7 +3823,7 @@ void lcModel::SetSelectedPiecesStepShow(lcStep Step)
 	std::vector<lcPiece*> MovedPieces;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); )
 	{
@@ -3860,7 +3866,7 @@ void lcModel::SetSelectedPiecesStepHide(lcStep Step)
 	bool Modified = false;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -3894,7 +3900,7 @@ void lcModel::SetCameraProjection(lcCamera* Camera, lcCameraProjection CameraPro
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::None);
+		BeginEditHistory();
 	}
 
 	Camera->SetProjection(CameraProjection);
@@ -3917,7 +3923,7 @@ void lcModel::SetObjectsProperty(const std::vector<lcObject*>& Objects, lcObject
 	if (!PropertyEditActive)
 	{
 		BeginHistorySequence();
-		BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+		BeginMergeableEditHistory(lcModelHistoryEditMerge::PropertiesEdit, PropertyId);
 	}
 
 	bool Modified = false;
@@ -3971,7 +3977,7 @@ void lcModel::BeginPropertyEdit(lcObjectPropertyId PropertyId)
 
 	mActivePropertyEdit = PropertyId;
 	BeginHistorySequence();
-	BeginEditHistory(static_cast<lcModelHistoryEditMerge>(static_cast<uint32_t>(lcModelHistoryEditMerge::PropertiesEdit) | static_cast<uint32_t>(PropertyId)));
+	BeginMergeableEditHistory(lcModelHistoryEditMerge::PropertiesEdit, PropertyId);
 }
 
 void lcModel::EndPropertyEdit(lcObjectPropertyId PropertyId, bool Accept)
@@ -4641,7 +4647,7 @@ void lcModel::SelectGroup(lcGroup* TopGroup, bool Select)
 void lcModel::HideSelectedPieces()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -4675,7 +4681,7 @@ void lcModel::HideSelectedPieces()
 void lcModel::HideUnselectedPieces()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -4706,7 +4712,7 @@ void lcModel::HideUnselectedPieces()
 void lcModel::UnhideSelectedPieces()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -4737,7 +4743,7 @@ void lcModel::UnhideSelectedPieces()
 void lcModel::UnhideAllPieces()
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	bool Modified = false;
 
@@ -4802,7 +4808,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 	int ReplacedCount = 0;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	if (!FindAll)
 	{
@@ -4939,7 +4945,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Move:
 		case lcTool::Rotate:
 			BeginHistorySequence();
-			BeginEditHistory(lcModelHistoryEditMerge::None);
+			BeginEditHistory();
 			break;
 
 		case lcTool::Eraser:
@@ -4954,7 +4960,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 			if (!View->GetCamera()->IsSimple())
 			{
 				BeginHistorySequence();
-				BeginEditHistory(lcModelHistoryEditMerge::None);
+				BeginEditHistory();
 			}
 			break;
 
@@ -5051,7 +5057,7 @@ bool lcModel::InsertPieceToolClicked()
 		return false;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	lcPiece* Piece = nullptr;
 
@@ -5085,7 +5091,7 @@ bool lcModel::InsertPieceToolClicked()
 void lcModel::InsertCameraToolClicked(const lcVector3& Position)
 {
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	lcCamera* Camera = new lcCamera(false, Position, GetSelectionOrModelCenter());
 
@@ -5126,7 +5132,7 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 	}
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	lcLight* Light = new lcLight(Position, LightType);
 
@@ -5258,7 +5264,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 		return;
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	switch (Object->GetType())
 	{
@@ -5324,7 +5330,7 @@ void lcModel::PaintToolClicked(lcObject* Object)
 	if (Piece->GetColorIndex() != gMainWindow->mColorIndex)
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::None);
+		BeginEditHistory();
 
 		Piece->SetColorIndex(gMainWindow->mColorIndex);
 
@@ -5388,7 +5394,7 @@ void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVec
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::None);
+		BeginEditHistory();
 	}
 
 	Camera->ZoomRegion(AspectRatio, Position, TargetPosition, Corners, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5420,7 +5426,7 @@ void lcModel::LookAt(lcCamera* Camera)
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::None);
+		BeginEditHistory();
 	}
 
 	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5440,7 +5446,7 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::KeyboardMoveCamera);
+		BeginMergeableEditHistory(lcModelHistoryEditMerge::KeyboardMoveCamera, lcObjectPropertyId::Count);
 	}
 
 	Camera->MoveRelative(Direction, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5477,7 +5483,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::None);
+		BeginEditHistory();
 	}
 
 	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
@@ -5499,7 +5505,7 @@ void lcModel::Zoom(lcCamera* Camera, float Amount)
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginEditHistory(lcModelHistoryEditMerge::KeyboardZoom);
+		BeginMergeableEditHistory(lcModelHistoryEditMerge::KeyboardZoom, lcObjectPropertyId::Count);
 	}
 
 	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());
@@ -5559,7 +5565,7 @@ void lcModel::ShowArrayDialog()
 	}
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	std::vector<lcObject*> NewPieces;
 
@@ -5628,7 +5634,7 @@ void lcModel::ShowMinifigDialog()
 	gMainWindow->GetActiveView()->MakeCurrent();
 
 	BeginHistorySequence();
-	BeginEditHistory(lcModelHistoryEditMerge::None);
+	BeginEditHistory();
 
 	lcGroup* Group = AddGroup(tr("Minifig #"), nullptr);
 	std::vector<lcObject*> Pieces;

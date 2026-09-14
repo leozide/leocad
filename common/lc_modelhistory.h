@@ -90,13 +90,26 @@ enum class lcModelHistoryEditMerge
 	KeyboardMoveCamera,
 	PropertiesMove,
 	PropertiesRotate,
-	PropertiesEdit = 0x40000000
+	PropertiesEdit
+};
+
+struct lcModelHistoryEditMergeKey
+{
+	lcModelHistoryEditMerge Operation;
+	lcObjectPropertyId PropertyEditId = lcObjectPropertyId::Count;
+	lcStep Step;
+	bool AddKeys;
+
+	bool operator==(const lcModelHistoryEditMergeKey& Other) const
+	{
+		return Operation == Other.Operation && PropertyEditId == Other.PropertyEditId && Step == Other.Step && AddKeys == Other.AddKeys;
+	}
 };
 
 class lcModelHistoryEdit : public lcModelHistory
 {
 public:
-	lcModelHistoryEdit(lcModelHistoryEditMerge ModelHistoryEditMerge);
+	lcModelHistoryEdit(lcModelHistoryEditMergeKey MergeKey);
 	virtual ~lcModelHistoryEdit();
 
 	void SaveStartState(const lcModel* Model) override;
@@ -114,7 +127,7 @@ protected:
 
 	lcModelHistoryEditState mStartState;
 	lcModelHistoryEditState mEndState;
-	lcModelHistoryEditMerge mMerge;
+	lcModelHistoryEditMergeKey mMergeKey;
 };
 
 class lcModelHistoryProperties : public lcModelHistory

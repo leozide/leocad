@@ -421,7 +421,8 @@ protected:
 	void InvertPieceSelection();
 	void AddToSelection(const std::vector<lcObject*>& Objects);
 	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
-	void BeginEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge);
+	void BeginEditHistory();
+	void BeginMergeableEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge, lcObjectPropertyId PropertyId);
 	void EndEditHistory();
 	void SetModelProperties(const lcModelProperties& ModelProperties);
 

@@ -147,8 +147,8 @@ bool operator!=(const lcModelHistoryEditState& a, const lcModelHistoryEditState&
 	return a.Groups != b.Groups || a.Pieces != b.Pieces || a.Cameras != b.Cameras || a.Lights != b.Lights;
 }
 
-lcModelHistoryEdit::lcModelHistoryEdit(lcModelHistoryEditMerge ModelHistoryEditMerge)
-	: mMerge(ModelHistoryEditMerge)
+lcModelHistoryEdit::lcModelHistoryEdit(lcModelHistoryEditMergeKey MergeKey)
+	: mMergeKey(MergeKey)
 {
 }
 
@@ -213,7 +213,7 @@ bool lcModelHistoryEdit::CanMergeWith(const lcModelHistory* Other) const
 {
 	const lcModelHistoryEdit* OtherModelHistoryEdit = dynamic_cast<const lcModelHistoryEdit*>(Other);
 
-	return OtherModelHistoryEdit && mMerge != lcModelHistoryEditMerge::None && mMerge == OtherModelHistoryEdit->mMerge;
+	return OtherModelHistoryEdit && mMergeKey.Operation != lcModelHistoryEditMerge::None && mMergeKey == OtherModelHistoryEdit->mMergeKey;
 }
 
 void lcModelHistoryEdit::MergeWith(lcModelHistory* Other)

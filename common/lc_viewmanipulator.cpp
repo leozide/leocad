@@ -826,7 +826,7 @@ void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrack
 	lcVector3 ViewDir = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
 	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(lcMatrix33(WorldMatrix));
 	ViewDir = lcMul(ViewDir, WorldToLocalMatrix);
-	const lcVector3 FrontVector = lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix);
+	const lcVector3 FrontVector = lcNormalize(lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix));
 
 	Context->SetWorldMatrix(WorldMatrix);
 
@@ -889,8 +889,22 @@ void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrack
 
 			const lcVector3 NodeCenter1 = v1 * (mOverlayRotateRadius * OverlayScale);
 			const lcVector3 NodeCenter2 = v2 * (mOverlayRotateRadius * OverlayScale);
-			const lcVector3 ScreenPerpendicular1 = lcNormalize(lcCross(FrontVector, t1));
-			const lcVector3 ScreenPerpendicular2 = lcNormalize(lcCross(FrontVector, t2));
+			lcVector3 ScreenPerpendicular1 = lcCross(FrontVector, t1);
+			lcVector3 ScreenPerpendicular2 = lcCross(FrontVector, t2);
+			const float ScreenPerpendicularLengthSquared1 = ScreenPerpendicular1.LengthSquared();
+			const float ScreenPerpendicularLengthSquared2 = ScreenPerpendicular2.LengthSquared();
+
+			if (ScreenPerpendicularLengthSquared1 < 0.000001f)
+				ScreenPerpendicular1 = ScreenPerpendicular2;
+			else if (ScreenPerpendicularLengthSquared2 < 0.000001f)
+				ScreenPerpendicular2 = ScreenPerpendicular1;
+
+			ScreenPerpendicular1 = lcNormalize(ScreenPerpendicular1);
+			ScreenPerpendicular2 = lcNormalize(ScreenPerpendicular2);
+
+			if (lcDot(ScreenPerpendicular1, ScreenPerpendicular2) < 0.0f)
+				ScreenPerpendicular2 = -ScreenPerpendicular2;
+
 			const lcVector3 Left1 = NodeCenter1 - (ScreenPerpendicular1 * HalfWidth);
 			const lcVector3 Right1 = NodeCenter1 + (ScreenPerpendicular1 * HalfWidth);
 			const lcVector3 Left2 = NodeCenter2 - (ScreenPerpendicular2 * HalfWidth);

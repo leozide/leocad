@@ -972,7 +972,13 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 
 	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
 
-	SetPieceInfo(Info, mID, true, false);
+	if (mPieceInfo != Info)
+	{
+		if (mPieceInfo)
+			lcGetPiecesLibrary()->ReleasePieceInfo(mPieceInfo);
+
+		SetPieceInfo(Info, mID, true, false);
+	}
 
 	UpdateMesh();
 

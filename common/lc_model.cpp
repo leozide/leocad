@@ -1967,7 +1967,7 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 	bool CanMerge = false;
 
-	if (mHistorySequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front()->HistorySequence.size() == 1)
+	if (mHistorySequence.size() == 1 && !mUndoHistory.empty() && mUndoHistory.front().get() != mSavedHistory && mUndoHistory.front()->HistorySequence.size() == 1)
 		CanMerge = mHistorySequence.front()->CanMergeWith(mUndoHistory.front()->HistorySequence.front().get());
 
 	if (!CanMerge)

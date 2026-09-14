@@ -1448,14 +1448,20 @@ void lcView::DrawGrid()
 
 	if (DrawInsertPreview)
 	{
-		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : mModel->GetPreviewInsertPieceInfo())
+		const lcModel* PreviewModel = GetActiveModel();
+
+		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : PreviewModel->GetPreviewInsertPieceInfo())
 		{
 			lcVector3 Points[8];
 			lcGetBoxCorners(PreviewInsertPieceInfo.Info->GetBoundingBox(), Points);
+			lcMatrix44 PreviewTransform = PreviewInsertPieceInfo.Transform;
+
+			if (PreviewModel != mModel)
+				PreviewTransform = lcMul(PreviewTransform, mActiveSubmodelTransform);
 
 			for (int i = 0; i < 8; i++)
 			{
-				lcVector3 Point = lcMul31(Points[i], PreviewInsertPieceInfo.Transform);
+				lcVector3 Point = lcMul31(Points[i], PreviewTransform);
 
 				Min = lcMin(Point, Min);
 				Max = lcMax(Point, Max);
@@ -3269,7 +3275,7 @@ void lcView::OnMouseLeave()
 		lcModel* ActiveModel = GetActiveModel();
 
 		if (ActiveModel)
-			ActiveModel->UpdateAllViews();
+			ActiveModel->SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>());
 	}
 }
 

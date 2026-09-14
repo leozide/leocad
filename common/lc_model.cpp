@@ -3220,11 +3220,26 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 	}
 }
 
-void lcModel::RenamePiece(PieceInfo* Info)
+void lcModel::RenamePiece(PieceInfo* Info, const QString& OldName, const QString& NewName)
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->mPieceInfo == Info)
 			Piece->UpdateID();
+
+	const bool RenameModelProperties = mPieceInfo == Info;
+	auto RenameHistorySequence = [&OldName, &NewName, RenameModelProperties](std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence)
+	{
+		for (const std::unique_ptr<lcModelHistory>& ModelHistory : HistorySequence)
+			ModelHistory->RenamePiece(OldName, NewName, RenameModelProperties);
+	};
+
+	RenameHistorySequence(mHistorySequence);
+
+	for (const std::unique_ptr<lcModelHistoryEntry>& HistoryEntry : mUndoHistory)
+		RenameHistorySequence(HistoryEntry->HistorySequence);
+
+	for (const std::unique_ptr<lcModelHistoryEntry>& HistoryEntry : mRedoHistory)
+		RenameHistorySequence(HistoryEntry->HistorySequence);
 }
 
 void lcModel::MoveSelectionToModel(lcModel* Model)

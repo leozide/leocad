@@ -209,6 +209,21 @@ bool lcModelHistoryEdit::StateChanged() const
 	return mStartState != mEndState;
 }
 
+void lcModelHistoryEdit::RenamePiece(const QString& OldName, const QString& NewName, bool RenameModelProperties)
+{
+	Q_UNUSED(RenameModelProperties);
+
+	auto RenamePieceId = [&OldName, &NewName](lcModelHistoryEditState& State)
+	{
+		for (lcPieceHistoryState& Piece : State.Pieces)
+			if (Piece.PieceId.compare(OldName, Qt::CaseInsensitive) == 0)
+				Piece.PieceId = NewName;
+	};
+
+	RenamePieceId(mStartState);
+	RenamePieceId(mEndState);
+}
+
 bool lcModelHistoryEdit::CanMergeWith(const lcModelHistory* Other) const
 {
 	const lcModelHistoryEdit* OtherModelHistoryEdit = dynamic_cast<const lcModelHistoryEdit*>(Other);
@@ -247,6 +262,26 @@ void lcModelHistoryProperties::LoadEndState(lcModel* Model) const
 bool lcModelHistoryProperties::StateChanged() const
 {
 	return mStartState != mEndState;
+}
+
+void lcModelHistoryProperties::RenamePiece(const QString& OldName, const QString& NewName, bool RenameModelProperties)
+{
+	if (!RenameModelProperties)
+		return;
+
+	auto RenameModel = [&OldName, &NewName](lcModelProperties& Properties)
+	{
+		if (Properties.mFileName.compare(OldName, Qt::CaseInsensitive) != 0)
+			return;
+
+		if (Properties.mModelName == Properties.mFileName)
+			Properties.mModelName = NewName;
+
+		Properties.mFileName = NewName;
+	};
+
+	RenameModel(mStartState);
+	RenameModel(mEndState);
 }
 
 void lcModelHistoryProperties::SaveState(lcModelProperties& State, const lcModel* Model)

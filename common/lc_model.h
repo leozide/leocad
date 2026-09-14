@@ -258,7 +258,7 @@ public:
 	void ShowSelectedPiecesLater();
 	void InsertStepAndMoveSelectedPieces(lcStep Step);
 	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);
-	void RenamePiece(PieceInfo* Info);
+	void RenamePiece(PieceInfo* Info, const QString& OldName, const QString& NewName);
 
 	void MoveSelectionToModel(lcModel* Model);
 	void InlineSelectedModels();

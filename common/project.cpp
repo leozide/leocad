@@ -327,11 +327,12 @@ void Project::ShowModelListDialog()
 		}
 		else if (Model->GetProperties().mFileName != Entry.Name)
 		{
+			const QString OldName = Model->GetProperties().mFileName;
 			Model->SetFileName(Entry.Name);
 			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData());
 
 			for (const std::unique_ptr<lcModel> &CheckModel : mModels)
-				CheckModel->RenamePiece(Model->GetPieceInfo());
+				CheckModel->RenamePiece(Model->GetPieceInfo(), OldName, Entry.Name);
 
 			mModified = true;
 		}

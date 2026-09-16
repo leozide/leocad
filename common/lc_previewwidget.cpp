@@ -53,6 +53,7 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 void lcPreviewDockWidget::UpdatePreview()
 {
 	mPreview->UpdatePreview();
+	mLabel->setText(mPreview->GetDescription());
 }
 
 void lcPreviewDockWidget::ClearPreview()

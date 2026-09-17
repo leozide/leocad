@@ -495,12 +495,12 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		lcPiece* MousePiece = reinterpret_cast<lcPiece*>(ObjectRayTest.ObjectSection.Object);
 		lcTrainTrackInfo* RayTrackInfo = MousePiece->mPieceInfo->GetTrainTrackInfo();
 		lcTrainTrackInfo* InfoTrackInfo = Info->GetTrainTrackInfo();
+		const lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 
 		if (RayTrackInfo && InfoTrackInfo)
 		{
 			ActiveModel->UpdateTrainTrackConnections(MousePiece, IgnoreSelected);
 
-			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
 			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, Info, MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
@@ -509,27 +509,50 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 				return { TrainTracks, true };
 		}
 
-		lcVector3 Position = ObjectRayTest.PieceInfoRayTest.Plane;
+		const lcMatrix44& HitTransform = ObjectRayTest.PieceInfoRayTest.Transform;
+		const lcVector3& HitPlane = ObjectRayTest.PieceInfoRayTest.Plane;
+		const PieceInfo* HitInfo = ObjectRayTest.PieceInfoRayTest.Info ? ObjectRayTest.PieceInfoRayTest.Info : MousePiece->mPieceInfo;
+		const lcBoundingBox& HitBoundingBox = HitInfo->GetBoundingBox();
+		const lcBoundingBox& InsertBoundingBox = Info->GetBoundingBox();
+		lcVector3 Position = lcMul31(ClosestPoint, lcMatrix44AffineInverse(HitTransform));
 
-		if (Position.x > 0.0f)
-			Position.x += fabsf(Info->GetBoundingBox().Min.x);
-		else if (Position.x < 0.0f)
-			Position.x -= fabsf(Info->GetBoundingBox().Max.x);
-		else if (Position.y > 0.0f)
-			Position.y += fabsf(Info->GetBoundingBox().Min.y);
-		else if (Position.y < 0.0f)
-			Position.y -= fabsf(Info->GetBoundingBox().Max.y);
-		else if (Position.z > 0.0f)
-			Position.z += fabsf(Info->GetBoundingBox().Min.z);
-		else if (Position.z < 0.0f)
-			Position.z -= fabsf(Info->GetBoundingBox().Max.z);
+		// Anchor the snap grid to the bounding boxes so pieces with different stud parity remain aligned.
+		const lcVector3 BoundingBoxSnapOffset = HitBoundingBox.Min - InsertBoundingBox.Min;
+		lcVector3 SnapOffset(0.0f, 0.0f, 0.0f);
+		int HitAxis = -1;
+
+		for (int Axis = 0; Axis < 3; Axis++)
+		{
+			if (HitPlane[Axis] > 0.0f)
+				Position[Axis] = HitPlane[Axis] + fabsf(InsertBoundingBox.Min[Axis]);
+			else if (HitPlane[Axis] < 0.0f)
+				Position[Axis] = HitPlane[Axis] - fabsf(InsertBoundingBox.Max[Axis]);
+			else
+				continue;
+
+			HitAxis = Axis;
+			break;
+		}
+
+		if (HitAxis != -1)
+		{
+			SnapOffset = BoundingBoxSnapOffset;
+			SnapOffset[HitAxis] = 0.0f;
+		}
 
 		if (gMainWindow->GetRelativeTransform())
-			Position = lcMul31(ActiveModel->SnapPosition(Position), ObjectRayTest.PieceInfoRayTest.Transform);
+		{
+			Position = ActiveModel->SnapPosition(Position - SnapOffset) + SnapOffset;
+			Position = lcMul31(Position, HitTransform);
+		}
 		else
-			Position = ActiveModel->SnapPosition(lcMul31(Position, ObjectRayTest.PieceInfoRayTest.Transform));
+		{
+			const lcVector3 WorldSnapOffset = lcMul31(SnapOffset, HitTransform);
+			Position = lcMul31(Position, HitTransform);
+			Position = ActiveModel->SnapPosition(Position - WorldSnapOffset) + WorldSnapOffset;
+		}
 
-		lcMatrix44 WorldMatrix = ObjectRayTest.PieceInfoRayTest.Transform;
+		lcMatrix44 WorldMatrix = HitTransform;
 		WorldMatrix.SetTranslation(Position);
 
 		return { { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } }, false };

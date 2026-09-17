@@ -7,7 +7,6 @@
 #include "lc_string.h"
 
 #ifdef Q_OS_WIN
-#include <windows.h>
 #include <TlHelp32.h>
 #endif
 

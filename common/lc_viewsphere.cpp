@@ -5,15 +5,17 @@
 #include "lc_context.h"
 #include "lc_stringcache.h"
 #include "lc_application.h"
+#include "lc_glextensions.h"
 #include "image.h"
 #include "lc_texture.h"
 
 lcTexture* lcViewSphere::mTexture;
 lcVertexBuffer lcViewSphere::mVertexBuffer;
 lcIndexBuffer lcViewSphere::mIndexBuffer;
+int lcViewSphere::mSphereIndexCount;
 const float lcViewSphere::mRadius = 1.0f;
 const float lcViewSphere::mHighlightRadius = 0.35f;
-const int lcViewSphere::mSubdivisions = 7;
+const int lcViewSphere::mSubdivisions = 24;
 
 lcViewSphere::lcViewSphere(lcView* View)
 	: mView(View)
@@ -60,7 +62,8 @@ lcMatrix44 lcViewSphere::GetProjectionMatrix() const
 
 void lcViewSphere::CreateResources(lcContext* Context)
 {
-	constexpr int ImageSize = 128;
+	constexpr int SourceCellSize = 128, CellHeight = 64, CellBottom = (SourceCellSize - CellHeight) / 2;
+	constexpr int AtlasWidth = SourceCellSize, AtlasHeight = 512;
 	mTexture = new lcTexture();
 
 	const QString ViewNames[6] =
@@ -69,46 +72,99 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		QCoreApplication::translate("ViewName", "Front"), QCoreApplication::translate("ViewName", "Top"), QCoreApplication::translate("ViewName", "Bottom")
 	};
 
-	const QTransform ViewTransforms[6] =
-	{
-		QTransform(0, 1, 1, 0, 0, 0), QTransform(0, -1, -1, 0, ImageSize, ImageSize), QTransform(-1, 0, 0, 1, ImageSize, 0),
-		QTransform(1, 0, 0, -1, 0, ImageSize), QTransform(1, 0, 0, -1, 0, ImageSize), QTransform(-1, 0, 0, 1, ImageSize, 0)
-	};
-
-	QImage PainterImage(ImageSize, ImageSize, QImage::Format_ARGB32);
+	QImage PainterImage(SourceCellSize, SourceCellSize, QImage::Format_ARGB32);
 	QPainter Painter;
-	QFont Font("Helvetica", 20);
-	std::vector<Image> Images;
+	QFont Font("Helvetica", gSupportsShaderObjects ? 36 : 20);
+	const bool UseSDF = gSupportsShaderObjects;
+	Image AtlasImage;
+	std::vector<Image> BitmapFaces;
+	if (UseSDF)
+	{
+		AtlasImage.Allocate(AtlasWidth, AtlasHeight, lcPixelFormat::A8);
+		memset(AtlasImage.mData, 0, AtlasWidth * AtlasHeight);
+	}
+	else
+		BitmapFaces.reserve(6);
+	const QTransform BitmapTransforms[6] =
+	{
+		QTransform(0, 1, 1, 0, 0, 0), QTransform(0, -1, -1, 0, SourceCellSize, SourceCellSize),
+		QTransform(-1, 0, 0, 1, SourceCellSize, 0), QTransform(1, 0, 0, -1, 0, SourceCellSize),
+		QTransform(1, 0, 0, -1, 0, SourceCellSize), QTransform(-1, 0, 0, 1, SourceCellSize, 0)
+	};
+	auto ConvertToSDF = [](Image& TextureImage)
+	{
+		constexpr int Size = 128, Count = Size * Size;
+		std::vector<int> ToInk(Count), ToOutside(Count);
+		for (int i = 0; i < Count; i++) { ToInk[i] = TextureImage.mData[i] >= 128 ? 0 : 1 << 20; ToOutside[i] = TextureImage.mData[i] >= 128 ? 1 << 20 : 0; }
+		auto Relax = [](std::vector<int>& Distance, bool Reverse)
+		{
+			for (int y = Reverse ? Size - 1 : 0; Reverse ? y >= 0 : y < Size; y += Reverse ? -1 : 1)
+				for (int x = Reverse ? Size - 1 : 0; Reverse ? x >= 0 : x < Size; x += Reverse ? -1 : 1)
+				{
+					int& Value = Distance[y * Size + x]; const int Step = Reverse ? 1 : -1;
+					if (y + Step >= 0 && y + Step < Size) Value = lcMin(Value, Distance[(y + Step) * Size + x] + 3);
+					if (x + Step >= 0 && x + Step < Size) Value = lcMin(Value, Distance[y * Size + x + Step] + 3);
+					if (y + Step >= 0 && y + Step < Size && x + Step >= 0 && x + Step < Size) Value = lcMin(Value, Distance[(y + Step) * Size + x + Step] + 4);
+				}
+		};
+		Relax(ToInk, false); Relax(ToInk, true); Relax(ToOutside, false); Relax(ToOutside, true);
+		for (int i = 0; i < Count; i++) TextureImage.mData[i] = static_cast<unsigned char>(lcClamp(128 + (ToOutside[i] - ToInk[i]) / 3 * 16, 0, 255));
+	};
 
 	for (int ViewIdx = 0; ViewIdx < 6; ViewIdx++)
 	{
 		Image TextureImage;
-		TextureImage.Allocate(ImageSize, ImageSize, lcPixelFormat::A8);
+		TextureImage.Allocate(SourceCellSize, SourceCellSize, lcPixelFormat::A8);
+		QFont LabelFont = Font;
+		if (UseSDF)
+		{
+			// The shader displays the middle 80% of each cell. Leave six pixels
+			// on either side for the SDF halo, including for translated labels.
+			constexpr int MaxLabelWidth = 90;
+			while (LabelFont.pointSize() > 1 && QFontMetrics(LabelFont).horizontalAdvance(ViewNames[ViewIdx]) > MaxLabelWidth)
+				LabelFont.setPointSize(LabelFont.pointSize() - 1);
+		}
 
 		Painter.begin(&PainterImage);
+		Painter.setRenderHint(QPainter::TextAntialiasing, UseSDF);
 		Painter.fillRect(0, 0, PainterImage.width(), PainterImage.height(), QColor(0, 0, 0));
 		Painter.setBrush(QColor(255, 255, 255));
 		Painter.setPen(QColor(255, 255, 255));
-		Painter.setFont(Font);
-		Painter.setTransform(ViewTransforms[ViewIdx]);
+		Painter.setFont(LabelFont);
+		if (!UseSDF)
+			Painter.setTransform(BitmapTransforms[ViewIdx]);
 		Painter.drawText(0, 0, PainterImage.width(), PainterImage.height(), Qt::AlignCenter, ViewNames[ViewIdx]);
 		Painter.end();
 
-		for (int y = 0; y < ImageSize; y++)
+		for (int y = 0; y < SourceCellSize; y++)
 		{
-			unsigned char* Dest = TextureImage.mData + (ImageSize - y - 1) * TextureImage.mWidth;
+			unsigned char* Dest = TextureImage.mData + (SourceCellSize - y - 1) * TextureImage.mWidth;
 
-			for (int x = 0; x < ImageSize; x++)
+			for (int x = 0; x < SourceCellSize; x++)
 				*Dest++ = qRed(PainterImage.pixel(x, y));
 		}
-
-		Images.emplace_back(std::move(TextureImage));
+		if (UseSDF)
+		{
+			ConvertToSDF(TextureImage);
+			// Keep the middle band and its SDF margin in a vertical atlas.
+			const int AtlasY = ViewIdx * CellHeight;
+			for (int y = 0; y < CellHeight; y++)
+				memcpy(AtlasImage.mData + (AtlasY + y) * AtlasWidth,
+					TextureImage.mData + (CellBottom + y) * SourceCellSize, SourceCellSize);
+		}
+		else
+			BitmapFaces.emplace_back(std::move(TextureImage));
 	}
 
-	mTexture->SetImage(std::move(Images), LC_TEXTURE_CUBEMAP | LC_TEXTURE_LINEAR);
+	if (UseSDF)
+		mTexture->SetImage(std::move(AtlasImage), LC_TEXTURE_LINEAR);
+	else
+		mTexture->SetImage(std::move(BitmapFaces), LC_TEXTURE_CUBEMAP | LC_TEXTURE_LINEAR);
 
-	lcVector3 Verts[(mSubdivisions + 1) * (mSubdivisions + 1) * 6];
-	GLushort Indices[mSubdivisions * mSubdivisions * 6 * 6];
+	const int SphereVertexCount = (mSubdivisions + 1) * (mSubdivisions + 1) * 6;
+	mSphereIndexCount = mSubdivisions * mSubdivisions * 6 * 6;
+	std::vector<float> Verts(SphereVertexCount * (UseSDF ? 6 : 3));
+	std::vector<GLushort> Indices(mSphereIndexCount);
 
 	lcMatrix44 Transforms[6] =
 	{
@@ -121,7 +177,14 @@ void lcViewSphere::CreateResources(lcContext* Context)
 	};
 
 	constexpr float Step = 2.0f / mSubdivisions;
-	lcVector3* CurVert = Verts;
+	float* CurVert = Verts.data();
+	auto ProjectToSphere = [](const lcVector3& Vert)
+	{
+		const lcVector3 Vert2 = Vert * Vert;
+		return lcVector3(Vert.x * sqrt(1.0 - 0.5 * (Vert2.y + Vert2.z) + Vert2.y * Vert2.z / 3.0),
+			Vert.y * sqrt(1.0 - 0.5 * (Vert2.z + Vert2.x) + Vert2.z * Vert2.x / 3.0),
+			Vert.z * sqrt(1.0 - 0.5 * (Vert2.x + Vert2.y) + Vert2.x * Vert2.y / 3.0));
+	};
 
 	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
 	{
@@ -130,17 +193,21 @@ void lcViewSphere::CreateResources(lcContext* Context)
 			for (int x = 0; x <= mSubdivisions; x++)
 			{
 				const lcVector3 Vert = lcMul31(lcVector3(Step * x - 1.0f, Step * y - 1.0f, 0.0f), Transforms[FaceIdx]);
-				const lcVector3 Vert2 = Vert * Vert;
-
-				*CurVert++ = lcVector3(Vert.x * sqrt(1.0 - 0.5 * (Vert2.y + Vert2.z) + Vert2.y * Vert2.z / 3.0),
-									   Vert.y * sqrt(1.0 - 0.5 * (Vert2.z + Vert2.x) + Vert2.z * Vert2.x / 3.0),
-									   Vert.z * sqrt(1.0 - 0.5 * (Vert2.x + Vert2.y) + Vert2.x * Vert2.y / 3.0)
-				) * mRadius;
+				const lcVector3 SphereVert = ProjectToSphere(Vert) * mRadius;
+				*CurVert++ = SphereVert.x;
+				*CurVert++ = SphereVert.y;
+				*CurVert++ = SphereVert.z;
+				if (UseSDF)
+				{
+					*CurVert++ = x / static_cast<float>(mSubdivisions);
+					*CurVert++ = y / static_cast<float>(mSubdivisions);
+					*CurVert++ = static_cast<float>(FaceIdx);
+				}
 			}
 		}
 	}
 
-	GLushort* CurIndex = Indices;
+	GLushort* CurIndex = Indices.data();
 
 	for (int FaceIdx = 0; FaceIdx < 6; FaceIdx++)
 	{
@@ -163,8 +230,8 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		}
 	}
 
-	mVertexBuffer = Context->CreateVertexBuffer(sizeof(Verts), Verts);
-	mIndexBuffer = Context->CreateIndexBuffer(sizeof(Indices), Indices);
+	mVertexBuffer = Context->CreateVertexBuffer(Verts.size() * sizeof(float), Verts.data());
+	mIndexBuffer = Context->CreateIndexBuffer(Indices.size() * sizeof(GLushort), Indices.data());
 }
 
 void lcViewSphere::DestroyResources(lcContext* Context)
@@ -195,7 +262,10 @@ void lcViewSphere::Draw()
 	Context->EnableCullFace(true);
 
 	Context->SetVertexBuffer(mVertexBuffer);
-	Context->SetVertexFormatPosition(3);
+	if (gSupportsShaderObjects)
+		Context->SetVertexFormat(0, 3, 0, 3, 0, false);
+	else
+		Context->SetVertexFormatPosition(3);
 	Context->SetIndexBuffer(mIndexBuffer);
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
@@ -206,10 +276,13 @@ void lcViewSphere::Draw()
 	Context->SetViewMatrix(GetViewMatrix());
 	Context->SetProjectionMatrix(GetProjectionMatrix());
 
-	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
+	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSphereIndexCount, GL_UNSIGNED_SHORT, 0);
 
 	Context->SetMaterial(lcMaterialType::UnlitViewSphere);
-	Context->BindTextureCubeMap(mTexture);
+	if (gSupportsShaderObjects)
+		Context->BindTexture2D(mTexture);
+	else
+		Context->BindTextureCubeMap(mTexture);
 
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(GetViewMatrix());
@@ -236,10 +309,11 @@ void lcViewSphere::Draw()
 	const lcVector4 HighlightColor = lcVector4FromColor(Preferences.mViewSphereHighlightColor);
 
 	Context->SetHighlightParams(HighlightPosition, TextColor, BackgroundColor, HighlightColor);
-	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSubdivisions * mSubdivisions * 6 * 6, GL_UNSIGNED_SHORT, 0);
+	Context->SetTextHaloColor(lcVector4FromColor(Preferences.mTextHaloColor));
+	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSphereIndexCount, GL_UNSIGNED_SHORT, 0);
 
-	Context->EnableCullFace(false);
 	Context->SetDepthFunction(lcDepthFunction::LessEqual);
+	Context->EnableCullFace(false);
 
 	Context->SetViewport(0, 0, mView->GetWidth(), mView->GetHeight());
 }

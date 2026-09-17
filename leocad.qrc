@@ -144,6 +144,7 @@
         <file>resources/shaders/unlit_texture_decal_vs.glsl</file>
         <file>resources/shaders/unlit_texture_modulate_ps.glsl</file>
         <file>resources/shaders/unlit_texture_modulate_vs.glsl</file>
+        <file>resources/shaders/text_sdf_ps.glsl</file>
         <file>resources/shaders/unlit_vertex_color_ps.glsl</file>
         <file>resources/shaders/unlit_vertex_color_vs.glsl</file>
         <file>resources/shaders/unlit_view_sphere_ps.glsl</file>

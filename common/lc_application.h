@@ -43,8 +43,8 @@ public:
 	quint32 mBackgroundGradientColorBottom;
 	bool mDrawAxes;
 	lcAxisIconLocation mAxisIconLocation;
-	quint32 mAxesColor;
 	quint32 mTextColor;
+	quint32 mTextHaloColor;
 	quint32 mMarqueeBorderColor;
 	quint32 mMarqueeFillColor;
 	quint32 mOverlayColor;

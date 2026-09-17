@@ -2,6 +2,7 @@
 #include <string.h>
 #include "texfont.h"
 #include "lc_context.h"
+#include "lc_glextensions.h"
 #include "lc_texture.h"
 #include "image.h"
 
@@ -104,43 +105,131 @@ bool TexFont::Initialize(lcContext* Context)
 		return true;
 
 	mFontHeight = 16;
-	mTextureWidth = 128;
-	mTextureHeight = 128;
+	mSDF = gSupportsShaderObjects;
 
+	// Keep the original binary atlas as a fixed-function fallback. SDF rendering
+	// requires only the shader support LeoCAD already uses for normal rendering.
+	if (!mSDF)
+	{
+		mTextureWidth = 128;
+		mTextureHeight = 128;
+		Image Image;
+		Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
+		for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
+		{
+			const unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
+			Image.mData[TexelIdx * 2] = Image.mData[TexelIdx * 2 + 1] = Texel;
+		}
+
+		const unsigned char* Ptr = GlyphData;
+		while (*Ptr)
+		{
+			const unsigned char Glyph = *Ptr++;
+			mGlyphs[Glyph].Left = *Ptr++;
+			mGlyphs[Glyph].Bottom = *Ptr++;
+			mGlyphs[Glyph].Width = *Ptr++;
+			mGlyphs[Glyph].Right = mGlyphs[Glyph].Left + mGlyphs[Glyph].Width;
+			mGlyphs[Glyph].Top = mGlyphs[Glyph].Bottom - mFontHeight;
+			mGlyphs[Glyph].RenderWidth = mGlyphs[Glyph].Width;
+			mGlyphs[Glyph].RenderHeight = mFontHeight;
+			mGlyphs[Glyph].Offset = 0.0f;
+			mGlyphs[Glyph].Left /= mTextureWidth;
+			mGlyphs[Glyph].Right /= mTextureWidth;
+			mGlyphs[Glyph].Top /= mTextureHeight;
+			mGlyphs[Glyph].Bottom /= mTextureHeight;
+		}
+
+		mTexture = new lcTexture();
+		mTexture->SetImage(std::move(Image), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_POINT);
+		mTexture->Upload(Context);
+		return true;
+	}
+
+	constexpr int Scale = 4, Padding = 8, TileWidth = 96, TileHeight = 80;
+	mTextureWidth = mTextureHeight = 1024;
 	Image Image;
 	Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
+	memset(Image.mData, 0, mTextureWidth * mTextureHeight * 2);
 
-	unsigned char* ExpandedData = Image.mData;
-	for (unsigned int TexelIdx = 0; TexelIdx < sizeof(TextureData) * 8; TexelIdx++)
+	QFont Font(QStringLiteral("Arial"));
+	Font.setPixelSize(56);
+	Font.setStyleStrategy(QFont::PreferAntialias);
+	const QFontMetrics Metrics(Font);
+
+	const unsigned char* Ptr = GlyphData;
+	int GlyphIndex = 0;
+	while (*Ptr)
 	{
-		const unsigned char Texel = TextureData[TexelIdx / 8] & (1 << (TexelIdx % 8)) ? 255 : 0;
-		ExpandedData[TexelIdx * 2] = ExpandedData[TexelIdx * 2 + 1] = Texel;
+		const unsigned char Glyph = *Ptr++;
+		Ptr += 2; // Legacy atlas position; metrics now come from the vector font.
+		Ptr++;
+		const int Advance = Metrics.horizontalAdvance(QChar(Glyph));
+		const int TileX = (GlyphIndex % 10) * TileWidth;
+		const int TileY = (GlyphIndex / 10) * TileHeight;
+		const int MaskWidth = lcMin(TileWidth, Advance + Padding * 2);
+		std::vector<unsigned char> Mask(MaskWidth * TileHeight, 0);
+		QImage GlyphImage(MaskWidth, TileHeight, QImage::Format_Alpha8);
+		GlyphImage.fill(0);
+		QPainter Painter(&GlyphImage);
+		Painter.setRenderHint(QPainter::TextAntialiasing);
+		Painter.setPen(Qt::white);
+		Painter.setFont(Font);
+		Painter.drawText(Padding, Padding + (mFontHeight * Scale - Metrics.height()) / 2 + Metrics.ascent(), QString(QChar(Glyph)));
+		Painter.end();
+
+		for (int y = 0; y < TileHeight; y++)
+			for (int x = 0; x < MaskWidth; x++)
+				Mask[y * MaskWidth + x] = GlyphImage.constScanLine(y)[x] >= 128;
+
+		// A two-pass chamfer transform is compact and sufficiently accurate for
+		// the small, padded glyph tiles. Distances are in high-resolution pixels.
+		std::vector<int> ToInk(MaskWidth * TileHeight), ToOutside(MaskWidth * TileHeight);
+		for (int i = 0; i < MaskWidth * TileHeight; i++)
+		{
+			ToInk[i] = Mask[i] ? 0 : 1 << 20;
+			ToOutside[i] = Mask[i] ? 1 << 20 : 0;
+		}
+		auto Relax = [MaskWidth](std::vector<int>& Distance, bool Reverse)
+		{
+			for (int row = Reverse ? TileHeight - 1 : 0; Reverse ? row >= 0 : row < TileHeight; row += Reverse ? -1 : 1)
+				for (int column = Reverse ? MaskWidth - 1 : 0; Reverse ? column >= 0 : column < MaskWidth; column += Reverse ? -1 : 1)
+				{
+					int& Value = Distance[row * MaskWidth + column];
+					const int RowStep = Reverse ? 1 : -1, ColumnStep = Reverse ? 1 : -1;
+					if (row + RowStep >= 0 && row + RowStep < TileHeight)
+						Value = lcMin(Value, Distance[(row + RowStep) * MaskWidth + column] + 3);
+					if (column + ColumnStep >= 0 && column + ColumnStep < MaskWidth)
+						Value = lcMin(Value, Distance[row * MaskWidth + column + ColumnStep] + 3);
+					if (row + RowStep >= 0 && row + RowStep < TileHeight && column + ColumnStep >= 0 && column + ColumnStep < MaskWidth)
+						Value = lcMin(Value, Distance[(row + RowStep) * MaskWidth + column + ColumnStep] + 4);
+				}
+		};
+		Relax(ToInk, false); Relax(ToInk, true);
+		Relax(ToOutside, false); Relax(ToOutside, true);
+
+		for (int y = 0; y < TileHeight; y++)
+			for (int x = 0; x < MaskWidth; x++)
+			{
+				const int SignedDistance = (ToOutside[y * MaskWidth + x] - ToInk[y * MaskWidth + x]) / 3;
+				const unsigned char Value = static_cast<unsigned char>(lcClamp(128 + SignedDistance * 8, 0, 255));
+				unsigned char* Pixel = Image.mData + ((TileY + y) * mTextureWidth + TileX + x) * 2;
+				Pixel[0] = Pixel[1] = Value;
+			}
+
+		mGlyphs[Glyph].Width = Advance / static_cast<float>(Scale);
+		mGlyphs[Glyph].Offset = -Padding / static_cast<float>(Scale);
+		mGlyphs[Glyph].RenderWidth = MaskWidth / static_cast<float>(Scale);
+		mGlyphs[Glyph].RenderHeight = TileHeight / static_cast<float>(Scale);
+		mGlyphs[Glyph].Left = TileX / static_cast<float>(mTextureWidth);
+		mGlyphs[Glyph].Right = (TileX + MaskWidth) / static_cast<float>(mTextureWidth);
+		mGlyphs[Glyph].Top = TileY / static_cast<float>(mTextureHeight);
+		mGlyphs[Glyph].Bottom = (TileY + TileHeight) / static_cast<float>(mTextureHeight);
+		GlyphIndex++;
 	}
 
 	mTexture = new lcTexture();
-	mTexture->SetImage(std::move(Image), LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_POINT);
+	mTexture->SetImage(std::move(Image), LC_TEXTURE_LINEAR);
 	mTexture->Upload(Context);
-
-	const unsigned char* Ptr = GlyphData;
-
-	for (;;)
-	{
-		unsigned char Glyph = *Ptr++;
-
-		if (!Glyph)
-			break;
-
-		mGlyphs[Glyph].left = *Ptr++;
-		mGlyphs[Glyph].bottom = *Ptr++;
-		mGlyphs[Glyph].width = *Ptr++;
-		mGlyphs[Glyph].right = mGlyphs[Glyph].left + mGlyphs[Glyph].width;
-		mGlyphs[Glyph].top = mGlyphs[Glyph].bottom - mFontHeight;
-
-		mGlyphs[Glyph].left /= mTextureWidth;
-		mGlyphs[Glyph].right /= mTextureWidth;
-		mGlyphs[Glyph].top /= mTextureHeight;
-		mGlyphs[Glyph].bottom /= mTextureHeight;
-	}
 
 	return true;
 }
@@ -148,18 +237,21 @@ bool TexFont::Initialize(lcContext* Context)
 void TexFont::Reset()
 {
 	mTexture = 0;
+	mSDF = false;
 }
 
 void TexFont::GetStringDimensions(int* cx, int* cy, const char* Text) const
 {
-	*cx = 0;
 	*cy = mFontHeight;
+	float Width = 0.0f;
 
 	while (*Text != 0)
 	{
-		*cx += mGlyphs[(int)(*Text)].width;
+		Width += mGlyphs[(int)(*Text)].Width;
 		Text++;
 	}
+
+	*cx = static_cast<int>(Width + 0.5f);
 }
 
 void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, const char* Text) const
@@ -175,46 +267,48 @@ void TexFont::PrintText(lcContext* Context, float Left, float Top, float Z, cons
 	while (*Text)
 	{
 		int ch = *Text;
-		float Right = Left + mGlyphs[ch].width;
-		float Bottom = Top - mFontHeight;
+		const float GlyphLeft = Left + mGlyphs[ch].Offset;
+		const float GlyphRight = GlyphLeft + mGlyphs[ch].RenderWidth;
+		const float GlyphTop = Top - mGlyphs[ch].Offset;
+		const float GlyphBottom = GlyphTop - mGlyphs[ch].RenderHeight;
 
-		*CurVert++ = Left;
-		*CurVert++ = Top;
+		*CurVert++ = GlyphLeft;
+		*CurVert++ = GlyphTop;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].left;
-		*CurVert++ = mGlyphs[ch].top;
+		*CurVert++ = mGlyphs[ch].Left;
+		*CurVert++ = mGlyphs[ch].Top;
 
-		*CurVert++ = Left;
-		*CurVert++ = Bottom;
+		*CurVert++ = GlyphLeft;
+		*CurVert++ = GlyphBottom;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].left;
-		*CurVert++ = mGlyphs[ch].bottom;
+		*CurVert++ = mGlyphs[ch].Left;
+		*CurVert++ = mGlyphs[ch].Bottom;
 
-		*CurVert++ = Right;
-		*CurVert++ = Bottom;
+		*CurVert++ = GlyphRight;
+		*CurVert++ = GlyphBottom;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].right;
-		*CurVert++ = mGlyphs[ch].bottom;
+		*CurVert++ = mGlyphs[ch].Right;
+		*CurVert++ = mGlyphs[ch].Bottom;
 
-		*CurVert++ = Right;
-		*CurVert++ = Bottom;
+		*CurVert++ = GlyphRight;
+		*CurVert++ = GlyphBottom;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].right;
-		*CurVert++ = mGlyphs[ch].bottom;
+		*CurVert++ = mGlyphs[ch].Right;
+		*CurVert++ = mGlyphs[ch].Bottom;
 
-		*CurVert++ = Right;
-		*CurVert++ = Top;
+		*CurVert++ = GlyphRight;
+		*CurVert++ = GlyphTop;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].right;
-		*CurVert++ = mGlyphs[ch].top;
+		*CurVert++ = mGlyphs[ch].Right;
+		*CurVert++ = mGlyphs[ch].Top;
 
-		*CurVert++ = Left;
-		*CurVert++ = Top;
+		*CurVert++ = GlyphLeft;
+		*CurVert++ = GlyphTop;
 		*CurVert++ = Z;
-		*CurVert++ = mGlyphs[ch].left;
-		*CurVert++ = mGlyphs[ch].top;
+		*CurVert++ = mGlyphs[ch].Left;
+		*CurVert++ = mGlyphs[ch].Top;
 
-		Left = Right;
+		Left += mGlyphs[ch].Width;
 		Text++;
 	}
 
@@ -233,7 +327,7 @@ void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float*
 	for (const char* ch = Text; *ch; ch++)
 	{
 		const int Glyph = *ch;
-		Width += mGlyphs[Glyph].width;
+		Width += mGlyphs[Glyph].Width;
 	}
 
 	float Left = -Width / 2.0f;
@@ -244,12 +338,16 @@ void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float*
 	{
 		int ch = *Text;
 
+		const float GlyphLeft = Left + mGlyphs[ch].Offset;
+		const float GlyphRight = GlyphLeft + mGlyphs[ch].RenderWidth;
+		const float GlyphTop = Top - mGlyphs[ch].Offset;
+		const float GlyphBottom = GlyphTop - mGlyphs[ch].RenderHeight;
 		lcVector3 Points[4] =
 		{
-			lcVector3(Left, Top, Z),
-			lcVector3(Left, Top - mFontHeight, Z),
-			lcVector3(Left + mGlyphs[ch].width, Top - mFontHeight, Z),
-			lcVector3(Left + mGlyphs[ch].width, Top, Z),
+			lcVector3(GlyphLeft, GlyphTop, Z),
+			lcVector3(GlyphLeft, GlyphBottom, Z),
+			lcVector3(GlyphRight, GlyphBottom, Z),
+			lcVector3(GlyphRight, GlyphTop, Z),
 		};
 
 		for (int PointIdx = 0; PointIdx < 4; PointIdx++)
@@ -258,82 +356,86 @@ void TexFont::GetTriangles(const lcMatrix44& Transform, const char* Text, float*
 		*Buffer++ = Points[0].x;
 		*Buffer++ = Points[0].y;
 		*Buffer++ = Points[0].z;
-		*Buffer++ = mGlyphs[ch].left;
-		*Buffer++ = mGlyphs[ch].top;
+		*Buffer++ = mGlyphs[ch].Left;
+		*Buffer++ = mGlyphs[ch].Top;
 
 		*Buffer++ = Points[1].x;
 		*Buffer++ = Points[1].y;
 		*Buffer++ = Points[1].z;
-		*Buffer++ = mGlyphs[ch].left;
-		*Buffer++ = mGlyphs[ch].bottom;
+		*Buffer++ = mGlyphs[ch].Left;
+		*Buffer++ = mGlyphs[ch].Bottom;
 
 		*Buffer++ = Points[2].x;
 		*Buffer++ = Points[2].y;
 		*Buffer++ = Points[2].z;
-		*Buffer++ = mGlyphs[ch].right;
-		*Buffer++ = mGlyphs[ch].bottom;
+		*Buffer++ = mGlyphs[ch].Right;
+		*Buffer++ = mGlyphs[ch].Bottom;
 
 		*Buffer++ = Points[2].x;
 		*Buffer++ = Points[2].y;
 		*Buffer++ = Points[2].z;
-		*Buffer++ = mGlyphs[ch].right;
-		*Buffer++ = mGlyphs[ch].bottom;
+		*Buffer++ = mGlyphs[ch].Right;
+		*Buffer++ = mGlyphs[ch].Bottom;
 
 		*Buffer++ = Points[3].x;
 		*Buffer++ = Points[3].y;
 		*Buffer++ = Points[3].z;
-		*Buffer++ = mGlyphs[ch].right;
-		*Buffer++ = mGlyphs[ch].top;
+		*Buffer++ = mGlyphs[ch].Right;
+		*Buffer++ = mGlyphs[ch].Top;
 
 		*Buffer++ = Points[0].x;
 		*Buffer++ = Points[0].y;
 		*Buffer++ = Points[0].z;
-		*Buffer++ = mGlyphs[ch].left;
-		*Buffer++ = mGlyphs[ch].top;
+		*Buffer++ = mGlyphs[ch].Left;
+		*Buffer++ = mGlyphs[ch].Top;
 
-		Left += mGlyphs[ch].width;
+		Left += mGlyphs[ch].Width;
 		Text++;
 	}
 }
 
 void TexFont::GetGlyphTriangles(float Left, float Top, float Z, int Glyph, float* Buffer) const
 {
-	Left -= mGlyphs[Glyph].width / 2.0f;
+	Left -= mGlyphs[Glyph].Width / 2.0f;
 	Top += mFontHeight / 2.0f;
+	const float GlyphLeft = Left + mGlyphs[Glyph].Offset;
+	const float GlyphRight = GlyphLeft + mGlyphs[Glyph].RenderWidth;
+	const float GlyphTop = Top - mGlyphs[Glyph].Offset;
+	const float GlyphBottom = GlyphTop - mGlyphs[Glyph].RenderHeight;
 
-	*Buffer++ = Left;
-	*Buffer++ = Top;
+	*Buffer++ = GlyphLeft;
+	*Buffer++ = GlyphTop;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].left;
-	*Buffer++ = mGlyphs[Glyph].top;
+	*Buffer++ = mGlyphs[Glyph].Left;
+	*Buffer++ = mGlyphs[Glyph].Top;
 
-	*Buffer++ = Left;
-	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = GlyphLeft;
+	*Buffer++ = GlyphBottom;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].left;
-	*Buffer++ = mGlyphs[Glyph].bottom;
+	*Buffer++ = mGlyphs[Glyph].Left;
+	*Buffer++ = mGlyphs[Glyph].Bottom;
 
-	*Buffer++ = Left + mGlyphs[Glyph].width;
-	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = GlyphRight;
+	*Buffer++ = GlyphBottom;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].right;
-	*Buffer++ = mGlyphs[Glyph].bottom;
+	*Buffer++ = mGlyphs[Glyph].Right;
+	*Buffer++ = mGlyphs[Glyph].Bottom;
 
-	*Buffer++ = Left + mGlyphs[Glyph].width;
-	*Buffer++ = Top - mFontHeight;
+	*Buffer++ = GlyphRight;
+	*Buffer++ = GlyphBottom;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].right;
-	*Buffer++ = mGlyphs[Glyph].bottom;
+	*Buffer++ = mGlyphs[Glyph].Right;
+	*Buffer++ = mGlyphs[Glyph].Bottom;
 
-	*Buffer++ = Left + mGlyphs[Glyph].width;
-	*Buffer++ = Top;
+	*Buffer++ = GlyphRight;
+	*Buffer++ = GlyphTop;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].right;
-	*Buffer++ = mGlyphs[Glyph].top;
+	*Buffer++ = mGlyphs[Glyph].Right;
+	*Buffer++ = mGlyphs[Glyph].Top;
 
-	*Buffer++ = Left;
-	*Buffer++ = Top;
+	*Buffer++ = GlyphLeft;
+	*Buffer++ = GlyphTop;
 	*Buffer++ = Z;
-	*Buffer++ = mGlyphs[Glyph].left;
-	*Buffer++ = mGlyphs[Glyph].top;
+	*Buffer++ = mGlyphs[Glyph].Left;
+	*Buffer++ = mGlyphs[Glyph].Top;
 }

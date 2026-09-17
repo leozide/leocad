@@ -84,7 +84,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	connect(ui->BackgroundGradient2ColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ActiveViewColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->InactiveViewColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
-	connect(ui->AxesColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
+	connect(ui->TextHaloColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->TextColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->MarqueeBorderColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->MarqueeFillColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
@@ -261,8 +261,8 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	SetButtonPixmap(mOptions->Preferences.mBackgroundSolidColor, ui->BackgroundSolidColorButton);
 	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorTop, ui->BackgroundGradient1ColorButton);
 	SetButtonPixmap(mOptions->Preferences.mBackgroundGradientColorBottom, ui->BackgroundGradient2ColorButton);
-	SetButtonPixmap(mOptions->Preferences.mAxesColor, ui->AxesColorButton);
 	SetButtonPixmap(mOptions->Preferences.mTextColor, ui->TextColorButton);
+	SetButtonPixmap(mOptions->Preferences.mTextHaloColor, ui->TextHaloColorButton);
 	SetButtonPixmap(mOptions->Preferences.mMarqueeBorderColor, ui->MarqueeBorderColorButton);
 	SetButtonPixmap(mOptions->Preferences.mMarqueeFillColor, ui->MarqueeFillColorButton);
 	SetButtonPixmap(mOptions->Preferences.mOverlayColor, ui->OverlayColorButton);
@@ -507,15 +507,16 @@ void lcPreferencesDialog::ColorButtonClicked()
 		Color = &mOptions->Preferences.mBackgroundGradientColorBottom;
 		Title = tr("Select Gradient Bottom Color");
 	}
-	else if (Button == ui->AxesColorButton)
-	{
-		Color = &mOptions->Preferences.mAxesColor;
-		Title = tr("Select Axes Color");
-	}
 	else if (Button == ui->TextColorButton)
 	{
 		Color = &mOptions->Preferences.mTextColor;
 		Title = tr("Select Text Color");
+	}
+	else if (Button == ui->TextHaloColorButton)
+	{
+		Color = &mOptions->Preferences.mTextHaloColor;
+		Title = tr("Select Text Halo Color");
+		DialogOptions = QColorDialog::ShowAlphaChannel;
 	}
 	else if (Button == ui->MarqueeBorderColorButton)
 	{

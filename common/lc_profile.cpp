@@ -66,8 +66,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "GradientColorBottom", LC_RGB(49, 52, 55)),                                 // LC_PROFILE_GRADIENT_COLOR_BOTTOM
 	lcProfileEntry("Settings", "DrawAxes", 0),                                                             // LC_PROFILE_DRAW_AXES
 	lcProfileEntry("Settings", "DrawAxesLocation", static_cast<int>(lcAxisIconLocation::BottomLeft)),      // LC_PROFILE_DRAW_AXES_LOCATION
-	lcProfileEntry("Settings", "AxesColor", LC_RGBA(160, 160, 160, 255)),                                  // LC_PROFILE_AXES_COLOR
-	lcProfileEntry("Settings", "TextColor", LC_RGBA(160, 160, 160, 255)),                                  // LC_PROFILE_TEXT_COLOR
+	lcProfileEntry("Settings", "TextColor", LC_RGBA(214, 220, 227, 255)),                                  // LC_PROFILE_TEXT_COLOR
+	lcProfileEntry("Settings", "TextHaloColor", LC_RGBA(17, 19, 24, 160)),                                // LC_PROFILE_TEXT_HALO_COLOR
 	lcProfileEntry("Settings", "MarqueeBorderColor", LC_RGBA(64, 64, 255, 255)),                           // LC_PROFILE_MARQUEE_BORDER_COLOR
 	lcProfileEntry("Settings", "MarqueeFillColor", LC_RGBA(64, 64, 255, 64)),                              // LC_PROFILE_MARQUEE_FILL_COLOR
 	lcProfileEntry("Settings", "OverlayColor", LC_RGBA(0, 0, 0, 255)),                                     // LC_PROFILE_OVERLAY_COLOR
@@ -85,8 +85,8 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ViewSphereEnabled", 1),                                                    // LC_PROFILE_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "ViewSphereLocation", (int)lcViewSphereLocation::TopRight),                 // LC_PROFILE_VIEW_SPHERE_LOCATION
 	lcProfileEntry("Settings", "ViewSphereSize", 100),                                                     // LC_PROFILE_VIEW_SPHERE_SIZE
-	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(35, 38, 41, 255)),                               // LC_PROFILE_VIEW_SPHERE_COLOR
-	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(224, 224, 224, 255)),                        // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
+	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(27, 31, 36, 255)),                               // LC_PROFILE_VIEW_SPHERE_COLOR
+	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(232, 237, 242, 255)),                        // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
 	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(41, 128, 185, 255)),                    // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
 	lcProfileEntry("Settings", "ObjectSelectedColor", static_cast<uint>(LC_RGBA(229, 76, 102, 255))),      // LC_PROFILE_OBJECT_SELECTED_COLOR
 	lcProfileEntry("Settings", "ObjectFocusedColor", static_cast<uint>(LC_RGBA(102, 76, 229, 255))),       // LC_PROFILE_OBJECT_FOCUSED_COLOR

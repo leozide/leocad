@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>726</width>
-    <height>638</height>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -931,12 +931,12 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>Camera Name:</string>
+             <string>Text Color:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="4">
-           <widget class="QToolButton" name="AxesColorButton">
+           <widget class="QToolButton" name="TextHaloColorButton">
             <property name="text">
              <string/>
             </property>
@@ -966,7 +966,7 @@
           <item row="2" column="3">
            <widget class="QLabel" name="label_31">
             <property name="text">
-             <string>Axis Icon Labels:</string>
+             <string>Text Halo Color:</string>
             </property>
            </widget>
           </item>
@@ -2025,7 +2025,7 @@
   <tabstop>ActiveViewColorButton</tabstop>
   <tabstop>InactiveViewColorButton</tabstop>
   <tabstop>TextColorButton</tabstop>
-  <tabstop>AxesColorButton</tabstop>
+  <tabstop>TextHaloColorButton</tabstop>
   <tabstop>MarqueeBorderColorButton</tabstop>
   <tabstop>MarqueeFillColorButton</tabstop>
   <tabstop>OverlayColorButton</tabstop>

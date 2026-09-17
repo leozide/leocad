@@ -48,6 +48,7 @@ enum class lcMaterialType
 	UnlitColor,
 	UnlitColorConditional,
 	UnlitTextureModulate,
+	TextSDF,
 	UnlitTextureDecal,
 	UnlitVertexColor,
 	UnlitViewSphere,
@@ -78,6 +79,7 @@ struct lcProgram
 	GLint LightPositionLocation;
 	GLint EyePositionLocation;
 	GLint HighlightParamsLocation;
+	GLint TextHaloColorLocation;
 };
 
 enum class lcPolygonOffset
@@ -186,6 +188,12 @@ public:
 		mColorDirty = true;
 	}
 
+	void SetTextHaloColor(const lcVector4& Color)
+	{
+		mTextHaloColor = Color;
+		mTextHaloColorDirty = true;
+	}
+
 	void SetHighlightParams(const lcVector4& HighlightPosition, const lcVector4& TextColor, const lcVector4& BackgroundColor, const lcVector4& HighlightColor)
 	{
 		mHighlightParams[0] = HighlightPosition;
@@ -264,12 +272,14 @@ protected:
 	bool mTextureEnabled;
 
 	lcVector4 mColor;
+	lcVector4 mTextHaloColor;
 	lcMatrix44 mWorldMatrix;
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
 	lcVector4 mHighlightParams[4];
 	bool mColorDirty;
+	bool mTextHaloColorDirty;
 	bool mWorldMatrixDirty;
 	bool mViewMatrixDirty;
 	bool mProjectionMatrixDirty;
@@ -284,4 +294,3 @@ protected:
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);
 };
-

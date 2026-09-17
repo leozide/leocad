@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_application.h"
 #include "lc_viewmanipulator.h"
 #include "lc_view.h"
 #include "lc_model.h"
@@ -942,7 +943,7 @@ void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVect
 	const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
 	const float UIScale = mView->GetUIScale();
 
-	Context->SetMaterial(lcMaterialType::UnlitTextureModulate);
+	Context->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
@@ -954,7 +955,8 @@ void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVect
 
 	int Width, Height;
 	gTexFont.GetStringDimensions(&Width, &Height, Buffer);
-	Context->SetColor(0.9f, 0.9f, 0.9f, 1.0f);
+	Context->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+	Context->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 	gTexFont.PrintText(Context, ScreenPos[0] / UIScale - (Width / 2), ScreenPos[1] / UIScale + (Height / 2), 0.0f, Buffer);
 	Context->EnableColorBlend(false);
 }

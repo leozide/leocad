@@ -32,8 +32,8 @@ void lcPreferences::LoadDefaults()
 	mBackgroundGradientColorBottom = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
 	mAxisIconLocation = static_cast<lcAxisIconLocation>(lcGetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION));
-	mAxesColor = lcGetProfileUInt(LC_PROFILE_AXES_COLOR);
 	mTextColor = lcGetProfileUInt(LC_PROFILE_TEXT_COLOR);
+	mTextHaloColor = lcGetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR);
 	mMarqueeBorderColor = lcGetProfileUInt(LC_PROFILE_MARQUEE_BORDER_COLOR);
 	mMarqueeFillColor = lcGetProfileUInt(LC_PROFILE_MARQUEE_FILL_COLOR);
 	mOverlayColor = lcGetProfileUInt(LC_PROFILE_OVERLAY_COLOR);
@@ -93,8 +93,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION, static_cast<int>(mAxisIconLocation));
-	lcSetProfileUInt(LC_PROFILE_AXES_COLOR, mAxesColor);
 	lcSetProfileUInt(LC_PROFILE_TEXT_COLOR, mTextColor);
+	lcSetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR, mTextHaloColor);
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT, mBackgroundGradient);
 	lcSetProfileUInt(LC_PROFILE_BACKGROUND_COLOR, mBackgroundSolidColor);
 	lcSetProfileUInt(LC_PROFILE_GRADIENT_COLOR_TOP, mBackgroundGradientColorTop);
@@ -154,8 +154,8 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 {
 	if (ColorTheme == lcColorTheme::Dark)
 	{
-		mAxesColor = LC_RGBA(160, 160, 160, 255);
-		mTextColor = LC_RGBA(160, 160, 160, 255);
+		mTextColor = LC_RGBA(214, 220, 227, 255);
+		mTextHaloColor = LC_RGBA(17, 19, 24, 160);
 		mBackgroundSolidColor = LC_RGB(49, 52, 55);
 		mBackgroundGradientColorTop = LC_RGB(0, 0, 191);
 		mBackgroundGradientColorBottom = LC_RGB(255, 255, 255);
@@ -163,14 +163,14 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 		mActiveViewColor = LC_RGBA(41, 128, 185, 255);
 		mGridStudColor = LC_RGBA(24, 24, 24, 192);
 		mGridLineColor = LC_RGBA(24, 24, 24, 255);
-		mViewSphereColor = LC_RGBA(35, 38, 41, 255);
-		mViewSphereTextColor = LC_RGBA(224, 224, 224, 255);
+		mViewSphereColor = LC_RGBA(27, 31, 36, 255);
+		mViewSphereTextColor = LC_RGBA(232, 237, 242, 255);
 		mViewSphereHighlightColor = LC_RGBA(41, 128, 185, 255);
 	}
 	else
 	{
-		mAxesColor = LC_RGBA(0, 0, 0, 255);
-		mTextColor = LC_RGBA(0, 0, 0, 255);
+		mTextColor = LC_RGBA(24, 33, 43, 255);
+		mTextHaloColor = LC_RGBA(248, 250, 252, 204);
 		mBackgroundSolidColor = LC_RGB(255, 255, 255);
 		mBackgroundGradientColorTop = LC_RGB(54, 72, 95);
 		mBackgroundGradientColorBottom = LC_RGB(49, 52, 55);
@@ -178,9 +178,9 @@ void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 		mActiveViewColor = LC_RGBA(255, 0, 0, 255);
 		mGridStudColor = LC_RGBA(64, 64, 64, 192);
 		mGridLineColor = LC_RGBA(0, 0, 0, 255);
-		mViewSphereColor = LC_RGBA(255, 255, 255, 255);
-		mViewSphereTextColor = LC_RGBA(0, 0, 0, 255);
-		mViewSphereHighlightColor = LC_RGBA(255, 0, 0, 255);
+		mViewSphereColor = LC_RGBA(248, 250, 252, 255);
+		mViewSphereTextColor = LC_RGBA(24, 33, 43, 255);
+		mViewSphereHighlightColor = LC_RGBA(41, 128, 185, 255);
 	}
 }
 

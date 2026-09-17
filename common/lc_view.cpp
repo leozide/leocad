@@ -1019,8 +1019,9 @@ void lcView::OnDraw()
 
 	QString Line = QString("GPU: %1 CPU: %2").arg(QString::number(QueryAverage / 1000000.0, 'f', 2), QString::number(TimerAverage / 1000000.0, 'f', 2));
 
-	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
+	mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
 	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+	mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 	mContext->BindTexture2D(gTexFont.GetTexture());
 
 	mContext->EnableDepthTest(false);
@@ -1150,8 +1151,9 @@ void lcView::DrawViewport() const
 
 	if (!CameraName.isEmpty())
 	{
-		mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
+		mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+		mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 		mContext->BindTexture2D(gTexFont.GetTexture());
 
 		mContext->EnableColorBlend(true);
@@ -1256,7 +1258,7 @@ void lcView::DrawAxes() const
 	mContext->DrawIndexedPrimitives(GL_LINES, 6, GL_UNSIGNED_SHORT, 0);
 	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, 6 * 2);
 
-	mContext->SetMaterial(lcMaterialType::UnlitTextureModulate);
+	mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
 	mContext->SetViewMatrix(TranslationMatrix);
 	mContext->BindTexture2D(gTexFont.GetTexture());
 	mContext->EnableColorBlend(true);
@@ -1272,7 +1274,8 @@ void lcView::DrawAxes() const
 	mContext->SetVertexBufferPointer(TextBuffer);
 	mContext->SetVertexFormat(0, 3, 0, 2, 0, false);
 
-	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mAxesColor));
+	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+	mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 	mContext->DrawPrimitives(GL_TRIANGLES, 0, 6 * 3);
 
 	mContext->EnableColorBlend(false);

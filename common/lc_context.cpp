@@ -53,6 +53,7 @@ lcContext::lcContext()
 	mLineWidth = 1.0f;
 
 	mColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mTextHaloColor = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mWorldMatrix = lcMatrix44Identity();
 	mViewMatrix = lcMatrix44Identity();
 	mProjectionMatrix = lcMatrix44Identity();
@@ -62,6 +63,7 @@ lcContext::lcContext()
 	mHighlightParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mHighlightParams[3] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
+	mTextHaloColorDirty = false;
 	mWorldMatrixDirty = false;
 	mViewMatrixDirty = false;
 	mProjectionMatrixDirty = false;
@@ -209,6 +211,7 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/unlit_color_vs.glsl",             // UnlitColor
 		":/resources/shaders/unlit_color_conditional_vs.glsl", // UnlitColorConditional
 		":/resources/shaders/unlit_texture_modulate_vs.glsl",  // UnlitTextureModulate
+		":/resources/shaders/unlit_texture_modulate_vs.glsl",  // TextSDF
 		":/resources/shaders/unlit_texture_decal_vs.glsl",     // UnlitTextureDecal
 		":/resources/shaders/unlit_vertex_color_vs.glsl",      // UnlitVertexColor
 		":/resources/shaders/unlit_view_sphere_vs.glsl",       // UnlitViewSphere
@@ -223,6 +226,7 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/unlit_color_ps.glsl",             // UnlitColor
 		":/resources/shaders/unlit_color_conditional_ps.glsl", // UnlitColorConditional
 		":/resources/shaders/unlit_texture_modulate_ps.glsl",  // UnlitTextureModulate
+		":/resources/shaders/text_sdf_ps.glsl",                // TextSDF
 		":/resources/shaders/unlit_texture_decal_ps.glsl",     // UnlitTextureDecal
 		":/resources/shaders/unlit_vertex_color_ps.glsl",      // UnlitVertexColor
 		":/resources/shaders/unlit_view_sphere_ps.glsl",       // UnlitViewSphere
@@ -316,6 +320,7 @@ void lcContext::CreateShaderPrograms()
 		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 		mPrograms[MaterialType].HighlightParamsLocation = glGetUniformLocation(Program, "HighlightParams");
+		mPrograms[MaterialType].TextHaloColorLocation = glGetUniformLocation(Program, "TextHaloColor");
 
 		const GLint TextureLocation = glGetUniformLocation(Program, "Texture");
 
@@ -478,6 +483,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
 		mHighlightParamsDirty = true;
+		mTextHaloColorDirty = true;
 	}
 }
 
@@ -1185,6 +1191,12 @@ void lcContext::FlushState()
 		{
 			glUniform4fv(Program.MaterialColorLocation, 1, mColor.GetFloats());
 			mColorDirty = false;
+		}
+
+		if (mTextHaloColorDirty && Program.TextHaloColorLocation != -1)
+		{
+			glUniform4fv(Program.TextHaloColorLocation, 1, mTextHaloColor.GetFloats());
+			mTextHaloColorDirty = false;
 		}
 
 		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)

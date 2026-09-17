@@ -48,6 +48,7 @@ protected:
 	static lcTexture* mTexture;
 	static lcVertexBuffer mVertexBuffer;
 	static lcIndexBuffer mIndexBuffer;
+	static int mSphereIndexCount;
 	static const float mRadius;
 	static const float mHighlightRadius;
 	static const int mSubdivisions;

@@ -10,6 +10,11 @@ public:
 		return mTexture != nullptr;
 	}
 
+	bool IsSDF() const
+	{
+		return mSDF;
+	}
+
 	lcTexture* GetTexture() const
 	{
 		return mTexture;
@@ -26,15 +31,15 @@ public:
 protected:
 	struct
 	{
-		unsigned char width;
-		float left, right, top, bottom;
+		float Width, Offset, RenderWidth, RenderHeight;
+		float Left, Right, Top, Bottom;
 	} mGlyphs[256];
 
 	lcTexture* mTexture = nullptr;
 	int mTextureWidth;
 	int mTextureHeight;
 	int mFontHeight;
+	bool mSDF = false;
 };
 
 extern TexFont gTexFont;
-

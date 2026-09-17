@@ -74,7 +74,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	const int Width = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
 	const int Height = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
 
-	if (mView && (mView->GetWidth() != Width || mView->GetHeight() != Height))
+	if (mView && mView->GetRenderImage().size() != QSize(Width, Height))
 		mView.reset();
 
 	if (!mView)
@@ -114,7 +114,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 
 	mView->UnbindRenderFramebuffer();
 
-	QImage Image = mView->GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
+	QImage Image = mView->GetRenderImage().convertToFormat(QImage::Format_ARGB32);
 	const char* IconName = nullptr;
 
 	if (Info->GetSynthInfo())

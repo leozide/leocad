@@ -248,6 +248,21 @@ bool lcTexture::LoadImages()
 void lcTexture::Unload()
 {
 	if (mTexture)
-		glDeleteTextures(1, &mTexture);
+	{
+		QOpenGLContext* GLContext = QOpenGLContext::currentContext();
+
+		if (GLContext)
+			GLContext->functions()->glDeleteTextures(1, &mTexture);
+		else if (qApp && QThread::currentThread() == qApp->thread())
+		{
+			if (lcContext* Context = lcContext::GetGlobalOffscreenContext())
+			{
+				Context->MakeCurrent();
+
+				if (QOpenGLContext* OffscreenContext = QOpenGLContext::currentContext())
+					OffscreenContext->functions()->glDeleteTextures(1, &mTexture);
+			}
+		}
+	}
 	mTexture = 0;
 }

@@ -70,6 +70,24 @@ std::optional<PieceInfo*> lcShowPartSelectionPopup(PieceInfo* InitialPart, const
 	else
 		PartSelectionWidget->SetCustomParts(CustomParts, ColorIndex);
 
+	QScreen* PopupScreen = QGuiApplication::primaryScreen();
+	for (QScreen* Screen : QGuiApplication::screens())
+	{
+		if (Screen->geometry().contains(Position))
+		{
+			PopupScreen = Screen;
+			break;
+		}
+	}
+
+	if (PopupScreen)
+	{
+		const QSize ScreenSize = PopupScreen->availableGeometry().size();
+		const QSize MaximumSize(ScreenSize.width() * 3 / 5, ScreenSize.height() * 3 / 5);
+		Popup->setMaximumSize(MaximumSize);
+		Menu->setMaximumSize(MaximumSize);
+	}
+
 	Action->setDefaultWidget(Popup);
 	Menu->addAction(Action);
 

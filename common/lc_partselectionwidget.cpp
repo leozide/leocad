@@ -686,27 +686,27 @@ void lcPartSelectionListView::SetCurrentPart(PieceInfo* Info)
 
 void lcPartSelectionListView::SetNoIcons()
 {
-	SetIconSize(0);
+	SetIconSize(NoIconSize);
 }
 
 void lcPartSelectionListView::SetSmallIcons()
 {
-	SetIconSize(32);
+	SetIconSize(SmallIconSize);
 }
 
 void lcPartSelectionListView::SetMediumIcons()
 {
-	SetIconSize(64);
+	SetIconSize(MediumIconSize);
 }
 
 void lcPartSelectionListView::SetLargeIcons()
 {
-	SetIconSize(96);
+	SetIconSize(LargeIconSize);
 }
 
 void lcPartSelectionListView::SetExtraLargeIcons()
 {
-	SetIconSize(192);
+	SetIconSize(ExtraLargeIconSize);
 }
 
 void lcPartSelectionListView::TogglePartNames()
@@ -806,7 +806,7 @@ void lcPartSelectionListView::SetIconSize(int Size)
 	int Height = Size + 2 * frameWidth() + 2;
 	if (horizontalScrollBar())
 		Height += horizontalScrollBar()->sizeHint().height();
-	setMinimumSize(Width, Height);
+	setMinimumSize(mPartSelectionWidget->GetIsPopup() ? QSize(0, 0) : QSize(Width, Height));
 }
 
 void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
@@ -836,7 +836,7 @@ QSize lcPartSelectionListView::sizeHint() const
 	if (model()->rowCount() == 0)
 		return QListView::sizeHint();
 
-	if (mListModel->GetIconSize() == 0)
+	if (mListModel->GetIconSize() == NoIconSize)
 		return QSize(500, 350);
 
 	int Columns = 5;
@@ -1175,7 +1175,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
-	if (ListModel->GetIconSize() != 0 && !ListModel->IsListMode())
+	if (ListModel->GetIconSize() != lcPartSelectionListView::NoIconSize && !ListModel->IsListMode())
 	{
 		QAction* PartNames = Menu->addAction(tr("Show Part Names"), mPartsWidget, &lcPartSelectionListView::TogglePartNames);
 		PartNames->setCheckable(true);
@@ -1200,30 +1200,30 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 		QAction* NoIcons = IconMenu->addAction(tr("No Icons"), mPartsWidget, &lcPartSelectionListView::SetNoIcons);
 		NoIcons->setCheckable(true);
-		NoIcons->setChecked(ListModel->GetIconSize() == 0);
+		NoIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::NoIconSize);
 		IconGroup->addAction(NoIcons);
 
 		QAction* SmallIcons = IconMenu->addAction(tr("Small Icons"), mPartsWidget, &lcPartSelectionListView::SetSmallIcons);
 		SmallIcons->setCheckable(true);
-		SmallIcons->setChecked(ListModel->GetIconSize() == 32);
+		SmallIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::SmallIconSize);
 		IconGroup->addAction(SmallIcons);
 
 		QAction* MediumIcons = IconMenu->addAction(tr("Medium Icons"), mPartsWidget, &lcPartSelectionListView::SetMediumIcons);
 		MediumIcons->setCheckable(true);
-		MediumIcons->setChecked(ListModel->GetIconSize() == 64);
+		MediumIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::MediumIconSize);
 		IconGroup->addAction(MediumIcons);
 
 		QAction* LargeIcons = IconMenu->addAction(tr("Large Icons"), mPartsWidget, &lcPartSelectionListView::SetLargeIcons);
 		LargeIcons->setCheckable(true);
-		LargeIcons->setChecked(ListModel->GetIconSize() == 96);
+		LargeIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::LargeIconSize);
 		IconGroup->addAction(LargeIcons);
 
 		QAction* ExtraLargeIcons = IconMenu->addAction(tr("Extra Large Icons"), mPartsWidget, &lcPartSelectionListView::SetExtraLargeIcons);
 		ExtraLargeIcons->setCheckable(true);
-		ExtraLargeIcons->setChecked(ListModel->GetIconSize() == 192);
+		ExtraLargeIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::ExtraLargeIconSize);
 		IconGroup->addAction(ExtraLargeIcons);
 
-		if (ListModel->GetIconSize() != 0)
+		if (ListModel->GetIconSize() != lcPartSelectionListView::NoIconSize)
 		{
 			IconMenu->addSeparator();
 

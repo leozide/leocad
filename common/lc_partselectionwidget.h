@@ -190,6 +190,12 @@ class lcPartSelectionListView : public QListView
 	Q_OBJECT
 
 public:
+	static constexpr int NoIconSize = 0;
+	static constexpr int SmallIconSize = 32;
+	static constexpr int MediumIconSize = 64;
+	static constexpr int LargeIconSize = 96;
+	static constexpr int ExtraLargeIconSize = 192;
+
 	lcPartSelectionListView(QWidget* Parent, lcPartSelectionWidget* PartSelectionWidget);
 
 	void startDrag(Qt::DropActions SupportedActions) override;
@@ -286,6 +292,9 @@ public:
 	void SetIsPopup(bool IsPopup)
 	{
 		mIsPopup = IsPopup;
+
+		if (mIsPopup)
+			mPartsWidget->setMinimumSize(0, 0);
 	}
 
 	int GetColorIndex() const

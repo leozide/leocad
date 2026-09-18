@@ -37,7 +37,7 @@ for:
     - mkdir appdir
     - copy build\release\leocad.exe appdir
     - copy docs\readme.md appdir\readme.txt
-    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-25.08.zip -FileName library.zip
+    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
     - 7z e library.zip
     - copy library.bin appdir\\library.bin
     - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe
@@ -79,7 +79,7 @@ for:
       
     after_build:
       - make install INSTALL_ROOT=AppDir
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-25.08.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
       - unzip library.zip
       - mkdir -p AppDir/usr/share/leocad
       - mv library.bin AppDir/usr/share/leocad/library.bin
@@ -116,7 +116,7 @@ for:
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
       - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povray
       - chmod +x povray
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-25.08.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
       - unzip library.zip
      
     build_script:

@@ -28,7 +28,7 @@ Group: Graphics
 %if 0%{?fedora} || 0%{?centos_version}
 Group: Amusements/Graphics
 %endif
-Version: 25.09
+Version: 26.09
 %if 0%{?opensuse_bs}
 Release: <CI_CNT>.<B_CNT>%{?dist}
 %else
@@ -290,4 +290,3 @@ rm -rf $RPM_BUILD_ROOT
 
 * Tue Sep 16 2016 - pbartfai (at) stardust.hu 0.90
 - Initial version
-

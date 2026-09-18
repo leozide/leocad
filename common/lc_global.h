@@ -59,10 +59,10 @@ typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
 
 // Version number.
-#define LC_VERSION_MAJOR 25
+#define LC_VERSION_MAJOR 26
 #define LC_VERSION_MINOR 9
 #define LC_VERSION_PATCH 0
-#define LC_VERSION_TEXT "25.09"
+#define LC_VERSION_TEXT "26.09"
 
 // Forward declarations.
 class Project;

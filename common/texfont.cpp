@@ -149,7 +149,7 @@ bool TexFont::Initialize(lcContext* Context)
 	mTextureWidth = mTextureHeight = 1024;
 	Image Image;
 	Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
-	memset(Image.mData, 0, mTextureWidth * mTextureHeight * 2);
+	memset(Image.mData, 0, static_cast<size_t>(mTextureWidth) * mTextureHeight * 2);
 
 	QFont Font(QStringLiteral("Arial"));
 	Font.setPixelSize(56);

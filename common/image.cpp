@@ -105,7 +105,7 @@ void Image::Allocate(int Width, int Height, lcPixelFormat Format)
 	mWidth = Width;
 	mHeight = Height;
 	mFormat = Format;
-	mData = (unsigned char*)malloc(mWidth * mHeight * GetBPP());
+	mData = (unsigned char*)malloc(static_cast<size_t>(mWidth) * mHeight * GetBPP());
 }
 
 void Image::ResizePow2()
@@ -133,7 +133,7 @@ void Image::Resize(int width, int height)
 	unsigned char* bits = nullptr;
 
 	components = GetBPP();
-	const int BufferSize = width * height * components;
+	const size_t BufferSize = static_cast<size_t>(width) * height * components;
 
 	if (BufferSize)
 	{

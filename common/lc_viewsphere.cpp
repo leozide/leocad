@@ -230,8 +230,8 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		}
 	}
 
-	mVertexBuffer = Context->CreateVertexBuffer(Verts.size() * sizeof(float), Verts.data());
-	mIndexBuffer = Context->CreateIndexBuffer(Indices.size() * sizeof(GLushort), Indices.data());
+	mVertexBuffer = Context->CreateVertexBuffer(static_cast<int>(Verts.size()) * sizeof(float), Verts.data());
+	mIndexBuffer = Context->CreateIndexBuffer(static_cast<int>(Indices.size()) * sizeof(GLushort), Indices.data());
 }
 
 void lcViewSphere::DestroyResources(lcContext* Context)

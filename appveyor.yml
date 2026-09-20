@@ -1,5 +1,5 @@
 version: '{branch}.{build}'
-skip_tags: false
+skip_tags: true
 image:
 - Ubuntu1604
 - macOS
@@ -23,7 +23,8 @@ for:
     before_build:
     - call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
     - set PATH=C:\Qt\6.9\msvc2022_64\bin;%PATH%
-    - if defined APPVEYOR_REPO_TAG_NAME (set VERSION=%APPVEYOR_REPO_TAG_NAME:v=%) else (git rev-parse --short HEAD > version.txt && set /p VERSION= < version.txt)
+    - git rev-parse --short HEAD > version.txt
+    - set /p VERSION= < version.txt
     - qmake -v
     - qmake -tp vc
 
@@ -36,7 +37,7 @@ for:
     - mkdir appdir
     - copy build\release\leocad.exe appdir
     - copy docs\readme.md appdir\readme.txt
-    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
+    - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v26.09/Library-26.08.zip -FileName library.zip
     - 7z e library.zip
     - copy library.bin appdir\\library.bin
     - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povconsole32-sse2.exe -FileName appdir\povconsole32-sse2.exe
@@ -78,7 +79,7 @@ for:
       
     after_build:
       - make install INSTALL_ROOT=AppDir
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v26.09/Library-26.08.zip -FileName library.zip
       - unzip library.zip
       - mkdir -p AppDir/usr/share/leocad
       - mv library.bin AppDir/usr/share/leocad/library.bin
@@ -89,7 +90,7 @@ for:
       - appveyor DownloadFile https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
       - chmod a+x linuxdeployqt*.AppImage 
       - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
-      - if [ -n "$APPVEYOR_REPO_TAG_NAME" ]; then export VERSION="${APPVEYOR_REPO_TAG_NAME#v}"; else export VERSION=$(git rev-parse --short HEAD); fi
+      - export VERSION=$(git rev-parse --short HEAD)
       - ./linuxdeployqt*.AppImage ./AppDir/usr/share/applications/*.desktop -bundle-non-qt-libs
       - ./linuxdeployqt*.AppImage --appimage-extract
       - export PATH=$(readlink -f ./squashfs-root/usr/bin/):$PATH
@@ -115,7 +116,7 @@ for:
       - export TRAVIS_COMMIT=$APPVEYOR_REPO_COMMIT
       - appveyor DownloadFile https://github.com/leozide/povray/releases/download/build1/povray
       - chmod +x povray
-      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -FileName library.zip
+      - appveyor DownloadFile https://github.com/leozide/leocad/releases/download/v26.09/Library-26.08.zip -FileName library.zip
       - unzip library.zip
      
     build_script:
@@ -125,8 +126,7 @@ for:
     after_build:
       - cd build/release
       - macdeployqt LeoCAD.app -dmg
-      - if [ -n "$APPVEYOR_REPO_TAG_NAME" ]; then export VERSION="${APPVEYOR_REPO_TAG_NAME#v}"; else export VERSION=$(git rev-parse --short HEAD); fi
-      - mv LeoCAD.dmg LeoCAD-macOS-$VERSION.dmg
+      - mv LeoCAD.dmg LeoCAD-macOS-$(git rev-parse --short HEAD).dmg
       - 'curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/leozide/leocad/commits/master -o repo.txt' 
       - "export REMOTE=$(awk -F'\"' '/\"sha\"[[:space:]]*:/ { print $(NF-1); exit }' repo.txt)"
       - export LOCAL=$(git rev-parse HEAD)

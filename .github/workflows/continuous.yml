@@ -43,7 +43,7 @@ jobs:
     - name: Download Library
       if: steps.cache-library.outputs.cache-hit != 'true'
       run: |
-        wget https://github.com/leozide/leocad/releases/download/v25.09/Library-26.08.zip -O library.zip
+        wget https://github.com/leozide/leocad/releases/download/v26.09/Library-26.08.zip -O library.zip
         unzip library.zip
     - name: Cache POV-Ray
       uses: actions/cache@v3

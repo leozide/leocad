@@ -1416,6 +1416,7 @@ void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result, const QStr
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 {
 	lcGetPreferences().mShadingMode = ShadingMode;
+	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(ShadingMode));
 
 	UpdateShadingMode();
 
@@ -1435,6 +1436,7 @@ void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
 void lcMainWindow::ToggleViewSphere()
 {
 	lcGetPreferences().mViewSphereEnabled = !lcGetPreferences().mViewSphereEnabled;
+	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, lcGetPreferences().mViewSphereEnabled);
 
 	lcView::UpdateAllViews();
 }
@@ -1442,6 +1444,7 @@ void lcMainWindow::ToggleViewSphere()
 void lcMainWindow::ToggleAxisIcon()
 {
 	lcGetPreferences().mDrawAxes = !lcGetPreferences().mDrawAxes;
+	lcSetProfileInt(LC_PROFILE_DRAW_AXES, lcGetPreferences().mDrawAxes);
 
 	lcView::UpdateAllViews();
 }
@@ -1456,6 +1459,7 @@ void lcMainWindow::ToggleGrid()
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
+	lcSetProfileInt(LC_PROFILE_FADE_STEPS, lcGetPreferences().mFadeSteps);
 
 	lcView::UpdateAllViews();
 }

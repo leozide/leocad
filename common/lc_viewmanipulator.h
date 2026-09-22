@@ -29,6 +29,11 @@ protected:
 		bool CameraFacing;
 	};
 
+	struct lcMoveAxisInfo
+	{
+		lcVector4 Color;
+	};
+
 	void DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTrackTool TrackTool, quint32 TrackToolSection);
 	std::tuple<lcTrackTool, quint32, float> UpdateSelectMoveTrainTrack(lcPiece* Piece, float OverlayScale, const lcVector3& Start, const lcVector3& End) const;
 
@@ -36,6 +41,7 @@ protected:
 	bool GetRotationWorldMatrix(lcMatrix44& WorldMatrix) const;
 	static lcTrackTool GetRotationAxis(const lcVector3& LocalIntersection, float Epsilon);
 	static std::optional<lcRotationDiscInfo> GetRotationDiscInfo(lcTrackTool TrackTool);
+	static std::optional<lcMoveAxisInfo> GetMoveAxisInfo(lcTrackTool TrackTool);
 	lcMatrix44 GetRotationDiscWorldMatrix(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& WorldMatrix) const;
 	float GetRotationDiscStartAngle(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& DiscWorldMatrix) const;
 	void DrawTrackballHover(const lcMatrix44& WorldMatrix, float OverlayScale) const;
@@ -43,6 +49,7 @@ protected:
 	void DrawCameraRotationRing(lcTrackButton TrackButton, lcTrackTool TrackTool, const lcMatrix44& WorldMatrix, float OverlayScale) const;
 	void DrawAxisRotationRings(lcTrackButton TrackButton, lcTrackTool TrackTool, bool HasAngle, const lcMatrix44& WorldMatrix, float OverlayScale) const;
 	void DrawRotationText(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const;
+	void DrawMoveDistance(lcTrackButton TrackButton, lcTrackTool TrackTool, const lcVector3& StartPosition, const lcVector3& EndPosition, float Distance) const;
 
 	lcView* mView = nullptr;
 

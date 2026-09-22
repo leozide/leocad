@@ -362,6 +362,17 @@ public:
 		return mMouseToolDistance;
 	}
 
+	bool GetMouseToolMovePositions(lcVector3& Start, lcVector3& End) const
+	{
+		if (!mMouseToolMovePositionValid)
+			return false;
+
+		Start = mMouseToolMoveStartPosition;
+		End = mMouseToolMoveEndPosition;
+
+		return true;
+	}
+
 	void BeginMouseTool(lcTool Tool, lcView* View);
 	void EndMouseTool(lcTool Tool, lcView* View, bool Accept);
 	bool InsertPieceToolClicked();
@@ -458,6 +469,10 @@ protected:
 	bool mActive;
 	lcStep mCurrentStep;
 	lcVector3 mMouseToolDistance;
+	lcVector3 mMouseToolMoveStartPosition;
+	lcVector3 mMouseToolMoveEndPosition;
+	bool mMouseToolMovePositionValid = false;
+	bool mMouseToolMoveUsesFocus = false;
 	bool mMouseToolFirstMove;
 	std::vector<lcInsertPieceInfo> mPreviewInsertPieceInfo;
 

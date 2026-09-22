@@ -9,6 +9,8 @@
 #define LC_2PI (static_cast<float>(2 * M_PI))
 #define LC_RGB_EPSILON (static_cast<float>(0.5f / 255.0f))
 
+inline constexpr float LC_EPSILON = 0.0001f;
+
 #define LC_RGB(r,g,b) LC_RGBA(r,g,b,255)
 #define LC_RGBA(r,g,b,a) ((quint32)(((quint8) (r) | ((quint16) (g) << 8)) | (((quint32) (quint8) (b)) << 16) | (((quint32) (quint8) (a)) << 24)))
 #define LC_RGBA_RED(rgba)   ((quint8)(((rgba) >>  0) & 0xff))
@@ -49,6 +51,11 @@ inline T lcClamp(const T& Value, const T& Min, const T& Max)
 		return Min;
 	else
 		return Value;
+}
+
+inline bool lcIsZero(float Value)
+{
+	return fabsf(Value) < LC_EPSILON;
 }
 
 class lcVector2i
@@ -583,6 +590,11 @@ inline float lcLength(const lcVector3& a)
 inline float lcLengthSquared(const lcVector3& a)
 {
 	return a.LengthSquared();
+}
+
+inline bool lcIsZero(const lcVector3& Value)
+{
+	return Value.LengthSquared() < LC_EPSILON * LC_EPSILON;
 }
 
 inline lcVector3 lcNormalize(const lcVector3& a)

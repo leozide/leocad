@@ -4983,6 +4983,30 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 	}
 
 	mMouseToolDistance = lcVector3(0.0f, 0.0f, 0.0f);
+	mMouseToolMoveStartPosition = lcVector3(0.0f, 0.0f, 0.0f);
+	mMouseToolMoveEndPosition = lcVector3(0.0f, 0.0f, 0.0f);
+	mMouseToolMovePositionValid = false;
+	mMouseToolMoveUsesFocus = false;
+
+	if (Tool == lcTool::Move)
+	{
+		lcObject* Focus = GetFocusObject();
+
+		if (Focus && Focus->GetFocusSection() != LC_OBJECT_SECTION_INVALID)
+		{
+			mMouseToolMoveStartPosition = Focus->GetSectionPosition(Focus->GetFocusSection());
+			mMouseToolMovePositionValid = true;
+			mMouseToolMoveUsesFocus = true;
+		}
+		else
+		{
+			lcMatrix33 RelativeRotation;
+			mMouseToolMovePositionValid = GetMoveRotateTransform(mMouseToolMoveStartPosition, RelativeRotation);
+		}
+
+		mMouseToolMoveEndPosition = mMouseToolMoveStartPosition;
+	}
+
 	mMouseToolFirstMove = true;
 }
 
@@ -5164,6 +5188,24 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 
 	lcModelTransformFlags Flags = (AllowRelative ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None) | (mMouseToolFirstMove ? lcModelTransformFlag::FirstMove : lcModelTransformFlag::None);
 	MoveSelectedObjects(PieceDistance, ObjectDistance, Flags, lcModelHistoryEditMerge::None);
+
+	if (mMouseToolMovePositionValid)
+	{
+		if (mMouseToolMoveUsesFocus)
+		{
+			lcObject* Focus = GetFocusObject();
+
+			if (Focus && Focus->GetFocusSection() != LC_OBJECT_SECTION_INVALID)
+				mMouseToolMoveEndPosition = Focus->GetSectionPosition(Focus->GetFocusSection());
+			else
+				mMouseToolMovePositionValid = false;
+		}
+		else
+		{
+			lcMatrix33 RelativeRotation;
+			mMouseToolMovePositionValid = GetMoveRotateTransform(mMouseToolMoveEndPosition, RelativeRotation);
+		}
+	}
 
 	mMouseToolDistance = Distance;
 	mMouseToolFirstMove = false;

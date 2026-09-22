@@ -1918,7 +1918,10 @@ void lcView::ZoomExtents()
 
 lcCursor lcView::GetCursor() const
 {
-	if (mTrackButton != lcTrackButton::None && mTrackTool != lcTrackTool::Paint && GetCurrentTool() != lcTool::Rotate)
+	const lcTool CurrentTool = GetCurrentTool();
+	const bool IsMoveTool = mTrackTool >= lcTrackTool::MoveX && mTrackTool <= lcTrackTool::MoveXYZ;
+
+	if (mTrackButton != lcTrackButton::None && mTrackTool != lcTrackTool::Paint && !IsMoveTool && CurrentTool != lcTool::Rotate)
 		return lcCursor::Hidden;
 
 	if (mTrackTool == lcTrackTool::Select)
@@ -1940,13 +1943,13 @@ lcCursor lcView::GetCursor() const
 		lcCursor::AreaLight,        // lcTrackTool::AreaLight
 		lcCursor::Camera,           // lcTrackTool::Camera
 		lcCursor::Select,           // lcTrackTool::Select
-		lcCursor::Move,             // lcTrackTool::MoveX
-		lcCursor::Move,             // lcTrackTool::MoveY
-		lcCursor::Move,             // lcTrackTool::MoveZ
-		lcCursor::Move,             // lcTrackTool::MoveXY
-		lcCursor::Move,             // lcTrackTool::MoveXZ
-		lcCursor::Move,             // lcTrackTool::MoveYZ
-		lcCursor::Move,             // lcTrackTool::MoveXYZ
+		lcCursor::Default,          // lcTrackTool::MoveX
+		lcCursor::Default,          // lcTrackTool::MoveY
+		lcCursor::Default,          // lcTrackTool::MoveZ
+		lcCursor::Default,          // lcTrackTool::MoveXY
+		lcCursor::Default,          // lcTrackTool::MoveXZ
+		lcCursor::Default,          // lcTrackTool::MoveYZ
+		lcCursor::Default,          // lcTrackTool::MoveXYZ
 		lcCursor::Default,          // lcTrackTool::RotateX
 		lcCursor::Default,          // lcTrackTool::RotateY
 		lcCursor::Default,          // lcTrackTool::RotateZ

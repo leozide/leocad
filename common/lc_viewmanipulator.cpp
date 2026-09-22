@@ -310,6 +310,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 	lcModel* ActiveModel = mView->GetActiveModel();
 	ActiveModel->GetMoveRotateTransform(OverlayCenter, RelativeRotation);
 	bool AnyPiecesSelected = ActiveModel->AnyPiecesSelected();
+	lcObject* Focus = ActiveModel->GetFocusObject();
 
 	lcMatrix44 WorldMatrix = lcMatrix44(RelativeRotation, OverlayCenter);
 
@@ -326,10 +327,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 	Context->SetVertexBuffer(mRotateMoveVertexBuffer);
 	Context->SetVertexFormatPosition(3);
 
-	lcObject* Focus = ActiveModel->GetFocusObject();
 	quint32 AllowedTransforms = Focus ? Focus->GetAllowedTransforms() : LC_OBJECT_TRANSFORM_MOVE_X | LC_OBJECT_TRANSFORM_MOVE_Y | LC_OBJECT_TRANSFORM_MOVE_Z | LC_OBJECT_TRANSFORM_ROTATE_X | LC_OBJECT_TRANSFORM_ROTATE_Y | LC_OBJECT_TRANSFORM_ROTATE_Z;
 
-	if (TrackButton == lcTrackButton::None || (TrackTool >= lcTrackTool::MoveX && TrackTool <= lcTrackTool::MoveXYZ))
+	if (TrackButton == lcTrackButton::None)
 	{
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_X)
 		{
@@ -338,7 +338,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 				Context->SetColor(mColorXAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 			}
-			else if (TrackButton == lcTrackButton::None)
+			else
 			{
 				Context->SetColor(mColorXAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
@@ -352,7 +352,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 				Context->SetColor(mColorYAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 			}
-			else if (TrackButton == lcTrackButton::None)
+			else
 			{
 				Context->SetColor(mColorYAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
@@ -366,7 +366,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 				Context->SetColor(mColorZAxisSelected);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 			}
-			else if (TrackButton == lcTrackButton::None)
+			else
 			{
 				Context->SetColor(mColorZAxis);
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
@@ -486,6 +486,20 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			DrawTrainTrack(Piece, Context, TrackTool, TrackToolSection);
 		}
+	}
+
+	lcVector3 MoveStartPosition, MoveEndPosition;
+	if (ActiveModel->GetMouseToolMovePositions(MoveStartPosition, MoveEndPosition))
+	{
+		const float MoveDistance = lcLength(MoveEndPosition - MoveStartPosition);
+
+		if (ActiveModel != mView->GetModel())
+		{
+			MoveStartPosition = lcMul31(MoveStartPosition, mView->GetActiveSubmodelTransform());
+			MoveEndPosition = lcMul31(MoveEndPosition, mView->GetActiveSubmodelTransform());
+		}
+
+		DrawMoveDistance(TrackButton, TrackTool, MoveStartPosition, MoveEndPosition, MoveDistance);
 	}
 
 	Context->EnableDepthTest(true);
@@ -659,6 +673,24 @@ std::optional<lcViewManipulator::lcRotationDiscInfo> lcViewManipulator::GetRotat
 	}
 }
 
+std::optional<lcViewManipulator::lcMoveAxisInfo> lcViewManipulator::GetMoveAxisInfo(lcTrackTool TrackTool)
+{
+	switch (TrackTool)
+	{
+	case lcTrackTool::MoveX:
+		return lcMoveAxisInfo{ mColorXAxisSelected };
+
+	case lcTrackTool::MoveY:
+		return lcMoveAxisInfo{ mColorYAxisSelected };
+
+	case lcTrackTool::MoveZ:
+		return lcMoveAxisInfo{ mColorZAxisSelected };
+
+	default:
+		return std::nullopt;
+	}
+}
+
 lcMatrix44 lcViewManipulator::GetRotationDiscWorldMatrix(const lcRotationDiscInfo& DiscInfo, const lcMatrix44& WorldMatrix) const
 {
 	if (!DiscInfo.CameraFacing)
@@ -720,7 +752,7 @@ void lcViewManipulator::DrawTrackballHover(const lcMatrix44& WorldMatrix, float 
 
 bool lcViewManipulator::DrawRotationDisc(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const
 {
-	if (MouseToolDistance.LengthSquared() == 0.0f || TrackButton == lcTrackButton::None || !RotationDisc)
+	if (lcIsZero(MouseToolDistance) || TrackButton == lcTrackButton::None || !RotationDisc)
 		return false;
 
 	lcContext* Context = mView->mContext;
@@ -933,6 +965,9 @@ void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVect
 	lcContext* Context = mView->mContext;
 	const lcRotationDiscInfo& DiscInfo = *RotationDisc;
 	const float Angle = MouseToolDistance[DiscInfo.AxisIndex];
+	if (lcIsZero(Angle))
+		return;
+
 	const lcMatrix44 RotatedWorldMatrix = GetRotationDiscWorldMatrix(DiscInfo, WorldMatrix);
 	const float StartAngle = GetRotationDiscStartAngle(DiscInfo, RotatedWorldMatrix);
 	const float StartVectorAngle = DiscInfo.CameraFacing ? StartAngle : -StartAngle;
@@ -958,6 +993,90 @@ void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVect
 	Context->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
 	Context->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 	gTexFont.PrintText(Context, ScreenPos[0] / UIScale - (Width / 2), ScreenPos[1] / UIScale + (Height / 2), 0.0f, Buffer);
+	Context->EnableColorBlend(false);
+}
+
+void lcViewManipulator::DrawMoveDistance(lcTrackButton TrackButton, lcTrackTool TrackTool, const lcVector3& StartPosition, const lcVector3& EndPosition, float MoveDistance) const
+{
+	if (TrackButton == lcTrackButton::None)
+		return;
+
+	const std::optional<lcMoveAxisInfo> MoveAxis = GetMoveAxisInfo(TrackTool);
+	if (!MoveAxis)
+		return;
+
+	lcContext* Context = mView->mContext;
+	const lcMoveAxisInfo& AxisInfo = *MoveAxis;
+	const lcVector3 Distance = EndPosition - StartPosition;
+	if (lcIsZero(Distance))
+		return;
+
+	const lcVector3 LineStart = StartPosition;
+	const lcVector3 LineEnd = EndPosition;
+	const lcVector3 TextPosition = (LineStart + LineEnd) * 0.5f;
+	const lcVector3 Direction = lcNormalize(Distance);
+	const lcVector3 CameraFront = lcNormalize(mView->GetCamera()->mTargetPosition - mView->GetCamera()->mPosition);
+	lcVector3 ScreenPerpendicular = lcCross(CameraFront, Direction);
+
+	if (lcIsZero(ScreenPerpendicular))
+		ScreenPerpendicular = lcCross(lcVector3(0.0f, 1.0f, 0.0f), Direction);
+
+	if (lcIsZero(ScreenPerpendicular))
+		ScreenPerpendicular = lcCross(lcVector3(1.0f, 0.0f, 0.0f), Direction);
+
+	ScreenPerpendicular = lcNormalize(ScreenPerpendicular) * (mView->GetOverlayScale() * 0.035f);
+	const lcVector3 TickHalfLength = ScreenPerpendicular * 3.0f;
+	const lcVector3 TickHalfWidth = Direction * (mView->GetOverlayScale() * 0.035f);
+	const lcVector3 TextNormal = TickHalfLength;
+	const lcVector3 LineVertices[18] =
+	{
+		LineStart - ScreenPerpendicular, LineEnd - ScreenPerpendicular, LineStart + ScreenPerpendicular,
+		LineStart + ScreenPerpendicular, LineEnd - ScreenPerpendicular, LineEnd + ScreenPerpendicular,
+		LineStart - TickHalfLength - TickHalfWidth, LineStart + TickHalfLength - TickHalfWidth, LineStart - TickHalfLength + TickHalfWidth,
+		LineStart - TickHalfLength + TickHalfWidth, LineStart + TickHalfLength - TickHalfWidth, LineStart + TickHalfLength + TickHalfWidth,
+		LineEnd - TickHalfLength - TickHalfWidth, LineEnd + TickHalfLength - TickHalfWidth, LineEnd - TickHalfLength + TickHalfWidth,
+		LineEnd - TickHalfLength + TickHalfWidth, LineEnd + TickHalfLength - TickHalfWidth, LineEnd + TickHalfLength + TickHalfWidth
+	};
+	Context->SetMaterial(lcMaterialType::UnlitColor);
+	Context->SetColor(AxisInfo.Color);
+	Context->SetWorldMatrix(lcMatrix44Identity());
+	Context->SetVertexBufferPointer(LineVertices);
+	Context->ClearIndexBuffer();
+	Context->SetVertexFormatPosition(3);
+	Context->DrawPrimitives(GL_TRIANGLES, 0, 18);
+
+	const lcVector3 ScreenPos = mView->ProjectPoint(TextPosition);
+	const float UIScale = mView->GetUIScale();
+
+	Context->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
+	Context->SetWorldMatrix(lcMatrix44Identity());
+	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
+	Context->BindTexture2D(gTexFont.GetTexture());
+	Context->EnableColorBlend(true);
+
+	char Buffer[32];
+	snprintf(Buffer, sizeof(Buffer), "%.2f", MoveDistance);
+
+	int Width, Height;
+	gTexFont.GetStringDimensions(&Width, &Height, Buffer);
+	lcVector3 TextScreenPos(ScreenPos[0] / UIScale, ScreenPos[1] / UIScale, 0.0f);
+
+	const lcVector3 NormalScreenPos = mView->ProjectPoint(TextPosition + TextNormal);
+	lcVector3 ScreenNormal(NormalScreenPos[0] - ScreenPos[0], NormalScreenPos[1] - ScreenPos[1], 0.0f);
+	const float ScreenNormalLength = lcLength(ScreenNormal);
+
+	if (!lcIsZero(ScreenNormalLength))
+	{
+		ScreenNormal /= ScreenNormalLength;
+		const float TextRadius = fabsf(ScreenNormal[0]) * Width * 0.5f + fabsf(ScreenNormal[1]) * Height * 0.5f;
+		const float LineRadius = ScreenNormalLength / UIScale;
+		TextScreenPos += ScreenNormal * (TextRadius + LineRadius + 4.0f);
+	}
+
+	Context->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+	Context->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
+	gTexFont.PrintText(Context, TextScreenPos[0] - (Width / 2), TextScreenPos[1] + (Height / 2), 0.0f, Buffer);
 	Context->EnableColorBlend(false);
 }
 

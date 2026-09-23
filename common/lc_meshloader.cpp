@@ -992,9 +992,6 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, mMeshLoader->mCurrentProject, mMeshLoader->mSearchProjectFolder);
 				else
 					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, nullptr, false);
-
-				if (DstSection.Texture)
-					DstSection.Texture->AddRef();
 			}
 
 			DstSection.DrawOffset = NumIndices * sizeof(IndexType);

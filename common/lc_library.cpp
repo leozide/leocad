@@ -217,9 +217,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
-	for (lcTexture* Texture : mTextures)
-		if (!strcmp(TextureName, Texture->mName))
-			return Texture;
+	QMutexLocker LoadLock(&mLoadMutex);
 
 	QString ProjectPath;
 	if (SearchProjectFolder)
@@ -230,17 +228,33 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
+	QFileInfo ProjectTextureFile;
+	if (!ProjectPath.isEmpty())
+		ProjectTextureFile.setFile(ProjectPath + QDir::separator() + TextureName + ".png");
+
+	for (lcTexture* Texture : mTextures)
+	{
+		if (strcmp(TextureName, Texture->mName))
+			continue;
+
+		if (Texture->IsTemporary() && (ProjectPath.isEmpty() || Texture->mFileName != ProjectTextureFile.absoluteFilePath()))
+			continue;
+
+		Texture->AddRef();
+		return Texture;
+	}
+
 	if (!ProjectPath.isEmpty())
 	{
-		QFileInfo TextureFile = QFileInfo(ProjectPath + QDir::separator() + TextureName + ".png");
-
-		if (TextureFile.isFile())
+		if (ProjectTextureFile.isFile())
 		{
-			lcTexture* Texture = lcLoadTexture(TextureFile.absoluteFilePath(), LC_TEXTURE_MIPMAPS);
+			lcTexture* Texture = lcLoadTexture(ProjectTextureFile.absoluteFilePath(), LC_TEXTURE_MIPMAPS);
 
 			if (Texture)
 			{
+				lcstrcpy(Texture->mName, TextureName);
 				mTextures.push_back(Texture);
+				Texture->AddRef();
 				return Texture;
 			}
 		}

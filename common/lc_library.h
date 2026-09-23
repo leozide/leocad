@@ -149,6 +149,7 @@ public:
 	void LoadQueuedPiece();
 	void WaitForLoadQueue();
 
+	// Returns a texture reference that the caller must release.
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);

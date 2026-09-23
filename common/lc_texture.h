@@ -37,14 +37,21 @@ public:
 	void Upload(lcContext* Context);
 	void Unload();
 
+	bool HasImageData() const
+	{
+		return mTexture != 0 || !mImages.empty();
+	}
+
+	// Only to be called by lcPiecesLibrary.
 	void AddRef()
 	{
 		mRefCount.ref();
 
-		if (mRefCount == 1)
+		if (mRefCount == 1 && !HasImageData())
 			Load();
 	}
 
+	// Only to be called by lcPiecesLibrary.
 	bool Release()
 	{
 		const bool InUse = mRefCount.deref();
@@ -103,7 +110,6 @@ protected:
 };
 
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);
-void lcReleaseTexture(lcTexture* Texture);
 
 extern lcTexture* gGridTexture;
 

@@ -1181,7 +1181,6 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 		if (Library->ShouldCancelLoading())
 			return false;
 
-		quint32 ColorCode, ColorCodeHex;
 		bool LastToken = false;
 		int LineType;
 
@@ -1372,16 +1371,21 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				continue;
 		}
 
-		if (sscanf(Line, "%d %d", &LineType, &ColorCode) != 2)
+		int ParsedColorCode;
+		if (sscanf(Line, "%d %d", &LineType, &ParsedColorCode) != 2)
 			continue;
 
 		if (LineType < 1 || LineType > 5)
 			continue;
 
+		quint32 ColorCode = static_cast<quint32>(ParsedColorCode);
 		if (ColorCode == 0)
 		{
-			sscanf(Line, "%d %i", &LineType, &ColorCodeHex);
+			int ParsedHexColorCode;
+			if (sscanf(Line, "%d %i", &LineType, &ParsedHexColorCode) != 2)
+				continue;
 
+			const quint32 ColorCodeHex = static_cast<quint32>(ParsedHexColorCode);
 			if (ColorCode != ColorCodeHex)
 				ColorCode = ColorCodeHex | LC_COLOR_DIRECT;
 		}
@@ -1420,7 +1424,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			char OriginalFileName[LC_MAXPATH];
 			float fm[12];
 
-			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %s", &LineType, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], OriginalFileName);
+			if (sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f %1023s", &LineType, &Dummy, &fm[0], &fm[1], &fm[2], &fm[3], &fm[4], &fm[5], &fm[6], &fm[7], &fm[8], &fm[9], &fm[10], &fm[11], OriginalFileName) != 15)
+				break;
 
 			char FileName[LC_MAXPATH];
 			lcstrcpy(FileName, OriginalFileName);
@@ -1468,7 +1473,8 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 		} break;
 
 		case 2:
-			sscanf(Line, "%d %i %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z);
+			if (sscanf(Line, "%d %i %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z) != 8)
+				break;
 
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);
@@ -1477,8 +1483,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			break;
 
 		case 3:
-			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z);
+			if (sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z) != 11)
+				break;
 
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);
@@ -1497,8 +1504,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			break;
 
 		case 4:
-			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+			if (sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z) != 14)
+				break;
 
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);
@@ -1518,8 +1526,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			break;
 
 		case 5:
-			sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
-				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z);
+			if (sscanf(Line, "%d %i %f %f %f %f %f %f %f %f %f %f %f %f", &LineType, &Dummy, &Points[0].x, &Points[0].y, &Points[0].z,
+				   &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Points[3].x, &Points[3].y, &Points[3].z) != 14)
+				break;
 
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);

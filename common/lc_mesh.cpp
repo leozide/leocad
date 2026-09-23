@@ -8,7 +8,7 @@
 #include "lc_library.h"
 
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
-#define LC_MESH_FILE_VERSION 0x0121
+#define LC_MESH_FILE_VERSION 0x0123
 
 lcMesh* gPlaceholderMesh;
 
@@ -39,7 +39,7 @@ void lcMesh::Create(quint16(&NumSections)[LC_NUM_MESH_LODS], int VertexCount, in
 	mVertexDataSize = VertexCount * sizeof(lcVertex) + TexturedVertexCount * sizeof(lcVertexTextured) + ConditionalVertexCount * sizeof(lcVertexConditional);
 	mVertexData = malloc(mVertexDataSize);
 
-	if (VertexCount < 0x10000 && TexturedVertexCount < 0x10000 && ConditionalVertexCount < 0x10000)
+	if (VertexCount < 0x10000 && TexturedVertexCount < 0x10000)
 	{
 		mIndexType = GL_UNSIGNED_SHORT;
 		mIndexDataSize = IndexCount * sizeof(GLushort);
@@ -50,7 +50,7 @@ void lcMesh::Create(quint16(&NumSections)[LC_NUM_MESH_LODS], int VertexCount, in
 		mIndexDataSize = IndexCount * sizeof(GLuint);
 	}
 
-	mIndexData = malloc(mIndexDataSize);
+	mIndexData = mIndexDataSize ? malloc(mIndexDataSize) : nullptr;
 }
 
 void lcMesh::CreateBox()
@@ -124,8 +124,8 @@ void lcMesh::CreateBox()
 
 	lcMeshSection* Section = &mLods[LC_MESH_LOD_HIGH].Sections[0];
 	Section->ColorIndex = gDefaultColor;
-	Section->IndexOffset = 0;
-	Section->NumIndices = 36;
+	Section->DrawOffset = 0;
+	Section->DrawCount = 36;
 	Section->PrimitiveType = LC_MESH_TRIANGLES;
 	Section->Texture = nullptr;
 	Section->BoundingBox = mBoundingBox;
@@ -151,8 +151,8 @@ void lcMesh::CreateBox()
 
 	Section = &mLods[LC_MESH_LOD_HIGH].Sections[1];
 	Section->ColorIndex = gEdgeColor;
-	Section->IndexOffset = 36 * 2;
-	Section->NumIndices = 24;
+	Section->DrawOffset = 36 * 2;
+	Section->DrawCount = 24;
 	Section->PrimitiveType = LC_MESH_LINES;
 	Section->Texture = nullptr;
 	Section->BoundingBox = mBoundingBox;
@@ -187,9 +187,9 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
 			const lcVertex* Verts = GetVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 			{
 				const lcVector3& v1 = Verts[Indices[Idx]].Position;
 				const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
@@ -202,9 +202,9 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 		{
 			const lcVertexTextured* Verts = GetTexturedVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 			{
 				const lcVector3& v1 = Verts[Indices[Idx]].Position;
 				const lcVector3& v2 = Verts[Indices[Idx + 1]].Position;
@@ -240,18 +240,18 @@ bool lcMesh::IntersectsPlanes(const lcVector4 (&Planes)[6])
 		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
 			const lcVertex* Verts = GetVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
 					return true;
 		}
 		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 		{
 			const lcVertexTextured* Verts = GetTexturedVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				if (lcTriangleIntersectsPlanes(Verts[Indices[Idx]].Position, Verts[Indices[Idx+1]].Position, Verts[Indices[Idx+2]].Position, Planes))
 					return true;
 		}
@@ -296,12 +296,12 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
 			const lcVertex* Verts = GetVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
 			if (NumSections > 1)
 				File.WriteLine(" mesh {\n");
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 			{
 				const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
 				const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
@@ -318,12 +318,12 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 		{
 			const lcVertexTextured* Verts = GetTexturedVertexData();
-			const IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+			const IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
 			if (NumSections > 1)
 				File.WriteLine(" mesh {\n");
 
-			for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 			{
 				const lcVector3 v1 = Verts[Indices[Idx]].Position / 25.0f;
 				const lcVector3 v2 = Verts[Indices[Idx + 1]].Position / 25.0f;
@@ -373,7 +373,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 			continue;
 
-		IndexType* Indices = (IndexType*)mIndexData + Section->IndexOffset / sizeof(IndexType);
+		IndexType* Indices = (IndexType*)mIndexData + Section->DrawOffset / sizeof(IndexType);
 
 		if (Section->ColorIndex == gDefaultColor)
 			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
@@ -381,7 +381,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
 		File.WriteLine(Line);
 
-		for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+		for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 		{
 			const long int idx1 = Indices[Idx + 0] + VertexOffset;
 			const long int idx2 = Indices[Idx + 1] + VertexOffset;
@@ -433,15 +433,15 @@ bool lcMesh::FileLoad(lcMemFile& File)
 		{
 			lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
 
-			quint32 ColorCode, IndexOffset;
+			quint32 ColorCode, DrawOffset, DrawCount;
 			quint16 PrimtiveType, Length;
 
-			if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&IndexOffset, 1) || !File.ReadU32(&IndexCount, 1) || !File.ReadU16(&PrimtiveType, 1))
+			if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&DrawOffset, 1) || !File.ReadU32(&DrawCount, 1) || !File.ReadU16(&PrimtiveType, 1))
 				return false;
 
 			Section.ColorIndex = lcGetColorIndex(ColorCode);
-			Section.IndexOffset = IndexOffset;
-			Section.NumIndices = IndexCount;
+			Section.DrawOffset = DrawOffset;
+			Section.DrawCount = DrawCount;
 			Section.PrimitiveType = (lcMeshPrimitiveType)PrimtiveType;
 			Section.BoundingBox.Min = File.ReadVector3();
 			Section.BoundingBox.Max = File.ReadVector3();
@@ -506,8 +506,8 @@ bool lcMesh::FileSave(lcMemFile& File)
 			const lcMeshSection& Section = mLods[LodIdx].Sections[SectionIdx];
 
 			File.WriteU32(lcGetColorCode(Section.ColorIndex));
-			File.WriteU32(Section.IndexOffset);
-			File.WriteU32(Section.NumIndices);
+			File.WriteU32(Section.DrawOffset);
+			File.WriteU32(Section.DrawCount);
 			File.WriteU16(Section.PrimitiveType);
 			File.WriteVector3(Section.BoundingBox.Min);
 			File.WriteVector3(Section.BoundingBox.Max);

@@ -35,8 +35,8 @@ struct lcVertexConditional
 struct lcMeshSection
 {
 	int ColorIndex;
-	int IndexOffset;
-	int NumIndices;
+	int DrawOffset; // Index-buffer byte offset, or first conditional vertex.
+	int DrawCount;  // Index count, or conditional vertex count.
 	lcMeshPrimitiveType PrimitiveType;
 	lcTexture* Texture;
 	lcBoundingBox BoundingBox;

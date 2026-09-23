@@ -346,7 +346,8 @@ void lcMeshLoaderTypeData::AddMeshData(const lcMeshLoaderTypeData& Data, const l
 	}
 
 	mConditionalVertices.reserve(mConditionalVertices.size() + Data.mConditionalVertices.size());
-	std::vector<quint32> ConditionalRemap(Data.mConditionalVertices.size());
+	std::vector<quint32> ConditionalRemap;
+	ConditionalRemap.reserve(Data.mConditionalVertices.size());
 
 	for (const lcMeshLoaderConditionalVertex& DataVertex : Data.mConditionalVertices)
 	{
@@ -807,7 +808,6 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	lcMesh* Mesh = new lcMesh();
 
 	int BaseVertices[LC_NUM_MESHDATA_TYPES];
-	int BaseConditionalVertices[LC_NUM_MESHDATA_TYPES];
 	int NumVertices = 0;
 	int ConditionalVertexCount = 0;
 
@@ -818,8 +818,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	{
 		BaseVertices[MeshDataIdx] = NumVertices;
 		NumVertices += static_cast<int>(mData[MeshDataIdx].mVertices.size());
-		BaseConditionalVertices[MeshDataIdx] = ConditionalVertexCount;
-		ConditionalVertexCount += static_cast<int>(mData[MeshDataIdx].mConditionalVertices.size());
+		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataIdx].mSections)
+			if (Section->mPrimitiveType == LC_MESH_CONDITIONAL_LINES)
+				ConditionalVertexCount += static_cast<int>(Section->mIndices.size());
 	}
 
 	if (mHasTextures)
@@ -847,14 +848,16 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
 		{
-			NumIndices += static_cast<int>(Section->mIndices.size());
+			if (Section->mPrimitiveType != LC_MESH_CONDITIONAL_LINES)
+				NumIndices += static_cast<int>(Section->mIndices.size());
 
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
 
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LodIdx].mSections)
 		{
-			NumIndices += static_cast<int>(Section->mIndices.size());
+			if (Section->mPrimitiveType != LC_MESH_CONDITIONAL_LINES)
+				NumIndices += static_cast<int>(Section->mIndices.size());
 
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
@@ -892,26 +895,71 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 		}
 	}
 
-	lcVertexConditional* DstConditionalVerts = (lcVertexConditional*)DstTexturedVerts;
-
-	for (const lcMeshLoaderTypeData& Data : mData)
-	{
-		for (const lcMeshLoaderConditionalVertex& SrcVertex : Data.mConditionalVertices)
-		{
-			lcVertexConditional& DstVertex = *DstConditionalVerts++;
-
-			DstVertex.Position1 = lcVector3LDrawToLeoCAD(SrcVertex.Position[0]);
-			DstVertex.Position2 = lcVector3LDrawToLeoCAD(SrcVertex.Position[1]);
-			DstVertex.Position3 = lcVector3LDrawToLeoCAD(SrcVertex.Position[2]);
-			DstVertex.Position4 = lcVector3LDrawToLeoCAD(SrcVertex.Position[3]);
-		}
-	}
-
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		WriteSections<quint16>(Mesh, FinalSections, BaseVertices, BaseConditionalVertices);
+		WriteSections<quint16>(Mesh, FinalSections, BaseVertices);
 	else
-		WriteSections<quint32>(Mesh, FinalSections, BaseVertices, BaseConditionalVertices);
+		WriteSections<quint32>(Mesh, FinalSections, BaseVertices);
 
+	// Pack each color/material group as high, shared, low. Either LOD then
+	// occupies one contiguous range without duplicating the shared vertices.
+	std::vector<lcMeshLoaderFinalSection> ConditionalSections;
+	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+		for (const lcMeshLoaderFinalSection& Section : FinalSections[LodIdx])
+		{
+			if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+				continue;
+
+			const auto SameSection = [&Section](const lcMeshLoaderFinalSection& Other)
+			{
+				return Section.Color == Other.Color && !strcmp(Section.Name, Other.Name);
+			};
+			if (std::find_if(ConditionalSections.begin(), ConditionalSections.end(), SameSection) == ConditionalSections.end())
+				ConditionalSections.push_back(Section);
+		}
+
+	lcVertexConditional* const ConditionalVertices = (lcVertexConditional*)DstTexturedVerts;
+	int ConditionalOffset = 0;
+	for (const lcMeshLoaderFinalSection& FinalSection : ConditionalSections)
+	{
+		const auto AppendVertices = [this, &FinalSection, &ConditionalOffset, ConditionalVertices](lcMeshDataType DataType)
+		{
+			const lcMeshLoaderTypeData& Data = mData[DataType];
+			for (const std::unique_ptr<lcMeshLoaderSection>& Section : Data.mSections)
+			{
+				if (Section->mPrimitiveType != LC_MESH_CONDITIONAL_LINES || Section->mMaterial->Color != FinalSection.Color || strcmp(Section->mMaterial->Name, FinalSection.Name))
+					continue;
+
+				for (const quint32 Index : Section->mIndices)
+				{
+					const lcMeshLoaderConditionalVertex& SrcVertex = Data.mConditionalVertices[Index];
+					lcVertexConditional& DstVertex = ConditionalVertices[ConditionalOffset++];
+					DstVertex.Position1 = lcVector3LDrawToLeoCAD(SrcVertex.Position[0]);
+					DstVertex.Position2 = lcVector3LDrawToLeoCAD(SrcVertex.Position[1]);
+					DstVertex.Position3 = lcVector3LDrawToLeoCAD(SrcVertex.Position[2]);
+					DstVertex.Position4 = lcVector3LDrawToLeoCAD(SrcVertex.Position[3]);
+				}
+			}
+		};
+
+		const int HighStart = ConditionalOffset;
+		AppendVertices(LC_MESHDATA_HIGH);
+		const int SharedStart = ConditionalOffset;
+		AppendVertices(LC_MESHDATA_SHARED);
+		const int LowStart = ConditionalOffset;
+		AppendVertices(LC_MESHDATA_LOW);
+
+		for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+			for (size_t SectionIdx = 0; SectionIdx < FinalSections[LodIdx].size(); SectionIdx++)
+			{
+				const lcMeshLoaderFinalSection& Section = FinalSections[LodIdx][SectionIdx];
+				if (Section.PrimitiveType != LC_MESH_CONDITIONAL_LINES || Section.Color != FinalSection.Color || strcmp(Section.Name, FinalSection.Name))
+					continue;
+
+				lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIdx];
+				DstSection.DrawOffset = LodIdx == LC_MESH_LOD_HIGH ? HighStart : SharedStart;
+				DstSection.DrawCount = LodIdx == LC_MESH_LOD_HIGH ? LowStart - HighStart : ConditionalOffset - SharedStart;
+			}
+	}
 	if (mHasStyleStud)
 		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
 
@@ -921,7 +969,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], int(&BaseConditionalVertices)[LC_NUM_MESHDATA_TYPES])
+void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES])
 {
 	int NumIndices = 0;
 
@@ -934,7 +982,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 
 			DstSection.ColorIndex = FinalSection.Color;
 			DstSection.PrimitiveType = FinalSection.PrimitiveType;
-			DstSection.NumIndices = 0;
+			DstSection.DrawCount = 0;
 
 			if (!FinalSection.Name[0])
 				DstSection.Texture = nullptr;
@@ -949,11 +997,11 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					DstSection.Texture->AddRef();
 			}
 
-			DstSection.IndexOffset = NumIndices * sizeof(IndexType);
+			DstSection.DrawOffset = NumIndices * sizeof(IndexType);
 
-			IndexType* Index = (IndexType*)Mesh->mIndexData + NumIndices;
+			IndexType* Index = Mesh->mIndexDataSize ? (IndexType*)Mesh->mIndexData + NumIndices : nullptr;
 
-			const auto AddSection = [&DstSection, &Index, &BaseVertices, &BaseConditionalVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
+			const auto AddSection = [&DstSection, &Index, &BaseVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
 				switch (DstSection.PrimitiveType)
 				{
@@ -968,13 +1016,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					break;
 
 					case LC_MESH_CONDITIONAL_LINES:
-					{
-						const IndexType BaseVertex = BaseConditionalVertices[SrcDataType];
-
-						for (size_t IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
-							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
-					}
-					break;
+						return;
 
 					case LC_MESH_TEXTURED_TRIANGLES:
 					{
@@ -987,7 +1029,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 						break;
 				}
 
-				DstSection.NumIndices += static_cast<int>(SrcSection->mIndices.size());
+				DstSection.DrawCount += static_cast<int>(SrcSection->mIndices.size());
 			};
 
 			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
@@ -1018,7 +1060,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 			if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 				Mesh->mFlags |= lcMeshFlag::HasTexture;
 
-			NumIndices += DstSection.NumIndices;
+			NumIndices += DstSection.DrawCount;
 		}
 	}
 }
@@ -1066,16 +1108,15 @@ void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
 template<typename IndexType>
 void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax)
 {
-	const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.IndexOffset);
-
 	switch (Section.PrimitiveType)
 	{
 		case LC_MESH_LINES:
 		case LC_MESH_TRIANGLES:
 		{
+			const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.DrawOffset);
 			const lcVertex* VertexBuffer = Mesh->GetVertexData();
 
-			for (int Index = 0; Index < Section.NumIndices; Index++)
+			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
 				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
 				SectionMin = lcMin(SectionMin, Position);
@@ -1088,9 +1129,9 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 		{
 			const lcVertexConditional* VertexBuffer = Mesh->GetConditionalVertexData();
 
-			for (int Index = 0; Index < Section.NumIndices; Index++)
+			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
-				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position1;
+				const lcVector3& Position = VertexBuffer[Section.DrawOffset + Index].Position1;
 				SectionMin = lcMin(SectionMin, Position);
 				SectionMax = lcMax(SectionMax, Position);
 			}
@@ -1099,9 +1140,10 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 
 		case LC_MESH_TEXTURED_TRIANGLES:
 		{
+			const IndexType* IndexBuffer = reinterpret_cast<IndexType*>(static_cast<char*>(Mesh->mIndexData) + Section.DrawOffset);
 			const lcVertexTextured* VertexBuffer = Mesh->GetTexturedVertexData();
 
-			for (int Index = 0; Index < Section.NumIndices; Index++)
+			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
 				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
 				SectionMin = lcMin(SectionMin, Position);

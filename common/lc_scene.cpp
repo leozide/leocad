@@ -250,12 +250,10 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 				{
 					int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
 					VertexBufferOffset += Mesh->mNumVertices * sizeof(lcVertex) + Mesh->mNumTexturedVertices * sizeof(lcVertexTextured);
-					const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
-
 					Context->SetMaterial(lcMaterialType::UnlitColorConditional);
 					Context->SetVertexFormatConditional(VertexBufferOffset);
 
-					Context->DrawIndexedPrimitives(GL_LINES, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+					Context->DrawPrimitives(GL_LINES, Section->DrawOffset, Section->DrawCount);
 
 					continue;
 				}
@@ -291,7 +289,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 			}
 
 			const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
-			Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+			Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->DrawCount, Mesh->mIndexType, IndexBufferOffset + Section->DrawOffset);
 		}
 
 #ifdef LC_DEBUG_NORMALS
@@ -399,7 +397,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 		}
 
 		const GLenum DrawPrimitiveType = Section->PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES) ? GL_TRIANGLES : GL_LINES;
-		Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->NumIndices, Mesh->mIndexType, IndexBufferOffset + Section->IndexOffset);
+		Context->DrawIndexedPrimitives(DrawPrimitiveType, Section->DrawCount, Mesh->mIndexType, IndexBufferOffset + Section->DrawOffset);
 
 #ifdef LC_DEBUG_NORMALS
 		DrawDebugNormals(Context, Mesh);

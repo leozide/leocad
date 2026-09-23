@@ -1481,11 +1481,11 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	Context->DestroyVertexBuffer(mVertexBuffer);
 	Context->DestroyIndexBuffer(mIndexBuffer);
 
-	if (!VertexDataSize || !IndexDataSize)
+	if (!VertexDataSize)
 		return;
 
 	void* VertexData = malloc(VertexDataSize);
-	void* IndexData = malloc(IndexDataSize);
+	void* IndexData = IndexDataSize ? malloc(IndexDataSize) : nullptr;
 
 	VertexDataSize = 0;
 	IndexDataSize = 0;
@@ -1496,14 +1496,16 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 		Mesh->mIndexCacheOffset = IndexDataSize;
 
 		memcpy((char*)VertexData + VertexDataSize, Mesh->mVertexData, Mesh->mVertexDataSize);
-		memcpy((char*)IndexData + IndexDataSize, Mesh->mIndexData, Mesh->mIndexDataSize);
+		if (Mesh->mIndexDataSize)
+			memcpy((char*)IndexData + IndexDataSize, Mesh->mIndexData, Mesh->mIndexDataSize);
 
 		VertexDataSize += Mesh->mVertexDataSize;
 		IndexDataSize += Mesh->mIndexDataSize;
 	}
 
 	mVertexBuffer = Context->CreateVertexBuffer(VertexDataSize, VertexData);
-	mIndexBuffer = Context->CreateIndexBuffer(IndexDataSize, IndexData);
+	if (IndexDataSize)
+		mIndexBuffer = Context->CreateIndexBuffer(IndexDataSize, IndexData);
 	mBuffersDirty = false;
 
 	free(VertexData);

@@ -1131,7 +1131,7 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
-			NumTriangles += Section->NumIndices / 3;
+			NumTriangles += Section->DrawCount / 3;
 		}
 
 		File.WriteU16(NumTriangles);
@@ -1143,9 +1143,9 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
-			quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
+			quint16* Indices = (quint16*)Mesh->mIndexData + Section->DrawOffset / sizeof(quint16);
 
-			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+			for (int IndexIdx = 0; IndexIdx < Section->DrawCount; IndexIdx += 3)
 			{
 				File.WriteU16(Indices[IndexIdx + 0]);
 				File.WriteU16(Indices[IndexIdx + 1]);
@@ -1166,14 +1166,14 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 			int MaterialIndex = Section->ColorIndex == gDefaultColor ? ModelPart.ColorIndex : Section->ColorIndex;
 
 			File.WriteU16(0x4130); // CHK_MSH_MAT_GROUP
-			File.WriteU32(6 + MaterialNameLength + 1 + 2 + 2 * Section->NumIndices / 3);
+			File.WriteU32(6 + MaterialNameLength + 1 + 2 + 2 * Section->DrawCount / 3);
 
 			snprintf(MaterialName, sizeof(MaterialName), "Material%03d", MaterialIndex);
 			File.WriteBuffer(MaterialName, MaterialNameLength + 1);
 
-			File.WriteU16(Section->NumIndices / 3);
+			File.WriteU16(Section->DrawCount / 3);
 
-			for (int IndexIdx = 0; IndexIdx < Section->NumIndices; IndexIdx += 3)
+			for (int IndexIdx = 0; IndexIdx < Section->DrawCount; IndexIdx += 3)
 				File.WriteU16(NumTriangles++);
 		}
 
@@ -1402,14 +1402,14 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 			{
-				quint16* Indices = (quint16*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint16);
+				quint16* Indices = (quint16*)Mesh->mIndexData + Section->DrawOffset / sizeof(quint16);
 
-				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->DrawCount / 3), ColorName);
 				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
 				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
 				Stream << "\t\t\t<p>\r\n";
 
-				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				{
 					QString idx1 = QString::number(Indices[Idx + 0]);
 					QString idx2 = QString::number(Indices[Idx + 1]);
@@ -1420,14 +1420,14 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 			}
 			else
 			{
-				quint32* Indices = (quint32*)Mesh->mIndexData + Section->IndexOffset / sizeof(quint32);
+				quint32* Indices = (quint32*)Mesh->mIndexData + Section->DrawOffset / sizeof(quint32);
 
-				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->NumIndices / 3), ColorName);
+				Stream << QString("\t\t\t<triangles count=\"%1\" material=\"%2\">\r\n").arg(QString::number(Section->DrawCount / 3), ColorName);
 				Stream << QString("\t\t\t<input semantic=\"VERTEX\" source=\"#%1-vertices\" offset=\"0\" />\r\n").arg(ID);
 				Stream << QString("\t\t\t<input semantic=\"NORMAL\" source=\"#%1-normal\" offset=\"0\" />\r\n").arg(ID);
 				Stream << "\t\t\t<p>\r\n";
 
-				for (int Idx = 0; Idx < Section->NumIndices; Idx += 3)
+				for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				{
 					QString idx1 = QString::number(Indices[Idx + 0]);
 					QString idx2 = QString::number(Indices[Idx + 1]);

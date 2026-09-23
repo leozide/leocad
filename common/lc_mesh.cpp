@@ -21,7 +21,16 @@ lcMesh::~lcMesh()
 	free(mVertexData);
 	free(mIndexData);
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
+	{
+		for (int SectionIdx = 0; SectionIdx < mLods[LodIdx].NumSections; SectionIdx++)
+		{
+			lcTexture* Texture = mLods[LodIdx].Sections[SectionIdx].Texture;
+			if (Texture)
+				Texture->Release();
+		}
+
 		delete[] mLods[LodIdx].Sections;
+	}
 }
 
 void lcMesh::Create(quint16(&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount)

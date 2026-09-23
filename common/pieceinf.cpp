@@ -167,17 +167,6 @@ void PieceInfo::ReleaseMesh()
 {
 	if (mMesh)
 	{
-		for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
-		{
-			for (int SectionIdx = 0; SectionIdx < mMesh->mLods[LodIdx].NumSections; SectionIdx++)
-			{
-				lcMeshSection& Section = mMesh->mLods[LodIdx].Sections[SectionIdx];
-
-				if (Section.Texture)
-					Section.Texture->Release();
-			}
-		}
-
 		delete mMesh;
 		mMesh = nullptr;
 	}

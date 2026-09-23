@@ -20,7 +20,7 @@ lcTexture* lcLoadTexture(const QString& FileName, int Flags)
 	else
 	{
 		lcstrcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
-		Texture->mFileName = FileName;
+		Texture->mFilePath = FileName;
 		Texture->SetTemporary(true);
 	}
 

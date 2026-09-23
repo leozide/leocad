@@ -215,6 +215,55 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 	return nullptr;
 }
 
+QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName)
+{
+	QDir Directory(ProjectPath);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+	const auto SkipEmptyParts = Qt::SkipEmptyParts;
+#else
+	const auto SkipEmptyParts = QString::SplitBehavior::SkipEmptyParts;
+#endif
+	const QStringList PathComponents = (TextureName + QLatin1String(".png")).split(QLatin1Char('/'), SkipEmptyParts);
+
+	for (int ComponentIdx = 0; ComponentIdx < PathComponents.size(); ComponentIdx++)
+	{
+		const QString& Component = PathComponents[ComponentIdx];
+		const bool LastComponent = ComponentIdx == PathComponents.size() - 1;
+
+		if (Component == QLatin1String(".") || Component == QLatin1String(".."))
+		{
+			if (LastComponent || !Directory.cd(Component))
+				return QString();
+			continue;
+		}
+
+		QFileInfo Entry(Directory, Component);
+		if (LastComponent ? !Entry.isFile() : !Entry.isDir())
+		{
+			Entry = QFileInfo();
+			for (const QFileInfo& Candidate : Directory.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System))
+			{
+				if (Candidate.fileName().compare(Component, Qt::CaseInsensitive) == 0 &&
+					(LastComponent ? Candidate.isFile() : Candidate.isDir()))
+				{
+					Entry = Candidate;
+					break;
+				}
+			}
+		}
+
+		if (LastComponent)
+			return Entry.isFile() ? Entry.absoluteFilePath() : QString();
+
+		if (!Entry.isDir())
+			return QString();
+
+		Directory.setPath(Entry.absoluteFilePath());
+	}
+
+	return QString();
+}
+
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
@@ -228,17 +277,17 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
-	QFileInfo ProjectTextureFile;
-	if (!ProjectPath.isEmpty())
-		ProjectTextureFile.setFile(ProjectPath + QDir::separator() + TextureName + ".png");
-
 	for (lcTexture* Texture : mTextures)
 	{
 		if (strcmp(TextureName, Texture->mName))
 			continue;
 
-		if (Texture->IsTemporary() && (ProjectPath.isEmpty() || Texture->mFileName != ProjectTextureFile.absoluteFilePath()))
-			continue;
+		if (Texture->IsTemporary())
+		{
+			if (ProjectPath.isEmpty() ||
+				(Texture->mProjectPath != ProjectPath && QFileInfo(Texture->mProjectPath) != QFileInfo(ProjectPath)))
+				continue;
+		}
 
 		Texture->AddRef();
 		return Texture;
@@ -246,13 +295,15 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 
 	if (!ProjectPath.isEmpty())
 	{
-		if (ProjectTextureFile.isFile())
+		const QString ProjectTextureFile = FindProjectTextureFile(ProjectPath, QString::fromLatin1(TextureName));
+		if (!ProjectTextureFile.isEmpty())
 		{
-			lcTexture* Texture = lcLoadTexture(ProjectTextureFile.absoluteFilePath(), LC_TEXTURE_MIPMAPS);
+			lcTexture* Texture = lcLoadTexture(ProjectTextureFile, LC_TEXTURE_MIPMAPS);
 
 			if (Texture)
 			{
 				lcstrcpy(Texture->mName, TextureName);
+				Texture->mProjectPath = ProjectPath;
 				mTextures.push_back(Texture);
 				Texture->AddRef();
 				return Texture;
@@ -671,7 +722,7 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 
 			strncpy(Texture->mName, Name, sizeof(Texture->mName));
 			Texture->mName[sizeof(Texture->mName) - 1] = 0;
-			Texture->mFileName = Dir.absoluteFilePath(FileList[FileIdx]);
+			Texture->mFilePath = Dir.absoluteFilePath(FileList[FileIdx]);
 		}
 	}
 
@@ -1560,7 +1611,7 @@ bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 		return Texture->Load(TextureFile);
 	}
 	else
-		return Texture->Load(Texture->mFileName);
+		return Texture->Load(Texture->mFilePath);
 }
 
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)

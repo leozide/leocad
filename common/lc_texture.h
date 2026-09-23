@@ -95,7 +95,8 @@ public:
 	int mWidth;
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN];
-	QString mFileName;
+	QString mFilePath;    // Absolute PNG path for disk-backed textures; empty for archive textures.
+	QString mProjectPath; // Directory used to scope temporary textures to their project.
 	GLuint mTexture = 0;
 
 protected:
@@ -112,4 +113,3 @@ protected:
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);
 
 extern lcTexture* gGridTexture;
-

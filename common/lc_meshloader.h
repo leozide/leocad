@@ -154,6 +154,8 @@ public:
 		for (lcMeshLoaderTypeData& Data : mData)
 			Data.Clear();
 
+		mMaterials.clear();
+		mTexturedVertices.clear();
 		mHasTextures = false;
 		mHasStyleStud = false;
 	}

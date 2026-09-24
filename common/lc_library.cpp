@@ -1354,6 +1354,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 
 		if (mHasUnofficial && !Loaded)
 		{
+			MeshData.Clear();
 			snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
 			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
 			if (PieceFile.Open(QIODevice::ReadOnly))
@@ -1721,6 +1722,14 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 	mLoadMutex.unlock();
 
+	const auto LoadFailed = [this, Primitive]()
+	{
+		Primitive->mMeshData.Clear();
+		QMutexLocker LoadLock(&mLoadMutex);
+		Primitive->mState = lcPrimitiveState::NotLoaded;
+		return false;
+	};
+
 	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
 
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
@@ -1743,23 +1752,23 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		}
 
 		if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
-			return false;
+			return LoadFailed();
 
 		if (!LowPrimitive)
 		{
 			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
-				return false;
+				return LoadFailed();
 		}
 		else
 		{
 			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_HIGH))
-				return false;
+				return LoadFailed();
 
 			if (!mZipFiles[static_cast<int>(LowPrimitive->mZipFileType)]->ExtractFile(LowPrimitive->mZipFileIndex, PrimFile))
-				return false;
+				return LoadFailed();
 
 			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_LOW))
-				return false;
+				return LoadFailed();
 		}
 	}
 	else
@@ -1769,17 +1778,17 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 			lcDiskFile PrimFile(Primitive->mFileName);
 
 			if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
-				return false;
+				return LoadFailed();
 		}
 		else
 		{
 			lcMemFile PrimFile;
 
 			if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
-				return false;
+				return LoadFailed();
 
 			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
-				return false;
+				return LoadFailed();
 		}
 	}
 

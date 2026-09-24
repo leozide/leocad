@@ -244,6 +244,7 @@ protected:
 
 	QOpenGLWidget* mWidget = nullptr;
 	QOpenGLContext* mContext = nullptr;
+	GLuint mVertexArrayObject = 0;
 
 	GLuint mVertexBufferObject;
 	GLuint mIndexBufferObject;

@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_library.h"
+#include "lc_assetloader.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_zipfile.h"
 #include "lc_file.h"
@@ -16,9 +17,9 @@
 #include "project.h"
 #include "lc_profile.h"
 #include "lc_meshloader.h"
+#include "lc_model.h"
 #include "lc_string.h"
 #include <zlib.h>
-#include <QtConcurrent>
 
 #if MAX_MEM_LEVEL >= 8
 #  define DEF_MEM_LEVEL 8
@@ -35,6 +36,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	: mLoadMutex(QMutex::Recursive)
 #endif
 {
+	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this, mLoadMutex));
 	mThumbnailManager = std::unique_ptr<lcThumbnailManager>(new lcThumbnailManager(this));
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 	mCachePath = cachePathList.first();
@@ -45,7 +47,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mNumOfficialPieces = 0;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
-	mCancelLoading = false;
 	mStudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
 	mStudCylinderColorEnabled = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED);
 }
@@ -53,25 +54,28 @@ lcPiecesLibrary::lcPiecesLibrary()
 lcPiecesLibrary::~lcPiecesLibrary()
 {
 	mThumbnailManager.reset();
-	mLoadMutex.lock();
-	mLoadQueue.clear();
-	mLoadMutex.unlock();
-	mCancelLoading = true;
-	WaitForLoadQueue();
+	mCancelLoading.store(true);
+	mAssetLoader->CancelAndDrain();
+	mAssetLoader.reset();
 	Unload();
 	ReleaseBuffers();
 }
 
 void lcPiecesLibrary::Unload()
 {
+	if (mAssetLoader)
+		mAssetLoader->WaitForLoadQueue();
+
 	for (const auto& PieceIt : mPieces)
 		delete PieceIt.second;
+
 	mPieces.clear();
 
 	mSources.clear();
 
 	for (lcTexture* Texture : mTextures)
 		delete Texture;
+
 	mTextures.clear();
 
 	mNumOfficialPieces = 0;
@@ -404,6 +408,11 @@ bool lcPiecesLibrary::IsStudStylePrimitive(const char* FileName)
 			return true;
 
 	return false;
+}
+
+qint32 lcPiecesLibrary::MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
+{
+	return 0x10000 | (static_cast<qint32>(StudStyle) << 1) | static_cast<qint32>(StudCylinderColorEnabled);
 }
 
 void lcPiecesLibrary::UpdateStudStyleSource()
@@ -1201,7 +1210,7 @@ bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
 	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
-	if (Flags != static_cast<qint32>(mStudStyle) + static_cast<qint32>(mStudCylinderColorEnabled))
+	if (Flags != MeshCacheSettingsKey(mStudStyle, mStudCylinderColorEnabled))
 		return false;
 
 	lcMesh* Mesh = new lcMesh;
@@ -1221,7 +1230,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 {
 	lcMemFile MeshData;
 
-	const qint32 Flags = static_cast<qint32>(mStudStyle) + static_cast<qint32>(mStudCylinderColorEnabled);
+	const qint32 Flags = MeshCacheSettingsKey(mStudStyle, mStudCylinderColorEnabled);
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
 		return false;
 
@@ -1233,6 +1242,7 @@ bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
 	return WriteArchiveCacheFile(FileName, MeshData);
 }
 
+// TODO: Remove this helper when LoadPrimitive() uses a condition-based wait.
 class lcSleeper : public QThread
 {
 public:
@@ -1244,40 +1254,7 @@ public:
 
 void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
-	if (Wait)
-	{
-		if (Info->AddRef() == 1)
-			Info->Load();
-		else
-		{
-			if (Info->mState == lcPieceInfoState::Unloaded)
-			{
-				Info->Load();
-				emit PartLoaded(Info);
-			}
-			else
-			{
-				LoadLock.unlock();
-
-				while (Info->mState != lcPieceInfoState::Loaded)
-					lcSleeper::msleep(10);
-			}
-		}
-	}
-	else
-	{
-		if (Info->AddRef() == 1)
-		{
-			if (Priority)
-				mLoadQueue.prepend(Info);
-			else
-				mLoadQueue.append(Info);
-
-			mLoadFutures.append(QtConcurrent::run([this]() { LoadQueuedPiece(); }));
-		}
-	}
+	mAssetLoader->LoadPieceInfo(Info, Wait, Priority);
 }
 
 void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
@@ -1288,38 +1265,9 @@ void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
 		Info->Unload();
 }
 
-void lcPiecesLibrary::LoadQueuedPiece()
-{
-	mLoadMutex.lock();
-
-	PieceInfo* Info = nullptr;
-
-	while (!mLoadQueue.isEmpty())
-	{
-		Info = mLoadQueue.takeFirst();
-
-		if (Info->mState == lcPieceInfoState::Unloaded && Info->GetRefCount() > 0)
-		{
-			Info->mState = lcPieceInfoState::Loading;
-			break;
-		}
-
-		Info = nullptr;
-	}
-
-	mLoadMutex.unlock();
-
-	if (Info)
-		Info->Load();
-
-	emit PartLoaded(Info);
-}
-
 void lcPiecesLibrary::WaitForLoadQueue()
 {
-	for (QFuture<void>& Future : mLoadFutures)
-		Future.waitForFinished();
-	mLoadFutures.clear();
+	mAssetLoader->WaitForLoadQueue();
 }
 
 bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
@@ -1362,7 +1310,7 @@ bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
 		}
 	}
 
-	if (mCancelLoading)
+	if (mCancelLoading.load())
 		return false;
 
 	if (Info)
@@ -1544,14 +1492,28 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 		Meshes.push_back(Mesh);
 	}
 
-	Context->DestroyVertexBuffer(mVertexBuffer);
-	Context->DestroyIndexBuffer(mIndexBuffer);
-
 	if (!VertexDataSize)
+	{
+		Context->DestroyVertexBuffer(mVertexBuffer);
+		Context->DestroyIndexBuffer(mIndexBuffer);
+		mBuffersDirty = false;
+
 		return;
+	}
 
 	void* VertexData = malloc(VertexDataSize);
 	void* IndexData = IndexDataSize ? malloc(IndexDataSize) : nullptr;
+
+	if (!VertexData || (IndexDataSize && !IndexData))
+	{
+		free(VertexData);
+		free(IndexData);
+
+		return;
+	}
+
+	Context->DestroyVertexBuffer(mVertexBuffer);
+	Context->DestroyIndexBuffer(mIndexBuffer);
 
 	VertexDataSize = 0;
 	IndexDataSize = 0;
@@ -1638,6 +1600,10 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 	if (mStudStyle == StudStyle && mStudCylinderColorEnabled == StudCylinderColorEnabled)
 		return;
 
+	// Finish running workers before changing shared primitive data and colors.
+	// Queued requests resume with the new settings afterward.
+	mAssetLoader->PauseQueuedWork();
+
 	mStudStyle = StudStyle;
 
 	mStudCylinderColorEnabled = StudCylinderColorEnabled;
@@ -1670,16 +1636,29 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 
 			if (Info->mState == lcPieceInfoState::Loaded && Info->GetMesh() && Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud)
 			{
-				Info->Unload();
-				mLoadQueue.append(Info);
-				mLoadFutures.append(QtConcurrent::run([this]() { LoadQueuedPiece(); }));
+				if (Info->IsModel())
+				{
+					lcModel* Model = Info->GetModel();
+					Project* ModelProject = Model->GetProject();
+					Info->SetModel(Model, true, ModelProject, ModelProject != nullptr);
+				}
+				else if (!Info->IsProject())
+				{
+					Info->Unload();
+					mAssetLoader->QueuePiece(Info, false);
+				}
+
+				mBuffersDirty = true;
 			}
 		}
 
 		mLoadMutex.unlock();
-
-		WaitForLoadQueue();
 	}
+
+	mAssetLoader->ResumeQueuedWork();
+
+	if (Reload)
+		WaitForLoadQueue();
 }
 
 bool lcPiecesLibrary::IsPrimitive(const char* Name) const

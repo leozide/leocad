@@ -3,6 +3,7 @@
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_meshloader.h"
+#include <atomic>
 
 class PieceInfo;
 class lcTrainTrackInfo;
@@ -10,6 +11,13 @@ struct lcTrainTrackConnectionType;
 class lcZipFile;
 class lcLibraryMeshData;
 class lcThumbnailManager;
+class lcAssetLoader;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+using lcLibraryLoadMutex = QRecursiveMutex;
+#else
+using lcLibraryLoadMutex = QMutex;
+#endif
 
 enum class lcStudStyle
 {
@@ -146,7 +154,6 @@ public:
 	void ReleasePieceInfo(PieceInfo* Info);
 	bool LoadBuiltinPieces();
 	bool LoadPieceData(PieceInfo* Info);
-	void LoadQueuedPiece();
 	void WaitForLoadQueue();
 
 	// Returns a texture reference that the caller must release.
@@ -186,7 +193,7 @@ public:
 
 	bool ShouldCancelLoading() const
 	{
-		return mCancelLoading;
+		return mCancelLoading.load();
 	}
 
 	void UpdateBuffers(lcContext* Context);
@@ -226,29 +233,25 @@ protected:
 	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
 	static bool IsStudPrimitive(const char* FileName);
 	static bool IsStudStylePrimitive(const char* FileName);
+	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	void UpdateStudStyleSource();
 
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	QRecursiveMutex mLoadMutex;
-#else
-	QMutex mLoadMutex;
-#endif
-	QList<QFuture<void>> mLoadFutures;
-	QList<PieceInfo*> mLoadQueue;
+	lcLibraryLoadMutex mLoadMutex;
 
 	QMutex mTextureMutex;
 
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;
 
+	std::unique_ptr<lcAssetLoader> mAssetLoader;
 	std::unique_ptr<lcThumbnailManager> mThumbnailManager;
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
 	bool mHasUnofficial;
-	bool mCancelLoading;
+	std::atomic_bool mCancelLoading{ false };
 };

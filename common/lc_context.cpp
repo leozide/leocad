@@ -646,8 +646,12 @@ void lcContext::ClearTextureCubeMap()
 	mTextureCubeMap = 0;
 }
 
-void lcContext::UploadTexture(lcTexture* Texture)
+bool lcContext::UploadTexture(lcTexture* Texture)
 {
+	for (int Error = 0; Error < 16 && glGetError() != GL_NO_ERROR; Error++)
+	{
+	}
+
 	if (!Texture->mTexture)
 		glGenTextures(1, &Texture->mTexture);
 
@@ -683,9 +687,12 @@ void lcContext::UploadTexture(lcTexture* Texture)
 	glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	if (Flags & LC_TEXTURE_CUBEMAP)
+	{
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
 
 	if (gSupportsAnisotropic && FilterFlags == LC_TEXTURE_ANISOTROPIC)
 		glTexParameterf(Target, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
@@ -763,6 +770,8 @@ void lcContext::UploadTexture(lcTexture* Texture)
 		ClearTexture2D();
 	else
 		ClearTextureCubeMap();
+
+	return glGetError() == GL_NO_ERROR;
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)

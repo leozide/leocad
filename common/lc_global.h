@@ -16,9 +16,11 @@
 #include <map>
 #include <vector>
 #include <array>
+#include <atomic>
 #include <set>
 #include <deque>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <unordered_map>

@@ -289,13 +289,13 @@ void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	mPieceInfo = Library->FindPiece(mProperties.mFileName.toLatin1().constData(), Project, true, false);
-	mPieceInfo->SetModel(this, true, Project, true);
-	Library->LoadPieceInfo(mPieceInfo, true, true);
+	mPieceInfo->SetModel(this, false);
+	Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
 }
 
 void lcModel::UpdateMesh()
 {
-	mPieceInfo->SetModel(this, true, nullptr, false);
+	mPieceInfo->SetModel(this, true);
 }
 
 void lcModel::UpdateAllViews() const
@@ -308,7 +308,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	if (std::find(UpdatedModels.begin(), UpdatedModels.end(), this) != UpdatedModels.end())
 		return;
 
-	mPieceInfo->SetModel(this, false, nullptr, false);
+	mPieceInfo->SetModel(this, false);
 	UpdatedModels.push_back(this);
 
 	const lcMesh* Mesh = mPieceInfo->GetMesh();
@@ -774,7 +774,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
-	Library->WaitForLoadQueue();
+	if (!mIsPreview)
+		Library->WaitForLoadQueue();
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
@@ -1049,7 +1050,8 @@ bool lcModel::LoadLDD(const QString& FileData)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	CalculateStep(mCurrentStep);
-	Library->WaitForLoadQueue();
+	if (!mIsPreview)
+		Library->WaitForLoadQueue();
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
@@ -1078,7 +1080,16 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 	if (mPieces.empty())
 		return false;
 
-	Library->WaitForLoadQueue();
+	std::vector<PieceInfo*> Required;
+
+	Required.reserve(mPieces.size());
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		Required.push_back(Piece->mPieceInfo);
+
+	if (!Library->EnsurePiecesReady(Required))
+		return false;
+
 	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
@@ -2907,9 +2918,23 @@ void lcModel::UpdateSelectedPiecesTrainTrackConnections()
 void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	std::vector<PieceInfo*> Required;
+
+	Required.reserve(PreviewInsertPieceInfo.size());
 
 	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
-		Library->LoadPieceInfo(InfoTransform.Info, true, true);
+	{
+		Library->LoadPieceInfo(InfoTransform.Info, lcPieceLoadFlag::Visible);
+		Required.push_back(InfoTransform.Info);
+	}
+
+	if (!Library->EnsurePiecesReady(Required))
+	{
+		for (const lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
+			Library->ReleasePieceInfo(InfoTransform.Info);
+
+		return;
+	}
 
 	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);

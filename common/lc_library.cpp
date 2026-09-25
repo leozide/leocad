@@ -13,7 +13,6 @@
 #include "lc_glextensions.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
-#include "lc_traintrack.h"
 #include "project.h"
 #include "lc_profile.h"
 #include "lc_meshloader.h"
@@ -36,7 +35,7 @@ lcPiecesLibrary::lcPiecesLibrary()
 	: mLoadMutex(QMutex::Recursive)
 #endif
 {
-	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this, mLoadMutex));
+	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this));
 	mThumbnailManager = std::unique_ptr<lcThumbnailManager>(new lcThumbnailManager(this));
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 	mCachePath = cachePathList.first();
@@ -63,8 +62,20 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
+	const bool HadLoader = static_cast<bool>(mAssetLoader);
+
+	if (HadLoader && mThumbnailManager)
+		mThumbnailManager->Clear();
+
 	if (mAssetLoader)
-		mAssetLoader->WaitForLoadQueue();
+	{
+		mAssetLoader->CancelAndDrain();
+		mAssetLoader.reset();
+	}
+
+	mPieceErrorMutex.lock();
+	mFailedPartErrors.clear();
+	mPieceErrorMutex.unlock();
 
 	for (const auto& PieceIt : mPieces)
 		delete PieceIt.second;
@@ -82,6 +93,9 @@ void lcPiecesLibrary::Unload()
 
 	for (std::unique_ptr<lcZipFile>& ZipFile : mZipFiles)
 		ZipFile.reset();
+
+	if (HadLoader)
+		mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this));
 }
 
 void lcPiecesLibrary::RemoveTemporaryPieces()
@@ -94,6 +108,7 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 
 		if (Info->IsTemporary() && Info->GetRefCount() == 0)
 		{
+			ClearPieceLoadError(Info);
 			PieceIt = mPieces.erase(PieceIt);
 			delete Info;
 		}
@@ -104,6 +119,8 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 
 void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 {
+	ClearPieceLoadError(Info);
+
 	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
 	{
 		if (PieceIt->second == Info)
@@ -112,11 +129,14 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 			break;
 		}
 	}
+
 	delete Info;
 }
 
 void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 {
+	ClearPieceLoadError(Info);
+
 	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
 	{
 		if (PieceIt->second == Info)
@@ -141,6 +161,7 @@ void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
 {
 	QString ProjectPath;
+
 	if (SearchProjectFolder)
 	{
 		QString FileName = CurrentProject->GetFileName();
@@ -190,7 +211,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 		if (ProjectFile.isFile())
 		{
-			Project* NewProject = new Project();
+			Project* NewProject = new Project(CurrentProject && CurrentProject->IsPreview());
 
 			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
 			{
@@ -270,10 +291,9 @@ QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, cons
 
 lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	QString ProjectPath;
-	if (SearchProjectFolder)
+
+	if (SearchProjectFolder && CurrentProject)
 	{
 		QString FileName = CurrentProject->GetFileName();
 
@@ -281,41 +301,125 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
+	lcTexture* Texture = FindTextureDeferred(TextureName, ProjectPath);
+
+	if (!Texture)
+		return nullptr;
+
+	if (EnsureTextureReady(Texture))
+		return Texture;
+
+	ReleaseTexture(Texture);
+
+	return nullptr;
+}
+
+lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const QString& ProjectPath)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	QString FilePath;
+
+	if (!ProjectPath.isEmpty())
+	{
+		FilePath = FindProjectTextureFile(ProjectPath, QString::fromLatin1(TextureName));
+
+		if (!FilePath.isEmpty())
+		{
+			const QString CanonicalPath = QFileInfo(FilePath).canonicalFilePath();
+			FilePath = CanonicalPath.isEmpty() ? QFileInfo(FilePath).absoluteFilePath() : CanonicalPath;
+		}
+	}
+
 	for (lcTexture* Texture : mTextures)
 	{
 		if (strcmp(TextureName, Texture->mName))
 			continue;
 
-		if (Texture->IsTemporary())
-		{
-			if (ProjectPath.isEmpty() ||
-				(Texture->mProjectPath != ProjectPath && QFileInfo(Texture->mProjectPath) != QFileInfo(ProjectPath)))
-				continue;
-		}
+		if (Texture->IsTemporary() != !FilePath.isEmpty())
+			continue;
+
+		if (Texture->IsTemporary() && Texture->mFilePath != FilePath)
+			continue;
 
 		Texture->AddRef();
+
 		return Texture;
 	}
 
-	if (!ProjectPath.isEmpty())
-	{
-		const QString ProjectTextureFile = FindProjectTextureFile(ProjectPath, QString::fromLatin1(TextureName));
-		if (!ProjectTextureFile.isEmpty())
-		{
-			lcTexture* Texture = lcLoadTexture(ProjectTextureFile, LC_TEXTURE_MIPMAPS);
+	if (FilePath.isEmpty())
+		return nullptr;
 
-			if (Texture)
+	lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
+
+	lcstrcpy(Texture->mName, TextureName);
+	Texture->mFilePath = FilePath;
+	Texture->mProjectPath = ProjectPath;
+	Texture->SetTemporary(true);
+	Texture->AddRef();
+
+	mTextures.push_back(Texture);
+
+	return Texture;
+}
+
+lcTextureSourceSnapshot lcPiecesLibrary::SnapshotTextureSource(const lcTexture* Texture) const
+{
+	lcTextureSourceSnapshot Source;
+
+	Source.Name = QString::fromLatin1(Texture->mName);
+	Source.FilePath = Texture->mFilePath;
+
+	return Source;
+}
+
+lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnapshot& Source)
+{
+	lcTextureBuildResult Result;
+
+	Result.DecodedImage.reset(new Image);
+
+	bool Loaded = false;
+
+	if (!Source.FilePath.isEmpty())
+		Loaded = Result.DecodedImage->FileLoad(Source.FilePath);
+	else
+	{
+		lcMemFile TextureFile;
+		QByteArray Name = Source.Name.toLatin1();
+		char FileName[2 * LC_MAXPATH];
+		bool Extracted = false;
+
+		{
+			QMutexLocker TextureLock(&mTextureMutex);
+
+			if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 			{
-				lcstrcpy(Texture->mName, TextureName);
-				Texture->mProjectPath = ProjectPath;
-				mTextures.push_back(Texture);
-				Texture->AddRef();
-				return Texture;
+				snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Name.constData());
+
+				Extracted = mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile);
+
+				if (!Extracted && mZipFiles[static_cast<int>(lcZipFileType::Unofficial)])
+				{
+					snprintf(FileName, sizeof(FileName), "parts/textures/%s.png", Name.constData());
+					Extracted = mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile);
+				}
 			}
 		}
+
+		if (Extracted)
+			Loaded = Result.DecodedImage->FileLoad(TextureFile);
 	}
 
-	return nullptr;
+	if (Loaded)
+		Result.DecodedImage->ResizePow2();
+	else
+	{
+		Result.DecodedImage.reset();
+		Result.Error = lcTextureLoadError::DecodeFailed;
+	}
+
+	return Result;
 }
 
 bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
@@ -1198,50 +1302,6 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-bool lcPiecesLibrary::LoadCachePiece(PieceInfo* Info)
-{
-	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
-	lcMemFile MeshData;
-
-	if (!ReadArchiveCacheFile(FileName, MeshData))
-		return false;
-
-	qint32 Flags;
-	if (MeshData.ReadBuffer((char*)&Flags, sizeof(Flags)) == 0)
-		return false;
-
-	if (Flags != MeshCacheSettingsKey(mStudStyle, mStudCylinderColorEnabled))
-		return false;
-
-	lcMesh* Mesh = new lcMesh;
-	if (Mesh->FileLoad(MeshData))
-	{
-		Info->SetMesh(Mesh);
-		return true;
-	}
-	else
-	{
-		delete Mesh;
-		return false;
-	}
-}
-
-bool lcPiecesLibrary::SaveCachePiece(PieceInfo* Info)
-{
-	lcMemFile MeshData;
-
-	const qint32 Flags = MeshCacheSettingsKey(mStudStyle, mStudCylinderColorEnabled);
-	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) == 0)
-		return false;
-
-	if (!Info->GetMesh()->FileSave(MeshData))
-		return false;
-
-	QString FileName = QFileInfo(QDir(mCachePath), QString::fromLatin1(Info->mFileName)).absoluteFilePath();
-
-	return WriteArchiveCacheFile(FileName, MeshData);
-}
-
 // TODO: Remove this helper when LoadPrimitive() uses a condition-based wait.
 class lcSleeper : public QThread
 {
@@ -1252,17 +1312,97 @@ public:
 	}
 };
 
-void lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority)
+bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 {
-	mAssetLoader->LoadPieceInfo(Info, Wait, Priority);
+	return mAssetLoader->LoadPieceInfo(Info, Flags);
+}
+
+bool lcPiecesLibrary::EnsurePieceReady(PieceInfo* Info)
+{
+	return mAssetLoader->EnsurePieceReady(Info);
+}
+
+bool lcPiecesLibrary::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
+{
+	return mAssetLoader->EnsurePiecesReady(Parts);
+}
+
+bool lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
+{
+	return mAssetLoader->RebuildModelPiece(Info);
+}
+
+bool lcPiecesLibrary::EnsureTextureReady(lcTexture* Texture)
+{
+	return mAssetLoader->EnsureTextureReady(Texture);
 }
 
 void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
 {
+	int Remaining;
+
+	{
+		QMutexLocker LoadLock(&mLoadMutex);
+
+		if (Info->GetRefCount() == 0)
+			return;
+
+		Remaining = Info->Release();
+
+		if (Remaining == 0)
+			Info->Unload();
+	}
+
+	if (Remaining != 0 && mAssetLoader)
+		mAssetLoader->OnConsumerReleased(Info);
+}
+
+void lcPiecesLibrary::AddPieceReference(PieceInfo* Info)
+{
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	if (Info->GetRefCount() == 0 || Info->Release() == 0)
+	Info->AddRef();
+}
+
+bool lcPiecesLibrary::HasPieceConsumers(const PieceInfo* Info)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	return Info->GetRefCount() > 1;
+}
+
+void lcPiecesLibrary::ReleasePieceLoadHold(PieceInfo* Info)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+
+	if (Info->Release() == 0)
 		Info->Unload();
+}
+
+void lcPiecesLibrary::SetPieceLoadError(const PieceInfo* Info, QString Error)
+{
+	QMutexLocker ErrorLock(&mPieceErrorMutex);
+
+	if (Error.isEmpty())
+		mFailedPartErrors.erase(Info);
+	else
+		mFailedPartErrors.insert_or_assign(Info, std::move(Error));
+}
+
+QString lcPiecesLibrary::GetPieceLoadError(const PieceInfo* Info) const
+{
+	QMutexLocker ErrorLock(&mPieceErrorMutex);
+
+	const auto It = mFailedPartErrors.find(Info);
+
+	return It == mFailedPartErrors.end() ? QString() : It->second;
+}
+
+void lcPiecesLibrary::ClearPieceLoadError(const PieceInfo* Info)
+{
+	QMutexLocker ErrorLock(&mPieceErrorMutex);
+
+	mFailedPartErrors.erase(Info);
 }
 
 void lcPiecesLibrary::WaitForLoadQueue()
@@ -1270,65 +1410,163 @@ void lcPiecesLibrary::WaitForLoadQueue()
 	mAssetLoader->WaitForLoadQueue();
 }
 
-bool lcPiecesLibrary::LoadPieceData(PieceInfo* Info)
+lcPartSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info) const
 {
-	lcLibraryMeshData MeshData;
-	lcMeshLoader MeshLoader(MeshData, true, nullptr, false);
+	lcPartSourceSnapshot Source;
 
-	bool Loaded = false;
-	bool SaveCache = false;
+	Source.FileName = QString::fromLatin1(Info->mFileName);
+	Source.LibraryDirectory = mLibraryDir.absolutePath();
+	Source.CachePath = QFileInfo(QDir(mCachePath), Source.FileName).absoluteFilePath();
+	Source.ZipFileType = Info->mZipFileType;
+	Source.ZipFileIndex = Info->mZipFileIndex;
+	Source.StudStyle = mStudStyle;
+	Source.StudCylinderColorEnabled = mStudCylinderColorEnabled;
 
-	if (Info->mZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Info->mZipFileType)])
+	if (Info->IsModel())
 	{
-		if (LoadCachePiece(Info))
-			return true;
+		Source.InlineModel = true;
+		Source.InlineMeshLines = Info->GetModel()->GetFileLines();
+
+		if (Project* ModelProject = Info->GetModel()->GetProject())
+		{
+			const QString ProjectFileName = ModelProject->GetFileName();
+
+			if (!ProjectFileName.isEmpty())
+				Source.ProjectPath = QFileInfo(ProjectFileName).absolutePath();
+		}
+	}
+
+	return Source;
+}
+
+lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& Source)
+{
+	lcPartBuildResult Result;
+
+	if (mCancelLoading.load())
+	{
+		Result.Error = tr("Library loading was cancelled.");
+		return Result;
+	}
+
+	if (Source.InlineModel)
+	{
+		Result.MeshData.reset(new lcLibraryMeshData);
 
 		lcMemFile PieceFile;
 
-		if (mZipFiles[static_cast<int>(Info->mZipFileType)]->ExtractFile(Info->mZipFileIndex, PieceFile))
-			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
+		for (const QString& Line : Source.InlineMeshLines)
+		{
+			const QByteArray Buffer = Line.toLatin1();
 
-		SaveCache = Loaded;
+			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());
+			PieceFile.WriteBuffer("\r\n", 2);
+		}
+
+		PieceFile.Seek(0, SEEK_SET);
+
+		lcMeshLoader MeshLoader(*Result.MeshData, true, nullptr, false);
+
+		if (!MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED))
+		{
+			Result.MeshData.reset();
+			Result.Error = tr("Could not load model geometry %1.").arg(Source.FileName);
+		}
+		else if (Result.MeshData->IsEmpty())
+		{
+			Result.MeshData.reset();
+			Result.EmptyGeometry = true;
+		}
+
+		if (Result.MeshData)
+		{
+			Result.TextureDependencies = Result.MeshData->GetTextureDependencies();
+			Result.MeshData->SetMeshLoader(nullptr);
+		}
+
+		return Result;
+	}
+
+	if (!Source.SkipCache && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
+	{
+		std::unique_ptr<lcMemFile> CacheData(new lcMemFile);
+
+		if (ReadArchiveCacheFile(Source.CachePath, *CacheData))
+		{
+			qint32 Flags;
+
+			if (CacheData->ReadBuffer(&Flags, sizeof(Flags)) == sizeof(Flags) && Flags == MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled))
+			{
+				Result.CacheData = std::move(CacheData);
+
+				return Result;
+			}
+		}
+	}
+
+	Result.MeshData.reset(new lcLibraryMeshData);
+
+	lcMeshLoader MeshLoader(*Result.MeshData, true, nullptr, false);
+
+	bool Loaded = false;
+
+	if (Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
+	{
+		lcMemFile PieceFile;
+
+		if (mZipFiles[static_cast<int>(Source.ZipFileType)]->ExtractFile(Source.ZipFileIndex, PieceFile))
+			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 	}
 	else
 	{
-		char FileName[LC_MAXPATH];
 		lcDiskFile PieceFile;
 
-		snprintf(FileName, sizeof(FileName), "parts/%s", Info->mFileName);
-		PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+		PieceFile.SetFileName(QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("parts/") + Source.FileName));
+
 		if (PieceFile.Open(QIODevice::ReadOnly))
 			Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 
 		if (mHasUnofficial && !Loaded)
 		{
-			MeshData.Clear();
-			snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", Info->mFileName);
-			PieceFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
+			Result.MeshData->Clear();
+
+			PieceFile.SetFileName(QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("unofficial/parts/") + Source.FileName));
+
 			if (PieceFile.Open(QIODevice::ReadOnly))
 				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
 		}
 	}
 
 	if (mCancelLoading.load())
-		return false;
+		Result.Error = tr("Library loading was cancelled.");
+	else if (!Loaded)
+		Result.Error = tr("Could not load part %1.").arg(Source.FileName);
 
-	if (Info)
+	if (!Result.Error.isEmpty())
+		Result.MeshData.reset();
+
+	if (Result.MeshData)
 	{
-		if (Loaded)
-			Info->SetMesh(MeshData.CreateMesh());
-		else
-		{
-			lcMesh* Mesh = new lcMesh;
-			Mesh->CreateBox();
-			Info->SetMesh(Mesh);
-		}
+		Result.TextureDependencies = Result.MeshData->GetTextureDependencies();
+		Result.MeshData->SetMeshLoader(nullptr);
 	}
 
-	if (SaveCache)
-		SaveCachePiece(Info);
+	return Result;
+}
 
-	return Loaded;
+void lcPiecesLibrary::SaveBuiltPieceCache(const lcPartSourceSnapshot& Source, lcMesh& Mesh)
+{
+	if (Source.ZipFileType == lcZipFileType::Count)
+		return;
+
+	lcMemFile MeshData;
+
+	const qint32 Flags = MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled);
+
+	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(MeshData))
+		return;
+
+	WriteArchiveCacheFile(Source.CachePath, MeshData);
 }
 
 void lcPiecesLibrary::GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback)
@@ -1639,8 +1877,11 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 				if (Info->IsModel())
 				{
 					lcModel* Model = Info->GetModel();
-					Project* ModelProject = Model->GetProject();
-					Info->SetModel(Model, true, ModelProject, ModelProject != nullptr);
+					Info->SetModel(Model, false);
+					Info->ReleaseMesh();
+					Info->mState = lcPieceInfoState::Unloaded;
+
+					mAssetLoader->QueuePiece(Info, false);
 				}
 				else if (!Info->IsProject())
 				{

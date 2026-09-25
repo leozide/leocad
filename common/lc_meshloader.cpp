@@ -803,7 +803,25 @@ void lcLibraryMeshData::GenerateTexturedVertices()
 	}
 }
 
-lcMesh* lcLibraryMeshData::CreateMesh()
+QStringList lcLibraryMeshData::GetTextureDependencies() const
+{
+	QStringList Dependencies;
+
+	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
+	{
+		if (!Material->Name[0])
+			continue;
+
+		const QString Name = QString::fromLatin1(Material->Name);
+
+		if (!Dependencies.contains(Name))
+			Dependencies.append(Name);
+	}
+
+	return Dependencies;
+}
+
+lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup)
 {
 	lcMesh* Mesh = new lcMesh();
 
@@ -818,6 +836,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	{
 		BaseVertices[MeshDataIdx] = NumVertices;
 		NumVertices += static_cast<int>(mData[MeshDataIdx].mVertices.size());
+
 		for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataIdx].mSections)
 			if (Section->mPrimitiveType == LC_MESH_CONDITIONAL_LINES)
 				ConditionalVertexCount += static_cast<int>(Section->mIndices.size());
@@ -896,9 +915,9 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 	}
 
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		WriteSections<quint16>(Mesh, FinalSections, BaseVertices);
+		WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup);
 	else
-		WriteSections<quint32>(Mesh, FinalSections, BaseVertices);
+		WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup);
 
 	// Pack each color/material group as high, shared, low. Either LOD then
 	// occupies one contiguous range without duplicating the shared vertices.
@@ -969,7 +988,7 @@ lcMesh* lcLibraryMeshData::CreateMesh()
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES])
+void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup)
 {
 	int NumIndices = 0;
 
@@ -983,12 +1002,15 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 			DstSection.ColorIndex = FinalSection.Color;
 			DstSection.PrimitiveType = FinalSection.PrimitiveType;
 			DstSection.DrawCount = 0;
+			DstSection.TextureName = QString::fromLatin1(FinalSection.Name);
 
 			if (!FinalSection.Name[0])
 				DstSection.Texture = nullptr;
 			else
 			{
-				if (mMeshLoader)
+				if (TextureLookup)
+					DstSection.Texture = TextureLookup(FinalSection.Name);
+				else if (mMeshLoader)
 					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, mMeshLoader->mCurrentProject, mMeshLoader->mSearchProjectFolder);
 				else
 					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, nullptr, false);

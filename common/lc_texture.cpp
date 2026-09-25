@@ -152,6 +152,7 @@ void lcTexture::CreateGridTexture()
 
 	mRefCount = 1;
 	mFlags = LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC;
+	mState = lcTextureState::Decoded;
 
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	Context->MakeCurrent();
@@ -168,13 +169,14 @@ bool lcTexture::Load(const QString& FileName, int Flags)
 	Image Image;
 
 	if (!Image.FileLoad(FileName))
-		return false;
+	{
+		mState = lcTextureState::Failed;
+		mLoadFailure = lcTextureLoadError::DecodeFailed;
 
-	mLoading = true;
+		return false;
+	}
 
 	SetImage(std::move(Image), Flags);
-
-	mLoading = false;
 
 	return true;
 }
@@ -184,13 +186,13 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 	Image Image;
 
 	if (!Image.FileLoad(File))
+	{
+		mState = lcTextureState::Failed;
+		mLoadFailure = lcTextureLoadError::DecodeFailed;
 		return false;
-
-	mLoading = true;
+	}
 
 	SetImage(std::move(Image), Flags);
-
-	mLoading = false;
 
 	return true;
 }
@@ -202,6 +204,19 @@ void lcTexture::SetImage(Image&& Image, int Flags)
 	mFlags = Flags;
 
 	LoadImages();
+}
+
+void lcTexture::AdoptDecodedImage(Image&& Image, int Flags)
+{
+	mImages.clear();
+	mImages.emplace_back(std::move(Image));
+	mFlags = Flags;
+	mState = lcTextureState::Decoded;
+}
+
+void lcTexture::DiscardDecodedImage()
+{
+	mImages.clear();
 }
 
 void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
@@ -220,9 +235,26 @@ void lcTexture::Upload(lcContext* Context)
 	mWidth = mImages[0].mWidth;
 	mHeight = mImages[0].mHeight;
 
-	Context->UploadTexture(this);
+	const bool Uploaded = Context->UploadTexture(this);
 
-	mImages.clear();
+	if (Uploaded && mTexture)
+	{
+		mImages.clear();
+		mState = lcTextureState::Ready;
+		mLoadFailure = lcTextureLoadError::None;
+	}
+	else
+	{
+		if (mTexture)
+		{
+			QOpenGLContext::currentContext()->functions()->glDeleteTextures(1, &mTexture);
+
+			mTexture = 0;
+		}
+
+		mState = lcTextureState::Failed;
+		mLoadFailure = lcTextureLoadError::UploadFailed;
+	}
 }
 
 bool lcTexture::LoadImages()
@@ -230,10 +262,14 @@ bool lcTexture::LoadImages()
 	for (Image& Image : mImages)
 		Image.ResizePow2();
 
+	mState = lcTextureState::Decoded;
+
 	if (QThread::currentThread() == qApp->thread())
 	{
 		lcContext* Context = lcContext::GetGlobalOffscreenContext();
+
 		Context->MakeCurrent();
+
 		Upload(Context);
 	}
 
@@ -255,9 +291,15 @@ void lcTexture::Unload()
 				Context->MakeCurrent();
 
 				if (QOpenGLContext* OffscreenContext = QOpenGLContext::currentContext())
+				{
 					OffscreenContext->functions()->glDeleteTextures(1, &mTexture);
+					OffscreenContext->doneCurrent();
+				}
 			}
 		}
 	}
+
 	mTexture = 0;
+	mState = lcTextureState::Unrequested;
+	mLoadFailure = lcTextureLoadError::None;
 }

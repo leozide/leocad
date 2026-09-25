@@ -39,6 +39,7 @@ struct lcMeshSection
 	int DrawCount;  // Index count, or conditional vertex count.
 	lcMeshPrimitiveType PrimitiveType;
 	lcTexture* Texture = nullptr;
+	QString TextureName;
 	lcBoundingBox BoundingBox;
 	float Radius;
 };
@@ -83,7 +84,7 @@ public:
 	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();
 
-	bool FileLoad(lcMemFile& File);
+	bool FileLoad(lcMemFile& File, const std::function<lcTexture*(const char*)>& TextureLookup);
 	bool FileSave(lcMemFile& File);
 
 	template<typename IndexType>

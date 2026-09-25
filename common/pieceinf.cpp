@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
-#include "lc_meshloader.h"
 #include "lc_colors.h"
 #include "lc_texture.h"
 #include "pieceinf.h"
@@ -12,7 +11,6 @@
 #include "lc_scene.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
-#include "lc_file.h"
 #include <locale.h>
 
 PieceInfo::PieceInfo()
@@ -31,7 +29,7 @@ PieceInfo::~PieceInfo()
 	delete mSynthInfo;
 	delete mTrainTrackInfo;
 
-	if (mState == lcPieceInfoState::Loaded)
+	if (mMesh)
 		Unload();
 }
 
@@ -42,8 +40,17 @@ void PieceInfo::SetMesh(lcMesh* Mesh)
 	mMesh = Mesh;
 }
 
+void PieceInfo::SetLoadedPartMesh(lcMesh* Mesh)
+{
+	SetMesh(Mesh);
+
+	if (mType == lcPieceInfoType::Placeholder)
+		mType = lcPieceInfoType::Part;
+}
+
 void PieceInfo::SetPlaceholder()
 {
+	lcGetPiecesLibrary()->ClearPieceLoadError(this);
 	lcMesh* Mesh = new lcMesh;
 	Mesh->CreateBox();
 	SetMesh(Mesh);
@@ -53,7 +60,7 @@ void PieceInfo::SetPlaceholder()
 	mProject = nullptr;
 }
 
-void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder)
+void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 {
 	if (mModel != Model)
 	{
@@ -61,6 +68,8 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 		mModel = Model;
 		delete mMesh;
 		mMesh = nullptr;
+		mState = lcPieceInfoState::Unloaded;
+		lcGetPiecesLibrary()->ClearPieceLoadError(this);
 	}
 
 	strncpy(mFileName, Model->GetProperties().mFileName.toLatin1().data(), sizeof(mFileName) - 1);
@@ -68,34 +77,15 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProjec
 	strncpy(m_strDescription, Model->GetProperties().mFileName.toLatin1().data(), sizeof(m_strDescription) - 1);
 	m_strDescription[sizeof(m_strDescription)-1] = 0;
 
-	const QStringList& MeshLines = Model->GetFileLines();
-
-	if (UpdateMesh && !MeshLines.isEmpty())
-	{
-		lcMemFile PieceFile;
-
-		for (const QString& Line : MeshLines)
-		{
-			QByteArray Buffer = Line.toLatin1();
-			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());
-			PieceFile.WriteBuffer("\r\n", 2);
-		}
-
-		lcLibraryMeshData MeshData;
-		PieceFile.Seek(0, SEEK_SET);
-
-		lcMeshLoader MeshLoader(MeshData, true, CurrentProject, SearchProjectFolder);
-		const bool Ret = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
-
-		if (Ret && !MeshData.IsEmpty())
-			SetMesh(MeshData.CreateMesh());
-	}
+	if (UpdateMesh)
+		lcGetPiecesLibrary()->RebuildModelPiece(this);
 }
 
 void PieceInfo::CreateProject(Project* Project, const char* PieceName)
 {
 	if (mProject != Project)
 	{
+		lcGetPiecesLibrary()->ClearPieceLoadError(this);
 		mType = lcPieceInfoType::Project;
 		mProject = Project;
 		mState = lcPieceInfoState::Loaded;
@@ -143,24 +133,6 @@ void PieceInfo::CreatePlaceholder(const char* Name)
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 
 	SetPlaceholder();
-}
-
-void PieceInfo::Load()
-{
-	if (!IsModel() && !IsProject())
-	{
-		mState = lcPieceInfoState::Loading; // todo: mutex lock when changing load state
-
-		if (IsPlaceholder())
-		{
-			if (lcGetPiecesLibrary()->LoadPieceData(this))
-				mType = lcPieceInfoType::Part;
-		}
-		else
-			lcGetPiecesLibrary()->LoadPieceData(this);
-	}
-
-	mState = lcPieceInfoState::Loaded;
 }
 
 void PieceInfo::ReleaseMesh()

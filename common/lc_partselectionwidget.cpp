@@ -341,7 +341,17 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 
 		case Qt::ToolTipRole:
 			if (Info)
+			{
+				const QString Error = lcGetPiecesLibrary()->GetPieceLoadError(Info);
+
+				if (!Error.isEmpty())
+					return QVariant(Error);
+
+				if (Info->mState == lcPieceInfoState::Failed)
+					return QVariant(tr("Could not load part %1.").arg(QString::fromLatin1(Info->mFileName)));
+
 				return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(Info->m_strDescription), QString::fromLatin1(Info->mFileName)));
+			}
 			break;
 
 		case Qt::DecorationRole:

@@ -27,15 +27,18 @@ public:
 
 	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale);
 	void ReleaseThumbnail(lcPartThumbnailId ThumbnailId);
+	void Clear();
 
 signals:
 	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);
 
 protected slots:
 	void PartLoaded(PieceInfo* Info);
+	void PartLoadFailed(PieceInfo* Info);
 
 protected:
 	void DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
+	void DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 
 	lcPiecesLibrary* mLibrary = nullptr;
 	std::map<lcPartThumbnailId, lcPartThumbnail> mThumbnails;

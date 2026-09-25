@@ -128,6 +128,7 @@ public:
 	void ClearResources();
 
 	void MakeCurrent();
+	QOpenGLContext* GetGLContext() const { return mContext; }
 
 	void SetGLContext(QOpenGLContext* GLContext, QOpenGLWidget* Widget);
 	void SetOffscreenContext();
@@ -180,7 +181,7 @@ public:
 	void BindTextureCubeMap(const lcTexture* Texture);
 	void ClearTexture2D();
 	void ClearTextureCubeMap();
-	void UploadTexture(lcTexture* Texture);
+	bool UploadTexture(lcTexture* Texture);
 
 	void SetColor(const lcVector4& Color)
 	{

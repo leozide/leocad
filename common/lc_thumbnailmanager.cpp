@@ -10,13 +10,24 @@ lcThumbnailManager::lcThumbnailManager(lcPiecesLibrary* Library)
 	: QObject(Library), mLibrary(Library)
 {
 	connect(mLibrary, &lcPiecesLibrary::PartLoaded, this, &lcThumbnailManager::PartLoaded);
+	connect(mLibrary, &lcPiecesLibrary::PartLoadFailed, this, &lcThumbnailManager::PartLoadFailed);
 }
 
 lcThumbnailManager::~lcThumbnailManager()
 {
+	Clear();
+}
+
+void lcThumbnailManager::Clear()
+{
+	mView.reset();
+	mModel.reset();
+
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
 		if (Thumbnail.Pixmap.isNull())
 			mLibrary->ReleasePieceInfo(Thumbnail.Info);
+
+	mThumbnails.clear();
 }
 
 std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale)
@@ -34,10 +45,12 @@ std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(Piece
 	Thumbnail.DeviceScale = DeviceScale;
 	Thumbnail.ReferenceCount = 1;
 
-	mLibrary->LoadPieceInfo(Info, false, false);
+	mLibrary->LoadPieceInfo(Info, lcPieceLoadFlag::None);
 
 	if (Info->mState == lcPieceInfoState::Loaded)
 		DrawThumbnail(ThumbnailId, Thumbnail);
+	else if (Info->mState == lcPieceInfoState::Failed)
+		DrawFailedThumbnail(ThumbnailId, Thumbnail);
 
 	return { ThumbnailId, Thumbnail.Pixmap };
 }
@@ -64,9 +77,62 @@ void lcThumbnailManager::ReleaseThumbnail(lcPartThumbnailId ThumbnailId)
 
 void lcThumbnailManager::PartLoaded(PieceInfo* Info)
 {
-	for (auto& [ThumbnailId, Thumbnail] : mThumbnails)
+	std::vector<lcPartThumbnailId> Ready;
+
+	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
 		if (Thumbnail.Info == Info && Thumbnail.Pixmap.isNull())
-			DrawThumbnail(ThumbnailId, Thumbnail);
+			Ready.push_back(ThumbnailId);
+
+	for (lcPartThumbnailId ThumbnailId : Ready)
+	{
+		const auto It = mThumbnails.find(ThumbnailId);
+
+		if (It != mThumbnails.end())
+			DrawThumbnail(ThumbnailId, It->second);
+	}
+}
+
+void lcThumbnailManager::PartLoadFailed(PieceInfo* Info)
+{
+	std::vector<lcPartThumbnailId> Failed;
+
+	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
+		if (Thumbnail.Info == Info && Thumbnail.Pixmap.isNull())
+			Failed.push_back(ThumbnailId);
+
+	for (lcPartThumbnailId ThumbnailId : Failed)
+	{
+		const auto It = mThumbnails.find(ThumbnailId);
+
+		if (It != mThumbnails.end())
+			DrawFailedThumbnail(ThumbnailId, It->second);
+	}
+}
+
+void lcThumbnailManager::DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
+{
+	const int Size = qMax(1, static_cast<int>(Thumbnail.Size * Thumbnail.DeviceScale));
+
+	Thumbnail.Pixmap = QPixmap(Size, Size);
+	Thumbnail.Pixmap.fill(Qt::transparent);
+
+	QPainter Painter(&Thumbnail.Pixmap);
+	QPen Pen(QColor(180, 40, 40));
+
+	Pen.setWidth(qMax(2, Size / 12));
+	Painter.setPen(Pen);
+
+	const int Margin = qMax(3, Size / 5);
+
+	Painter.drawLine(Margin, Margin, Size - Margin, Size - Margin);
+	Painter.drawLine(Size - Margin, Margin, Margin, Size - Margin);
+	Painter.end();
+
+	Thumbnail.Pixmap.setDevicePixelRatio(Thumbnail.DeviceScale);
+
+	mLibrary->ReleasePieceInfo(Thumbnail.Info);
+
+	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
 }
 
 void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)

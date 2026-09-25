@@ -42,11 +42,15 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 		return true;
 
 	mLabel->setText(tr("Loading..."));
+
 	if (mPreview->SetCurrentPiece(PartType, ColorCode))
 	{
 		mLabel->setText(mPreview->GetDescription());
 		return true;
 	}
+
+	mLabel->setText(tr("Preview unavailable"));
+
 	return false;
 }
 
@@ -103,6 +107,7 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 			if (Info == ModelPiece->mPieceInfo)
 			{
 				int ModelColorCode = ModelPiece->GetColorCode();
+
 				if (ModelColorCode == ColorCode)
 					return true;
 			}
@@ -114,27 +119,83 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		mModel->SelectAllPiecesAction();
 		mModel->DeleteSelectedObjects();
 
-		Library->LoadPieceInfo(Info, false, true);
-		Library->WaitForLoadQueue();
+		if (!Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible))
+		{
+			Library->ReleasePieceInfo(Info);
+
+			return false;
+		}
 
 		mModel->SetPreviewPieceInfo(Info, lcGetColorIndex(ColorCode));
+
+		std::vector<lcModel*> UpdatedModels;
+
+		mModel->UpdatePieceInfo(UpdatedModels);
 
 		Library->ReleasePieceInfo(Info);
 	}
 	else
 	{
 		QString ModelPath = QString("%1/%2").arg(QDir::currentPath(), PartType);
+		std::unique_ptr<Project> NewLoader(new Project(true));
 
-		if (!mLoader->Load(ModelPath, false))
+		if (!NewLoader->Load(ModelPath, false))
+		{
+			NewLoader.reset();
+			Library->RemoveTemporaryPieces();
 			return false;
+		}
 
-		mLoader->SetActiveModel(0, false);
-		lcGetPiecesLibrary()->RemoveTemporaryPieces();
-		mModel = mLoader->GetActiveModel();
+		NewLoader->SetActiveModel(0, false);
+		lcModel* NewModel = NewLoader->GetActiveModel();
+		std::vector<PieceInfo*> Required;
+		std::vector<const lcModel*> Visited;
+		std::function<void(lcModel*)> CollectModel = [&](lcModel* Model)
+		{
+			if (!Model || std::find(Visited.begin(), Visited.end(), Model) != Visited.end())
+				return;
+
+			Visited.push_back(Model);
+			Required.push_back(Model->GetPieceInfo());
+
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+			{
+				PieceInfo* Child = Piece->mPieceInfo;
+
+				if (Child->IsModel())
+					CollectModel(Child->GetModel());
+				else if (Child->IsProject())
+					CollectModel(Child->GetProject()->GetMainModel());
+				else
+					Required.push_back(Child);
+			}
+		};
+
+		CollectModel(NewModel);
+
+		if (!Library->EnsurePiecesReady(Required))
+		{
+			NewLoader.reset();
+			Library->RemoveTemporaryPieces();
+
+			return false;
+		}
+
+		std::vector<lcModel*> UpdatedModels;
+
+		NewModel->UpdatePieceInfo(UpdatedModels);
+		NewModel->CalculateStep(NewModel->GetCurrentStep());
+
+		mLoader = std::move(NewLoader);
+		mModel = NewModel;
+
+		Library->RemoveTemporaryPieces();
+
 		if (!mModel->GetProperties().mDescription.isEmpty())
 			mDescription = mModel->GetProperties().mDescription;
 		else
 			mDescription = PartType;
+
 		mIsModel = true;
 	}
 

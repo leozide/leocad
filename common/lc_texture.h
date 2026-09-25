@@ -17,6 +17,26 @@
 
 #include "image.h"
 
+enum class lcTextureState
+{
+	Unrequested,
+	Queued,
+	Decoding,
+	Decoded,
+	RetryPending,
+	Ready,
+	Failed
+};
+
+enum class lcTextureLoadError
+{
+	None,
+	DecodeFailed,
+	ContextActivationFailed,
+	ContextUnavailable,
+	UploadFailed
+};
+
 class lcTexture
 {
 public:
@@ -34,6 +54,8 @@ public:
 	bool Load(lcMemFile& File, int Flags = 0);
 	void SetImage(Image&& Image, int Flags = 0);
 	void SetImage(std::vector<Image>&& Images, int Flags = 0);
+	void AdoptDecodedImage(Image&& Image, int Flags = 0);
+	void DiscardDecodedImage();
 	void Upload(lcContext* Context);
 	void Unload();
 
@@ -46,9 +68,11 @@ public:
 	void AddRef()
 	{
 		mRefCount.ref();
+	}
 
-		if (mRefCount == 1 && !HasImageData())
-			Load();
+	int GetRefCount() const
+	{
+		return mRefCount.loadRelaxed();
 	}
 
 	// Only to be called by lcPiecesLibrary.
@@ -74,7 +98,12 @@ public:
 
 	bool NeedsUpload() const
 	{
-		return !mLoading && mTexture == 0 && !mImages.empty();
+		return mState == lcTextureState::Decoded && mTexture == 0 && !mImages.empty();
+	}
+
+	bool IsReady() const
+	{
+		return mState == lcTextureState::Ready && mTexture != 0;
 	}
 
 	int GetFlags() const
@@ -94,10 +123,12 @@ public:
 
 	int mWidth;
 	int mHeight;
-	char mName[LC_TEXTURE_NAME_LEN];
+	char mName[LC_TEXTURE_NAME_LEN] = {};
 	QString mFilePath;    // Absolute PNG path for disk-backed textures; empty for archive textures.
 	QString mProjectPath; // Directory used to scope temporary textures to their project.
 	GLuint mTexture = 0;
+	lcTextureState mState = lcTextureState::Unrequested;
+	lcTextureLoadError mLoadFailure = lcTextureLoadError::None;
 
 protected:
 	bool Load();
@@ -107,7 +138,6 @@ protected:
 	QAtomicInt mRefCount = 0;
 	std::vector<Image> mImages;
 	int mFlags = 0;
-	bool mLoading = false;
 };
 
 lcTexture* lcLoadTexture(const QString& FileName, int Flags);

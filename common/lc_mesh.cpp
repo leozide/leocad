@@ -415,26 +415,48 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
 }
 
-bool lcMesh::FileLoad(lcMemFile& File)
+bool lcMesh::FileLoad(lcMemFile& File, const std::function<lcTexture*(const char*)>& TextureLookup)
 {
-	if (File.ReadU32() != LC_MESH_FILE_ID || File.ReadU32() != LC_MESH_FILE_VERSION)
+	quint32 FileId, FileVersion, Flags;
+
+	if (File.ReadU32(&FileId, 1) != 1 || FileId != LC_MESH_FILE_ID || File.ReadU32(&FileVersion, 1) != 1 ||
+	    FileVersion != LC_MESH_FILE_VERSION || File.ReadU32(&Flags, 1) != 1)
 		return false;
 
-	mFlags = static_cast<lcMeshFlags>(File.ReadU32());
-	mBoundingBox.Min = File.ReadVector3();
-	mBoundingBox.Max = File.ReadVector3();
-	mRadius = File.ReadFloat();
+	mFlags = static_cast<lcMeshFlags>(Flags);
+
+	if (File.ReadFloats(mBoundingBox.Min.GetFloats(), 3) != 3 ||
+		File.ReadFloats(mBoundingBox.Max.GetFloats(), 3) != 3 || File.ReadFloats(&mRadius, 1) != 1)
+		return false;
 
 	quint32 VertexCount, TexturedVertexCount, ConditionalVertexCount, IndexCount;
 	quint16 NumLods, NumSections[LC_NUM_MESH_LODS];
 
-	if (!File.ReadU32(&VertexCount, 1) || !File.ReadU32(&TexturedVertexCount, 1) || !File.ReadU32(&ConditionalVertexCount, 1) || !File.ReadU32(&IndexCount, 1))
+	if (File.ReadU32(&VertexCount, 1) != 1 || File.ReadU32(&TexturedVertexCount, 1) != 1 ||
+		File.ReadU32(&ConditionalVertexCount, 1) != 1 || File.ReadU32(&IndexCount, 1) != 1)
 		return false;
 
-	if (!File.ReadU16(&NumLods, 1) || NumLods != LC_NUM_MESH_LODS || !File.ReadU16(NumSections, LC_NUM_MESH_LODS))
+	if (File.ReadU16(&NumLods, 1) != 1 || NumLods != LC_NUM_MESH_LODS || File.ReadU16(NumSections, LC_NUM_MESH_LODS) != LC_NUM_MESH_LODS)
+		return false;
+
+	const quint64 VertexDataSize = static_cast<quint64>(VertexCount) * sizeof(lcVertex) +
+		static_cast<quint64>(TexturedVertexCount) * sizeof(lcVertexTextured) +
+		static_cast<quint64>(ConditionalVertexCount) * sizeof(lcVertexConditional);
+	const quint64 IndexElementSize = VertexCount < 0x10000 && TexturedVertexCount < 0x10000 ? sizeof(GLushort) : sizeof(GLuint);
+	const quint64 IndexDataSize = static_cast<quint64>(IndexCount) * IndexElementSize;
+	constexpr quint64 MinimumSectionSize = 3 * sizeof(quint32) + sizeof(quint16) + 7 * sizeof(float) + sizeof(quint16);
+	const quint64 MinimumSectionsSize = static_cast<quint64>(NumSections[LC_MESH_LOD_HIGH] + NumSections[LC_MESH_LOD_LOW]) * MinimumSectionSize;
+	const long Position = File.GetPosition();
+
+	if (VertexDataSize > std::numeric_limits<int>::max() || IndexDataSize > std::numeric_limits<int>::max() ||
+		Position < 0 || static_cast<size_t>(Position) > File.GetLength() ||
+		MinimumSectionsSize + VertexDataSize + IndexDataSize > File.GetLength() - static_cast<size_t>(Position))
 		return false;
 
 	Create(NumSections, VertexCount, TexturedVertexCount, ConditionalVertexCount, IndexCount);
+
+	if ((mVertexDataSize && !mVertexData) || (mIndexDataSize && !mIndexData))
+		return false;
 
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
@@ -445,18 +467,21 @@ bool lcMesh::FileLoad(lcMemFile& File)
 			quint32 ColorCode, DrawOffset, DrawCount;
 			quint16 PrimtiveType, Length;
 
-			if (!File.ReadU32(&ColorCode, 1) || !File.ReadU32(&DrawOffset, 1) || !File.ReadU32(&DrawCount, 1) || !File.ReadU16(&PrimtiveType, 1))
+			if (File.ReadU32(&ColorCode, 1) != 1 || File.ReadU32(&DrawOffset, 1) != 1 ||
+				File.ReadU32(&DrawCount, 1) != 1 || File.ReadU16(&PrimtiveType, 1) != 1)
 				return false;
 
 			Section.ColorIndex = lcGetColorIndex(ColorCode);
 			Section.DrawOffset = DrawOffset;
 			Section.DrawCount = DrawCount;
 			Section.PrimitiveType = (lcMeshPrimitiveType)PrimtiveType;
-			Section.BoundingBox.Min = File.ReadVector3();
-			Section.BoundingBox.Max = File.ReadVector3();
-			Section.Radius = File.ReadFloat();
 
-			if (!File.ReadU16(&Length, 1))
+			if (File.ReadFloats(Section.BoundingBox.Min.GetFloats(), 3) != 3 ||
+				File.ReadFloats(Section.BoundingBox.Max.GetFloats(), 3) != 3 ||
+				File.ReadFloats(&Section.Radius, 1) != 1)
+				return false;
+
+			if (File.ReadU16(&Length, 1) != 1)
 				return false;
 
 			if (Length)
@@ -466,22 +491,32 @@ bool lcMesh::FileLoad(lcMemFile& File)
 
 				char FileName[LC_TEXTURE_NAME_LEN];
 
-				File.ReadBuffer(FileName, Length);
+				if (File.ReadBuffer(FileName, Length) != Length)
+					return false;
+
 				FileName[Length] = 0;
 
-				Section.Texture = lcGetPiecesLibrary()->FindTexture(FileName, nullptr, false);
+				Section.TextureName = QString::fromLatin1(FileName);
+				Section.Texture = TextureLookup ? TextureLookup(FileName) : lcGetPiecesLibrary()->FindTexture(FileName, nullptr, false);
 			}
 			else
 				Section.Texture = nullptr;
 		}
 	}
 
-	File.ReadBuffer(mVertexData, mNumVertices * sizeof(lcVertex) + mNumTexturedVertices * sizeof(lcVertexTextured) + mConditionalVertexCount * sizeof(lcVertexConditional));
+	if (File.ReadBuffer(mVertexData, mVertexDataSize) != static_cast<size_t>(mVertexDataSize))
+		return false;
 
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		File.ReadU16((quint16*)mIndexData, mIndexDataSize / 2);
+	{
+		if (File.ReadU16((quint16*)mIndexData, mIndexDataSize / 2) != static_cast<size_t>(mIndexDataSize / 2))
+			return false;
+	}
 	else
-		File.ReadU32((quint32*)mIndexData, mIndexDataSize / 4);
+	{
+		if (File.ReadU32((quint32*)mIndexData, mIndexDataSize / 4) != static_cast<size_t>(mIndexDataSize / 4))
+			return false;
+	}
 
 	return true;
 }
@@ -519,11 +554,13 @@ bool lcMesh::FileSave(lcMemFile& File)
 			File.WriteVector3(Section.BoundingBox.Max);
 			File.WriteFloat(Section.Radius);
 
-			if (Section.Texture)
+			const QByteArray TextureName = Section.TextureName.isEmpty() && Section.Texture ? QByteArray(Section.Texture->mName) : Section.TextureName.toLatin1();
+
+			if (!TextureName.isEmpty())
 			{
-				const quint16 Length = (quint16)strlen(Section.Texture->mName);
+				const quint16 Length = (quint16)TextureName.size();
 				File.WriteU16(Length);
-				File.WriteBuffer(Section.Texture->mName, Length);
+				File.WriteBuffer(TextureName.constData(), Length);
 			}
 			else
 				File.WriteU16(0);

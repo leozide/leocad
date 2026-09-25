@@ -72,6 +72,11 @@ public:
 		return !mModels.empty() ? mModels[0].get() : nullptr;
 	}
 
+	bool IsPreview() const
+	{
+		return mIsPreview;
+	}
+
 	bool IsModified() const;
 	void MarkAsModified();
 	QString GetTitle() const;
@@ -136,4 +141,3 @@ inline lcModel* lcGetActiveModel()
 	const Project* const Project = lcGetActiveProject();
 	return Project ? Project->GetActiveModel() : nullptr;
 }
-

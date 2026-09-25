@@ -16,8 +16,12 @@ enum class lcPieceInfoType
 enum class lcPieceInfoState
 {
 	Unloaded,
+	Queued,
 	Loading,
-	Loaded
+	AwaitingTextures,
+	Loaded,
+	Failed,
+	Cancelled
 };
 
 struct lcModelPartsEntry
@@ -90,6 +94,8 @@ public:
 	}
 
 	void SetMesh(lcMesh* Mesh);
+	void SetLoadedPartMesh(lcMesh* Mesh);
+	void ReleaseMesh();
 
 	int AddRef()
 	{
@@ -176,7 +182,7 @@ public:
 	void CreatePlaceholder(const char* Name);
 
 	void SetPlaceholder();
-	void SetModel(lcModel* Model, bool UpdateMesh, Project* CurrentProject, bool SearchProjectFolder);
+	void SetModel(lcModel* Model, bool UpdateMesh);
 	void CreateProject(Project* Project, const char* PieceName);
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
@@ -188,7 +194,6 @@ public:
 	void AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
 	void UpdateBoundingBox(std::vector<lcModel*>& UpdatedModels);
 
-	void Load();
 	void Unload();
 
 public:
@@ -201,8 +206,6 @@ public:
 	int mFolderIndex;
 
 protected:
-	void ReleaseMesh();
-
 	int mRefCount = 0;
 	lcPieceInfoType mType = lcPieceInfoType::Part;
 	lcModel* mModel = nullptr;
@@ -212,4 +215,3 @@ protected:
 	lcSynthInfo* mSynthInfo = nullptr;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
 };
-

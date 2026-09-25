@@ -3,15 +3,19 @@
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_meshloader.h"
-#include <atomic>
 
 class PieceInfo;
+class lcMesh;
 class lcTrainTrackInfo;
 struct lcTrainTrackConnectionType;
 class lcZipFile;
 class lcLibraryMeshData;
 class lcThumbnailManager;
 class lcAssetLoader;
+struct lcPartSourceSnapshot;
+struct lcPartBuildResult;
+struct lcTextureSourceSnapshot;
+struct lcTextureBuildResult;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 using lcLibraryLoadMutex = QRecursiveMutex;
@@ -58,6 +62,16 @@ enum class lcPrimitiveState
 	Loading,
 	Loaded
 };
+
+enum class lcPieceLoadFlag
+{
+	None = 0,
+	Wait = 1 << 0,
+	Visible = 1 << 1
+};
+
+Q_DECLARE_FLAGS(lcPieceLoadFlags, lcPieceLoadFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(lcPieceLoadFlags)
 
 class lcLibraryPrimitive
 {
@@ -150,14 +164,29 @@ public:
 
 	void RenamePiece(PieceInfo* Info, const char* NewName);
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
-	void LoadPieceInfo(PieceInfo* Info, bool Wait, bool Priority);
+	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
+	bool EnsurePieceReady(PieceInfo* Info);
+	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	bool RebuildModelPiece(PieceInfo* Info);
+	bool EnsureTextureReady(lcTexture* Texture);
 	void ReleasePieceInfo(PieceInfo* Info);
+	void AddPieceReference(PieceInfo* Info);
+	bool HasPieceConsumers(const PieceInfo* Info);
+	void ReleasePieceLoadHold(PieceInfo* Info);
+	void SetPieceLoadError(const PieceInfo* Info, QString Error);
+	QString GetPieceLoadError(const PieceInfo* Info) const;
+	void ClearPieceLoadError(const PieceInfo* Info);
 	bool LoadBuiltinPieces();
-	bool LoadPieceData(PieceInfo* Info);
+	lcPartSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
+	lcPartBuildResult BuildPieceData(const lcPartSourceSnapshot& Source);
+	void SaveBuiltPieceCache(const lcPartSourceSnapshot& Source, lcMesh& Mesh);
 	void WaitForLoadQueue();
 
 	// Returns a texture reference that the caller must release.
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
+	lcTexture* FindTextureDeferred(const char* TextureName, const QString& ProjectPath);
+	lcTextureSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
+	lcTextureBuildResult BuildTextureData(const lcTextureSourceSnapshot& Source);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
 
@@ -212,6 +241,7 @@ public:
 
 signals:
 	void PartLoaded(PieceInfo* Info);
+	void PartLoadFailed(PieceInfo* Info, const QString& Error);
 	void ColorsLoaded();
 
 protected:
@@ -225,8 +255,6 @@ protected:
 	bool WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool LoadCacheIndex(const QString& FileName);
 	bool SaveArchiveCacheIndex(const QString& FileName);
-	bool LoadCachePiece(PieceInfo* Info);
-	bool SaveCachePiece(PieceInfo* Info);
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
@@ -243,6 +271,8 @@ protected:
 	lcLibraryLoadMutex mLoadMutex;
 
 	QMutex mTextureMutex;
+	mutable QMutex mPieceErrorMutex;
+	std::unordered_map<const PieceInfo*, QString> mFailedPartErrors;
 
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;

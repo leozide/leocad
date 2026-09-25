@@ -142,11 +142,13 @@ void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 	for (const std::unique_ptr<lcModel> &Model : mModels)
 		Model->SetActive(Model.get() == ActiveModel);
 
-	std::vector<lcModel*> UpdatedModels;
-	UpdatedModels.reserve(mModels.size());
-
-	for (const std::unique_ptr<lcModel> &Model : mModels)
-		Model->UpdatePieceInfo(UpdatedModels);
+	if (!mIsPreview)
+	{
+		std::vector<lcModel*> UpdatedModels;
+		UpdatedModels.reserve(mModels.size());
+		for (const std::unique_ptr<lcModel> &Model : mModels)
+			Model->UpdatePieceInfo(UpdatedModels);
+	}
 
 	mActiveModel = ActiveModel;
 
@@ -482,8 +484,18 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		Model->UpdateMesh();
-		Model->UpdatePieceInfo(UpdatedModels);
+		if (mIsPreview)
+		{
+			PieceInfo* Info = Model->GetPieceInfo();
+
+			Info->ReleaseMesh();
+			Info->mState = lcPieceInfoState::Unloaded;
+		}
+		else
+		{
+			Model->UpdateMesh();
+			Model->UpdatePieceInfo(UpdatedModels);
+		}
 	}
 
 	mModified = false;

@@ -3,6 +3,7 @@
 #include "lc_math.h"
 #include "lc_commands.h"
 #include "lc_objectproperty.h"
+#include "lc_result.h"
 
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
@@ -159,6 +160,8 @@ public:
 	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
 	void UpdateMesh();
 	void UpdateAllViews() const;
+	std::vector<PieceInfo*> GetRequiredPieces() const;
+	lcResult<void> EnsureAssetsReady() const;
 
 	PieceInfo* GetPieceInfo() const
 	{

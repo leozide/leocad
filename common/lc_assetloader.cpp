@@ -120,6 +120,13 @@ void lcAssetLoader::QueuePieceLocked(PieceInfo* Info, Priority LoadPriority)
 	mLibrary->AddPieceReference(Info); // The request owns a separate in-flight hold.
 
 	Info->mState = lcPieceInfoState::Queued;
+
+	if (!Info->IsModel() && !Info->IsProject())
+	{
+		const lcBoundingBox& Box = mLibrary->GetLoadingMesh()->mBoundingBox;
+		Info->SetBoundingBox(Box.Min, Box.Max);
+	}
+
 	mLibrary->ClearPieceLoadError(Info);
 
 	std::shared_ptr<Request> RequestedPart = std::make_shared<Request>();
@@ -141,6 +148,8 @@ void lcAssetLoader::QueuePieceLocked(PieceInfo* Info, Priority LoadPriority)
 
 		StartWorkersLocked();
 	}
+
+	emit mLibrary->AssetRequestsChanged();
 }
 
 void lcAssetLoader::StartWorkersLocked()
@@ -388,7 +397,7 @@ void lcAssetLoader::FinishPart(const std::shared_ptr<Request>& RequestedPart)
 	mResultReady.wakeAll();
 	mQueueMutex.unlock();
 
-	mLibrary->mBuffersDirty = true;
+	mLibrary->ScheduleBufferRepack();
 	mNotifications.push_back({ RequestedPart, Loaded, std::move(LoadError) });
 
 	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
@@ -1036,6 +1045,15 @@ void lcAssetLoader::WaitForLoadQueue()
 		Future.waitForFinished();
 
 	mFutures.clear();
+}
+
+bool lcAssetLoader::HasPendingWork()
+{
+	mQueueMutex.lock();
+	const bool Pending = !mRequests.empty() || !mTextureRequests.empty() || !mCompletions.empty();
+	mQueueMutex.unlock();
+
+	return Pending;
 }
 
 void lcAssetLoader::CancelAndDrain()

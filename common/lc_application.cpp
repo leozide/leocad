@@ -297,6 +297,9 @@ void lcApplication::SetProject(Project* Project)
 	delete mProject;
 	mProject = Project;
 
+	if (gMainWindow)
+		gMainWindow->ScheduleAssetUpdate();
+
 	Project->SetActiveModel(0, true);
 	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 
@@ -956,6 +959,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 #endif
 
 	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
+	bool OutputFailed = false;
 
 	if (!SaveAndExit)
 	{
@@ -1135,6 +1139,15 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			if (Options.SetHighlightColor)
 				mPreferences.mHighlightNewPartsColor = Options.HighlightColor;
 
+			const lcResult<void> Ready = ActiveModel->EnsureAssetsReady();
+
+			if (!Ready)
+			{
+				StdErr << Ready.error() << '\n';
+
+				return lcStartupMode::Error;
+			}
+
 			if (Options.CameraName.isEmpty() && !Options.SetCameraPosition)
 				ActiveView->ZoomExtents();
 
@@ -1171,8 +1184,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else if (!ExportResult.error().isEmpty())
-				StdErr << ExportResult.error();
+			else
+			{
+				OutputFailed = true;
+
+				if (!ExportResult.error().isEmpty())
+					StdErr << ExportResult.error() << '\n';
+			}
 		}
 
 		if (Options.Save3DS)
@@ -1200,8 +1218,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else if (!ExportResult.error().isEmpty())
-				StdErr << ExportResult.error();
+			else
+			{
+				OutputFailed = true;
+
+				if (!ExportResult.error().isEmpty())
+					StdErr << ExportResult.error() << '\n';
+			}
 		}
 
 		if (Options.SaveCOLLADA)
@@ -1229,8 +1252,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else if (!ExportResult.error().isEmpty())
-			    StdErr << ExportResult.error();
+			else
+			{
+				OutputFailed = true;
+
+				if (!ExportResult.error().isEmpty())
+					StdErr << ExportResult.error() << '\n';
+			}
 		}
 
 		if (Options.SaveCSV)
@@ -1258,8 +1286,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else if (!ExportResult.error().isEmpty())
-				StdErr << ExportResult.error();
+			else
+			{
+				OutputFailed = true;
+
+				if (!ExportResult.error().isEmpty())
+					StdErr << ExportResult.error() << '\n';
+			}
 		}
 
 		if (Options.SaveHTML)
@@ -1273,8 +1306,13 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 			if (ExportResult)
 				StdOut << tr("Saved '%1'.\n").arg(HTMLOptions.PathName);
-			else if (!ExportResult.error().isEmpty())
-				StdErr << ExportResult.error();
+			else
+			{
+				OutputFailed = true;
+
+				if (!ExportResult.error().isEmpty())
+					StdErr << ExportResult.error() << '\n';
+			}
 		}
 	}
 
@@ -1299,6 +1337,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 #endif
 #endif
 	}
+
+	if (OutputFailed)
+		return lcStartupMode::Error;
 
 	return SaveAndExit ? lcStartupMode::Success : lcStartupMode::ShowWindow;
 }

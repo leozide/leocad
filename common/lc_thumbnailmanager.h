@@ -6,6 +6,7 @@ struct lcPartThumbnail
 {
 	QPixmap Pixmap;
 	PieceInfo* Info;
+	std::vector<PieceInfo*> Required;
 	int ColorIndex;
 	int Size;
 	float DeviceScale;
@@ -37,6 +38,9 @@ protected slots:
 	void PartLoadFailed(PieceInfo* Info);
 
 protected:
+	void RefreshRequiredPieces(lcPartThumbnail& Thumbnail);
+	void ReleaseRequiredPieces(lcPartThumbnail& Thumbnail);
+	void UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 

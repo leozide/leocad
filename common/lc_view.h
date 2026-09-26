@@ -236,6 +236,7 @@ public:
 	void SetSelectedSubmodelActive();
 
 	void OnDraw();
+	bool HasMissingAssets() const;
 	void OnLeftButtonDown();
 	void OnLeftButtonUp();
 	void OnLeftButtonDoubleClick();

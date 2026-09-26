@@ -4,6 +4,7 @@
 #include "pieceinf.h"
 #include "lc_view.h"
 #include "lc_model.h"
+#include "project.h"
 #include "camera.h"
 
 lcThumbnailManager::lcThumbnailManager(lcPiecesLibrary* Library)
@@ -24,8 +25,7 @@ void lcThumbnailManager::Clear()
 	mModel.reset();
 
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Pixmap.isNull())
-			mLibrary->ReleasePieceInfo(Thumbnail.Info);
+		ReleaseRequiredPieces(Thumbnail);
 
 	mThumbnails.clear();
 }
@@ -45,12 +45,7 @@ std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(Piece
 	Thumbnail.DeviceScale = DeviceScale;
 	Thumbnail.ReferenceCount = 1;
 
-	mLibrary->LoadPieceInfo(Info, lcPieceLoadFlag::None);
-
-	if (Info->mState == lcPieceInfoState::Loaded)
-		DrawThumbnail(ThumbnailId, Thumbnail);
-	else if (Info->mState == lcPieceInfoState::Failed)
-		DrawFailedThumbnail(ThumbnailId, Thumbnail);
+	UpdateThumbnail(ThumbnailId, Thumbnail);
 
 	return { ThumbnailId, Thumbnail.Pixmap };
 }
@@ -68,11 +63,87 @@ void lcThumbnailManager::ReleaseThumbnail(lcPartThumbnailId ThumbnailId)
 
 	if (Thumbnail.ReferenceCount == 0)
 	{
-		if (Thumbnail.Pixmap.isNull())
-			mLibrary->ReleasePieceInfo(Thumbnail.Info);
+		ReleaseRequiredPieces(Thumbnail);
 
 		mThumbnails.erase(ThumbnailIt);
 	}
+}
+
+void lcThumbnailManager::RefreshRequiredPieces(lcPartThumbnail& Thumbnail)
+{
+	std::vector<PieceInfo*> Required{ Thumbnail.Info };
+
+	if (Thumbnail.Info->IsModel())
+	{
+		std::vector<PieceInfo*> ModelRequired = Thumbnail.Info->GetModel()->GetRequiredPieces();
+		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+	}
+	else if (Thumbnail.Info->IsProject())
+	{
+		const lcModel* Model = Thumbnail.Info->GetProject()->GetMainModel();
+
+		if (Model)
+		{
+			std::vector<PieceInfo*> ModelRequired = Model->GetRequiredPieces();
+			Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+		}
+	}
+
+	std::sort(Required.begin(), Required.end());
+	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+
+	std::unordered_set<PieceInfo*> Previous(Thumbnail.Required.begin(), Thumbnail.Required.end());
+
+	for (PieceInfo* Info : Required)
+	{
+		if (Previous.erase(Info) == 0)
+			mLibrary->LoadPieceInfo(Info, lcPieceLoadFlag::None);
+	}
+
+	for (PieceInfo* Info : Previous)
+		mLibrary->ReleasePieceInfo(Info);
+
+	Thumbnail.Required = std::move(Required);
+}
+
+void lcThumbnailManager::ReleaseRequiredPieces(lcPartThumbnail& Thumbnail)
+{
+	for (PieceInfo* Info : Thumbnail.Required)
+		mLibrary->ReleasePieceInfo(Info);
+
+	Thumbnail.Required.clear();
+}
+
+void lcThumbnailManager::UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
+{
+	RefreshRequiredPieces(Thumbnail);
+
+	bool Pending = false;
+
+	for (const PieceInfo* Info : Thumbnail.Required)
+	{
+		if (Info->mState == lcPieceInfoState::Failed || Info->mState == lcPieceInfoState::Cancelled)
+		{
+			DrawFailedThumbnail(ThumbnailId, Thumbnail);
+			return;
+		}
+
+		if (Info->mState != lcPieceInfoState::Loaded)
+			Pending = true;
+	}
+
+	if (Pending)
+		return;
+
+	if (Thumbnail.Info->IsModel())
+	{
+		std::vector<lcModel*> UpdatedModels;
+		Thumbnail.Info->GetModel()->UpdatePieceInfo(UpdatedModels);
+	}
+	else if (Thumbnail.Info->IsProject())
+		Thumbnail.Info->GetProject()->UpdatePieceInfo(Thumbnail.Info);
+
+	DrawThumbnail(ThumbnailId, Thumbnail);
 }
 
 void lcThumbnailManager::PartLoaded(PieceInfo* Info)
@@ -80,15 +151,15 @@ void lcThumbnailManager::PartLoaded(PieceInfo* Info)
 	std::vector<lcPartThumbnailId> Ready;
 
 	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Info == Info && Thumbnail.Pixmap.isNull())
+		if (Thumbnail.Pixmap.isNull() && std::find(Thumbnail.Required.begin(), Thumbnail.Required.end(), Info) != Thumbnail.Required.end())
 			Ready.push_back(ThumbnailId);
 
 	for (lcPartThumbnailId ThumbnailId : Ready)
 	{
 		const auto It = mThumbnails.find(ThumbnailId);
 
-		if (It != mThumbnails.end())
-			DrawThumbnail(ThumbnailId, It->second);
+		if (It != mThumbnails.end() && It->second.Pixmap.isNull())
+			UpdateThumbnail(ThumbnailId, It->second);
 	}
 }
 
@@ -97,15 +168,15 @@ void lcThumbnailManager::PartLoadFailed(PieceInfo* Info)
 	std::vector<lcPartThumbnailId> Failed;
 
 	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Info == Info && Thumbnail.Pixmap.isNull())
+		if (Thumbnail.Pixmap.isNull() && std::find(Thumbnail.Required.begin(), Thumbnail.Required.end(), Info) != Thumbnail.Required.end())
 			Failed.push_back(ThumbnailId);
 
 	for (lcPartThumbnailId ThumbnailId : Failed)
 	{
 		const auto It = mThumbnails.find(ThumbnailId);
 
-		if (It != mThumbnails.end())
-			DrawFailedThumbnail(ThumbnailId, It->second);
+		if (It != mThumbnails.end() && It->second.Pixmap.isNull())
+			UpdateThumbnail(ThumbnailId, It->second);
 	}
 }
 
@@ -130,7 +201,7 @@ void lcThumbnailManager::DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPa
 
 	Thumbnail.Pixmap.setDevicePixelRatio(Thumbnail.DeviceScale);
 
-	mLibrary->ReleasePieceInfo(Thumbnail.Info);
+	ReleaseRequiredPieces(Thumbnail);
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
 }
@@ -180,6 +251,18 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 
 	mView->UnbindRenderFramebuffer();
 
+	if (mView->HasMissingAssets())
+	{
+		RefreshRequiredPieces(Thumbnail);
+
+		for (const PieceInfo* Required : Thumbnail.Required)
+			if (Required->mState != lcPieceInfoState::Loaded && Required->mState != lcPieceInfoState::Failed && Required->mState != lcPieceInfoState::Cancelled)
+				return;
+
+		DrawFailedThumbnail(ThumbnailId, Thumbnail);
+		return;
+	}
+
 	QImage Image = mView->GetRenderImage().convertToFormat(QImage::Format_ARGB32);
 	const char* IconName = nullptr;
 
@@ -219,7 +302,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 
 	Thumbnail.Pixmap = QPixmap::fromImage(Image).scaled(ScaledSize, ScaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-	mLibrary->ReleasePieceInfo(Info);
+	ReleaseRequiredPieces(Thumbnail);
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
 }

@@ -58,6 +58,26 @@ public:
 		return mDrawInterface;
 	}
 
+	void SetRequireCompleteAssets(bool RequireCompleteAssets)
+	{
+		mRequireCompleteAssets = RequireCompleteAssets;
+	}
+
+	bool GetRequireCompleteAssets() const
+	{
+		return mRequireCompleteAssets;
+	}
+
+	void MarkMissingAssets()
+	{
+		mMissingAssets = true;
+	}
+
+	bool HasMissingAssets() const
+	{
+		return mMissingAssets;
+	}
+
 	void SetDrawInsertPreview(bool DrawInsertPreview)
 	{
 		mDrawInsertPreview = DrawInsertPreview;
@@ -115,6 +135,8 @@ protected:
 	lcPiece* mActiveSubmodelInstance = nullptr;
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
+	bool mRequireCompleteAssets = false;
+	bool mMissingAssets = false;
 	bool mDrawInsertPreview = false;
 	bool mAllowLOD = true;
 	float mMeshLODDistance;

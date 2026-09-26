@@ -660,6 +660,13 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	return ModelParts;
 }
 
+lcResult<void> Project::EnsureAssetsReady() const
+{
+	const lcModel* Model = GetMainModel();
+
+	return Model ? Model->EnsureAssetsReady() : lcResult<void>();
+}
+
 lcResult<void> Project::ExportCurrentStep(const QString& FileName)
 {
 	QFile File(FileName);
@@ -801,6 +808,11 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 
 lcResult<void> Project::Export3DStudio(const QString& FileName)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+		return Ready;
+
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
@@ -1254,6 +1266,11 @@ lcResult<void> Project::ExportBrickLink()
 
 lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+		return Ready;
+
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
@@ -1568,9 +1585,6 @@ lcInstructions* Project::GetInstructions()
 
 lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 {
-	QDir Dir(Options.PathName);
-	Dir.mkpath(QLatin1String("."));
-
 	std::set<lcModel*> Models;
 
 	if (Options.CurrentOnly)
@@ -1585,6 +1599,17 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		for (const std::unique_ptr<lcModel>& Model : mModels)
 			Models.insert(Model.get());
 	}
+
+	for (const lcModel* Model : Models)
+	{
+		const lcResult<void> Ready = Model->EnsureAssetsReady();
+
+		if (!Ready)
+			return Ready;
+	}
+
+	QDir Dir(Options.PathName);
+	Dir.mkpath(QLatin1String("."));
 
 	QString ProjectTitle = GetTitle();
 
@@ -1777,6 +1802,11 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 lcResult<void> Project::ExportPOVRay(const QString& FileName)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+		return Ready;
+
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())
@@ -2463,6 +2493,11 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 lcResult<void> Project::ExportWavefront(const QString& FileName)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+		return Ready;
+
 	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	if (ModelParts.empty())

@@ -148,32 +148,8 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 		NewLoader->SetActiveModel(0, false);
 		lcModel* NewModel = NewLoader->GetActiveModel();
-		std::vector<PieceInfo*> Required;
-		std::vector<const lcModel*> Visited;
-		std::function<void(lcModel*)> CollectModel = [&](lcModel* Model)
-		{
-			if (!Model || std::find(Visited.begin(), Visited.end(), Model) != Visited.end())
-				return;
 
-			Visited.push_back(Model);
-			Required.push_back(Model->GetPieceInfo());
-
-			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
-			{
-				PieceInfo* Child = Piece->mPieceInfo;
-
-				if (Child->IsModel())
-					CollectModel(Child->GetModel());
-				else if (Child->IsProject())
-					CollectModel(Child->GetProject()->GetMainModel());
-				else
-					Required.push_back(Child);
-			}
-		};
-
-		CollectModel(NewModel);
-
-		if (!Library->EnsurePiecesReady(Required))
+		if (!NewModel->EnsureAssetsReady())
 		{
 			NewLoader.reset();
 			Library->RemoveTemporaryPieces();

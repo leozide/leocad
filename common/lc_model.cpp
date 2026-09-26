@@ -303,6 +303,67 @@ void lcModel::UpdateAllViews() const
 	lcView::UpdateProjectViews(mProject);
 }
 
+std::vector<PieceInfo*> lcModel::GetRequiredPieces() const
+{
+	std::vector<PieceInfo*> Required;
+	std::unordered_set<const lcModel*> Visited;
+
+	const std::function<void(const lcModel*)> Collect = [&Required, &Visited, &Collect](const lcModel* Model)
+	{
+		if (!Model || !Visited.insert(Model).second)
+			return;
+
+		if (Model->mPieceInfo)
+			Required.push_back(Model->mPieceInfo);
+
+		for (const std::unique_ptr<lcPiece>& Piece : Model->mPieces)
+		{
+			PieceInfo* Info = Piece->mPieceInfo;
+
+			if (Info->IsModel())
+				Collect(Info->GetModel());
+			else if (Info->IsProject())
+				Collect(Info->GetProject()->GetMainModel());
+			else
+				Required.push_back(Info);
+		}
+	};
+
+	Collect(this);
+
+	std::sort(Required.begin(), Required.end());
+	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+
+	return Required;
+}
+
+lcResult<void> lcModel::EnsureAssetsReady() const
+{
+	const std::vector<PieceInfo*> Required = GetRequiredPieces();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (!Library->EnsurePiecesReady(Required))
+	{
+		for (const PieceInfo* Info : Required)
+		{
+			if (Info->mState != lcPieceInfoState::Failed)
+				continue;
+
+			const QString Error = Library->GetPieceLoadError(Info);
+
+			if (!Error.isEmpty())
+				return lcUnexpected(Error);
+		}
+
+		return lcUnexpected(tr("Could not load all required parts."));
+	}
+
+	std::vector<lcModel*> UpdatedModels;
+	const_cast<lcModel*>(this)->UpdatePieceInfo(UpdatedModels);
+
+	return lcResult<void>();
+}
+
 void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 {
 	if (std::find(UpdatedModels.begin(), UpdatedModels.end(), this) != UpdatedModels.end())
@@ -311,9 +372,10 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetModel(this, false);
 	UpdatedModels.push_back(this);
 
-	const lcMesh* Mesh = mPieceInfo->GetMesh();
+	const lcMesh* Mesh = mPieceInfo->IsLoading() ? nullptr : mPieceInfo->GetMesh();
+	const lcMesh* PendingMesh = mPieceInfo->IsLoading() && !mFileLines.isEmpty() ? lcGetPiecesLibrary()->GetLoadingMesh() : nullptr;
 
-	if (mPieces.empty() && !Mesh)
+	if (mPieces.empty() && !Mesh && !PendingMesh)
 	{
 		mPieceInfo->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
 		return;
@@ -334,6 +396,11 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	{
 		Min = lcMin(Min, Mesh->mBoundingBox.Min);
 		Max = lcMax(Max, Mesh->mBoundingBox.Max);
+	}
+	else if (PendingMesh)
+	{
+		Min = lcMin(Min, PendingMesh->mBoundingBox.Min);
+		Max = lcMax(Max, PendingMesh->mBoundingBox.Max);
 	}
 
 	mPieceInfo->SetBoundingBox(Min, Max);
@@ -1393,6 +1460,16 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
+
+		return QImage();
+	}
+
 	const lcView* ActiveView = gMainWindow->GetActiveView();
 	const lcStep CurrentStep = mCurrentStep;
 	lcCamera* Camera = ActiveView->GetCamera();
@@ -1415,7 +1492,12 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 	View.OnDraw();
 
-	QImage Image = View.GetRenderImage();
+	QImage Image;
+
+	const bool MissingAssets = View.HasMissingAssets();
+
+	if (!MissingAssets)
+		Image = View.GetRenderImage();
 
 	View.EndRenderToImage();
 
@@ -1424,11 +1506,24 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
 
+	if (MissingAssets && gMainWindow)
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+
 	return Image;
 }
 
 QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
+
+		return QImage();
+	}
+
 	lcPartsList PartsList;
 
 	if (Step == 0)
@@ -1537,12 +1632,25 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 			ShadingMode = lcShadingMode::Flat;
 
 		Scene.SetShadingMode(ShadingMode);
+		Scene.SetRequireCompleteAssets(true);
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 
 		Image.Info->AddRenderMeshes(&Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
 
 		Scene.End();
+
+		if (Scene.HasMissingAssets())
+		{
+			View.UnbindRenderFramebuffer();
+			View.EndRenderToImage();
+			Context->ClearResources();
+
+			if (gMainWindow)
+				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+
+			return QImage();
+		}
 
 		Scene.Draw(Context);
 
@@ -1653,6 +1761,16 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
+	const lcResult<void> Ready = EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
+
+		return;
+	}
+
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
 		QString FileName;
@@ -1743,6 +1861,32 @@ bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 
 void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
+	const lcMesh* Mesh = nullptr;
+
+	if (mPieceInfo)
+	{
+		if (mPieceInfo->IsLoading())
+		{
+			if (!mFileLines.isEmpty())
+				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
+		}
+		else
+			Mesh = mPieceInfo->GetMesh();
+	}
+
+	if (Mesh)
+	{
+		lcVector3 Box[8];
+		lcGetBoxCorners(Mesh->mBoundingBox, Box);
+
+		for (const lcVector3& Corner : Box)
+		{
+			const lcVector3 Point = lcMul31(Corner, WorldMatrix);
+			Min = lcMin(Min, Point);
+			Max = lcMax(Max, Point);
+		}
+	}
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
@@ -1750,6 +1894,28 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
 {
+	const lcMesh* Mesh = nullptr;
+
+	if (mPieceInfo)
+	{
+		if (mPieceInfo->IsLoading())
+		{
+			if (!mFileLines.isEmpty())
+				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
+		}
+		else
+			Mesh = mPieceInfo->GetMesh();
+	}
+
+	if (Mesh)
+	{
+		lcVector3 Box[8];
+		lcGetBoxCorners(Mesh->mBoundingBox, Box);
+
+		for (const lcVector3& Corner : Box)
+			Points.emplace_back(lcMul31(Corner, WorldMatrix));
+	}
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
 			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);

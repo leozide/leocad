@@ -72,6 +72,7 @@ public:
 	~lcMainWindow();
 
 	void CreateWidgets();
+	void ScheduleAssetUpdate();
 
 	lcTool GetTool() const
 	{
@@ -298,6 +299,7 @@ protected:
 	void CreateMenus();
 	void CreateToolBars();
 	void CreateStatusBar();
+	void UpdateAssets();
 	lcView* CreateView(lcModel* Model);
 	void SetActiveView(lcView* ActiveView);
 	void ToggleDockWidget(QWidget* DockWidget);
@@ -374,6 +376,11 @@ protected:
 	QLabel* mStatusPositionLabel = nullptr;
 	QLabel* mStatusSnapLabel = nullptr;
 	QLabel* mStatusTimeLabel = nullptr;
+	QLabel* mStatusLoadLabel = nullptr;
+	const Project* mStatusProject = nullptr;
+	std::unordered_set<const PieceInfo*> mStatusRequiredAssets;
+	bool mAssetUpdateScheduled = false;
+	bool mHadPendingAssets = false;
 
 	QMenu* mTransformMenu = nullptr;
 	QMenu* mToolsMenu = nullptr;

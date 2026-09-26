@@ -62,6 +62,7 @@ lcPiece::~lcPiece()
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 		Library->ReleasePieceInfo(mPieceInfo);
+		Library->NotifyConsumersChanged();
 	}
 
 	delete mMesh;
@@ -97,6 +98,8 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 			UpdateMesh();
 		}
 	}
+
+	Library->NotifyConsumersChanged();
 }
 
 bool lcPiece::SetPieceId(PieceInfo* Info)
@@ -477,7 +480,7 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	const lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
 	const lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
 
-	if (mMesh)
+	if (mMesh && !mPieceInfo->IsLoading())
 	{
 		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest.Plane))
 		{
@@ -1008,7 +1011,7 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 			RenderMeshState = lcRenderMeshState::Faded;
 	}
 
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
 	else
 		Scene->AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState);
@@ -1031,7 +1034,7 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	else if (ParentActive)
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
 
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
 	else
 		Scene->AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
@@ -1042,21 +1045,38 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
-	mPieceInfo->CompareBoundingBox(lcMul(mModelWorld, WorldMatrix), Min, Max);
+	const lcMatrix44 ModelWorldMatrix = lcMul(mModelWorld, WorldMatrix);
+
+	if (!mMesh || mPieceInfo->IsLoading())
+	{
+		mPieceInfo->CompareBoundingBox(ModelWorldMatrix, Min, Max);
+		return;
+	}
+
+	lcVector3 Points[8];
+	lcGetBoxCorners(mMesh->mBoundingBox, Points);
+
+	for (const lcVector3& Corner : Points)
+	{
+		const lcVector3 Point = lcMul31(Corner, ModelWorldMatrix);
+		Min = lcMin(Point, Min);
+		Max = lcMax(Point, Max);
+	}
 }
 
 void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
 {
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points);
 	else
 	{
 		lcVector3 BoxPoints[8];
+		const lcMatrix44 ModelWorldMatrix = lcMul(mModelWorld, WorldMatrix);
 
 		lcGetBoxCorners(mMesh->mBoundingBox, BoxPoints);
 
 		for (int i = 0; i < 8; i++)
-			Points.emplace_back(lcMul31(BoxPoints[i], mModelWorld));
+			Points.emplace_back(lcMul31(BoxPoints[i], ModelWorldMatrix));
 	}
 }
 
@@ -1401,7 +1421,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
 		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceInfo, mMesh, ColorIndex });
@@ -1409,7 +1429,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const
 {
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		return mPieceInfo->GetBoundingBox();
 	else
 		return mMesh->mBoundingBox;
@@ -1417,7 +1437,7 @@ const lcBoundingBox& lcPiece::GetBoundingBox() const
 
 void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
-	if (!mMesh)
+	if (!mMesh || mPieceInfo->IsLoading())
 		mPieceInfo->CompareBoundingBox(mModelWorld, Min, Max);
 	else
 	{

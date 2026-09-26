@@ -722,6 +722,15 @@ std::vector<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, fl
 std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 {
 	std::vector<QImage> Images;
+	const lcResult<void> Ready = mModel->EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
+
+		return Images;
+	}
 
 	if (!BeginRenderToImage(mWidth, mHeight))
 	{
@@ -730,12 +739,20 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	}
 
 	const lcStep CurrentStep = mModel->GetCurrentStep();
+	bool MissingAssets = false;
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
 		mModel->SetTemporaryStep(Step);
 
 		OnDraw();
+
+		if (HasMissingAssets())
+		{
+			MissingAssets = true;
+			Images.clear();
+			break;
+		}
 
 		Images.emplace_back(GetRenderImage());
 	}
@@ -747,12 +764,18 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	if (!mModel->IsActive())
 		mModel->CalculateStep(LC_STEP_MAX);
 
+	if (MissingAssets && gMainWindow)
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+
 	return Images;
 }
 
 void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback)
 {
 	std::vector<QImage> Images = GetStepImages(Start, End);
+
+	if (Images.size() != static_cast<size_t>(End - Start + 1))
+		return;
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -806,7 +829,14 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 
 	mRenderFramebuffer = std::unique_ptr<QOpenGLFramebufferObject>(new QOpenGLFramebufferObject(QSize(TileWidth, TileHeight), Format));
 
-	return mRenderFramebuffer->bind();
+	if (!mRenderFramebuffer->bind())
+	{
+		mRenderFramebuffer.reset();
+		mRenderImage = QImage();
+		return false;
+	}
+
+	return true;
 }
 
 void lcView::EndRenderToImage()
@@ -865,6 +895,7 @@ void lcView::OnDraw()
 
 	mScene->SetShadingMode(ShadingMode);
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
+	mScene->SetRequireCompleteAssets(static_cast<bool>(mRenderFramebuffer));
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 
 	mScene->Begin(mCamera->mWorldView);
@@ -1036,6 +1067,11 @@ void lcView::OnDraw()
 #endif
 
 	mContext->ClearResources();
+}
+
+bool lcView::HasMissingAssets() const
+{
+	return mScene->HasMissingAssets();
 }
 
 void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const

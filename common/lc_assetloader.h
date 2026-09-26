@@ -79,6 +79,7 @@ public:
 	void PauseQueuedWork();
 	void ResumeQueuedWork();
 	void OnConsumerReleased(PieceInfo* Info);
+	bool HasPendingWork();
 
 private:
 	enum class Priority

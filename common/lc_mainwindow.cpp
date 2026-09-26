@@ -946,6 +946,136 @@ void lcMainWindow::CreateStatusBar()
 
 	mStatusTimeLabel = new QLabel();
 	StatusBar->addPermanentWidget(mStatusTimeLabel);
+
+	mStatusLoadLabel = new QLabel();
+	StatusBar->addPermanentWidget(mStatusLoadLabel);
+	mStatusLoadLabel->hide();
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	connect(Library, &lcPiecesLibrary::AssetRequestsChanged, this, &lcMainWindow::ScheduleAssetUpdate);
+	connect(Library, &lcPiecesLibrary::PartLoaded, this, [this](PieceInfo* Info)
+	{
+		if (mStatusRequiredAssets.find(Info) != mStatusRequiredAssets.end())
+			ScheduleAssetUpdate();
+	});
+	connect(Library, &lcPiecesLibrary::PartLoadFailed, this, [this](PieceInfo* Info, const QString&)
+	{
+		if (mStatusRequiredAssets.find(Info) != mStatusRequiredAssets.end())
+			ScheduleAssetUpdate();
+	});
+}
+
+void lcMainWindow::ScheduleAssetUpdate()
+{
+	if (mAssetUpdateScheduled)
+		return;
+
+	mAssetUpdateScheduled = true;
+
+	QTimer::singleShot(0, this, [this]()
+	{
+		mAssetUpdateScheduled = false;
+		UpdateAssets();
+	});
+}
+
+void lcMainWindow::UpdateAssets()
+{
+	Project* Project = lcGetActiveProject();
+	mStatusLoadLabel->setToolTip(QString());
+
+	if (mStatusProject != Project)
+	{
+		mStatusProject = Project;
+		mHadPendingAssets = false;
+		mStatusRequiredAssets.clear();
+		mStatusLoadLabel->clear();
+	}
+
+	if (!Project || !Project->GetMainModel())
+	{
+		mStatusLoadLabel->hide();
+		return;
+	}
+
+	std::vector<lcModel*> UpdatedModels;
+
+	for (const std::unique_ptr<lcModel>& Model : Project->GetModels())
+		Model->UpdatePieceInfo(UpdatedModels);
+
+	lcView::UpdateProjectViews(Project);
+
+	std::vector<PieceInfo*> Required;
+
+	for (const std::unique_ptr<lcModel>& Model : Project->GetModels())
+	{
+		std::vector<PieceInfo*> ModelRequired = Model->GetRequiredPieces();
+		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+	}
+
+	std::sort(Required.begin(), Required.end());
+	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+
+	mStatusRequiredAssets.clear();
+	mStatusRequiredAssets.insert(Required.begin(), Required.end());
+
+	if (Required.empty())
+	{
+		mHadPendingAssets = false;
+		mStatusLoadLabel->clear();
+		mStatusLoadLabel->hide();
+		return;
+	}
+
+	int Pending = 0;
+	int Failed = 0;
+	QString FailureDetails;
+
+	for (const PieceInfo* Info : Required)
+	{
+		if (Info->mState == lcPieceInfoState::Failed)
+		{
+			Failed++;
+
+			if (FailureDetails.isEmpty())
+				FailureDetails = lcGetPiecesLibrary()->GetPieceLoadError(Info);
+		}
+		else if (Info->mState != lcPieceInfoState::Loaded)
+			Pending++;
+	}
+
+	if (Failed)
+	{
+		mHadPendingAssets = false;
+		mStatusLoadLabel->setText(tr("%n part(s) failed to load", nullptr, Failed));
+		mStatusLoadLabel->setToolTip(FailureDetails);
+	}
+	else if (Pending)
+	{
+		mHadPendingAssets = true;
+		mStatusLoadLabel->setText(tr("Loading %n part(s)…", nullptr, Pending));
+	}
+	else if (mHadPendingAssets)
+	{
+		mHadPendingAssets = false;
+		mStatusLoadLabel->setText(tr("All parts loaded"));
+		QTimer::singleShot(2500, this, [this, Project]()
+		{
+			if (mStatusProject == Project && !mHadPendingAssets && mStatusLoadLabel->text() == tr("All parts loaded"))
+			{
+				mStatusLoadLabel->clear();
+				mStatusLoadLabel->hide();
+			}
+		});
+	}
+	else
+	{
+		mStatusLoadLabel->clear();
+		mStatusLoadLabel->hide();
+	}
+
+	if (Failed || Pending || mStatusLoadLabel->text() == tr("All parts loaded"))
+		mStatusLoadLabel->show();
 }
 
 void lcMainWindow::closeEvent(QCloseEvent* Event)
@@ -1182,6 +1312,14 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 void lcMainWindow::Print(QPrinter* Printer)
 {
 #ifndef QT_NO_PRINTER
+	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
+		return;
+	}
+
 	int DocCopies;
 	int PageCopies;
 
@@ -1342,6 +1480,14 @@ void lcMainWindow::ShowRenderDialog(lcRenderDialogMode RenderDialogMode)
 
 void lcMainWindow::ShowInstructionsDialog()
 {
+	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
+		return;
+	}
+
 	lcInstructionsDialog* Dialog = new lcInstructionsDialog(this, lcGetActiveProject());
 	Dialog->setWindowModality(Qt::ApplicationModal);
 	Dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -1350,6 +1496,14 @@ void lcMainWindow::ShowInstructionsDialog()
 
 void lcMainWindow::ShowPrintDialog()
 {
+	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
+
+	if (!Ready)
+	{
+		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
+		return;
+	}
+
 #ifndef QT_NO_PRINTER
 	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions()->mPages.size());
 

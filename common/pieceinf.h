@@ -119,6 +119,11 @@ public:
 		return mType == lcPieceInfoType::Placeholder;
 	}
 
+	bool IsLoading() const
+	{
+		return mState == lcPieceInfoState::Queued || mState == lcPieceInfoState::Loading || mState == lcPieceInfoState::AwaitingTextures;
+	}
+
 	bool IsModel() const
 	{
 		return mType == lcPieceInfoType::Model;
@@ -206,6 +211,8 @@ public:
 	int mFolderIndex;
 
 protected:
+	void SetLoadingBoundingBox();
+
 	int mRefCount = 0;
 	lcPieceInfoType mType = lcPieceInfoType::Part;
 	lcModel* mModel = nullptr;

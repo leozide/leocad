@@ -16,6 +16,7 @@ lcScene::lcScene()
 
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
+	mMissingAssets = false;
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
 	mPreTranslucentCallback = nullptr;

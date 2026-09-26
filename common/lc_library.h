@@ -165,6 +165,7 @@ public:
 	void RenamePiece(PieceInfo* Info, const char* NewName);
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
+	void NotifyConsumersChanged();
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
 	bool RebuildModelPiece(PieceInfo* Info);
@@ -226,7 +227,9 @@ public:
 	}
 
 	void UpdateBuffers(lcContext* Context);
+	void ScheduleBufferRepack();
 	void UnloadUnusedParts();
+	lcMesh* GetLoadingMesh() const;
 
 	std::map<std::string, PieceInfo*> mPieces;
 	int mNumOfficialPieces;
@@ -240,6 +243,7 @@ public:
 	lcIndexBuffer mIndexBuffer;
 
 signals:
+	void AssetRequestsChanged();
 	void PartLoaded(PieceInfo* Info);
 	void PartLoadFailed(PieceInfo* Info, const QString& Error);
 	void ColorsLoaded();
@@ -262,6 +266,7 @@ protected:
 	static bool IsStudPrimitive(const char* FileName);
 	static bool IsStudStylePrimitive(const char* FileName);
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
+	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
 
 	void ReleaseBuffers();
@@ -279,6 +284,9 @@ protected:
 
 	std::unique_ptr<lcAssetLoader> mAssetLoader;
 	std::unique_ptr<lcThumbnailManager> mThumbnailManager;
+	std::unique_ptr<lcMesh> mLoadingMesh;
+	bool mStreamingBuffersPending = false;
+	bool mBufferRepackScheduled = false;
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];

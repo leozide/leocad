@@ -17,6 +17,7 @@
 #include "lc_profile.h"
 #include "lc_meshloader.h"
 #include "lc_model.h"
+#include "lc_view.h"
 #include "lc_string.h"
 #include <zlib.h>
 
@@ -41,6 +42,8 @@ lcPiecesLibrary::lcPiecesLibrary()
 {
 	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this));
 	mThumbnailManager = std::unique_ptr<lcThumbnailManager>(new lcThumbnailManager(this));
+	mLoadingMesh = std::unique_ptr<lcMesh>(new lcMesh);
+	mLoadingMesh->CreateBox();
 	QStringList cachePathList = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
 	mCachePath = cachePathList.first();
 
@@ -470,6 +473,7 @@ void lcPiecesLibrary::LoadColors()
 
 		if (ColorFile.Open(QIODevice::ReadOnly) && lcLoadColorFile(ColorFile, mStudStyle))
 		{
+			UpdateLoadingMeshColors();
 			emit ColorsLoaded();
 			return;
 		}
@@ -495,7 +499,16 @@ void lcPiecesLibrary::LoadColors()
 		}
 	}
 
+	UpdateLoadingMeshColors();
 	emit ColorsLoaded();
+}
+
+void lcPiecesLibrary::UpdateLoadingMeshColors()
+{
+	lcMeshSection* Sections = mLoadingMesh->mLods[LC_MESH_LOD_HIGH].Sections;
+
+	Sections[0].ColorIndex = gDefaultColor;
+	Sections[1].ColorIndex = gEdgeColor;
 }
 
 bool lcPiecesLibrary::IsStudPrimitive(const char* FileName)
@@ -1355,6 +1368,11 @@ bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 	return mAssetLoader->LoadPieceInfo(Info, Flags);
 }
 
+void lcPiecesLibrary::NotifyConsumersChanged()
+{
+	emit AssetRequestsChanged();
+}
+
 bool lcPiecesLibrary::EnsurePieceReady(PieceInfo* Info)
 {
 	return mAssetLoader->EnsurePieceReady(Info);
@@ -1839,6 +1857,39 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	free(IndexData);
 }
 
+void lcPiecesLibrary::ScheduleBufferRepack()
+{
+	mStreamingBuffersPending = true;
+
+	if (mBufferRepackScheduled)
+		return;
+
+	mBufferRepackScheduled = true;
+
+	QTimer::singleShot(120, this, [this]()
+	{
+		mBufferRepackScheduled = false;
+
+		if (!mStreamingBuffersPending)
+			return;
+
+		if (mAssetLoader && mAssetLoader->HasPendingWork())
+		{
+			ScheduleBufferRepack();
+			return;
+		}
+
+		mStreamingBuffersPending = false;
+		mBuffersDirty = true;
+		lcView::UpdateAllViews();
+	});
+}
+
+lcMesh* lcPiecesLibrary::GetLoadingMesh() const
+{
+	return mLoadingMesh.get();
+}
+
 void lcPiecesLibrary::UnloadUnusedParts()
 {
 	QMutexLocker LoadLock(&mLoadMutex);
@@ -2244,6 +2295,7 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 	}
 
 	lcLoadDefaultColors(lcStudStyle::Plain);
+	UpdateLoadingMeshColors();
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);

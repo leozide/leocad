@@ -83,9 +83,9 @@ public:
 private:
 	enum class Priority
 	{
-		Background,
-		Visible,
-		Blocking
+		Background, // Ordinary queued asset work.
+		Visible,    // Assets requested for the visible model.
+		Blocking    // Assets needed by a synchronous wait.
 	};
 
 	struct Request

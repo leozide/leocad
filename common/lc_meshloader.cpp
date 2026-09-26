@@ -887,6 +887,12 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*
 
 	Mesh->Create(NumSections, NumVertices, static_cast<int>(mTexturedVertices.size()), ConditionalVertexCount, NumIndices);
 
+	if ((Mesh->mVertexDataSize && !Mesh->mVertexData) || (Mesh->mIndexDataSize && !Mesh->mIndexData))
+	{
+		delete Mesh;
+		return nullptr;
+	}
+
 	lcVertex* DstVerts = (lcVertex*)Mesh->mVertexData;
 
 	for (const lcMeshLoaderTypeData& Data : mData)
@@ -914,10 +920,18 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*
 		}
 	}
 
+	bool SectionsWritten;
+
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup);
+		SectionsWritten = WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup);
 	else
-		WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup);
+		SectionsWritten = WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup);
+
+	if (!SectionsWritten)
+	{
+		delete Mesh;
+		return nullptr;
+	}
 
 	// Pack each color/material group as high, shared, low. Either LOD then
 	// occupies one contiguous range without duplicating the shared vertices.
@@ -988,7 +1002,7 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup)
+bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup)
 {
 	int NumIndices = 0;
 
@@ -1022,6 +1036,9 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 
 			const auto AddSection = [&DstSection, &Index, &BaseVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
+				if (!Index && DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
+					return SrcSection->mIndices.empty();
+
 				switch (DstSection.PrimitiveType)
 				{
 					case LC_MESH_LINES:
@@ -1035,7 +1052,7 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					break;
 
 					case LC_MESH_CONDITIONAL_LINES:
-						return;
+						return true;
 
 					case LC_MESH_TEXTURED_TRIANGLES:
 					{
@@ -1049,17 +1066,21 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 				}
 
 				DstSection.DrawCount += static_cast<int>(SrcSection->mIndices.size());
+
+				return true;
 			};
 
 			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[LC_MESHDATA_SHARED].mSections)
 				if (FinalSection.PrimitiveType == Section->mPrimitiveType && FinalSection.Color == Section->mMaterial->Color && !strcmp(FinalSection.Name, Section->mMaterial->Name))
-					AddSection(Section.get(), LC_MESHDATA_SHARED);
+					if (!AddSection(Section.get(), LC_MESHDATA_SHARED))
+						return false;
 
 			const lcMeshDataType MeshDataType = (LodIdx == LC_MESH_LOD_LOW) ? LC_MESHDATA_LOW : LC_MESHDATA_HIGH;
 
 			for (const std::unique_ptr<lcMeshLoaderSection>& Section : mData[MeshDataType].mSections)
 				if (FinalSection.PrimitiveType == Section->mPrimitiveType && FinalSection.Color == Section->mMaterial->Color && !strcmp(FinalSection.Name, Section->mMaterial->Name))
-					AddSection(Section.get(), MeshDataType);
+					if (!AddSection(Section.get(), MeshDataType))
+						return false;
 
 			if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
 			{
@@ -1082,6 +1103,8 @@ void lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 			NumIndices += DstSection.DrawCount;
 		}
 	}
+
+	return true;
 }
 
 void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)

@@ -84,7 +84,7 @@ public:
 	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();
 
-	bool FileLoad(lcMemFile& File, const std::function<lcTexture*(const char*)>& TextureLookup);
+	bool FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes);
 	bool FileSave(lcMemFile& File);
 
 	template<typename IndexType>

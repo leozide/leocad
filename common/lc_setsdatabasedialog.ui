@@ -63,7 +63,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Parts</string>
+       <string>Pieces</string>
       </property>
      </column>
     </widget>

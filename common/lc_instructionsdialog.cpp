@@ -361,15 +361,15 @@ void lcInstructionsPropertiesWidget::AddColorProperty(lcInstructionsPropertyType
 				break;
 
 			case lcInstructionsPropertyType::PLIBackgroundColor:
-				Title = tr("Select Parts List Background Color");
+				Title = tr("Select Pieces List Background Color");
 				break;
 
 			case lcInstructionsPropertyType::PLIBorderColor:
-				Title = tr("Select Parts List Border Color");
+				Title = tr("Select Pieces List Border Color");
 				break;
 
 			case lcInstructionsPropertyType::PLITextColor:
-				Title = tr("Select Parts List Text Color");
+				Title = tr("Select Pieces List Text Color");
 				break;
 
 			case lcInstructionsPropertyType::ShowStepNumber:
@@ -423,7 +423,7 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 				break;
 
 			case lcInstructionsPropertyType::PLIFont:
-				Title = tr("Select Parts List Font");
+				Title = tr("Select Pieces List Font");
 				break;
 
 			case lcInstructionsPropertyType::ShowStepNumber:
@@ -510,7 +510,7 @@ void lcInstructionsPropertiesWidget::SelectionChanged(QGraphicsItem* FocusItem)
 
 	if (PartsItem)
 	{
-		CreatePropertyWidget(tr("Parts List Properties"));
+		CreatePropertyWidget(tr("Pieces List Properties"));
 
 		mModel = PartsItem->GetModel();
 		mStep = PartsItem->GetStep();

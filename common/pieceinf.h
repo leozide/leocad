@@ -187,7 +187,7 @@ public:
 	void CreatePlaceholder(const char* Name);
 
 	void SetPlaceholder();
-	void SetModel(lcModel* Model, bool UpdateMesh);
+	void SetModel(lcModel* Model);
 	void CreateProject(Project* Project, const char* PieceName);
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;

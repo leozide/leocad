@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_assetloader.h"
+#include "lc_colors.h"
 #include "lc_file.h"
 #include "lc_library.h"
 #include "lc_mesh.h"
@@ -28,7 +29,7 @@ bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 
 	mLibrary->AddPieceReference(Info);
 
-	if (Info->IsProject() || (Info->IsModel() && Info->GetModel()->GetFileLines().isEmpty()))
+	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 		Info->mState = lcPieceInfoState::Loaded;
 	else if (Info->mState == lcPieceInfoState::Unloaded)
 		QueuePieceLocked(Info, Flags.testFlag(lcPieceLoadFlag::Visible) ? Priority::Visible : Priority::Background);
@@ -36,8 +37,8 @@ bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 	{
 		mQueueMutex.lock();
 		const auto It = mRequests.find(Info);
-		if (It != mRequests.end() && It->second->LoadPriority < Priority::Visible)
-			It->second->LoadPriority = Priority::Visible;
+		if (It != mRequests.end())
+			SetRequestPriorityLocked(It->second, Priority::Visible);
 		mQueueMutex.unlock();
 	}
 
@@ -49,6 +50,47 @@ void lcAssetLoader::QueuePiece(PieceInfo* Info, bool PriorityHint)
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	QueuePieceLocked(Info, PriorityHint ? Priority::Visible : Priority::Background);
+}
+
+void lcAssetLoader::SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	const Priority LoadPriority = Visible ? Priority::Visible : Priority::Background;
+
+	mQueueMutex.lock();
+
+	for (PieceInfo* Info : Parts)
+	{
+		const auto It = mRequests.find(Info);
+
+		if (It != mRequests.end())
+			SetRequestPriorityLocked(It->second, LoadPriority);
+	}
+
+	mQueueMutex.unlock();
+}
+
+void lcAssetLoader::SetRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority)
+{
+	if (RequestedPart->LoadPriority == Priority::Blocking && LoadPriority != Priority::Blocking)
+		return;
+
+	RequestedPart->LoadPriority = LoadPriority;
+
+	if (!RequestedPart->StagedMesh)
+		return;
+
+	for (const lcMeshLod& Lod : RequestedPart->StagedMesh->mLods)
+	{
+		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
+		{
+			const auto It = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
+
+			if (It != mTextureRequests.end() && (It->second->LoadPriority != Priority::Blocking || LoadPriority == Priority::Blocking))
+				It->second->LoadPriority = LoadPriority;
+		}
+	}
 }
 
 void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
@@ -229,7 +271,28 @@ void lcAssetLoader::LoadQueuedPieces()
 		if (RequestedPart)
 		{
 			Completed.RequestedPart = RequestedPart;
-			Completed.Result = mLibrary->BuildPieceData(RequestedPart->Source);
+
+			if (RequestedPart->ConvertingMesh)
+			{
+				Completed.Result.Mesh.reset(RequestedPart->MeshData->CreateMeshResolved(RequestedPart->ColorTranslucency, RequestedPart->DefaultColorIndex));
+				RequestedPart->MeshData.reset();
+
+				if (!Completed.Result.Mesh)
+					Completed.Result.Error = tr("Could not prepare piece %1 for rendering.").arg(RequestedPart->Source.FileName);
+			}
+			else
+			{
+				Completed.Result = mLibrary->BuildPieceData(RequestedPart->Source);
+
+				if (Completed.Result.CacheData)
+				{
+					Completed.Result.Mesh.reset(new lcMesh);
+
+					if (!Completed.Result.Mesh->FileLoad(*Completed.Result.CacheData, Completed.Result.ColorCodes))
+						Completed.Result.Mesh.reset();
+				}
+			}
+
 			Completed.Result.RequestId = RequestedPart->Id;
 			Completed.Result.Generation = RequestedPart->Generation;
 		}
@@ -719,35 +782,73 @@ bool lcAssetLoader::ProcessCompletions()
 				return mLibrary->FindTextureDeferred(Name, RequestedPart->Source.ProjectPath);
 			};
 
-			if (Completed.Result.CacheData)
+			if (Completed.Result.CacheData && !Completed.Result.Mesh)
 			{
-				RequestedPart->StagedMesh.reset(new lcMesh);
+				// Rebuild a corrupt cache privately on a worker, then use the normal commit path.
+				RequestedPart->Source.SkipCache = true;
+				Info->mState = lcPieceInfoState::Queued;
 
-				if (!RequestedPart->StagedMesh->FileLoad(*Completed.Result.CacheData, TextureLookup))
+				QMutexLocker QueueLock(&mQueueMutex);
+
+				if (mPaused)
+					mPausedQueue.push_back(RequestedPart);
+				else
 				{
-					RequestedPart->StagedMesh.reset();
-
-					// Rebuild a corrupt cache privately on a worker, then use the normal commit path.
-					RequestedPart->Source.SkipCache = true;
-					Info->mState = lcPieceInfoState::Queued;
-
-					QMutexLocker QueueLock(&mQueueMutex);
-
-					if (mPaused)
-						mPausedQueue.push_back(RequestedPart);
-					else
-					{
-						mQueue.push_back(RequestedPart);
-						StartWorkersLocked();
-					}
-
-					continue;
+					mQueue.push_back(RequestedPart);
+					StartWorkersLocked();
 				}
+
+				continue;
 			}
 			else if (Completed.Result.MeshData)
 			{
-				RequestedPart->StagedMesh.reset(Completed.Result.MeshData->CreateMesh(TextureLookup));
-				RequestedPart->SaveCache = true;
+				// Register color indices on the UI thread, then queue the expensive mesh conversion.
+				Completed.Result.MeshData->ResolveColors();
+				RequestedPart->ColorTranslucency.clear();
+				RequestedPart->ColorTranslucency.reserve(gColorList.size());
+
+				for (const lcColor& Color : gColorList)
+					RequestedPart->ColorTranslucency.push_back(Color.Translucent);
+
+				RequestedPart->DefaultColorIndex = gDefaultColor;
+				RequestedPart->MeshData = std::move(Completed.Result.MeshData);
+				RequestedPart->ConvertingMesh = true;
+				Info->mState = lcPieceInfoState::Queued;
+
+				QMutexLocker QueueLock(&mQueueMutex);
+
+				if (mPaused)
+					mPausedQueue.push_back(RequestedPart);
+				else
+				{
+					mQueue.push_back(RequestedPart);
+					StartWorkersLocked();
+				}
+
+				continue;
+			}
+			else if (Completed.Result.Mesh)
+			{
+				RequestedPart->ConvertingMesh = false;
+				RequestedPart->ColorTranslucency.clear();
+				RequestedPart->StagedMesh = std::move(Completed.Result.Mesh);
+				size_t ColorIndex = 0;
+
+				for (lcMeshLod& Lod : RequestedPart->StagedMesh->mLods)
+				{
+					for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
+					{
+						lcMeshSection& Section = Lod.Sections[SectionIdx];
+
+						if (Completed.Result.CacheData)
+							Section.ColorIndex = lcGetColorIndex(Completed.Result.ColorCodes[ColorIndex++]);
+
+						if (!Section.TextureName.isEmpty())
+							Section.Texture = TextureLookup(Section.TextureName.toLatin1().constData());
+					}
+				}
+
+				RequestedPart->SaveCache = !Completed.Result.CacheData;
 			}
 		}
 
@@ -927,7 +1028,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 		if (Info->mState != lcPieceInfoState::Unloaded)
 			continue;
 
-		if (Info->IsProject() || (Info->IsModel() && Info->GetModel()->GetFileLines().isEmpty()))
+		if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 			Info->mState = lcPieceInfoState::Loaded;
 		else
 			QueuePieceLocked(Info, Priority::Blocking);
@@ -1001,26 +1102,27 @@ bool lcAssetLoader::EnsureTextureReady(lcTexture* Texture)
 	return Texture->IsReady();
 }
 
-bool lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
+void lcAssetLoader::QueueModelPiece(PieceInfo* Info)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 	Q_ASSERT(Info->IsModel());
 
-	mLibrary->AddPieceReference(Info);
-
-	if (Info->mState == lcPieceInfoState::Queued || Info->mState == lcPieceInfoState::Loading || Info->mState == lcPieceInfoState::AwaitingTextures)
+	if (Info->IsLoading())
 		WaitForRequest(Info);
 
 	Info->ReleaseMesh();
+	mLibrary->ClearPieceLoadError(Info);
+
+	if (!Info->GetModel()->HasDirectGeometry())
+	{
+		Info->mState = lcPieceInfoState::Loaded;
+		emit mLibrary->AssetRequestsChanged();
+		return;
+	}
+
 	Info->mState = lcPieceInfoState::Unloaded;
 
-	QueuePieceLocked(Info, Priority::Blocking);
-
-	const bool Ready = WaitForRequest(Info);
-
-	mLibrary->ReleasePieceInfo(Info);
-
-	return Ready;
+	QueuePieceLocked(Info, Priority::Visible);
 }
 
 void lcAssetLoader::WaitForLoadQueue()
@@ -1152,6 +1254,14 @@ void lcAssetLoader::PauseQueuedWork()
 	for (const PartRequestMap::value_type& Entry : mRequests)
 	{
 		const std::shared_ptr<Request>& RequestedPart = Entry.second;
+
+		if (RequestedPart->ConvertingMesh)
+		{
+			RequestedPart->MeshData.reset();
+			RequestedPart->ColorTranslucency.clear();
+			RequestedPart->ConvertingMesh = false;
+			RequestedPart->Info->mState = lcPieceInfoState::Queued;
+		}
 
 		if (!RequestedPart->StagedMesh)
 			continue;

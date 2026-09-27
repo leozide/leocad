@@ -283,19 +283,21 @@ void lcModel::DeleteModel()
 	mLights.clear();
 	mGroups.clear();
 	mFileLines.clear();
+	mHasDirectGeometry = false;
 }
 
 void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	mPieceInfo = Library->FindPiece(mProperties.mFileName.toLatin1().constData(), Project, true, false);
-	mPieceInfo->SetModel(this, false);
+	mPieceInfo->SetModel(this);
 	Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
 }
 
-void lcModel::UpdateMesh()
+void lcModel::QueueMeshBuild()
 {
-	mPieceInfo->SetModel(this, true);
+	mPieceInfo->SetModel(this);
+	lcGetPiecesLibrary()->QueueModelPiece(mPieceInfo);
 }
 
 void lcModel::UpdateAllViews() const
@@ -355,7 +357,7 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 				return lcUnexpected(Error);
 		}
 
-		return lcUnexpected(tr("Could not load all required parts."));
+		return lcUnexpected(tr("Could not load all required pieces."));
 	}
 
 	std::vector<lcModel*> UpdatedModels;
@@ -369,11 +371,11 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	if (std::find(UpdatedModels.begin(), UpdatedModels.end(), this) != UpdatedModels.end())
 		return;
 
-	mPieceInfo->SetModel(this, false);
+	mPieceInfo->SetModel(this);
 	UpdatedModels.push_back(this);
 
 	const lcMesh* Mesh = mPieceInfo->IsLoading() ? nullptr : mPieceInfo->GetMesh();
-	const lcMesh* PendingMesh = mPieceInfo->IsLoading() && !mFileLines.isEmpty() ? lcGetPiecesLibrary()->GetLoadingMesh() : nullptr;
+	const lcMesh* PendingMesh = mPieceInfo->IsLoading() && mHasDirectGeometry ? lcGetPiecesLibrary()->GetLoadingMesh() : nullptr;
 
 	if (mPieces.empty() && !Mesh && !PendingMesh)
 	{
@@ -623,6 +625,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	std::vector<lcPieceControlPoint> ControlPoints;
 	int CurrentStep = 1;
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	mHasDirectGeometry = false;
 
 	mProperties.mAuthor.clear();
 	mProperties.mDescription.clear();
@@ -682,6 +685,15 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			if (Token != QLatin1String("!LEOCAD"))
 			{
 				mFileLines.append(OriginalLine);
+
+				if (Token == QLatin1String("!:"))
+				{
+					LineStream >> Token;
+
+					if (Token == QLatin1String("1") || Token == QLatin1String("2") || Token == QLatin1String("3") || Token == QLatin1String("4") || Token == QLatin1String("5"))
+						mHasDirectGeometry = true;
+				}
+
 				continue;
 			}
 
@@ -796,6 +808,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 			if (Library->IsPrimitive(CleanId.constData()))
 			{
 				mFileLines.append(OriginalLine);
+				mHasDirectGeometry = true;
 			}
 			else
 			{
@@ -834,6 +847,9 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 		{
 			ReadingHeader = false;
 			mFileLines.append(OriginalLine);
+
+			if (Token == QLatin1String("2") || Token == QLatin1String("3") || Token == QLatin1String("4") || Token == QLatin1String("5"))
+				mHasDirectGeometry = true;
 		}
 
 		FirstLine = false;
@@ -841,9 +857,6 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
-	if (!mIsPreview)
-		Library->WaitForLoadQueue();
-	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
 	delete Piece;
@@ -1117,9 +1130,6 @@ bool lcModel::LoadLDD(const QString& FileData)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	CalculateStep(mCurrentStep);
-	if (!mIsPreview)
-		Library->WaitForLoadQueue();
-	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
 	return true;
@@ -1507,7 +1517,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 		CalculateStep(LC_STEP_MAX);
 
 	if (MissingAssets && gMainWindow)
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
 
 	return Image;
 }
@@ -1647,7 +1657,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 			Context->ClearResources();
 
 			if (gMainWindow)
-				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
 
 			return QImage();
 		}
@@ -1867,7 +1877,7 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 	{
 		if (mPieceInfo->IsLoading())
 		{
-			if (!mFileLines.isEmpty())
+			if (mHasDirectGeometry)
 				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
 		}
 		else
@@ -1900,7 +1910,7 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 	{
 		if (mPieceInfo->IsLoading())
 		{
-			if (!mFileLines.isEmpty())
+			if (mHasDirectGeometry)
 				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
 		}
 		else

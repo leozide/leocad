@@ -918,7 +918,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	PartsLayout->addLayout(SearchLayout);
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
-	mFilterWidget->setPlaceholderText(tr("Filter Parts"));
+	mFilterWidget->setPlaceholderText(tr("Filter Pieces"));
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();
@@ -1192,7 +1192,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 		PartNames->setChecked(ListModel->GetShowPartNames());
 	}
 
-	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Parts"), mPartsWidget, &lcPartSelectionListView::ToggleDecoratedParts);
+	QAction* DecoratedParts = Menu->addAction(tr("Show Decorated Pieces"), mPartsWidget, &lcPartSelectionListView::ToggleDecoratedParts);
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(ListModel->GetShowDecoratedParts());
 
@@ -1439,7 +1439,7 @@ void lcPartSelectionWidget::UpdateCategories()
 
 	mCategoriesWidget->clear();
 
-	mAllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Parts")));
+	mAllPartsCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("All Pieces")));
 	mAllPartsCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::AllParts));
 
 	if (CurrentType == lcPartCategoryType::AllParts && CurrentIndex == 0)

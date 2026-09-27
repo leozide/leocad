@@ -376,7 +376,7 @@ protected:
 	QLabel* mStatusPositionLabel = nullptr;
 	QLabel* mStatusSnapLabel = nullptr;
 	QLabel* mStatusTimeLabel = nullptr;
-	QLabel* mStatusLoadLabel = nullptr;
+	QProgressBar* mStatusLoadProgress = nullptr;
 	const Project* mStatusProject = nullptr;
 	std::unordered_set<const PieceInfo*> mStatusRequiredAssets;
 	bool mAssetUpdateScheduled = false;

@@ -5,6 +5,7 @@
 #include "project.h"
 #include "lc_model.h"
 #include "lc_library.h"
+#include "lc_application.h"
 #include "lc_viewwidget.h"
 #include "lc_view.h"
 
@@ -119,7 +120,14 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		mModel->SelectAllPiecesAction();
 		mModel->DeleteSelectedObjects();
 
-		if (!Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible))
+		bool Ready = Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+
+		if (Ready && Info->IsModel())
+			Ready = static_cast<bool>(Info->GetModel()->EnsureAssetsReady());
+		else if (Ready && Info->IsProject())
+			Ready = static_cast<bool>(Info->GetProject()->EnsureAssetsReady());
+
+		if (!Ready)
 		{
 			Library->ReleasePieceInfo(Info);
 
@@ -165,6 +173,9 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 		mLoader = std::move(NewLoader);
 		mModel = NewModel;
 
+		if (Project* ActiveProject = lcGetActiveProject())
+			Library->RestorePieceMappings(ActiveProject->GetRequiredPieces());
+
 		Library->RemoveTemporaryPieces();
 
 		if (!mModel->GetProperties().mDescription.isEmpty())
@@ -185,7 +196,14 @@ void lcPreview::ClearPreview()
 	mLoader = std::unique_ptr<Project>(new Project(true/*IsPreview*/));
 	mLoader->SetActiveModel(0, false);
 	mModel = mLoader->GetActiveModel();
-	lcGetPiecesLibrary()->UnloadUnusedParts();
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (Project* ActiveProject = lcGetActiveProject())
+		Library->RestorePieceMappings(ActiveProject->GetRequiredPieces());
+
+	Library->RemoveTemporaryPieces();
+	Library->UnloadUnusedParts();
 	Redraw();
 }
 

@@ -160,15 +160,19 @@ public:
 	void LoadColors();
 	void Unload();
 	void RemoveTemporaryPieces();
+	std::vector<PieceInfo*> CaptureMappedPieces(const std::vector<PieceInfo*>& Pieces);
+	void RestorePieceMappings(const std::vector<PieceInfo*>& Pieces);
 	void RemovePiece(PieceInfo* Info);
 
+	void SetModelPieceName(PieceInfo* Info, const char* Name);
 	void RenamePiece(PieceInfo* Info, const char* NewName);
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
 	void NotifyConsumersChanged();
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
-	bool RebuildModelPiece(PieceInfo* Info);
+	void QueueModelPiece(PieceInfo* Info);
+	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void ReleasePieceInfo(PieceInfo* Info);
 	void AddPieceReference(PieceInfo* Info);
@@ -268,10 +272,22 @@ protected:
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
+	void UnloadPieceInfo(PieceInfo* Info);
+	void DetachPiece(PieceInfo* Info, const std::string& Name);
+	void RestoreDetachedPiece(const std::string& Name);
 
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
+	struct DetachedPiece
+	{
+		std::string Name;
+		quint64 Order;
+	};
+
+	// Entries displaced by a project-local piece with the same name.
+	std::unordered_map<PieceInfo*, DetachedPiece> mDetachedPieces;
+	quint64 mNextDetachedPieceOrder = 0;
 
 	lcLibraryLoadMutex mLoadMutex;
 

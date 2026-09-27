@@ -383,7 +383,7 @@
           <item row="11" column="0">
            <widget class="QCheckBox" name="HighlightNewParts">
             <property name="text">
-             <string>Highlight New Parts</string>
+             <string>Highlight New Pieces</string>
             </property>
            </widget>
           </item>

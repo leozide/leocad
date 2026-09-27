@@ -45,7 +45,7 @@ QString lcInstructions::GetPropertyLabel(lcInstructionsPropertyType Type)
 		case lcInstructionsPropertyType::ShowStepNumber:
 			return tr("Show Step Number");
 		case lcInstructionsPropertyType::ShowStepPLI:
-			return tr("Show Parts List");
+			return tr("Show Pieces List");
 		case lcInstructionsPropertyType::StepNumberFont:
 			return tr("Font:");
 		case lcInstructionsPropertyType::StepNumberColor:

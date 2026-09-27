@@ -56,7 +56,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Import.Inventory"),
 		QT_TRANSLATE_NOOP("Menu", "Set &Inventory..."),
-		QT_TRANSLATE_NOOP("Status", "Import all parts from an official set"),
+		QT_TRANSLATE_NOOP("Status", "Import all pieces from an official set"),
 		""
 	},
 	// LC_FILE_EXPORT_3DS
@@ -84,14 +84,14 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.BrickLink"),
 		QT_TRANSLATE_NOOP("Menu", "&BrickLink..."),
-		QT_TRANSLATE_NOOP("Status", "Export a list of parts used in BrickLink XML format"),
+		QT_TRANSLATE_NOOP("Status", "Export a list of pieces used in BrickLink XML format"),
 		""
 	},
 	// LC_FILE_EXPORT_CSV
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.CSV"),
 		QT_TRANSLATE_NOOP("Menu", "&CSV..."),
-		QT_TRANSLATE_NOOP("Status", "Export a list of parts used in comma delimited file format"),
+		QT_TRANSLATE_NOOP("Status", "Export a list of pieces used in comma delimited file format"),
 		""
 	},
 	// LC_FILE_EXPORT_POVRAY
@@ -1113,8 +1113,8 @@ const lcCommand gCommands[] =
 	// LC_VIEW_TOOLBAR_PARTS
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Toolbars.Parts"),
-		QT_TRANSLATE_NOOP("Menu", "Parts"),
-		QT_TRANSLATE_NOOP("Status", "Toggle the Parts Toolbar"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the Pieces Toolbar"),
 		""
 	},
 	// LC_VIEW_TOOLBAR_COLORS
@@ -1863,21 +1863,21 @@ const lcCommand gCommands[] =
 	{
 		"",
 		QT_TRANSLATE_NOOP("Menu", "Move Selection Here"),
-		QT_TRANSLATE_NOOP("Status", "Move the selected parts into this step"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected pieces into this step"),
 		""
 	},
 	// LC_TIMELINE_MOVE_SELECTION_BEFORE
 	{
 		"",
 		QT_TRANSLATE_NOOP("Menu", "Move Selection Before"),
-		QT_TRANSLATE_NOOP("Status", "Move the selected parts into a new step before this"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected pieces into a new step before this"),
 		""
 	},
 	// LC_TIMELINE_MOVE_SELECTION_AFTER
 	{
 		"",
 		QT_TRANSLATE_NOOP("Menu", "Move Selection After"),
-		QT_TRANSLATE_NOOP("Status", "Move the selected parts into a new step after this"),
+		QT_TRANSLATE_NOOP("Status", "Move the selected pieces into a new step after this"),
 		""
 	},
 	// LC_TIMELINE_SET_CURRENT

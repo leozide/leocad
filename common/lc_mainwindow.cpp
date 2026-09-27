@@ -60,9 +60,11 @@ lcMainWindow::lcMainWindow()
 
 lcMainWindow::~lcMainWindow()
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	disconnect(Library, nullptr, this, nullptr);
+
 	if (mCurrentPieceInfo)
 	{
-		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 		Library->ReleasePieceInfo(mCurrentPieceInfo);
 		mCurrentPieceInfo = nullptr;
 	}
@@ -680,7 +682,7 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ZOOM_REGION]);
 	mToolsToolBar->hide();
 
-	mPartsToolBar = new QDockWidget(tr("Parts"), this);
+	mPartsToolBar = new QDockWidget(tr("Pieces"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
 	mPartSelectionWidget = new lcPartSelectionWidget(mPartsToolBar);
 	mPartsToolBar->setWidget(mPartSelectionWidget);
@@ -938,6 +940,11 @@ void lcMainWindow::CreateStatusBar()
 	mStatusBarLabel = new lcElidedLabel();
 	StatusBar->addWidget(mStatusBarLabel, 1);
 
+	mStatusLoadProgress = new QProgressBar();
+	mStatusLoadProgress->setFixedWidth(170);
+	StatusBar->addPermanentWidget(mStatusLoadProgress);
+	mStatusLoadProgress->hide();
+
 	mStatusPositionLabel = new QLabel();
 	StatusBar->addPermanentWidget(mStatusPositionLabel);
 
@@ -946,10 +953,6 @@ void lcMainWindow::CreateStatusBar()
 
 	mStatusTimeLabel = new QLabel();
 	StatusBar->addPermanentWidget(mStatusTimeLabel);
-
-	mStatusLoadLabel = new QLabel();
-	StatusBar->addPermanentWidget(mStatusLoadLabel);
-	mStatusLoadLabel->hide();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	connect(Library, &lcPiecesLibrary::AssetRequestsChanged, this, &lcMainWindow::ScheduleAssetUpdate);
@@ -982,19 +985,20 @@ void lcMainWindow::ScheduleAssetUpdate()
 void lcMainWindow::UpdateAssets()
 {
 	Project* Project = lcGetActiveProject();
-	mStatusLoadLabel->setToolTip(QString());
+	mStatusLoadProgress->setToolTip(QString());
 
 	if (mStatusProject != Project)
 	{
 		mStatusProject = Project;
 		mHadPendingAssets = false;
 		mStatusRequiredAssets.clear();
-		mStatusLoadLabel->clear();
+		mStatusLoadProgress->reset();
+		mStatusLoadProgress->setFormat(QString());
 	}
 
 	if (!Project || !Project->GetMainModel())
 	{
-		mStatusLoadLabel->hide();
+		mStatusLoadProgress->hide();
 		return;
 	}
 
@@ -1005,16 +1009,7 @@ void lcMainWindow::UpdateAssets()
 
 	lcView::UpdateProjectViews(Project);
 
-	std::vector<PieceInfo*> Required;
-
-	for (const std::unique_ptr<lcModel>& Model : Project->GetModels())
-	{
-		std::vector<PieceInfo*> ModelRequired = Model->GetRequiredPieces();
-		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
-	}
-
-	std::sort(Required.begin(), Required.end());
-	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+	const std::vector<PieceInfo*> Required = Project->GetRequiredPieces();
 
 	mStatusRequiredAssets.clear();
 	mStatusRequiredAssets.insert(Required.begin(), Required.end());
@@ -1022,8 +1017,8 @@ void lcMainWindow::UpdateAssets()
 	if (Required.empty())
 	{
 		mHadPendingAssets = false;
-		mStatusLoadLabel->clear();
-		mStatusLoadLabel->hide();
+		mStatusLoadProgress->reset();
+		mStatusLoadProgress->hide();
 		return;
 	}
 
@@ -1044,38 +1039,38 @@ void lcMainWindow::UpdateAssets()
 			Pending++;
 	}
 
+	mStatusLoadProgress->setRange(0, static_cast<int>(Required.size()));
+	mStatusLoadProgress->setValue(static_cast<int>(Required.size()) - Pending);
+
 	if (Failed)
 	{
 		mHadPendingAssets = false;
-		mStatusLoadLabel->setText(tr("%n part(s) failed to load", nullptr, Failed));
-		mStatusLoadLabel->setToolTip(FailureDetails);
+		mStatusLoadProgress->setFormat(tr("%n failed (%v/%m)", nullptr, Failed));
+		mStatusLoadProgress->setToolTip(FailureDetails);
 	}
 	else if (Pending)
 	{
 		mHadPendingAssets = true;
-		mStatusLoadLabel->setText(tr("Loading %n part(s)…", nullptr, Pending));
+		mStatusLoadProgress->setFormat(tr("Loading %v/%m"));
 	}
 	else if (mHadPendingAssets)
 	{
 		mHadPendingAssets = false;
-		mStatusLoadLabel->setText(tr("All parts loaded"));
+		mStatusLoadProgress->setFormat(tr("All pieces loaded"));
 		QTimer::singleShot(2500, this, [this, Project]()
 		{
-			if (mStatusProject == Project && !mHadPendingAssets && mStatusLoadLabel->text() == tr("All parts loaded"))
+			if (mStatusProject == Project && !mHadPendingAssets && mStatusLoadProgress->format() == tr("All pieces loaded"))
 			{
-				mStatusLoadLabel->clear();
-				mStatusLoadLabel->hide();
+				mStatusLoadProgress->setFormat(QString());
+				mStatusLoadProgress->hide();
 			}
 		});
 	}
 	else
-	{
-		mStatusLoadLabel->clear();
-		mStatusLoadLabel->hide();
-	}
+		mStatusLoadProgress->hide();
 
-	if (Failed || Pending || mStatusLoadLabel->text() == tr("All parts loaded"))
-		mStatusLoadLabel->show();
+	if (Failed || Pending || mStatusLoadProgress->format() == tr("All pieces loaded"))
+		mStatusLoadProgress->show();
 }
 
 void lcMainWindow::closeEvent(QCloseEvent* Event)
@@ -1996,7 +1991,7 @@ void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 	mCurrentPieceInfo = Info;
 
 	if (mCurrentPieceInfo)
-		Library->LoadPieceInfo(mCurrentPieceInfo, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(mCurrentPieceInfo, lcPieceLoadFlag::Visible);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()
@@ -2615,6 +2610,11 @@ void lcMainWindow::OpenRecentProject(int RecentFileIndex)
 
 bool lcMainWindow::OpenProjectFile(const QString& FileName)
 {
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
+	const std::vector<PieceInfo*> PreviousMappedParts = Library->CaptureMappedPieces(PreviousParts);
+	Library->SetPieceRequestsVisible(PreviousParts, false);
+
 	Project* NewProject = new Project();
 
 	if (NewProject->Load(FileName, true))
@@ -2627,6 +2627,9 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	}
 
 	delete NewProject;
+	Library->RestorePieceMappings(PreviousMappedParts);
+	Library->RemoveTemporaryPieces();
+	Library->SetPieceRequestsVisible(PreviousParts, true);
 	return false;
 }
 
@@ -2682,6 +2685,11 @@ void lcMainWindow::ImportLDD()
 	if (LoadFileName.isEmpty())
 		return;
 
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
+	const std::vector<PieceInfo*> PreviousMappedParts = Library->CaptureMappedPieces(PreviousParts);
+	Library->SetPieceRequestsVisible(PreviousParts, false);
+
 	Project* NewProject = new Project();
 
 	if (NewProject->ImportLDD(LoadFileName))
@@ -2690,7 +2698,12 @@ void lcMainWindow::ImportLDD()
 		lcView::UpdateProjectViews(NewProject);
 	}
 	else
+	{
 		delete NewProject;
+		Library->RestorePieceMappings(PreviousMappedParts);
+		Library->RemoveTemporaryPieces();
+		Library->SetPieceRequestsVisible(PreviousParts, true);
+	}
 }
 
 void lcMainWindow::ImportInventory()

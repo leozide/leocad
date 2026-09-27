@@ -2057,7 +2057,7 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1087"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Piezas</translation>
     </message>
     <message>
@@ -2949,12 +2949,12 @@ Formato de archivo no reconocido.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="87"/>
-        <source>Export a list of parts used in BrickLink XML format</source>
+        <source>Export a list of pieces used in BrickLink XML format</source>
         <translation>Exporta una lista de las piezas usadas en formato XML de BrickLink</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="94"/>
-        <source>Export a list of parts used in comma delimited file format</source>
+        <source>Export a list of pieces used in comma delimited file format</source>
         <translation>Exporta una lista de las piezas usadas en formato delimitado por comas</translation>
     </message>
     <message>
@@ -3165,7 +3165,7 @@ Formato de archivo no reconocido.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="59"/>
-        <source>Import all parts from an official set</source>
+        <source>Import all pieces from an official set</source>
         <translation>Importar todas las piezas de un set oficial</translation>
     </message>
     <message>
@@ -3655,17 +3655,17 @@ Formato de archivo no reconocido.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1816"/>
-        <source>Move the selected parts into this step</source>
+        <source>Move the selected pieces into this step</source>
         <translation>Mover las piezas seleccionadas a este paso</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1823"/>
-        <source>Move the selected parts into a new step before this</source>
+        <source>Move the selected pieces into a new step before this</source>
         <translation>Mover las piezas seleccionadas a un nuevo paso antes de este</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1830"/>
-        <source>Move the selected parts into a new step after this</source>
+        <source>Move the selected pieces into a new step after this</source>
         <translation>Mover las piezas seleccionadas a un nuevo paso después de este</translation>
     </message>
     <message>
@@ -3777,7 +3777,7 @@ Formato de archivo no reconocido.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
-        <source>Toggle the Parts Toolbar</source>
+        <source>Toggle the Pieces Toolbar</source>
         <translation>Alternar barra de herramientas de piezas</translation>
     </message>
     <message>
@@ -4717,7 +4717,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_instructions.cpp" line="48"/>
-        <source>Show Parts List</source>
+        <source>Show Pieces List</source>
         <translation>Mostrar lista de piezas</translation>
     </message>
     <message>
@@ -4839,17 +4839,17 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="364"/>
-        <source>Select Parts List Background Color</source>
+        <source>Select Pieces List Background Color</source>
         <translation>Seleccionar color de fondo para la lista de piezas</translation>
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="368"/>
-        <source>Select Parts List Border Color</source>
+        <source>Select Pieces List Border Color</source>
         <translation>Seleccionar color de borde para la lista de piezas</translation>
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="372"/>
-        <source>Select Parts List Text Color</source>
+        <source>Select Pieces List Text Color</source>
         <translation>Seleccionar color de texto para la lista de piezas</translation>
     </message>
     <message>
@@ -4860,7 +4860,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="426"/>
-        <source>Select Parts List Font</source>
+        <source>Select Pieces List Font</source>
         <translation>Seleccionar fuente para la lista de piezas</translation>
     </message>
     <message>
@@ -4875,7 +4875,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="513"/>
-        <source>Parts List Properties</source>
+        <source>Pieces List Properties</source>
         <translation>Propiedades de la lista de piezas</translation>
     </message>
 </context>
@@ -5050,7 +5050,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="667"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Piezas</translation>
     </message>
     <message>
@@ -5948,7 +5948,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1012"/>
-        <source>Show Decorated Parts</source>
+        <source>Show Decorated Pieces</source>
         <translation>Mostrar piezas decoradas</translation>
     </message>
     <message>
@@ -5973,7 +5973,7 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1184"/>
-        <source>All Parts</source>
+        <source>All Pieces</source>
         <translation>Todas las piezas</translation>
     </message>
     <message>
@@ -6411,7 +6411,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="172"/>
-        <source>Parts List</source>
+        <source>Pieces List</source>
         <translation>Lista de piezas</translation>
     </message>
     <message>
@@ -7329,7 +7329,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="469"/>
-        <source>Highlight New Parts</source>
+        <source>Highlight New Pieces</source>
         <translation>Resaltar piezas nuevas</translation>
     </message>
     <message>
@@ -7907,7 +7907,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="91"/>
-        <source>Parts Used</source>
+        <source>Pieces Used</source>
         <translation>Piezas usadas</translation>
     </message>
     <message>
@@ -8310,7 +8310,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Piezas</translation>
     </message>
     <message>

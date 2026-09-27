@@ -169,7 +169,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Parts List</string>
+      <string>Pieces List</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>

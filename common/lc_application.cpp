@@ -257,7 +257,7 @@ void lcApplication::UpdateStyle()
 
 void lcApplication::SaveTabLayout() const
 {
-	if (!mProject || mProject->GetFileName().isEmpty())
+	if (!gMainWindow || !mProject || mProject->GetFileName().isEmpty())
 		return;
 
 	QSettings Settings;

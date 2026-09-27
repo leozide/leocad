@@ -492,10 +492,13 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			Info->mState = lcPieceInfoState::Unloaded;
 		}
 		else
-		{
-			Model->UpdateMesh();
+			Model->QueueMeshBuild();
+	}
+
+	if (!mIsPreview)
+	{
+		for (const std::unique_ptr<lcModel>& Model : mModels)
 			Model->UpdatePieceInfo(UpdatedModels);
-		}
 	}
 
 	mModified = false;
@@ -658,6 +661,22 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	SetActiveModel(mActiveModel, false);
 
 	return ModelParts;
+}
+
+std::vector<PieceInfo*> Project::GetRequiredPieces() const
+{
+	std::vector<PieceInfo*> Required;
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+	{
+		std::vector<PieceInfo*> ModelRequired = Model->GetRequiredPieces();
+		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+	}
+
+	std::sort(Required.begin(), Required.end());
+	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+
+	return Required;
 }
 
 lcResult<void> Project::EnsureAssetsReady() const

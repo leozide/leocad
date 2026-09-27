@@ -106,6 +106,7 @@ public:
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
 	void SaveImage(const lcImageDialogOptions& Options);
+	std::vector<PieceInfo*> GetRequiredPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 	lcResult<void> ExportCurrentStep(const QString& FileName);
 	lcResult<void> ExportModel(const QString& FileName, lcModel* Model) const;

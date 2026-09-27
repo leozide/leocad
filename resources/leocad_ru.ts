@@ -2022,7 +2022,7 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1087"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Детали</translation>
     </message>
     <message>
@@ -2938,7 +2938,7 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="59"/>
-        <source>Import all parts from an official set</source>
+        <source>Import all pieces from an official set</source>
         <translation>Импортировать все детали из официального набора</translation>
     </message>
     <message>
@@ -2958,12 +2958,12 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="87"/>
-        <source>Export a list of parts used in BrickLink XML format</source>
+        <source>Export a list of pieces used in BrickLink XML format</source>
         <translation>Экспортировать список деталей, использующихся в формате BrickLink XML</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="94"/>
-        <source>Export a list of parts used in comma delimited file format</source>
+        <source>Export a list of pieces used in comma delimited file format</source>
         <translation>Экспортировать список деталей в формате файла с разделением запятыми</translation>
     </message>
     <message>
@@ -3604,7 +3604,7 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1088"/>
-        <source>Toggle the Parts Toolbar</source>
+        <source>Toggle the Pieces Toolbar</source>
         <translation>Переключить отображение панели инструментов «Детали»</translation>
     </message>
     <message>
@@ -3929,17 +3929,17 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1816"/>
-        <source>Move the selected parts into this step</source>
+        <source>Move the selected pieces into this step</source>
         <translation>Переместить выбранные детали на этот шаг</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1823"/>
-        <source>Move the selected parts into a new step before this</source>
+        <source>Move the selected pieces into a new step before this</source>
         <translation>Переместить выбранные детали на новый шаг перед этим шагом</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1830"/>
-        <source>Move the selected parts into a new step after this</source>
+        <source>Move the selected pieces into a new step after this</source>
         <translation>Переместить выбранные детали на новый шаг после этого шага</translation>
     </message>
     <message>
@@ -4655,7 +4655,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_instructions.cpp" line="48"/>
-        <source>Show Parts List</source>
+        <source>Show Pieces List</source>
         <translation>Показывать список деталей</translation>
     </message>
     <message>
@@ -4777,17 +4777,17 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="364"/>
-        <source>Select Parts List Background Color</source>
+        <source>Select Pieces List Background Color</source>
         <translation>Выберите цвет фона списка деталей</translation>
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="368"/>
-        <source>Select Parts List Border Color</source>
+        <source>Select Pieces List Border Color</source>
         <translation>Выберите цвет границы списка деталей</translation>
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="372"/>
-        <source>Select Parts List Text Color</source>
+        <source>Select Pieces List Text Color</source>
         <translation>Выберите цвет текста списка деталей</translation>
     </message>
     <message>
@@ -4798,7 +4798,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="426"/>
-        <source>Select Parts List Font</source>
+        <source>Select Pieces List Font</source>
         <translation>Выберите шрифт списка деталей</translation>
     </message>
     <message>
@@ -4813,7 +4813,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_instructionsdialog.cpp" line="513"/>
-        <source>Parts List Properties</source>
+        <source>Pieces List Properties</source>
         <translation>Свойства списка деталей</translation>
     </message>
 </context>
@@ -4988,7 +4988,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="667"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Детали</translation>
     </message>
     <message>
@@ -5871,7 +5871,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1012"/>
-        <source>Show Decorated Parts</source>
+        <source>Show Decorated Pieces</source>
         <translation>Показывать декоративные детали</translation>
     </message>
     <message>
@@ -5896,7 +5896,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1184"/>
-        <source>All Parts</source>
+        <source>All Pieces</source>
         <translation>Все детали</translation>
     </message>
     <message>
@@ -6312,7 +6312,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="172"/>
-        <source>Parts List</source>
+        <source>Pieces List</source>
         <translation>Список деталей</translation>
     </message>
     <message>
@@ -7123,7 +7123,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="469"/>
-        <source>Highlight New Parts</source>
+        <source>Highlight New Pieces</source>
         <translation>Подсвечивать новые детали</translation>
     </message>
     <message>
@@ -7776,7 +7776,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="91"/>
-        <source>Parts Used</source>
+        <source>Pieces Used</source>
         <translation>Использующиеся детали</translation>
     </message>
     <message>
@@ -8179,7 +8179,7 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
-        <source>Parts</source>
+        <source>Pieces</source>
         <translation>Деталей</translation>
     </message>
     <message>

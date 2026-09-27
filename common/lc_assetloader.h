@@ -37,7 +37,9 @@ struct lcPartBuildResult
 	quint64 RequestId = 0;
 	quint64 Generation = 0;
 	std::unique_ptr<lcLibraryMeshData> MeshData;
+	std::unique_ptr<lcMesh> Mesh;
 	std::unique_ptr<lcMemFile> CacheData;
+	std::vector<quint32> ColorCodes;
 	bool EmptyGeometry = false;
 	QStringList TextureDependencies;
 	QString Error;
@@ -72,7 +74,8 @@ public:
 	void QueuePiece(PieceInfo* Info, bool Priority);
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
-	bool RebuildModelPiece(PieceInfo* Info);
+	void QueueModelPiece(PieceInfo* Info);
+	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void WaitForLoadQueue();
 	void CancelAndDrain();
@@ -101,6 +104,10 @@ private:
 		bool Obsolete = false;
 		bool Terminal = false;
 		bool Succeeded = false;
+		bool ConvertingMesh = false;
+		std::unique_ptr<lcLibraryMeshData> MeshData;
+		std::vector<bool> ColorTranslucency;
+		int DefaultColorIndex = 0;
 		std::unique_ptr<lcMesh> StagedMesh;
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
@@ -138,6 +145,7 @@ private:
 	};
 
 	void QueuePieceLocked(PieceInfo* Info, Priority LoadPriority);
+	void SetRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority);
 	void QueueTexture(lcTexture* Texture, Priority LoadPriority);
 	static QString TextureFailureMessage(const lcTexture* Texture);
 	void CancelUnusedTextureRequests();

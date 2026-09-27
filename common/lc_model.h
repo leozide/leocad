@@ -158,7 +158,7 @@ public:
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
 	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
-	void UpdateMesh();
+	void QueueMeshBuild();
 	void UpdateAllViews() const;
 	std::vector<PieceInfo*> GetRequiredPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
@@ -218,6 +218,11 @@ public:
 	const QStringList& GetFileLines() const
 	{
 		return mFileLines;
+	}
+
+	bool HasDirectGeometry() const
+	{
+		return mHasDirectGeometry;
 	}
 
 	lcStep GetLastStep() const;
@@ -484,6 +489,7 @@ protected:
 	std::vector<std::unique_ptr<lcLight>> mLights;
 	std::vector<std::unique_ptr<lcGroup>> mGroups;
 	QStringList mFileLines;
+	bool mHasDirectGeometry = false;
 
 	std::vector<std::unique_ptr<lcModelHistory>> mHistorySequence;
 	lcObjectPropertyId mActivePropertyEdit = lcObjectPropertyId::Count;

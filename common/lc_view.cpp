@@ -765,7 +765,7 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 		mModel->CalculateStep(LC_STEP_MAX);
 
 	if (MissingAssets && gMainWindow)
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required parts."));
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
 
 	return Images;
 }

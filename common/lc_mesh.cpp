@@ -415,8 +415,10 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
 }
 
-bool lcMesh::FileLoad(lcMemFile& File, const std::function<lcTexture*(const char*)>& TextureLookup)
+bool lcMesh::FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes)
 {
+	ColorCodes.clear();
+
 	quint32 FileId, FileVersion, Flags;
 
 	if (File.ReadU32(&FileId, 1) != 1 || FileId != LC_MESH_FILE_ID || File.ReadU32(&FileVersion, 1) != 1 ||
@@ -471,7 +473,8 @@ bool lcMesh::FileLoad(lcMemFile& File, const std::function<lcTexture*(const char
 				File.ReadU32(&DrawCount, 1) != 1 || File.ReadU16(&PrimtiveType, 1) != 1)
 				return false;
 
-			Section.ColorIndex = lcGetColorIndex(ColorCode);
+			Section.ColorIndex = 0;
+			ColorCodes.push_back(ColorCode);
 			Section.DrawOffset = DrawOffset;
 			Section.DrawCount = DrawCount;
 			Section.PrimitiveType = (lcMeshPrimitiveType)PrimtiveType;
@@ -497,7 +500,7 @@ bool lcMesh::FileLoad(lcMemFile& File, const std::function<lcTexture*(const char
 				FileName[Length] = 0;
 
 				Section.TextureName = QString::fromLatin1(FileName);
-				Section.Texture = TextureLookup ? TextureLookup(FileName) : lcGetPiecesLibrary()->FindTexture(FileName, nullptr, false);
+				Section.Texture = nullptr;
 			}
 			else
 				Section.Texture = nullptr;

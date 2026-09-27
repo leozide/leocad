@@ -68,7 +68,7 @@ void PieceInfo::SetPlaceholder()
 	mProject = nullptr;
 }
 
-void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
+void PieceInfo::SetModel(lcModel* Model)
 {
 	if (mModel != Model)
 	{
@@ -80,13 +80,7 @@ void PieceInfo::SetModel(lcModel* Model, bool UpdateMesh)
 		lcGetPiecesLibrary()->ClearPieceLoadError(this);
 	}
 
-	strncpy(mFileName, Model->GetProperties().mFileName.toLatin1().data(), sizeof(mFileName) - 1);
-	mFileName[sizeof(mFileName)-1] = 0;
-	strncpy(m_strDescription, Model->GetProperties().mFileName.toLatin1().data(), sizeof(m_strDescription) - 1);
-	m_strDescription[sizeof(m_strDescription)-1] = 0;
-
-	if (UpdateMesh)
-		lcGetPiecesLibrary()->RebuildModelPiece(this);
+	lcGetPiecesLibrary()->SetModelPieceName(this, Model->GetProperties().mFileName.toLatin1().data());
 }
 
 void PieceInfo::CreateProject(Project* Project, const char* PieceName)
@@ -209,7 +203,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 			Intersect = true;
 		}
 	}
-	else if (IsModel() && IsLoading() && !mModel->GetFileLines().isEmpty())
+	else if (IsModel() && IsLoading() && mModel->HasDirectGeometry())
 	{
 		float Distance;
 		lcVector3 Plane;
@@ -278,7 +272,7 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	if (mMesh && !IsLoading() && mMesh->IntersectsPlanes(LocalPlanes))
 		return true;
 
-	if (IsModel() && IsLoading() && !mModel->GetFileLines().isEmpty() && lcGetPiecesLibrary()->GetLoadingMesh()->IntersectsPlanes(LocalPlanes))
+	if (IsModel() && IsLoading() && mModel->HasDirectGeometry() && lcGetPiecesLibrary()->GetLoadingMesh()->IntersectsPlanes(LocalPlanes))
 		return true;
 
 	if (IsModel())
@@ -314,7 +308,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	{
 		if (Scene.GetRequireCompleteAssets())
 			Scene.MarkMissingAssets();
-		else if (IsLoading() && (!IsModel() || (mModel && !mModel->GetFileLines().isEmpty())))
+		else if (IsLoading() && (!IsModel() || (mModel && mModel->HasDirectGeometry())))
 			Scene.AddMesh(lcGetPiecesLibrary()->GetLoadingMesh(), lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
 		else if (mMesh)
 			Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
@@ -329,7 +323,7 @@ void PieceInfo::AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, i
 	{
 		if (Scene->GetRequireCompleteAssets())
 			Scene->MarkMissingAssets();
-		else if (IsLoading() && (!IsModel() || (mModel && !mModel->GetFileLines().isEmpty())))
+		else if (IsLoading() && (!IsModel() || (mModel && mModel->HasDirectGeometry())))
 			Scene->AddMesh(lcGetPiecesLibrary()->GetLoadingMesh(), WorldMatrix, ColorIndex, RenderMeshState);
 		else if (mMesh)
 			Scene->AddMesh(mMesh, WorldMatrix, ColorIndex, RenderMeshState);

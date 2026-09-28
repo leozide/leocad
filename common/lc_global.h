@@ -19,6 +19,7 @@
 #include <array>
 #include <atomic>
 #include <set>
+#include <unordered_set>
 #include <deque>
 #include <functional>
 #include <limits>

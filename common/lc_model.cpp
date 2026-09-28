@@ -187,6 +187,74 @@ lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
 	mPieceInfo = nullptr;
 }
 
+void lcModel::SetProject(Project* Project)
+{
+	if (mProject && mProject != Project)
+	{
+		const QString SourceFileName = mProject->GetFileName();
+		const QString SourceDirectory = SourceFileName.isEmpty() ? QString() : QFileInfo(SourceFileName).absolutePath();
+
+		PreserveAssetSourceDirectory(SourceDirectory, false);
+	}
+
+	mProject = Project;
+}
+
+void lcModel::PreserveAssetSourceDirectory(const QString& Directory, bool PreferCurrentDirectory)
+{
+	if (!Directory.isEmpty())
+	{
+		const QString CleanDirectory = QDir::cleanPath(Directory);
+		const std::vector<QString>::iterator NewEnd = std::remove(mAssetSourceDirectories.begin(), mAssetSourceDirectories.end(), CleanDirectory);
+
+		mAssetSourceDirectories.erase(NewEnd, mAssetSourceDirectories.end());
+
+		if (mPreferCurrentAssetDirectory)
+			mAssetSourceDirectories.insert(mAssetSourceDirectories.begin(), CleanDirectory);
+		else
+			mAssetSourceDirectories.push_back(CleanDirectory);
+	}
+
+	mPreferCurrentAssetDirectory = PreferCurrentDirectory;
+}
+
+lcModelAssetSourceState lcModel::GetAssetSourceState() const
+{
+	return { mAssetSourceDirectories, mPreferCurrentAssetDirectory };
+}
+
+void lcModel::RestoreAssetSourceState(const lcModelAssetSourceState& State)
+{
+	mAssetSourceDirectories = State.Directories;
+	mPreferCurrentAssetDirectory = State.PreferCurrentDirectory;
+}
+
+std::vector<QString> lcModel::GetAssetSearchDirectories() const
+{
+	std::vector<QString> Directories;
+	QString CurrentDirectory;
+
+	if (mProject && !mProject->GetFileName().isEmpty())
+		CurrentDirectory = QFileInfo(mProject->GetFileName()).absolutePath();
+
+	if (mPreferCurrentAssetDirectory && !CurrentDirectory.isEmpty())
+		Directories.push_back(CurrentDirectory);
+
+	for (const QString& Directory : mAssetSourceDirectories)
+	{
+		if (mPreferCurrentAssetDirectory && Directory == CurrentDirectory)
+			continue;
+
+		Directories.push_back(Directory);
+	}
+
+	if (!mPreferCurrentAssetDirectory && !CurrentDirectory.isEmpty() &&
+		std::find(mAssetSourceDirectories.begin(), mAssetSourceDirectories.end(), CurrentDirectory) == mAssetSourceDirectories.end())
+		Directories.push_back(CurrentDirectory);
+
+	return Directories;
+}
+
 lcModel::~lcModel()
 {
 	if (!mPreviewInsertPieceInfo.empty())
@@ -201,11 +269,16 @@ lcModel::~lcModel()
 
 	if (mPieceInfo)
 	{
-		if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
-			gMainWindow->SetCurrentPieceInfo(nullptr);
-
 		if (mPieceInfo->GetModel() == this)
+		{
+			if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
+				gMainWindow->SetCurrentPieceInfo(nullptr);
+
+			// Keep the name indexed while placements still reference this placeholder.
+			lcGetPiecesLibrary()->InvalidatePiece(mPieceInfo);
 			mPieceInfo->SetPlaceholder();
+			mPieceInfo->mState = lcPieceInfoState::Loaded;
+		}
 
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 		Library->ReleasePieceInfo(mPieceInfo);
@@ -243,14 +316,27 @@ bool lcModel::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix)
 
 bool lcModel::IncludesModel(const lcModel* Model) const
 {
-	if (Model == this)
-		return true;
-
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->mPieceInfo->IncludesModel(Model))
+	std::unordered_set<const lcModel*> Visited;
+	const std::function<bool(const lcModel*)> Visit = [Model, &Visited, &Visit](const lcModel* Current)
+	{
+		if (Current == Model)
 			return true;
 
-	return false;
+		if (!Current || !Visited.insert(Current).second)
+			return false;
+
+		for (const std::unique_ptr<lcPiece>& Piece : Current->mPieces)
+		{
+			const PieceInfo* Info = Piece->mPieceInfo;
+
+			if (Info && Info->IsModel() && Visit(Info->GetModel()))
+				return true;
+		}
+
+		return false;
+	};
+
+	return Visit(this);
 }
 
 void lcModel::DeleteModel()
@@ -289,9 +375,59 @@ void lcModel::DeleteModel()
 void lcModel::CreatePieceInfo(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	mPieceInfo = Library->FindPiece(mProperties.mFileName.toLatin1().constData(), Project, true, false);
+	bool Reused;
+	mPieceInfo = Library->CreateModelPiece(mProperties.mFileName.toLatin1().constData(), Project, Reused);
 	mPieceInfo->SetModel(this);
-	Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+
+	if (Reused)
+	{
+		// Reusing a referenced name can turn an existing placement into a cycle.
+		mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this](const std::unique_ptr<lcPiece>& Piece)
+		{
+			return Piece->mPieceInfo && Piece->mPieceInfo->IncludesModel(this);
+		}), mPieces.end());
+	}
+
+	// A streamed external model retains its initial CreateModelPiece reference
+	// until its source lines have been parsed and QueueMeshBuild() runs.
+	if (!Project->UsesStreamingMeshes())
+	{
+		Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+		Library->ReleasePieceInfo(mPieceInfo);
+	}
+
+	if (Reused)
+	{
+		UpdateAllViews();
+
+		if (!Project->UsesStreamingMeshes())
+			RefreshPreview();
+	}
+}
+
+bool lcModel::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	bool Changed = false;
+
+	mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this, Previous, Replacement, Library, &Changed](const std::unique_ptr<lcPiece>& Piece)
+	{
+		if (Piece->mPieceInfo != Previous)
+			return false;
+
+		Changed = true;
+
+		if (Replacement->IncludesModel(this))
+			return true;
+
+		const QString PieceId = Piece->GetID();
+		Piece->SetPieceInfo(Replacement, PieceId, false, false);
+		Library->ReleasePieceInfo(Previous);
+
+		return false;
+	}), mPieces.end());
+
+	return Changed;
 }
 
 void lcModel::QueueMeshBuild()
@@ -303,6 +439,15 @@ void lcModel::QueueMeshBuild()
 void lcModel::UpdateAllViews() const
 {
 	lcView::UpdateProjectViews(mProject);
+}
+
+void lcModel::RefreshPreview() const
+{
+	if (mIsPreview || !mProject)
+		return;
+
+	if (gMainWindow && gMainWindow->GetPreviewWidget())
+		gMainWindow->GetPreviewWidget()->RefreshModel(this);
 }
 
 std::vector<PieceInfo*> lcModel::GetRequiredPieces() const
@@ -413,6 +558,12 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 	const QLatin1String LineEnding("\r\n");
 
 	mProperties.SaveLDraw(Stream);
+
+	for (const QString& Directory : mAssetSourceDirectories)
+		Stream << QLatin1String("0 !LEOCAD MODEL ASSET_SOURCE ") << QString::fromLatin1(Directory.toUtf8().toBase64()) << LineEnding;
+
+	if (!mAssetSourceDirectories.empty() && !mPreferCurrentAssetDirectory)
+		Stream << QLatin1String("0 !LEOCAD MODEL ASSET_SOURCE_PRIORITY SOURCE") << LineEnding;
 
 	std::vector<lcGroup*> CurrentGroups;
 	lcStep Step = 1;
@@ -630,6 +781,8 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	mProperties.mAuthor.clear();
 	mProperties.mDescription.clear();
 	mProperties.mComments.clear();
+	mAssetSourceDirectories.clear();
+	mPreferCurrentAssetDirectory = true;
 	bool ReadingHeader = true;
 	bool FirstLine = true;
 
@@ -701,7 +854,31 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			if (Token == QLatin1String("MODEL"))
 			{
-				mProperties.ParseLDrawLine(LineStream);
+				LineStream >> Token;
+
+				if (Token == QLatin1String("ASSET_SOURCE"))
+				{
+					const QString Directory = QString::fromUtf8(QByteArray::fromBase64(LineStream.readAll().trimmed().toLatin1()));
+
+					if (QDir::isAbsolutePath(Directory))
+					{
+						const QString CleanDirectory = QDir::cleanPath(Directory);
+
+						if (std::find(mAssetSourceDirectories.begin(), mAssetSourceDirectories.end(), CleanDirectory) == mAssetSourceDirectories.end())
+							mAssetSourceDirectories.push_back(CleanDirectory);
+					}
+				}
+				else if (Token == QLatin1String("ASSET_SOURCE_PRIORITY"))
+				{
+					LineStream >> Token;
+					mPreferCurrentAssetDirectory = Token != QLatin1String("SOURCE");
+				}
+				else
+				{
+					QString PropertiesLine = Token + LineStream.readAll();
+					QTextStream PropertiesStream(&PropertiesLine, QIODevice::ReadOnly);
+					mProperties.ParseLDrawLine(PropertiesStream);
+				}
 			}
 			else if (Token == QLatin1String("PIECE"))
 			{
@@ -919,7 +1096,7 @@ bool lcModel::LoadBinary(lcFile* file)
 		if (fv > 0.4f)
 		{
 			lcPiece* pPiece = new lcPiece(nullptr);
-			pPiece->FileLoad(*file);
+			pPiece->FileLoad(*file, mProject);
 			AddPiece(pPiece);
 		}
 		else
@@ -940,7 +1117,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			PieceInfo* pInfo = Library->FindPiece(name, nullptr, true, false);
+			PieceInfo* pInfo = Library->FindPiece(name, mProject, true, false);
 			lcPiece* pPiece = new lcPiece(pInfo);
 
 			pPiece->Initialize(WorldMatrix, step);
@@ -1115,7 +1292,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 	std::vector<lcPiece*> Pieces;
 	std::vector<std::vector<lcPiece*>> Groups;
 
-	if (!lcImportLXFMLFile(FileData, Pieces, Groups))
+	if (!lcImportLXFMLFile(FileData, mProject, Pieces, Groups))
 		return false;
 
 	for (lcPiece* Piece : Pieces)
@@ -1141,7 +1318,7 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 
 	for (const lcSetInventoryItem& SetInventoryItem : SetInventory)
 	{
-		PieceInfo* Info = Library->FindPiece(SetInventoryItem.PartID + ".dat", nullptr, true, false);
+		PieceInfo* Info = Library->FindPiece(SetInventoryItem.PartID + ".dat", mProject, true, false);
 		int Quantity = SetInventoryItem.Quantity;
 
 		while (Quantity--)
@@ -2032,6 +2209,14 @@ void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 {
 	LoadObjectHistoryState(HistoryState.Groups, mGroups);
 	LoadObjectHistoryState(HistoryState.Pieces, mPieces);
+
+	// Model-list changes are not undoable, but older edit states can still name
+	// a submodel that was replaced. Do not restore references that now recurse.
+	mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this](const std::unique_ptr<lcPiece>& Piece)
+	{
+		return Piece->mPieceInfo && Piece->mPieceInfo->IncludesModel(this);
+	}), mPieces.end());
+
 	LoadObjectHistoryState(HistoryState.Cameras, mCameras);
 	LoadObjectHistoryState(HistoryState.Lights, mLights);
 }
@@ -2138,6 +2323,8 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 	gMainWindow->UpdateTimeline(true, false);
 
 	UpdateAllViews();
+	if (EditChanged)
+		RefreshPreview();
 }
 
 void lcModel::BeginHistorySequence()
@@ -2155,6 +2342,17 @@ void lcModel::EndHistorySequence(const QString& Description)
 		mHistorySequence.clear();
 
 		return;
+	}
+
+	bool EditChanged = false;
+
+	for (const std::unique_ptr<lcModelHistory>& ModelHistory : mHistorySequence)
+	{
+		if (dynamic_cast<const lcModelHistoryEdit*>(ModelHistory.get()))
+		{
+			EditChanged = true;
+			break;
+		}
 	}
 
 	bool CanMerge = false;
@@ -2199,6 +2397,8 @@ void lcModel::EndHistorySequence(const QString& Description)
 	}
 
 	UpdateAllViews();
+	if (EditChanged)
+		RefreshPreview();
 }
 
 void lcModel::DiscardHistorySequence()
@@ -3417,17 +3617,27 @@ void lcModel::SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& Piec
 	}
 }
 
-void lcModel::RenamePiece(PieceInfo* Info, const QString& OldName, const QString& NewName)
+void lcModel::RenamePieces(const std::vector<lcModelPieceRename>& Renames)
 {
-	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->mPieceInfo == Info)
-			Piece->UpdateID();
+	if (Renames.empty())
+		return;
 
-	const bool RenameModelProperties = mPieceInfo == Info;
-	auto RenameHistorySequence = [&OldName, &NewName, RenameModelProperties](std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence)
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		for (const lcModelPieceRename& Rename : Renames)
+		{
+			if (Piece->mPieceInfo != Rename.Info)
+				continue;
+
+			Piece->UpdateID();
+			break;
+		}
+	}
+
+	auto RenameHistorySequence = [&Renames, ModelInfo = mPieceInfo](std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence)
 	{
 		for (const std::unique_ptr<lcModelHistory>& ModelHistory : HistorySequence)
-			ModelHistory->RenamePiece(OldName, NewName, RenameModelProperties);
+			ModelHistory->RenamePieces(Renames, ModelInfo);
 	};
 
 	RenameHistorySequence(mHistorySequence);

@@ -30,6 +30,35 @@ void lcThumbnailManager::Clear()
 	mThumbnails.clear();
 }
 
+void lcThumbnailManager::RefreshPieces(const std::vector<PieceInfo*>& ChangedPieces)
+{
+	const std::unordered_set<PieceInfo*> Changed(ChangedPieces.begin(), ChangedPieces.end());
+	std::vector<lcPartThumbnailId> ThumbnailIds;
+
+	for (std::map<lcPartThumbnailId, lcPartThumbnail>::value_type& Entry : mThumbnails)
+	{
+		const lcPartThumbnail& Thumbnail = Entry.second;
+		const bool RequiredChanged = std::any_of(Thumbnail.Required.begin(), Thumbnail.Required.end(), [&Changed](PieceInfo* Info)
+		{
+			return Changed.find(Info) != Changed.end();
+		});
+
+		if (Changed.find(Thumbnail.Info) == Changed.end() && !RequiredChanged)
+			continue;
+
+		Entry.second.Pixmap = QPixmap();
+		ThumbnailIds.push_back(Entry.first);
+	}
+
+	for (lcPartThumbnailId ThumbnailId : ThumbnailIds)
+	{
+		const std::map<lcPartThumbnailId, lcPartThumbnail>::iterator It = mThumbnails.find(ThumbnailId);
+
+		if (It != mThumbnails.end())
+			UpdateThumbnail(ThumbnailId, It->second);
+	}
+}
+
 std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale)
 {
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)

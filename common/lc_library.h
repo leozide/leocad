@@ -20,7 +20,15 @@ struct lcTextureBuildResult;
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 using lcLibraryLoadMutex = QRecursiveMutex;
 #else
-using lcLibraryLoadMutex = QMutex;
+// Qt 5 has no QRecursiveMutex; library release paths can reenter this lock.
+class lcLibraryLoadMutex : public QMutex
+{
+public:
+	lcLibraryLoadMutex()
+		: QMutex(QMutex::Recursive)
+	{
+	}
+};
 #endif
 
 enum class lcStudStyle
@@ -160,18 +168,22 @@ public:
 	void LoadColors();
 	void Unload();
 	void RemoveTemporaryPieces();
-	std::vector<PieceInfo*> CaptureMappedPieces(const std::vector<PieceInfo*>& Pieces);
-	void RestorePieceMappings(const std::vector<PieceInfo*>& Pieces);
+	void ReleaseProjectPieces(Project* OwnerProject);
+	void TransferProjectPieces(Project* Source, Project* Destination);
 	void RemovePiece(PieceInfo* Info);
 
 	void SetModelPieceName(PieceInfo* Info, const char* Name);
-	void RenamePiece(PieceInfo* Info, const char* NewName);
+	bool RenamePiece(PieceInfo* Info, const char* NewName);
+	static std::string NormalizePieceName(const char* PieceName);
+	PieceInfo* CreateModelPiece(const char* PieceName, Project* Project, bool& Reused);
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
+	bool RemapProjectPiece(PieceInfo* Info, const QString& ProjectDirectory, bool IsPreview);
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
 	void NotifyConsumersChanged();
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
 	void QueueModelPiece(PieceInfo* Info);
+	void InvalidatePiece(PieceInfo* Info);
 	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void ReleasePieceInfo(PieceInfo* Info);
@@ -189,7 +201,7 @@ public:
 
 	// Returns a texture reference that the caller must release.
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
-	lcTexture* FindTextureDeferred(const char* TextureName, const QString& ProjectPath);
+	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories);
 	lcTextureSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
 	lcTextureBuildResult BuildTextureData(const lcTextureSourceSnapshot& Source);
 	bool LoadTexture(lcTexture* Texture);
@@ -273,21 +285,14 @@ protected:
 	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
 	void UnloadPieceInfo(PieceInfo* Info);
-	void DetachPiece(PieceInfo* Info, const std::string& Name);
-	void RestoreDetachedPiece(const std::string& Name);
+	void RegisterProjectPiece(Project* Project, const std::string& Name, PieceInfo* Info);
 
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
-	struct DetachedPiece
-	{
-		std::string Name;
-		quint64 Order;
-	};
-
-	// Entries displaced by a project-local piece with the same name.
-	std::unordered_map<PieceInfo*, DetachedPiece> mDetachedPieces;
-	quint64 mNextDetachedPieceOrder = 0;
+	// Each project maps its local filenames to PieceInfo pointers. This map tracks the
+	// project for each local PieceInfo, or nullptr after that project is destroyed.
+	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
 
 	lcLibraryLoadMutex mLoadMutex;
 

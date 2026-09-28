@@ -36,9 +36,6 @@ enum class lcLibraryCacheFlag : quint32
 };
 
 lcPiecesLibrary::lcPiecesLibrary()
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-	: mLoadMutex(QMutex::Recursive)
-#endif
 {
 	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this));
 	mThumbnailManager = std::unique_ptr<lcThumbnailManager>(new lcThumbnailManager(this));
@@ -89,10 +86,15 @@ void lcPiecesLibrary::Unload()
 
 	mPieces.clear();
 
-	while (!mDetachedPieces.empty())
+	while (!mProjectPieces.empty())
 	{
-		PieceInfo* Info = mDetachedPieces.begin()->first;
-		mDetachedPieces.erase(Info);
+		PieceInfo* Info = mProjectPieces.begin()->first;
+		Project* Owner = mProjectPieces.begin()->second;
+
+		if (Owner)
+			Owner->UnregisterPiece(Info);
+
+		mProjectPieces.erase(Info);
 
 		const bool DeleteAfterUnload = !Info->IsModel() && !Info->IsProject();
 		Info->Unload();
@@ -100,7 +102,6 @@ void lcPiecesLibrary::Unload()
 		if (DeleteAfterUnload)
 			delete Info;
 	}
-	mNextDetachedPieceOrder = 0;
 
 	mSources.clear();
 
@@ -128,96 +129,75 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 
 		if (Info->IsTemporary() && Info->GetRefCount() == 0)
 		{
-			const std::string Name = PieceIt->first;
 			ClearPieceLoadError(Info);
 			PieceIt = mPieces.erase(PieceIt);
 			delete Info;
-			RestoreDetachedPiece(Name);
-			PieceIt = mPieces.lower_bound(Name);
 		}
 		else
 			PieceIt++;
 	}
 
-	for (;;)
+	std::vector<PieceInfo*> Unused;
+
+	for (const std::unordered_map<PieceInfo*, Project*>::value_type& Entry : mProjectPieces)
 	{
-		PieceInfo* Unused = nullptr;
-
-		for (const auto& Entry : mDetachedPieces)
-		{
-			PieceInfo* Info = Entry.first;
-
-			if (Info->IsTemporary() && Info->GetRefCount() == 0)
-			{
-				Unused = Info;
-				break;
-			}
-		}
-
-		if (!Unused)
-			break;
-
-		UnloadPieceInfo(Unused);
+		if (Entry.first->GetRefCount() == 0)
+			Unused.push_back(Entry.first);
 	}
+
+	for (PieceInfo* Info : Unused)
+		UnloadPieceInfo(Info);
 }
 
-std::vector<PieceInfo*> lcPiecesLibrary::CaptureMappedPieces(const std::vector<PieceInfo*>& Pieces)
+void lcPiecesLibrary::ReleaseProjectPieces(Project* OwnerProject)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
+	std::vector<PieceInfo*> Unused;
 
-	std::vector<PieceInfo*> Mapped;
-	Mapped.reserve(Pieces.size());
+	OwnerProject->ClearPieceIndex();
 
-	for (PieceInfo* Info : Pieces)
-		if (mDetachedPieces.find(Info) == mDetachedPieces.end())
-			Mapped.push_back(Info);
-
-	return Mapped;
-}
-
-void lcPiecesLibrary::RestorePieceMappings(const std::vector<PieceInfo*>& Pieces)
-{
-	QMutexLocker LoadLock(&mLoadMutex);
-
-	for (PieceInfo* Info : Pieces)
+	for (std::unordered_map<PieceInfo*, Project*>::value_type& Entry : mProjectPieces)
 	{
-		const auto Detached = mDetachedPieces.find(Info);
-
-		if (Detached == mDetachedPieces.end())
+		if (Entry.second != OwnerProject)
 			continue;
 
-		const std::string Name = Detached->second.Name;
-		mDetachedPieces.erase(Detached);
+		Entry.second = nullptr;
 
-		const auto Current = mPieces.find(Name);
-
-		if (Current != mPieces.end() && Current->second != Info)
-			DetachPiece(Current->second, Name);
-
-		mPieces[Name] = Info;
+		if (Entry.first->GetRefCount() == 0)
+			Unused.push_back(Entry.first);
 	}
+
+	for (PieceInfo* Info : Unused)
+		UnloadPieceInfo(Info);
 }
 
-void lcPiecesLibrary::DetachPiece(PieceInfo* Info, const std::string& Name)
+void lcPiecesLibrary::TransferProjectPieces(Project* Source, Project* Destination)
 {
-	mDetachedPieces.insert_or_assign(Info, DetachedPiece{ Name, ++mNextDetachedPieceOrder });
-}
+	QMutexLocker LoadLock(&mLoadMutex);
+	std::vector<PieceInfo*> Unused;
 
-void lcPiecesLibrary::RestoreDetachedPiece(const std::string& Name)
-{
-	auto Latest = mDetachedPieces.end();
+	Source->TransferPieceIndexTo(Destination);
 
-	for (auto It = mDetachedPieces.begin(); It != mDetachedPieces.end(); It++)
+	for (std::unordered_map<PieceInfo*, Project*>::value_type& Entry : mProjectPieces)
 	{
-		if (It->second.Name == Name && (Latest == mDetachedPieces.end() || It->second.Order > Latest->second.Order))
-			Latest = It;
+		if (Entry.second == Source)
+		{
+			Entry.second = Destination;
+
+			if (Entry.first->GetRefCount() == 0)
+				Unused.push_back(Entry.first);
+		}
 	}
 
-	if (Latest == mDetachedPieces.end())
-		return;
+	for (PieceInfo* Info : Unused)
+		UnloadPieceInfo(Info);
+}
 
-	mPieces[Name] = Latest->first;
-	mDetachedPieces.erase(Latest);
+void lcPiecesLibrary::RegisterProjectPiece(Project* Project, const std::string& Name, PieceInfo* Info)
+{
+	QMutexLocker LoadLock(&mLoadMutex);
+	Project->RegisterPiece(Name, Info);
+	mProjectPieces[Info] = Project;
 }
 
 void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
@@ -226,16 +206,26 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 	{
 		QMutexLocker LoadLock(&mLoadMutex);
 
-		mDetachedPieces.erase(Info);
+		const std::unordered_map<PieceInfo*, Project*>::iterator Local = mProjectPieces.find(Info);
+		const bool IsLocal = Local != mProjectPieces.end();
 
-		for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
+		if (IsLocal)
 		{
-			if (PieceIt->second == Info)
+			if (Local->second)
+				Local->second->UnregisterPiece(Info);
+
+			mProjectPieces.erase(Local);
+		}
+
+		if (!IsLocal)
+		{
+			for (std::map<std::string, PieceInfo*>::iterator PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
 			{
-				const std::string Name = PieceIt->first;
-				mPieces.erase(PieceIt);
-				RestoreDetachedPiece(Name);
-				break;
+				if (PieceIt->second == Info)
+				{
+					mPieces.erase(PieceIt);
+					break;
+				}
 			}
 		}
 	}
@@ -245,20 +235,17 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 
 void lcPiecesLibrary::UnloadPieceInfo(PieceInfo* Info)
 {
-	const bool Detached = mDetachedPieces.find(Info) != mDetachedPieces.end();
+	const std::unordered_map<PieceInfo*, Project*>::iterator Local = mProjectPieces.find(Info);
+	const bool DeleteAfterUnload = Local != mProjectPieces.end() && !Info->IsModel() && !Info->IsProject();
 
-	// A detached library part still needs its mapping when the temporary override goes away.
-	if (Detached && !Info->IsTemporary())
+	if (Local != mProjectPieces.end())
 	{
-		Info->Unload();
-		return;
-	}
+		if (Local->second)
+			Local->second->UnregisterPiece(Info);
 
-	mDetachedPieces.erase(Info);
-	const bool DeleteAfterUnload = Detached && !Info->IsModel() && !Info->IsProject();
-
-	if (DeleteAfterUnload)
+		mProjectPieces.erase(Local);
 		ClearPieceLoadError(Info);
+	}
 
 	Info->Unload();
 
@@ -276,19 +263,40 @@ void lcPiecesLibrary::SetModelPieceName(PieceInfo* Info, const char* Name)
 	Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
 }
 
-void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
+bool lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 {
-	ClearPieceLoadError(Info);
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	for (auto PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
+	const std::unordered_map<PieceInfo*, Project*>::iterator Local = mProjectPieces.find(Info);
+	const std::string NewPieceName = NormalizePieceName(NewName);
+
+	if (Local != mProjectPieces.end() && Local->second)
 	{
-		if (PieceIt->second == Info)
+		PieceInfo* Existing = Local->second->FindPiece(NewPieceName);
+
+		if (Existing && Existing != Info)
+			return false;
+	}
+	else if (Local == mProjectPieces.end())
+	{
+		const std::map<std::string, PieceInfo*>::const_iterator Existing = mPieces.find(NewPieceName);
+
+		if (Existing != mPieces.end() && Existing->second != Info)
+			return false;
+	}
+
+	if (Local != mProjectPieces.end() && Local->second)
+		Local->second->UnregisterPiece(Info);
+
+	if (Local == mProjectPieces.end())
+	{
+		for (std::map<std::string, PieceInfo*>::iterator PieceIt = mPieces.begin(); PieceIt != mPieces.end(); PieceIt++)
 		{
-			const std::string OldName = PieceIt->first;
-			mPieces.erase(PieceIt);
-			RestoreDetachedPiece(OldName);
-			break;
+			if (PieceIt->second == Info)
+			{
+				mPieces.erase(PieceIt);
+				break;
+			}
 		}
 	}
 
@@ -297,72 +305,93 @@ void lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 	strncpy(Info->m_strDescription, NewName, sizeof(Info->m_strDescription));
 	Info->m_strDescription[sizeof(Info->m_strDescription) - 1] = 0;
 
-	char PieceName[LC_PIECE_NAME_LEN];
-	lcstrcpy(PieceName, Info->mFileName);
-	lcstrupr(PieceName);
+	const std::string PieceName = NormalizePieceName(Info->mFileName);
 
-	const auto Existing = mPieces.find(PieceName);
+	if (Local != mProjectPieces.end())
+	{
+		if (Local->second)
+			Local->second->RegisterPiece(PieceName, Info);
+	}
+	else
+		mPieces[PieceName] = Info;
 
-	if (Existing != mPieces.end() && Existing->second != Info)
-		DetachPiece(Existing->second, PieceName);
+	LoadLock.unlock();
+	ClearPieceLoadError(Info);
 
-	mDetachedPieces.erase(Info);
-	mPieces[PieceName] = Info;
+	return true;
+}
+
+std::string lcPiecesLibrary::NormalizePieceName(const char* PieceName)
+{
+	std::string Name;
+	Name.reserve(LC_PIECE_NAME_LEN - 1);
+
+	for (const char* Src = PieceName; *Src && Name.size() < LC_PIECE_NAME_LEN - 1; Src++)
+	{
+		if (*Src == '\\')
+			Name.push_back('/');
+		else if (*Src >= 'a' && *Src <= 'z')
+			Name.push_back(*Src + 'A' - 'a');
+		else
+			Name.push_back(*Src);
+	}
+
+	return Name;
+}
+
+PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Project, bool& Reused)
+{
+	const std::string Name = NormalizePieceName(PieceName);
+	PieceInfo* Info;
+	Reused = false;
+
+	{
+		QMutexLocker LoadLock(&mLoadMutex);
+
+		Info = Project->FindPiece(Name);
+
+		if (!Info || Info->IsModel())
+		{
+			Info = new PieceInfo();
+			Info->CreatePlaceholder(PieceName);
+			Project->RegisterPiece(Name, Info);
+			mProjectPieces[Info] = Project;
+		}
+		else
+			Reused = true;
+
+		// Keep a local piece alive while a pending load finishes and the model takes its reference.
+		Info->AddRef();
+	}
+
+	if (Reused)
+		mAssetLoader->InvalidatePiece(Info);
+
+	return Info;
 }
 
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
 {
+	const std::string Name = NormalizePieceName(PieceName);
 	QString ProjectPath;
 
-	if (SearchProjectFolder)
+	if (CurrentProject)
 	{
-		QString FileName = CurrentProject->GetFileName();
+		QMutexLocker LoadLock(&mLoadMutex);
 
-		if (!FileName.isEmpty())
-			ProjectPath = QFileInfo(FileName).absolutePath();
+		if (PieceInfo* Info = CurrentProject->FindPiece(Name))
+			return Info;
+
+		if (SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
+			ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
 	}
-
-	char CleanName[LC_PIECE_NAME_LEN];
-	const char* Src = PieceName;
-	char* Dst = CleanName;
-
-	while (*Src && Dst - CleanName != sizeof(CleanName))
-	{
-		if (*Src == '\\')
-			*Dst = '/';
-		else if (*Src >= 'a' && *Src <= 'z')
-			*Dst = *Src + 'A' - 'a';
-		else
-			*Dst = *Src;
-
-		Src++;
-		Dst++;
-	}
-	*Dst = 0;
-
-	PieceInfo* ExistingInfo = nullptr;
 
 	{
 		QMutexLocker LoadLock(&mLoadMutex);
-		const auto PieceIt = mPieces.find(CleanName);
+		const std::map<std::string, PieceInfo*>::const_iterator PieceIt = mPieces.find(Name);
 
 		if (PieceIt != mPieces.end())
-			ExistingInfo = PieceIt->second;
-	}
-
-	if (ExistingInfo)
-	{
-		PieceInfo* Info = ExistingInfo;
-		bool HasModel = false;
-
-		if (CurrentProject)
-		{
-			const std::vector<std::unique_ptr<lcModel>>& Models = CurrentProject->GetModels();
-			HasModel = std::find_if(Models.begin(), Models.end(), [Model = Info->GetModel()](const std::unique_ptr<lcModel>& CheckModel) { return CheckModel.get() == Model; }) != Models.end();
-		}
-
-		if ((!CurrentProject || !Info->IsModel() || HasModel) && (!ProjectPath.isEmpty() || !Info->IsProject() || Info->IsProjectPiece()))
-			return Info;
+			return PieceIt->second;
 	}
 
 	if (!ProjectPath.isEmpty())
@@ -372,22 +401,14 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		if (ProjectFile.isFile())
 		{
 			Project* NewProject = new Project(CurrentProject && CurrentProject->IsPreview());
+			NewProject->SetStreamMeshes(CurrentProject && CurrentProject->UsesStreamingMeshes());
 
 			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
 			{
 				PieceInfo* Info = new PieceInfo();
 
 				Info->CreateProject(NewProject, PieceName);
-
-				{
-					QMutexLocker LoadLock(&mLoadMutex);
-					const auto PieceIt = mPieces.find(CleanName);
-
-					if (PieceIt != mPieces.end())
-						DetachPiece(PieceIt->second, CleanName);
-
-					mPieces[CleanName] = Info;
-				}
+				RegisterProjectPiece(CurrentProject, Name, Info);
 
 				return Info;
 			}
@@ -402,20 +423,57 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 		Info->CreatePlaceholder(PieceName);
 
+		if (CurrentProject)
+			RegisterProjectPiece(CurrentProject, Name, Info);
+		else
 		{
 			QMutexLocker LoadLock(&mLoadMutex);
-			const auto PieceIt = mPieces.find(CleanName);
-
-			if (PieceIt != mPieces.end())
-				DetachPiece(PieceIt->second, CleanName);
-
-			mPieces[CleanName] = Info;
+			mPieces[Name] = Info;
 		}
 
 		return Info;
 	}
 
 	return nullptr;
+}
+
+bool lcPiecesLibrary::RemapProjectPiece(PieceInfo* Info, const QString& ProjectDirectory, bool IsPreview)
+{
+	const QByteArray PieceName(Info->mFileName);
+	const QFileInfo Candidate(QDir(ProjectDirectory).absoluteFilePath(QString::fromLatin1(PieceName.constData())));
+
+	if (Info->IsProject() && Candidate.isFile() &&
+		QFileInfo(Info->GetProject()->GetFileName()).canonicalFilePath() == Candidate.canonicalFilePath())
+		return false;
+
+	if (!Info->IsProject() && !Candidate.isFile())
+		return false;
+
+	InvalidatePiece(Info);
+
+	if (Candidate.isFile())
+	{
+		Project* LocalProject = new Project(IsPreview);
+		LocalProject->SetStreamMeshes(true);
+
+		if (LocalProject->Load(Candidate.absoluteFilePath(), false))
+			Info->CreateProject(LocalProject, PieceName.constData());
+		else
+		{
+			delete LocalProject;
+			Info->SetPlaceholder();
+		}
+	}
+	else
+		Info->SetPlaceholder();
+
+	if (Info->IsPlaceholder() && Info->GetRefCount() > 1)
+	{
+		LoadPieceInfo(Info, lcPieceLoadFlag::Visible);
+		ReleasePieceInfo(Info);
+	}
+
+	return true;
 }
 
 QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName)
@@ -479,7 +537,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
-	lcTexture* Texture = FindTextureDeferred(TextureName, ProjectPath);
+	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath });
 
 	if (!Texture)
 		return nullptr;
@@ -492,21 +550,31 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 	return nullptr;
 }
 
-lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const QString& ProjectPath)
+lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
 	QString FilePath;
+	QString ResolvedProjectPath;
 
-	if (!ProjectPath.isEmpty())
+	for (const QString& Directory : SearchDirectories)
 	{
-		FilePath = FindProjectTextureFile(ProjectPath, QString::fromLatin1(TextureName));
+		if (Directory.isEmpty())
+			continue;
+
+		FilePath = FindProjectTextureFile(Directory, QString::fromLatin1(TextureName));
 
 		if (!FilePath.isEmpty())
 		{
-			const QString CanonicalPath = QFileInfo(FilePath).canonicalFilePath();
-			FilePath = CanonicalPath.isEmpty() ? QFileInfo(FilePath).absoluteFilePath() : CanonicalPath;
+			ResolvedProjectPath = Directory;
+			break;
 		}
+	}
+
+	if (!FilePath.isEmpty())
+	{
+		const QString CanonicalPath = QFileInfo(FilePath).canonicalFilePath();
+		FilePath = CanonicalPath.isEmpty() ? QFileInfo(FilePath).absoluteFilePath() : CanonicalPath;
 	}
 
 	for (lcTexture* Texture : mTextures)
@@ -532,7 +600,7 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const Q
 
 	lcstrcpy(Texture->mName, TextureName);
 	Texture->mFilePath = FilePath;
-	Texture->mProjectPath = ProjectPath;
+	Texture->mProjectPath = ResolvedProjectPath;
 	Texture->SetTemporary(true);
 	Texture->AddRef();
 
@@ -1559,6 +1627,17 @@ void lcPiecesLibrary::QueueModelPiece(PieceInfo* Info)
 	mAssetLoader->QueueModelPiece(Info);
 }
 
+void lcPiecesLibrary::InvalidatePiece(PieceInfo* Info)
+{
+	if (mAssetLoader)
+		mAssetLoader->InvalidatePiece(Info);
+	else
+	{
+		Info->mState = lcPieceInfoState::Unloaded;
+		ClearPieceLoadError(Info);
+	}
+}
+
 void lcPiecesLibrary::SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible)
 {
 	mAssetLoader->SetPieceRequestsVisible(Parts, Visible);
@@ -1659,13 +1738,8 @@ lcPartSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info)
 		Source.InlineModel = true;
 		Source.InlineMeshLines = Info->GetModel()->GetFileLines();
 
-		if (Project* ModelProject = Info->GetModel()->GetProject())
-		{
-			const QString ProjectFileName = ModelProject->GetFileName();
-
-			if (!ProjectFileName.isEmpty())
-				Source.ProjectPath = QFileInfo(ProjectFileName).absolutePath();
-		}
+		const lcModel* Model = Info->GetModel();
+		Source.TextureSearchDirectories = Model->GetAssetSearchDirectories();
 	}
 
 	return Source;
@@ -1988,8 +2062,8 @@ void lcPiecesLibrary::UpdateBuffers(lcContext* Context)
 	for (const std::map<std::string, PieceInfo*>::value_type& PieceIt : mPieces)
 		AddMesh(PieceIt.second);
 
-	for (const std::unordered_map<PieceInfo*, DetachedPiece>::value_type& Detached : mDetachedPieces)
-		AddMesh(Detached.first);
+	for (const std::unordered_map<PieceInfo*, Project*>::value_type& Local : mProjectPieces)
+		AddMesh(Local.first);
 
 	if (!VertexDataSize)
 	{
@@ -2203,8 +2277,8 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 		for (const std::map<std::string, PieceInfo*>::value_type& PieceIt : mPieces)
 			ReloadPiece(PieceIt.second);
 
-		for (const std::unordered_map<PieceInfo*, DetachedPiece>::value_type& Detached : mDetachedPieces)
-			ReloadPiece(Detached.first);
+		for (const std::unordered_map<PieceInfo*, Project*>::value_type& Local : mProjectPieces)
+			ReloadPiece(Local.first);
 
 		mLoadMutex.unlock();
 	}

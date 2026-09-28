@@ -26,6 +26,18 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 
 	mLabel = new QLabel();
 
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	connect(Library, &lcPiecesLibrary::PartLoaded, this, [this](PieceInfo*)
+	{
+		if (mAssetRefreshPending)
+			RefreshPendingAssets();
+	});
+	connect(Library, &lcPiecesLibrary::PartLoadFailed, this, [this](PieceInfo*, const QString&)
+	{
+		if (mAssetRefreshPending)
+			RefreshPendingAssets();
+	});
+
 	mToolBar = addToolBar(tr("Toolbar"));
 	mToolBar->setObjectName("Toolbar");
 	mToolBar->setStatusTip(tr("Preview Toolbar"));
@@ -37,19 +49,21 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 		mToolBar->show();
 }
 
-bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode)
+bool lcPreviewDockWidget::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 {
 	if (mLockAction->isChecked())
 		return true;
 
+	mAssetRefreshPending = false;
 	mLabel->setText(tr("Loading..."));
 
-	if (mPreview->SetCurrentPiece(PartType, ColorCode))
+	if (mPreview->SetCurrentPiece(Info, ColorCode))
 	{
-		mLabel->setText(mPreview->GetDescription());
+		RefreshPendingAssets();
 		return true;
 	}
 
+	mViewWidget->show();
 	mLabel->setText(tr("Preview unavailable"));
 
 	return false;
@@ -57,12 +71,135 @@ bool lcPreviewDockWidget::SetCurrentPiece(const QString& PartType, int ColorCode
 
 void lcPreviewDockWidget::UpdatePreview()
 {
+	mAssetRefreshPending = false;
+	mViewWidget->show();
 	mPreview->UpdatePreview();
 	mLabel->setText(mPreview->GetDescription());
 }
 
+void lcPreviewDockWidget::RefreshDescription()
+{
+	mPreview->RefreshDescription();
+	mLabel->setText(mPreview->GetDescription());
+}
+
+void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
+{
+	if (mLockAction->isChecked() || mRefreshingModel)
+		return;
+
+	const std::vector<PieceInfo*> Required = mPreview->GetModel()->GetRequiredPieces();
+
+	if (std::find(Required.begin(), Required.end(), Model->GetPieceInfo()) == Required.end())
+		return;
+
+	mRefreshingModel = true;
+
+	if (mPreview->GetModel()->EnsureAssetsReady())
+	{
+		mAssetRefreshPending = false;
+		mViewWidget->show();
+		mPreview->Redraw();
+	}
+	else
+	{
+		mPreview->ClearPreview();
+		mLabel->setText(tr("Preview unavailable"));
+	}
+
+	mRefreshingModel = false;
+}
+
+void lcPreviewDockWidget::RefreshAfterAssetChange(const std::vector<PieceInfo*>& ChangedPieces)
+{
+	if (mPreview->GetModel()->GetPieces().empty())
+		return;
+
+	const std::vector<PieceInfo*> Required = mPreview->GetModel()->GetRequiredPieces();
+	bool Affected = std::any_of(Required.begin(), Required.end(), [&ChangedPieces](PieceInfo* Info)
+	{
+		return std::find(ChangedPieces.begin(), ChangedPieces.end(), Info) != ChangedPieces.end();
+	});
+
+	if (!Affected)
+	{
+		for (const std::unique_ptr<lcPiece>& Piece : mPreview->GetModel()->GetPieces())
+		{
+			if (std::find(ChangedPieces.begin(), ChangedPieces.end(), Piece->mPieceInfo) != ChangedPieces.end())
+			{
+				Affected = true;
+				break;
+			}
+		}
+	}
+
+	if (!Affected)
+		return;
+
+	RefreshPendingAssets();
+}
+
+void lcPreviewDockWidget::RefreshPendingAssets()
+{
+	const std::vector<PieceInfo*> Required = mPreview->GetModel()->GetRequiredPieces();
+
+	for (const PieceInfo* Info : Required)
+	{
+		if (Info->mState == lcPieceInfoState::Failed || Info->mState == lcPieceInfoState::Cancelled)
+		{
+			mAssetRefreshPending = false;
+			mViewWidget->hide();
+			mLabel->setText(tr("Preview unavailable"));
+			return;
+		}
+
+		if (Info->mState != lcPieceInfoState::Loaded)
+		{
+			mAssetRefreshPending = true;
+			mViewWidget->hide();
+			mLabel->setText(tr("Loading..."));
+			return;
+		}
+	}
+
+	mAssetRefreshPending = false;
+	mViewWidget->show();
+	mPreview->RefreshDescription();
+	mPreview->Redraw();
+	mLabel->setText(mPreview->GetDescription());
+}
+
+void lcPreviewDockWidget::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
+{
+	int ColorCode = -1;
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPreview->GetModel()->GetPieces())
+	{
+		if (Piece->mPieceInfo == Previous)
+		{
+			ColorCode = Piece->GetColorCode();
+			break;
+		}
+	}
+
+	if (ColorCode == -1)
+		return;
+
+	mAssetRefreshPending = false;
+
+	if (mPreview->SetCurrentPiece(Replacement, ColorCode))
+		RefreshPendingAssets();
+	else
+	{
+		mViewWidget->show();
+		mLabel->setText(tr("Preview unavailable"));
+	}
+}
+
 void lcPreviewDockWidget::ClearPreview()
 {
+	mAssetRefreshPending = false;
+	mViewWidget->show();
 	if (mPreview->GetModel()->GetPieces().size())
 		mPreview->ClearPreview();
 
@@ -96,96 +233,56 @@ lcPreview::lcPreview()
 	mModel = mLoader->GetActiveModel();
 }
 
-bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
+bool lcPreview::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* Info = Library->FindPiece(PartType.toLatin1().constData(), nullptr, false, false);
-
-	if (Info)
+	if (!Info)
 	{
-		for (const std::unique_ptr<lcPiece>& ModelPiece : mModel->GetPieces())
-		{
-			if (Info == ModelPiece->mPieceInfo)
-			{
-				int ModelColorCode = ModelPiece->GetColorCode();
+		ClearPreview();
+		return false;
+	}
 
-				if (ModelColorCode == ColorCode)
-					return true;
+	for (const std::unique_ptr<lcPiece>& ModelPiece : mModel->GetPieces())
+	{
+		if (Info == ModelPiece->mPieceInfo)
+		{
+			int ModelColorCode = ModelPiece->GetColorCode();
+
+			if (ModelColorCode == ColorCode)
+			{
+			RefreshDescription();
+				return true;
 			}
 		}
-
-		mIsModel = Info->IsModel();
-		mDescription = Info->m_strDescription;
-
-		mModel->SelectAllPiecesAction();
-		mModel->DeleteSelectedObjects();
-
-		bool Ready = Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
-
-		if (Ready && Info->IsModel())
-			Ready = static_cast<bool>(Info->GetModel()->EnsureAssetsReady());
-		else if (Ready && Info->IsProject())
-			Ready = static_cast<bool>(Info->GetProject()->EnsureAssetsReady());
-
-		if (!Ready)
-		{
-			Library->ReleasePieceInfo(Info);
-
-			return false;
-		}
-
-		mModel->SetPreviewPieceInfo(Info, lcGetColorIndex(ColorCode));
-
-		std::vector<lcModel*> UpdatedModels;
-
-		mModel->UpdatePieceInfo(UpdatedModels);
-
-		Library->ReleasePieceInfo(Info);
 	}
-	else
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	bool Ready = Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+
+	if (Ready && Info->IsModel())
+		Ready = static_cast<bool>(Info->GetModel()->EnsureAssetsReady());
+	else if (Ready && Info->IsProject())
+		Ready = static_cast<bool>(Info->GetProject()->EnsureAssetsReady());
+
+	if (!Ready)
 	{
-		QString ModelPath = QString("%1/%2").arg(QDir::currentPath(), PartType);
-		std::unique_ptr<Project> NewLoader(new Project(true));
+		Library->ReleasePieceInfo(Info);
+		ClearPreview();
 
-		if (!NewLoader->Load(ModelPath, false))
-		{
-			NewLoader.reset();
-			Library->RemoveTemporaryPieces();
-			return false;
-		}
-
-		NewLoader->SetActiveModel(0, false);
-		lcModel* NewModel = NewLoader->GetActiveModel();
-
-		if (!NewModel->EnsureAssetsReady())
-		{
-			NewLoader.reset();
-			Library->RemoveTemporaryPieces();
-
-			return false;
-		}
-
-		std::vector<lcModel*> UpdatedModels;
-
-		NewModel->UpdatePieceInfo(UpdatedModels);
-		NewModel->CalculateStep(NewModel->GetCurrentStep());
-
-		mLoader = std::move(NewLoader);
-		mModel = NewModel;
-
-		if (Project* ActiveProject = lcGetActiveProject())
-			Library->RestorePieceMappings(ActiveProject->GetRequiredPieces());
-
-		Library->RemoveTemporaryPieces();
-
-		if (!mModel->GetProperties().mDescription.isEmpty())
-			mDescription = mModel->GetProperties().mDescription;
-		else
-			mDescription = PartType;
-
-		mIsModel = true;
+		return false;
 	}
 
+	mIsModel = Info->IsModel();
+	mDescription = Info->m_strDescription;
+
+	mModel->SelectAllPiecesAction();
+	mModel->DeleteSelectedObjects();
+	mModel->SetPreviewPieceInfo(Info, lcGetColorIndex(ColorCode));
+
+	std::vector<lcModel*> UpdatedModels;
+
+	mModel->UpdatePieceInfo(UpdatedModels);
+
+	Library->ReleasePieceInfo(Info);
 	ZoomExtents();
 
 	return true;
@@ -193,14 +290,13 @@ bool lcPreview::SetCurrentPiece(const QString& PartType, int ColorCode)
 
 void lcPreview::ClearPreview()
 {
+	mDescription.clear();
+	mIsModel = false;
 	mLoader = std::unique_ptr<Project>(new Project(true/*IsPreview*/));
 	mLoader->SetActiveModel(0, false);
 	mModel = mLoader->GetActiveModel();
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	if (Project* ActiveProject = lcGetActiveProject())
-		Library->RestorePieceMappings(ActiveProject->GetRequiredPieces());
 
 	Library->RemoveTemporaryPieces();
 	Library->UnloadUnusedParts();
@@ -209,21 +305,43 @@ void lcPreview::ClearPreview()
 
 void lcPreview::UpdatePreview()
 {
-	QString PartType;
+	PieceInfo* Info = nullptr;
 	int ColorCode = -1;
 
 	for (const std::unique_ptr<lcPiece>& ModelPiece : mModel->GetPieces())
 	{
 		if (ModelPiece->mPieceInfo)
 		{
-			PartType = ModelPiece->mPieceInfo->mFileName;
+			Info = ModelPiece->mPieceInfo;
 			ColorCode = ModelPiece->GetColorCode();
 			break;
 		}
 	}
 
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	if (Info)
+		Library->AddPieceReference(Info);
+
 	ClearPreview();
 
-	if (!PartType.isEmpty() && ColorCode > -1)
-		SetCurrentPiece(PartType, ColorCode);
+	if (Info && ColorCode > -1)
+		SetCurrentPiece(Info, ColorCode);
+
+	if (Info)
+		Library->ReleasePieceInfo(Info);
+}
+
+void lcPreview::RefreshDescription()
+{
+	for (const std::unique_ptr<lcPiece>& Piece : mModel->GetPieces())
+	{
+		if (!Piece->mPieceInfo)
+			continue;
+
+		mDescription = QString::fromLatin1(Piece->mPieceInfo->m_strDescription);
+		return;
+	}
+
+	mDescription.clear();
 }

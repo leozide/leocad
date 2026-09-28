@@ -15,7 +15,7 @@ struct lcPartSourceSnapshot
 	QString FileName;
 	QString LibraryDirectory;
 	QString CachePath;
-	QString ProjectPath;
+	std::vector<QString> TextureSearchDirectories;
 	QStringList InlineMeshLines;
 	bool InlineModel = false;
 	bool SkipCache = false;
@@ -75,6 +75,7 @@ public:
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
 	void QueueModelPiece(PieceInfo* Info);
+	void InvalidatePiece(PieceInfo* Info);
 	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void WaitForLoadQueue();

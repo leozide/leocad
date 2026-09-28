@@ -61,6 +61,11 @@ public:
 	}
 
 	lcModel* GetModel(const QString& FileName) const;
+	PieceInfo* FindPiece(const std::string& Name) const;
+	void RegisterPiece(const std::string& Name, PieceInfo* Info);
+	void UnregisterPiece(PieceInfo* Info);
+	void ClearPieceIndex();
+	void TransferPieceIndexTo(Project* Destination);
 
 	lcModel* GetActiveModel() const
 	{
@@ -75,6 +80,16 @@ public:
 	bool IsPreview() const
 	{
 		return mIsPreview;
+	}
+
+	bool UsesStreamingMeshes() const
+	{
+		return mStreamMeshes;
+	}
+
+	void SetStreamMeshes(bool StreamMeshes)
+	{
+		mStreamMeshes = StreamMeshes;
 	}
 
 	bool IsModified() const;
@@ -101,7 +116,7 @@ public:
 	bool Load(const QString& FileName, bool ShowErrors);
 	lcResult<void> Save(const QString& FileName);
 	bool Save(QTextStream& Stream);
-	void Merge(Project* Other);
+	lcResult<void> Merge(const std::vector<Project*>& Sources);
 	bool ImportLDD(const QString& FileName);
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
@@ -121,17 +136,23 @@ public:
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
 protected:
+	static bool CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming);
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 
 	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 
 	bool mIsPreview;
+	// External projects can parse their models before queuing direct meshes.
+	bool mStreamMeshes = false;
 	bool mModified;
 	QString mFileName;
 	QFileSystemWatcher mFileWatcher;
 
 	std::vector<std::unique_ptr<lcModel>> mModels;
+	// Maps normalized local filenames to PieceInfo objects visible in this project.
+	// This map does not own them; lcPiecesLibrary tracks and deletes them.
+	std::map<std::string, PieceInfo*> mPieceIndex;
 	lcModel* mActiveModel;
 	std::unique_ptr<lcInstructions> mInstructions;
 

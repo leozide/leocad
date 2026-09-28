@@ -161,7 +161,7 @@ public:
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo);
 	bool SetPieceId(PieceInfo* Info);
-	bool FileLoad(lcFile& file);
+	bool FileLoad(lcFile& file, Project* Project);
 
 	void UpdatePosition(lcStep Step) override;
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);

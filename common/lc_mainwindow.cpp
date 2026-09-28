@@ -795,12 +795,12 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 	return NewView;
 }
 
-void lcMainWindow::PreviewPiece(const QString& PartId, int ColorCode, bool ShowPreview)
+void lcMainWindow::PreviewPiece(PieceInfo* Info, int ColorCode, bool ShowPreview)
 {
 	if (ShowPreview)
 		mPreviewToolBar->show();
 
-	mPreviewWidget->SetCurrentPiece(PartId, ColorCode);
+	mPreviewWidget->SetCurrentPiece(Info, ColorCode);
 }
 
 void lcMainWindow::CreatePreviewWidget()
@@ -1247,7 +1247,7 @@ void lcMainWindow::PartListPicked(PieceInfo* Info)
 
 	quint32 ColorCode = lcGetColorCode(mPartSelectionWidget->GetColorIndex());
 
-	PreviewPiece(Info->mFileName, ColorCode, true);
+	PreviewPiece(Info, ColorCode, true);
 }
 
 void lcMainWindow::ColorButtonClicked()
@@ -2255,7 +2255,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		int ColorIndex = Piece->GetColorIndex();
 		quint32 ColorCode = lcGetColorCode(ColorIndex);
 
-		PreviewPiece(Piece->mPieceInfo->mFileName, ColorCode, false);
+		PreviewPiece(Piece->mPieceInfo, ColorCode, false);
 	}
 
 	QString Message;
@@ -2612,7 +2612,6 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
-	const std::vector<PieceInfo*> PreviousMappedParts = Library->CaptureMappedPieces(PreviousParts);
 	Library->SetPieceRequestsVisible(PreviousParts, false);
 
 	Project* NewProject = new Project();
@@ -2627,7 +2626,6 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	}
 
 	delete NewProject;
-	Library->RestorePieceMappings(PreviousMappedParts);
 	Library->RemoveTemporaryPieces();
 	Library->SetPieceRequestsVisible(PreviousParts, true);
 	return false;
@@ -2660,12 +2658,21 @@ void lcMainWindow::ShowMergeDialog()
 	}
 
 	size_t ModelCount = 0;
+	std::vector<Project*> Sources;
+	Sources.reserve(ProjectsToMerge.size());
 
 	for (const std::unique_ptr<Project>& ProjectToMerge : ProjectsToMerge)
 	{
 		ModelCount += ProjectToMerge->GetModels().size();
+		Sources.push_back(ProjectToMerge.get());
+	}
 
-		lcGetActiveProject()->Merge(ProjectToMerge.get());
+	const lcResult<void> MergeResult = lcGetActiveProject()->Merge(Sources);
+
+	if (!MergeResult)
+	{
+		QMessageBox::warning(this, tr("Cannot Merge Model"), MergeResult.error());
+		return;
 	}
 
 	if (ModelCount == 1)
@@ -2687,7 +2694,6 @@ void lcMainWindow::ImportLDD()
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
-	const std::vector<PieceInfo*> PreviousMappedParts = Library->CaptureMappedPieces(PreviousParts);
 	Library->SetPieceRequestsVisible(PreviousParts, false);
 
 	Project* NewProject = new Project();
@@ -2700,7 +2706,6 @@ void lcMainWindow::ImportLDD()
 	else
 	{
 		delete NewProject;
-		Library->RestorePieceMappings(PreviousMappedParts);
 		Library->RemoveTemporaryPieces();
 		Library->SetPieceRequestsVisible(PreviousParts, true);
 	}

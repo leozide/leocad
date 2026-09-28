@@ -29,6 +29,7 @@ public:
 	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale);
 	void ReleaseThumbnail(lcPartThumbnailId ThumbnailId);
 	void Clear();
+	void RefreshPieces(const std::vector<PieceInfo*>& ChangedPieces);
 
 signals:
 	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);

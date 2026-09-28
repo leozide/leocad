@@ -188,7 +188,7 @@ bool lcPiece::ParseLDrawLine(QTextStream& Stream)
 	return false;
 }
 
-bool lcPiece::FileLoad(lcFile& file)
+bool lcPiece::FileLoad(lcFile& file, Project* Project)
 {
 	quint8 version, ch;
 
@@ -323,7 +323,7 @@ bool lcPiece::FileLoad(lcFile& file)
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 	lcstrcat(name, ".dat");
 
-	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, nullptr, true, false);
+	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, Project, true, false);
 	SetPieceInfo(pInfo, QString(), true, true);
 
 	// 11 (0.77)
@@ -973,7 +973,7 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), nullptr, true, false);
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), Model->GetProject(), true, false);
 
 	if (mPieceInfo != Info)
 	{

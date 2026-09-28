@@ -762,7 +762,7 @@ bool lcAssetLoader::ProcessCompletions()
 			RequestedPart->Terminal = true;
 			RequestedPart->Succeeded = false;
 
-			if (HasConsumer)
+			if (HasConsumer && !Stale)
 				Info->mState = lcPieceInfoState::Cancelled;
 
 			mResultReady.wakeAll();
@@ -779,7 +779,7 @@ bool lcAssetLoader::ProcessCompletions()
 		{
 			const auto TextureLookup = [this, &RequestedPart](const char* Name)
 			{
-				return mLibrary->FindTextureDeferred(Name, RequestedPart->Source.ProjectPath);
+				return mLibrary->FindTextureDeferred(Name, RequestedPart->Source.TextureSearchDirectories);
 			};
 
 			if (Completed.Result.CacheData && !Completed.Result.Mesh)
@@ -920,7 +920,7 @@ void lcAssetLoader::DispatchNotifications()
 
 		PieceInfo* Info = Notification.RequestedPart->Info;
 
-		if (!mLibrary->HasPieceConsumers(Info))
+		if (Notification.RequestedPart->Obsolete || !mLibrary->HasPieceConsumers(Info))
 		{
 			mLibrary->ReleasePieceLoadHold(Info);
 
@@ -1123,6 +1123,59 @@ void lcAssetLoader::QueueModelPiece(PieceInfo* Info)
 	Info->mState = lcPieceInfoState::Unloaded;
 
 	QueuePieceLocked(Info, Priority::Visible);
+}
+
+void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	std::shared_ptr<Request> Removed;
+	bool ReleaseHold = false;
+
+	{
+		QMutexLocker QueueLock(&mQueueMutex);
+
+		const auto It = mRequests.find(Info);
+
+		if (It != mRequests.end())
+		{
+			Removed = It->second;
+			Removed->Obsolete = true;
+			Removed->Terminal = true;
+			Removed->Succeeded = false;
+			ReleaseHold = !Removed->Running;
+			mRequests.erase(It);
+
+			const auto EraseRequest = [&Removed](auto& Queue)
+			{
+				Queue.erase(std::remove(Queue.begin(), Queue.end(), Removed), Queue.end());
+			};
+
+			EraseRequest(mQueue);
+			EraseRequest(mPausedQueue);
+		}
+
+		for (Notification& Pending : mNotifications)
+			if (Pending.RequestedPart->Info == Info)
+				Pending.RequestedPart->Obsolete = true;
+
+		mResultReady.wakeAll();
+	}
+
+	if (Removed && !Removed->Running)
+		Removed->StagedMesh.reset();
+
+	Info->mState = lcPieceInfoState::Unloaded;
+	mLibrary->ClearPieceLoadError(Info);
+
+	// Running work retains its load hold until its stale completion arrives.
+	if (ReleaseHold)
+		mLibrary->ReleasePieceLoadHold(Info);
+
+	if (Removed)
+		CancelUnusedTextureRequests();
+
+	emit mLibrary->AssetRequestsChanged();
 }
 
 void lcAssetLoader::WaitForLoadQueue()

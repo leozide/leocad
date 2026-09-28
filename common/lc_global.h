@@ -13,6 +13,7 @@
 #include <QOpenGLWidget>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QSaveFile>
 #include <map>
 #include <vector>
 #include <array>

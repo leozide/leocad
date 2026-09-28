@@ -1,6 +1,8 @@
 #include "lc_global.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
+#include "lc_previewwidget.h"
+#include "piece.h"
 #include "pieceinf.h"
 #include "camera.h"
 #include "project.h"
@@ -10,6 +12,7 @@
 #include "lc_mainwindow.h"
 #include "lc_view.h"
 #include "lc_library.h"
+#include "lc_thumbnailmanager.h"
 #include "lc_application.h"
 #include "lc_profile.h"
 #include "lc_file.h"
@@ -78,6 +81,64 @@ Project::Project(bool IsPreview)
 
 Project::~Project()
 {
+	mModels.clear();
+	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
+}
+
+PieceInfo* Project::FindPiece(const std::string& Name) const
+{
+	const std::map<std::string, PieceInfo*>::const_iterator It = mPieceIndex.find(Name);
+
+	return It == mPieceIndex.end() ? nullptr : It->second;
+}
+
+void Project::RegisterPiece(const std::string& Name, PieceInfo* Info)
+{
+	mPieceIndex[Name] = Info;
+}
+
+void Project::UnregisterPiece(PieceInfo* Info)
+{
+	for (std::map<std::string, PieceInfo*>::iterator It = mPieceIndex.begin(); It != mPieceIndex.end();)
+	{
+		if (It->second == Info)
+			It = mPieceIndex.erase(It);
+		else
+			It++;
+	}
+}
+
+void Project::ClearPieceIndex()
+{
+	mPieceIndex.clear();
+}
+
+void Project::TransferPieceIndexTo(Project* Destination)
+{
+	for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+	{
+		if (!Destination->FindPiece(Entry.first))
+			Destination->RegisterPiece(Entry.first, Entry.second);
+	}
+
+	mPieceIndex.clear();
+}
+
+bool Project::CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming)
+{
+	if (Existing == Incoming)
+		return true;
+
+	if (Existing->IsPlaceholder() && Incoming->IsPlaceholder())
+		return true;
+
+	if (!Existing->IsProject() || !Incoming->IsProject())
+		return false;
+
+	const QString ExistingPath = QFileInfo(Existing->GetProject()->GetFileName()).canonicalFilePath();
+	const QString IncomingPath = QFileInfo(Incoming->GetProject()->GetFileName()).canonicalFilePath();
+
+	return !ExistingPath.isEmpty() && ExistingPath == IncomingPath;
 }
 
 lcModel* Project::GetModel(const QString& FileName) const
@@ -240,6 +301,20 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 			continue;
 		}
 
+		if (!CurrentName.isEmpty())
+		{
+			const std::string PieceName = lcPiecesLibrary::NormalizePieceName(Name.toLatin1().constData());
+			PieceInfo* ExistingPiece = FindPiece(PieceName);
+			lcModel* CurrentModel = GetModel(CurrentName);
+
+			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceInfo()) &&
+				(!ExistingPiece->IsModel() || ExistingModels.contains(Name, Qt::CaseInsensitive)))
+			{
+				QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project, please enter a unique name.").arg(Name));
+				continue;
+			}
+		}
+
 		break;
 	}
 
@@ -291,6 +366,132 @@ void Project::ShowModelListDialog()
 
 	std::vector<std::unique_ptr<lcModel>> NewModels;
 	std::vector<lcModelListDialogEntry> Results = Dialog.GetResults();
+	std::vector<std::pair<PieceInfo*, PieceInfo*>> Replacements;
+	std::vector<lcModel*> ChangedModels;
+	std::vector<lcModelPieceRename> Renames;
+	std::set<std::string> FinalNames;
+	int ModelIndex = Dialog.GetActiveModelIndex();
+
+	if (ModelIndex == -1)
+	{
+		for (size_t Index = 0; Index < Results.size(); Index++)
+		{
+			if (Results[Index].ExistingModel != mActiveModel)
+				continue;
+
+			ModelIndex = static_cast<int>(Index);
+			break;
+		}
+
+		if (ModelIndex == -1)
+			ModelIndex = 0;
+	}
+
+	// Validate the final names before changing any model or index entry.
+	for (const lcModelListDialogEntry& Entry : Results)
+	{
+		const std::string Name = lcPiecesLibrary::NormalizePieceName(Entry.Name.toLatin1().constData());
+
+		if (!FinalNames.insert(Name).second)
+		{
+			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			return;
+		}
+
+		if (!Entry.ExistingModel || Entry.ExistingModel->GetFileName() == Entry.Name)
+			continue;
+
+		PieceInfo* Occupant = FindPiece(Name);
+
+		if (!Occupant || Occupant == Entry.ExistingModel->GetPieceInfo())
+			continue;
+
+		const bool Vacated = std::any_of(mModels.begin(), mModels.end(), [&Results, Occupant, &Name](const std::unique_ptr<lcModel>& OldModel)
+		{
+			if (OldModel->GetPieceInfo() != Occupant)
+				return false;
+
+			const std::vector<lcModelListDialogEntry>::const_iterator Result = std::find_if(Results.begin(), Results.end(), [OldModel = OldModel.get()](const lcModelListDialogEntry& CheckEntry)
+			{
+				return CheckEntry.ExistingModel == OldModel;
+			});
+
+			return Result == Results.end() || lcPiecesLibrary::NormalizePieceName(Result->Name.toLatin1().constData()) != Name;
+		});
+
+		if (!Vacated)
+		{
+			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			return;
+		}
+	}
+
+	// Free names being renamed or deleted before applying the new names.
+	for (const std::unique_ptr<lcModel>& OldModel : mModels)
+	{
+		const lcModel* Model = OldModel.get();
+		const std::vector<lcModelListDialogEntry>::const_iterator Kept = std::find_if(Results.begin(), Results.end(), [Model](const lcModelListDialogEntry& Entry)
+		{
+			return Entry.ExistingModel == Model;
+		});
+
+		if (Kept != Results.end())
+		{
+			if (Kept->Name != Model->GetFileName())
+				UnregisterPiece(Model->GetPieceInfo());
+
+			continue;
+		}
+
+		const std::string OldName = lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData());
+
+		for (const lcModelListDialogEntry& Entry : Results)
+		{
+			if (lcPiecesLibrary::NormalizePieceName(Entry.Name.toLatin1().constData()) != OldName)
+				continue;
+
+			// A new model can reuse this PieceInfo. A renamed model keeps its own
+			// PieceInfo, so references to the deleted model are rebound below.
+			lcGetPiecesLibrary()->InvalidatePiece(OldModel->GetPieceInfo());
+			OldModel->GetPieceInfo()->SetPlaceholder();
+			OldModel->GetPieceInfo()->mState = lcPieceInfoState::Loaded;
+
+			if (Entry.ExistingModel)
+			{
+				UnregisterPiece(OldModel->GetPieceInfo());
+				Replacements.emplace_back(OldModel->GetPieceInfo(), Entry.ExistingModel->GetPieceInfo());
+			}
+
+			break;
+		}
+	}
+
+	// Rename surviving models before loading any duplicates from them.
+	for (const lcModelListDialogEntry& Entry : Results)
+	{
+		lcModel* Model = Entry.ExistingModel;
+
+		if (!Model || Model->GetFileName() == Entry.Name)
+			continue;
+
+		const QString OldName = Model->GetFileName();
+
+		if (!lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData()))
+		{
+			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			return;
+		}
+
+		Model->SetFileName(Entry.Name);
+		Renames.push_back({ Model->GetPieceInfo(), OldName, Entry.Name });
+
+		mModified = true;
+	}
+
+	// Apply original-to-final names together so a later rename cannot rewrite
+	// an earlier rename's history snapshots a second time.
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->RenamePieces(Renames);
 
 	for (const lcModelListDialogEntry& Entry : Results)
 	{
@@ -319,7 +520,6 @@ void Project::ShowModelListDialog()
 
 				Model->LoadLDraw(Buffer, this);
 				Model->SetFileName(Entry.Name);
-				Model->CreatePieceInfo(this);
 			}
 
 			Model->CreatePieceInfo(this);
@@ -327,19 +527,21 @@ void Project::ShowModelListDialog()
 
 			mModified = true;
 		}
-		else if (Model->GetProperties().mFileName != Entry.Name)
+		NewModels.emplace_back(Model);
+	}
+
+	for (const std::pair<PieceInfo*, PieceInfo*>& Replacement : Replacements)
+	{
+		for (const std::unique_ptr<lcModel>& Model : NewModels)
 		{
-			const QString OldName = Model->GetProperties().mFileName;
-			Model->SetFileName(Entry.Name);
-			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData());
-
-			for (const std::unique_ptr<lcModel> &CheckModel : mModels)
-				CheckModel->RenamePiece(Model->GetPieceInfo(), OldName, Entry.Name);
-
-			mModified = true;
+			if (Model->RebindPieceInfo(Replacement.first, Replacement.second) && std::find(ChangedModels.begin(), ChangedModels.end(), Model.get()) == ChangedModels.end())
+				ChangedModels.push_back(Model.get());
 		}
 
-		NewModels.emplace_back(Model);
+		if (gMainWindow->GetCurrentPieceInfo() == Replacement.first)
+			gMainWindow->SetCurrentPieceInfo(Replacement.second);
+
+		gMainWindow->GetPreviewWidget()->RebindPieceInfo(Replacement.first, Replacement.second);
 	}
 
 	for (std::unique_ptr<lcModel>& Model : mModels)
@@ -353,11 +555,15 @@ void Project::ShowModelListDialog()
 	mModels = std::move(NewModels);
 
 	gMainWindow->UpdateTitle();
+
+	SetActiveModel(ModelIndex, true);
 	gMainWindow->UpdateModels();
 
-	int ModelIndex = Dialog.GetActiveModelIndex();
-	if (ModelIndex != -1)
-		SetActiveModel(ModelIndex, true);
+	if (!Renames.empty())
+		gMainWindow->GetPreviewWidget()->RefreshDescription();
+
+	for (lcModel* Model : ChangedModels)
+		Model->RefreshPreview();
 }
 
 void Project::SetFileName(const QString& FileName)
@@ -390,6 +596,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	}
 
 	mModels.clear();
+	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
 	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
@@ -474,8 +681,18 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 		if (Model->GetProperties().mFileName.isEmpty())
 		{
-			Model->SetFileName(FileInfo.fileName());
-			lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), FileInfo.fileName().toLatin1());
+			QString ModelName = FileInfo.fileName();
+			int Suffix = 2;
+
+			while (!lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), ModelName.toLatin1().constData()))
+			{
+				const QString Extension = FileInfo.suffix().isEmpty() ? QString() : QLatin1Char('.') + FileInfo.suffix();
+				const QString NameSuffix = QLatin1Char(' ') + QString::number(Suffix++) + Extension;
+				const int BaseLength = LC_PIECE_NAME_LEN - 1 - NameSuffix.length();
+				ModelName = FileInfo.completeBaseName().left(BaseLength) + NameSuffix;
+			}
+
+			Model->SetFileName(ModelName);
 		}
 	}
 
@@ -492,7 +709,12 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			Info->mState = lcPieceInfoState::Unloaded;
 		}
 		else
+		{
+			if (mStreamMeshes)
+				lcGetPiecesLibrary()->InvalidatePiece(Model->GetPieceInfo());
+
 			Model->QueueMeshBuild();
+		}
 	}
 
 	if (!mIsPreview)
@@ -508,22 +730,116 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 lcResult<void> Project::Save(const QString& FileName)
 {
-	SetFileName(QString());
+	std::vector<std::pair<lcModel*, lcModelAssetSourceState>> PreviousAssetSources;
+	const QString SourceDirectory = mFileName.isEmpty() ? QString() : QFileInfo(mFileName).absolutePath();
+	const QString DestinationDirectory = QFileInfo(FileName).absolutePath();
+	const bool DirectoryChanged = SourceDirectory.isEmpty() ||
+		(SourceDirectory != DestinationDirectory && QDir(SourceDirectory).canonicalPath() != QDir(DestinationDirectory).canonicalPath());
 
-	QFile File(FileName);
+	if (DirectoryChanged && !SourceDirectory.isEmpty())
+	{
+		for (const std::unique_ptr<lcModel>& Model : mModels)
+		{
+			PreviousAssetSources.emplace_back(Model.get(), Model->GetAssetSourceState());
+			Model->PreserveAssetSourceDirectory(SourceDirectory, true);
+		}
+	}
+
+	const auto RestoreAssetSources = [&PreviousAssetSources]()
+	{
+		for (const std::pair<lcModel*, lcModelAssetSourceState>& Entry : PreviousAssetSources)
+			Entry.first->RestoreAssetSourceState(Entry.second);
+	};
+
+	QSaveFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-
-	QTextStream Stream(&File);
-	bool Success = Save(Stream);
-	File.close();
-
-	if (Success)
 	{
-		SetFileName(FileName);
-		mModified = false;
+		RestoreAssetSources();
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 	}
+
+	{
+		QTextStream Stream(&File);
+		const bool Serialized = Save(Stream);
+		Stream.flush();
+
+		if (!Serialized || Stream.status() != QTextStream::Ok)
+		{
+			File.cancelWriting();
+			RestoreAssetSources();
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, tr("Could not write all model data.")));
+		}
+	}
+
+	const QString PreviousFileName = mFileName;
+	SetFileName(QString());
+
+	if (!File.commit())
+	{
+		SetFileName(PreviousFileName);
+		RestoreAssetSources();
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+	}
+
+	SetFileName(FileName);
+
+	if (DirectoryChanged)
+	{
+		lcPiecesLibrary* Library = lcGetPiecesLibrary();
+		std::vector<PieceInfo*> LocalPieces;
+		std::vector<PieceInfo*> ChangedPieces;
+
+		for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+		{
+			PieceInfo* Info = Entry.second;
+
+			if (Info->IsModel())
+				continue;
+
+			Library->AddPieceReference(Info);
+			LocalPieces.push_back(Info);
+		}
+
+		for (PieceInfo* Info : LocalPieces)
+			if (Library->RemapProjectPiece(Info, DestinationDirectory, mIsPreview))
+				ChangedPieces.push_back(Info);
+
+		for (const std::unique_ptr<lcModel>& Model : mModels)
+		{
+			if (!Model->HasDirectGeometry())
+				continue;
+
+			Library->InvalidatePiece(Model->GetPieceInfo());
+			Model->QueueMeshBuild();
+			ChangedPieces.push_back(Model->GetPieceInfo());
+		}
+
+		if (!ChangedPieces.empty())
+		{
+			std::vector<lcModel*> UpdatedModels;
+
+			for (const std::unique_ptr<lcModel>& Model : mModels)
+			{
+				Model->UpdatePieceInfo(UpdatedModels);
+				ChangedPieces.push_back(Model->GetPieceInfo());
+			}
+
+			Library->GetThumbnailManager()->RefreshPieces(ChangedPieces);
+			lcView::UpdateProjectViews(this);
+
+			if (!mIsPreview && gMainWindow && gMainWindow->GetPreviewWidget())
+				gMainWindow->GetPreviewWidget()->RefreshAfterAssetChange(ChangedPieces);
+		}
+
+		for (PieceInfo* Info : LocalPieces)
+			Library->ReleasePieceInfo(Info);
+	}
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+		Model->SetSaved();
+
+	mModified = false;
 
 	return lcResult<void>();
 }
@@ -538,7 +854,6 @@ bool Project::Save(QTextStream& Stream)
 			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
 
 		Model->SaveLDraw(Stream, false, 0);
-		Model->SetSaved();
 
 		if (MPD)
 			Stream << QLatin1String("0 NOFILE\r\n");
@@ -547,37 +862,194 @@ bool Project::Save(QTextStream& Stream)
 	return true;
 }
 
-void Project::Merge(Project* Other)
+lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
 {
-	for (std::unique_ptr<lcModel>& Model : Other->mModels)
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	std::map<std::string, PieceInfo*> NonModelPieces;
+	std::set<std::string> DestinationModelNames;
+	std::set<std::string> OriginalModelNames;
+	std::set<std::string> PlannedModelNames;
+	QString ConflictName;
+
+	struct ModelPlan
 	{
-		QString FileName = Model->GetProperties().mFileName;
+		lcModel* Model;
+		QString FinalName;
+	};
 
-		for (;;)
-		{
-			bool Duplicate = false;
+	std::vector<ModelPlan> PlannedModels;
 
-			for (const std::unique_ptr<lcModel>& ExistingModel : mModels)
-			{
-				if (ExistingModel->GetProperties().mFileName == FileName)
-				{
-					Duplicate = true;
-					break;
-				}
-			}
-
-			if (!Duplicate)
-				break;
-
-			FileName = tr("Merged ") + FileName;
-			Model->SetFileName(FileName);
-		}
-
-		mModels.emplace_back(std::move(Model));
+	for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+	{
+		if (Entry.second->IsModel())
+			DestinationModelNames.insert(Entry.first);
+		else
+			NonModelPieces.emplace(Entry.first, Entry.second);
 	}
 
-	Other->mModels.clear();
-	mModified = true;
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+	{
+		DestinationModelNames.insert(lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData()));
+
+		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+		{
+			if (Piece->mPieceInfo && !Piece->mPieceInfo->IsModel())
+				NonModelPieces.emplace(lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData()), Piece->mPieceInfo);
+		}
+	}
+
+	const auto RegisterSourcePiece = [&NonModelPieces, &DestinationModelNames, &ConflictName](const std::string& Name, PieceInfo* Info)
+	{
+		if (!Info || Info->IsModel())
+			return true;
+
+		if (DestinationModelNames.find(Name) != DestinationModelNames.end())
+		{
+			ConflictName = QString::fromStdString(Name);
+			return false;
+		}
+
+		const std::map<std::string, PieceInfo*>::const_iterator Existing = NonModelPieces.find(Name);
+
+		if (Existing != NonModelPieces.end() && !CanShareMergePiece(Existing->second, Info))
+		{
+			ConflictName = QString::fromStdString(Name);
+			return false;
+		}
+
+		NonModelPieces.emplace(Name, Info);
+		return true;
+	};
+
+	// Validate the identities behind every piece name before changing any project.
+	for (Project* Source : Sources)
+	{
+		for (const std::map<std::string, PieceInfo*>::value_type& Entry : Source->mPieceIndex)
+		{
+			if (!RegisterSourcePiece(Entry.first, Entry.second))
+				return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
+		}
+
+		for (const std::unique_ptr<lcModel>& Model : Source->mModels)
+		{
+			OriginalModelNames.insert(lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData()));
+
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+			{
+				const std::string Name = lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData());
+
+				if (!RegisterSourcePiece(Name, Piece->mPieceInfo))
+					return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
+			}
+		}
+	}
+
+	// Pick final model names against the complete set of incoming piece names.
+	for (Project* Source : Sources)
+	{
+		for (const std::unique_ptr<lcModel>& Model : Source->mModels)
+		{
+			const QString OriginalName = Model->GetFileName();
+			QString FinalName = OriginalName;
+			int RenameIndex = 0;
+
+			for (;;)
+			{
+				const std::string Name = lcPiecesLibrary::NormalizePieceName(FinalName.toLatin1().constData());
+				const bool ReservedOriginal = FinalName != OriginalName && OriginalModelNames.find(Name) != OriginalModelNames.end();
+				const bool Duplicate = DestinationModelNames.find(Name) != DestinationModelNames.end() || NonModelPieces.find(Name) != NonModelPieces.end() ||
+					PlannedModelNames.find(Name) != PlannedModelNames.end() || ReservedOriginal ||
+					Library->FindPiece(FinalName.toLatin1().constData(), nullptr, false, false) != nullptr;
+
+				if (!Duplicate)
+				{
+					PlannedModelNames.insert(Name);
+					PlannedModels.push_back({ Model.get(), FinalName });
+					break;
+				}
+
+				RenameIndex++;
+				const QString Prefix = RenameIndex == 1 ? tr("Merged ") : tr("Merged %1 ").arg(RenameIndex);
+				FinalName = QString::fromLatin1((Prefix + OriginalName).toLatin1().left(LC_PIECE_NAME_LEN - 1));
+			}
+		}
+	}
+
+	// Reserve all planned names before moving models, so a failed reservation
+	// can be rolled back without leaving either project partly merged.
+	std::vector<const ModelPlan*> AppliedRenames;
+
+	for (const ModelPlan& Planned : PlannedModels)
+	{
+		if (Planned.FinalName == Planned.Model->GetFileName())
+			continue;
+
+		if (!Library->RenamePiece(Planned.Model->GetPieceInfo(), Planned.FinalName.toLatin1().constData()))
+		{
+			for (std::vector<const ModelPlan*>::reverse_iterator It = AppliedRenames.rbegin(); It != AppliedRenames.rend(); It++)
+				Library->RenamePiece((*It)->Model->GetPieceInfo(), (*It)->Model->GetFileName().toLatin1().constData());
+
+			return lcUnexpected(tr("Could not reserve submodel name '%1'.").arg(Planned.FinalName));
+		}
+
+		AppliedRenames.push_back(&Planned);
+	}
+
+	size_t PlanIndex = 0;
+
+	for (Project* Source : Sources)
+	{
+		std::vector<lcModelPieceRename> Renames;
+		std::vector<lcModel*> ImportedModels;
+
+		for (const std::unique_ptr<lcModel>& Model : Source->mModels)
+		{
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+			{
+				PieceInfo* Incoming = Piece->mPieceInfo;
+
+				if (!Incoming || Incoming->IsModel())
+					continue;
+
+				const std::string Name = lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData());
+				PieceInfo* Existing = FindPiece(Name);
+
+				if (!Existing || Existing == Incoming || !CanShareMergePiece(Existing, Incoming))
+					continue;
+
+				const QString PieceId = Piece->GetID();
+				Piece->SetPieceInfo(Existing, PieceId, false, false);
+				Library->ReleasePieceInfo(Incoming);
+			}
+		}
+
+		for (std::unique_ptr<lcModel>& Model : Source->mModels)
+		{
+			const ModelPlan& Planned = PlannedModels[PlanIndex++];
+
+			if (Planned.FinalName != Model->GetFileName())
+			{
+				Renames.push_back({ Model->GetPieceInfo(), Model->GetFileName(), Planned.FinalName });
+				Model->SetFileName(Planned.FinalName);
+			}
+
+			Model->SetProject(this);
+			ImportedModels.push_back(Model.get());
+			mModels.emplace_back(std::move(Model));
+		}
+
+		// Only incoming histories used these original names for the incoming models.
+		for (lcModel* Model : ImportedModels)
+			Model->RenamePieces(Renames);
+
+		Library->TransferProjectPieces(Source, this);
+		Source->mModels.clear();
+	}
+
+	if (!Sources.empty())
+		mModified = true;
+
+	return lcResult<void>();
 }
 
 bool Project::ImportLDD(const QString& FileName)

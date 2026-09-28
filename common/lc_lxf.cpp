@@ -73,7 +73,7 @@ static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std:
 	return true;
 }
 
-bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, std::vector<std::vector<lcPiece*>>& Groups)
+bool lcImportLXFMLFile(const QString& FileData, Project* Project, std::vector<lcPiece*>& Pieces, std::vector<std::vector<lcPiece*>>& Groups)
 {
 	std::map<int, int> MaterialTable;
 	std::map<int, std::string> BrickTable;
@@ -154,9 +154,9 @@ bool lcImportLXFMLFile(const QString& FileData, std::vector<lcPiece*>& Pieces, s
 				PieceInfo* Info = nullptr;
 				const auto BrickIt = BrickTable.find(LegoID.toInt());
 				if (BrickIt != BrickTable.end())
-					Info = lcGetPiecesLibrary()->FindPiece(BrickIt->second.c_str(), nullptr, true, false);
+					Info = lcGetPiecesLibrary()->FindPiece(BrickIt->second.c_str(), Project, true, false);
 				else
-					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1() + ".dat", nullptr, true, false);
+					Info = lcGetPiecesLibrary()->FindPiece(LegoID.toLatin1() + ".dat", Project, true, false);
 
 				const auto ColorIt = MaterialTable.find(Material);
 				int ColorCode = 16;

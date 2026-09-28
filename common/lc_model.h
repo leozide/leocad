@@ -68,6 +68,19 @@ struct lcInsertPieceInfo
 	int ColorIndex;
 };
 
+struct lcModelPieceRename
+{
+	PieceInfo* Info;
+	QString OldName;
+	QString NewName;
+};
+
+struct lcModelAssetSourceState
+{
+	std::vector<QString> Directories;
+	bool PreferCurrentDirectory;
+};
+
 class lcModelProperties
 {
 public:
@@ -146,6 +159,12 @@ public:
 		return mProject;
 	}
 
+	void SetProject(Project* Project);
+	void PreserveAssetSourceDirectory(const QString& Directory, bool PreferCurrentDirectory);
+	lcModelAssetSourceState GetAssetSourceState() const;
+	void RestoreAssetSourceState(const lcModelAssetSourceState& State);
+	std::vector<QString> GetAssetSearchDirectories() const;
+
 	bool IsActive() const
 	{
 		return mActive;
@@ -157,9 +176,11 @@ public:
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
 	void CreatePieceInfo(Project* Project);
+	bool RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement);
 	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
 	void QueueMeshBuild();
 	void UpdateAllViews() const;
+	void RefreshPreview() const;
 	std::vector<PieceInfo*> GetRequiredPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 
@@ -267,7 +288,7 @@ public:
 	void ShowSelectedPiecesLater();
 	void InsertStepAndMoveSelectedPieces(lcStep Step);
 	void SetPieceSteps(const std::vector<std::pair<lcPiece*, lcStep>>& PieceSteps);
-	void RenamePiece(PieceInfo* Info, const QString& OldName, const QString& NewName);
+	void RenamePieces(const std::vector<lcModelPieceRename>& Renames);
 
 	void MoveSelectionToModel(lcModel* Model);
 	void InlineSelectedModels();
@@ -470,7 +491,11 @@ protected:
 
 	lcPOVRayOptions mPOVRayOptions;
 	lcModelProperties mProperties;
-	Project* const mProject;
+	Project* mProject;
+	// Search roots retained when a model moves between project directories.
+	// Their order and the current-directory preference are saved with the model.
+	std::vector<QString> mAssetSourceDirectories;
+	bool mPreferCurrentAssetDirectory = true;
 	PieceInfo* mPieceInfo;
 
 	bool mIsPreview;

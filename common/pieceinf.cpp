@@ -59,21 +59,30 @@ void PieceInfo::SetLoadedPartMesh(lcMesh* Mesh)
 void PieceInfo::SetPlaceholder()
 {
 	lcGetPiecesLibrary()->ClearPieceLoadError(this);
-	lcMesh* Mesh = new lcMesh;
-	Mesh->CreateBox();
-	SetMesh(Mesh);
-
+	Project* PreviousProject = IsProject() ? mProject : nullptr;
 	mType = lcPieceInfoType::Placeholder;
 	mModel = nullptr;
 	mProject = nullptr;
+	strncpy(m_strDescription, mFileName, sizeof(m_strDescription) - 1);
+	m_strDescription[sizeof(m_strDescription) - 1] = 0;
+	delete PreviousProject;
+
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	SetMesh(Mesh);
 }
 
 void PieceInfo::SetModel(lcModel* Model)
 {
 	if (mModel != Model)
 	{
+		// A submodel can take the name of a local external project. Keep this
+		// PieceInfo so existing placements continue to refer to the same name.
+		Project* PreviousProject = IsProject() ? mProject : nullptr;
 		mType = lcPieceInfoType::Model;
 		mModel = Model;
+		mProject = nullptr;
+		delete PreviousProject;
 		delete mMesh;
 		mMesh = nullptr;
 		mState = lcPieceInfoState::Unloaded;
@@ -83,19 +92,23 @@ void PieceInfo::SetModel(lcModel* Model)
 	lcGetPiecesLibrary()->SetModelPieceName(this, Model->GetProperties().mFileName.toLatin1().data());
 }
 
-void PieceInfo::CreateProject(Project* Project, const char* PieceName)
+void PieceInfo::CreateProject(Project* NewProject, const char* PieceName)
 {
-	if (mProject != Project)
+	if (mProject != NewProject)
 	{
 		lcGetPiecesLibrary()->ClearPieceLoadError(this);
+		Project* PreviousProject = IsProject() ? mProject : nullptr;
 		mType = lcPieceInfoType::Project;
-		mProject = Project;
+		mModel = nullptr;
+		mProject = NewProject;
 		mState = lcPieceInfoState::Loaded;
+		ReleaseMesh();
+		delete PreviousProject;
 	}
 
 	strncpy(mFileName, PieceName, sizeof(mFileName) - 1);
 	mFileName[sizeof(mFileName) - 1] = 0;
-	strncpy(m_strDescription, Project->GetFileName().toLatin1().data(), sizeof(m_strDescription) - 1);
+	strncpy(m_strDescription, NewProject->GetFileName().toLatin1().data(), sizeof(m_strDescription) - 1);
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 }
 

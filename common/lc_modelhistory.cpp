@@ -209,19 +209,27 @@ bool lcModelHistoryEdit::StateChanged() const
 	return mStartState != mEndState;
 }
 
-void lcModelHistoryEdit::RenamePiece(const QString& OldName, const QString& NewName, bool RenameModelProperties)
+void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo)
 {
-	Q_UNUSED(RenameModelProperties);
+	Q_UNUSED(ModelInfo);
 
-	auto RenamePieceId = [&OldName, &NewName](lcModelHistoryEditState& State)
+	auto RenamePieceIds = [&Renames](lcModelHistoryEditState& State)
 	{
 		for (lcPieceHistoryState& Piece : State.Pieces)
-			if (Piece.PieceId.compare(OldName, Qt::CaseInsensitive) == 0)
-				Piece.PieceId = NewName;
+		{
+			for (const lcModelPieceRename& Rename : Renames)
+			{
+				if (Piece.PieceId.compare(Rename.OldName, Qt::CaseInsensitive) != 0)
+					continue;
+
+				Piece.PieceId = Rename.NewName;
+				break;
+			}
+		}
 	};
 
-	RenamePieceId(mStartState);
-	RenamePieceId(mEndState);
+	RenamePieceIds(mStartState);
+	RenamePieceIds(mEndState);
 }
 
 bool lcModelHistoryEdit::CanMergeWith(const lcModelHistory* Other) const
@@ -264,20 +272,21 @@ bool lcModelHistoryProperties::StateChanged() const
 	return mStartState != mEndState;
 }
 
-void lcModelHistoryProperties::RenamePiece(const QString& OldName, const QString& NewName, bool RenameModelProperties)
+void lcModelHistoryProperties::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo)
 {
-	if (!RenameModelProperties)
-		return;
-
-	auto RenameModel = [&OldName, &NewName](lcModelProperties& Properties)
+	auto RenameModel = [&Renames, ModelInfo](lcModelProperties& Properties)
 	{
-		if (Properties.mFileName.compare(OldName, Qt::CaseInsensitive) != 0)
-			return;
+		for (const lcModelPieceRename& Rename : Renames)
+		{
+			if (Rename.Info != ModelInfo || Properties.mFileName.compare(Rename.OldName, Qt::CaseInsensitive) != 0)
+				continue;
 
-		if (Properties.mModelName == Properties.mFileName)
-			Properties.mModelName = NewName;
+			if (Properties.mModelName == Properties.mFileName)
+				Properties.mModelName = Rename.NewName;
 
-		Properties.mFileName = NewName;
+			Properties.mFileName = Rename.NewName;
+			break;
+		}
 	};
 
 	RenameModel(mStartState);

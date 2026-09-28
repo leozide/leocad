@@ -401,7 +401,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		if (ProjectFile.isFile())
 		{
 			Project* NewProject = new Project(CurrentProject && CurrentProject->IsPreview());
-			NewProject->SetStreamMeshes(CurrentProject && CurrentProject->UsesStreamingMeshes());
+			NewProject->SetDeferModelMeshRequests(CurrentProject && CurrentProject->DefersModelMeshRequests());
 
 			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
 			{
@@ -454,7 +454,7 @@ bool lcPiecesLibrary::RemapProjectPiece(PieceInfo* Info, const QString& ProjectD
 	if (Candidate.isFile())
 	{
 		Project* LocalProject = new Project(IsPreview);
-		LocalProject->SetStreamMeshes(true);
+		LocalProject->SetDeferModelMeshRequests(true);
 
 		if (LocalProject->Load(Candidate.absoluteFilePath(), false))
 			Info->CreateProject(LocalProject, PieceName.constData());
@@ -1771,7 +1771,7 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 
 		PieceFile.Seek(0, SEEK_SET);
 
-		lcMeshLoader MeshLoader(*Result.MeshData, true, nullptr, false);
+		lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize);
 
 		if (!MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED))
 		{
@@ -1812,7 +1812,7 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 
 	Result.MeshData.reset(new lcLibraryMeshData);
 
-	lcMeshLoader MeshLoader(*Result.MeshData, true, nullptr, false);
+	lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize);
 
 	bool Loaded = false;
 
@@ -2337,7 +2337,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		return false;
 	};
 
-	lcMeshLoader MeshLoader(Primitive->mMeshData, true, nullptr, false);
+	lcMeshLoader MeshLoader(Primitive->mMeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{

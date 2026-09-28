@@ -331,7 +331,7 @@ public:
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
 	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const;
-	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
+	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -423,6 +423,7 @@ public:
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
+	void ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step);
 	void Zoom(lcCamera* Camera, float Amount);
 
 	void MoveSelectedObjects(const lcVector3& Distance, lcModelTransformFlags Flags, lcModelHistoryEditMerge ModelHistoryEditMerge)
@@ -452,6 +453,8 @@ public:
 	void UpdateInterface();
 
 protected:
+	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera);
+
 	void DeleteModel();
 
 	void AddSelectionHistory(std::function<void()> Callback);

@@ -1148,15 +1148,28 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				return lcStartupMode::Error;
 			}
 
-			if (Options.CameraName.isEmpty() && !Options.SetCameraPosition)
-				ActiveView->ZoomExtents();
+			const bool UsesCameraPosition = Options.SetCameraPosition && Options.Viewpoint == lcViewpoint::Count && !Options.SetCameraAngles;
+
+			if (Options.CameraName.isEmpty() && !UsesCameraPosition)
+			{
+				const lcStep FitStep = Options.ImageStart == Options.ImageEnd ? Options.ImageStart : ActiveModel->GetLastStep();
+
+				ActiveModel->ZoomExtentsAtStep(ActiveView->GetCamera(), (float)ActiveView->GetWidth() / (float)ActiveView->GetHeight(), FitStep);
+			}
 
 			auto ProgressCallback = [&StdOut](const QString& FileName)
 			{
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 			};
 
-			ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd, ProgressCallback);
+			const lcResult<void> ImagesSaved = ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd, ProgressCallback);
+
+			if (!ImagesSaved)
+			{
+				StdErr << ImagesSaved.error() << '\n';
+
+				return lcStartupMode::Error;
+			}
 		}
 
 		if (Options.SaveWavefront)

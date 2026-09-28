@@ -68,6 +68,16 @@ public:
 		return mRequireCompleteAssets;
 	}
 
+	void SetRequireGeneratedMeshes(bool RequireGeneratedMeshes)
+	{
+		mRequireGeneratedMeshes = RequireGeneratedMeshes;
+	}
+
+	bool GetRequireGeneratedMeshes() const
+	{
+		return mRequireGeneratedMeshes;
+	}
+
 	void MarkMissingAssets()
 	{
 		mMissingAssets = true;
@@ -136,6 +146,7 @@ protected:
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
 	bool mRequireCompleteAssets = false;
+	bool mRequireGeneratedMeshes = false;
 	bool mMissingAssets = false;
 	bool mDrawInsertPreview = false;
 	bool mAllowLOD = true;

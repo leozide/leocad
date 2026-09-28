@@ -201,15 +201,26 @@ protected:
 	static void UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);
 };
 
+enum class lcMeshLoaderFlag
+{
+	None = 0,
+	Optimize = 1 << 0,
+	SearchProjectFolder = 1 << 1,
+	RequireAllIncludes = 1 << 2
+};
+
+Q_DECLARE_FLAGS(lcMeshLoaderFlags, lcMeshLoaderFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(lcMeshLoaderFlags)
+
 class lcMeshLoader
 {
 public:
-	lcMeshLoader(lcLibraryMeshData& MeshData, bool Optimize, Project* CurrentProject, bool SearchProjectFolder);
+	lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags);
 
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
+	bool SearchProjectFolder() const { return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder); }
 
 	Project* mCurrentProject;
-	bool mSearchProjectFolder;
 
 protected:
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
@@ -217,5 +228,5 @@ protected:
 	std::vector<lcMeshLoaderTextureMap> mTextureStack;
 
 	lcLibraryMeshData& mMeshData;
-	bool mOptimize;
+	lcMeshLoaderFlags mFlags;
 };

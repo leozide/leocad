@@ -25,6 +25,8 @@ void lcInstructionsStepImageItem::Update()
 
 	if (!Images.empty())
 		setPixmap(QPixmap::fromImage(Images.front()));
+	else
+		setPixmap(QPixmap());
 }
 
 lcInstructionsStepNumberItem::lcInstructionsStepNumberItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step)

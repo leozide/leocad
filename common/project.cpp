@@ -710,7 +710,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 		}
 		else
 		{
-			if (mStreamMeshes)
+			if (mDeferModelMeshRequests)
 				lcGetPiecesLibrary()->InvalidatePiece(Model->GetPieceInfo());
 
 			Model->QueueMeshBuild();
@@ -1118,7 +1118,7 @@ bool Project::ImportInventory(const std::vector<lcSetInventoryItem>& SetInventor
 	return true;
 }
 
-std::vector<lcModelPartsEntry> Project::GetModelParts()
+lcResult<std::vector<lcModelPartsEntry>> Project::GetModelParts()
 {
 	std::vector<lcModelPartsEntry> ModelParts;
 
@@ -1132,7 +1132,13 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	SetActiveModel(mActiveModel, false);
 
-	return ModelParts;
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	{
+		if (ModelPart.Info->GetSynthInfo() && !ModelPart.Mesh)
+			return lcUnexpected(tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(ModelPart.Info->mFileName)));
+	}
+
+	return std::move(ModelParts);
 }
 
 std::vector<PieceInfo*> Project::GetRequiredPieces() const
@@ -1304,7 +1310,12 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 	if (!Ready)
 		return Ready;
 
-	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
+
+	if (!ModelPartsResult)
+		return lcUnexpected(ModelPartsResult.error());
+
+	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
 
 	if (ModelParts.empty())
 		return lcUnexpected(tr("Nothing to export."));
@@ -1762,7 +1773,12 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	if (!Ready)
 		return Ready;
 
-	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
+
+	if (!ModelPartsResult)
+		return lcUnexpected(ModelPartsResult.error());
+
+	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
 
 	if (ModelParts.empty())
 		return lcUnexpected(tr("Nothing to export."));
@@ -2104,19 +2120,33 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	QString ProjectTitle = GetTitle();
 
-	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName)
+	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName) -> lcResult<void>
 	{
+		lcPartsList PartsList;
+
+		if (Step == 0)
+			Model->GetPartsList(gDefaultColor, true, false, PartsList);
+		else
+			Model->GetPartsListForStep(Step, gDefaultColor, PartsList, false);
+
+		if (PartsList.empty())
+			return lcResult<void>();
+
 		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black);
 
-		if (!Image.isNull())
-		{
-			QString ImageName = BaseName + QLatin1String("-parts.png");
-			QString FileName = QFileInfo(Dir, ImageName).absoluteFilePath();
+		if (Image.isNull())
+			return lcUnexpected(tr("Could not render the pieces list image."));
 
-			Image.save(FileName);
+		QString ImageName = BaseName + QLatin1String("-parts.png");
+		QString FileName = QFileInfo(Dir, ImageName).absoluteFilePath();
+		QImageWriter Writer(FileName);
 
-			Stream << QString::fromLatin1("<p><IMG SRC=\"%1\" /></p><br><br>\r\n").arg(ImageName);
-		}
+		if (!Writer.write(Image))
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+
+		Stream << QString::fromLatin1("<p><IMG SRC=\"%1\" /></p><br><br>\r\n").arg(ImageName);
+
+		return lcResult<void>();
 	};
 
 	for (lcModel* Model : Models)
@@ -2152,11 +2182,21 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 				Stream << QString::fromLatin1("<p><IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5></p><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
-					AddPartsListImage(Stream, Model, Step, QString("%1-%2").arg(BaseName, StepString));
+				{
+					const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, Step, QString("%1-%2").arg(BaseName, StepString));
+
+					if (!PartsImageSaved)
+						return PartsImageSaved;
+				}
 			}
 
 			if (Options.PartsListEnd)
-				AddPartsListImage(Stream, Model, 0, BaseName);
+			{
+				const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, 0, BaseName);
+
+				if (!PartsImageSaved)
+					return PartsImageSaved;
+			}
 
 			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></I></B><BR></HTML>\r\n");
 		}
@@ -2198,7 +2238,12 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
-					AddPartsListImage(Stream, Model, Step, QString("%1-%2").arg(BaseName, StepString));
+				{
+					const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, Step, QString("%1-%2").arg(BaseName, StepString));
+
+					if (!PartsImageSaved)
+						return PartsImageSaved;
+				}
 
 				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
 				if (Step != 1)
@@ -2227,7 +2272,10 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(PageTitle);
 
-				AddPartsListImage(Stream, Model, 0, BaseName);
+				const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, 0, BaseName);
+
+				if (!PartsImageSaved)
+					return PartsImageSaved;
 
 				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
 				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
@@ -2240,7 +2288,10 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		}
 
 		QString StepImageBaseName = QFileInfo(Dir, BaseName + QLatin1String("-%1.png")).absoluteFilePath();
-		Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
+		const lcResult<void> ImagesSaved = Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
+
+		if (!ImagesSaved)
+			return ImagesSaved;
 	}
 
 	if (Models.size() > 1)
@@ -2298,7 +2349,12 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	if (!Ready)
 		return Ready;
 
-	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
+
+	if (!ModelPartsResult)
+		return lcUnexpected(ModelPartsResult.error());
+
+	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
 
 	if (ModelParts.empty())
 		return lcUnexpected(tr("Nothing to export."));
@@ -2989,7 +3045,12 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 	if (!Ready)
 		return Ready;
 
-	std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
+	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
+
+	if (!ModelPartsResult)
+		return lcUnexpected(ModelPartsResult.error());
+
+	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
 
 	if (ModelParts.empty())
 		return lcUnexpected(tr("Nothing to export."));
@@ -3089,7 +3150,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 	return lcResult<void>();
 }
 
-void Project::SaveImage(const lcImageDialogOptions& Options)
+lcResult<void> Project::SaveImage(const lcImageDialogOptions& Options)
 {
 	QString FilePath = Options.FilePath;
 	QString Extension = QFileInfo(FilePath).suffix();
@@ -3100,7 +3161,7 @@ void Project::SaveImage(const lcImageDialogOptions& Options)
 	if (Options.Start != Options.End)
 		FilePath = FilePath.insert(FilePath.length() - Extension.length() - 1, QLatin1String("%1"));
 
-	mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End);
+	return mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End);
 }
 
 void Project::UpdatePieceInfo(PieceInfo* Info) const

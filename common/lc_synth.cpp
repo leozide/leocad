@@ -1526,8 +1526,8 @@ lcMesh* lcSynthInfo::CreateMesh(const std::vector<lcPieceControlPoint>& ControlP
 	File.WriteU8(0);
 	File.Seek(0, SEEK_SET);
 
-	lcMeshLoader MeshLoader(MeshData, false, nullptr, false);
-	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED))
+	lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
+	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED) && !MeshData.IsEmpty())
 		return MeshData.CreateMesh();
 
 	return nullptr;

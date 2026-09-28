@@ -990,7 +990,6 @@ void lcMainWindow::UpdateAssets()
 	if (mStatusProject != Project)
 	{
 		mStatusProject = Project;
-		mHadPendingAssets = false;
 		mStatusRequiredAssets.clear();
 		mStatusLoadProgress->reset();
 		mStatusLoadProgress->setFormat(QString());
@@ -1016,7 +1015,6 @@ void lcMainWindow::UpdateAssets()
 
 	if (Required.empty())
 	{
-		mHadPendingAssets = false;
 		mStatusLoadProgress->reset();
 		mStatusLoadProgress->hide();
 		return;
@@ -1044,33 +1042,21 @@ void lcMainWindow::UpdateAssets()
 
 	if (Failed)
 	{
-		mHadPendingAssets = false;
 		mStatusLoadProgress->setFormat(tr("%n failed (%v/%m)", nullptr, Failed));
 		mStatusLoadProgress->setToolTip(FailureDetails);
 	}
 	else if (Pending)
 	{
-		mHadPendingAssets = true;
 		mStatusLoadProgress->setFormat(tr("Loading %v/%m"));
 	}
-	else if (mHadPendingAssets)
-	{
-		mHadPendingAssets = false;
-		mStatusLoadProgress->setFormat(tr("All pieces loaded"));
-		QTimer::singleShot(2500, this, [this, Project]()
-		{
-			if (mStatusProject == Project && !mHadPendingAssets && mStatusLoadProgress->format() == tr("All pieces loaded"))
-			{
-				mStatusLoadProgress->setFormat(QString());
-				mStatusLoadProgress->hide();
-			}
-		});
-	}
 	else
+	{
+		mStatusLoadProgress->setFormat(QString());
 		mStatusLoadProgress->hide();
+		return;
+	}
 
-	if (Failed || Pending || mStatusLoadProgress->format() == tr("All pieces loaded"))
-		mStatusLoadProgress->show();
+	mStatusLoadProgress->show();
 }
 
 void lcMainWindow::closeEvent(QCloseEvent* Event)
@@ -1389,6 +1375,12 @@ void lcMainWindow::Print(QPrinter* Printer)
 				lcStep Step = PageLayout.Steps[0].Step;
 				QImage Image = Model->GetStepImage(false, StepWidth, StepHeight, Step);
 
+				if (Image.isNull())
+				{
+					Printer->abort();
+					return;
+				}
+
 				Painter.drawImage(MarginRect.left(), MarginRect.top(), Image);
 
 				// TODO: add print options somewhere but Qt doesn't allow changes to the page setup dialog
@@ -1532,7 +1524,10 @@ void lcMainWindow::ShowImageDialog()
 	lcSetProfileInt(LC_PROFILE_IMAGE_WIDTH, Options.Width);
 	lcSetProfileInt(LC_PROFILE_IMAGE_HEIGHT, Options.Height);
 
-	lcGetActiveProject()->SaveImage(Options);
+	const lcResult<void> Saved = lcGetActiveProject()->SaveImage(Options);
+
+	if (!Saved)
+		QMessageBox::warning(this, tr("LeoCAD"), Saved.error());
 }
 
 void lcMainWindow::ShowSelectDialog()

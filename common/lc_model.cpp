@@ -388,9 +388,9 @@ void lcModel::CreatePieceInfo(Project* Project)
 		}), mPieces.end());
 	}
 
-	// A streamed external model retains its initial CreateModelPiece reference
+	// A model with deferred mesh requests retains its initial CreateModelPiece reference
 	// until its source lines have been parsed and QueueMeshBuild() runs.
-	if (!Project->UsesStreamingMeshes())
+	if (!Project->DefersModelMeshRequests())
 	{
 		Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
 		Library->ReleasePieceInfo(mPieceInfo);
@@ -400,7 +400,7 @@ void lcModel::CreatePieceInfo(Project* Project)
 	{
 		UpdateAllViews();
 
-		if (!Project->UsesStreamingMeshes())
+		if (!Project->DefersModelMeshRequests())
 			RefreshPreview();
 	}
 }
@@ -1657,25 +1657,51 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 		return QImage();
 	}
 
-	const lcView* ActiveView = gMainWindow->GetActiveView();
-	const lcStep CurrentStep = mCurrentStep;
-	lcCamera* Camera = ActiveView->GetCamera();
+	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr);
 
-	lcView View(lcViewType::View, this);
-	View.SetCamera(Camera, true);
-	View.SetOffscreenContext();
-	View.MakeCurrent();
-
-	if (!View.BeginRenderToImage(Width, Height))
+	if (!Image)
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Image.error());
+
 		return QImage();
 	}
 
+	return Image.value();
+}
+
+lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera)
+{
+	const lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
+	const lcStep CurrentStep = mCurrentStep;
+
+	lcView View(lcViewType::View, this);
+
+	if (OutputCamera)
+		View.SetCamera(OutputCamera, true);
+	else if (ActiveView)
+		View.SetCamera(ActiveView->GetCamera(), true);
+
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+
+	if (!OutputCamera && !ActiveView)
+		ZoomExtentsAtStep(View.GetCamera(), (float)Width / (float)Height, GetLastStep());
+
 	SetTemporaryStep(Step);
 
-	if (Zoom)
-		ZoomExtents(Camera, (float)Width / (float)Height, lcMatrix44Identity());
+	if (Zoom && ActiveView && !OutputCamera)
+		ZoomExtents(View.GetCamera(), (float)Width / (float)Height, lcMatrix44Identity());
+
+	if (!View.BeginRenderToImage(Width, Height))
+	{
+		SetTemporaryStep(CurrentStep);
+
+		if (!mActive)
+			CalculateStep(LC_STEP_MAX);
+
+		return lcUnexpected(tr("Error creating images."));
+	}
 
 	View.OnDraw();
 
@@ -1693,8 +1719,8 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
 
-	if (MissingAssets && gMainWindow)
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
+	if (MissingAssets || Image.isNull())
+		return lcUnexpected(tr("Could not render all required pieces."));
 
 	return Image;
 }
@@ -1765,7 +1791,9 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 	if (!View.BeginRenderToImage(ThumbnailSize, ThumbnailSize))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+
 		return QImage();
 	}
 
@@ -1946,16 +1974,21 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	return PainterImage;
 }
 
-void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
+lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
 	const lcResult<void> Ready = EnsureAssetsReady();
 
 	if (!Ready)
-	{
-		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
+		return Ready;
 
-		return;
+	lcCamera OutputCamera(true);
+	lcCamera* Camera = nullptr;
+
+	if (!gMainWindow || !gMainWindow->GetActiveView())
+	{
+		OutputCamera.SetViewpoint(lcViewpoint::Home);
+		ZoomExtentsAtStep(&OutputCamera, (float)Width / (float)Height, GetLastStep());
+		Camera = &OutputCamera;
 	}
 
 	for (lcStep Step = Start; Step <= End; Step++)
@@ -1967,18 +2000,21 @@ void lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Z
 		else
 			FileName = BaseName;
 
+		const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, Camera);
+
+		if (!Image)
+			return lcUnexpected(Image.error());
+
 		QImageWriter Writer(FileName);
 
 		if (Writer.format().isEmpty())
 			Writer.setFormat("png");
 
-		QImage Image = GetStepImage(Zoom, Width, Height, Step);
-		if (!Writer.write(Image))
-		{
-			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
-			break;
-		}
+		if (!Writer.write(Image.value()))
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 	}
+
+	return lcResult<void>();
 }
 
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
@@ -2026,7 +2062,7 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 
 		if (Piece->IsVisibleInSubModel())
 		{
-			if (Piece->mPieceInfo->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest)) // todo: this should check for piece->mMesh first
+			if (Piece->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest))
 			{
 				MinIntersect = true;
 				PieceInfoRayTest.Transform = lcMul(PieceInfoRayTest.Transform, Piece->mModelWorld);
@@ -2040,7 +2076,7 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsVisibleInSubModel() && Piece->mPieceInfo->BoxTest(Piece->mModelWorld, Planes))
+		if (Piece->IsVisibleInSubModel() && Piece->IntersectsPlanes(Piece->mModelWorld, Planes))
 			return true;
 
 	return false;
@@ -5962,6 +5998,18 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 		EndEditHistory();
 		EndHistorySequence(tr("Zoom Extents"));
 	}
+}
+
+void lcModel::ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step)
+{
+	const lcStep CurrentStep = mCurrentStep;
+
+	SetTemporaryStep(Step);
+	ZoomExtents(Camera, Aspect, lcMatrix44Identity());
+	SetTemporaryStep(CurrentStep);
+
+	if (!mActive)
+		CalculateStep(LC_STEP_MAX);
 }
 
 void lcModel::Zoom(lcCamera* Camera, float Amount)

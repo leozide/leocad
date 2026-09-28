@@ -734,7 +734,9 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 
 	if (!BeginRenderToImage(mWidth, mHeight))
 	{
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		if (gMainWindow)
+			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+
 		return Images;
 	}
 
@@ -754,7 +756,16 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 			break;
 		}
 
-		Images.emplace_back(GetRenderImage());
+		QImage Image = GetRenderImage();
+
+		if (Image.isNull())
+		{
+			MissingAssets = true;
+			Images.clear();
+			break;
+		}
+
+		Images.emplace_back(std::move(Image));
 	}
 
 	EndRenderToImage();
@@ -770,12 +781,12 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	return Images;
 }
 
-void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback)
+lcResult<void> lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback)
 {
 	std::vector<QImage> Images = GetStepImages(Start, End);
 
 	if (Images.size() != static_cast<size_t>(End - Start + 1))
-		return;
+		return lcUnexpected(tr("Could not render all required pieces."));
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -792,14 +803,13 @@ void lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep 
 			Writer.setFormat("png");
 
 		if (!Writer.write(Images[Step - Start]))
-		{
-			QMessageBox::information(gMainWindow, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
-			break;
-		}
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 
 		if (ProgressCallback)
 			ProgressCallback(FileName);
 	}
+
+	return lcResult<void>();
 }
 
 bool lcView::BeginRenderToImage(int Width, int Height)
@@ -896,6 +906,7 @@ void lcView::OnDraw()
 	mScene->SetShadingMode(ShadingMode);
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 	mScene->SetRequireCompleteAssets(static_cast<bool>(mRenderFramebuffer));
+	mScene->SetRequireGeneratedMeshes(mRenderFramebuffer && mViewType != lcViewType::PartsList);
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 
 	mScene->Begin(mCamera->mWorldView);

@@ -480,23 +480,11 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	const lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
 	const lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
 
-	if (mMesh && !mPieceInfo->IsLoading())
+	if (MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest))
 	{
-		if (mMesh->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest.Plane))
-		{
-			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-			ObjectRayTest.PieceInfoRayTest.Transform = mModelWorld;
-		}
-	}
-	else
-	{
-		if (mPieceInfo->MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest))
-		{
-			ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
-			ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-			ObjectRayTest.PieceInfoRayTest.Transform = lcMul(ObjectRayTest.PieceInfoRayTest.Transform, mModelWorld);
-		}
+		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
+		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
+		ObjectRayTest.PieceInfoRayTest.Transform = lcMul(ObjectRayTest.PieceInfoRayTest.Transform, mModelWorld);
 	}
 
 	if (mPieceInfo->GetSynthInfo() && AreControlPointsVisible())
@@ -524,10 +512,65 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	}
 }
 
+bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
+{
+	if (!mMesh || mPieceInfo->IsLoading())
+		return mPieceInfo->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest);
+
+	if (!mMesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
+		return false;
+
+	PieceInfoRayTest.Info = mPieceInfo;
+	PieceInfoRayTest.Transform = lcMatrix44Identity();
+
+	return true;
+}
+
 void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
-	if (mPieceInfo->BoxTest(mModelWorld, ObjectBoxTest.Planes))
+	if (IntersectsPlanes(mModelWorld, ObjectBoxTest.Planes))
 		ObjectBoxTest.Objects.emplace_back(const_cast<lcPiece*>(this));
+}
+
+bool lcPiece::IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const
+{
+	if (!mMesh || mPieceInfo->IsLoading())
+		return mPieceInfo->BoxTest(WorldMatrix, Planes);
+
+	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
+	lcVector4 LocalPlanes[6];
+
+	for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+	{
+		const lcVector3 PlaneNormal = lcMul30(Planes[PlaneIdx], InverseWorldMatrix);
+		LocalPlanes[PlaneIdx] = lcVector4(PlaneNormal, Planes[PlaneIdx][3] - lcDot3(InverseWorldMatrix[3], PlaneNormal));
+	}
+
+	lcVector3 Corners[8];
+	lcGetBoxCorners(mMesh->mBoundingBox, Corners);
+
+	int OutcodesOR = 0;
+	int OutcodesAND = 0x3f;
+
+	for (const lcVector3& Corner : Corners)
+	{
+		int Outcode = 0;
+
+		for (int PlaneIdx = 0; PlaneIdx < 6; PlaneIdx++)
+			if (lcDot3(Corner, LocalPlanes[PlaneIdx]) + LocalPlanes[PlaneIdx][3] > 0)
+				Outcode |= 1 << PlaneIdx;
+
+		OutcodesOR |= Outcode;
+		OutcodesAND &= Outcode;
+	}
+
+	if (OutcodesAND != 0)
+		return false;
+
+	if (OutcodesOR == 0)
+		return true;
+
+	return mMesh->IntersectsPlanes(LocalPlanes);
 }
 
 void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
@@ -1012,7 +1055,12 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 	}
 
 	if (!mMesh || mPieceInfo->IsLoading())
+	{
+		if (!mMesh && mPieceInfo->GetSynthInfo() && Scene->GetRequireGeneratedMeshes())
+			Scene->MarkMissingAssets();
+
 		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
+	}
 	else
 		Scene->AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState);
 
@@ -1035,7 +1083,12 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
 
 	if (!mMesh || mPieceInfo->IsLoading())
+	{
+		if (!mMesh && mPieceInfo->GetSynthInfo() && Scene->GetRequireGeneratedMeshes())
+			Scene->MarkMissingAssets();
+
 		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
+	}
 	else
 		Scene->AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
 

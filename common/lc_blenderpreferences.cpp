@@ -3060,6 +3060,9 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 		NativeImage& Image = Images.back();
 		Image.RenderedImage = Model->GetStepImage(false, ImageWidth, ImageHeight, Model->GetCurrentStep());
 
+		if (Image.RenderedImage.isNull())
+			return;
+
 		auto CalculateImageBounds = [](NativeImage& Image)
 		{
 			QImage& RenderedImage = Image.RenderedImage;

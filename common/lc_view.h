@@ -3,6 +3,7 @@
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_commands.h"
+#include "lc_result.h"
 
 struct lcInsertPieceInfo;
 enum class lcCameraProjection;
@@ -304,7 +305,7 @@ public:
 	void UnbindRenderFramebuffer();
 	QImage GetRenderFramebufferImage() const;
 	std::vector<QImage> GetStepImages(lcStep Start, lcStep End);
-	void SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback);
+	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, lcStep Start, lcStep End, std::function<void(const QString&)> ProgressCallback);
 
 	lcContext* mContext = nullptr;
 

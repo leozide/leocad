@@ -256,6 +256,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 		if (!mView->BeginRenderToImage(Width, Height))
 		{
 			mView.reset();
+			DrawFailedThumbnail(ThumbnailId, Thumbnail);
 			return;
 		}
 	}
@@ -293,6 +294,13 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	}
 
 	QImage Image = mView->GetRenderImage().convertToFormat(QImage::Format_ARGB32);
+
+	if (Image.isNull())
+	{
+		DrawFailedThumbnail(ThumbnailId, Thumbnail);
+		return;
+	}
+
 	const char* IconName = nullptr;
 
 	if (Info->GetSynthInfo())

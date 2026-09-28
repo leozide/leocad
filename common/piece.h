@@ -85,6 +85,8 @@ public:
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
+	bool IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;
 	bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) override;

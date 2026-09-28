@@ -380,7 +380,6 @@ protected:
 	const Project* mStatusProject = nullptr;
 	std::unordered_set<const PieceInfo*> mStatusRequiredAssets;
 	bool mAssetUpdateScheduled = false;
-	bool mHadPendingAssets = false;
 
 	QMenu* mTransformMenu = nullptr;
 	QMenu* mToolsMenu = nullptr;

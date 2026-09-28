@@ -82,14 +82,14 @@ public:
 		return mIsPreview;
 	}
 
-	bool UsesStreamingMeshes() const
+	bool DefersModelMeshRequests() const
 	{
-		return mStreamMeshes;
+		return mDeferModelMeshRequests;
 	}
 
-	void SetStreamMeshes(bool StreamMeshes)
+	void SetDeferModelMeshRequests(bool Defer)
 	{
-		mStreamMeshes = StreamMeshes;
+		mDeferModelMeshRequests = Defer;
 	}
 
 	bool IsModified() const;
@@ -120,7 +120,7 @@ public:
 	bool ImportLDD(const QString& FileName);
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
-	void SaveImage(const lcImageDialogOptions& Options);
+	lcResult<void> SaveImage(const lcImageDialogOptions& Options);
 	std::vector<PieceInfo*> GetRequiredPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 	lcResult<void> ExportCurrentStep(const QString& FileName);
@@ -139,12 +139,12 @@ protected:
 	static bool CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming);
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 
-	std::vector<lcModelPartsEntry> GetModelParts();
+	lcResult<std::vector<lcModelPartsEntry>> GetModelParts();
 	void SetFileName(const QString& FileName);
 
 	bool mIsPreview;
 	// External projects can parse their models before queuing direct meshes.
-	bool mStreamMeshes = false;
+	bool mDeferModelMeshRequests = false;
 	bool mModified;
 	QString mFileName;
 	QFileSystemWatcher mFileWatcher;

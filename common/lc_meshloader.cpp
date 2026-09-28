@@ -1052,7 +1052,7 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 				if (TextureLookup)
 					DstSection.Texture = TextureLookup(FinalSection.Name);
 				else if (mMeshLoader)
-					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, mMeshLoader->mCurrentProject, mMeshLoader->mSearchProjectFolder);
+					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, mMeshLoader->mCurrentProject, mMeshLoader->SearchProjectFolder());
 				else
 					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, nullptr, false);
 			}
@@ -1226,8 +1226,8 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 	}
 }
 
-lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, bool Optimize, Project* CurrentProject, bool SearchProjectFolder)
-	: mCurrentProject(CurrentProject), mSearchProjectFolder(SearchProjectFolder), mMeshData(MeshData), mOptimize(Optimize)
+lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags)
+	: mCurrentProject(CurrentProject), mMeshData(MeshData), mFlags(Flags)
 {
 	MeshData.SetMeshLoader(this);
 }
@@ -1247,6 +1247,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 	bool InvertNext = false;
 	bool WindingCCW = !InvertWinding;
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	const bool Optimize = mFlags.testFlag(lcMeshLoaderFlag::Optimize);
 
 	while (File.ReadLine(Buffer, sizeof(Buffer)))
 	{
@@ -1539,18 +1540,28 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 				else if (!Primitive->mSubFile)
 				{
-					if (mOptimize)
+					if (Optimize)
 						mMeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 					else
 						mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 				}
 				else
+				{
+					if (mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
+						IncludeLoaded = false;
+
 					Library->GetPrimitiveFile(Primitive, FileCallback);
+				}
 
 				mMeshData.mHasStyleStud |= Primitive->mStudStyle | Primitive->mMeshData.mHasStyleStud;
 			}
 			else
+			{
+				if (mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
+					IncludeLoaded = false;
+
 				Library->GetPieceFile(FileName, FileCallback);
+			}
 
 			if (!IncludeLoaded)
 				return false;
@@ -1563,7 +1574,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			Points[0] = lcMul31(Points[0], CurrentTransform);
 			Points[1] = lcMul31(Points[1], CurrentTransform);
 
-			mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, mOptimize);
+			mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			break;
 
 		case 3:
@@ -1576,11 +1587,11 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			Points[2] = lcMul31(Points[2], CurrentTransform);
 
 			if (!TextureMap)
-				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, mOptimize);
+				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			else
 			{
 				mMeshData.mHasTextures = true;
-				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, mOptimize);
+				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, Optimize);
 
 			}
 			break;
@@ -1596,11 +1607,11 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			Points[3] = lcMul31(Points[3], CurrentTransform);
 
 			if (!TextureMap)
-				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, mOptimize);
+				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			else
 			{
 				mMeshData.mHasTextures = true;
-				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, mOptimize);
+				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, Optimize);
 
 			}
 			break;
@@ -1615,7 +1626,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			Points[2] = lcMul31(Points[2], CurrentTransform);
 			Points[3] = lcMul31(Points[3], CurrentTransform);
 
-			mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, mOptimize);
+			mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			break;
 		}
 

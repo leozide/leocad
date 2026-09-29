@@ -4887,6 +4887,9 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 
 void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
+	if (mHasDirectGeometry && mPieceInfo->GetMesh())
+		ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, mPieceInfo, nullptr, DefaultColorIndex });
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
 }

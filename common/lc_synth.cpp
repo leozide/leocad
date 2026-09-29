@@ -17,8 +17,8 @@ public:
 
 protected:
 	float GetSectionTwist(const lcMatrix44& StartTransform, const lcMatrix44& EndTransform) const;
-	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
-	static void AddTubeParts(lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, float Radius, bool IsInner);
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const override;
+	static void AddTubeParts(lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, float Radius, bool IsInner, const std::atomic_bool* Cancelled);
 
 	struct lcSynthComponent
 	{
@@ -41,7 +41,7 @@ public:
 	lcSynthInfoFlexibleHose(float Length, int NumSections, const char* EdgePart2);
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 
 	const char* mEdgePart2;
 };
@@ -54,7 +54,7 @@ public:
 	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 };
 
 class lcSynthInfoPneumaticTube : public lcSynthInfoCurved
@@ -63,7 +63,7 @@ public:
 	lcSynthInfoPneumaticTube(float Length, int NumSections, const char* EndPart);
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 
 	const char* mEndPart;
 };
@@ -74,7 +74,7 @@ public:
 	lcSynthInfoRibbedHose(float Length, int NumSections);
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 };
 
 class lcSynthInfoFlexibleAxle : public lcSynthInfoCurved
@@ -83,7 +83,7 @@ public:
 	lcSynthInfoFlexibleAxle(float Length, int NumSections);
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 };
 
 class lcSynthInfoBraidedString : public lcSynthInfoCurved
@@ -92,8 +92,8 @@ public:
 	lcSynthInfoBraidedString(float Length, int NumSections);
 
 protected:
-	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 };
 
 class lcSynthInfoStraight : public lcSynthInfo
@@ -104,7 +104,7 @@ public:
 	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const override;
 };
 
 class lcSynthInfoShockAbsorber : public lcSynthInfoStraight
@@ -115,7 +115,7 @@ public:
 	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 
 	const char* mSpringPart;
 };
@@ -128,7 +128,7 @@ public:
 	void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 
 	const char* mBodyPart;
 	const char* mPistonPart;
@@ -145,8 +145,8 @@ public:
 	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const override;
 
 protected:
-	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const override;
-	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const override;
+	void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const override;
+	void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const override;
 
 	float mEndOffset;
 	const char* mEndPart;
@@ -659,7 +659,7 @@ float lcSynthInfoCurved::GetSectionTwist(const lcMatrix44& StartTransform, const
 	return 0.0f;
 }
 
-void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const
 {
 	if (ControlPoints.empty())
 		return;
@@ -668,6 +668,9 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 
 	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size() - 1 && Sections.size() < mSectionCount + 2; ControlPointIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcVector3 SegmentControlPoints[4];
 
 		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
@@ -700,6 +703,9 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 
 		for (int PointIdx = 0; PointIdx < NumCurvePoints; PointIdx++)
 		{
+			if ((PointIdx & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			float t = (float)PointIdx / (float)(NumCurvePoints - 1);
 			float it = 1.0f - t;
 
@@ -711,7 +717,12 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 		float TotalSegmentLength = 0.0f;
 
 		for (size_t PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
+		{
+			if ((PointIdx & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
+		}
 
 		lcVector3 StartUp = lcMul30(lcVector3(1.0f, 0.0f, 0.0f), StartTransform);
 		float Twist = GetSectionTwist(StartTransform, EndTransform);
@@ -719,6 +730,9 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 
 		while (CurrentPointIndex < CurvePoints.size() - 1)
 		{
+			if ((CurrentPointIndex & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			float Length = lcLength(CurvePoints[CurrentPointIndex + 1] - CurvePoints[CurrentPointIndex]);
 			CurrentSegmentLength += Length;
 			SectionLength -= Length;
@@ -765,6 +779,9 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 
 	while (Sections.size() < mSectionCount + 2)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints.back().Transform);
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(0.0f, SectionLength, 0.0f), EndTransform);
@@ -784,7 +801,7 @@ void lcSynthInfoCurved::CalculateSections(const std::vector<lcPieceControlPoint>
 	}
 }
 
-void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const
 {
 	if (ControlPoints.empty())
 		return;
@@ -793,6 +810,9 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 
 	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size() - 1 && Sections.size() < mSectionCount + 2; ControlPointIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcVector3 SegmentControlPoints[4];
 
 		lcMatrix44 StartTransform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
@@ -825,6 +845,9 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 
 		for (int PointIdx = 0; PointIdx < NumCurvePoints; PointIdx++)
 		{
+			if ((PointIdx & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			float t = (float)PointIdx / (float)(NumCurvePoints - 1);
 			float it = 1.0f - t;
 
@@ -836,7 +859,12 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 		float TotalSegmentLength = 0.0f;
 
 		for (size_t PointIdx = 0; PointIdx < CurvePoints.size() - 1; PointIdx++)
+		{
+			if ((PointIdx & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			TotalSegmentLength += lcLength(CurvePoints[PointIdx] - CurvePoints[PointIdx + 1]);
+		}
 
 		lcVector3 StartUp = lcMul30(lcVector3(0.0f, 1.0f, 0.0f), StartTransform);
 		float Twist = GetSectionTwist(StartTransform, EndTransform);
@@ -844,6 +872,9 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 
 		while (CurrentPointIndex < CurvePoints.size() - 1)
 		{
+			if ((CurrentPointIndex & 63) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			float Length = lcLength(CurvePoints[CurrentPointIndex + 1] - CurvePoints[CurrentPointIndex]);
 			CurrentSegmentLength += Length;
 			SectionLength -= Length;
@@ -890,6 +921,9 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 
 	while (Sections.size() < mSectionCount + 2)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix44 EndTransform = lcMatrix44LeoCADToLDraw(ControlPoints.back().Transform);
 		EndTransform = lcMatrix44(lcMul(lcMul(lcMatrix33(mEnd.Transform), lcMatrix33(EndTransform)), lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f))), EndTransform.GetTranslation());
 		lcVector3 Position = lcMul31(lcVector3(SectionLength, 0.0f, 0.0f), EndTransform);
@@ -909,10 +943,13 @@ void lcSynthInfoBraidedString::CalculateSections(const std::vector<lcPieceContro
 	}
 }
 
-void lcSynthInfoStraight::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoStraight::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const
 {
 	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size(); ControlPointIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
 		Sections.emplace_back(Transform);
 
@@ -921,10 +958,13 @@ void lcSynthInfoStraight::CalculateSections(const std::vector<lcPieceControlPoin
 	}
 }
 
-void lcSynthInfoUniversalJoint::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const
+void lcSynthInfoUniversalJoint::CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const
 {
 	for (quint32 ControlPointIndex = 0; ControlPointIndex < ControlPoints.size(); ControlPointIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix44 Transform = lcMatrix44LeoCADToLDraw(ControlPoints[ControlPointIndex].Transform);
 		Sections.emplace_back(Transform);
 
@@ -933,7 +973,7 @@ void lcSynthInfoUniversalJoint::CalculateSections(const std::vector<lcPieceContr
 	}
 }
 
-void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const
 {
 	if (Sections.empty())
 		return;
@@ -966,6 +1006,9 @@ void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, cons
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix33 Transform = lcMatrix33(Sections[SectionIndex]);
 		lcVector3 Offset = Sections[SectionIndex].GetTranslation();
 
@@ -997,7 +1040,7 @@ void lcSynthInfoFlexibleHose::AddParts(lcMemFile& File, lcLibraryMeshData&, cons
 	}
 }
 
-void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, float Radius, bool IsInner)
+void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, float Radius, bool IsInner, const std::atomic_bool* Cancelled)
 {
 	// a unit circle
 	static const lcVector3 Vertices[16] =
@@ -1030,6 +1073,9 @@ void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const std::vec
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size(); SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
 			VertexBuffer->Position = lcMul31(Radius * Vertices[VertexIdx], Sections[SectionIndex]);
@@ -1055,6 +1101,9 @@ void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const std::vec
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
 			int Vertex1 = BaseVertex + (VertexIdx + Offset1) % NumSectionVertices;
@@ -1071,7 +1120,7 @@ void lcSynthInfoCurved::AddTubeParts(lcLibraryMeshData& MeshData, const std::vec
 	}
 }
 
-void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const
 {
 	if (Sections.empty())
 		return;
@@ -1100,11 +1149,14 @@ void lcSynthInfoFlexSystemHose::AddParts(lcMemFile& File, lcLibraryMeshData& Mes
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	AddTubeParts(MeshData, Sections, 4.0f, false);
-	AddTubeParts(MeshData, Sections, 2.0f, true);
+	AddTubeParts(MeshData, Sections, 4.0f, false, Cancelled);
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		return;
+
+	AddTubeParts(MeshData, Sections, 2.0f, true, Cancelled);
 }
 
-void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const
 {
 	if (Sections.empty())
 		return;
@@ -1135,11 +1187,14 @@ void lcSynthInfoPneumaticTube::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 		File.WriteBuffer(Line, strlen(Line));
 	}
 
-	AddTubeParts(MeshData, Sections, 5.0f, false);
-	AddTubeParts(MeshData, Sections, 3.0f, true);
+	AddTubeParts(MeshData, Sections, 5.0f, false, Cancelled);
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		return;
+
+	AddTubeParts(MeshData, Sections, 3.0f, true, Cancelled);
 }
 
-void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const
 {
 	if (Sections.empty())
 		return;
@@ -1159,6 +1214,9 @@ void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const 
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		const lcMatrix44& Transform = Sections[SectionIndex];
 
 		snprintf(Line, sizeof(Line), "1 16 %f %f %f %f %f %f %f %f %f %f %f %f 80.dat\n", Transform[3][0], Transform[3][1], Transform[3][2], Transform[0][0], Transform[1][0], Transform[2][0],
@@ -1179,7 +1237,7 @@ void lcSynthInfoRibbedHose::AddParts(lcMemFile& File, lcLibraryMeshData&, const 
 	}
 }
 
-void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const
 {
 	if (Sections.empty())
 		return;
@@ -1268,6 +1326,9 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size(); SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
 			VertexBuffer->Position = lcMul31(SectionVertices[VertexIdx].Position, Sections[SectionIndex]);
@@ -1281,6 +1342,9 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		const int Indices[] = { 1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26 };
 
 		for (int VertexIdx = 0; VertexIdx < 12; VertexIdx++)
@@ -1296,6 +1360,9 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		for (int VertexIdx = 0; VertexIdx < NumSectionVertices; VertexIdx++)
 		{
 			int Vertex1 = BaseVertex + VertexIdx;
@@ -1312,13 +1379,19 @@ void lcSynthInfoFlexibleAxle::AddParts(lcMemFile& File, lcLibraryMeshData& MeshD
 	}
 }
 
-void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& SectionsIn) const
+void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& SectionsIn, const std::atomic_bool* Cancelled) const
 {
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		return;
+
 	std::vector<lcMatrix44> Sections;
 	Sections.resize(SectionsIn.size());
 
 	for (size_t SectionIndex = 0; SectionIndex < Sections.size(); SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix33 Transform(lcMul(lcMatrix33Scale(lcVector3(1.0f, -1.0f, 1.0f)), lcMatrix33(SectionsIn[SectionIndex])));
 		lcVector3 Offset = SectionsIn[SectionIndex].GetTranslation();
 		Sections[SectionIndex] = lcMatrix44(Transform, Offset);
@@ -1357,6 +1430,9 @@ void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 
 		for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 		{
+			if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return;
+
 			lcMatrix33 Transform1 = lcMatrix33(Sections[SectionIndex]);
 			lcMatrix33 Transform2 = lcMatrix33(Sections[SectionIndex + 1]);
 			lcVector3 Offset1 = Sections[SectionIndex].GetTranslation();
@@ -1394,6 +1470,9 @@ void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 
 	for (size_t SectionIndex = 1; SectionIndex < Sections.size() - 1; SectionIndex++)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+			return;
+
 		lcMatrix33 Transform1 = lcMatrix33(Sections[SectionIndex]);
 		lcMatrix33 Transform2 = lcMatrix33(Sections[SectionIndex + 1]);
 		lcVector3 Offset1 = Sections[SectionIndex].GetTranslation();
@@ -1445,7 +1524,7 @@ void lcSynthInfoBraidedString::AddParts(lcMemFile& File, lcLibraryMeshData& Mesh
 	}
 }
 
-void lcSynthInfoShockAbsorber::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoShockAbsorber::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections, const std::atomic_bool*) const
 {
 	char Line[256];
 	lcVector3 Offset;
@@ -1466,7 +1545,7 @@ void lcSynthInfoShockAbsorber::AddParts(lcMemFile& File, lcLibraryMeshData&, con
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections, const std::atomic_bool*) const
 {
 	char Line[256];
 	lcVector3 Offset;
@@ -1484,7 +1563,7 @@ void lcSynthInfoActuator::AddParts(lcMemFile& File, lcLibraryMeshData&, const st
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections) const
+void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, const std::vector<lcMatrix44>& Sections, const std::atomic_bool*) const
 {
 	char Line[256];
 	lcVector3 Offset = Sections[0].GetTranslation();
@@ -1512,23 +1591,37 @@ void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, co
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-lcMesh* lcSynthInfo::CreateMesh(const std::vector<lcPieceControlPoint>& ControlPoints) const
+std::unique_ptr<lcLibraryMeshData> lcSynthInfo::BuildMeshData(const std::vector<lcPieceControlPoint>& ControlPoints, const std::atomic_bool& Cancelled) const
 {
+	if (Cancelled.load(std::memory_order_relaxed))
+		return nullptr;
+
 	std::vector<lcMatrix44> Sections;
 
-	CalculateSections(ControlPoints, Sections, nullptr);
+	CalculateSections(ControlPoints, Sections, nullptr, &Cancelled);
 
-	lcLibraryMeshData MeshData;
+	if (Cancelled.load(std::memory_order_relaxed))
+		return nullptr;
+
+	std::unique_ptr<lcLibraryMeshData> MeshData(new lcLibraryMeshData);
 	lcMemFile File; // todo: rewrite this to pass the parts directly
 
-	AddParts(File, MeshData, Sections);
+	AddParts(File, *MeshData, Sections, &Cancelled);
+
+	if (Cancelled.load(std::memory_order_relaxed))
+		return nullptr;
 
 	File.WriteU8(0);
 	File.Seek(0, SEEK_SET);
 
-	lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
-	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED) && !MeshData.IsEmpty())
-		return MeshData.CreateMesh();
+	lcMeshLoader MeshLoader(*MeshData, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
+	MeshLoader.SetCancellationFlag(&Cancelled);
+
+	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED) && !MeshData->IsEmpty() && !Cancelled.load(std::memory_order_relaxed))
+	{
+		MeshData->SetMeshLoader(nullptr);
+		return MeshData;
+	}
 
 	return nullptr;
 }
@@ -1553,7 +1646,7 @@ int lcSynthInfo::InsertControlPoint(std::vector<lcPieceControlPoint>& ControlPoi
 				BestDistance = Distance;
 				BestPosition = lcVector3LDrawToLeoCAD(CurvePoint);
 			}
-		}
+		}, nullptr
 	);
 
 	if (BestSegment != UINT32_MAX)

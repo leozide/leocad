@@ -32,6 +32,7 @@ protected:
 	lcViewWidget* mViewWidget;
 	bool mRefreshingModel = false;
 	bool mAssetRefreshPending = false;
+	bool mRefitAfterAssetLoad = true;
 };
 
 class lcPreview : public lcView

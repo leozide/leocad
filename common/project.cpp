@@ -1157,6 +1157,23 @@ std::vector<PieceInfo*> Project::GetRequiredPieces() const
 	return Required;
 }
 
+std::vector<lcPiece*> Project::GetRequiredSynthPieces() const
+{
+	std::vector<lcPiece*> Required;
+	std::unordered_set<lcPiece*> Seen;
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+	{
+		const std::vector<lcPiece*> ModelRequired = Model->GetRequiredSynthPieces();
+
+		for (lcPiece* Piece : ModelRequired)
+			if (Seen.insert(Piece).second)
+				Required.push_back(Piece);
+	}
+
+	return Required;
+}
+
 lcResult<void> Project::EnsureAssetsReady() const
 {
 	const lcModel* Model = GetMainModel();

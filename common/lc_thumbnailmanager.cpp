@@ -4,6 +4,7 @@
 #include "pieceinf.h"
 #include "lc_view.h"
 #include "lc_model.h"
+#include "piece.h"
 #include "project.h"
 #include "camera.h"
 
@@ -12,6 +13,7 @@ lcThumbnailManager::lcThumbnailManager(lcPiecesLibrary* Library)
 {
 	connect(mLibrary, &lcPiecesLibrary::PartLoaded, this, &lcThumbnailManager::PartLoaded);
 	connect(mLibrary, &lcPiecesLibrary::PartLoadFailed, this, &lcThumbnailManager::PartLoadFailed);
+	connect(mLibrary, &lcPiecesLibrary::GeneratedMeshSettled, this, &lcThumbnailManager::GeneratedMeshSettled);
 }
 
 lcThumbnailManager::~lcThumbnailManager()
@@ -23,6 +25,7 @@ void lcThumbnailManager::Clear()
 {
 	mView.reset();
 	mModel.reset();
+	mPendingGeneratedModels.clear();
 
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
 		ReleaseRequiredPieces(Thumbnail);
@@ -47,6 +50,7 @@ void lcThumbnailManager::RefreshPieces(const std::vector<PieceInfo*>& ChangedPie
 			continue;
 
 		Entry.second.Pixmap = QPixmap();
+		mPendingGeneratedModels.erase(Entry.first);
 		ThumbnailIds.push_back(Entry.first);
 	}
 
@@ -92,6 +96,8 @@ void lcThumbnailManager::ReleaseThumbnail(lcPartThumbnailId ThumbnailId)
 
 	if (Thumbnail.ReferenceCount == 0)
 	{
+		mPendingGeneratedModels.erase(ThumbnailId);
+
 		ReleaseRequiredPieces(Thumbnail);
 
 		mThumbnails.erase(ThumbnailIt);
@@ -209,8 +215,64 @@ void lcThumbnailManager::PartLoadFailed(PieceInfo* Info)
 	}
 }
 
+void lcThumbnailManager::GeneratedMeshSettled(PieceInfo*)
+{
+	std::vector<lcPartThumbnailId> Ready;
+
+	for (const std::map<lcPartThumbnailId, std::unique_ptr<lcModel>>::value_type& Entry : mPendingGeneratedModels)
+	{
+		bool Pending = false;
+
+		for (const lcPiece* Piece : Entry.second->GetRequiredSynthPieces())
+			if (Piece->IsGeneratedMeshPending())
+			{
+				Pending = true;
+				break;
+			}
+
+		if (!Pending)
+			Ready.push_back(Entry.first);
+	}
+
+	for (lcPartThumbnailId ThumbnailId : Ready)
+	{
+		const std::map<lcPartThumbnailId, lcPartThumbnail>::iterator It = mThumbnails.find(ThumbnailId);
+
+		if (It != mThumbnails.end())
+			UpdateThumbnail(It->first, It->second);
+	}
+}
+
+void lcThumbnailManager::SchedulePendingThumbnails()
+{
+	if (mRetryScheduled)
+		return;
+
+	mRetryScheduled = true;
+
+	QTimer::singleShot(0, this, [this]()
+	{
+		mRetryScheduled = false;
+		std::vector<lcPartThumbnailId> Pending;
+
+		for (const std::map<lcPartThumbnailId, lcPartThumbnail>::value_type& Entry : mThumbnails)
+			if (Entry.second.Pixmap.isNull())
+				Pending.push_back(Entry.first);
+
+		for (lcPartThumbnailId ThumbnailId : Pending)
+		{
+			const std::map<lcPartThumbnailId, lcPartThumbnail>::iterator It = mThumbnails.find(ThumbnailId);
+
+			if (It != mThumbnails.end() && It->second.Pixmap.isNull())
+				UpdateThumbnail(It->first, It->second);
+		}
+	});
+}
+
 void lcThumbnailManager::DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
 {
+	mPendingGeneratedModels.erase(ThumbnailId);
+
 	const int Size = qMax(1, static_cast<int>(Thumbnail.Size * Thumbnail.DeviceScale));
 
 	Thumbnail.Pixmap = QPixmap(Size, Size);
@@ -233,10 +295,25 @@ void lcThumbnailManager::DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPa
 	ReleaseRequiredPieces(Thumbnail);
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
+	SchedulePendingThumbnails();
 }
 
 void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
 {
+	const std::map<lcPartThumbnailId, std::unique_ptr<lcModel>>::iterator PendingIt = mPendingGeneratedModels.find(ThumbnailId);
+	const bool ReuseGeneratedPiece = PendingIt != mPendingGeneratedModels.end();
+
+	if (ReuseGeneratedPiece)
+	{
+		for (const lcPiece* Piece : PendingIt->second->GetRequiredSynthPieces())
+			if (Piece->IsGeneratedMeshPending())
+				return;
+
+		mView.reset();
+		mModel = std::move(PendingIt->second);
+		mPendingGeneratedModels.erase(PendingIt);
+	}
+
 	const int Width = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
 	const int Height = Thumbnail.Size * 2 * Thumbnail.DeviceScale;
 
@@ -268,7 +345,28 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	mView->SetBackgroundColorOverride(LC_RGBA(qRed(BackgroundColor), qGreen(BackgroundColor), qBlue(BackgroundColor), 0));
 
 	PieceInfo* Info = Thumbnail.Info;
-	mModel->SetPreviewPieceInfo(Info, Thumbnail.ColorIndex);
+
+	if (!ReuseGeneratedPiece)
+	{
+		mModel->SetPreviewPieceInfo(Info, Thumbnail.ColorIndex);
+
+		bool GeneratedPiecePending = false;
+
+		for (const lcPiece* Piece : mModel->GetRequiredSynthPieces())
+			if (Piece->IsGeneratedMeshPending())
+			{
+				GeneratedPiecePending = true;
+				break;
+			}
+
+		if (GeneratedPiecePending)
+		{
+			mView->UnbindRenderFramebuffer();
+			mView.reset();
+			mPendingGeneratedModels.emplace(ThumbnailId, std::move(mModel));
+			return;
+		}
+	}
 
 	const lcVector3 Center = (Info->GetBoundingBox().Min + Info->GetBoundingBox().Max) / 2.0f;
 	const lcVector3 Position = Center + lcVector3(100.0f, -100.0f, 75.0f);
@@ -342,4 +440,5 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	ReleaseRequiredPieces(Thumbnail);
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
+	SchedulePendingThumbnails();
 }

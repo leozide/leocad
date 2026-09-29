@@ -37,6 +37,7 @@ signals:
 protected slots:
 	void PartLoaded(PieceInfo* Info);
 	void PartLoadFailed(PieceInfo* Info);
+	void GeneratedMeshSettled(PieceInfo* Info);
 
 protected:
 	void RefreshRequiredPieces(lcPartThumbnail& Thumbnail);
@@ -44,6 +45,7 @@ protected:
 	void UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
+	void SchedulePendingThumbnails();
 
 	lcPiecesLibrary* mLibrary = nullptr;
 	std::map<lcPartThumbnailId, lcPartThumbnail> mThumbnails;
@@ -51,4 +53,6 @@ protected:
 
 	std::unique_ptr<lcView> mView;
 	std::unique_ptr<lcModel> mModel;
+	std::map<lcPartThumbnailId, std::unique_ptr<lcModel>> mPendingGeneratedModels;
+	bool mRetryScheduled = false;
 };

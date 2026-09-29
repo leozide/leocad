@@ -39,12 +39,12 @@ public:
 	virtual void GetDefaultControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const = 0;
 	virtual void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const = 0;
 	int InsertControlPoint(std::vector<lcPieceControlPoint>& ControlPoints, const lcVector3& Start, const lcVector3& End) const;
-	lcMesh* CreateMesh(const std::vector<lcPieceControlPoint>& ControlPoints) const;
+	std::unique_ptr<lcLibraryMeshData> BuildMeshData(const std::vector<lcPieceControlPoint>& ControlPoints, const std::atomic_bool& Cancelled) const;
 
 protected:
 	using SectionCallbackFunc = std::function<void(const lcVector3& CurvePoint, quint32 SegmentIndex, float t)>;
-	virtual void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback) const = 0;
-	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections) const = 0;
+	virtual void CalculateSections(const std::vector<lcPieceControlPoint>& ControlPoints, std::vector<lcMatrix44>& Sections, SectionCallbackFunc SectionCallback, const std::atomic_bool* Cancelled) const = 0;
+	virtual void AddParts(lcMemFile& File, lcLibraryMeshData& MeshData, const std::vector<lcMatrix44>& Sections, const std::atomic_bool* Cancelled) const = 0;
 
 	bool mCurve = false;
 	bool mUnidirectional = false;
@@ -53,4 +53,3 @@ protected:
 };
 
 void lcSynthInit();
-

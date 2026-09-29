@@ -484,6 +484,34 @@ std::vector<PieceInfo*> lcModel::GetRequiredPieces() const
 	return Required;
 }
 
+std::vector<lcPiece*> lcModel::GetRequiredSynthPieces() const
+{
+	std::vector<lcPiece*> Required;
+	std::unordered_set<const lcModel*> Visited;
+
+	const std::function<void(const lcModel*)> Collect = [&Required, &Visited, &Collect](const lcModel* Model)
+	{
+		if (!Model || !Visited.insert(Model).second)
+			return;
+
+		for (const std::unique_ptr<lcPiece>& Piece : Model->mPieces)
+		{
+			PieceInfo* Info = Piece->mPieceInfo;
+
+			if (Info->IsModel())
+				Collect(Info->GetModel());
+			else if (Info->IsProject())
+				Collect(Info->GetProject()->GetMainModel());
+			else if (Info->GetSynthInfo())
+				Required.push_back(Piece.get());
+		}
+	};
+
+	Collect(this);
+
+	return Required;
+}
+
 lcResult<void> lcModel::EnsureAssetsReady() const
 {
 	const std::vector<PieceInfo*> Required = GetRequiredPieces();
@@ -503,6 +531,22 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 		}
 
 		return lcUnexpected(tr("Could not load all required pieces."));
+	}
+
+	const std::vector<lcPiece*> GeneratedPieces = GetRequiredSynthPieces();
+
+	if (!Library->EnsureSynthMeshesReady(GeneratedPieces))
+	{
+		for (const lcPiece* Piece : GeneratedPieces)
+			if (!Piece->HasGeneratedMesh())
+			{
+				QString Error = Library->GetSynthMeshError(Piece);
+
+				if (Error.isEmpty())
+					Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
+
+				return lcUnexpected(Error);
+			}
 	}
 
 	std::vector<lcModel*> UpdatedModels;
@@ -1002,7 +1046,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 									       lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info, PartId, false, true);
+				Piece->SetPieceInfo(Info, PartId, false, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->VerifyControlPoints(ControlPoints);

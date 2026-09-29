@@ -60,13 +60,15 @@ public:
 
 	lcSynthInfo* GetSynthInfo() const
 	{
+		return mSynthInfo.get();
+	}
+
+	std::shared_ptr<const lcSynthInfo> GetSynthInfoShared() const
+	{
 		return mSynthInfo;
 	}
 
-	void SetSynthInfo(lcSynthInfo* SynthInfo)
-	{
-		mSynthInfo = SynthInfo;
-	}
+	void SetSynthInfo(lcSynthInfo* SynthInfo);
 
 	lcTrainTrackInfo* GetTrainTrackInfo() const
 	{
@@ -219,6 +221,6 @@ protected:
 	Project* mProject = nullptr;
 	lcMesh* mMesh = nullptr;
 	lcBoundingBox mBoundingBox;
-	lcSynthInfo* mSynthInfo = nullptr;
+	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
 };

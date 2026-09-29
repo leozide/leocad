@@ -37,6 +37,11 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 		if (mAssetRefreshPending)
 			RefreshPendingAssets();
 	});
+	connect(Library, &lcPiecesLibrary::GeneratedMeshSettled, this, [this](PieceInfo*)
+	{
+		if (mAssetRefreshPending)
+			RefreshPendingAssets();
+	});
 
 	mToolBar = addToolBar(tr("Toolbar"));
 	mToolBar->setObjectName("Toolbar");
@@ -55,6 +60,7 @@ bool lcPreviewDockWidget::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 		return true;
 
 	mAssetRefreshPending = false;
+	mRefitAfterAssetLoad = true;
 	mLabel->setText(tr("Loading..."));
 
 	if (mPreview->SetCurrentPiece(Info, ColorCode))
@@ -72,9 +78,9 @@ bool lcPreviewDockWidget::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 void lcPreviewDockWidget::UpdatePreview()
 {
 	mAssetRefreshPending = false;
-	mViewWidget->show();
+	mRefitAfterAssetLoad = true;
 	mPreview->UpdatePreview();
-	mLabel->setText(mPreview->GetDescription());
+	RefreshPendingAssets();
 }
 
 void lcPreviewDockWidget::RefreshDescription()
@@ -95,17 +101,24 @@ void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
 
 	mRefreshingModel = true;
 
-	if (mPreview->GetModel()->EnsureAssetsReady())
+	if (!mAssetRefreshPending)
+		mRefitAfterAssetLoad = false;
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (PieceInfo* Info : Required)
 	{
-		mAssetRefreshPending = false;
-		mViewWidget->show();
-		mPreview->Redraw();
+		if (Info->mState != lcPieceInfoState::Unloaded)
+			continue;
+
+		Library->LoadPieceInfo(Info, lcPieceLoadFlag::Visible);
+		Library->ReleasePieceInfo(Info);
 	}
-	else
-	{
-		mPreview->ClearPreview();
-		mLabel->setText(tr("Preview unavailable"));
-	}
+
+	std::vector<lcModel*> UpdatedModels;
+	mPreview->GetModel()->UpdatePieceInfo(UpdatedModels);
+
+	RefreshPendingAssets();
 
 	mRefreshingModel = false;
 }
@@ -162,7 +175,30 @@ void lcPreviewDockWidget::RefreshPendingAssets()
 		}
 	}
 
+	for (const lcPiece* Piece : mPreview->GetModel()->GetRequiredSynthPieces())
+	{
+		if (Piece->IsGeneratedMeshPending())
+		{
+			mAssetRefreshPending = true;
+			mViewWidget->hide();
+			mLabel->setText(tr("Loading..."));
+			return;
+		}
+
+		if (!Piece->HasGeneratedMesh())
+		{
+			mAssetRefreshPending = false;
+			mViewWidget->hide();
+			mLabel->setText(tr("Preview unavailable"));
+			return;
+		}
+	}
+
+	if (mAssetRefreshPending && mRefitAfterAssetLoad)
+		mPreview->ZoomExtents();
+
 	mAssetRefreshPending = false;
+	mRefitAfterAssetLoad = true;
 	mViewWidget->show();
 	mPreview->RefreshDescription();
 	mPreview->Redraw();
@@ -186,6 +222,7 @@ void lcPreviewDockWidget::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replac
 		return;
 
 	mAssetRefreshPending = false;
+	mRefitAfterAssetLoad = true;
 
 	if (mPreview->SetCurrentPiece(Replacement, ColorCode))
 		RefreshPendingAssets();
@@ -199,6 +236,7 @@ void lcPreviewDockWidget::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replac
 void lcPreviewDockWidget::ClearPreview()
 {
 	mAssetRefreshPending = false;
+	mRefitAfterAssetLoad = true;
 	mViewWidget->show();
 	if (mPreview->GetModel()->GetPieces().size())
 		mPreview->ClearPreview();

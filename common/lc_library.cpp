@@ -1622,6 +1622,27 @@ bool lcPiecesLibrary::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 	return mAssetLoader->EnsurePiecesReady(Parts);
 }
 
+void lcPiecesLibrary::QueueSynthMesh(lcPiece* Piece)
+{
+	mAssetLoader->QueueSynthMesh(Piece);
+}
+
+void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
+{
+	if (mAssetLoader)
+		mAssetLoader->CancelSynthMesh(Piece);
+}
+
+bool lcPiecesLibrary::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
+{
+	return mAssetLoader->EnsureSynthMeshesReady(Pieces);
+}
+
+QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
+{
+	return mAssetLoader ? mAssetLoader->GetSynthMeshError(Piece) : QString();
+}
+
 void lcPiecesLibrary::QueueModelPiece(PieceInfo* Info)
 {
 	mAssetLoader->QueueModelPiece(Info);
@@ -2281,6 +2302,7 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 			ReloadPiece(Local.first);
 
 		mLoadMutex.unlock();
+		mAssetLoader->ReloadSynthMeshes();
 	}
 
 	mAssetLoader->ResumeQueuedWork();

@@ -177,6 +177,11 @@ public:
 	bool InsertControlPoint(const lcVector3& WorldStart, const lcVector3& WorldEnd);
 	bool RemoveFocusedControlPoint();
 	void VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const;
+	bool IsGeneratedMeshPending() const { return mSynthPending; }
+	// An older mesh may remain visible while its replacement is pending.
+	bool HasGeneratedMesh() const { return mMesh != nullptr && !mSynthPending; }
+	void SetGeneratedMesh(lcMesh* Mesh);
+	void RefreshGeneratedMesh();
 
 	lcGroup* GetTopGroup();
 
@@ -280,6 +285,7 @@ public:
 
 protected:
 	void UpdateMesh();
+	lcMesh* GetDisplayMesh() const;
 
 	bool IsPivotPointVisible() const
 	{
@@ -311,4 +317,5 @@ protected:
 	std::vector<lcPieceControlPoint> mControlPoints;
 	std::vector<bool> mTrainTrackConnections;
 	lcMesh* mMesh = nullptr;
+	bool mSynthPending = false;
 };

@@ -37,7 +37,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Other.mPieceInfo, Other.mID, true, true);
+	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
 	mColorIndex = Other.mColorIndex;
@@ -58,6 +58,8 @@ lcPiece::lcPiece(const lcPiece& Other)
 
 lcPiece::~lcPiece()
 {
+	lcGetPiecesLibrary()->CancelSynthMesh(this);
+
 	if (mPieceInfo)
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -71,6 +73,16 @@ lcPiece::~lcPiece()
 void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	PieceInfo* PreviousInfo = mPieceInfo;
+
+	if (PreviousInfo != Info || UpdateSynthInfo)
+		Library->CancelSynthMesh(this);
+
+	if (PreviousInfo != Info)
+	{
+		delete mMesh;
+		mMesh = nullptr;
+	}
 
 	mPieceInfo = Info;
 	if (mPieceInfo)
@@ -87,17 +99,15 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 	{
 		mControlPoints.clear();
 
-		delete mMesh;
-		mMesh = nullptr;
-
 		const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
 
 		if (SynthInfo)
-		{
 			SynthInfo->GetDefaultControlPoints(mControlPoints);
-			UpdateMesh();
-		}
+
+		UpdateMesh();
 	}
+	else if (PreviousInfo && PreviousInfo != Info)
+		UpdateMesh();
 
 	Library->NotifyConsumersChanged();
 }
@@ -514,10 +524,12 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 
 bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
 {
-	if (!mMesh || mPieceInfo->IsLoading())
+	lcMesh* Mesh = GetDisplayMesh();
+
+	if (!Mesh || mPieceInfo->IsLoading())
 		return mPieceInfo->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest);
 
-	if (!mMesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
+	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
 		return false;
 
 	PieceInfoRayTest.Info = mPieceInfo;
@@ -534,7 +546,9 @@ void lcPiece::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 
 bool lcPiece::IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const
 {
-	if (!mMesh || mPieceInfo->IsLoading())
+	lcMesh* Mesh = GetDisplayMesh();
+
+	if (!Mesh || mPieceInfo->IsLoading())
 		return mPieceInfo->BoxTest(WorldMatrix, Planes);
 
 	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
@@ -547,7 +561,7 @@ bool lcPiece::IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Pl
 	}
 
 	lcVector3 Corners[8];
-	lcGetBoxCorners(mMesh->mBoundingBox, Corners);
+	lcGetBoxCorners(Mesh->mBoundingBox, Corners);
 
 	int OutcodesOR = 0;
 	int OutcodesAND = 0x3f;
@@ -570,7 +584,7 @@ bool lcPiece::IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Pl
 	if (OutcodesOR == 0)
 		return true;
 
-	return mMesh->IntersectsPlanes(LocalPlanes);
+	return Mesh->IntersectsPlanes(LocalPlanes);
 }
 
 void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
@@ -1020,13 +1034,18 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 
 	if (mPieceInfo != Info)
 	{
+		const bool NewPiece = !mPieceInfo;
+
 		if (mPieceInfo)
 			lcGetPiecesLibrary()->ReleasePieceInfo(mPieceInfo);
 
 		SetPieceInfo(Info, mID, true, false);
-	}
 
-	UpdateMesh();
+		if (NewPiece)
+			UpdateMesh();
+	}
+	else
+		UpdateMesh();
 
 	//	std::vector<bool> mTrainTrackConnections;
 }
@@ -1054,15 +1073,15 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 			RenderMeshState = lcRenderMeshState::Faded;
 	}
 
-	if (!mMesh || mPieceInfo->IsLoading())
-	{
-		if (!mMesh && mPieceInfo->GetSynthInfo() && Scene->GetRequireGeneratedMeshes())
-			Scene->MarkMissingAssets();
+	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+		Scene->MarkMissingAssets();
 
-		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
-	}
+	if (mSynthPending && Scene->GetRequireCompleteAssets())
+		Scene->MarkMissingAssets();
+	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceInfo->IsLoading())
+		Scene->AddMesh(Mesh, mModelWorld, mColorIndex, RenderMeshState);
 	else
-		Scene->AddMesh(mMesh, mModelWorld, mColorIndex, RenderMeshState);
+		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
 
 	if (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected)
 		Scene->AddInterfaceObject(this);
@@ -1082,15 +1101,15 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	else if (ParentActive)
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
 
-	if (!mMesh || mPieceInfo->IsLoading())
-	{
-		if (!mMesh && mPieceInfo->GetSynthInfo() && Scene->GetRequireGeneratedMeshes())
-			Scene->MarkMissingAssets();
+	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+		Scene->MarkMissingAssets();
 
-		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
-	}
+	if (mSynthPending && Scene->GetRequireCompleteAssets())
+		Scene->MarkMissingAssets();
+	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceInfo->IsLoading())
+		Scene->AddMesh(Mesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
 	else
-		Scene->AddMesh(mMesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
+		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
 
 	if (ParentActive && (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected))
 		Scene->AddInterfaceObject(this);
@@ -1099,15 +1118,16 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
 	const lcMatrix44 ModelWorldMatrix = lcMul(mModelWorld, WorldMatrix);
+	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!mMesh || mPieceInfo->IsLoading())
+	if (!Mesh || mPieceInfo->IsLoading())
 	{
 		mPieceInfo->CompareBoundingBox(ModelWorldMatrix, Min, Max);
 		return;
 	}
 
 	lcVector3 Points[8];
-	lcGetBoxCorners(mMesh->mBoundingBox, Points);
+	lcGetBoxCorners(Mesh->mBoundingBox, Points);
 
 	for (const lcVector3& Corner : Points)
 	{
@@ -1119,14 +1139,16 @@ void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
 {
-	if (!mMesh || mPieceInfo->IsLoading())
+	lcMesh* Mesh = GetDisplayMesh();
+
+	if (!Mesh || mPieceInfo->IsLoading())
 		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points);
 	else
 	{
 		lcVector3 BoxPoints[8];
 		const lcMatrix44 ModelWorldMatrix = lcMul(mModelWorld, WorldMatrix);
 
-		lcGetBoxCorners(mMesh->mBoundingBox, BoxPoints);
+		lcGetBoxCorners(Mesh->mBoundingBox, BoxPoints);
 
 		for (int i = 0; i < 8; i++)
 			Points.emplace_back(lcMul31(BoxPoints[i], ModelWorldMatrix));
@@ -1482,21 +1504,25 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const
 {
-	if (!mMesh || mPieceInfo->IsLoading())
+	lcMesh* Mesh = GetDisplayMesh();
+
+	if (!Mesh || mPieceInfo->IsLoading())
 		return mPieceInfo->GetBoundingBox();
 	else
-		return mMesh->mBoundingBox;
+		return Mesh->mBoundingBox;
 }
 
 void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
-	if (!mMesh || mPieceInfo->IsLoading())
+	lcMesh* Mesh = GetDisplayMesh();
+
+	if (!Mesh || mPieceInfo->IsLoading())
 		mPieceInfo->CompareBoundingBox(mModelWorld, Min, Max);
 	else
 	{
 		lcVector3 Points[8];
 
-		lcGetBoxCorners(mMesh->mBoundingBox, Points);
+		lcGetBoxCorners(Mesh->mBoundingBox, Points);
 
 		for (int i = 0; i < 8; i++)
 		{
@@ -1523,7 +1549,40 @@ void lcPiece::UpdatePosition(lcStep Step)
 
 void lcPiece::UpdateMesh()
 {
+	mSynthPending = mPieceInfo && mPieceInfo->GetSynthInfo();
+
+	if (mSynthPending)
+		lcGetPiecesLibrary()->QueueSynthMesh(this);
+	else
+	{
+		delete mMesh;
+		mMesh = nullptr;
+		lcGetPiecesLibrary()->CancelSynthMesh(this);
+	}
+}
+
+lcMesh* lcPiece::GetDisplayMesh() const
+{
+	if (mMesh)
+		return mMesh;
+
+	if (mSynthPending && mPieceInfo && mPieceInfo->GetSynthInfo())
+		return lcGetPiecesLibrary()->GetLoadingMesh();
+
+	return nullptr;
+}
+
+void lcPiece::SetGeneratedMesh(lcMesh* Mesh)
+{
 	delete mMesh;
-	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
-	mMesh = SynthInfo ? SynthInfo->CreateMesh(mControlPoints) : nullptr;
+	mMesh = Mesh;
+	mSynthPending = false;
+}
+
+void lcPiece::RefreshGeneratedMesh()
+{
+	delete mMesh;
+	mMesh = nullptr;
+
+	UpdateMesh();
 }

@@ -831,7 +831,7 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*
 	for (const lcColor& Color : gColorList)
 		ColorTranslucency.push_back(Color.Translucent);
 
-	return CreateMeshInternal(TextureLookup, ColorTranslucency, gDefaultColor);
+	return CreateMeshInternal(TextureLookup, ColorTranslucency, gDefaultColor, nullptr);
 }
 
 void lcLibraryMeshData::ResolveColors()
@@ -840,15 +840,18 @@ void lcLibraryMeshData::ResolveColors()
 		Material->Color = lcGetColorIndex(Material->Color);
 }
 
-lcMesh* lcLibraryMeshData::CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex)
+lcMesh* lcLibraryMeshData::CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
 {
 	// Keep project texture lookup on the UI thread after conversion.
 	const std::function<lcTexture*(const char*)> DeferTexture = [](const char*) -> lcTexture* { return nullptr; };
-	return CreateMeshInternal(DeferTexture, ColorTranslucency, DefaultColorIndex);
+	return CreateMeshInternal(DeferTexture, ColorTranslucency, DefaultColorIndex, Cancelled);
 }
 
-lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex)
+lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
 {
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		return nullptr;
+
 	lcMesh* Mesh = new lcMesh();
 
 	int BaseVertices[LC_NUM_MESHDATA_TYPES];
@@ -911,6 +914,12 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 		});
 	}
 
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+	{
+		delete Mesh;
+		return nullptr;
+	}
+
 	Mesh->Create(NumSections, NumVertices, static_cast<int>(mTexturedVertices.size()), ConditionalVertexCount, NumIndices);
 
 	if ((Mesh->mVertexDataSize && !Mesh->mVertexData) || (Mesh->mIndexDataSize && !Mesh->mIndexData))
@@ -923,8 +932,22 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 
 	for (const lcMeshLoaderTypeData& Data : mData)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		{
+			delete Mesh;
+			return nullptr;
+		}
+
+		size_t VertexIndex = 0;
+
 		for (const lcMeshLoaderVertex& SrcVertex : Data.mVertices)
 		{
+			if ((VertexIndex++ & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+			{
+				delete Mesh;
+				return nullptr;
+			}
+
 			lcVertex& DstVertex = *DstVerts++;
 
 			DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
@@ -936,8 +959,16 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 
 	if (mHasTextures)
 	{
+		size_t VertexIndex = 0;
+
 		for (const lcMeshLoaderTexturedVertex& SrcVertex : mTexturedVertices)
 		{
+			if ((VertexIndex++ & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+			{
+				delete Mesh;
+				return nullptr;
+			}
+
 			lcVertexTextured& DstVertex = *DstTexturedVerts++;
 
 			DstVertex.Position = lcVector3LDrawToLeoCAD(SrcVertex.Position);
@@ -949,11 +980,17 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 	bool SectionsWritten;
 
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		SectionsWritten = WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex);
+		SectionsWritten = WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex, Cancelled);
 	else
-		SectionsWritten = WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex);
+		SectionsWritten = WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex, Cancelled);
 
 	if (!SectionsWritten)
+	{
+		delete Mesh;
+		return nullptr;
+	}
+
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
 	{
 		delete Mesh;
 		return nullptr;
@@ -980,6 +1017,11 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 	int ConditionalOffset = 0;
 	for (const lcMeshLoaderFinalSection& FinalSection : ConditionalSections)
 	{
+		if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+		{
+			delete Mesh;
+			return nullptr;
+		}
 		const auto AppendVertices = [this, &FinalSection, &ConditionalOffset, ConditionalVertices](lcMeshDataType DataType)
 		{
 			const lcMeshLoaderTypeData& Data = mData[DataType];
@@ -1023,13 +1065,23 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 	if (mHasStyleStud)
 		Mesh->mFlags |= lcMeshFlag::HasStyleStud;
 
-	UpdateMeshBoundingBox(Mesh);
+	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+	{
+		delete Mesh;
+		return nullptr;
+	}
+
+	if (!UpdateMeshBoundingBox(Mesh, Cancelled))
+	{
+		delete Mesh;
+		return nullptr;
+	}
 
 	return Mesh;
 }
 
 template<typename IndexType>
-bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex)
+bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
 {
 	int NumIndices = 0;
 
@@ -1037,6 +1089,9 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 	{
 		for (size_t SectionIndex = 0; SectionIndex < FinalSections[LodIdx].size(); SectionIndex++)
 		{
+			if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return false;
+
 			const lcMeshLoaderFinalSection& FinalSection = FinalSections[LodIdx][SectionIndex];
 			lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIndex];
 
@@ -1061,7 +1116,7 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 
 			IndexType* Index = Mesh->mIndexDataSize ? (IndexType*)Mesh->mIndexData + NumIndices : nullptr;
 
-			const auto AddSection = [&DstSection, &Index, &BaseVertices](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
+			const auto AddSection = [&DstSection, &Index, &BaseVertices, Cancelled](lcMeshLoaderSection* SrcSection, lcMeshDataType SrcDataType)
 			{
 				if (!Index && DstSection.PrimitiveType != LC_MESH_CONDITIONAL_LINES)
 					return SrcSection->mIndices.empty();
@@ -1074,7 +1129,12 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 						const IndexType BaseVertex = BaseVertices[SrcDataType];
 
 						for (size_t IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
+						{
+							if ((IndexIdx & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+								return false;
+
 							*Index++ = BaseVertex + SrcSection->mIndices[IndexIdx];
+						}
 					}
 					break;
 
@@ -1084,7 +1144,12 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					case LC_MESH_TEXTURED_TRIANGLES:
 					{
 						for (size_t IndexIdx = 0; IndexIdx < SrcSection->mIndices.size(); IndexIdx++)
+						{
+							if ((IndexIdx & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+								return false;
+
 							*Index++ = SrcSection->mIndices[IndexIdx];
+						}
 					}
 					break;
 
@@ -1134,7 +1199,7 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 	return true;
 }
 
-void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
+bool lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh, const std::atomic_bool* Cancelled)
 {
 	lcVector3 MeshMin(FLT_MAX, FLT_MAX, FLT_MAX), MeshMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 	bool UpdatedBoundingBox = false;
@@ -1145,13 +1210,22 @@ void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
 
 		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
 		{
+			if (Cancelled && Cancelled->load(std::memory_order_relaxed))
+				return false;
+
 			lcMeshSection& Section = Lod.Sections[SectionIdx];
 			lcVector3 SectionMin(FLT_MAX, FLT_MAX, FLT_MAX), SectionMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-				UpdateMeshSectionBoundingBox<quint16>(Mesh, Section, SectionMin, SectionMax);
+			{
+				if (!UpdateMeshSectionBoundingBox<quint16>(Mesh, Section, SectionMin, SectionMax, Cancelled))
+					return false;
+			}
 			else
-				UpdateMeshSectionBoundingBox<quint32>(Mesh, Section, SectionMin, SectionMax);
+			{
+				if (!UpdateMeshSectionBoundingBox<quint32>(Mesh, Section, SectionMin, SectionMax, Cancelled))
+					return false;
+			}
 
 			Section.BoundingBox.Max = SectionMax;
 			Section.BoundingBox.Min = SectionMin;
@@ -1172,10 +1246,12 @@ void lcLibraryMeshData::UpdateMeshBoundingBox(lcMesh* Mesh)
 	Mesh->mBoundingBox.Max = MeshMax;
 	Mesh->mBoundingBox.Min = MeshMin;
 	Mesh->mRadius = lcLength((MeshMax - MeshMin) / 2.0f);
+
+	return true;
 }
 
 template<typename IndexType>
-void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax)
+bool lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax, const std::atomic_bool* Cancelled)
 {
 	switch (Section.PrimitiveType)
 	{
@@ -1187,6 +1263,9 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 
 			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
+				if ((Index & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+					return false;
+
 				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
 				SectionMin = lcMin(SectionMin, Position);
 				SectionMax = lcMax(SectionMax, Position);
@@ -1200,6 +1279,9 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 
 			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
+				if ((Index & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+					return false;
+
 				const lcVector3& Position = VertexBuffer[Section.DrawOffset + Index].Position1;
 				SectionMin = lcMin(SectionMin, Position);
 				SectionMax = lcMax(SectionMax, Position);
@@ -1214,6 +1296,9 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 
 			for (int Index = 0; Index < Section.DrawCount; Index++)
 			{
+				if ((Index & 1023) == 0 && Cancelled && Cancelled->load(std::memory_order_relaxed))
+					return false;
+
 				const lcVector3& Position = VertexBuffer[IndexBuffer[Index]].Position;
 				SectionMin = lcMin(SectionMin, Position);
 				SectionMax = lcMax(SectionMax, Position);
@@ -1224,6 +1309,8 @@ void lcLibraryMeshData::UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const l
 		case LC_MESH_NUM_PRIMITIVE_TYPES:
 			break;
 	}
+
+	return true;
 }
 
 lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags)
@@ -1251,7 +1338,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 	while (File.ReadLine(Buffer, sizeof(Buffer)))
 	{
-		if (Library->ShouldCancelLoading())
+		if (Library->ShouldCancelLoading() || (mCancelled && mCancelled->load(std::memory_order_relaxed)))
 			return false;
 
 		bool LastToken = false;

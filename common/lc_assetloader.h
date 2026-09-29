@@ -1,9 +1,12 @@
 #pragma once
 
 #include "lc_library.h"
+#include "piece.h"
 
 class PieceInfo;
+class lcPiece;
 class lcMesh;
+class lcSynthInfo;
 class lcMemFile;
 class lcLibraryMeshData;
 class Image;
@@ -74,6 +77,11 @@ public:
 	void QueuePiece(PieceInfo* Info, bool Priority);
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	void QueueSynthMesh(lcPiece* Piece);
+	void CancelSynthMesh(lcPiece* Piece);
+	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
+	QString GetSynthMeshError(const lcPiece* Piece) const;
+	void ReloadSynthMeshes();
 	void QueueModelPiece(PieceInfo* Info);
 	void InvalidatePiece(PieceInfo* Info);
 	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
@@ -127,8 +135,28 @@ private:
 		qint64 RetryAt = 0;
 	};
 
+	struct SynthRequest
+	{
+		lcPiece* Piece;
+		std::shared_ptr<const lcSynthInfo> SynthInfo;
+		std::vector<lcPieceControlPoint> ControlPoints;
+		Priority LoadPriority;
+		qint64 EnqueuedAt;
+		quint64 Generation;
+		bool Running = false;
+		std::atomic_bool Cancelled = false;
+		bool Terminal = false;
+		bool ConvertingMesh = false;
+		std::unique_ptr<lcLibraryMeshData> MeshData;
+		std::vector<bool> ColorTranslucency;
+		int DefaultColorIndex = 0;
+		std::unique_ptr<lcMesh> StagedMesh;
+		QString Error;
+	};
+
 	using PartRequestMap = std::map<PieceInfo*, std::shared_ptr<Request>>;
 	using TextureRequestMap = std::map<lcTexture*, std::shared_ptr<TextureRequest>>;
+	using SynthRequestMap = std::map<lcPiece*, std::shared_ptr<SynthRequest>>;
 
 	struct Completion
 	{
@@ -136,6 +164,9 @@ private:
 		lcPartBuildResult Result;
 		std::shared_ptr<TextureRequest> RequestedTexture;
 		lcTextureBuildResult TextureResult;
+		std::shared_ptr<SynthRequest> RequestedSynth;
+		std::unique_ptr<lcLibraryMeshData> SynthMeshData;
+		std::unique_ptr<lcMesh> SynthMesh;
 	};
 
 	struct Notification
@@ -156,6 +187,8 @@ private:
 	void DispatchNotifications();
 	void FinishPart(const std::shared_ptr<Request>& RequestedPart);
 	void CheckWaitingParts();
+	void CheckWaitingSynths();
+	void FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSynth);
 	void UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
 	void FinishTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
 	void WaitForResultsLocked();
@@ -168,10 +201,15 @@ private:
 	QMutex mDrainMutex;
 	PartRequestMap mRequests;
 	TextureRequestMap mTextureRequests;
+	SynthRequestMap mSynthRequests;
+	std::unordered_map<const lcPiece*, QString> mFailedSynthErrors;
+	std::unordered_set<lcPiece*> mSynthPieces;
 	std::deque<std::shared_ptr<Request>> mQueue;
 	std::deque<std::shared_ptr<Request>> mPausedQueue;
 	std::deque<std::shared_ptr<TextureRequest>> mTextureQueue;
 	std::deque<std::shared_ptr<TextureRequest>> mPausedTextureQueue;
+	std::deque<std::shared_ptr<SynthRequest>> mSynthQueue;
+	std::deque<std::shared_ptr<SynthRequest>> mPausedSynthQueue;
 	std::deque<Completion> mCompletions;
 	std::deque<std::shared_ptr<Request>> mStarted;
 	std::deque<std::shared_ptr<TextureRequest>> mStartedTextures;

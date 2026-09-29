@@ -34,11 +34,15 @@ void PieceInfo::SetLoadingBoundingBox()
 
 PieceInfo::~PieceInfo()
 {
-	delete mSynthInfo;
 	delete mTrainTrackInfo;
 
 	if (mMesh)
 		Unload();
+}
+
+void PieceInfo::SetSynthInfo(lcSynthInfo* SynthInfo)
+{
+	mSynthInfo.reset(SynthInfo);
 }
 
 void PieceInfo::SetMesh(lcMesh* Mesh)

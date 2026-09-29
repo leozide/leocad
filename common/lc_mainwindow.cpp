@@ -1009,6 +1009,7 @@ void lcMainWindow::UpdateAssets()
 	lcView::UpdateProjectViews(Project);
 
 	const std::vector<PieceInfo*> Required = Project->GetRequiredPieces();
+	const std::vector<lcPiece*> GeneratedPieces = Project->GetRequiredSynthPieces();
 
 	mStatusRequiredAssets.clear();
 	mStatusRequiredAssets.insert(Required.begin(), Required.end());
@@ -1037,8 +1038,27 @@ void lcMainWindow::UpdateAssets()
 			Pending++;
 	}
 
-	mStatusLoadProgress->setRange(0, static_cast<int>(Required.size()));
-	mStatusLoadProgress->setValue(static_cast<int>(Required.size()) - Pending);
+	for (const lcPiece* Piece : GeneratedPieces)
+	{
+		if (Piece->IsGeneratedMeshPending())
+			Pending++;
+		else if (!Piece->HasGeneratedMesh())
+		{
+			Failed++;
+
+			if (FailureDetails.isEmpty())
+			{
+				FailureDetails = lcGetPiecesLibrary()->GetSynthMeshError(Piece);
+
+				if (FailureDetails.isEmpty())
+					FailureDetails = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
+			}
+		}
+	}
+
+	const int Total = static_cast<int>(Required.size() + GeneratedPieces.size());
+	mStatusLoadProgress->setRange(0, Total);
+	mStatusLoadProgress->setValue(Total - Pending);
 
 	if (Failed)
 	{

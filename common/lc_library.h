@@ -5,6 +5,7 @@
 #include "lc_meshloader.h"
 
 class PieceInfo;
+class lcPiece;
 class lcMesh;
 class lcTrainTrackInfo;
 struct lcTrainTrackConnectionType;
@@ -182,6 +183,10 @@ public:
 	void NotifyConsumersChanged();
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	void QueueSynthMesh(lcPiece* Piece);
+	void CancelSynthMesh(lcPiece* Piece);
+	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
+	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void QueueModelPiece(PieceInfo* Info);
 	void InvalidatePiece(PieceInfo* Info);
 	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
@@ -262,6 +267,7 @@ signals:
 	void AssetRequestsChanged();
 	void PartLoaded(PieceInfo* Info);
 	void PartLoadFailed(PieceInfo* Info, const QString& Error);
+	void GeneratedMeshSettled(PieceInfo* Info);
 	void ColorsLoaded();
 
 protected:

@@ -182,6 +182,7 @@ public:
 	void UpdateAllViews() const;
 	void RefreshPreview() const;
 	std::vector<PieceInfo*> GetRequiredPieces() const;
+	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 
 	PieceInfo* GetPieceInfo() const

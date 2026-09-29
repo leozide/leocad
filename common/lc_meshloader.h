@@ -167,7 +167,7 @@ public:
 
 	lcMesh* CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup = {});
 	void ResolveColors();
-	lcMesh* CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex);
+	lcMesh* CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
 	QStringList GetTextureDependencies() const;
 	void AddVertices(lcMeshDataType MeshDataType, size_t VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, size_t IndexCount, quint32** IndexBuffer);
@@ -193,12 +193,12 @@ protected:
 	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoords);
 
 	template<typename IndexType>
-	bool WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex);
-	lcMesh* CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex);
+	bool WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
+	lcMesh* CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
 
-	static void UpdateMeshBoundingBox(lcMesh* Mesh);
+	static bool UpdateMeshBoundingBox(lcMesh* Mesh, const std::atomic_bool* Cancelled);
 	template<typename IndexType>
-	static void UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax);
+	static bool UpdateMeshSectionBoundingBox(const lcMesh* Mesh, const lcMeshSection& Section, lcVector3& SectionMin, lcVector3& SectionMax, const std::atomic_bool* Cancelled);
 };
 
 enum class lcMeshLoaderFlag
@@ -218,6 +218,7 @@ public:
 	lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags);
 
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
+	void SetCancellationFlag(const std::atomic_bool* Cancelled) { mCancelled = Cancelled; }
 	bool SearchProjectFolder() const { return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder); }
 
 	Project* mCurrentProject;
@@ -229,4 +230,5 @@ protected:
 
 	lcLibraryMeshData& mMeshData;
 	lcMeshLoaderFlags mFlags;
+	const std::atomic_bool* mCancelled = nullptr;
 };

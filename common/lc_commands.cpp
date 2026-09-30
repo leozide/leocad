@@ -1296,7 +1296,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.TrainTrack.Rotate"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate Train Track"),
-		QT_TRANSLATE_NOOP("Status", "Rotate the focused train track arount its last connection"),
+		QT_TRANSLATE_NOOP("Status", "Rotate the focused train track around its last connection"),
 		""
 	},
 	// LC_PIECE_MOVE_PLUSX

@@ -53,7 +53,7 @@ static QString WhatsThisDescription = QObject::tr(
 	"    %1 will automatically apply the setting and\n"
 	"    attempt the configure the LDraw addon.\n"
 	"  - %1 Blender LDraw Addon: you can update the LDraw\n"
-	"    addon which will downlod the latest addon or apply\n"
+	"    addon which will download the latest addon or apply\n"
 	"    the current addon if the version is the same or newer\n"
 	"    than the online version.\n"
 	"    You can view the standard output log for the update.\n\n"

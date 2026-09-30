@@ -1295,6 +1295,58 @@ lcResult<void> Project::ExportModel(const QString& FileName, lcModel* Model) con
 	return lcResult<void>();
 }
 
+QString Project::MakeExportNameFragment(const QString& Name)
+{
+	QString Identifier;
+	bool AddSeparator = false;
+
+	for (QChar Character : Name)
+	{
+		const ushort Value = Character.unicode();
+		const bool IsAsciiLetter = (Value >= 'A' && Value <= 'Z') || (Value >= 'a' && Value <= 'z');
+		const bool IsAsciiDigit = Value >= '0' && Value <= '9';
+
+		if (IsAsciiLetter || IsAsciiDigit)
+		{
+			if (AddSeparator && !Identifier.isEmpty() && !Identifier.endsWith(QLatin1Char('_')))
+				Identifier.append(QLatin1Char('_'));
+
+			Identifier.append(Character);
+			AddSeparator = false;
+		}
+		else
+			AddSeparator = true;
+	}
+
+	if (Identifier.isEmpty())
+		Identifier = QLatin1String("Unnamed");
+
+	if (Identifier.size() > 80)
+	{
+		const QByteArray Hash = QCryptographicHash::hash(Name.toUtf8(), QCryptographicHash::Sha256).toHex();
+		Identifier = Identifier.left(67) + QLatin1Char('_') + QString::fromLatin1(Hash.left(12));
+	}
+
+	return Identifier;
+}
+
+QString Project::MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix)
+{
+	QString Identifier = BaseName;
+	int Suffix = 2;
+
+	while (UsedNames.find(Identifier) != UsedNames.end() ||
+		(!ReservedSuffix.isEmpty() && UsedNames.find(Identifier + ReservedSuffix) != UsedNames.end()))
+		Identifier = BaseName + QLatin1Char('_') + QString::number(Suffix++);
+
+	UsedNames.insert(Identifier);
+
+	if (!ReservedSuffix.isEmpty())
+		UsedNames.insert(Identifier + ReservedSuffix);
+
+	return Identifier;
+}
+
 QString Project::GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const
 {
 	if (!FileName.isEmpty())
@@ -1822,11 +1874,26 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	Stream << "\t<up_axis>Z_UP</up_axis>\r\n";
 	Stream << "</asset>\r\n";
 
+	std::vector<QString> ColorIDs(gColorList.size());
+	std::set<QString> UsedColorIDs;
+
+	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
+	{
+		const QString BaseName = QLatin1String("Color_") + MakeExportNameFragment(QString::fromLatin1(gColorList[ColorIndex].SafeName));
+		QString Identifier = BaseName;
+
+		if (UsedColorIDs.find(Identifier) != UsedColorIDs.end())
+			Identifier += QLatin1Char('_') + QString::number(ColorIndex);
+
+		ColorIDs[ColorIndex] = MakeUniqueExportIdentifier(Identifier, UsedColorIDs, QString());
+	}
+
 	Stream << "<library_effects>\r\n";
 
-	for (const lcColor& Color : gColorList)
+	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{
-		const char* ColorName = Color.SafeName;
+		const lcColor& Color = gColorList[ColorIndex];
+		const QString& ColorName = ColorIDs[ColorIndex];
 
 		Stream << QString("\t<effect id=\"%1-phong\">\r\n").arg(ColorName);
 		Stream << "\t\t<profile_COMMON>\r\n";
@@ -1862,9 +1929,9 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</library_effects>\r\n";
 	Stream << "<library_materials>\r\n";
 
-	for (const lcColor& Color : gColorList)
+	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{
-		const char* ColorName = Color.SafeName;
+		const QString& ColorName = ColorIDs[ColorIndex];
 		Stream << QString("\t<material id=\"%1-material\">\r\n").arg(ColorName);
 		Stream << QString("\t\t<instance_effect url=\"#%1-phong\" />\r\n").arg(ColorName);
 		Stream << "\t</material>\r\n";
@@ -1872,30 +1939,22 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 	Stream << "</library_materials>\r\n";
 	Stream << "<library_geometries>\r\n";
-	std::set<lcMesh*> AddedMeshes;
-
-	auto GetMeshID = [](const lcModelPartsEntry& ModelPart)
-	{
-		const PieceInfo* Info = ModelPart.Info;
-		QString ID = QString(Info->mFileName).replace('.', '_');
-
-		if (ModelPart.Mesh)
-			ID += "_" + QString::number((quintptr)ModelPart.Mesh, 16);
-
-		return ID;
-	};
+	std::map<const lcMesh*, QString> MeshIDs;
+	std::set<QString> UsedMeshIDs;
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
 		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
-		if (!AddedMeshes.insert(Mesh).second)
-			continue;
-
-		QString ID = GetMeshID(ModelPart);
-
 		if (!Mesh)
 			continue;
+
+		if (MeshIDs.find(Mesh) != MeshIDs.end())
+			continue;
+
+		const QString BaseName = QLatin1String("Part_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.Info->mFileName));
+		const QString ID = MakeUniqueExportIdentifier(BaseName, UsedMeshIDs, QString());
+		MeshIDs.emplace(Mesh, ID);
 
 		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
 		Stream << "\t\t<mesh>\r\n";
@@ -1951,7 +2010,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
-			const char* ColorName = gColorList[Section->ColorIndex].SafeName;
+			const QString& ColorName = ColorIDs[Section->ColorIndex];
 
 			if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
 			{
@@ -2009,7 +2068,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		if (!Mesh)
 			continue;
 
-		QString ID = GetMeshID(ModelPart);
+		const QString& ID = MeshIDs.at(Mesh);
 
 		Stream << "\t\t<node>\r\n";
 		Stream << "\t\t\t<matrix>\r\n";
@@ -2032,14 +2091,14 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				continue;
 
-			const char* SourceColorName = gColorList[Section->ColorIndex].SafeName;
-			const char* TargetColorName;
+			const QString& SourceColorName = ColorIDs[Section->ColorIndex];
+			const QString* TargetColorName;
 			if (Section->ColorIndex == gDefaultColor)
-				TargetColorName = gColorList[ModelPart.ColorIndex].SafeName;
+				TargetColorName = &ColorIDs[ModelPart.ColorIndex];
 			else
-				TargetColorName = gColorList[Section->ColorIndex].SafeName;
+				TargetColorName = &SourceColorName;
 
-			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>\r\n").arg(SourceColorName, TargetColorName);
+			Stream << QString("\t\t\t\t\t\t<instance_material symbol=\"%1\" target=\"#%2-material\"/>\r\n").arg(SourceColorName, *TargetColorName);
 		}
 
 		Stream << "\t\t\t\t\t</technique_common>\r\n";
@@ -2135,7 +2194,59 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
 
-	QString ProjectTitle = GetTitle();
+	const QString ProjectTitle = GetTitle();
+	auto MakeSafeFileName = [](const QString& Name)
+	{
+		const QByteArray Utf8Name = Name.toUtf8();
+		QString SafeName;
+		SafeName.reserve(Utf8Name.size() * 3);
+
+		for (char Byte : Utf8Name)
+		{
+			const unsigned char Value = static_cast<unsigned char>(Byte);
+
+			if ((Value >= 'A' && Value <= 'Z') || (Value >= 'a' && Value <= 'z') || (Value >= '0' && Value <= '9') || Value == '-')
+				SafeName.append(QLatin1Char(Value));
+			else
+				SafeName.append(QString("_%1").arg(Value, 2, 16, QLatin1Char('0')));
+		}
+
+		if (SafeName.isEmpty())
+			return QString("Model");
+
+		if (SafeName.size() > 80)
+		{
+			const QByteArray Digest = QCryptographicHash::hash(Utf8Name, QCryptographicHash::Sha256).toHex();
+			SafeName = SafeName.left(60) + '-' + QString::fromLatin1(Digest.left(16));
+		}
+
+		// Windows reserves device names even when a file has an extension.
+		const QString UpperName = SafeName.toUpper();
+		const bool NumberedDevice = UpperName.size() == 4 && (UpperName.startsWith(QLatin1String("COM")) || UpperName.startsWith(QLatin1String("LPT"))) &&
+			UpperName[3] >= QLatin1Char('1') && UpperName[3] <= QLatin1Char('9');
+
+		if (UpperName == QLatin1String("CON") || UpperName == QLatin1String("PRN") || UpperName == QLatin1String("AUX") || UpperName == QLatin1String("NUL") || NumberedDevice)
+			SafeName.prepend('_');
+
+		return SafeName;
+	};
+
+	const QString ProjectBaseName = MakeSafeFileName(QFileInfo(ProjectTitle).completeBaseName());
+	std::map<const lcModel*, QString> ModelBaseNames;
+	int ModelOrdinal = 0;
+
+	for (const std::unique_ptr<lcModel>& Model : mModels)
+	{
+		if (Models.find(Model.get()) == Models.end())
+			continue;
+
+		QString BaseName = ProjectBaseName;
+
+		if (Models.size() > 1)
+			BaseName += QString("-%1-%2").arg(++ModelOrdinal).arg(MakeSafeFileName(Model->GetProperties().mFileName));
+
+		ModelBaseNames.emplace(Model.get(), std::move(BaseName));
+	}
 
 	auto AddPartsListImage = [&Dir](QTextStream& Stream, lcModel* Model, lcStep Step, const QString& BaseName) -> lcResult<void>
 	{
@@ -2161,25 +2272,23 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		if (!Writer.write(Image))
 			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 
-		Stream << QString::fromLatin1("<p><IMG SRC=\"%1\" /></p><br><br>\r\n").arg(ImageName);
+		Stream << QString::fromLatin1("<p><IMG SRC=\"%1\" /></p><br><br>\r\n").arg(ImageName.toHtmlEscaped());
 
 		return lcResult<void>();
 	};
 
 	for (lcModel* Model : Models)
 	{
-		QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
+		const QString& BaseName = ModelBaseNames.at(Model);
 		lcStep LastStep = Model->GetLastStep();
 		QString PageTitle;
 
 		if (Models.size() > 1)
-		{
-			BaseName += '-' + Model->GetProperties().mFileName;
 			PageTitle = Model->GetProperties().mFileName;
-		}
 		else
 			PageTitle = ProjectTitle;
-		BaseName.replace('#', '_');
+
+		const QString EscapedPageTitle = PageTitle.toHtmlEscaped();
 
 		if (Options.SinglePage)
 		{
@@ -2191,12 +2300,12 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 			QTextStream Stream(&File);
 
-			Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle);
+			Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle);
 
 			for (lcStep Step = 1; Step <= LastStep; Step++)
 			{
 				QString StepString = QString::fromLatin1("%1").arg(Step, 2, 10, QLatin1Char('0'));
-				Stream << QString::fromLatin1("<p><IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5></p><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+				Stream << QString::fromLatin1("<p><IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5></p><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
 				{
@@ -2229,7 +2338,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle);
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle);
 
 				for (lcStep Step = 1; Step <= LastStep; Step++)
 					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
@@ -2251,8 +2360,8 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>%1 - Step %2</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(PageTitle, QString::number(Step));
-				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName, StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>%1 - Step %2</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle, QString::number(Step));
+				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
 				{
@@ -2287,7 +2396,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(PageTitle);
+				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(EscapedPageTitle);
 
 				const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, 0, BaseName);
 
@@ -2313,8 +2422,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 	if (Models.size() > 1)
 	{
-		QString BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1);
-		QString FileName = QFileInfo(Dir, BaseName + QLatin1String("-index.html")).absoluteFilePath();
+		QString FileName = QFileInfo(Dir, ProjectBaseName + QLatin1String("-index.html")).absoluteFilePath();
 		QFile File(FileName);
 
 		if (!File.open(QIODevice::WriteOnly))
@@ -2322,28 +2430,27 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		QTextStream Stream(&File);
 
-		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle);
+		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle.toHtmlEscaped());
 
 		for (const lcModel* Model : Models)
 		{
-			BaseName = ProjectTitle.left(ProjectTitle.length() - QFileInfo(ProjectTitle).suffix().length() - 1) + '-' + Model->GetProperties().mFileName;
-			BaseName.replace('#', '_');
+			const QString& BaseName = ModelBaseNames.at(Model);
 
 			if (Options.SinglePage)
 			{
 				FileName = BaseName + QLatin1String(".html");
-				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mFileName);
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName.toHtmlEscaped(), Model->GetProperties().mFileName.toHtmlEscaped());
 			}
 			else if (Options.IndexPage)
 			{
 				FileName = BaseName + QLatin1String("-index.html");
-				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName, Model->GetProperties().mFileName);
+				Stream << QString::fromLatin1("<p><a href=\"%1\">%2</a>").arg(FileName.toHtmlEscaped(), Model->GetProperties().mFileName.toHtmlEscaped());
 			}
 			else
 			{
 				lcStep LastStep = Model->GetLastStep();
 
-				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mFileName);
+				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mFileName.toHtmlEscaped());
 
 				for (lcStep Step = 1; Step <= LastStep; Step++)
 					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
@@ -2424,13 +2531,30 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 	const std::vector<std::unique_ptr<lcLight>>& Lights = gMainWindow->GetActiveModel()->GetLights();
 	const lcCamera* Camera = gMainWindow->GetActiveView()->GetCamera();
-	const QString CameraName = QString(Camera->GetName()).replace(" ","_");
+	auto MakeIdentifier = [](const QString& Name, const QString& Fallback)
+	{
+		QString Identifier;
+
+		for (QChar Character : Name)
+		{
+			const ushort Value = Character.unicode();
+
+			if ((Value >= 'A' && Value <= 'Z') || (Value >= 'a' && Value <= 'z') || (Value >= '0' && Value <= '9') || Value == '_')
+				Identifier.append(Character);
+			else
+				Identifier.append('_');
+		}
+
+		return Identifier.isEmpty() ? Fallback : Identifier.left(48);
+	};
+
+	const QString CameraName = MakeIdentifier(QString(Camera->GetName()), QLatin1String("Camera"));
 	const lcVector3& Position = Camera->mPosition;
 	const lcVector3& Target = Camera->mTargetPosition;
 	const lcVector3& Up = Camera->mUpVector;
 	const lcVector3 BackgroundColor = lcVector3FromColor(lcGetPreferences().mBackgroundSolidColor);
 	const lcPOVRayOptions& POVRayOptions = mModels[0]->GetPOVRayOptions();
-	const QString TopModelName = QString("LC_%1").arg(QString(mModels[0]->GetFileName()).replace(" ","_").replace(".","_dot_"));
+	const QString TopModelName = QLatin1String("LC_") + MakeExportNameFragment(QString(mModels[0]->GetFileName()));
 	const QString LGEOPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
 	const bool UseLGEO = POVRayOptions.UseLGEO && !LGEOPath.isEmpty();
 	const int TopModelColorCode = 7;
@@ -2739,12 +2863,20 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	}
 	else
 	{
+		std::set<QString> UsedLightNames;
+
 		for (const std::unique_ptr<lcLight>& Light : Lights)
 		{
 			const lcVector3 LightPosition = Light->GetPosition();
 			const lcVector3 LightTarget = LightPosition + Light->GetDirection();
 			const lcVector3 LightColor = Light->GetColor();
-			const QString LightName = QString(Light->GetName()).replace(" ", "_");
+			const QString BaseLightName = MakeIdentifier(QString(Light->GetName()), QLatin1String("Light"));
+			QString LightName = BaseLightName;
+			int LightSuffix = 1;
+
+			while (!UsedLightNames.insert(LightName).second)
+				LightName = BaseLightName + '_' + QString::number(LightSuffix++);
+
 			LightType = Light->GetLightType();
 			Shadowless = Light->GetCastShadow() ? 0 : 1;
 			Power = Light->GetPOVRayPower();
@@ -2826,9 +2958,13 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 			if (strchr(Flags, 'S'))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
-				Entry.second |= LGEO_PIECE_SLOPE;
-				Entry.first[0] = 0;
+				auto Entry = PieceTable.find(Info);
+
+				if (Entry != PieceTable.end() && Entry->second.first[0])
+				{
+					// The external include declares both the base object and its slope surface.
+					Entry->second.second |= LGEO_PIECE_SLOPE;
+				}
 			}
 		}
 
@@ -2906,7 +3042,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 	AddColorDefinition(lcGetColorIndex(TopModelColorCode));
 
-	std::set<lcMesh*> AddedMeshes;
+	std::set<std::string> IncludedLgeoNames;
 
 	if (UseLGEO)
 	{
@@ -2924,11 +3060,8 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			if (!Mesh)
 				continue;
 
-			if (!AddedMeshes.insert(Mesh).second)
-				continue;
-
 			const std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = Search->second;
-			if (Entry.first[0])
+			if (Entry.first[0] && IncludedLgeoNames.insert(Entry.first).second)
 			{
 				snprintf(Line, sizeof(Line), "#include \"%s.inc\" // %s\n", Entry.first, ModelPart.Info->m_strDescription);
 				POVFile.WriteLine(Line);
@@ -2942,49 +3075,53 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	ColorTablePointer.resize(NumColors);
 	for (size_t ColorIdx = 0; ColorIdx < NumColors; ColorIdx++)
 		ColorTablePointer[ColorIdx] = ColorTable[ColorIdx].data();
+	std::map<const lcMesh*, std::string> MeshNames;
+	std::set<QString> UsedPovNames;
+	UsedPovNames.insert(TopModelName);
 
-	auto GetMeshName = [](const lcModelPartsEntry& ModelPart, char (&Name)[LC_PIECE_NAME_LEN])
-	{
-		strncpy(Name, ModelPart.Info->mFileName, sizeof(Name));
-		Name[sizeof(Name) - 1] = 0;
-
-		for (char* c = Name; *c; c++)
-			if (*c == '-' || *c == '.')
-				*c = '_';
-
-		if (ModelPart.Mesh)
-		{
-			char Suffix[32];
-			snprintf(Suffix, sizeof(Suffix), "_%p", ModelPart.Mesh);
-			strncat(Name, Suffix, sizeof(Name) - strlen(Name) - 1);
-			Name[sizeof(Name) - 1] = 0;
-		}
-	};
+	for (const lcColor& Color : gColorList)
+		UsedPovNames.insert(QLatin1String("lc_") + QString::fromLatin1(Color.SafeName));
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
 		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
-		if (!AddedMeshes.insert(Mesh).second)
-			continue;
-
 		if (!Mesh)
 			continue;
 
-		char Name[LC_PIECE_NAME_LEN];
-		GetMeshName(ModelPart, Name);
+		if (!ModelPart.Mesh)
+		{
+			const std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>>::const_iterator ExistingPiece = PieceTable.find(ModelPart.Info);
+
+			if (ExistingPiece != PieceTable.end() && ExistingPiece->second.first[0] &&
+				(ExistingPiece->second.second & (LGEO_PIECE_LGEO | LGEO_PIECE_AR)))
+				continue;
+		}
+
+		std::map<const lcMesh*, std::string>::iterator MeshNameIt = MeshNames.find(Mesh);
+		const bool Added = MeshNameIt == MeshNames.end();
+
+		if (Added)
+		{
+			const QString BaseName = QLatin1String("lc_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.Info->mFileName));
+			const QString Identifier = MakeUniqueExportIdentifier(BaseName, UsedPovNames, QLatin1String("_clear"));
+			MeshNameIt = MeshNames.emplace(Mesh, Identifier.mid(3).toStdString()).first;
+		}
+
+		const std::string& MeshName = MeshNameIt->second;
 
 		if (!ModelPart.Mesh)
 		{
 			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
-			lcstrcpy(Entry.first, "lc_");
-			strncat(Entry.first, Name, sizeof(Entry.first) - 1);
-			Entry.first[sizeof(Entry.first) - 1] = 0;
+			snprintf(Entry.first, sizeof(Entry.first), "lc_%s", MeshName.c_str());
 		}
 
-		Mesh->ExportPOVRay(POVFile, Name, &ColorTablePointer[0]);
+		if (!Added)
+			continue;
 
-		snprintf(Line, sizeof(Line), "#declare lc_%s_clear = lc_%s\n\n", Name, Name);
+		Mesh->ExportPOVRay(POVFile, MeshName.c_str(), &ColorTablePointer[0]);
+
+		snprintf(Line, sizeof(Line), "#declare lc_%s_clear = lc_%s\n\n", MeshName.c_str(), MeshName.c_str());
 		POVFile.WriteLine(Line);
 	}
 
@@ -3005,13 +3142,21 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		{
 			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
 
+			if (!Entry.first[0] && !(Entry.second & LGEO_PIECE_SLOPE))
+			{
+				const std::map<const lcMesh*, std::string>::const_iterator MeshName = MeshNames.find(ModelPart.Info->GetMesh());
+
+				if (MeshName != MeshNames.end())
+					snprintf(Entry.first, sizeof(Entry.first), "lc_%s", MeshName->second.c_str());
+			}
+
 			if (Entry.second & LGEO_PIECE_SLOPE)
 			{
 				snprintf(Line, sizeof(Line),
 						"  merge {\n    object {\n      %s%s\n      %s { %s }\n    }\n"
-						"    object {\n      %s_slope\n      texture {\n        %s normal { bumps 0.3 scale 0.02 }\n      }\n    }\n"
+						"    object {\n      %s_slope\n      %s { %s }\n      normal { bumps 0.3 scale 0.02 }\n    }\n"
 						"    matrix <%g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g>\n  }\n",
-						Entry.first, Suffix, Modifier, ColorTable[ColorIdx].data(), Entry.first, ColorTable[ColorIdx].data(),
+						Entry.first, Suffix, Modifier, ColorTable[ColorIdx].data(), Entry.first, Modifier, ColorTable[ColorIdx].data(),
 						-f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 			}
 			else
@@ -3026,11 +3171,10 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		}
 		else
 		{
-			char Name[LC_PIECE_NAME_LEN];
-			GetMeshName(ModelPart, Name);
+			const std::string& Name = MeshNames.at(ModelPart.Mesh);
 
 			snprintf(Line, sizeof(Line), "  object {\n    lc_%s%s\n    %s { %s }\n    matrix <%g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g>\n  }\n",
-					Name, Suffix, Modifier, ColorTable[ColorIdx].data(), -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
+					Name.c_str(), Suffix, Modifier, ColorTable[ColorIdx].data(), -f[5], -f[4], -f[6], -f[1], -f[0], -f[2], f[9], f[8], f[10], f[13] / 25.0f, f[12] / 25.0f, f[14] / 25.0f);
 		}
 
 		POVFile.WriteLine(Line);

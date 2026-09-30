@@ -11,6 +11,7 @@
 #include <QtGui>
 #include <QWidget>
 #include <QOpenGLWidget>
+#include <QCryptographicHash>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QSaveFile>

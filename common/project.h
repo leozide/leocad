@@ -136,6 +136,10 @@ public:
 
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
+private:
+	static QString MakeExportNameFragment(const QString& Name);
+	static QString MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix);
+
 protected:
 	static bool CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming);
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;

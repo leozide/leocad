@@ -153,5 +153,6 @@
         <file>resources/part_flexible.png</file>
         <file>resources/part_traintrack.png</file>
         <file>resources/gear_in.png</file>
+        <file>resources/warning.svg</file>
     </qresource>
 </RCC>

@@ -14,6 +14,7 @@ class lcColorList;
 class lcPropertiesWidget;
 class lcTimelineWidget;
 class lcElidedLabel;
+class lcSpinnerWidget;
 enum class lcRenderDialogMode;
 
 class lcModelTabWidget : public QWidget
@@ -376,7 +377,8 @@ protected:
 	QLabel* mStatusPositionLabel = nullptr;
 	QLabel* mStatusSnapLabel = nullptr;
 	QLabel* mStatusTimeLabel = nullptr;
-	QProgressBar* mStatusLoadProgress = nullptr;
+	lcSpinnerWidget* mStatusLoadSpinner = nullptr;
+	QLabel* mStatusLoadFailureLabel = nullptr;
 	const Project* mStatusProject = nullptr;
 	std::unordered_set<const PieceInfo*> mStatusRequiredAssets;
 	bool mAssetUpdateScheduled = false;

@@ -232,6 +232,7 @@ SOURCES += \
 	common/lc_selectdialog.cpp \
 	common/lc_setsdatabasedialog.cpp \
 	common/lc_shortcuts.cpp \
+	common/lc_spinnerwidget.cpp \
 	common/lc_string.cpp \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
@@ -314,6 +315,7 @@ HEADERS += \
 	common/lc_selectdialog.h \
 	common/lc_setsdatabasedialog.h \
 	common/lc_shortcuts.h \
+	common/lc_spinnerwidget.h \
 	common/lc_string.h \
 	common/lc_stringcache.h \
 	common/lc_synth.h \

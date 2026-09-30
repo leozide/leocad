@@ -27,6 +27,7 @@
 #include "lc_colors.h"
 #include "lc_previewwidget.h"
 #include "lc_modelhistory.h"
+#include "lc_spinnerwidget.h"
 
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>
@@ -940,10 +941,20 @@ void lcMainWindow::CreateStatusBar()
 	mStatusBarLabel = new lcElidedLabel();
 	StatusBar->addWidget(mStatusBarLabel, 1);
 
-	mStatusLoadProgress = new QProgressBar();
-	mStatusLoadProgress->setFixedWidth(170);
-	StatusBar->addPermanentWidget(mStatusLoadProgress);
-	mStatusLoadProgress->hide();
+	mStatusLoadSpinner = new lcSpinnerWidget();
+	StatusBar->addPermanentWidget(mStatusLoadSpinner);
+	mStatusLoadSpinner->hide();
+
+	mStatusLoadFailureLabel = new QLabel();
+	constexpr int WarningIconSize = 14;
+	const QSize WarningPixelSize = QSize(WarningIconSize, WarningIconSize) * devicePixelRatioF();
+	QPixmap WarningPixmap = QIcon(QStringLiteral(":/resources/warning.svg")).pixmap(WarningPixelSize);
+	WarningPixmap = WarningPixmap.scaled(WarningPixelSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	WarningPixmap.setDevicePixelRatio(devicePixelRatioF());
+	mStatusLoadFailureLabel->setPixmap(WarningPixmap);
+	mStatusLoadFailureLabel->setAccessibleName(tr("Asset loading failed"));
+	StatusBar->addPermanentWidget(mStatusLoadFailureLabel);
+	mStatusLoadFailureLabel->hide();
 
 	mStatusPositionLabel = new QLabel();
 	StatusBar->addPermanentWidget(mStatusPositionLabel);
@@ -985,19 +996,21 @@ void lcMainWindow::ScheduleAssetUpdate()
 void lcMainWindow::UpdateAssets()
 {
 	Project* Project = lcGetActiveProject();
-	mStatusLoadProgress->setToolTip(QString());
+	mStatusLoadSpinner->setToolTip(QString());
 
 	if (mStatusProject != Project)
 	{
 		mStatusProject = Project;
 		mStatusRequiredAssets.clear();
-		mStatusLoadProgress->reset();
-		mStatusLoadProgress->setFormat(QString());
+		mStatusLoadFailureLabel->hide();
+		mStatusLoadFailureLabel->setToolTip(QString());
+		mStatusLoadFailureLabel->setAccessibleDescription(QString());
 	}
 
 	if (!Project || !Project->GetMainModel())
 	{
-		mStatusLoadProgress->hide();
+		mStatusLoadSpinner->hide();
+		mStatusLoadFailureLabel->hide();
 		return;
 	}
 
@@ -1014,14 +1027,16 @@ void lcMainWindow::UpdateAssets()
 	mStatusRequiredAssets.clear();
 	mStatusRequiredAssets.insert(Required.begin(), Required.end());
 
-	if (Required.empty())
+	if (Required.empty() && GeneratedPieces.empty())
 	{
-		mStatusLoadProgress->reset();
-		mStatusLoadProgress->hide();
+		mStatusLoadSpinner->hide();
+		mStatusLoadFailureLabel->hide();
 		return;
 	}
 
-	int Pending = 0;
+	int PendingParts = 0;
+	int PendingSynths = 0;
+	int FailedSynths = 0;
 	int Failed = 0;
 	QString FailureDetails;
 
@@ -1031,52 +1046,84 @@ void lcMainWindow::UpdateAssets()
 		{
 			Failed++;
 
-			if (FailureDetails.isEmpty())
-				FailureDetails = lcGetPiecesLibrary()->GetPieceLoadError(Info);
+			QString Error = lcGetPiecesLibrary()->GetPieceLoadError(Info);
+
+			if (Error.isEmpty())
+				Error = tr("Could not load part.");
+
+			if (!FailureDetails.isEmpty())
+				FailureDetails += QLatin1Char('\n');
+
+			FailureDetails += QString::fromLatin1(Info->mFileName) + QStringLiteral(": ") + Error;
 		}
 		else if (Info->mState != lcPieceInfoState::Loaded)
-			Pending++;
+			PendingParts++;
 	}
 
 	for (const lcPiece* Piece : GeneratedPieces)
 	{
 		if (Piece->IsGeneratedMeshPending())
-			Pending++;
+			PendingSynths++;
 		else if (!Piece->HasGeneratedMesh())
 		{
 			Failed++;
+			FailedSynths++;
 
-			if (FailureDetails.isEmpty())
-			{
-				FailureDetails = lcGetPiecesLibrary()->GetSynthMeshError(Piece);
+			QString Error = lcGetPiecesLibrary()->GetSynthMeshError(Piece);
 
-				if (FailureDetails.isEmpty())
-					FailureDetails = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
-			}
+			if (Error.isEmpty())
+				Error = tr("Could not generate geometry.");
+
+			if (!FailureDetails.isEmpty())
+				FailureDetails += QLatin1Char('\n');
+
+			FailureDetails += QString::fromLatin1(Piece->mPieceInfo->mFileName) + QStringLiteral(": ") + Error;
 		}
 	}
 
 	const int Total = static_cast<int>(Required.size() + GeneratedPieces.size());
-	mStatusLoadProgress->setRange(0, Total);
-	mStatusLoadProgress->setValue(Total - Pending);
+	const int Pending = PendingParts + PendingSynths;
+	QString LoadingText;
 
-	if (Failed)
+	if (!PendingParts && PendingSynths)
 	{
-		mStatusLoadProgress->setFormat(tr("%n failed (%v/%m)", nullptr, Failed));
-		mStatusLoadProgress->setToolTip(FailureDetails);
-	}
-	else if (Pending)
-	{
-		mStatusLoadProgress->setFormat(tr("Loading %v/%m"));
+		const int TotalSynths = static_cast<int>(GeneratedPieces.size());
+		LoadingText = tr("Regenerating synthesized piece geometry.\n%1 of %2 pieces are ready; %3 are still being regenerated.")
+			.arg(TotalSynths - PendingSynths - FailedSynths).arg(TotalSynths).arg(PendingSynths);
 	}
 	else
 	{
-		mStatusLoadProgress->setFormat(QString());
-		mStatusLoadProgress->hide();
-		return;
+		LoadingText = tr("Loading model parts and preparing geometry.\n%1 of %2 required assets are ready; %3 are still loading.")
+			.arg(Total - Pending - Failed).arg(Total).arg(Pending);
 	}
 
-	mStatusLoadProgress->show();
+	if (Failed)
+		LoadingText += tr("\nSome assets could not be loaded. Hover over the warning icon for details.");
+
+	mStatusLoadSpinner->setToolTip(LoadingText);
+	mStatusLoadSpinner->setAccessibleDescription(LoadingText);
+
+	if (Failed)
+	{
+		QString FailureText = tr("The model could not be fully loaded.\n%1 of %2 required assets failed. Some parts or geometry may be missing.")
+			.arg(Failed).arg(Total);
+
+		if (Pending)
+			FailureText += tr("\nLoading is continuing for the remaining assets.");
+
+		FailureText += tr("\n\nFailed assets:\n%1").arg(FailureDetails);
+		mStatusLoadFailureLabel->setToolTip(FailureText);
+		mStatusLoadFailureLabel->setAccessibleDescription(FailureText);
+		mStatusLoadFailureLabel->show();
+	}
+	else
+	{
+		mStatusLoadFailureLabel->hide();
+		mStatusLoadFailureLabel->setToolTip(QString());
+		mStatusLoadFailureLabel->setAccessibleDescription(QString());
+	}
+
+	mStatusLoadSpinner->setVisible(Pending > 0);
 }
 
 void lcMainWindow::closeEvent(QCloseEvent* Event)

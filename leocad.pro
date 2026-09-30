@@ -138,7 +138,7 @@ unix:!macx {
 	mime.path = $$MIME_DIR
 	mime.files = qt/leocad.xml
 	appdata.path = $$APPDATA_DIR
-	appdata.files = tools/setup/leocad.appdata.xml
+	appdata.files = tools/setup/org.leocad.LeoCAD.appdata.xml
 
 	INSTALLS += target docs man desktop icons mime appdata
 

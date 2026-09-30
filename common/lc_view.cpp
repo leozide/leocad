@@ -916,8 +916,8 @@ void lcView::OnDraw()
 
 	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
 	mScene->SetDrawInsertPreview(DrawInsertPreview);
-
-	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps);
+	
+	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps && mViewType == lcViewType::View);
 
 	if (DrawInterface)
 		mScene->SetPreTranslucentCallback([this]() { DrawGrid(); });

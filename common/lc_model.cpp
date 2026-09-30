@@ -549,8 +549,12 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 			}
 	}
 
-	std::vector<lcModel*> UpdatedModels;
-	const_cast<lcModel*>(this)->UpdatePieceInfo(UpdatedModels);
+	// Temporary minifigure and thumbnail models have no container piece to update.
+	if (mPieceInfo)
+	{
+		std::vector<lcModel*> UpdatedModels;
+		const_cast<lcModel*>(this)->UpdatePieceInfo(UpdatedModels);
+	}
 
 	return lcResult<void>();
 }

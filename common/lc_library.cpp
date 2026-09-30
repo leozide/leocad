@@ -2038,13 +2038,17 @@ void lcPiecesLibrary::GetPieceFile(const char* PieceName, std::function<void(lcF
 
 void lcPiecesLibrary::ReleaseBuffers()
 {
+	mBuffersDirty = true;
+
+	// Library-only loading can finish without creating a renderer or shared buffers.
+	if (!mVertexBuffer.IsValid() && !mIndexBuffer.IsValid())
+		return;
+
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 
 	Context->MakeCurrent();
 	Context->DestroyVertexBuffer(mVertexBuffer);
 	Context->DestroyIndexBuffer(mIndexBuffer);
-
-	mBuffersDirty = true;
 }
 
 void lcPiecesLibrary::UpdateBuffers(lcContext* Context)

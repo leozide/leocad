@@ -32,7 +32,7 @@ parts:
       - libqt5printsupport5
       - libqt5xml5
     source: https://github.com/leozide/leocad/archive/v26.09.tar.gz
-    parse-info: [usr/share/metainfo/leocad.appdata.xml]
+    parse-info: [usr/share/metainfo/org.leocad.LeoCAD.appdata.xml]
   library:
     source: .
     plugin: dump

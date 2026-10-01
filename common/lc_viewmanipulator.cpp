@@ -407,7 +407,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		}
 	}
 
-	if ((TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveXZ) || (TrackTool == lcTrackTool::MoveYZ))
+	if ((TrackButton == lcTrackButton::None) && ((TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveXZ) || (TrackTool == lcTrackTool::MoveYZ)))
 	{
 		Context->EnableColorBlend(true);
 

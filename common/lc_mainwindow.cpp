@@ -1086,32 +1086,17 @@ void lcMainWindow::UpdateAssets()
 	QString LoadingText;
 
 	if (!PendingParts && PendingSynths)
-	{
-		const int TotalSynths = static_cast<int>(GeneratedPieces.size());
-		LoadingText = tr("Regenerating synthesized piece geometry.\n%1 of %2 pieces are ready; %3 are still being regenerated.")
-			.arg(TotalSynths - PendingSynths - FailedSynths).arg(TotalSynths).arg(PendingSynths);
-	}
+		LoadingText = tr("Regenerating synthesized piece geometry.");
 	else
-	{
-		LoadingText = tr("Loading model parts and preparing geometry.\n%1 of %2 required assets are ready; %3 are still loading.")
-			.arg(Total - Pending - Failed).arg(Total).arg(Pending);
-	}
-
-	if (Failed)
-		LoadingText += tr("\nSome assets could not be loaded. Hover over the warning icon for details.");
+		LoadingText = tr("Loading model pieces (%1 / %2).").arg(Total - Pending - Failed).arg(Total);
 
 	mStatusLoadSpinner->setToolTip(LoadingText);
 	mStatusLoadSpinner->setAccessibleDescription(LoadingText);
 
 	if (Failed)
 	{
-		QString FailureText = tr("The model could not be fully loaded.\n%1 of %2 required assets failed. Some parts or geometry may be missing.")
-			.arg(Failed).arg(Total);
+		QString FailureText = tr("The model could not be fully loaded, some pieces may be missing.\n\n%1").arg(FailureDetails);
 
-		if (Pending)
-			FailureText += tr("\nLoading is continuing for the remaining assets.");
-
-		FailureText += tr("\n\nFailed assets:\n%1").arg(FailureDetails);
 		mStatusLoadFailureLabel->setToolTip(FailureText);
 		mStatusLoadFailureLabel->setAccessibleDescription(FailureText);
 		mStatusLoadFailureLabel->show();

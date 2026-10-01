@@ -10,8 +10,6 @@
 #define LC_MESH_FILE_ID      LC_FOURCC('M', 'E', 'S', 'H')
 #define LC_MESH_FILE_VERSION 0x0123
 
-lcMesh* gPlaceholderMesh;
-
 lcMesh::lcMesh()
 {
 }
@@ -441,17 +439,14 @@ bool lcMesh::FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes)
 	if (File.ReadU16(&NumLods, 1) != 1 || NumLods != LC_NUM_MESH_LODS || File.ReadU16(NumSections, LC_NUM_MESH_LODS) != LC_NUM_MESH_LODS)
 		return false;
 
-	const quint64 VertexDataSize = static_cast<quint64>(VertexCount) * sizeof(lcVertex) +
-		static_cast<quint64>(TexturedVertexCount) * sizeof(lcVertexTextured) +
-		static_cast<quint64>(ConditionalVertexCount) * sizeof(lcVertexConditional);
+	const quint64 VertexDataSize = static_cast<quint64>(VertexCount) * sizeof(lcVertex) + static_cast<quint64>(TexturedVertexCount) * sizeof(lcVertexTextured) + static_cast<quint64>(ConditionalVertexCount) * sizeof(lcVertexConditional);
 	const quint64 IndexElementSize = VertexCount < 0x10000 && TexturedVertexCount < 0x10000 ? sizeof(GLushort) : sizeof(GLuint);
 	const quint64 IndexDataSize = static_cast<quint64>(IndexCount) * IndexElementSize;
 	constexpr quint64 MinimumSectionSize = 3 * sizeof(quint32) + sizeof(quint16) + 7 * sizeof(float) + sizeof(quint16);
 	const quint64 MinimumSectionsSize = static_cast<quint64>(NumSections[LC_MESH_LOD_HIGH] + NumSections[LC_MESH_LOD_LOW]) * MinimumSectionSize;
 	const long Position = File.GetPosition();
 
-	if (VertexDataSize > std::numeric_limits<int>::max() || IndexDataSize > std::numeric_limits<int>::max() ||
-		Position < 0 || static_cast<size_t>(Position) > File.GetLength() ||
+	if (VertexDataSize > std::numeric_limits<uint>::max() || IndexDataSize > std::numeric_limits<uint>::max() || Position < 0 || static_cast<size_t>(Position) > File.GetLength() ||
 		MinimumSectionsSize + VertexDataSize + IndexDataSize > File.GetLength() - static_cast<size_t>(Position))
 		return false;
 

@@ -718,47 +718,84 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 		break;
 	}
 
-	int CurrentImage = 0;
 	if (Flags & LC_TEXTURE_CUBEMAP)
 		Target = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 
+	const bool LoadMipmaps = (Flags & LC_TEXTURE_MIPMAPS) || FilterFlags >= LC_TEXTURE_BILINEAR;
+	const bool HasMipmaps = Texture->GetImageCount() > Faces;
+	int CurrentImage = 0;
+
 	for (size_t FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
 	{
-		void* Data = Texture->GetImage(CurrentImage).mData;
-		glTexImage2D(Target, 0, Format, Texture->mWidth, Texture->mHeight, 0, Format, GL_UNSIGNED_BYTE, Data);
+		const void* ImageData = Texture->GetImage(CurrentImage).mData;
 
-		if (Flags & LC_TEXTURE_MIPMAPS || FilterFlags >= LC_TEXTURE_BILINEAR)
+		glTexImage2D(Target, 0, Format, Texture->mWidth, Texture->mHeight, 0, Format, GL_UNSIGNED_BYTE, ImageData);
+
+		if (LoadMipmaps)
 		{
 			int Width = Texture->mWidth;
 			int Height = Texture->mHeight;
 			int Components = Texture->GetImage(CurrentImage).GetBPP();
+			GLubyte* MipBuffer = nullptr;
+
+			if (!HasMipmaps)
+			{
+				MipBuffer = new GLubyte[Width * Height * Components];
+
+				if (!MipBuffer)
+					return false;
+
+				memcpy(MipBuffer, ImageData, Width * Height * Components);
+			}
 
 			for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
 			{
-				int RowStride = Width * Components;
+				int PrevRowStride = Width * Components;
+				int PrevWidth = Width;
+				int PrevHeight = Height;
 
 				Width = lcMax(1, Width >> 1);
 				Height = lcMax(1, Height >> 1);
+				int RowStride = Width * Components;
 
-				if (Texture->GetImageCount() == Faces)
+				if (!HasMipmaps)
 				{
-					GLubyte* Out, * In;
+					for (int y = 0; y < Height; y++)
+					{
+						int SrcY0 = y * 2;
+						int SrcY1 = lcMin(SrcY0 + 1, PrevHeight - 1);
 
-					In = Out = (GLubyte*)Data;
+						for (int x = 0; x < Width; x++)
+						{
+							int SrcX0 = x * 2;
+							int SrcX1 = lcMin(SrcX0 + 1, PrevWidth - 1);
 
-					for (int y = 0; y < Height; y++, In += RowStride)
-						for (int x = 0; x < Width; x++, Out += Components, In += 2 * Components)
 							for (int c = 0; c < Components; c++)
-								Out[c] = (In[c] + In[c + Components] + In[RowStride] + In[c + RowStride + Components]) / 4;
+							{
+								GLubyte c00 = MipBuffer[SrcX0 * Components + SrcY0 * PrevRowStride + c];
+								GLubyte c01 = MipBuffer[SrcX0 * Components + SrcY1 * PrevRowStride + c];
+								GLubyte c10 = MipBuffer[SrcX1 * Components + SrcY0 * PrevRowStride + c];
+								GLubyte c11 = MipBuffer[SrcX1 * Components + SrcY1 * PrevRowStride + c];
+
+								MipBuffer[x * Components + y * RowStride + c] = (c00 + c01 + c10 + c11) / 4;
+							}
+						}
+					}
+
+					glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, MipBuffer);
 				}
 				else
-					Data = Texture->GetImage(++CurrentImage).mData;
+				{
+					const void* Data = Texture->GetImage(++CurrentImage).mData;
 
-				glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
+					glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
+				}
 			}
 
 			if (Texture->GetImageCount() == Faces)
 				CurrentImage++;
+
+			delete[] MipBuffer;
 		}
 		else
 			CurrentImage++;

@@ -269,8 +269,6 @@ protected:
 	bool mColorBlend;
 	bool mCullFace;
 	float mLineWidth;
-	int mMatrixMode;
-	bool mTextureEnabled;
 
 	lcVector4 mColor;
 	lcVector4 mTextHaloColor;

@@ -1962,11 +1962,19 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		Stream << QString("\t\t\t<source id=\"%1-pos\">\r\n").arg(ID);
 		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
 
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+		const lcVertex* Verts = static_cast<const lcVertex*>(Mesh->mVertexData);
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
-			lcVector3& Position = Verts[VertexIdx].Position;
+			const lcVector3& Position = Verts[VertexIdx].Position;
+			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z));
+		}
+
+		const lcVertexTextured* TexturedVerts = reinterpret_cast<const lcVertexTextured*>(Verts + Mesh->mNumVertices);
+
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumTexturedVertices; VertexIdx++)
+		{
+			const lcVector3& Position = TexturedVerts[VertexIdx].Position;
 			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Position.x), QString::number(Position.y), QString::number(Position.z));
 		}
 
@@ -1989,6 +1997,12 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z));
 		}
 
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumTexturedVertices; VertexIdx++)
+		{
+			lcVector3 Normal = lcUnpackNormal(TexturedVerts[VertexIdx].Normal);
+			Stream << QString("\t\t\t\t\t%1 %2 %3\r\n").arg(QString::number(Normal.x), QString::number(Normal.y), QString::number(Normal.z));
+		}
+
 		Stream << "\t\t\t\t</float_array>\r\n";
 		Stream << "\t\t\t\t<technique_common>\r\n";
 		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
@@ -2006,8 +2020,13 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		for (int SectionIdx = 0; SectionIdx < Mesh->mLods[LC_MESH_LOD_HIGH].NumSections; SectionIdx++)
 		{
 			lcMeshSection* Section = &Mesh->mLods[LC_MESH_LOD_HIGH].Sections[SectionIdx];
+			int Offset = 0;
 
-			if (Section->PrimitiveType != LC_MESH_TRIANGLES && Section->PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+			if (Section->PrimitiveType == LC_MESH_TRIANGLES)
+				Offset = 0;
+			else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
+				Offset = Mesh->mNumVertices;
+			else
 				continue;
 
 			const QString& ColorName = ColorIDs[Section->ColorIndex];
@@ -2023,9 +2042,9 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 				for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				{
-					QString idx1 = QString::number(Indices[Idx + 0]);
-					QString idx2 = QString::number(Indices[Idx + 1]);
-					QString idx3 = QString::number(Indices[Idx + 2]);
+					QString idx1 = QString::number(Indices[Idx + 0] + Offset);
+					QString idx2 = QString::number(Indices[Idx + 1] + Offset);
+					QString idx3 = QString::number(Indices[Idx + 2] + Offset);
 
 					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
 				}
@@ -2041,9 +2060,9 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 				for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 				{
-					QString idx1 = QString::number(Indices[Idx + 0]);
-					QString idx2 = QString::number(Indices[Idx + 1]);
-					QString idx3 = QString::number(Indices[Idx + 2]);
+					QString idx1 = QString::number(Indices[Idx + 0] + Offset);
+					QString idx2 = QString::number(Indices[Idx + 1] + Offset);
+					QString idx3 = QString::number(Indices[Idx + 2] + Offset);
 
 					Stream << QString("\t\t\t\t %1 %2 %3\r\n").arg(idx1, idx2, idx3);
 				}

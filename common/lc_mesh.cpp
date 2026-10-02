@@ -386,18 +386,37 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[DefaultColorIndex].SafeName);
 		else
 			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
+
 		File.WriteLine(Line);
 
-		for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
+		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
-			const long int idx1 = Indices[Idx + 0] + VertexOffset;
-			const long int idx2 = Indices[Idx + 1] + VertexOffset;
-			const long int idx3 = Indices[Idx + 2] + VertexOffset;
-
-			if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
 			{
-				snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
-				File.WriteLine(Line);
+				const long int idx1 = Indices[Idx + 0] + VertexOffset;
+				const long int idx2 = Indices[Idx + 1] + VertexOffset;
+				const long int idx3 = Indices[Idx + 2] + VertexOffset;
+
+				if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+				{
+					snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
+					File.WriteLine(Line);
+				}
+			}
+		}
+		else
+		{
+			for (int Idx = 0; Idx < Section->DrawCount; Idx += 3)
+			{
+				const long int idx1 = Indices[Idx + 0] + VertexOffset;
+				const long int idx2 = Indices[Idx + 1] + VertexOffset;
+				const long int idx3 = Indices[Idx + 2] + VertexOffset;
+
+				if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
+				{
+					snprintf(Line, sizeof(Line), "f %ld//%ld//%ld %ld//%ld//%ld %ld//%ld//%ld\n", idx1 + mNumVertices, idx1, idx1 + mNumVertices, idx2 + mNumVertices, idx2, idx2 + mNumVertices, idx3 + mNumVertices, idx3, idx3 + mNumVertices);
+					File.WriteLine(Line);
+				}
 			}
 		}
 	}

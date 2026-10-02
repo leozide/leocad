@@ -3227,8 +3227,6 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 	if (!OBJFile.Open(QIODevice::WriteOnly))
 		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
 
-	quint32 vert = 1;
-
 	OBJFile.WriteLine("# Model exported from LeoCAD\n");
 
 	QFileInfo SaveInfo(SaveFileName);
@@ -3250,62 +3248,81 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 			snprintf(Line, sizeof(Line), "newmtl %s\nKd %.2f %.2f %.2f\nD %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2], Color.Value[3]);
 		else
 			snprintf(Line, sizeof(Line), "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2]);
+
 		MaterialFile.WriteLine(Line);
 	}
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	auto WritePositions=[&Line, &OBJFile](const auto* Verts, int VertexCount, const lcMatrix44& ModelWorld)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
-
-		if (!Mesh)
-			continue;
-
-		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
-
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+		for (int VertexIndex = 0; VertexIndex < VertexCount; VertexIndex++)
 		{
-			lcVector3 Vertex = lcMul31(Verts[VertexIdx].Position, ModelWorld);
-			snprintf(Line, sizeof(Line), "v %.2f %.2f %.2f\n", Vertex[0], Vertex[1], Vertex[2]);
+			lcVector3 Position = lcMul31(Verts[VertexIndex].Position, ModelWorld);
+			snprintf(Line, sizeof(Line), "v %.2f %.2f %.2f\n", Position[0], Position[1], Position[2]);
 			OBJFile.WriteLine(Line);
 		}
+	};
 
-		OBJFile.WriteLine("#\n\n");
-	}
-
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	auto WriteNormals=[&Line, &OBJFile](const auto* Verts, int VertexCount, const lcMatrix44& ModelWorld)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
-
-		if (!Mesh)
-			continue;
-
-		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
-
-		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
+		for (int VertexIndex = 0; VertexIndex < VertexCount; VertexIndex++)
 		{
-			lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIdx].Normal), ModelWorld);
+			lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIndex].Normal), ModelWorld);
 			snprintf(Line, sizeof(Line), "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
 			OBJFile.WriteLine(Line);
 		}
+	};
+
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	{
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+
+		if (!Mesh)
+			continue;
+
+		const lcVertex* Verts = static_cast<const lcVertex*>(Mesh->mVertexData);
+
+		WritePositions(Verts, Mesh->mNumVertices, ModelPart.WorldMatrix);
+
+		const lcVertexTextured* VertsTextured = reinterpret_cast<const lcVertexTextured*>(Verts + Mesh->mNumVertices);
+
+		WritePositions(VertsTextured, Mesh->mNumTexturedVertices, ModelPart.WorldMatrix);
 
 		OBJFile.WriteLine("#\n\n");
 	}
 
-	int NumPieces = 0;
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		snprintf(Line, sizeof(Line), "g Piece%.3d\n", NumPieces++);
-		OBJFile.WriteLine(Line);
-
 		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
 
-		if (Mesh)
-		{
-			Mesh->ExportWavefrontIndices(OBJFile, ModelPart.ColorIndex, vert);
-			vert += Mesh->mNumVertices;
-		}
+		if (!Mesh)
+			continue;
+
+		const lcVertex* Verts = static_cast<const lcVertex*>(Mesh->mVertexData);
+
+		WriteNormals(Verts, Mesh->mNumVertices, ModelPart.WorldMatrix);
+
+		const lcVertexTextured* VertsTextured = reinterpret_cast<const lcVertexTextured*>(Verts + Mesh->mNumVertices);
+
+		WriteNormals(VertsTextured, Mesh->mNumTexturedVertices, ModelPart.WorldMatrix);
+
+		OBJFile.WriteLine("#\n\n");
+	}
+
+	int PieceCount = 0;
+	quint32 BaseVertex = 1;
+
+	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	{
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+
+		if (!Mesh)
+			continue;
+
+		snprintf(Line, sizeof(Line), "g Piece%.3d\n", PieceCount++);
+		OBJFile.WriteLine(Line);
+
+		Mesh->ExportWavefrontIndices(OBJFile, ModelPart.ColorIndex, BaseVertex);
+		BaseVertex += Mesh->mNumVertices + Mesh->mNumTexturedVertices;
 	}
 
 	return lcResult<void>();

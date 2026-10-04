@@ -1030,7 +1030,7 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), Model->GetProject(), true, false);
+	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), Model->GetProject(), true, true);
 
 	if (mPieceInfo != Info)
 	{

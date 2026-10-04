@@ -1322,6 +1322,7 @@ lcMeshLoader::lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject,
 bool lcMeshLoader::LoadMesh(lcFile& File, lcMeshDataType MeshDataType)
 {
 	mTextureStack.clear();
+	mError.clear();
 
 	return ReadMeshData(File, lcMatrix44Identity(), 16, false, MeshDataType);
 }
@@ -1620,8 +1621,16 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (Primitive)
 			{
-				if (Primitive->mState != lcPrimitiveState::Loaded && !Library->LoadPrimitive(Primitive))
-					return false;
+				if (Primitive->mState != lcPrimitiveState::Loaded)
+				{
+					const lcResult<void> Result = Library->LoadPrimitive(Primitive);
+
+					if (!Result)
+					{
+						mError = Result.error();
+						return false;
+					}
+				}
 
 				if (Primitive->mStud)
 					mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
@@ -1651,7 +1660,12 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			}
 
 			if (!IncludeLoaded)
+			{
+				if (mError.isEmpty())
+					mError = tr("Could not load included file %1.").arg(QString::fromLatin1(OriginalFileName));
+
 				return false;
+			}
 		} break;
 
 		case 2:

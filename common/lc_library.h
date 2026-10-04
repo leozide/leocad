@@ -3,6 +3,7 @@
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_meshloader.h"
+#include "lc_result.h"
 
 class PieceInfo;
 class lcPiece;
@@ -109,6 +110,7 @@ public:
 	{
 		mState = lcPrimitiveState::NotLoaded;
 		mMeshData.Clear();
+		mLoadError.clear();
 	}
 
 	QString mFileName;
@@ -120,6 +122,7 @@ public:
 	bool mStudStyle;
 	bool mSubFile;
 	lcLibraryMeshData mMeshData;
+	QString mLoadError;
 };
 
 enum class lcLibrarySourceType
@@ -226,7 +229,7 @@ public:
 
 	bool IsPrimitive(const char* Name) const;
 	lcLibraryPrimitive* FindPrimitive(const char* Name) const;
-	bool LoadPrimitive(lcLibraryPrimitive* Primitive);
+	lcResult<void> LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudStyle() const;
 	void SetStudStyle(lcStudStyle StudStyle, bool Reload, bool StudCylinderColorEnabled);

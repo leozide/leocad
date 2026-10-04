@@ -28,6 +28,7 @@
 #endif
 
 constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0110;
+constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
 
 enum class lcLibraryCacheFlag : quint32
 {
@@ -774,7 +775,7 @@ bool lcPiecesLibrary::IsStudStylePrimitive(const char* FileName)
 
 qint32 lcPiecesLibrary::MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 {
-	return 0x10000 | (static_cast<qint32>(StudStyle) << 1) | static_cast<qint32>(StudCylinderColorEnabled);
+	return (LC_LIBRARY_MESH_CACHE_VERSION << 16) | (static_cast<qint32>(StudStyle) << 1) | static_cast<qint32>(StudCylinderColorEnabled);
 }
 
 void lcPiecesLibrary::UpdateStudStyleSource()
@@ -1794,12 +1795,15 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 
 		PieceFile.Seek(0, SEEK_SET);
 
-		lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize);
+		lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
 		if (!MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED))
 		{
 			Result.MeshData.reset();
 			Result.Error = tr("Could not load model geometry %1.").arg(Source.FileName);
+
+			if (!MeshLoader.GetError().isEmpty())
+				Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
 		}
 		else if (Result.MeshData->IsEmpty())
 		{
@@ -1835,7 +1839,7 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 
 	Result.MeshData.reset(new lcLibraryMeshData);
 
-	lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize);
+	lcMeshLoader MeshLoader(*Result.MeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
 	bool Loaded = false;
 
@@ -1869,7 +1873,12 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 	if (mCancelLoading.load())
 		Result.Error = tr("Library loading was cancelled.");
 	else if (!Loaded)
+	{
 		Result.Error = tr("Could not load part %1.").arg(Source.FileName);
+
+		if (!MeshLoader.GetError().isEmpty())
+			Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
+	}
 
 	if (!Result.Error.isEmpty())
 		Result.MeshData.reset();
@@ -2339,7 +2348,7 @@ lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
 	return	nullptr;
 }
 
-bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
+lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
 	mLoadMutex.lock();
 
@@ -2352,20 +2361,31 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		while (Primitive->mState == lcPrimitiveState::Loading)
 			lcSleeper::msleep(5);
 
-		return Primitive->mState == lcPrimitiveState::Loaded;
+		QMutexLocker LoadLock(&mLoadMutex);
+
+		if (Primitive->mState == lcPrimitiveState::Loaded)
+			return lcResult<void>();
+
+		return lcUnexpected(Primitive->mLoadError);
 	}
 
 	mLoadMutex.unlock();
 
-	const auto LoadFailed = [this, Primitive]()
+	lcMeshLoader MeshLoader(Primitive->mMeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
+
+	const auto LoadFailed = [this, Primitive, &MeshLoader]() -> lcResult<void>
 	{
 		Primitive->mMeshData.Clear();
-		QMutexLocker LoadLock(&mLoadMutex);
-		Primitive->mState = lcPrimitiveState::NotLoaded;
-		return false;
-	};
+		QString Error = MeshLoader.GetError();
 
-	lcMeshLoader MeshLoader(Primitive->mMeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
+		if (Error.isEmpty())
+			Error = tr("Could not load included file %1.").arg(QString::fromLatin1(Primitive->mName));
+
+		QMutexLocker LoadLock(&mLoadMutex);
+		Primitive->mLoadError = Error;
+		Primitive->mState = lcPrimitiveState::NotLoaded;
+		return lcUnexpected(std::move(Error));
+	};
 
 	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
@@ -2428,10 +2448,11 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	}
 
 	mLoadMutex.lock();
+	Primitive->mLoadError.clear();
 	Primitive->mState = lcPrimitiveState::Loaded;
 	mLoadMutex.unlock();
 
-	return true;
+	return lcResult<void>();
 }
 
 bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const

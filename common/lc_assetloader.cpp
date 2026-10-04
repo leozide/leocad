@@ -5,7 +5,6 @@
 #include "lc_library.h"
 #include "lc_mesh.h"
 #include "lc_model.h"
-#include "lc_view.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
 #include "piece.h"
@@ -61,6 +60,10 @@ void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 
 	mSynthPieces.erase(Piece);
 	mFailedSynthErrors.erase(Piece);
+
+	for (SynthNotification& Pending : mSynthNotifications)
+		if (Pending.RequestedSynth->Piece == Piece)
+			Pending.RequestedSynth->Cancelled.store(true, std::memory_order_relaxed);
 
 	std::shared_ptr<SynthRequest> Removed;
 
@@ -738,13 +741,10 @@ void lcAssetLoader::FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSy
 	mResultReady.wakeAll();
 	mQueueMutex.unlock();
 
-	lcView::UpdateAllViews();
+	mLibrary->AddPieceReference(Info);
+	mSynthNotifications.push_back({ RequestedSynth, Info });
 
-	QPointer<lcPiecesLibrary> Library(mLibrary);
-	Library->NotifyConsumersChanged();
-
-	if (Library)
-		emit Library->GeneratedMeshSettled(Info);
+	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 }
 
 void lcAssetLoader::CheckWaitingSynths()
@@ -1320,8 +1320,35 @@ void lcAssetLoader::DispatchNotifications()
 		mLibrary->ReleasePieceLoadHold(Info);
 	}
 
-	if (!mNotifications.empty())
+	std::unordered_set<PieceInfo*> SettledSynths;
+
+	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mSynthNotifications.empty(); Delivered++)
+	{
+		SynthNotification Notification = std::move(mSynthNotifications.front());
+
+		mSynthNotifications.pop_front();
+
+		PieceInfo* Info = Notification.Info;
+
+		if (!Notification.RequestedSynth->Cancelled.load(std::memory_order_relaxed) && mLibrary->HasPieceConsumers(Info) && SettledSynths.insert(Info).second)
+		{
+			QPointer<lcAssetLoader> LoaderGuard(this);
+			QPointer<lcPiecesLibrary> LibraryGuard(mLibrary);
+
+			emit mLibrary->GeneratedMeshSettled(Info);
+
+			if (!LoaderGuard || !LibraryGuard)
+				return;
+		}
+
+		mLibrary->ReleasePieceLoadHold(Info);
+	}
+
+	if (!mNotifications.empty() || !mSynthNotifications.empty())
 		QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
+
+	if (!SettledSynths.empty())
+		mLibrary->NotifyConsumersChanged();
 }
 
 bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
@@ -1674,6 +1701,15 @@ void lcAssetLoader::CancelAndDrain()
 		mNotifications.pop_front();
 
 		mLibrary->ReleasePieceLoadHold(Notification.RequestedPart->Info);
+	}
+
+	while (!mSynthNotifications.empty())
+	{
+		SynthNotification Notification = std::move(mSynthNotifications.front());
+
+		mSynthNotifications.pop_front();
+
+		mLibrary->ReleasePieceLoadHold(Notification.Info);
 	}
 }
 

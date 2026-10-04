@@ -218,6 +218,7 @@ public:
 	lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags);
 
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
+	const QString& GetError() const { return mError; }
 	void SetCancellationFlag(const std::atomic_bool* Cancelled) { mCancelled = Cancelled; }
 	bool SearchProjectFolder() const { return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder); }
 
@@ -231,4 +232,7 @@ protected:
 	lcLibraryMeshData& mMeshData;
 	lcMeshLoaderFlags mFlags;
 	const std::atomic_bool* mCancelled = nullptr;
+	QString mError;
+
+	Q_DECLARE_TR_FUNCTIONS(lcMeshLoader)
 };

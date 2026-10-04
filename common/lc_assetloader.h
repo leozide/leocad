@@ -176,6 +176,12 @@ private:
 		QString Error;
 	};
 
+	struct SynthNotification
+	{
+		std::shared_ptr<SynthRequest> RequestedSynth;
+		PieceInfo* Info;
+	};
+
 	void QueuePieceLocked(PieceInfo* Info, Priority LoadPriority);
 	void SetRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority);
 	void QueueTexture(lcTexture* Texture, Priority LoadPriority);
@@ -214,6 +220,7 @@ private:
 	std::deque<std::shared_ptr<Request>> mStarted;
 	std::deque<std::shared_ptr<TextureRequest>> mStartedTextures;
 	std::deque<Notification> mNotifications;
+	std::deque<SynthNotification> mSynthNotifications;
 	std::vector<QFuture<void>> mFutures;
 	int mActiveWorkers = 0;
 	quint64 mNextRequestId = 1;

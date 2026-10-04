@@ -4822,6 +4822,16 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
 {
 	std::vector<lcVector3> Points;
+	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+
+	if (Mesh)
+	{
+		lcVector3 Box[8];
+		lcGetBoxCorners(Mesh->mBoundingBox, Box);
+
+		for (const lcVector3& Point : Box)
+			Points.emplace_back(Point);
+	}
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))

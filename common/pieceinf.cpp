@@ -420,8 +420,28 @@ void PieceInfo::CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min
 	}
 }
 
-void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
+	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly)
+	{
+		if (IsModel())
+		{
+			mModel->SubModelAddBoundingBoxPoints(WorldMatrix, Points, Mode);
+			return;
+		}
+
+		if (IsProject())
+		{
+			if (const lcModel* Model = mProject->GetMainModel())
+				Model->SubModelAddBoundingBoxPoints(WorldMatrix, Points, Mode);
+
+			return;
+		}
+
+		if (mState != lcPieceInfoState::Loaded || !mMesh)
+			return;
+	}
+
 	if (!IsModel())
 	{
 		lcVector3 BoxPoints[8];
@@ -436,7 +456,7 @@ void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std:
 	}
 	else
 	{
-		mModel->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
+		mModel->SubModelAddBoundingBoxPoints(WorldMatrix, Points, Mode);
 	}
 }
 

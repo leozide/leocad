@@ -183,6 +183,7 @@ public:
 	void RefreshPreview() const;
 	std::vector<PieceInfo*> GetRequiredPieces() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
+	void WaitForAssets() const;
 	lcResult<void> EnsureAssetsReady() const;
 
 	PieceInfo* GetPieceInfo() const
@@ -331,7 +332,7 @@ public:
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
-	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const;
+	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const;
 	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
@@ -339,7 +340,7 @@ public:
 	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
 	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
 	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
-	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const;
+	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const;
 
 	bool HasPieces() const
 	{
@@ -359,7 +360,7 @@ public:
 	bool GetSelectionCenter(lcVector3& Center) const;
 	lcBoundingBox GetAllPiecesBoundingBox() const;
 	bool GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	std::vector<lcVector3> GetPiecesBoundingBoxPoints() const;
+	std::vector<lcVector3> GetPiecesBoundingBoxPoints(lcGeometryBoundsMode Mode) const;
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsList& PartsList, bool Cumulative) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
@@ -423,8 +424,8 @@ public:
 	void ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
-	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix);
-	void ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step);
+	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode);
+	void ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step, lcGeometryBoundsMode Mode);
 	void Zoom(lcCamera* Camera, float Amount);
 
 	void MoveSelectedObjects(const lcVector3& Distance, lcModelTransformFlags Flags, lcModelHistoryEditMerge ModelHistoryEditMerge)

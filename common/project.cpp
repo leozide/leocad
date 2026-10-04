@@ -1123,12 +1123,14 @@ bool Project::ImportInventory(const std::vector<lcSetInventoryItem>& SetInventor
 	return true;
 }
 
-lcResult<std::vector<lcModelPartsEntry>> Project::GetModelParts()
+std::vector<lcModelPartsEntry> Project::GetModelParts()
 {
 	std::vector<lcModelPartsEntry> ModelParts;
 
 	if (mModels.empty())
 		return ModelParts;
+
+	mModels[0]->WaitForAssets();
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 		Model->CalculateStep(LC_STEP_MAX);
@@ -1137,13 +1139,14 @@ lcResult<std::vector<lcModelPartsEntry>> Project::GetModelParts()
 
 	SetActiveModel(mActiveModel, false);
 
-	for (const lcModelPartsEntry& ModelPart : ModelParts)
+	ModelParts.erase(std::remove_if(ModelParts.begin(), ModelParts.end(), [](const lcModelPartsEntry& ModelPart)
 	{
-		if (ModelPart.Info->GetSynthInfo() && !ModelPart.Mesh)
-			return lcUnexpected(tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(ModelPart.Info->mFileName)));
-	}
+		return ModelPart.Info->mState != lcPieceInfoState::Loaded ||
+			(ModelPart.Info->GetSynthInfo() && !ModelPart.Mesh) ||
+			(!ModelPart.Mesh && !ModelPart.Info->GetMesh());
+	}), ModelParts.end());
 
-	return std::move(ModelParts);
+	return ModelParts;
 }
 
 std::vector<PieceInfo*> Project::GetRequiredPieces() const
@@ -1379,20 +1382,7 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 
 lcResult<void> Project::Export3DStudio(const QString& FileName)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-		return Ready;
-
-	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
-
-	if (!ModelPartsResult)
-		return lcUnexpected(ModelPartsResult.error());
-
-	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
-
-	if (ModelParts.empty())
-		return lcUnexpected(tr("Nothing to export."));
+	const std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	QString SaveFileName = GetExportFileName(FileName, "3ds", tr("Export 3D Studio"), tr("3DS Files (*.3ds);;All Files (*.*)"));
 
@@ -1842,20 +1832,7 @@ lcResult<void> Project::ExportBrickLink()
 
 lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-		return Ready;
-
-	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
-
-	if (!ModelPartsResult)
-		return lcUnexpected(ModelPartsResult.error());
-
-	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
-
-	if (ModelParts.empty())
-		return lcUnexpected(tr("Nothing to export."));
+	const std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	QString SaveFileName = GetExportFileName(FileName, "dae", tr("Export COLLADA"), tr("COLLADA Files (*.dae);;All Files (*.*)"));
 
@@ -2209,12 +2186,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 	}
 
 	for (const lcModel* Model : Models)
-	{
-		const lcResult<void> Ready = Model->EnsureAssetsReady();
-
-		if (!Ready)
-			return Ready;
-	}
+		Model->WaitForAssets();
 
 	QDir Dir(Options.PathName);
 	Dir.mkpath(QLatin1String("."));
@@ -2285,7 +2257,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		if (PartsList.empty())
 			return lcResult<void>();
 
-		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black);
+		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black, true);
 
 		if (Image.isNull())
 			return lcUnexpected(tr("Could not render the pieces list image."));
@@ -2493,20 +2465,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 lcResult<void> Project::ExportPOVRay(const QString& FileName)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-		return Ready;
-
-	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
-
-	if (!ModelPartsResult)
-		return lcUnexpected(ModelPartsResult.error());
-
-	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
-
-	if (ModelParts.empty())
-		return lcUnexpected(tr("Nothing to export."));
+	const std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("pov"), tr("Export POV-Ray"), tr("POV-Ray Files (*.pov);;All Files (*.*)"));
 
@@ -2588,11 +2547,18 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX);
 	lcVector3 Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
+	if (ModelParts.empty())
+	{
+		Min = lcVector3(-10.0f, -10.0f, -10.0f);
+		Max = lcVector3(10.0f, 10.0f, 10.0f);
+	}
+
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
 		lcVector3 Points[8];
 
-		lcGetBoxCorners(ModelPart.Info->GetBoundingBox(), Points);
+		const lcMesh* Mesh = ModelPart.Mesh ? ModelPart.Mesh : ModelPart.Info->GetMesh();
+		lcGetBoxCorners(Mesh->mBoundingBox, Points);
 
 		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
 		{
@@ -3150,8 +3116,11 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine(Line);
 	}
 
-	snprintf(Line, sizeof(Line), "#declare %s = union {\n", TopModelName.toLatin1().constData());
-	POVFile.WriteLine(Line);
+	if (!ModelParts.empty())
+	{
+		snprintf(Line, sizeof(Line), "#declare %s = union {\n", TopModelName.toLatin1().constData());
+		POVFile.WriteLine(Line);
+	}
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
@@ -3205,12 +3174,15 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		POVFile.WriteLine(Line);
 	}
 
-	snprintf(Line, sizeof(Line), "\n  #if (ModelReflection = 0)\n    no_reflection\n  #end\n  #if (ModelShadow = 0)\n    no_shadow\n  #end\n}\n\n");
-	POVFile.WriteLine(Line);
+	if (!ModelParts.empty())
+	{
+		snprintf(Line, sizeof(Line), "\n  #if (ModelReflection = 0)\n    no_reflection\n  #end\n  #if (ModelShadow = 0)\n    no_shadow\n  #end\n}\n\n");
+		POVFile.WriteLine(Line);
 
-	snprintf(Line, sizeof(Line), "object {\n  %s\n  %s { %s }\n}\n\n",
-			TopModelName.toLatin1().constData(), (UseLGEO ? "material" : "texture"), ColorTable[lcGetColorIndex(TopModelColorCode)].data());
-	POVFile.WriteLine(Line);
+		snprintf(Line, sizeof(Line), "object {\n  %s\n  %s { %s }\n}\n\n",
+				TopModelName.toLatin1().constData(), (UseLGEO ? "material" : "texture"), ColorTable[lcGetColorIndex(TopModelColorCode)].data());
+		POVFile.WriteLine(Line);
+	}
 
 	snprintf(Line, sizeof(Line), "#if (Floor)\n  object {\n    plane { FloorAxis, FloorLocation hollow }\n    texture {\n      pigment { color srgb FloorColor }\n      finish { emission 0 ambient FloorAmbient diffuse FloorDiffuse }\n    }\n  }\n#end\n");
 	POVFile.WriteLine(Line);
@@ -3226,20 +3198,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 lcResult<void> Project::ExportWavefront(const QString& FileName)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-		return Ready;
-
-	const lcResult<std::vector<lcModelPartsEntry>> ModelPartsResult = GetModelParts();
-
-	if (!ModelPartsResult)
-		return lcUnexpected(ModelPartsResult.error());
-
-	const std::vector<lcModelPartsEntry>& ModelParts = ModelPartsResult.value();
-
-	if (ModelParts.empty())
-		return lcUnexpected(tr("Nothing to export."));
+	const std::vector<lcModelPartsEntry> ModelParts = GetModelParts();
 
 	QString SaveFileName = GetExportFileName(FileName, QLatin1String("obj"), tr("Export Wavefront"), tr("Wavefront Files (*.obj);;All Files (*.*)"));
 

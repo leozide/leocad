@@ -234,21 +234,13 @@ void lcRenderDialog::RenderPOVRay()
 	ui->RenderProgress->setValue(ui->RenderProgress->minimum());
 	ui->RenderProgress->setFormat(tr("Exporting Model"));
 
-	QFuture<lcResult<void>> ExportThread = QtConcurrent::run([FileName]()
-	{
-		return lcGetActiveProject()->ExportPOVRay(FileName);
-	});
-
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
-	while (!ExportThread.isFinished())
-		QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+	lcResult<void> ExportResult = lcGetActiveProject()->ExportPOVRay(FileName);
 
 	QGuiApplication::restoreOverrideCursor();
 
 	ui->RenderProgress->setFormat("%p%");
-
-	lcResult<void> ExportResult = ExportThread.result();
 
 	if (!ExportResult)
 	{

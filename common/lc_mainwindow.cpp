@@ -1347,13 +1347,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 void lcMainWindow::Print(QPrinter* Printer)
 {
 #ifndef QT_NO_PRINTER
-	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
-		return;
-	}
+	lcGetActiveProject()->GetMainModel()->WaitForAssets();
 
 	int DocCopies;
 	int PageCopies;
@@ -1521,13 +1515,7 @@ void lcMainWindow::ShowRenderDialog(lcRenderDialogMode RenderDialogMode)
 
 void lcMainWindow::ShowInstructionsDialog()
 {
-	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
-		return;
-	}
+	lcGetActiveProject()->GetMainModel()->WaitForAssets();
 
 	lcInstructionsDialog* Dialog = new lcInstructionsDialog(this, lcGetActiveProject());
 	Dialog->setWindowModality(Qt::ApplicationModal);
@@ -1537,13 +1525,7 @@ void lcMainWindow::ShowInstructionsDialog()
 
 void lcMainWindow::ShowPrintDialog()
 {
-	const lcResult<void> Ready = lcGetActiveProject()->EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		QMessageBox::warning(this, tr("LeoCAD"), Ready.error());
-		return;
-	}
+	lcGetActiveProject()->GetMainModel()->WaitForAssets();
 
 #ifndef QT_NO_PRINTER
 	int PageCount = static_cast<int>(lcGetActiveProject()->GetInstructions()->mPages.size());

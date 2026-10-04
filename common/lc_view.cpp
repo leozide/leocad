@@ -722,15 +722,7 @@ std::vector<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, fl
 std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 {
 	std::vector<QImage> Images;
-	const lcResult<void> Ready = mModel->EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
-
-		return Images;
-	}
+	mModel->WaitForAssets();
 
 	if (!BeginRenderToImage(mWidth, mHeight))
 	{
@@ -741,7 +733,7 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	}
 
 	const lcStep CurrentStep = mModel->GetCurrentStep();
-	bool MissingAssets = false;
+	bool RenderFailed = false;
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -749,18 +741,11 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 
 		OnDraw();
 
-		if (HasMissingAssets())
-		{
-			MissingAssets = true;
-			Images.clear();
-			break;
-		}
-
 		QImage Image = GetRenderImage();
 
 		if (Image.isNull())
 		{
-			MissingAssets = true;
+			RenderFailed = true;
 			Images.clear();
 			break;
 		}
@@ -775,8 +760,8 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	if (!mModel->IsActive())
 		mModel->CalculateStep(LC_STEP_MAX);
 
-	if (MissingAssets && gMainWindow)
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
+	if (RenderFailed && gMainWindow)
+		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
 
 	return Images;
 }
@@ -786,7 +771,7 @@ lcResult<void> lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffi
 	std::vector<QImage> Images = GetStepImages(Start, End);
 
 	if (Images.size() != static_cast<size_t>(End - Start + 1))
-		return lcUnexpected(tr("Could not render all required pieces."));
+		return lcUnexpected(tr("Error creating images."));
 
 	for (lcStep Step = Start; Step <= End; Step++)
 	{
@@ -1959,7 +1944,7 @@ void lcView::ZoomExtents()
 	{
 		const lcMatrix44 WorldMatrix = mActiveSubmodelInstance ? mActiveSubmodelTransform : lcMatrix44Identity();
 
-		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix);
+		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix, lcGeometryBoundsMode::IncludeFallbackGeometry);
 	}
 }
 

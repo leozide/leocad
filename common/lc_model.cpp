@@ -513,42 +513,13 @@ std::vector<lcPiece*> lcModel::GetRequiredSynthPieces() const
 	return Required;
 }
 
-lcResult<void> lcModel::EnsureAssetsReady() const
+void lcModel::WaitForAssets() const
 {
 	const std::vector<PieceInfo*> Required = GetRequiredPieces();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	if (!Library->EnsurePiecesReady(Required))
-	{
-		for (const PieceInfo* Info : Required)
-		{
-			if (Info->mState != lcPieceInfoState::Failed)
-				continue;
-
-			const QString Error = Library->GetPieceLoadError(Info);
-
-			if (!Error.isEmpty())
-				return lcUnexpected(Error);
-		}
-
-		return lcUnexpected(tr("Could not load all required pieces."));
-	}
-
-	const std::vector<lcPiece*> GeneratedPieces = GetRequiredSynthPieces();
-
-	if (!Library->EnsureSynthMeshesReady(GeneratedPieces))
-	{
-		for (const lcPiece* Piece : GeneratedPieces)
-			if (!Piece->HasGeneratedMesh())
-			{
-				QString Error = Library->GetSynthMeshError(Piece);
-
-				if (Error.isEmpty())
-					Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
-
-				return lcUnexpected(Error);
-			}
-	}
+	Library->EnsurePiecesReady(Required);
+	Library->EnsureSynthMeshesReady(GetRequiredSynthPieces());
 
 	// Temporary minifigure and thumbnail models have no container piece to update.
 	if (mPieceInfo)
@@ -556,6 +527,40 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 		std::vector<lcModel*> UpdatedModels;
 		const_cast<lcModel*>(this)->UpdatePieceInfo(UpdatedModels);
 	}
+}
+
+lcResult<void> lcModel::EnsureAssetsReady() const
+{
+	WaitForAssets();
+
+	const std::vector<PieceInfo*> Required = GetRequiredPieces();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (const PieceInfo* Info : Required)
+	{
+		if (Info->mState == lcPieceInfoState::Loaded)
+			continue;
+
+		const QString Error = Library->GetPieceLoadError(Info);
+
+		if (!Error.isEmpty())
+			return lcUnexpected(Error);
+
+		return lcUnexpected(tr("Could not load all required pieces."));
+	}
+
+	const std::vector<lcPiece*> GeneratedPieces = GetRequiredSynthPieces();
+
+	for (const lcPiece* Piece : GeneratedPieces)
+		if (!Piece->HasGeneratedMesh())
+		{
+			QString Error = Library->GetSynthMeshError(Piece);
+
+			if (Error.isEmpty())
+				Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
+
+			return lcUnexpected(Error);
+		}
 
 	return lcResult<void>();
 }
@@ -1690,15 +1695,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
-
-		return QImage();
-	}
+	WaitForAssets();
 
 	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr);
 
@@ -1729,12 +1726,12 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	View.MakeCurrent();
 
 	if (!OutputCamera && !ActiveView)
-		ZoomExtentsAtStep(View.GetCamera(), (float)Width / (float)Height, GetLastStep());
+		ZoomExtentsAtStep(View.GetCamera(), (float)Width / (float)Height, GetLastStep(), lcGeometryBoundsMode::AvailableGeometryOnly);
 
 	SetTemporaryStep(Step);
 
 	if (Zoom && ActiveView && !OutputCamera)
-		ZoomExtents(View.GetCamera(), (float)Width / (float)Height, lcMatrix44Identity());
+		ZoomExtents(View.GetCamera(), (float)Width / (float)Height, lcMatrix44Identity(), lcGeometryBoundsMode::AvailableGeometryOnly);
 
 	if (!View.BeginRenderToImage(Width, Height))
 	{
@@ -1748,12 +1745,7 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 	View.OnDraw();
 
-	QImage Image;
-
-	const bool MissingAssets = View.HasMissingAssets();
-
-	if (!MissingAssets)
-		Image = View.GetRenderImage();
+	QImage Image = View.GetRenderImage();
 
 	View.EndRenderToImage();
 
@@ -1762,23 +1754,15 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
 
-	if (MissingAssets || Image.isNull())
-		return lcUnexpected(tr("Could not render all required pieces."));
+	if (Image.isNull())
+		return lcUnexpected(tr("Error creating images."));
 
 	return Image;
 }
 
-QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor) const
+QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-	{
-		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Ready.error());
-
-		return QImage();
-	}
+	WaitForAssets();
 
 	lcPartsList PartsList;
 
@@ -1804,6 +1788,11 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 	for (const auto& PartIt : PartsList)
 	{
+		const PieceInfo* Info = PartIt.first;
+
+		if (!KeepMissingParts && !Info->IsModel() && !Info->IsProject() && (Info->mState != lcPieceInfoState::Loaded || !Info->GetMesh()))
+			continue;
+
 		for (const auto& ColorIt : PartIt.second)
 		{
 			Images.push_back(lcPartsListImage());
@@ -1812,6 +1801,13 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 			Image.ColorIndex = ColorIt.first;
 			Image.Count = ColorIt.second;
 		}
+	}
+
+	if (Images.empty())
+	{
+		QImage Image(1, 1, QImage::Format_ARGB32);
+		Image.fill(lcQColorFromRGBA(BackgroundColor));
+		return Image;
 	}
 
 	auto ImageCompare = [](const lcPartsListImage& Image1, const lcPartsListImage& Image2)
@@ -1898,18 +1894,6 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 		Scene.End();
 
-		if (Scene.HasMissingAssets())
-		{
-			View.UnbindRenderFramebuffer();
-			View.EndRenderToImage();
-			Context->ClearResources();
-
-			if (gMainWindow)
-				QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Could not render all required pieces."));
-
-			return QImage();
-		}
-
 		Scene.Draw(Context);
 
 		View.UnbindRenderFramebuffer();
@@ -1948,6 +1932,27 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	};
 
 	QtConcurrent::blockingMap(Images, CalculateImageBounds);
+
+	if (KeepMissingParts)
+	{
+		for (lcPartsListImage& Image : Images)
+			if (Image.Bounds.isEmpty())
+				Image.Bounds = QRect(0, 0, qMin(64, ThumbnailSize), qMin(64, ThumbnailSize));
+	}
+	else
+	{
+		Images.erase(std::remove_if(Images.begin(), Images.end(), [](const lcPartsListImage& Image)
+		{
+			return Image.Bounds.isEmpty();
+		}), Images.end());
+	}
+
+	if (Images.empty())
+	{
+		QImage Image(1, 1, QImage::Format_ARGB32);
+		Image.fill(lcQColorFromRGBA(BackgroundColor));
+		return Image;
+	}
 
 	QImage DummyImage(16, 16, QImage::Format_ARGB32);
 	QPainter DummyPainter(&DummyImage);
@@ -2019,10 +2024,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
 {
-	const lcResult<void> Ready = EnsureAssetsReady();
-
-	if (!Ready)
-		return Ready;
+	WaitForAssets();
 
 	lcCamera OutputCamera(true);
 	lcCamera* Camera = nullptr;
@@ -2030,7 +2032,7 @@ lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuff
 	if (!gMainWindow || !gMainWindow->GetActiveView())
 	{
 		OutputCamera.SetViewpoint(lcViewpoint::Home);
-		ZoomExtentsAtStep(&OutputCamera, (float)Width / (float)Height, GetLastStep());
+		ZoomExtentsAtStep(&OutputCamera, (float)Width / (float)Height, GetLastStep(), lcGeometryBoundsMode::AvailableGeometryOnly);
 		Camera = &OutputCamera;
 	}
 
@@ -2147,9 +2149,12 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 			Piece->SubModelCompareBoundingBox(WorldMatrix, Min, Max);
 }
 
-void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+
+	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+		Mesh = nullptr;
 
 	if (Mesh)
 	{
@@ -2162,7 +2167,7 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsVisibleInSubModel())
-			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points);
+			Piece->SubModelAddBoundingBoxPoints(WorldMatrix, Points, Mode);
 }
 
 void lcModel::AddSelectionHistory(std::function<void()> Callback)
@@ -4819,10 +4824,13 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 	return Valid;
 }
 
-std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
+std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints(lcGeometryBoundsMode Mode) const
 {
 	std::vector<lcVector3> Points;
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+
+	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+		Mesh = nullptr;
 
 	if (Mesh)
 	{
@@ -4835,7 +4843,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints() const
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
-			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points);
+			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points, Mode);
 
 	return Points;
 }
@@ -5995,9 +6003,9 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 	}
 }
 
-void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix)
+void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode)
 {
-	std::vector<lcVector3> Points = GetPiecesBoundingBoxPoints();
+	std::vector<lcVector3> Points = GetPiecesBoundingBoxPoints(Mode);
 
 	if (Points.empty())
 		return;
@@ -6034,12 +6042,12 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 	}
 }
 
-void lcModel::ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step)
+void lcModel::ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step, lcGeometryBoundsMode Mode)
 {
 	const lcStep CurrentStep = mCurrentStep;
 
 	SetTemporaryStep(Step);
-	ZoomExtents(Camera, Aspect, lcMatrix44Identity());
+	ZoomExtents(Camera, Aspect, lcMatrix44Identity(), Mode);
 	SetTemporaryStep(CurrentStep);
 
 	if (!mActive)

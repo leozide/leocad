@@ -1139,14 +1139,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			if (Options.SetHighlightColor)
 				mPreferences.mHighlightNewPartsColor = Options.HighlightColor;
 
-			const lcResult<void> Ready = ActiveModel->EnsureAssetsReady();
-
-			if (!Ready)
-			{
-				StdErr << Ready.error() << '\n';
-
-				return lcStartupMode::Error;
-			}
+			ActiveModel->WaitForAssets();
 
 			const bool UsesCameraPosition = Options.SetCameraPosition && Options.Viewpoint == lcViewpoint::Count && !Options.SetCameraAngles;
 
@@ -1154,7 +1147,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			{
 				const lcStep FitStep = Options.ImageStart == Options.ImageEnd ? Options.ImageStart : ActiveModel->GetLastStep();
 
-				ActiveModel->ZoomExtentsAtStep(ActiveView->GetCamera(), (float)ActiveView->GetWidth() / (float)ActiveView->GetHeight(), FitStep);
+				ActiveModel->ZoomExtentsAtStep(ActiveView->GetCamera(), (float)ActiveView->GetWidth() / (float)ActiveView->GetHeight(), FitStep, lcGeometryBoundsMode::AvailableGeometryOnly);
 			}
 
 			auto ProgressCallback = [&StdOut](const QString& FileName)

@@ -1074,7 +1074,10 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 	}
 
 	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+	{
 		Scene->MarkMissingAssets();
+		return;
+	}
 
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
@@ -1102,7 +1105,10 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
 
 	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+	{
 		Scene->MarkMissingAssets();
+		return;
+	}
 
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
@@ -1137,12 +1143,15 @@ void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 	}
 }
 
-void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
+void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
+	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo->GetSynthInfo() && !HasGeneratedMesh())
+		return;
+
 	lcMesh* Mesh = GetDisplayMesh();
 
 	if (!Mesh || mPieceInfo->IsLoading())
-		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points);
+		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points, Mode);
 	else
 	{
 		lcVector3 BoxPoints[8];

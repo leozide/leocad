@@ -144,7 +144,7 @@ protected:
 	static bool CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming);
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 
-	lcResult<std::vector<lcModelPartsEntry>> GetModelParts();
+	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 
 	bool mIsPreview;

@@ -177,7 +177,7 @@ public:
 	bool RenamePiece(PieceInfo* Info, const char* NewName);
 	static std::string NormalizePieceName(const char* PieceName);
 	PieceInfo* CreateModelPiece(const char* PieceName, Project* Project, bool& Reused);
-	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreatePlaceholder, bool SearchProjectFolder);
+	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
 	bool RemapProjectPiece(PieceInfo* Info, const QString& ProjectDirectory, bool IsPreview);
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
 	void NotifyConsumersChanged();

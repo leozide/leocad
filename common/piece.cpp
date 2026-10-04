@@ -1496,7 +1496,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	if (!mMesh || mPieceInfo->IsLoading())
+	if (!mMesh || mPieceInfo->mState != lcPieceInfoState::Loaded)
 		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
 		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceInfo, mMesh, ColorIndex });
@@ -1563,6 +1563,9 @@ void lcPiece::UpdateMesh()
 
 lcMesh* lcPiece::GetDisplayMesh() const
 {
+	if (!mPieceInfo || mPieceInfo->mState != lcPieceInfoState::Loaded)
+		return nullptr;
+
 	if (mMesh)
 		return mMesh;
 

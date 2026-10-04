@@ -1019,6 +1019,8 @@ void lcMainWindow::UpdateAssets()
 	for (const std::unique_ptr<lcModel>& Model : Project->GetModels())
 		Model->UpdatePieceInfo(UpdatedModels);
 
+	UpdateTimeline(false, true);
+
 	lcView::UpdateProjectViews(Project);
 
 	const std::vector<PieceInfo*> Required = Project->GetRequiredPieces();

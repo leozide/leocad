@@ -129,8 +129,13 @@ bool Project::CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Inc
 	if (Existing == Incoming)
 		return true;
 
-	if (Existing->IsPlaceholder() && Incoming->IsPlaceholder())
-		return true;
+	if (Existing->IsLibraryPiece() || Incoming->IsLibraryPiece() || Existing->IsModel() || Incoming->IsModel())
+		return false;
+
+	// The callers have already matched filenames. Two missing part references
+	// can share an identity, while failed library parts and models cannot.
+	if (!Existing->IsProject() && !Incoming->IsProject())
+		return Existing->mState == lcPieceInfoState::Failed && Incoming->mState == lcPieceInfoState::Failed;
 
 	if (!Existing->IsProject() || !Incoming->IsProject())
 		return false;
@@ -453,8 +458,8 @@ void Project::ShowModelListDialog()
 			// A new model can reuse this PieceInfo. A renamed model keeps its own
 			// PieceInfo, so references to the deleted model are rebound below.
 			lcGetPiecesLibrary()->InvalidatePiece(OldModel->GetPieceInfo());
-			OldModel->GetPieceInfo()->SetPlaceholder();
-			OldModel->GetPieceInfo()->mState = lcPieceInfoState::Loaded;
+			OldModel->GetPieceInfo()->DetachContainer();
+			OldModel->GetPieceInfo()->SetFailed(tr("Model '%1' was deleted.").arg(Model->GetFileName()));
 
 			if (Entry.ExistingModel)
 			{

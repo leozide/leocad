@@ -352,6 +352,12 @@ void lcAssetLoader::QueuePieceLocked(PieceInfo* Info, Priority LoadPriority)
 		const lcBoundingBox& Box = mLibrary->GetLoadingMesh()->mBoundingBox;
 		Info->SetBoundingBox(Box.Min, Box.Max);
 	}
+	else if (Info->IsModel() && Info->GetModel()->HasDirectGeometry())
+	{
+		const lcBoundingBox& Box = mLibrary->GetLoadingMesh()->mBoundingBox;
+		const lcBoundingBox& ModelBox = Info->GetBoundingBox();
+		Info->SetBoundingBox(lcMin(ModelBox.Min, Box.Min), lcMax(ModelBox.Max, Box.Max));
+	}
 
 	mLibrary->ClearPieceLoadError(Info);
 
@@ -639,23 +645,16 @@ void lcAssetLoader::FinishPart(const std::shared_ptr<Request>& RequestedPart)
 			mLibrary->SaveBuiltPieceCache(RequestedPart->Source, *RequestedPart->StagedMesh);
 
 		if (RequestedPart->StagedMesh)
-			Info->SetLoadedPartMesh(RequestedPart->StagedMesh.release());
+			Info->SetMesh(RequestedPart->StagedMesh.release());
 
 		Info->mState = lcPieceInfoState::Loaded;
 		mLibrary->ClearPieceLoadError(Info);
 	}
 	else
 	{
-		std::unique_ptr<lcMesh> Box(new lcMesh);
-
-		Box->CreateBox();
-
-		Info->SetMesh(Box.release());
-		Info->mState = lcPieceInfoState::Failed;
-
 		LoadError = RequestedPart->Error.isEmpty() ? tr("Could not load part %1.").arg(RequestedPart->Source.FileName) : RequestedPart->Error;
 
-		mLibrary->SetPieceLoadError(Info, LoadError);
+		Info->SetFailed(LoadError);
 	}
 
 	mQueueMutex.lock();

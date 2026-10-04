@@ -127,7 +127,7 @@ void lcPiecesLibrary::RemoveTemporaryPieces()
 	{
 		PieceInfo* Info = PieceIt->second;
 
-		if (Info->IsTemporary() && Info->GetRefCount() == 0)
+		if (!Info->IsLibraryPiece() && Info->GetRefCount() == 0)
 		{
 			ClearPieceLoadError(Info);
 			PieceIt = mPieces.erase(PieceIt);
@@ -236,7 +236,7 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 void lcPiecesLibrary::UnloadPieceInfo(PieceInfo* Info)
 {
 	const std::unordered_map<PieceInfo*, Project*>::iterator Local = mProjectPieces.find(Info);
-	const bool DeleteAfterUnload = Local != mProjectPieces.end() && !Info->IsModel() && !Info->IsProject();
+	const bool DeleteAfterUnload = !Info->IsLibraryPiece() && !Info->IsModel() && !Info->IsProject();
 
 	if (Local != mProjectPieces.end())
 	{
@@ -250,7 +250,7 @@ void lcPiecesLibrary::UnloadPieceInfo(PieceInfo* Info)
 	Info->Unload();
 
 	if (DeleteAfterUnload)
-		delete Info;
+		RemovePiece(Info);
 }
 
 void lcPiecesLibrary::SetModelPieceName(PieceInfo* Info, const char* Name)
@@ -316,7 +316,8 @@ bool lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 		mPieces[PieceName] = Info;
 
 	LoadLock.unlock();
-	ClearPieceLoadError(Info);
+	if (Info->mState != lcPieceInfoState::Failed)
+		ClearPieceLoadError(Info);
 
 	return true;
 }
@@ -352,8 +353,8 @@ PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Pro
 
 		if (!Info || Info->IsModel())
 		{
-			Info = new PieceInfo();
-			Info->CreatePlaceholder(PieceName);
+			Info = new PieceInfo(false);
+			Info->CreatePart(PieceName);
 			Project->RegisterPiece(Name, Info);
 			mProjectPieces[Info] = Project;
 		}
@@ -370,7 +371,7 @@ PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Pro
 	return Info;
 }
 
-PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreatePlaceholder, bool SearchProjectFolder)
+PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
 {
 	const std::string Name = NormalizePieceName(PieceName);
 	QString ProjectPath;
@@ -405,7 +406,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
 			{
-				PieceInfo* Info = new PieceInfo();
+				PieceInfo* Info = new PieceInfo(false);
 
 				Info->CreateProject(NewProject, PieceName);
 				RegisterProjectPiece(CurrentProject, Name, Info);
@@ -417,11 +418,12 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		}
 	}
 
-	if (CreatePlaceholder)
+	if (CreateMissing)
 	{
-		PieceInfo* Info = new PieceInfo();
+		PieceInfo* Info = new PieceInfo(false);
 
-		Info->CreatePlaceholder(PieceName);
+		Info->CreatePart(PieceName);
+		Info->SetFailed(tr("Could not find piece '%1'.").arg(QString::fromLatin1(PieceName)));
 
 		if (CurrentProject)
 			RegisterProjectPiece(CurrentProject, Name, Info);
@@ -461,17 +463,17 @@ bool lcPiecesLibrary::RemapProjectPiece(PieceInfo* Info, const QString& ProjectD
 		else
 		{
 			delete LocalProject;
-			Info->SetPlaceholder();
+			Info->DetachContainer();
+			Info->SetFailed(tr("Could not load external project '%1'.").arg(Candidate.absoluteFilePath()));
 		}
 	}
 	else
-		Info->SetPlaceholder();
-
-	if (Info->IsPlaceholder() && Info->GetRefCount() > 1)
 	{
-		LoadPieceInfo(Info, lcPieceLoadFlag::Visible);
-		ReleasePieceInfo(Info);
+		Info->DetachContainer();
+		Info->SetFailed(tr("Could not find external project '%1'.").arg(Candidate.absoluteFilePath()));
 	}
+
+	NotifyConsumersChanged();
 
 	return true;
 }
@@ -889,7 +891,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 				if (!Info)
 				{
-					Info = new PieceInfo();
+					Info = new PieceInfo(true);
 
 					strncpy(Info->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(Info->mFileName)-1);
 					Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
@@ -1153,7 +1155,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			if (FolderIdx > 0 && mPieces.find(Name) != mPieces.end())
 				continue;
 
-			PieceInfo* Info = new PieceInfo();
+			PieceInfo* Info = new PieceInfo(true);
 
 			strncpy(Info->mFileName, FileString, sizeof(Info->mFileName));
 			Info->mFileName[sizeof(Info->mFileName) - 1] = 0;
@@ -2434,7 +2436,7 @@ bool lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 
 bool lcPiecesLibrary::PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const
 {
-	if (Info->IsTemporary())
+	if (!Info->IsLibraryPiece())
 		return false;
 
 	const char* PieceName;

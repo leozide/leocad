@@ -13,7 +13,8 @@
 #include "lc_traintrack.h"
 #include <locale.h>
 
-PieceInfo::PieceInfo()
+PieceInfo::PieceInfo(bool IsLibraryPiece)
+	: mIsLibraryPiece(IsLibraryPiece)
 {
 	mZipFileType = lcZipFileType::Count;
 	mZipFileIndex = -1;
@@ -52,28 +53,50 @@ void PieceInfo::SetMesh(lcMesh* Mesh)
 	mMesh = Mesh;
 }
 
-void PieceInfo::SetLoadedPartMesh(lcMesh* Mesh)
+lcMesh* PieceInfo::GetDisplayMesh() const
 {
-	SetMesh(Mesh);
+	if (mState == lcPieceInfoState::Loaded)
+		return mMesh;
 
-	if (mType == lcPieceInfoType::Placeholder)
-		mType = lcPieceInfoType::Part;
+	if ((IsLoading() || mState == lcPieceInfoState::Failed) &&
+		((!IsModel() && !IsProject()) || (IsModel() && mModel->HasDirectGeometry())))
+		return lcGetPiecesLibrary()->GetLoadingMesh();
+
+	return nullptr;
 }
 
-void PieceInfo::SetPlaceholder()
+void PieceInfo::SetFailed(QString Error)
 {
-	lcGetPiecesLibrary()->ClearPieceLoadError(this);
+	ReleaseMesh();
+	if (!IsModel() && !IsProject())
+		SetLoadingBoundingBox();
+
+	mState = lcPieceInfoState::Failed;
+
+	if (IsModel())
+	{
+		if (const lcMesh* Mesh = GetDisplayMesh())
+		{
+			mBoundingBox.Min = lcMin(mBoundingBox.Min, Mesh->mBoundingBox.Min);
+			mBoundingBox.Max = lcMax(mBoundingBox.Max, Mesh->mBoundingBox.Max);
+		}
+	}
+
+	lcGetPiecesLibrary()->SetPieceLoadError(this, std::move(Error));
+}
+
+void PieceInfo::DetachContainer()
+{
 	Project* PreviousProject = IsProject() ? mProject : nullptr;
-	mType = lcPieceInfoType::Placeholder;
+	mType = lcPieceInfoType::Part;
 	mModel = nullptr;
 	mProject = nullptr;
 	strncpy(m_strDescription, mFileName, sizeof(m_strDescription) - 1);
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
 	delete PreviousProject;
 
-	lcMesh* Mesh = new lcMesh;
-	Mesh->CreateBox();
-	SetMesh(Mesh);
+	ReleaseMesh();
+	SetLoadingBoundingBox();
 }
 
 void PieceInfo::SetModel(lcModel* Model)
@@ -144,14 +167,12 @@ bool PieceInfo::IncludesModel(const lcModel* Model) const
 	return false;
 }
 
-void PieceInfo::CreatePlaceholder(const char* Name)
+void PieceInfo::CreatePart(const char* Name)
 {
 	strncpy(mFileName, Name, sizeof(mFileName));
 	mFileName[sizeof(mFileName) - 1] = 0;
 	strncpy(m_strDescription, Name, sizeof(m_strDescription));
 	m_strDescription[sizeof(m_strDescription) - 1] = 0;
-
-	SetPlaceholder();
 }
 
 void PieceInfo::ReleaseMesh()
@@ -183,8 +204,9 @@ void PieceInfo::Unload()
 bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
 {
 	bool Intersect = false;
+	lcMesh* Mesh = GetDisplayMesh();
 
-	if (IsPlaceholder() || IsLoading() || IsModel() || IsProject())
+	if (Mesh == lcGetPiecesLibrary()->GetLoadingMesh() || IsModel() || IsProject())
 	{
 		float Distance;
 		lcVector3 Plane;
@@ -192,7 +214,7 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 		if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr, &Plane) || (Distance >= MinDistance))
 			return false;
 
-		if (IsPlaceholder() || (IsLoading() && !IsModel() && !IsProject()))
+		if (Mesh == lcGetPiecesLibrary()->GetLoadingMesh() && !IsModel() && !IsProject())
 		{
 			PieceInfoRayTest.Info = this;
 			PieceInfoRayTest.Transform = lcMatrix44Identity();
@@ -211,27 +233,12 @@ bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, f
 		}
 	}
 
-	if (mMesh && !IsLoading())
+	if (Mesh)
 	{
-		if (mMesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
+		if (Mesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
 		{
 			PieceInfoRayTest.Info = this;
 			PieceInfoRayTest.Transform = lcMatrix44Identity();
-			Intersect = true;
-		}
-	}
-	else if (IsModel() && IsLoading() && mModel->HasDirectGeometry())
-	{
-		float Distance;
-		lcVector3 Plane;
-		const lcBoundingBox& Box = lcGetPiecesLibrary()->GetLoadingMesh()->mBoundingBox;
-
-		if (lcBoundingBoxRayIntersectDistance(Box.Min, Box.Max, Start, End, &Distance, nullptr, &Plane) && Distance < MinDistance)
-		{
-			PieceInfoRayTest.Info = this;
-			PieceInfoRayTest.Transform = lcMatrix44Identity();
-			PieceInfoRayTest.Plane = Plane;
-			MinDistance = Distance;
 			Intersect = true;
 		}
 	}
@@ -283,13 +290,9 @@ bool PieceInfo::BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 WorldPlan
 	if (OutcodesOR == 0)
 		return true;
 
-	if (IsLoading() && !IsModel() && !IsProject())
-		return lcGetPiecesLibrary()->GetLoadingMesh()->IntersectsPlanes(LocalPlanes);
+	lcMesh* Mesh = GetDisplayMesh();
 
-	if (mMesh && !IsLoading() && mMesh->IntersectsPlanes(LocalPlanes))
-		return true;
-
-	if (IsModel() && IsLoading() && mModel->HasDirectGeometry() && lcGetPiecesLibrary()->GetLoadingMesh()->IntersectsPlanes(LocalPlanes))
+	if (Mesh && Mesh->IntersectsPlanes(LocalPlanes))
 		return true;
 
 	if (IsModel())
@@ -325,10 +328,8 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 	{
 		if (Scene.GetRequireCompleteAssets())
 			Scene.MarkMissingAssets();
-		else if (IsLoading() && (!IsModel() || (mModel && mModel->HasDirectGeometry())))
-			Scene.AddMesh(lcGetPiecesLibrary()->GetLoadingMesh(), lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
-		else if (mMesh)
-			Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
+		else if (lcMesh* Mesh = GetDisplayMesh())
+			Scene.AddMesh(Mesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
 	}
 	else if (mMesh)
 		Scene.AddMesh(mMesh, lcMatrix44Identity(), gDefaultColor, lcRenderMeshState::Default);
@@ -340,10 +341,8 @@ void PieceInfo::AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, i
 	{
 		if (Scene->GetRequireCompleteAssets())
 			Scene->MarkMissingAssets();
-		else if (IsLoading() && (!IsModel() || (mModel && mModel->HasDirectGeometry())))
-			Scene->AddMesh(lcGetPiecesLibrary()->GetLoadingMesh(), WorldMatrix, ColorIndex, RenderMeshState);
-		else if (mMesh)
-			Scene->AddMesh(mMesh, WorldMatrix, ColorIndex, RenderMeshState);
+		else if (lcMesh* Mesh = GetDisplayMesh())
+			Scene->AddMesh(Mesh, WorldMatrix, ColorIndex, RenderMeshState);
 	}
 	else if (mMesh)
 		Scene->AddMesh(mMesh, WorldMatrix, ColorIndex, RenderMeshState);

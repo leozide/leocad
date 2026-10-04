@@ -6,7 +6,6 @@
 enum class lcPieceInfoType
 {
 	Part,
-	Placeholder,
 	Model,
 	Project
 };
@@ -39,7 +38,7 @@ enum class lcZipFileType;
 class PieceInfo
 {
 public:
-	PieceInfo();
+	explicit PieceInfo(bool IsLibraryPiece);
 	~PieceInfo();
 
 	PieceInfo(const PieceInfo&) = delete;
@@ -96,7 +95,9 @@ public:
 	}
 
 	void SetMesh(lcMesh* Mesh);
-	void SetLoadedPartMesh(lcMesh* Mesh);
+	// Interactive fallback geometry is never owned by this piece or returned by GetMesh().
+	lcMesh* GetDisplayMesh() const;
+	void SetFailed(QString Error);
 	void ReleaseMesh();
 
 	int AddRef()
@@ -116,9 +117,9 @@ public:
 		return mRefCount;
 	}
 
-	bool IsPlaceholder() const
+	bool IsLibraryPiece() const
 	{
-		return mType == lcPieceInfoType::Placeholder;
+		return mIsLibraryPiece;
 	}
 
 	bool IsLoading() const
@@ -136,11 +137,6 @@ public:
 		return mType == lcPieceInfoType::Project;
 	}
 
-	bool IsTemporary() const
-	{
-		return mType != lcPieceInfoType::Part;
-	}
-
 	void SetZipFile(lcZipFileType ZipFileType, int ZipFileIndex)
 	{
 		mZipFileType = ZipFileType;
@@ -149,7 +145,7 @@ public:
 
 	bool IsPatterned() const
 	{
-		if (mType != lcPieceInfoType::Part)
+		if (!IsLibraryPiece())
 			return false;
 
 		const char* Name = mFileName;
@@ -186,9 +182,9 @@ public:
 	void AddRenderMesh(lcScene& Scene);
 	void AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 
-	void CreatePlaceholder(const char* Name);
+	void CreatePart(const char* Name);
 
-	void SetPlaceholder();
+	void DetachContainer();
 	void SetModel(lcModel* Model);
 	void CreateProject(Project* Project, const char* PieceName);
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
@@ -215,6 +211,8 @@ public:
 protected:
 	void SetLoadingBoundingBox();
 
+	// Fixed at creation, independently of type and load state.
+	const bool mIsLibraryPiece;
 	int mRefCount = 0;
 	lcPieceInfoType mType = lcPieceInfoType::Part;
 	lcModel* mModel = nullptr;

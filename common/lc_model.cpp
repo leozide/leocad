@@ -274,10 +274,11 @@ lcModel::~lcModel()
 			if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
 				gMainWindow->SetCurrentPieceInfo(nullptr);
 
-			// Keep the name indexed while placements still reference this placeholder.
+			// Keep the name indexed while placements still reference the deleted model.
 			lcGetPiecesLibrary()->InvalidatePiece(mPieceInfo);
-			mPieceInfo->SetPlaceholder();
-			mPieceInfo->mState = lcPieceInfoState::Loaded;
+			mPieceInfo->DetachContainer();
+			mPieceInfo->SetFailed(tr("Model '%1' was deleted.").arg(QString::fromLatin1(mPieceInfo->mFileName)));
+			lcGetPiecesLibrary()->NotifyConsumersChanged();
 		}
 
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
@@ -567,10 +568,9 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	mPieceInfo->SetModel(this);
 	UpdatedModels.push_back(this);
 
-	const lcMesh* Mesh = mPieceInfo->IsLoading() ? nullptr : mPieceInfo->GetMesh();
-	const lcMesh* PendingMesh = mPieceInfo->IsLoading() && mHasDirectGeometry ? lcGetPiecesLibrary()->GetLoadingMesh() : nullptr;
+	const lcMesh* Mesh = mPieceInfo->GetDisplayMesh();
 
-	if (mPieces.empty() && !Mesh && !PendingMesh)
+	if (mPieces.empty() && !Mesh)
 	{
 		mPieceInfo->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
 		return;
@@ -591,11 +591,6 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	{
 		Min = lcMin(Min, Mesh->mBoundingBox.Min);
 		Max = lcMax(Max, Mesh->mBoundingBox.Max);
-	}
-	else if (PendingMesh)
-	{
-		Min = lcMin(Min, PendingMesh->mBoundingBox.Min);
-		Max = lcMax(Max, PendingMesh->mBoundingBox.Max);
 	}
 
 	mPieceInfo->SetBoundingBox(Min, Max);
@@ -2132,18 +2127,7 @@ bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 
 void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
-	const lcMesh* Mesh = nullptr;
-
-	if (mPieceInfo)
-	{
-		if (mPieceInfo->IsLoading())
-		{
-			if (mHasDirectGeometry)
-				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
-		}
-		else
-			Mesh = mPieceInfo->GetMesh();
-	}
+	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
 	if (Mesh)
 	{
@@ -2165,18 +2149,7 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points) const
 {
-	const lcMesh* Mesh = nullptr;
-
-	if (mPieceInfo)
-	{
-		if (mPieceInfo->IsLoading())
-		{
-			if (mHasDirectGeometry)
-				Mesh = lcGetPiecesLibrary()->GetLoadingMesh();
-		}
-		else
-			Mesh = mPieceInfo->GetMesh();
-	}
+	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
 	if (Mesh)
 	{

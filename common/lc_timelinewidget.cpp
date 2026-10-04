@@ -214,7 +214,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 			QColor Color = palette().text().color();
 
-			if (Piece->mPieceInfo->IsPlaceholder())
+			if (Piece->mPieceInfo->mState == lcPieceInfoState::Failed)
 				Color = QColor(208, 0, 0);
 			else if (Piece->IsHidden())
 				Color.setAlpha(128);

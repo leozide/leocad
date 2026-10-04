@@ -414,7 +414,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 
 				if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 				{
-					snprintf(Line, sizeof(Line), "f %ld//%ld//%ld %ld//%ld//%ld %ld//%ld//%ld\n", idx1 + mNumVertices, idx1, idx1 + mNumVertices, idx2 + mNumVertices, idx2, idx2 + mNumVertices, idx3 + mNumVertices, idx3, idx3 + mNumVertices);
+					snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1 + mNumVertices, idx1 + mNumVertices, idx2 + mNumVertices, idx2 + mNumVertices, idx3 + mNumVertices, idx3 + mNumVertices);
 					File.WriteLine(Line);
 				}
 			}

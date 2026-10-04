@@ -1960,12 +1960,13 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		const QString BaseName = QLatin1String("Part_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.Info->mFileName));
 		const QString ID = MakeUniqueExportIdentifier(BaseName, UsedMeshIDs, QString());
 		MeshIDs.emplace(Mesh, ID);
+		const int NumVertices = Mesh->mNumVertices + Mesh->mNumTexturedVertices;
 
 		Stream << QString("\t<geometry id=\"%1\">\r\n").arg(ID);
 		Stream << "\t\t<mesh>\r\n";
 
 		Stream << QString("\t\t\t<source id=\"%1-pos\">\r\n").arg(ID);
-		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << QString("\t\t\t\t<float_array id=\"%1-pos-array\" count=\"%2\">\r\n").arg(ID, QString::number(NumVertices * 3));
 
 		const lcVertex* Verts = static_cast<const lcVertex*>(Mesh->mVertexData);
 
@@ -1985,7 +1986,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 		Stream << "\t\t\t\t</float_array>\r\n";
 		Stream << "\t\t\t\t<technique_common>\r\n";
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-pos-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(NumVertices));
 		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
 		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
 		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";
@@ -1994,7 +1995,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		Stream << "\t\t\t</source>\r\n";
 
 		Stream << QString("\t\t\t<source id=\"%1-normal\">\r\n").arg(ID);
-		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << QString("\t\t\t\t<float_array id=\"%1-normal-array\" count=\"%2\">\r\n").arg(ID, QString::number(NumVertices * 3));
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
@@ -2010,7 +2011,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 		Stream << "\t\t\t\t</float_array>\r\n";
 		Stream << "\t\t\t\t<technique_common>\r\n";
-		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(Mesh->mNumVertices));
+		Stream << QString("\t\t\t\t\t<accessor source=\"#%1-normal-array\" count=\"%2\" stride=\"3\">\r\n").arg(ID, QString::number(NumVertices));
 		Stream << "\t\t\t\t\t\t<param name=\"X\" type=\"float\" />\r\n";
 		Stream << "\t\t\t\t\t\t<param name=\"Y\" type=\"float\" />\r\n";
 		Stream << "\t\t\t\t\t\t<param name=\"Z\" type=\"float\" />\r\n";

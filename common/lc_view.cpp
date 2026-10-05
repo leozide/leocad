@@ -998,8 +998,21 @@ void lcView::OnDraw()
 				UnbindRenderFramebuffer();
 				QImage TileImage = GetRenderFramebufferImage();
 				BindRenderFramebuffer();
-				quint8* Buffer = TileImage.bits();
+
+				if (TileImage.isNull())
+				{
+					mRenderImage = QImage();
+					return;
+				}
+
+				const quint8* Buffer = TileImage.constBits();
 				uchar* ImageBuffer = mRenderImage.bits();
+
+				if (!ImageBuffer)
+				{
+					mRenderImage = QImage();
+					return;
+				}
 
 				quint32 TileY = 0, SrcY = 0;
 				if (CurrentTileRow != TotalTileRows - 1)
@@ -1011,7 +1024,7 @@ void lcView::OnDraw()
 
 				for (int y = 0; y < CurrentTileHeight; y++)
 				{
-					quint8* src = Buffer + (SrcY + y) * mWidth * 4;
+					const quint8* src = Buffer + (SrcY + y) * mWidth * 4;
 					quint8* dst = ImageBuffer + TileStart + y * mRenderImage.width() * 4;
 
 					memcpy(dst, src, CurrentTileWidth * 4);

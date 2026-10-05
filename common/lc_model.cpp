@@ -1764,7 +1764,7 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	return Image;
 }
 
-QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const
+lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const
 {
 	lcScopedGLContextState GLState;
 
@@ -1812,6 +1812,10 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	if (Images.empty())
 	{
 		QImage Image(1, 1, QImage::Format_ARGB32);
+
+		if (Image.isNull())
+			return lcUnexpected(tr("Could not allocate the pieces list image."));
+
 		Image.fill(lcQColorFromRGBA(BackgroundColor));
 		return Image;
 	}
@@ -1835,12 +1839,7 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	View.SetSize(ThumbnailSize, ThumbnailSize);
 
 	if (!View.BeginRenderToImage(ThumbnailSize, ThumbnailSize))
-	{
-		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
-
-		return QImage();
-	}
+		return lcUnexpected(tr("Could not create the pieces list framebuffer."));
 
 	float OrthoSize = 200.0f;
 
@@ -1879,6 +1878,8 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	Context->SetDefaultState();
 	Context->SetProjectionMatrix(ProjectionMatrix);
 
+	bool RenderFailed = false;
+
 	for (lcPartsListImage& Image : Images)
 	{
 		View.BindRenderFramebuffer();
@@ -1904,10 +1905,19 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 
 		View.UnbindRenderFramebuffer();
 		Image.Thumbnail = View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);
+
+		if (Image.Thumbnail.isNull())
+		{
+			RenderFailed = true;
+			break;
+		}
 	}
 
 	View.EndRenderToImage();
 	Context->ClearResources();
+
+	if (RenderFailed)
+		return lcUnexpected(tr("Could not read the pieces list image."));
 
 	auto CalculateImageBounds = [](lcPartsListImage& Image)
 	{
@@ -1956,11 +1966,19 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	if (Images.empty())
 	{
 		QImage Image(1, 1, QImage::Format_ARGB32);
+
+		if (Image.isNull())
+			return lcUnexpected(tr("Could not allocate the pieces list image."));
+
 		Image.fill(lcQColorFromRGBA(BackgroundColor));
 		return Image;
 	}
 
 	QImage DummyImage(16, 16, QImage::Format_ARGB32);
+
+	if (DummyImage.isNull())
+		return lcUnexpected(tr("Could not allocate the pieces list image."));
+
 	QPainter DummyPainter(&DummyImage);
 
 	DummyPainter.setFont(Font);
@@ -2010,6 +2028,10 @@ QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundC
 	}
 
 	QImage PainterImage(ImageWidth + 40, CurrentHeight + 40, QImage::Format_ARGB32);
+
+	if (PainterImage.isNull())
+		return lcUnexpected(tr("Could not allocate the pieces list image."));
+
 	PainterImage.fill(lcQColorFromRGBA(BackgroundColor));
 
 	QPainter Painter(&PainterImage);

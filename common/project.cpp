@@ -2257,16 +2257,16 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		if (PartsList.empty())
 			return lcResult<void>();
 
-		QImage Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black, true);
+		const lcResult<QImage> Image = Model->GetPartsListImage(1024, Step, LC_RGBA(255, 255, 255, 0), QFont("Arial", 16, QFont::Bold), Qt::black, true);
 
-		if (Image.isNull())
-			return lcUnexpected(tr("Could not render the pieces list image."));
+		if (!Image)
+			return lcUnexpected(Image.error());
 
 		QString ImageName = BaseName + QLatin1String("-parts.png");
 		QString FileName = QFileInfo(Dir, ImageName).absoluteFilePath();
 		QImageWriter Writer(FileName);
 
-		if (!Writer.write(Image))
+		if (!Writer.write(Image.value()))
 			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 
 		Stream << QString::fromLatin1("<p><IMG SRC=\"%1\" /></p><br><br>\r\n").arg(ImageName.toHtmlEscaped());

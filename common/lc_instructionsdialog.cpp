@@ -65,8 +65,19 @@ void lcInstructionsPartsListItem::Update()
 	QFont Font = mInstructions->GetFontProperty(lcInstructionsPropertyType::PLIFont, mModel, mStep);
 	QColor TextColor = mInstructions->GetColorProperty(lcInstructionsPropertyType::PLITextColor, mModel, mStep);
 
-	QImage PartsImage = mModel->GetPartsListImage(300, mStep, lcRGBAFromQColor(BackgroundColor), Font, TextColor, false);
-	setPixmap(QPixmap::fromImage(PartsImage));
+	const lcResult<QImage> PartsImage = mModel->GetPartsListImage(300, mStep, lcRGBAFromQColor(BackgroundColor), Font, TextColor, false);
+
+	if (!PartsImage)
+	{
+		setPixmap(QPixmap());
+
+		QWidget* Parent = scene() && !scene()->views().isEmpty() ? scene()->views().front() : nullptr;
+		QMessageBox::warning(Parent, QObject::tr("LeoCAD"), PartsImage.error());
+
+		return;
+	}
+
+	setPixmap(QPixmap::fromImage(PartsImage.value()));
 }
 
 lcInstructionsPageWidget::lcInstructionsPageWidget(QWidget* Parent, lcInstructions* Instructions, lcInstructionsPropertiesWidget* PropertiesWidget)

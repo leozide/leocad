@@ -332,7 +332,8 @@ public:
 	void GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
-	QImage GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const;
+	// Empty inventory succeeds with a null image; rendering failures return an error.
+	lcResult<QImage> GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const;
 	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;

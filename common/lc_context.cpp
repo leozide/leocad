@@ -29,6 +29,51 @@ std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
 std::unique_ptr<lcContext> lcContext::mGlobalOffscreenContext;
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
 
+lcScopedGLContextState::lcScopedGLContextState()
+	: mContext(QOpenGLContext::currentContext()), mSurface(mContext ? mContext->surface() : nullptr)
+{
+	if (!mContext)
+		return;
+
+	QOpenGLFunctions* Functions = mContext->functions();
+	mSeparateFramebuffers = QOpenGLFramebufferObject::hasOpenGLFramebufferBlit();
+
+	if (mSeparateFramebuffers)
+	{
+		Functions->glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &mDrawFramebuffer);
+		Functions->glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &mReadFramebuffer);
+	}
+	else
+		Functions->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mDrawFramebuffer);
+}
+
+lcScopedGLContextState::~lcScopedGLContextState()
+{
+	QOpenGLContext* CurrentContext = QOpenGLContext::currentContext();
+
+	if (!mContext)
+	{
+		if (CurrentContext)
+			CurrentContext->doneCurrent();
+
+		return;
+	}
+
+	if (CurrentContext != mContext || mContext->surface() != mSurface)
+		if (!mContext->makeCurrent(mSurface))
+			return;
+
+	QOpenGLFunctions* Functions = mContext->functions();
+
+	if (mSeparateFramebuffers)
+	{
+		Functions->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDrawFramebuffer);
+		Functions->glBindFramebuffer(GL_READ_FRAMEBUFFER, mReadFramebuffer);
+	}
+	else
+		Functions->glBindFramebuffer(GL_FRAMEBUFFER, mDrawFramebuffer);
+}
+
 lcContext::lcContext()
 {
 	mVertexBufferObject = 0;

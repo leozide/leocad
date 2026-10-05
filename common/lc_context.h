@@ -106,6 +106,24 @@ struct lcVertexAttribState
 	GLuint VertexBufferObject = 0;
 };
 
+// Restores caller state after temporary rendering, including a caller with no current context.
+class lcScopedGLContextState
+{
+public:
+	lcScopedGLContextState();
+	~lcScopedGLContextState();
+
+	lcScopedGLContextState(const lcScopedGLContextState&) = delete;
+	lcScopedGLContextState& operator=(const lcScopedGLContextState&) = delete;
+
+private:
+	QOpenGLContext* mContext;
+	QSurface* mSurface;
+	GLint mDrawFramebuffer = 0;
+	GLint mReadFramebuffer = 0;
+	bool mSeparateFramebuffers = false;
+};
+
 class lcContext : public QOpenGLFunctions
 {
 public:

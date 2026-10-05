@@ -1695,6 +1695,8 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 {
+	lcScopedGLContextState GLState;
+
 	WaitForAssets();
 
 	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr);
@@ -1712,6 +1714,8 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera)
 {
+	lcScopedGLContextState GLState;
+
 	const lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
 	const lcStep CurrentStep = mCurrentStep;
 
@@ -1762,6 +1766,8 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 QImage lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const
 {
+	lcScopedGLContextState GLState;
+
 	WaitForAssets();
 
 	lcPartsList PartsList;

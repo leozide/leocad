@@ -3072,6 +3072,16 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 		}
 	}
 
+	lcGetPiecesLibrary()->EnsurePieceAssetsReady(Info);
+
+	if (Last)
+	{
+		lcGetPiecesLibrary()->EnsurePieceAssetsReady(Last->mPieceInfo);
+
+		if (Last->mPieceInfo->GetSynthInfo())
+			lcGetPiecesLibrary()->EnsureSynthMeshesReady({ Last });
+	}
+
 	const lcBoundingBox& PieceInfoBoundingBox = Info->GetBoundingBox();
 	lcPiece* Piece = nullptr;
 
@@ -3366,13 +3376,7 @@ void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& Preview
 		Required.push_back(InfoTransform.Info);
 	}
 
-	if (!Library->EnsurePiecesReady(Required))
-	{
-		for (const lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
-			Library->ReleasePieceInfo(InfoTransform.Info);
-
-		return;
-	}
+	Library->EnsurePiecesReady(Required);
 
 	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);

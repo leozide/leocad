@@ -299,6 +299,7 @@ workers, including unrelated assets; it is not a scoped success check.
 | Retain and start ordinary asynchronous work | `LoadPieceInfo()` without `lcPieceLoadFlag::Wait`; add `Visible` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain without starting work | `AddPieceReference()`, paired with `ReleasePieceInfo()`. This does not make geometry ready. |
 | Wait for an explicit part set | `EnsurePiecesReady()` (or `EnsurePieceReady()`), check the boolean for strict consumers. Temporary holds end before return, so the caller still needs ownership if it will use the assets afterward. |
+| Wait for one identity and its container geometry | `EnsurePieceAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
 | Replace/wait for generated geometry | `QueueSynthMesh()` / `EnsureSynthMeshesReady()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
 | Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting; `EnsureTextureReady()` waits through GPU upload. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
@@ -315,12 +316,24 @@ its recursive pieces and per-instance synths, or use the model-level API.
 | Caller | Waiting and failure behavior |
 | --- | --- |
 | Ordinary LDraw/LDD opening and interactive views | Parse and queue, then return. Draw shared fallback cubes for unavailable geometry; recurse through available children. Update bounds and redraw as assets settle without automatically refitting the camera. |
-| Inventory import / insertion layout | Wait for required geometry before computing persistent placement; failure prevents using cube bounds as final layout. |
+| Inventory import | Wait for required geometry before computing persistent placement; failure prevents using cube bounds as final layout. |
+| Insertion layout | Wait for required geometry before computing persistent placement; failed geometry uses fallback boxes. |
 | Preview | Wait for its recursive requirements and generated meshes; failure rejects the preview. See [lc_previewwidget.cpp](../common/lc_previewwidget.cpp). |
 | Thumbnail manager | Acquire required assets asynchronously. Missing library geometry/textures produce an error thumbnail. Pending generated meshes delay rendering; synth failure can use a loaded library mesh. See [lc_thumbnailmanager.cpp](../common/lc_thumbnailmanager.cpp). |
 | OBJ, COLLADA, 3DS, POV-Ray export | Wait for model requirements, then omit failed meshes and failed generated geometry. Empty output is allowed. Render/write failures still report errors. See [project.cpp](../common/project.cpp). |
 | Saved images, screenshots, HTML, instructions, printing | Wait for settlement, then render available geometry without loading cubes. HTML parts lists retain missing entries and quantities with blank thumbnails; instruction parts lists omit unavailable thumbnails. Actual rendering/writing failures still fail the operation. |
 | Model save, CSV, BrickLink inventory | Save references or inventory data without requiring successful geometry loading. |
+
+Insertion waits for the candidate's recursive requirements before computing its
+placement. Stacking and mouse placement also wait for the existing piece whose
+geometry determines the position, including its current synth generation. Mouse
+placement repeats picking after pending geometry settles. A failed candidate
+replaces the previous insertion preview with the selected identity's fallback
+box so a later click inserts the current selection.
+Free dragging existing pieces also settles the moving piece and hit geometry,
+including current synth generations, and repeats picking before placement. If
+loading fails, both dragging and insertion use the available or fallback
+geometry rather than rejecting placement.
 
 Automatic output fitting uses `lcGeometryBoundsMode::AvailableGeometryOnly`;
 interactive fitting uses `IncludeFallbackGeometry`. A whole-model wait can

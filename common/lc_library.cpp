@@ -245,9 +245,9 @@ void lcPiecesLibrary::UnloadPieceInfo(PieceInfo* Info)
 			Local->second->UnregisterPiece(Info);
 
 		mProjectPieces.erase(Local);
-		ClearPieceLoadError(Info);
 	}
 
+	ClearPieceLoadError(Info);
 	Info->Unload();
 
 	if (DeleteAfterUnload)
@@ -1618,6 +1618,24 @@ void lcPiecesLibrary::NotifyConsumersChanged()
 bool lcPiecesLibrary::EnsurePieceReady(PieceInfo* Info)
 {
 	return mAssetLoader->EnsurePieceReady(Info);
+}
+
+bool lcPiecesLibrary::EnsurePieceAssetsReady(PieceInfo* Info)
+{
+	const bool PieceReady = EnsurePieceReady(Info);
+
+	if (Info->IsModel())
+		return static_cast<bool>(Info->GetModel()->EnsureAssetsReady()) && PieceReady;
+
+	if (Info->IsProject())
+	{
+		const bool ProjectReady = static_cast<bool>(Info->GetProject()->EnsureAssetsReady());
+
+		Info->GetProject()->UpdatePieceInfo(Info);
+		return ProjectReady && PieceReady;
+	}
+
+	return PieceReady;
 }
 
 bool lcPiecesLibrary::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)

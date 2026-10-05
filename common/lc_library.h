@@ -197,6 +197,8 @@ public:
 	// Does not traverse container children or wait for per-instance synth geometry.
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	// Also settles container children/synths and updates bounds; caller retains the identity.
+	bool EnsurePieceAssetsReady(PieceInfo* Info);
 	// Replaces any pending generation for this instance; snapshots control points for workers.
 	void QueueSynthMesh(lcPiece* Piece);
 	void CancelSynthMesh(lcPiece* Piece);

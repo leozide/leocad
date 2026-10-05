@@ -488,7 +488,37 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 {
 	lcModel* ActiveModel = GetActiveModel();
 
+	lcGetPiecesLibrary()->EnsurePieceAssetsReady(Info);
+
+	if (MovingPiece && Info->GetSynthInfo())
+		lcGetPiecesLibrary()->EnsureSynthMeshesReady({ MovingPiece });
+
 	lcObjectRayTest ObjectRayTest = RayTest(true, IgnoreSelected);
+
+	// Settling a hit's geometry can reveal another pending piece behind it, so pick again until the hit is stable.
+	while (ObjectRayTest.ObjectSection.Object)
+	{
+		lcPiece* MousePiece = reinterpret_cast<lcPiece*>(ObjectRayTest.ObjectSection.Object);
+		PieceInfo* MouseInfo = MousePiece->mPieceInfo;
+		const bool Retest = MouseInfo->mState != lcPieceInfoState::Loaded || MouseInfo->IsModel() || MouseInfo->IsProject() || MousePiece->IsGeneratedMeshPending();
+
+		lcGetPiecesLibrary()->EnsurePieceAssetsReady(MouseInfo);
+
+		if (MouseInfo->GetSynthInfo())
+			lcGetPiecesLibrary()->EnsureSynthMeshesReady({ MousePiece });
+
+		if (!Retest)
+			break;
+
+		lcObjectRayTest ReadyRayTest = RayTest(true, IgnoreSelected);
+		const bool SamePiece = ReadyRayTest.ObjectSection.Object == ObjectRayTest.ObjectSection.Object;
+		ObjectRayTest = ReadyRayTest;
+
+		if (SamePiece)
+			break;
+	}
+
+	const lcBoundingBox& BoundingBox = MovingPiece ? MovingPiece->GetBoundingBox() : Info->GetBoundingBox();
 
 	if (ObjectRayTest.ObjectSection.Object)
 	{
@@ -512,17 +542,17 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		lcVector3 Position = ObjectRayTest.PieceInfoRayTest.Plane;
 
 		if (Position.x > 0.0f)
-			Position.x += fabsf(Info->GetBoundingBox().Min.x);
+			Position.x += fabsf(BoundingBox.Min.x);
 		else if (Position.x < 0.0f)
-			Position.x -= fabsf(Info->GetBoundingBox().Max.x);
+			Position.x -= fabsf(BoundingBox.Max.x);
 		else if (Position.y > 0.0f)
-			Position.y += fabsf(Info->GetBoundingBox().Min.y);
+			Position.y += fabsf(BoundingBox.Min.y);
 		else if (Position.y < 0.0f)
-			Position.y -= fabsf(Info->GetBoundingBox().Max.y);
+			Position.y -= fabsf(BoundingBox.Max.y);
 		else if (Position.z > 0.0f)
-			Position.z += fabsf(Info->GetBoundingBox().Min.z);
+			Position.z += fabsf(BoundingBox.Min.z);
 		else if (Position.z < 0.0f)
-			Position.z -= fabsf(Info->GetBoundingBox().Max.z);
+			Position.z -= fabsf(BoundingBox.Max.z);
 
 		if (gMainWindow->GetRelativeTransform())
 			Position = lcMul31(ActiveModel->SnapPosition(Position), ObjectRayTest.PieceInfoRayTest.Transform);
@@ -546,7 +576,6 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 			Point = lcMul31(Point, InverseMatrix);
 	}
 
-	const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
 	lcVector3 Intersection;
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))

@@ -27,6 +27,7 @@ struct lcModelPartsEntry
 {
 	lcMatrix44 WorldMatrix;
 	const PieceInfo* Info;
+	// Borrowed explicit mesh for generated/direct geometry; null uses Info->GetMesh().
 	lcMesh* Mesh;
 	int ColorIndex;
 };

@@ -150,6 +150,9 @@ struct lcLibrarySource
 	std::map<std::string, lcLibraryPrimitive*> Primitives;
 };
 
+// Owns catalog/local identities, sources, references, and shared render buffers.
+// Its asset loader owns pending work; workers build privately and the UI thread publishes.
+// See docs/asset-loading.md for the loading and lifetime contracts.
 class lcPiecesLibrary : public QObject
 {
 	Q_OBJECT
@@ -179,37 +182,58 @@ public:
 	void SetModelPieceName(PieceInfo* Info, const char* Name);
 	bool RenamePiece(PieceInfo* Info, const char* NewName);
 	static std::string NormalizePieceName(const char* PieceName);
+	// Returns one acquired model reference, paired with ReleasePieceInfo().
 	PieceInfo* CreateModelPiece(const char* PieceName, Project* Project, bool& Reused);
+	// Returns a borrowed identity; lookup does not acquire a reference or ensure readiness.
 	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
 	bool RemapProjectPiece(PieceInfo* Info, const QString& ProjectDirectory, bool IsPreview);
+
+	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
+	// Acquires one reference even on failure; always pair with ReleasePieceInfo().
+	// Without Wait, true does not establish readiness. See docs/asset-loading.md.
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
 	void NotifyConsumersChanged();
+	// Wait for these identities only, with temporary holds; false means failure/cancellation.
+	// Does not traverse container children or wait for per-instance synth geometry.
 	bool EnsurePieceReady(PieceInfo* Info);
 	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	// Replaces any pending generation for this instance; snapshots control points for workers.
 	void QueueSynthMesh(lcPiece* Piece);
 	void CancelSynthMesh(lcPiece* Piece);
+	// Caller keeps the instances alive through the wait; false means missing generated geometry.
 	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void QueueModelPiece(PieceInfo* Info);
+	// Obsoletes pending work and resets readiness without acquiring a reference.
 	void InvalidatePiece(PieceInfo* Info);
+	// Waits through GPU upload; caller retains the texture, and false means not ready.
 	bool EnsureTextureReady(lcTexture* Texture);
+	// Releases one reference and lets the loader cancel unused queued work.
 	void ReleasePieceInfo(PieceInfo* Info);
+	// Lifetime hold only: does not start loading or establish readiness.
 	void AddPieceReference(PieceInfo* Info);
+	// Loader helper: assumes a pending request/notification owns one in-flight hold.
 	bool HasPieceConsumers(const PieceInfo* Info);
+	// Releases that in-flight hold without triggering consumer-release cancellation.
 	void ReleasePieceLoadHold(PieceInfo* Info);
 	void SetPieceLoadError(const PieceInfo* Info, QString Error);
 	QString GetPieceLoadError(const PieceInfo* Info) const;
 	void ClearPieceLoadError(const PieceInfo* Info);
 	bool LoadBuiltinPieces();
 	lcPartSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
+	// Worker build service: returns private CPU data/errors without publishing asset state.
 	lcPartBuildResult BuildPieceData(const lcPartSourceSnapshot& Source);
 	void SaveBuiltPieceCache(const lcPartSourceSnapshot& Source, lcMesh& Mesh);
+	// UI-thread drain of all work, including unrelated assets; not a success check.
 	void WaitForLoadQueue();
 
-	// Returns a texture reference that the caller must release.
+	// UI-thread lookup and upload wait; returns a ready reference or nullptr on failure.
+	// Release a returned reference with ReleaseTexture().
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
+	// UI-thread lookup/acquisition only, without decoding or upload; caller releases the reference.
 	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories);
 	lcTextureSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
+	// Worker decode service: returns private pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcTextureSourceSnapshot& Source);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
@@ -302,9 +326,13 @@ protected:
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
 
+	// Protects identity/reference bookkeeping and shared primitive loading state.
+	// Recursive because library release and lookup paths can reenter this lock.
 	lcLibraryLoadMutex mLoadMutex;
 
+	// Serializes texture source access, including archive extraction by workers.
 	QMutex mTextureMutex;
+	// Sparse errors avoid storing a QString in every catalog identity.
 	mutable QMutex mPieceErrorMutex;
 	std::unordered_map<const PieceInfo*, QString> mFailedPartErrors;
 

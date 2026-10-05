@@ -34,7 +34,7 @@ bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 		Info->mState = lcPieceInfoState::Loaded;
 	else if (Info->mState == lcPieceInfoState::Unloaded)
-		QueuePieceLocked(Info, Flags.testFlag(lcPieceLoadFlag::Visible) ? Priority::Visible : Priority::Background);
+		EnqueuePiece(Info, Flags.testFlag(lcPieceLoadFlag::Visible) ? Priority::Visible : Priority::Background);
 	else if (Flags.testFlag(lcPieceLoadFlag::Visible))
 	{
 		mQueueMutex.lock();
@@ -51,11 +51,12 @@ void lcAssetLoader::QueuePiece(PieceInfo* Info, bool PriorityHint)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	QueuePieceLocked(Info, PriorityHint ? Priority::Visible : Priority::Background);
+	EnqueuePiece(Info, PriorityHint ? Priority::Visible : Priority::Background);
 }
 
 void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 {
+	// Remove queued work immediately; running synth phases notice cancellation cooperatively.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	mSynthPieces.erase(Piece);
@@ -239,6 +240,7 @@ void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<Request>&
 
 void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
 {
+	// Ordinary running builds finish privately; discard them if their last consumer is gone.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	if (mLibrary->HasPieceConsumers(Info))
@@ -286,7 +288,7 @@ void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
 	mLibrary->ReleasePieceLoadHold(Info);
 }
 
-void lcAssetLoader::QueuePieceLocked(PieceInfo* Info, Priority LoadPriority)
+void lcAssetLoader::EnqueuePiece(PieceInfo* Info, Priority LoadPriority)
 {
 	QMutexLocker QueueLock(&mQueueMutex);
 
@@ -857,6 +859,7 @@ void lcAssetLoader::WaitForResultsLocked()
 
 bool lcAssetLoader::ProcessCompletions()
 {
+	// Bounded UI-thread publication also runs during scoped waits, without public callbacks.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	bool Progress = false;
@@ -1243,6 +1246,7 @@ bool lcAssetLoader::ProcessCompletions()
 
 void lcAssetLoader::DispatchNotifications()
 {
+	// Event-handler delivery avoids reentering consumers inside a synchronous readiness wait.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	constexpr int MaxNotificationsPerPump = 32;
@@ -1379,7 +1383,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 		if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 			Info->mState = lcPieceInfoState::Loaded;
 		else
-			QueuePieceLocked(Info, Priority::Blocking);
+			EnqueuePiece(Info, Priority::Blocking);
 	}
 
 	{
@@ -1456,7 +1460,7 @@ void lcAssetLoader::QueueModelPiece(PieceInfo* Info)
 
 	Info->mState = lcPieceInfoState::Unloaded;
 
-	QueuePieceLocked(Info, Priority::Visible);
+	EnqueuePiece(Info, Priority::Visible);
 }
 
 void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
@@ -1547,6 +1551,7 @@ bool lcAssetLoader::HasPendingWork()
 
 void lcAssetLoader::CancelAndDrain()
 {
+	// Shutdown/reload joins obsolete workers and releases holds without requiring GL success.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	std::deque<std::shared_ptr<Request>> Cancelled;

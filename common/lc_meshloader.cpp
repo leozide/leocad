@@ -1621,15 +1621,13 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (Primitive)
 			{
-				if (Primitive->mState != lcPrimitiveState::Loaded)
-				{
-					const lcResult<void> Result = Library->LoadPrimitive(Primitive);
+				// Read shared loading state under the library's primitive lock.
+				const lcResult<void> Result = Library->LoadPrimitive(Primitive);
 
-					if (!Result)
-					{
-						mError = Result.error();
-						return false;
-					}
+				if (!Result)
+				{
+					mError = Result.error();
+					return false;
 				}
 
 				if (Primitive->mStud)

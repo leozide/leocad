@@ -299,6 +299,11 @@ signals:
 	void ColorsLoaded();
 
 protected:
+	friend class lcAssetLoader;
+
+	lcResult<Project*> LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests);
+	lcResult<void> LoadPrimitiveData(lcLibraryPrimitive* Primitive);
+
 	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType);
 	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
@@ -328,9 +333,15 @@ protected:
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
 
-	// Protects identity/reference bookkeeping and shared primitive loading state.
+	// Protects identity/reference bookkeeping.
 	// Recursive because library release and lookup paths can reenter this lock.
 	lcLibraryLoadMutex mLoadMutex;
+
+	// Active dependency edges include both nested loads and waits on other workers.
+	QMutex mPrimitiveMutex;
+	QWaitCondition mPrimitiveLoaded;
+	std::unordered_map<QThread*, std::vector<lcLibraryPrimitive*>> mPrimitiveLoadStacks;
+	std::unordered_map<lcLibraryPrimitive*, lcLibraryPrimitive*> mPrimitiveDependencies;
 
 	// Serializes texture source access, including archive extraction by workers.
 	QMutex mTextureMutex;

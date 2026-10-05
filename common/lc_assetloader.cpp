@@ -1554,6 +1554,9 @@ void lcAssetLoader::CancelAndDrain()
 	// Shutdown/reload joins obsolete workers and releases holds without requiring GL success.
 	Q_ASSERT(QThread::currentThread() == thread());
 
+	const bool WasCancelled = mLibrary->mCancelLoading.exchange(true);
+	mLibrary->mPrimitiveLoaded.wakeAll();
+
 	std::deque<std::shared_ptr<Request>> Cancelled;
 	std::deque<std::shared_ptr<TextureRequest>> CancelledTextures;
 
@@ -1644,6 +1647,8 @@ void lcAssetLoader::CancelAndDrain()
 
 		mLibrary->ReleasePieceLoadHold(Notification.Info);
 	}
+
+	mLibrary->mCancelLoading.store(WasCancelled);
 }
 
 void lcAssetLoader::PauseQueuedWork()

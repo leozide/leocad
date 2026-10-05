@@ -372,10 +372,36 @@ PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Pro
 	return Info;
 }
 
+lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests)
+{
+	static thread_local std::vector<QString> LoadingPaths;
+	const QString Path = FileInfo.canonicalFilePath();
+
+	if (std::find(LoadingPaths.begin(), LoadingPaths.end(), Path) != LoadingPaths.end())
+		return lcUnexpected(tr("External project include cycle at '%1'.").arg(Path));
+
+	LoadingPaths.push_back(Path);
+
+	Project* ExternalProject = new Project(Preview);
+	ExternalProject->SetDeferModelMeshRequests(DeferModelMeshRequests);
+	const bool Loaded = ExternalProject->Load(FileInfo.absoluteFilePath(), false);
+
+	LoadingPaths.pop_back();
+
+	if (!Loaded)
+	{
+		delete ExternalProject;
+		return lcUnexpected(tr("Could not load external project '%1'.").arg(FileInfo.absoluteFilePath()));
+	}
+
+	return ExternalProject;
+}
+
 PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
 {
 	const std::string Name = NormalizePieceName(PieceName);
 	QString ProjectPath;
+	QString LoadError;
 
 	if (CurrentProject)
 	{
@@ -402,20 +428,19 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 
 		if (ProjectFile.isFile())
 		{
-			Project* NewProject = new Project(CurrentProject && CurrentProject->IsPreview());
-			NewProject->SetDeferModelMeshRequests(CurrentProject && CurrentProject->DefersModelMeshRequests());
+			const lcResult<Project*> ExternalProject = LoadExternalProject(ProjectFile, CurrentProject && CurrentProject->IsPreview(), CurrentProject && CurrentProject->DefersModelMeshRequests());
 
-			if (NewProject->Load(ProjectFile.absoluteFilePath(), false))
+			if (ExternalProject)
 			{
 				PieceInfo* Info = new PieceInfo(false);
 
-				Info->CreateProject(NewProject, PieceName);
+				Info->CreateProject(ExternalProject.value(), PieceName);
 				RegisterProjectPiece(CurrentProject, Name, Info);
 
 				return Info;
 			}
 			else
-				delete NewProject;
+				LoadError = ExternalProject.error();
 		}
 	}
 
@@ -424,7 +449,7 @@ PieceInfo* lcPiecesLibrary::FindPiece(const char* PieceName, Project* CurrentPro
 		PieceInfo* Info = new PieceInfo(false);
 
 		Info->CreatePart(PieceName);
-		Info->SetFailed(tr("Could not find piece '%1'.").arg(QString::fromLatin1(PieceName)));
+		Info->SetFailed(LoadError.isEmpty() ? tr("Could not find piece '%1'.").arg(QString::fromLatin1(PieceName)) : LoadError);
 
 		if (CurrentProject)
 			RegisterProjectPiece(CurrentProject, Name, Info);
@@ -456,16 +481,14 @@ bool lcPiecesLibrary::RemapProjectPiece(PieceInfo* Info, const QString& ProjectD
 
 	if (Candidate.isFile())
 	{
-		Project* LocalProject = new Project(IsPreview);
-		LocalProject->SetDeferModelMeshRequests(true);
+		const lcResult<Project*> ExternalProject = LoadExternalProject(Candidate, IsPreview, true);
 
-		if (LocalProject->Load(Candidate.absoluteFilePath(), false))
-			Info->CreateProject(LocalProject, PieceName.constData());
+		if (ExternalProject)
+			Info->CreateProject(ExternalProject.value(), PieceName.constData());
 		else
 		{
-			delete LocalProject;
 			Info->DetachContainer();
-			Info->SetFailed(tr("Could not load external project '%1'.").arg(Candidate.absoluteFilePath()));
+			Info->SetFailed(ExternalProject.error());
 		}
 	}
 	else
@@ -1595,16 +1618,6 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-// TODO: Remove this helper when LoadPrimitive() uses a condition-based wait.
-class lcSleeper : public QThread
-{
-public:
-	static void msleep(unsigned long Msecs)
-	{
-		QThread::msleep(Msecs);
-	}
-};
-
 bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 {
 	return mAssetLoader->LoadPieceInfo(Info, Flags);
@@ -2363,26 +2376,101 @@ lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
 
 lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 {
-	mLoadMutex.lock();
+	QThread* Thread = QThread::currentThread();
+	lcLibraryPrimitive* Parent = nullptr;
+
+	mPrimitiveMutex.lock();
+
+	if (ShouldCancelLoading())
+	{
+		mPrimitiveMutex.unlock();
+		return lcUnexpected(tr("Library loading was cancelled."));
+	}
+
+	if (Primitive->mState == lcPrimitiveState::Loaded)
+	{
+		mPrimitiveMutex.unlock();
+		return lcResult<void>();
+	}
+
+	std::vector<lcLibraryPrimitive*>& Stack = mPrimitiveLoadStacks[Thread];
+
+	if (!Stack.empty())
+	{
+		Parent = Stack.back();
+
+		for (lcLibraryPrimitive* Dependency = Primitive; Dependency;)
+		{
+			if (Dependency == Parent)
+			{
+				mPrimitiveMutex.unlock();
+				return lcUnexpected(tr("Primitive include cycle at '%1'.").arg(QString::fromLatin1(Primitive->mName)));
+			}
+
+			const auto It = mPrimitiveDependencies.find(Dependency);
+			Dependency = It != mPrimitiveDependencies.end() ? It->second : nullptr;
+		}
+
+		mPrimitiveDependencies[Parent] = Primitive;
+	}
+
+	Stack.push_back(Primitive);
+	mPrimitiveMutex.unlock();
+
+	lcResult<void> Result = LoadPrimitiveData(Primitive);
+
+	mPrimitiveMutex.lock();
+
+	if (Parent)
+		mPrimitiveDependencies.erase(Parent);
+
+	std::vector<lcLibraryPrimitive*>& CompletedStack = mPrimitiveLoadStacks[Thread];
+	CompletedStack.pop_back();
+
+	if (CompletedStack.empty())
+		mPrimitiveLoadStacks.erase(Thread);
+
+	mPrimitiveMutex.unlock();
+
+	return Result;
+}
+
+lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
+{
+	mPrimitiveMutex.lock();
+
+	if (ShouldCancelLoading())
+	{
+		mPrimitiveMutex.unlock();
+		return lcUnexpected(tr("Library loading was cancelled."));
+	}
 
 	if (Primitive->mState == lcPrimitiveState::NotLoaded)
 		Primitive->mState = lcPrimitiveState::Loading;
 	else
 	{
-		mLoadMutex.unlock();
-
 		while (Primitive->mState == lcPrimitiveState::Loading)
-			lcSleeper::msleep(5);
+		{
+			if (ShouldCancelLoading())
+			{
+				mPrimitiveMutex.unlock();
+				return lcUnexpected(tr("Library loading was cancelled."));
+			}
 
-		QMutexLocker LoadLock(&mLoadMutex);
+			mPrimitiveLoaded.wait(&mPrimitiveMutex, 10);
+		}
 
-		if (Primitive->mState == lcPrimitiveState::Loaded)
+		const bool Loaded = Primitive->mState == lcPrimitiveState::Loaded;
+		const QString Error = Primitive->mLoadError;
+		mPrimitiveMutex.unlock();
+
+		if (Loaded)
 			return lcResult<void>();
 
-		return lcUnexpected(Primitive->mLoadError);
+		return lcUnexpected(Error);
 	}
 
-	mLoadMutex.unlock();
+	mPrimitiveMutex.unlock();
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
@@ -2394,9 +2482,10 @@ lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		if (Error.isEmpty())
 			Error = tr("Could not load included file %1.").arg(QString::fromLatin1(Primitive->mName));
 
-		QMutexLocker LoadLock(&mLoadMutex);
+		QMutexLocker LoadLock(&mPrimitiveMutex);
 		Primitive->mLoadError = Error;
 		Primitive->mState = lcPrimitiveState::NotLoaded;
+		mPrimitiveLoaded.wakeAll();
 		return lcUnexpected(std::move(Error));
 	};
 
@@ -2460,10 +2549,11 @@ lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 		}
 	}
 
-	mLoadMutex.lock();
+	mPrimitiveMutex.lock();
 	Primitive->mLoadError.clear();
 	Primitive->mState = lcPrimitiveState::Loaded;
-	mLoadMutex.unlock();
+	mPrimitiveLoaded.wakeAll();
+	mPrimitiveMutex.unlock();
 
 	return lcResult<void>();
 }

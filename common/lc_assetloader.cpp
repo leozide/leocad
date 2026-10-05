@@ -40,7 +40,7 @@ bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
 		mQueueMutex.lock();
 		const auto It = mRequests.find(Info);
 		if (It != mRequests.end())
-			SetRequestPriorityLocked(It->second, Priority::Visible);
+			PromoteRequestPriorityLocked(It->second, Priority::Visible);
 		mQueueMutex.unlock();
 	}
 
@@ -218,52 +218,9 @@ void lcAssetLoader::ReloadSynthMeshes()
 		Piece->RefreshGeneratedMesh();
 }
 
-void lcAssetLoader::SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible)
+void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority)
 {
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	const Priority LoadPriority = Visible ? Priority::Visible : Priority::Background;
-	const std::unordered_set<PieceInfo*> Included(Parts.begin(), Parts.end());
-
-	mQueueMutex.lock();
-
-	for (PieceInfo* Info : Parts)
-	{
-		const auto It = mRequests.find(Info);
-
-		if (It != mRequests.end())
-			SetRequestPriorityLocked(It->second, LoadPriority);
-	}
-
-	for (const SynthRequestMap::value_type& Entry : mSynthRequests)
-	{
-		const std::shared_ptr<SynthRequest>& RequestedSynth = Entry.second;
-
-		if (Included.find(RequestedSynth->Piece->mPieceInfo) == Included.end() || RequestedSynth->LoadPriority == Priority::Blocking)
-			continue;
-
-		RequestedSynth->LoadPriority = LoadPriority;
-
-		if (RequestedSynth->StagedMesh)
-			for (const lcMeshLod& Lod : RequestedSynth->StagedMesh->mLods)
-				for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
-				{
-					const TextureRequestMap::iterator TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
-
-					if (TextureIt != mTextureRequests.end() && TextureIt->second->LoadPriority != Priority::Blocking)
-						TextureIt->second->LoadPriority = LoadPriority;
-				}
-	}
-
-	mQueueMutex.unlock();
-}
-
-void lcAssetLoader::SetRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority)
-{
-	if (RequestedPart->LoadPriority == Priority::Blocking && LoadPriority != Priority::Blocking)
-		return;
-
-	RequestedPart->LoadPriority = LoadPriority;
+	RequestedPart->LoadPriority = std::max(RequestedPart->LoadPriority, LoadPriority);
 
 	if (!RequestedPart->StagedMesh)
 		return;
@@ -274,8 +231,8 @@ void lcAssetLoader::SetRequestPriorityLocked(const std::shared_ptr<Request>& Req
 		{
 			const auto It = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
 
-			if (It != mTextureRequests.end() && (It->second->LoadPriority != Priority::Blocking || LoadPriority == Priority::Blocking))
-				It->second->LoadPriority = LoadPriority;
+			if (It != mTextureRequests.end())
+				It->second->LoadPriority = std::max(It->second->LoadPriority, RequestedPart->LoadPriority);
 		}
 	}
 }
@@ -340,8 +297,7 @@ void lcAssetLoader::QueuePieceLocked(PieceInfo* Info, Priority LoadPriority)
 
 	if (Existing != mRequests.end())
 	{
-		if (Existing->second->LoadPriority < LoadPriority)
-			Existing->second->LoadPriority = LoadPriority;
+		PromoteRequestPriorityLocked(Existing->second, LoadPriority);
 
 		return;
 	}
@@ -1366,21 +1322,7 @@ bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
 		{
 			RequestedPart = It->second;
 
-			It->second->LoadPriority = Priority::Blocking;
-
-			if (It->second->StagedMesh)
-			{
-				for (const lcMeshLod& Lod : It->second->StagedMesh->mLods)
-				{
-					for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
-					{
-						const auto TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
-
-						if (TextureIt != mTextureRequests.end())
-							TextureIt->second->LoadPriority = Priority::Blocking;
-					}
-				}
-			}
+			PromoteRequestPriorityLocked(RequestedPart, Priority::Blocking);
 		}
 		StartWorkersLocked();
 	}
@@ -1450,21 +1392,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 			if (It == mRequests.end())
 				continue;
 
-			It->second->LoadPriority = Priority::Blocking;
-
-			if (It->second->StagedMesh)
-			{
-				for (const lcMeshLod& Lod : It->second->StagedMesh->mLods)
-				{
-					for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
-					{
-						const auto TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
-
-						if (TextureIt != mTextureRequests.end())
-							TextureIt->second->LoadPriority = Priority::Blocking;
-					}
-				}
-			}
+			PromoteRequestPriorityLocked(It->second, Priority::Blocking);
 		}
 
 		StartWorkersLocked();

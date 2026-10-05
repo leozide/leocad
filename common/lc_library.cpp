@@ -1662,11 +1662,6 @@ void lcPiecesLibrary::InvalidatePiece(PieceInfo* Info)
 	}
 }
 
-void lcPiecesLibrary::SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible)
-{
-	mAssetLoader->SetPieceRequestsVisible(Parts, Visible);
-}
-
 bool lcPiecesLibrary::EnsureTextureReady(lcTexture* Texture)
 {
 	return mAssetLoader->EnsureTextureReady(Texture);

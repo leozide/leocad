@@ -192,7 +192,6 @@ public:
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void QueueModelPiece(PieceInfo* Info);
 	void InvalidatePiece(PieceInfo* Info);
-	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void ReleasePieceInfo(PieceInfo* Info);
 	void AddPieceReference(PieceInfo* Info);

@@ -84,7 +84,6 @@ public:
 	void ReloadSynthMeshes();
 	void QueueModelPiece(PieceInfo* Info);
 	void InvalidatePiece(PieceInfo* Info);
-	void SetPieceRequestsVisible(const std::vector<PieceInfo*>& Parts, bool Visible);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void WaitForLoadQueue();
 	void CancelAndDrain();
@@ -96,6 +95,7 @@ public:
 private:
 	enum class Priority
 	{
+		// Requests only promote; the priority lasts until completion or cancellation.
 		Background, // Ordinary queued asset work.
 		Visible,    // Assets requested for the visible model.
 		Blocking    // Assets needed by a synchronous wait.
@@ -183,7 +183,7 @@ private:
 	};
 
 	void QueuePieceLocked(PieceInfo* Info, Priority LoadPriority);
-	void SetRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority);
+	void PromoteRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority);
 	void QueueTexture(lcTexture* Texture, Priority LoadPriority);
 	static QString TextureFailureMessage(const lcTexture* Texture);
 	void CancelUnusedTextureRequests();

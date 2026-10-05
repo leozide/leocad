@@ -2641,10 +2641,6 @@ void lcMainWindow::OpenRecentProject(int RecentFileIndex)
 
 bool lcMainWindow::OpenProjectFile(const QString& FileName)
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
-	Library->SetPieceRequestsVisible(PreviousParts, false);
-
 	Project* NewProject = new Project();
 
 	if (NewProject->Load(FileName, true))
@@ -2657,8 +2653,7 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	}
 
 	delete NewProject;
-	Library->RemoveTemporaryPieces();
-	Library->SetPieceRequestsVisible(PreviousParts, true);
+	lcGetPiecesLibrary()->RemoveTemporaryPieces();
 	return false;
 }
 
@@ -2723,10 +2718,6 @@ void lcMainWindow::ImportLDD()
 	if (LoadFileName.isEmpty())
 		return;
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	const std::vector<PieceInfo*> PreviousParts = lcGetActiveProject()->GetRequiredPieces();
-	Library->SetPieceRequestsVisible(PreviousParts, false);
-
 	Project* NewProject = new Project();
 
 	if (NewProject->ImportLDD(LoadFileName))
@@ -2737,8 +2728,7 @@ void lcMainWindow::ImportLDD()
 	else
 	{
 		delete NewProject;
-		Library->RemoveTemporaryPieces();
-		Library->SetPieceRequestsVisible(PreviousParts, true);
+		lcGetPiecesLibrary()->RemoveTemporaryPieces();
 	}
 }
 

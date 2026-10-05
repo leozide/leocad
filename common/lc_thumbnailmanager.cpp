@@ -67,7 +67,11 @@ std::pair<lcPartThumbnailId, QPixmap> lcThumbnailManager::RequestThumbnail(Piece
 {
 	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
 		if (Thumbnail.Info == Info && Thumbnail.ColorIndex == ColorIndex && Thumbnail.Size == Size && Thumbnail.DeviceScale == DeviceScale)
+		{
+			Thumbnail.ReferenceCount++;
+
 			return { ThumbnailId, Thumbnail.Pixmap };
+		}
 
 	lcPartThumbnailId ThumbnailId = static_cast<lcPartThumbnailId>(mNextThumbnailId++);
 	lcPartThumbnail& Thumbnail = mThumbnails[ThumbnailId];

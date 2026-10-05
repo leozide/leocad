@@ -9,3 +9,10 @@
 - Prefer explicit `lock()` and `unlock()` over an extra scope with `QMutexLocker` for short, straight-line critical sections that must end before the following code. Keep `QMutexLocker` for early returns, waits, or nontrivial control flow.
 - Preserve existing blank lines when editing code. Prefer blank lines between declarations and following logic, and between distinct logical steps; do not remove user-added blank lines without a specific reason.
 - When adding a parameter to an existing function, update every call site explicitly instead of adding a default argument to preserve old calls.
+
+# Commit Messages
+
+- Every nontrivial commit must have a concise subject and a descriptive body.
+- Explain the problem or trigger, why the change is needed, and how the resulting behavior addresses it.
+- Write for a future maintainer without access to the chat. Do not merely restate the diff or include conversational history.
+- Subject-only messages are acceptable for purely mechanical changes.

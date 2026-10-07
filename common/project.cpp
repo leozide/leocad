@@ -76,7 +76,11 @@ Project::Project(bool IsPreview)
 	mModels.emplace_back(mActiveModel);
 
 	if (!mIsPreview && gMainWindow)
-		QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, gMainWindow, &lcMainWindow::ProjectFileChanged);
+		QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, gMainWindow, [this](const QString& Path)
+		{
+			if (HasFileChanged(Path))
+				gMainWindow->ProjectFileChanged(Path);
+		});
 }
 
 Project::~Project()
@@ -571,6 +575,36 @@ void Project::ShowModelListDialog()
 		Model->RefreshPreview();
 }
 
+QByteArray Project::ReadFileHash(const QString& FileName)
+{
+	QFile File(FileName);
+	QCryptographicHash Hash(QCryptographicHash::Sha256);
+
+	if (!File.open(QIODevice::ReadOnly) || !Hash.addData(&File))
+		return QByteArray();
+
+	return Hash.result();
+}
+
+bool Project::HasFileChanged(const QString& Path)
+{
+	if (Path != mFileName)
+		return false;
+
+	// Atomic replacements remove the old watch, even when the contents are unchanged.
+	if (!mFileWatcher.files().contains(Path) && QFileInfo::exists(Path))
+		mFileWatcher.addPath(Path);
+
+	const QByteArray FileHash = ReadFileHash(Path);
+
+	if (FileHash.isEmpty() || FileHash == mFileHash)
+		return false;
+
+	// Remember the observed contents so duplicate events do not prompt again.
+	mFileHash = FileHash;
+	return true;
+}
+
 void Project::SetFileName(const QString& FileName)
 {
 	if (mFileName == FileName)
@@ -607,6 +641,9 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	QString Extension = FileInfo.suffix().toLower();
 
 	QByteArray FileData = File.readAll();
+	if (!mIsPreview)
+		mFileHash = QCryptographicHash::hash(FileData, QCryptographicHash::Sha256);
+
 	bool LoadDAT;
 
 	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
@@ -786,6 +823,9 @@ lcResult<void> Project::Save(const QString& FileName)
 		RestoreAssetSources();
 		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 	}
+
+	if (!mIsPreview)
+		mFileHash = ReadFileHash(FileName);
 
 	SetFileName(FileName);
 

@@ -137,6 +137,8 @@ public:
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
 private:
+	static QByteArray ReadFileHash(const QString& FileName);
+	bool HasFileChanged(const QString& Path);
 	static QString MakeExportNameFragment(const QString& Name);
 	static QString MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix);
 
@@ -152,6 +154,7 @@ protected:
 	bool mDeferModelMeshRequests = false;
 	bool mModified;
 	QString mFileName;
+	QByteArray mFileHash;
 	QFileSystemWatcher mFileWatcher;
 
 	std::vector<std::unique_ptr<lcModel>> mModels;

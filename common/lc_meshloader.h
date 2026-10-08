@@ -225,6 +225,7 @@ public:
 	Project* mCurrentProject;
 
 protected:
+	static bool ParseTextureName(const char* Text, char* Name, size_t NameSize);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
 
 	std::vector<lcMeshLoaderTextureMap> mTextureStack;

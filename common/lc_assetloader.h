@@ -52,8 +52,9 @@ struct lcPartBuildResult
 
 struct lcTextureSourceSnapshot
 {
-	QString Name;
 	QString FilePath;
+	int ArchiveType = -1;
+	int ArchiveIndex = -1;
 };
 
 struct lcTextureBuildResult

@@ -1327,6 +1327,47 @@ bool lcMeshLoader::LoadMesh(lcFile& File, lcMeshDataType MeshDataType)
 	return ReadMeshData(File, lcMatrix44Identity(), 16, false, MeshDataType);
 }
 
+bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSize)
+{
+	while (*Text && *Text <= 32)
+		Text++;
+
+	const bool Quoted = *Text == '"';
+
+	if (Quoted)
+		Text++;
+
+	size_t Length = 0;
+
+	while (*Text && (Quoted ? *Text != '"' : *Text > 32))
+	{
+		char Character = *Text++;
+
+		if (Character == '\\' && (*Text == '"' || *Text == '\\'))
+			Character = *Text++;
+
+		if (Length + 1 >= NameSize || Length + 1 >= LC_TEXTURE_NAME_LEN)
+			return false;
+
+		if (Character >= 'a' && Character <= 'z')
+			Character += 'A' - 'a';
+		else if (Character == '\\')
+			Character = '/';
+
+		Name[Length++] = Character;
+	}
+
+	if (!Length || (Quoted && *Text != '"'))
+		return false;
+
+	Name[Length] = 0;
+
+	if (Length > 4 && !memcmp(Name + Length - 4, ".PNG", 4))
+		Name[Length - 4] = 0;
+
+	return true;
+}
+
 bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType)
 {
 	char Buffer[1024];
@@ -1409,24 +1450,6 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						End++;
 					*End = 0;
 
-					auto CleanTextureName = [](char* FileName)
-					{
-						char* Ch;
-						for (Ch = FileName; *Ch; Ch++)
-						{
-							if (*Ch >= 'a' && *Ch <= 'z')
-								*Ch = *Ch + 'A' - 'a';
-							else if (*Ch == '\\')
-								*Ch = '/';
-						}
-
-						if (Ch - FileName > 4)
-						{
-							Ch -= 4;
-							if (!memcmp(Ch, ".PNG", 4))
-								*Ch = 0;
-						}
-					};
 
 					if (!strcmp(Token, "PLANAR"))
 					{
@@ -1439,13 +1462,18 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 						lcVector3 (&Points)[3] = Map.Points;
 
-						sscanf(Token, "%f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, Map.Name);
+						int NameOffset = 0;
+						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &NameOffset);
+
+						if (Parsed != 9 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						{
+							mTextureStack.pop_back();
+							continue;
+						}
 
 						Points[0] = lcMul31(Points[0], CurrentTransform);
 						Points[1] = lcMul31(Points[1], CurrentTransform);
 						Points[2] = lcMul31(Points[2], CurrentTransform);
-
-						CleanTextureName(Map.Name);
 					}
 					else if (!strcmp(Token, "CYLINDRICAL"))
 					{
@@ -1459,13 +1487,18 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						lcVector3 (&Points)[3] = Map.Points;
 						float& Angle = Map.Angles[0];
 
-						sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle, Map.Name);
+						int NameOffset = 0;
+						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle, &NameOffset);
+
+						if (Parsed != 10 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						{
+							mTextureStack.pop_back();
+							continue;
+						}
 
 						Points[0] = lcMul31(Points[0], CurrentTransform);
 						Points[1] = lcMul31(Points[1], CurrentTransform);
 						Points[2] = lcMul31(Points[2], CurrentTransform);
-
-						CleanTextureName(Map.Name);
 					}
 					else if (!strcmp(Token, "SPHERICAL"))
 					{
@@ -1480,13 +1513,18 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						float& Angle1 = Map.Angles[0];
 						float& Angle2 = Map.Angles[1];
 
-						sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %f %s", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle1, &Angle2, Map.Name);
+						int NameOffset = 0;
+						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle1, &Angle2, &NameOffset);
+
+						if (Parsed != 11 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						{
+							mTextureStack.pop_back();
+							continue;
+						}
 
 						Points[0] = lcMul31(Points[0], CurrentTransform);
 						Points[1] = lcMul31(Points[1], CurrentTransform);
 						Points[2] = lcMul31(Points[2], CurrentTransform);
-
-						CleanTextureName(Map.Name);
 					}
 				}
 				else if (!strcmp(Token, "FALLBACK"))

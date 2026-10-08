@@ -284,6 +284,8 @@ public:
 	int mNumOfficialPieces;
 
 	std::vector<lcTexture*> mTextures;
+	std::map<QString, QString> mTextureDiskEntries;
+	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
 
 	QDir mLibraryDir;
 

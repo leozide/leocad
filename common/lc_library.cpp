@@ -110,6 +110,10 @@ void lcPiecesLibrary::Unload()
 		delete Texture;
 
 	mTextures.clear();
+	mTextureDiskEntries.clear();
+
+	for (std::map<QString, int>& Entries : mTextureArchiveEntries)
+		Entries.clear();
 
 	mNumOfficialPieces = 0;
 
@@ -578,23 +582,76 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 
 lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories)
 {
+	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)
+		return nullptr;
+
 	QMutexLocker LoadLock(&mLoadMutex);
 
 	QString FilePath;
 	QString ResolvedProjectPath;
+	int ArchiveType = -1;
+	int ArchiveIndex = -1;
+	const QString Name = QString::fromLatin1(TextureName);
+	const QString Candidates[] = { QLatin1String("textures/") + Name, Name };
+	const QString Folders[] = { QStringLiteral("p/"), QStringLiteral("parts/"), QStringLiteral("models/"), QStringLiteral("unofficial/p/"), QStringLiteral("unofficial/parts/") };
 
-	for (const QString& Directory : SearchDirectories)
+	// Complete the prefixed search before considering any unprefixed location.
+	for (const QString& Candidate : Candidates)
 	{
-		if (Directory.isEmpty())
-			continue;
+		for (const QString& Directory : SearchDirectories)
+		{
+			if (Directory.isEmpty())
+				continue;
 
-		FilePath = FindProjectTextureFile(Directory, QString::fromLatin1(TextureName));
+			FilePath = FindProjectTextureFile(Directory, Candidate);
+
+			if (!FilePath.isEmpty())
+			{
+				ResolvedProjectPath = Directory;
+				break;
+			}
+		}
 
 		if (!FilePath.isEmpty())
-		{
-			ResolvedProjectPath = Directory;
 			break;
+
+		for (const QString& Folder : Folders)
+		{
+			if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
+			{
+				const bool Unofficial = Folder.startsWith(QLatin1String("unofficial/"));
+				const int Type = static_cast<int>(Unofficial ? lcZipFileType::Unofficial : lcZipFileType::Official);
+				QString EntryName;
+
+				if (Unofficial)
+					EntryName = Folder.mid(11) + Candidate + QLatin1String(".png");
+				else
+					EntryName = QLatin1String("ldraw/") + Folder + Candidate + QLatin1String(".png");
+
+				const auto Entry = mTextureArchiveEntries[Type].find(QDir::cleanPath(EntryName).toUpper());
+
+				if (Entry != mTextureArchiveEntries[Type].end())
+				{
+					ArchiveType = Type;
+					ArchiveIndex = Entry->second;
+					break;
+				}
+			}
+			else
+			{
+				const QString EntryName = QDir::cleanPath(Folder + Candidate + QLatin1String(".png")).toUpper();
+				const auto Entry = mTextureDiskEntries.find(EntryName);
+
+				if (Entry != mTextureDiskEntries.end())
+				{
+					FilePath = Entry->second;
+					break;
+				}
+			}
 		}
+
+		if (!FilePath.isEmpty() || ArchiveIndex != -1)
+			break;
 	}
 
 	if (!FilePath.isEmpty())
@@ -605,13 +662,7 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 
 	for (lcTexture* Texture : mTextures)
 	{
-		if (strcmp(TextureName, Texture->mName))
-			continue;
-
-		if (Texture->IsTemporary() != !FilePath.isEmpty())
-			continue;
-
-		if (Texture->IsTemporary() && Texture->mFilePath != FilePath)
+		if (Texture->mFilePath != FilePath || Texture->mArchiveType != ArchiveType || Texture->mArchiveIndex != ArchiveIndex)
 			continue;
 
 		Texture->AddRef();
@@ -619,7 +670,7 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 		return Texture;
 	}
 
-	if (FilePath.isEmpty())
+	if (FilePath.isEmpty() && ArchiveIndex == -1)
 		return nullptr;
 
 	lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
@@ -627,7 +678,9 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 	lcstrcpy(Texture->mName, TextureName);
 	Texture->mFilePath = FilePath;
 	Texture->mProjectPath = ResolvedProjectPath;
-	Texture->SetTemporary(true);
+	Texture->mArchiveType = ArchiveType;
+	Texture->mArchiveIndex = ArchiveIndex;
+	Texture->SetTemporary(!ResolvedProjectPath.isEmpty());
 	Texture->AddRef();
 
 	mTextures.push_back(Texture);
@@ -639,8 +692,9 @@ lcTextureSourceSnapshot lcPiecesLibrary::SnapshotTextureSource(const lcTexture* 
 {
 	lcTextureSourceSnapshot Source;
 
-	Source.Name = QString::fromLatin1(Texture->mName);
 	Source.FilePath = Texture->mFilePath;
+	Source.ArchiveType = Texture->mArchiveType;
+	Source.ArchiveIndex = Texture->mArchiveIndex;
 
 	return Source;
 }
@@ -655,28 +709,17 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnap
 
 	if (!Source.FilePath.isEmpty())
 		Loaded = Result.DecodedImage->FileLoad(Source.FilePath);
-	else
+	else if (Source.ArchiveType >= 0 && Source.ArchiveType < static_cast<int>(lcZipFileType::Count) && Source.ArchiveIndex >= 0)
 	{
 		lcMemFile TextureFile;
-		QByteArray Name = Source.Name.toLatin1();
-		char FileName[2 * LC_MAXPATH];
 		bool Extracted = false;
 
 		{
 			QMutexLocker TextureLock(&mTextureMutex);
+			const std::unique_ptr<lcZipFile>& Archive = mZipFiles[Source.ArchiveType];
 
-			if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-			{
-				snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Name.constData());
-
-				Extracted = mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile);
-
-				if (!Extracted && mZipFiles[static_cast<int>(lcZipFileType::Unofficial)])
-				{
-					snprintf(FileName, sizeof(FileName), "parts/textures/%s.png", Name.constData());
-					Extracted = mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile);
-				}
-			}
+			if (Archive)
+				Extracted = Archive->ExtractFile(Source.ArchiveIndex, TextureFile);
 		}
 
 		if (Extracted)
@@ -848,6 +891,8 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 	if (!ZipFile->OpenRead(std::move(File)))
 		return false;
 
+	mTextureArchiveEntries[static_cast<int>(ZipFileType)].clear();
+
 	std::unique_ptr<lcLibrarySource> Source(new lcLibrarySource);
 	Source->Type = ZipFileType != lcZipFileType::StudStyle ? lcLibrarySourceType::Library : lcLibrarySourceType::StudStyle;
 
@@ -882,16 +927,8 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 		{
 			if (!memcmp(Dst, ".PNG", 4))
 			{
-				if ((ZipFileType == lcZipFileType::Official && !memcmp(Name, "LDRAW/PARTS/TEXTURES/", 21)) ||
-					(ZipFileType == lcZipFileType::Unofficial && !memcmp(Name, "PARTS/TEXTURES/", 15)))
-				{
-					lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
-					mTextures.push_back(Texture);
-
-					*Dst = 0;
-					strncpy(Texture->mName, Name + (ZipFileType == lcZipFileType::Official ? 21 : 15), sizeof(Texture->mName)-1);
-					Texture->mName[sizeof(Texture->mName) - 1] = 0;
-				}
+				if (ZipFileType == lcZipFileType::Official || ZipFileType == lcZipFileType::Unofficial)
+					mTextureArchiveEntries[static_cast<int>(ZipFileType)].emplace(QDir::cleanPath(QString::fromLatin1(Name)).toUpper(), FileIdx);
 			}
 
 			continue;
@@ -1001,6 +1038,8 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 
 bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 {
+	mTextureDiskEntries.clear();
+
 	const QLatin1String BaseFolders[] = { QLatin1String(""), QLatin1String("unofficial/") };
 	constexpr int NumBaseFolders = LC_ARRAY_COUNT(BaseFolders);
 
@@ -1074,50 +1113,22 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 		}
 
 		mSources.emplace_back(std::move(Source));
-	}
 
-	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
-	{
-		QDir BaseDir(LibraryDir.absoluteFilePath(QLatin1String(BaseFolders[BaseFolderIdx])));
-		QDir Dir(BaseDir.absoluteFilePath(QLatin1String("parts/textures/")), QLatin1String("*.png"), QDir::SortFlags(QDir::Name | QDir::IgnoreCase), QDir::Files | QDir::Hidden | QDir::Readable);
-		QStringList FileList = Dir.entryList();
+		// Index PNG paths once; UI-thread texture lookup must not enumerate library folders.
+		const char* TextureDirectories[] = { "p/", "parts/", "models/" };
 
-		mTextures.reserve(mTextures.size() + FileList.size());
-
-		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
+		for (const char* TextureDirectory : TextureDirectories)
 		{
-			char Name[LC_MAXPATH];
-			QByteArray FileString = FileList[FileIdx].toLatin1();
-			const char* Src = FileString;
-			char* Dst = Name;
+			const QString ChildPath = BaseDir.absoluteFilePath(QLatin1String(TextureDirectory));
+			QDirIterator DirIterator(ChildPath, QStringList() << QLatin1String("*.png"), QDir::Files | QDir::Hidden | QDir::Readable, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
 
-			while (*Src && Dst - Name < (int)sizeof(Name))
+			while (DirIterator.hasNext())
 			{
-				if (*Src >= 'a' && *Src <= 'z')
-					*Dst = *Src + 'A' - 'a';
-				else if (*Src == '\\')
-					*Dst = '/';
-				else
-					*Dst = *Src;
+				const QString FilePath = DirIterator.next();
+				const QString Name = QDir::cleanPath(LibraryDir.relativeFilePath(FilePath)).toUpper();
 
-				Src++;
-				Dst++;
+				mTextureDiskEntries.emplace(Name, FilePath);
 			}
-
-			if (Dst - Name <= 4)
-				continue;
-
-			Dst -= 4;
-			if (memcmp(Dst, ".PNG", 4))
-				continue;
-			*Dst = 0;
-
-			lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
-			mTextures.push_back(Texture);
-
-			strncpy(Texture->mName, Name, sizeof(Texture->mName));
-			Texture->mName[sizeof(Texture->mName) - 1] = 0;
-			Texture->mFilePath = Dir.absoluteFilePath(FileList[FileIdx]);
 		}
 	}
 
@@ -2237,27 +2248,21 @@ void lcPiecesLibrary::UnloadUnusedParts()
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
-	QMutexLocker Lock(&mTextureMutex);
-	char FileName[2*LC_MAXPATH];
-
-	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-	{
-		lcMemFile TextureFile;
-
-		snprintf(FileName, sizeof(FileName), "ldraw/parts/textures/%s.png", Texture->mName);
-
-		if (!mZipFiles[static_cast<int>(lcZipFileType::Official)]->ExtractFile(FileName, TextureFile))
-		{
-			snprintf(FileName, sizeof(FileName), "parts/textures/%s.png", Texture->mName);
-
-			if (!mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] || !mZipFiles[static_cast<int>(lcZipFileType::Unofficial)]->ExtractFile(FileName, TextureFile))
-				return false;
-		}
-
-		return Texture->Load(TextureFile);
-	}
-	else
+	if (!Texture->mFilePath.isEmpty())
 		return Texture->Load(Texture->mFilePath);
+
+	QMutexLocker Lock(&mTextureMutex);
+	const int Type = Texture->mArchiveType;
+
+	if (Type < 0 || Type >= static_cast<int>(lcZipFileType::Count) || Texture->mArchiveIndex < 0 || !mZipFiles[Type])
+		return false;
+
+	lcMemFile TextureFile;
+
+	if (!mZipFiles[Type]->ExtractFile(Texture->mArchiveIndex, TextureFile))
+		return false;
+
+	return Texture->Load(TextureFile);
 }
 
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)

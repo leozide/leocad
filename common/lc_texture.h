@@ -126,6 +126,8 @@ public:
 	char mName[LC_TEXTURE_NAME_LEN] = {};
 	QString mFilePath;    // Absolute PNG path for disk-backed textures; empty for archive textures.
 	QString mProjectPath; // Directory used to scope temporary textures to their project.
+	int mArchiveType = -1;
+	int mArchiveIndex = -1;
 	GLuint mTexture = 0;
 	lcTextureState mState = lcTextureState::Unrequested;
 	lcTextureLoadError mLoadFailure = lcTextureLoadError::None;

@@ -102,6 +102,7 @@ public:
 	}
 
 	QString GetImageFileName(bool AllowCurrentFolder) const;
+	void UpdateFileWatcher();
 
 	lcInstructions* GetInstructions();
 
@@ -137,7 +138,13 @@ public:
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
 private:
-	static QByteArray ReadFileHash(const QString& FileName);
+	struct FileState
+	{
+		QByteArray Hash;
+		bool Exists = false;
+		bool Readable = false;
+	};
+	static FileState ReadFileState(const QString& FileName);
 	bool HasFileChanged(const QString& Path);
 	static QString MakeExportNameFragment(const QString& Name);
 	static QString MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix);
@@ -155,7 +162,11 @@ protected:
 	bool mModified;
 	QString mFileName;
 	QByteArray mFileHash;
+	bool mFileExists = false;
+	bool mFileReadable = false;
+	int mFileReadAttempts = 0;
 	QFileSystemWatcher mFileWatcher;
+	QTimer mFileCheckTimer;
 
 	std::vector<std::unique_ptr<lcModel>> mModels;
 	// Maps normalized local filenames to PieceInfo objects visible in this project.

@@ -296,6 +296,7 @@ void lcApplication::SetProject(Project* Project)
 
 	delete mProject;
 	mProject = Project;
+	mProject->UpdateFileWatcher();
 
 	if (gMainWindow)
 		gMainWindow->ScheduleAssetUpdate();

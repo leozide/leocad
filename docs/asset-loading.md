@@ -107,6 +107,26 @@ and project teardown unregister borrowed index entries; they must not leave
 lookup pointers to deleted objects. These paths are in
 [project.cpp](../common/project.cpp) and [lc_model.cpp](../common/lc_model.cpp).
 
+### Active project file monitoring
+
+Only the active project's own file is watched. Preview projects, loading
+candidates, and referenced model projects do not register filesystem watches.
+`lcApplication::SetProject()` activates the new project's watcher after changing
+the active project. Loaded bytes and committed saves establish its content hash
+baseline, so unchanged rewrites, metadata updates, and own saves do not prompt.
+
+File and containing-directory events are debounced before checking the active
+file's contents, existence, and readability. Directory watches reattach after
+replacement and detect deletion/recreation, including missing parent directories.
+Transient read failures receive bounded retries. Events for unrelated files in
+the directory only cause the current file to be checked.
+
+The reload handler verifies the active project and filename before showing a
+dialog and after the response. Candidate ownership is scoped so failed reloads
+release their resources. Referenced files retain their existing loading and
+readiness policies and are not monitored or reloaded in response to filesystem
+events.
+
 ## Readiness
 
 ```mermaid

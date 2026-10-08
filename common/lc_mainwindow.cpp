@@ -1301,47 +1301,47 @@ void lcMainWindow::ColorButtonClicked()
 void lcMainWindow::ProjectFileChanged(const QString& Path)
 {
 	static bool Ignore;
+	Project* CurrentProject = lcGetActiveProject();
 
-	if (Ignore)
+	if (Ignore || !CurrentProject || Path.isEmpty() || QFileInfo(Path) != QFileInfo(CurrentProject->GetFileName()))
 		return;
 
 	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(QDir::toNativeSeparators(Path));
 
-	Project* CurrentProject = lcGetActiveProject();
+	const QString CurrentFileName = CurrentProject->GetFileName();
 
 	Ignore = true;
 
 	if (QMessageBox::question(this, tr("File Changed"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 	{
 		Ignore = false;
-		CurrentProject->MarkAsModified();
-		UpdateTitle();
+
+		if (CurrentProject == lcGetActiveProject() && CurrentFileName == CurrentProject->GetFileName())
+		{
+			CurrentProject->MarkAsModified();
+			UpdateTitle();
+		}
+
 		return;
 	}
 
+	if (CurrentProject != lcGetActiveProject() || CurrentFileName != CurrentProject->GetFileName())
+	{
+		Ignore = false;
+		return;
+	}
+
+	std::unique_ptr<Project> NewProject = std::make_unique<Project>();
+
+	if (NewProject->Load(Path, true))
+	{
+		QByteArray TabLayout = GetTabLayout();
+		gApplication->SetProject(NewProject.release());
+		RestoreTabLayout(TabLayout);
+		lcView::UpdateAllViews();
+	}
+
 	Ignore = false;
-
-	QFileInfo FileInfo(Path);
-
-	if (FileInfo == QFileInfo(CurrentProject->GetFileName()))
-	{
-		Project* NewProject = new Project;
-
-		if (NewProject->Load(Path, true))
-		{
-			QByteArray TabLayout = GetTabLayout();
-			gApplication->SetProject(NewProject);
-			RestoreTabLayout(TabLayout);
-			lcView::UpdateAllViews();
-		}
-	}
-	else
-	{
-		PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(FileInfo.fileName().toLatin1(), CurrentProject, false, true);
-
-		if (Info && Info->IsProject())
-			Info->GetProject()->Load(Path, true);
-	}
 }
 
 void lcMainWindow::Print(QPrinter* Printer)

@@ -75,12 +75,20 @@ Project::Project(bool IsPreview)
 	mActiveModel->SetSaved();
 	mModels.emplace_back(mActiveModel);
 
-	if (!mIsPreview && gMainWindow)
-		QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, gMainWindow, [this](const QString& Path)
+	if (!mIsPreview)
+	{
+		mFileCheckTimer.setSingleShot(true);
+		mFileCheckTimer.setInterval(150);
+		QObject::connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, &mFileWatcher, [this]() { mFileCheckTimer.start(); });
+		QObject::connect(&mFileWatcher, &QFileSystemWatcher::directoryChanged, &mFileWatcher, [this]() { mFileCheckTimer.start(); });
+		QObject::connect(&mFileCheckTimer, &QTimer::timeout, &mFileWatcher, [this]()
 		{
-			if (HasFileChanged(Path))
+			const QString Path = mFileName;
+
+			if (HasFileChanged(Path) && gMainWindow)
 				gMainWindow->ProjectFileChanged(Path);
 		});
+	}
 }
 
 Project::~Project()
@@ -575,34 +583,98 @@ void Project::ShowModelListDialog()
 		Model->RefreshPreview();
 }
 
-QByteArray Project::ReadFileHash(const QString& FileName)
+Project::FileState Project::ReadFileState(const QString& FileName)
 {
+	FileState State;
+	State.Exists = QFileInfo(FileName).isFile();
+
+	if (!State.Exists)
+		return State;
+
 	QFile File(FileName);
 	QCryptographicHash Hash(QCryptographicHash::Sha256);
+	State.Readable = File.open(QIODevice::ReadOnly) && Hash.addData(&File);
 
-	if (!File.open(QIODevice::ReadOnly) || !Hash.addData(&File))
-		return QByteArray();
+	if (State.Readable)
+		State.Hash = Hash.result();
 
-	return Hash.result();
+	return State;
 }
 
 bool Project::HasFileChanged(const QString& Path)
 {
-	if (Path != mFileName)
+	if (mIsPreview || this != lcGetActiveProject() || Path.isEmpty() || Path != mFileName)
 		return false;
 
-	// Atomic replacements remove the old watch, even when the contents are unchanged.
-	if (!mFileWatcher.files().contains(Path) && QFileInfo::exists(Path))
-		mFileWatcher.addPath(Path);
+	UpdateFileWatcher();
+	const FileState State = ReadFileState(Path);
 
-	const QByteArray FileHash = ReadFileHash(Path);
+	if (State.Exists && !State.Readable && ++mFileReadAttempts < 3)
+	{
+		mFileCheckTimer.start();
+		return false;
+	}
 
-	if (FileHash.isEmpty() || FileHash == mFileHash)
+	mFileReadAttempts = 0;
+
+	if (State.Hash == mFileHash && State.Exists == mFileExists && State.Readable == mFileReadable)
 		return false;
 
 	// Remember the observed contents so duplicate events do not prompt again.
-	mFileHash = FileHash;
+	mFileHash = State.Hash;
+	mFileExists = State.Exists;
+	mFileReadable = State.Readable;
 	return true;
+}
+
+void Project::UpdateFileWatcher()
+{
+	QStringList Files;
+	QStringList Directories;
+	const bool Active = !mIsPreview && this == lcGetActiveProject() && !mFileName.isEmpty();
+	const bool WasWatching = !mFileWatcher.files().isEmpty() || !mFileWatcher.directories().isEmpty();
+
+	if (Active)
+	{
+		if (QFileInfo(mFileName).isFile())
+			Files.push_back(mFileName);
+
+		QDir Directory(QFileInfo(mFileName).absolutePath());
+
+		while (!Directory.exists())
+		{
+			const QString Parent = QFileInfo(Directory.absolutePath()).absolutePath();
+
+			if (Parent == Directory.absolutePath())
+				break;
+
+			Directory.setPath(Parent);
+		}
+
+		if (Directory.exists())
+			Directories.push_back(Directory.absolutePath());
+	}
+
+	for (const QString& Path : mFileWatcher.files())
+		if (!Files.contains(Path))
+			mFileWatcher.removePath(Path);
+
+	for (const QString& Path : mFileWatcher.directories())
+		if (!Directories.contains(Path))
+			mFileWatcher.removePath(Path);
+
+	for (const QString& Path : Files)
+		if (!mFileWatcher.files().contains(Path))
+			mFileWatcher.addPath(Path);
+
+	for (const QString& Path : Directories)
+		if (!mFileWatcher.directories().contains(Path))
+			mFileWatcher.addPath(Path);
+
+	if (!Active)
+		mFileCheckTimer.stop();
+	else if (!WasWatching)
+		mFileCheckTimer.start();
 }
 
 void Project::SetFileName(const QString& FileName)
@@ -610,13 +682,8 @@ void Project::SetFileName(const QString& FileName)
 	if (mFileName == FileName)
 		return;
 
-	if (!mIsPreview && !mFileName.isEmpty())
-		mFileWatcher.removePath(mFileName);
-
-	if (!mIsPreview && !FileName.isEmpty())
-		mFileWatcher.addPath(FileName);
-
 	mFileName = FileName;
+	UpdateFileWatcher();
 }
 
 bool Project::Load(const QString& FileName, bool ShowErrors)
@@ -634,15 +701,28 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 		return false;
 	}
 
+	QByteArray FileData = File.readAll();
+
+	if (File.error() != QFileDevice::NoError)
+	{
+		if (ShowErrors)
+			QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		return false;
+	}
+
 	mModels.clear();
 	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
 	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
-	QByteArray FileData = File.readAll();
 	if (!mIsPreview)
+	{
 		mFileHash = QCryptographicHash::hash(FileData, QCryptographicHash::Sha256);
+		mFileExists = true;
+		mFileReadable = true;
+		mFileReadAttempts = 0;
+	}
 
 	bool LoadDAT;
 
@@ -825,7 +905,13 @@ lcResult<void> Project::Save(const QString& FileName)
 	}
 
 	if (!mIsPreview)
-		mFileHash = ReadFileHash(FileName);
+	{
+		const FileState State = ReadFileState(FileName);
+		mFileHash = State.Hash;
+		mFileExists = State.Exists;
+		mFileReadable = State.Readable;
+		mFileReadAttempts = 0;
+	}
 
 	SetFileName(FileName);
 

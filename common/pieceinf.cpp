@@ -422,7 +422,7 @@ void PieceInfo::CompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min
 
 void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
-	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly)
 	{
 		if (IsModel())
 		{

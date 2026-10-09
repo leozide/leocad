@@ -7,6 +7,7 @@
 #include "pieceinf.h"
 #include "lc_library.h"
 #include "lc_view.h"
+#include "lc_model.h"
 #include "camera.h"
 #include "lc_doublespinbox.h"
 #include "lc_qutils.h"
@@ -133,7 +134,7 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 
 	mMinifigWizard->Calculate();
 	mView->GetCamera()->SetViewpoint(lcVector3(0.0f, -270.0f, 90.0f));
-	mView->ZoomExtents();
+	mView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 
 	ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setFocus();
 

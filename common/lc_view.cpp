@@ -1832,7 +1832,7 @@ void lcView::SetViewpoint(lcViewpoint Viewpoint)
 	}
 
 	mCamera->SetViewpoint(Viewpoint);
-	ZoomExtents();
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 	Redraw();
 }
 
@@ -1849,7 +1849,7 @@ void lcView::SetViewpoint(const lcVector3& Position)
 	}
 
 	mCamera->SetViewpoint(Position);
-	ZoomExtents();
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 	Redraw();
 }
 
@@ -1882,7 +1882,7 @@ void lcView::SetCameraAngles(float Latitude, float Longitude)
 	}
 
 	mCamera->SetAngles(Latitude, Longitude, 1.0f);
-	ZoomExtents();
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 	Redraw();
 }
 
@@ -1892,7 +1892,7 @@ void lcView::SetDefaultCamera()
 		mCamera = new lcCamera(true);
 
 	mCamera->SetViewpoint(lcViewpoint::Home);
-	ZoomExtents();
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 	Redraw();
 }
 
@@ -1978,7 +1978,7 @@ void lcView::Zoom(float Amount)
 		ActiveModel->Zoom(mCamera, Amount);
 }
 
-void lcView::ZoomExtents()
+void lcView::ZoomExtents(lcGeometryBoundsMode Mode, bool AdjustFarPlane)
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -1986,8 +1986,25 @@ void lcView::ZoomExtents()
 	{
 		const lcMatrix44 WorldMatrix = mActiveSubmodelInstance ? mActiveSubmodelTransform : lcMatrix44Identity();
 
-		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix, lcGeometryBoundsMode::IncludeFallbackGeometry);
+		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix, Mode, AdjustFarPlane);
 	}
+}
+
+void lcView::ZoomExtentsAtStep(lcStep Step, lcGeometryBoundsMode Mode, bool AdjustFarPlane)
+{
+	lcModel* ActiveModel = GetActiveModel();
+
+	if (!ActiveModel)
+		return;
+
+	const lcStep CurrentStep = ActiveModel->GetCurrentStep();
+
+	ActiveModel->SetTemporaryStep(Step);
+	ZoomExtents(Mode, AdjustFarPlane);
+	ActiveModel->SetTemporaryStep(CurrentStep);
+
+	if (!ActiveModel->IsActive())
+		ActiveModel->CalculateStep(LC_STEP_MAX);
 }
 
 lcCursor lcView::GetCursor() const
@@ -2840,7 +2857,7 @@ void lcView::OnLeftButtonDoubleClick()
 {
 	if (mViewType != lcViewType::View)
 	{
-		ZoomExtents();
+		ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 		return;
 	}
 

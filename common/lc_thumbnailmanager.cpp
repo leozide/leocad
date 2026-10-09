@@ -377,7 +377,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 
 	mView->GetCamera()->SetViewpoint(Position, Center, lcVector3(0, 0, 1));
 	mView->GetCamera()->m_fovy = 20.0f;
-	mView->ZoomExtents();
+	mView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 
 	mView->OnDraw();
 

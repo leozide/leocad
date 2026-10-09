@@ -1737,7 +1737,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 
 		if (Model)
 		{
-			SetCurrentModelTab(Model);
+			SetCurrentModelTab(Model, false);
 			TabWidget = (lcModelTabWidget*)mModelTabWidget->widget(mModelTabWidget->count() - 1);
 		}
 
@@ -1792,6 +1792,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 							Camera->SetUpVector(UpVector, 1, false);
 						}
 						Camera->UpdatePosition(1);
+						Camera->ExpandFarPlane(CurrentView->GetModel()->GetPiecesBoundingBoxPoints(lcGeometryBoundsMode::IncludeFallback));
 					}
 				}
 				else
@@ -1857,7 +1858,7 @@ void lcMainWindow::CloseCurrentModelTab()
 		NewProject();
 }
 
-void lcMainWindow::SetCurrentModelTab(lcModel* Model)
+void lcMainWindow::SetCurrentModelTab(lcModel* Model, bool AdjustFarPlane)
 {
 	for (int TabIdx = 0; TabIdx < mModelTabWidget->count(); TabIdx++)
 	{
@@ -1884,7 +1885,7 @@ void lcMainWindow::SetCurrentModelTab(lcModel* Model)
 
 	ViewWidget->show();
 	ViewWidget->setFocus();
-	NewView->ZoomExtents();
+	NewView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, AdjustFarPlane);
 }
 
 void lcMainWindow::AddView(lcView* View)
@@ -2152,7 +2153,7 @@ void lcMainWindow::ResetViews()
 
 	ViewWidget->show();
 	ViewWidget->setFocus();
-	NewView->ZoomExtents();
+	NewView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, true);
 }
 
 void lcMainWindow::ToggleDockWidget(QWidget* DockWidget)
@@ -3401,7 +3402,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_ZOOM_EXTENTS:
 		if (ActiveView)
-			ActiveView->ZoomExtents();
+			ActiveView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 		break;
 
 	case LC_VIEW_LOOK_AT:

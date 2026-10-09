@@ -1731,14 +1731,20 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 	View.SetOffscreenContext();
 	View.MakeCurrent();
+	View.SetSize(Width, Height);
 
 	if (!OutputCamera && !ActiveView)
-		ZoomExtentsAtStep(View.GetCamera(), (float)Width / (float)Height, GetLastStep(), lcGeometryBoundsMode::AvailableGeometryOnly);
+	{
+		SetTemporaryStep(GetLastStep());
+		View.ZoomExtents(lcGeometryBoundsMode::AvailableOnly, true);
+	}
 
 	SetTemporaryStep(Step);
 
 	if (Zoom && ActiveView && !OutputCamera)
-		ZoomExtents(View.GetCamera(), (float)Width / (float)Height, lcMatrix44Identity(), lcGeometryBoundsMode::AvailableGeometryOnly);
+	{
+		View.ZoomExtents(lcGeometryBoundsMode::AvailableOnly, true);
+	}
 
 	if (!View.BeginRenderToImage(Width, Height))
 	{
@@ -2057,14 +2063,23 @@ lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuff
 {
 	WaitForAssets();
 
-	lcCamera OutputCamera(true);
+	std::unique_ptr<lcView> OutputView;
 	lcCamera* Camera = nullptr;
 
 	if (!gMainWindow || !gMainWindow->GetActiveView())
 	{
-		OutputCamera.SetViewpoint(lcViewpoint::Home);
-		ZoomExtentsAtStep(&OutputCamera, (float)Width / (float)Height, GetLastStep(), lcGeometryBoundsMode::AvailableGeometryOnly);
-		Camera = &OutputCamera;
+		const lcStep CurrentStep = mCurrentStep;
+
+		OutputView = std::make_unique<lcView>(lcViewType::View, this);
+		OutputView->SetSize(Width, Height);
+		SetTemporaryStep(GetLastStep());
+		OutputView->ZoomExtents(lcGeometryBoundsMode::AvailableOnly, true);
+		SetTemporaryStep(CurrentStep);
+
+		if (!mActive)
+			CalculateStep(LC_STEP_MAX);
+
+		Camera = OutputView->GetCamera();
 	}
 
 	for (lcStep Step = Start; Step <= End; Step++)
@@ -2184,7 +2199,7 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 {
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)
@@ -4864,7 +4879,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints(lcGeometryBoundsMode 
 	std::vector<lcVector3> Points;
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)
@@ -6038,7 +6053,7 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 	}
 }
 
-void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode)
+void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode, bool AdjustFarPlane)
 {
 	std::vector<lcVector3> Points = GetPiecesBoundingBoxPoints(Mode);
 
@@ -6063,7 +6078,7 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 		BeginEditHistory();
 	}
 
-	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false);
+	Camera->ZoomExtents(Aspect, Center, Points, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false, AdjustFarPlane);
 
 	if (!mIsPreview && gMainWindow)
 		gMainWindow->UpdateSelectedObjects(false);
@@ -6075,18 +6090,6 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 		EndEditHistory();
 		EndHistorySequence(tr("Zoom Extents"));
 	}
-}
-
-void lcModel::ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step, lcGeometryBoundsMode Mode)
-{
-	const lcStep CurrentStep = mCurrentStep;
-
-	SetTemporaryStep(Step);
-	ZoomExtents(Camera, Aspect, lcMatrix44Identity(), Mode);
-	SetTemporaryStep(CurrentStep);
-
-	if (!mActive)
-		CalculateStep(LC_STEP_MAX);
 }
 
 void lcModel::Zoom(lcCamera* Camera, float Amount)

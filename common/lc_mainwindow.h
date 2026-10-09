@@ -199,7 +199,7 @@ public:
 	void RestoreTabLayout(const QByteArray& TabLayout);
 	void RemoveAllModelTabs();
 	void CloseCurrentModelTab();
-	void SetCurrentModelTab(lcModel* Model);
+	void SetCurrentModelTab(lcModel* Model, bool AdjustFarPlane);
 	void AddView(lcView* View);
 	void RemoveView(lcView* View);
 

@@ -1079,7 +1079,25 @@ void lcCamera::RemoveTime(lcStep Start, lcStep Time)
 	mUpVector.RemoveTime(Start, Time);
 }
 
-void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey)
+void lcCamera::ExpandFarPlane(const std::vector<lcVector3>& Points)
+{
+	if (!IsSimple())
+		return;
+
+	float FarDistance = 0.0f;
+
+	for (const lcVector3& Point : Points)
+		FarDistance = lcMax(FarDistance, -lcMul31(Point, mWorldView).z);
+
+	// Orthographic views use four times the camera's far plane.
+	if (GetProjection() == lcCameraProjection::Orthographic)
+		FarDistance /= 4.0f;
+
+	if (FarDistance > DefaultFarPlane && FarDistance > m_zFar)
+		m_zFar = ceilf(FarDistance * 1.1f / 10000.0f) * 10000.0f;
+}
+
+void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey, bool AdjustFarPlane)
 {
 	lcVector3 Position, TargetPosition;
 
@@ -1137,6 +1155,9 @@ void lcCamera::ZoomExtents(float AspectRatio, const lcVector3& Center, const std
 	mTargetPosition.ChangeKey(TargetPosition, Step, AddKey);
 
 	UpdatePosition(Step);
+
+	if (AdjustFarPlane)
+		ExpandFarPlane(Points);
 }
 
 void lcCamera::ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey)

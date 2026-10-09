@@ -27,6 +27,25 @@ the visible step. The spinner hides immediately when work settles; there is no
 until the project's failures disappear or the project changes.
 
 Views redraw and update bounds as results arrive, but keep the user's camera.
+Interactive and output camera fits go through `lcView::ZoomExtents()`, with
+fallback geometry included for interactive views and only available geometry
+included for outputs. The view delegates fitting and saved camera undo history
+to `lcModel::ZoomExtents()`. `lcView::ZoomExtentsAtStep()` restores the model's
+current step after fitting.
+The adjustment flag passes through view, model, and camera. The camera adjusts
+clipping after updating its fitted position, using the fit's transformed bounding
+points without collecting bounds again.
+The view fit entry points take an explicit `AdjustFarPlane` flag. Initial view
+and preview fits and automatic image output fits enable it, using the bounds
+available at that time; ordinary fits disable it. The distance expands only when
+those bounds extend beyond both the default 50,000 and the current distance. Later asset
+updates, redraws, navigation, and fits do not adjust clipping again.
+Increases include a 10% margin and round up to multiples of 10,000; they never
+shrink the distance or change saved model cameras. Explicit command-line clipping
+planes remain authoritative for image output.
+Restored tab layouts defer clipping adjustment until the ordinary camera's saved
+position and settings have been applied, so a saved distance cannot undo the
+load-time expansion. Named model cameras retain their saved clipping settings.
 During synth edits, the previous generated mesh stays visible until a replacement
 settles. Images and geometry exports wait for their requirements and omit failed
 geometry instead of saving loading cubes. See [Caller policies](#caller-policies)
@@ -355,8 +374,8 @@ including current synth generations, and repeats picking before placement. If
 loading fails, both dragging and insertion use the available or fallback
 geometry rather than rejecting placement.
 
-Automatic output fitting uses `lcGeometryBoundsMode::AvailableGeometryOnly`;
-interactive fitting uses `IncludeFallbackGeometry`. A whole-model wait can
+Automatic output fitting uses `lcGeometryBoundsMode::AvailableOnly`;
+interactive fitting uses `IncludeFallback`. A whole-model wait can
 conservatively include later steps even when output requests an earlier step.
 Scene flags preventing fallback cubes do not themselves initiate a wait or
 guarantee success. See [lc_view.cpp](../common/lc_view.cpp) and

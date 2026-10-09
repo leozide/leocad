@@ -1148,7 +1148,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			{
 				const lcStep FitStep = Options.ImageStart == Options.ImageEnd ? Options.ImageStart : ActiveModel->GetLastStep();
 
-				ActiveModel->ZoomExtentsAtStep(ActiveView->GetCamera(), (float)ActiveView->GetWidth() / (float)ActiveView->GetHeight(), FitStep, lcGeometryBoundsMode::AvailableGeometryOnly);
+				ActiveView->ZoomExtentsAtStep(FitStep, lcGeometryBoundsMode::AvailableOnly, !Options.SetZPlanes);
 			}
 
 			auto ProgressCallback = [&StdOut](const QString& FileName)

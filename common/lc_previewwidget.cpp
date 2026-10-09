@@ -195,7 +195,7 @@ void lcPreviewDockWidget::RefreshPendingAssets()
 	}
 
 	if (mAssetRefreshPending && mRefitAfterAssetLoad)
-		mPreview->ZoomExtents();
+		mPreview->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 
 	mAssetRefreshPending = false;
 	mRefitAfterAssetLoad = true;
@@ -321,7 +321,7 @@ bool lcPreview::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 	mModel->UpdatePieceInfo(UpdatedModels);
 
 	Library->ReleasePieceInfo(Info);
-	ZoomExtents();
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, true);
 
 	return true;
 }

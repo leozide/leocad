@@ -233,7 +233,7 @@ void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 
 	if (!mIsPreview && gMainWindow && UpdateInterface)
 	{
-		gMainWindow->SetCurrentModelTab(mActiveModel);
+		gMainWindow->SetCurrentModelTab(mActiveModel, true);
 		mActiveModel->UpdateInterface();
 	}
 }

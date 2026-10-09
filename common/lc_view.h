@@ -275,7 +275,8 @@ public:
 	void LookAt();
 	void MoveCamera(const lcVector3& Direction);
 	void Zoom(float Amount);
-	void ZoomExtents();
+	void ZoomExtents(lcGeometryBoundsMode Mode, bool AdjustFarPlane);
+	void ZoomExtentsAtStep(lcStep Step, lcGeometryBoundsMode Mode, bool AdjustFarPlane);
 
 	void RemoveCamera();
 	void ShowContextMenu() const;

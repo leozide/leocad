@@ -1145,7 +1145,7 @@ void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
-	if (Mode == lcGeometryBoundsMode::AvailableGeometryOnly && mPieceInfo->GetSynthInfo() && !HasGeneratedMesh())
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo->GetSynthInfo() && !HasGeneratedMesh())
 		return;
 
 	lcMesh* Mesh = GetDisplayMesh();

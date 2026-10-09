@@ -204,7 +204,8 @@ public:
 	void CopyPosition(const lcCamera* Camera);
 	void CopySettings(const lcCamera* Camera);
 
-	void ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey);
+	void ZoomExtents(float AspectRatio, const lcVector3& Center, const std::vector<lcVector3>& Points, lcStep Step, bool AddKey, bool AdjustFarPlane);
+	void ExpandFarPlane(const std::vector<lcVector3>& Points);
 	void ZoomRegion(float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners, lcStep Step, bool AddKey);
 	void Zoom(float Distance, lcStep Step, bool AddKey);
 	void Pan(const lcVector3& Distance, lcStep Step, bool AddKey);
@@ -222,7 +223,8 @@ public:
 
 	float m_fovy = 30.0f;
 	float m_zNear = 25.0f;
-	float m_zFar = 50000;
+	static constexpr float DefaultFarPlane = 50000.0f;
+	float m_zFar = DefaultFarPlane;
 
 	lcMatrix44 mWorldView;
 	lcObjectProperty<lcVector3> mPosition = lcObjectProperty<lcVector3>(lcVector3(0.0f, 0.0f, 0.0f));

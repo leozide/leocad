@@ -5,6 +5,12 @@
 #include "lc_objectproperty.h"
 #include "lc_result.h"
 
+enum class lcGeometryBoundsMode
+{
+	IncludeFallback,
+	AvailableOnly
+};
+
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
 struct lcModelHistoryEditState;
@@ -424,8 +430,7 @@ public:
 	void ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
 	void LookAt(lcCamera* Camera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
-	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode);
-	void ZoomExtentsAtStep(lcCamera* Camera, float Aspect, lcStep Step, lcGeometryBoundsMode Mode);
+	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode, bool AdjustFarPlane);
 	void Zoom(lcCamera* Camera, float Amount);
 
 	void MoveSelectedObjects(const lcVector3& Distance, lcModelTransformFlags Flags, lcModelHistoryEditMerge ModelHistoryEditMerge)

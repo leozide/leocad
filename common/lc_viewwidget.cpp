@@ -100,7 +100,7 @@ bool lcViewWidget::event(QEvent* Event)
 			break;
 
 		case Qt::SmartZoomNativeGesture:
-			mView->ZoomExtents();
+			mView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 			break;
 
 		default:

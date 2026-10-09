@@ -63,12 +63,6 @@ class QPrinter;
 typedef quint32 lcStep;
 #define LC_STEP_MAX 0xffffffff
 
-enum class lcGeometryBoundsMode
-{
-	IncludeFallbackGeometry,
-	AvailableGeometryOnly
-};
-
 // Version number.
 #define LC_VERSION_MAJOR 26
 #define LC_VERSION_MINOR 9
@@ -78,6 +72,7 @@ enum class lcGeometryBoundsMode
 // Forward declarations.
 class Project;
 class lcModel;
+enum class lcGeometryBoundsMode;
 class lcObject;
 class lcPiece;
 class lcCamera;

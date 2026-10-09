@@ -218,6 +218,7 @@ public:
 	lcMeshLoader(lcLibraryMeshData& MeshData, Project* CurrentProject, lcMeshLoaderFlags Flags);
 
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
+	static std::vector<std::string> GetTextureReferences(const QByteArray& FileData);
 	const QString& GetError() const { return mError; }
 	void SetCancellationFlag(const std::atomic_bool* Cancelled) { mCancelled = Cancelled; }
 	bool SearchProjectFolder() const { return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder); }
@@ -225,7 +226,7 @@ public:
 	Project* mCurrentProject;
 
 protected:
-	static bool ParseTextureName(const char* Text, char* Name, size_t NameSize);
+	static bool ParseTextureName(const char* Text, char* Name, size_t NameSize, const char** EndOfName);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
 
 	std::vector<lcMeshLoaderTextureMap> mTextureStack;

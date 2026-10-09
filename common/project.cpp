@@ -12,6 +12,7 @@
 #include "lc_mainwindow.h"
 #include "lc_view.h"
 #include "lc_library.h"
+#include "lc_texture.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_application.h"
 #include "lc_profile.h"
@@ -686,6 +687,324 @@ void Project::SetFileName(const QString& FileName)
 	UpdateFileWatcher();
 }
 
+bool lcEmbeddedData::HasValidEncoding() const
+{
+	const QByteArray& Encoded = EncodedData;
+	int Padding = 0;
+	bool Valid = !Encoded.isEmpty();
+
+	for (const unsigned char Character : Encoded)
+	{
+		if (Character == '=')
+			Padding++;
+		else if (Padding || !((Character >= 'A' && Character <= 'Z') || (Character >= 'a' && Character <= 'z') ||
+			(Character >= '0' && Character <= '9') || Character == '+' || Character == '/'))
+		{
+			Valid = false;
+			break;
+		}
+	}
+
+	return Valid && Padding <= 2 && Encoded.size() % 4 != 1 && (!Padding || Encoded.size() % 4 == 0);
+}
+
+QString Project::NormalizeEmbeddedDataName(const QString& FileName)
+{
+	QString Name = FileName;
+	Name.replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+	return QDir::cleanPath(Name).toUpper();
+}
+
+std::shared_ptr<const lcEmbeddedData> Project::FindEmbeddedData(const QString& FileName) const
+{
+	if (FileName.isEmpty())
+		return std::shared_ptr<const lcEmbeddedData>();
+
+	const auto Entry = mEmbeddedDataIndex.find(NormalizeEmbeddedDataName(FileName));
+
+	if (Entry == mEmbeddedDataIndex.end())
+		return std::shared_ptr<const lcEmbeddedData>();
+
+	return Entry->second;
+}
+
+void Project::LoadLDrawDocument(const QByteArray& FileData, const Project* ReferenceProject, bool ReuseExistingModels)
+{
+	enum class BlockType { ImplicitModel, Model, Data, Ignore };
+	struct ModelBlock
+	{
+		QString FileName;
+		qint64 Begin;
+		qint64 End;
+		size_t LayoutIndex;
+	};
+
+	std::vector<ModelBlock> ModelBlocks;
+	BlockType Type = BlockType::ImplicitModel;
+	qint64 BlockBegin = 0;
+	QString ModelName;
+	bool HasImplicitContent = false;
+	bool HasImplicitGeometry = false;
+	std::shared_ptr<lcEmbeddedData> Data;
+
+	const auto FinishBlock = [&](qint64 End, bool KeepImplicit)
+	{
+		DocumentBlock Block;
+		Block.Raw = FileData.mid(BlockBegin, End - BlockBegin);
+
+		if (Type == BlockType::Model)
+		{
+			ModelBlocks.push_back({ ModelName, BlockBegin, End, mDocumentBlocks.size() });
+			Block.ExplicitModel = true;
+			Block.OriginalName = ModelName;
+		}
+		else if (Type == BlockType::ImplicitModel && KeepImplicit && HasImplicitContent)
+		{
+			const QString Name = QFileInfo(mFileName).fileName();
+			ModelBlocks.push_back({ Name, BlockBegin, End, mDocumentBlocks.size() });
+			Block.OriginalName = Name;
+		}
+		else if (Type == BlockType::Data)
+		{
+			Data->RawBlock = Block.Raw;
+
+			if (Data->FileName.isEmpty())
+				Data->Error = tr("Embedded data has no filename.");
+			else
+				mEmbeddedDataIndex.emplace(NormalizeEmbeddedDataName(Data->FileName), Data);
+
+			Block.Data = Data;
+			mEmbeddedData.push_back(Data);
+			Data.reset();
+		}
+
+		mDocumentBlocks.push_back(std::move(Block));
+	};
+
+	QBuffer Buffer;
+	Buffer.setData(FileData);
+	Buffer.open(QIODevice::ReadOnly);
+
+	while (!Buffer.atEnd())
+	{
+		const qint64 Pos = Buffer.pos();
+		const QByteArray OriginalLine = Buffer.readLine();
+		QString Line = QString::fromUtf8(OriginalLine).trimmed();
+		QTextStream LineStream(&Line, QIODevice::ReadOnly);
+		QString LineType;
+		QString Meta;
+		LineStream >> LineType >> Meta;
+
+		if (LineType == QLatin1String("0") && Meta == QLatin1String("FILE"))
+		{
+			// Preamble before an explicit first FILE is not part of that model.
+			FinishBlock(Pos, false);
+			Type = BlockType::Model;
+			BlockBegin = Pos;
+			ModelName = LineStream.readAll().trimmed();
+		}
+		else if (LineType == QLatin1String("0") && Meta == QLatin1String("!DATA"))
+		{
+			// Also accept a plain LDR model followed by embedded data.
+			FinishBlock(Pos, HasImplicitGeometry);
+			Type = BlockType::Data;
+			BlockBegin = Pos;
+			Data = std::make_shared<lcEmbeddedData>();
+			Data->FileName = LineStream.readAll().trimmed();
+		}
+		else if (LineType == QLatin1String("0") && Meta == QLatin1String("NOFILE"))
+		{
+			FinishBlock(Pos, true);
+			Type = BlockType::Ignore;
+			BlockBegin = Pos;
+		}
+		else if (Type == BlockType::Data)
+		{
+			if (LineType == QLatin1String("0") && Meta == QLatin1String("!:"))
+				Data->EncodedData += LineStream.readAll().trimmed().toLatin1();
+			else if (!Line.isEmpty() && Data->Error.isEmpty())
+				Data->Error = tr("Unexpected statement in embedded data '%1'.").arg(Data->FileName);
+		}
+		else if (Type == BlockType::ImplicitModel && !Line.isEmpty())
+		{
+			HasImplicitContent = true;
+			int GeometryType = LineType.toInt();
+
+			if (LineType == QLatin1String("0") && Meta == QLatin1String("!:"))
+			{
+				QString Token;
+				LineStream >> Token;
+				GeometryType = Token.toInt();
+			}
+
+			HasImplicitGeometry |= GeometryType >= 1 && GeometryType <= 5;
+		}
+	}
+
+	FinishBlock(Buffer.pos(), true);
+
+	// Preserve the existing ability to open an empty ordinary LDraw document.
+	if (ModelBlocks.empty() && mEmbeddedData.empty())
+		ModelBlocks.push_back({ QFileInfo(mFileName).fileName(), 0, 0, 0 });
+
+	std::vector<std::pair<const ModelBlock*, lcModel*>> Models;
+
+	for (const ModelBlock& Block : ModelBlocks)
+	{
+		const auto Existing = std::find_if(mModels.begin(), mModels.end(), [&Block](const std::unique_ptr<lcModel>& Model)
+		{
+			return Model->GetFileName().compare(Block.FileName, Qt::CaseInsensitive) == 0;
+		});
+
+		if (Existing != mModels.end())
+		{
+			mDocumentBlocks[Block.LayoutIndex].Model = Existing->get();
+			mDocumentBlocks[Block.LayoutIndex].DuplicateModel = true;
+			continue;
+		}
+
+		if (ReuseExistingModels && ReferenceProject && !Models.empty())
+		{
+			const std::string Name = lcPiecesLibrary::NormalizePieceName(Block.FileName.toLatin1().constData());
+			PieceInfo* ExistingInfo = ReferenceProject->FindPiece(Name);
+
+			if (ExistingInfo && (ExistingInfo->IsModel() || ExistingInfo->IsProject()))
+			{
+				RegisterPiece(Name, ExistingInfo);
+				continue;
+			}
+		}
+
+		std::unique_ptr<lcModel> Model(new lcModel(Block.FileName, this, mIsPreview));
+		Models.emplace_back(&Block, Model.get());
+		mModels.emplace_back(std::move(Model));
+		mModels.back()->CreatePieceInfo(this);
+		mDocumentBlocks[Block.LayoutIndex].Model = mModels.back().get();
+		mDocumentBlocks[Block.LayoutIndex].OriginalName = Block.FileName;
+	}
+
+	// Legacy clipboard references can use destination pieces when no definition was copied.
+	if (ReferenceProject)
+		for (const auto& [Name, Info] : ReferenceProject->mPieceIndex)
+			if (!FindPiece(Name))
+				RegisterPiece(Name, Info);
+
+	// Every model and asset is registered before geometry resolves references.
+	for (const std::pair<const ModelBlock*, lcModel*>& Entry : Models)
+	{
+		QBuffer ModelBuffer;
+		ModelBuffer.setData(FileData.mid(Entry.first->Begin, Entry.first->End - Entry.first->Begin));
+		ModelBuffer.open(QIODevice::ReadOnly);
+		Entry.second->LoadLDraw(ModelBuffer, this);
+		Entry.second->SetSaved();
+	}
+
+	for (DocumentBlock& Block : mDocumentBlocks)
+		if (Block.Model)
+			Block.Baseline = SerializeModelText(Block.Model, false, 0);
+}
+
+
+QByteArray Project::SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep)
+{
+	QByteArray Bytes;
+	QTextStream Stream(&Bytes, QIODevice::WriteOnly);
+	Model->SaveLDraw(Stream, SelectedOnly, LastStep);
+	Stream.flush();
+
+	return Bytes;
+}
+
+QByteArray Project::SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep)
+{
+	const QByteArray Current = SerializeModelText(Model, SelectedOnly, LastStep);
+	const bool Preserve = Original && !SelectedOnly && !LastStep && Current == Original->Baseline;
+	QByteArray LineEnding("\r\n");
+
+	if (Original && Original->Raw.contains('\n') && !Original->Raw.contains("\r\n"))
+		LineEnding = "\n";
+
+	if (Preserve && Original->ExplicitModel && Original->OriginalName == Name)
+		return Original->Raw;
+
+	QByteArray Text;
+	const bool Explicit = Original && Original->ExplicitModel;
+	const bool Renamed = Original && Original->OriginalName != Name;
+
+	if (NeedsHeader || Explicit || Renamed)
+	{
+		const int HeaderEnd = Original ? Original->Raw.indexOf('\n') : -1;
+
+		if (Explicit && !Renamed && HeaderEnd != -1)
+			Text = Original->Raw.left(HeaderEnd + 1);
+		else
+			Text = "0 FILE " + Name.toUtf8() + LineEnding;
+	}
+
+	if (Preserve)
+	{
+		if (Explicit)
+		{
+			const int HeaderEnd = Original->Raw.indexOf('\n');
+			Text += Original->Raw.mid(HeaderEnd == -1 ? Original->Raw.size() : HeaderEnd + 1);
+		}
+		else
+			Text += Original->Raw;
+	}
+	else
+	{
+		QByteArray Body = Current;
+
+		if (LineEnding == "\n")
+			Body.replace("\r\n", "\n");
+
+		if (Original && !Original->Raw.endsWith('\n') && !Original->Raw.endsWith('\r') && Body.endsWith(LineEnding))
+			Body.chop(LineEnding.size());
+
+		Text += Body;
+	}
+
+	return Text;
+}
+
+bool Project::WriteRaw(QTextStream& Stream, const QByteArray& Bytes)
+{
+	Stream.flush();
+
+	if (Stream.status() != QTextStream::Ok)
+		return false;
+
+	if (QIODevice* Device = Stream.device())
+		return Device->write(Bytes) == Bytes.size();
+
+	Stream << QString::fromUtf8(Bytes);
+	return Stream.status() == QTextStream::Ok;
+}
+
+bool Project::SameEmbeddedData(const lcEmbeddedData& First, const lcEmbeddedData& Second)
+{
+	if (First.Error != Second.Error)
+		return false;
+
+	if (First.EncodedData == Second.EncodedData)
+		return true;
+
+	if (!First.Error.isEmpty() || !First.HasValidEncoding() || !Second.HasValidEncoding())
+		return false;
+
+	int FirstSize = First.EncodedData.size();
+	int SecondSize = Second.EncodedData.size();
+
+	while (FirstSize && First.EncodedData[FirstSize - 1] == '=')
+		FirstSize--;
+
+	while (SecondSize && Second.EncodedData[SecondSize - 1] == '=')
+		SecondSize--;
+
+	return FirstSize == SecondSize && !memcmp(First.EncodedData.constData(), Second.EncodedData.constData(), FirstSize);
+}
+
 bool Project::Load(const QString& FileName, bool ShowErrors)
 {
 	QWidget *parent = nullptr;
@@ -711,6 +1030,9 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	}
 
 	mModels.clear();
+	mDocumentBlocks.clear();
+	mEmbeddedData.clear();
+	mEmbeddedDataIndex.clear();
 	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
 	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
@@ -735,42 +1057,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 	if (LoadDAT)
 	{
-		QBuffer Buffer(&FileData);
-		Buffer.open(QIODevice::ReadOnly);
-		std::vector<std::pair<int, lcModel*>> Models;
-
-		while (!Buffer.atEnd())
-		{
-			lcModel* Model = new lcModel(QString(), this, mIsPreview);
-			int Pos = Model->SplitMPD(Buffer);
-
-			if (Models.empty() || !Model->GetFileName().isEmpty())
-			{
-				auto ModelCompare = [Model](const std::pair<int, lcModel*>& ModelIt)
-				{
-					return ModelIt.second->GetFileName().compare(Model->GetFileName(), Qt::CaseInsensitive) == 0;
-				};
-
-				if (std::find_if(Models.begin(), Models.end(), ModelCompare) == Models.end())
-				{
-					mModels.emplace_back(Model);
-					Models.emplace_back(std::make_pair(Pos, Model));
-					Model->CreatePieceInfo(this);
-				}
-				else
-					delete Model;
-			}
-			else
-				delete Model;
-		}
-
-		for (size_t ModelIdx = 0; ModelIdx < Models.size(); ModelIdx++)
-		{
-			Buffer.seek(Models[ModelIdx].first);
-			lcModel* Model = Models[ModelIdx].second;
-			Model->LoadLDraw(Buffer, this);
-			Model->SetSaved();
-		}
+		LoadLDrawDocument(FileData, nullptr, false);
 	}
 	else
 	{
@@ -975,25 +1262,172 @@ lcResult<void> Project::Save(const QString& FileName)
 	return lcResult<void>();
 }
 
-bool Project::Save(QTextStream& Stream)
+bool Project::Save(QTextStream& Stream) const
 {
-	bool MPD = mModels.size() > 1;
+	const bool MPD = mModels.size() > 1 || !mEmbeddedData.empty();
+	std::set<const lcModel*> WrittenModels;
+	std::set<const lcEmbeddedData*> WrittenData;
+	std::vector<const lcModel*> OriginalOrder;
+
+	const auto IsPresent = [this](const lcModel* Model)
+	{
+		return std::any_of(mModels.begin(), mModels.end(), [Model](const std::unique_ptr<lcModel>& Entry) { return Entry.get() == Model; });
+	};
+
+	for (const DocumentBlock& Block : mDocumentBlocks)
+		if (Block.Model && !Block.DuplicateModel && IsPresent(Block.Model))
+			OriginalOrder.push_back(Block.Model);
+
+	bool Reordered = false;
+
+	for (size_t Index = 0; Index < OriginalOrder.size(); Index++)
+		Reordered |= OriginalOrder[Index] != mModels[Index].get();
+
+	const auto OriginalFor = [this](const lcModel* Model) -> const DocumentBlock*
+	{
+		for (const DocumentBlock& Block : mDocumentBlocks)
+			if (Block.Model == Model && !Block.DuplicateModel)
+				return &Block;
+
+		return nullptr;
+	};
+
+	QByteArray Output;
+	const auto Append = [&Output](const QByteArray& Bytes, bool NewBlock)
+	{
+		if (NewBlock && !Output.isEmpty() && !Output.endsWith('\n') && !Output.endsWith('\r'))
+			Output += "\r\n";
+
+		Output += Bytes;
+	};
+
+	size_t NextModel = 0;
+
+	for (const DocumentBlock& Block : mDocumentBlocks)
+	{
+		if (Block.Model)
+		{
+			if (!IsPresent(Block.Model))
+				continue;
+
+			if (Block.DuplicateModel)
+			{
+				if (WrittenModels.find(Block.Model) != WrittenModels.end() && Block.Model->GetFileName().compare(Block.OriginalName, Qt::CaseInsensitive) == 0)
+					Append(Block.Raw, true);
+
+				continue;
+			}
+
+			const lcModel* Model = Reordered ? mModels[NextModel++].get() : Block.Model;
+			Append(SerializeStoredModel(Model, Model->GetFileName(), OriginalFor(Model), mModels.size() > 1, false, 0), true);
+			WrittenModels.insert(Model);
+		}
+		else if (Block.Data)
+		{
+			Append(Block.Raw, true);
+			WrittenData.insert(Block.Data.get());
+		}
+		else
+			Append(Block.Raw, false);
+	}
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		if (MPD)
-			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
+		if (WrittenModels.find(Model.get()) != WrittenModels.end())
+			continue;
 
-		Model->SaveLDraw(Stream, false, 0);
-
-		if (MPD)
-			Stream << QLatin1String("0 NOFILE\r\n");
+		Append(SerializeStoredModel(Model.get(), Model->GetFileName(), OriginalFor(Model.get()), MPD || !mDocumentBlocks.empty(), false, 0), true);
 	}
 
-	return true;
+	for (const std::shared_ptr<const lcEmbeddedData>& Data : mEmbeddedData)
+		if (WrittenData.find(Data.get()) == WrittenData.end())
+			Append(Data->RawBlock, true);
+
+	return WriteRaw(Stream, Output);
+}
+
+std::vector<QString> Project::GetMergedAssetDirectories(const lcModel* Model) const
+{
+	if (Model->GetProject() == this)
+		return Model->GetAssetSearchDirectories();
+
+	lcModelAssetSourceState State = Model->GetAssetSourceState();
+	const QString SourceFile = Model->GetProject()->GetFileName();
+	const QString SourceDirectory = SourceFile.isEmpty() ? QString() : QFileInfo(SourceFile).absolutePath();
+
+	if (!SourceDirectory.isEmpty())
+	{
+		State.Directories.erase(std::remove(State.Directories.begin(), State.Directories.end(), SourceDirectory), State.Directories.end());
+
+		if (State.PreferCurrentDirectory)
+			State.Directories.insert(State.Directories.begin(), SourceDirectory);
+		else
+			State.Directories.push_back(SourceDirectory);
+	}
+
+	const QString DestinationDirectory = mFileName.isEmpty() ? QString() : QFileInfo(mFileName).absolutePath();
+
+	if (!DestinationDirectory.isEmpty() && std::find(State.Directories.begin(), State.Directories.end(), DestinationDirectory) == State.Directories.end())
+		State.Directories.push_back(DestinationDirectory);
+
+	return State.Directories;
+}
+
+lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& MergedData, const lcModel* ClipboardRoot) const
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	for (const std::unique_ptr<lcModel>& Model : Source.mModels)
+	{
+		if (Model.get() == ClipboardRoot)
+			continue;
+
+		std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0));
+
+		if (const lcMesh* Mesh = Model->GetPieceInfo()->GetMesh())
+			for (const lcMeshLod& Lod : Mesh->mLods)
+				for (int SectionIndex = 0; SectionIndex < Lod.NumSections; SectionIndex++)
+					if (!Lod.Sections[SectionIndex].TextureName.isEmpty())
+						References.push_back(Lod.Sections[SectionIndex].TextureName.toLatin1().constData());
+
+		const std::vector<QString> BeforeDirectories = Model->GetAssetSearchDirectories();
+		const std::vector<QString> AfterDirectories = GetMergedAssetDirectories(Model.get());
+
+		for (const std::string& Name : References)
+		{
+			lcTexture* Before = Library->FindTextureDeferred(Name.c_str(), BeforeDirectories, Source.mEmbeddedDataIndex);
+
+			if (!Before)
+				continue;
+
+			lcTexture* After = Library->FindTextureDeferred(Name.c_str(), AfterDirectories, MergedData);
+			bool Same = After != nullptr;
+
+			if (Same && Before->mEmbeddedData && After->mEmbeddedData)
+				Same = SameEmbeddedData(*Before->mEmbeddedData, *After->mEmbeddedData);
+			else if (Same)
+				Same = Before->mEmbeddedData == After->mEmbeddedData && Before->mFilePath == After->mFilePath &&
+					Before->mArchiveType == After->mArchiveType && Before->mArchiveIndex == After->mArchiveIndex;
+
+			Library->ReleaseTexture(Before);
+
+			if (After)
+				Library->ReleaseTexture(After);
+
+			if (!Same)
+				return lcUnexpected(tr("Merging would change texture '%1' used by model '%2'. Rename the conflicting texture before merging.").arg(QString::fromLatin1(Name.c_str()), Model->GetFileName()));
+		}
+	}
+
+	return lcResult<void>();
 }
 
 lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
+{
+	return MergeInternal(Sources, nullptr);
+}
+
+lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, const lcModel* ClipboardRoot)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	std::map<std::string, PieceInfo*> NonModelPieces;
@@ -1009,6 +1443,35 @@ lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
 	};
 
 	std::vector<ModelPlan> PlannedModels;
+	std::map<QString, std::shared_ptr<const lcEmbeddedData>> MergedData = mEmbeddedDataIndex;
+
+	// Validate every incoming asset before reserving names or moving models.
+	for (const Project* Source : Sources)
+	{
+		for (const auto& [Name, Data] : Source->mEmbeddedDataIndex)
+		{
+			const auto Existing = MergedData.find(Name);
+
+			if (Existing != MergedData.end() && !SameEmbeddedData(*Existing->second, *Data))
+				return lcUnexpected(tr("Both projects contain different embedded data named '%1'. Rename one before merging.").arg(Data->FileName));
+
+			MergedData.emplace(Name, Data);
+		}
+	}
+
+	const lcResult<void> DestinationBindings = ValidateMergedTextureBindings(*this, MergedData, ClipboardRoot);
+
+	if (!DestinationBindings)
+		return DestinationBindings;
+
+	for (const Project* Source : Sources)
+	{
+		const lcResult<void> SourceBindings = ValidateMergedTextureBindings(*Source, MergedData, ClipboardRoot);
+
+		if (!SourceBindings)
+			return SourceBindings;
+	}
+
 
 	for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
 	{
@@ -1126,6 +1589,8 @@ lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
 		AppliedRenames.push_back(&Planned);
 	}
 
+	mEmbeddedDataIndex = std::move(MergedData);
+
 	size_t PlanIndex = 0;
 
 	for (Project* Source : Sources)
@@ -1175,6 +1640,12 @@ lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
 
 		Library->TransferProjectPieces(Source, this);
 		Source->mModels.clear();
+		mEmbeddedData.insert(mEmbeddedData.end(), Source->mEmbeddedData.begin(), Source->mEmbeddedData.end());
+		mDocumentBlocks.insert(mDocumentBlocks.end(), Source->mDocumentBlocks.begin(), Source->mDocumentBlocks.end());
+		Source->mEmbeddedData.clear();
+		Source->mEmbeddedDataIndex.clear();
+		Source->mDocumentBlocks.clear();
+
 	}
 
 	if (!Sources.empty())
@@ -1203,6 +1674,9 @@ bool Project::ImportLDD(const QString& FileName)
 	NewModel->SetSaved();
 
 	mModels.clear();
+	mDocumentBlocks.clear();
+	mEmbeddedData.clear();
+	mEmbeddedDataIndex.clear();
 	mModels.emplace_back(std::move(NewModel));
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
@@ -1233,6 +1707,9 @@ bool Project::ImportInventory(const std::vector<lcSetInventoryItem>& SetInventor
 	NewModel->SetDescription(Description);
 
 	mModels.clear();
+	mDocumentBlocks.clear();
+	mEmbeddedData.clear();
+	mEmbeddedDataIndex.clear();
 	mModels.emplace_back(std::move(NewModel));
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
@@ -1315,116 +1792,277 @@ lcResult<void> Project::EnsureAssetsReady() const
 	return Model ? Model->EnsureAssetsReady() : lcResult<void>();
 }
 
-lcResult<void> Project::ExportCurrentStep(const QString& FileName)
+lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedOnly, lcStep LastStep) const
 {
-	QFile File(FileName);
-
-	if (!File.open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-
-	QStringList Models;
-
-	Models.append(lcGetActiveModel()->GetProperties().mFileName);
-
-	std::function<void(const QString&)> ParseStepModel = [&](const QString& ModelName)
+	struct ExportEntry
 	{
-		Models.append(ModelName);
-
-		for (const std::unique_ptr<lcModel>& Model : mModels)
-		{
-			if (Model->GetProperties().mFileName == ModelName)
-			{
-				lcPartsList ModelParts;
-
-				Model->GetPartsList(gDefaultColor, false, true, ModelParts);
-
-				for (const auto& PartIt : ModelParts)
-				{
-					const PieceInfo* PartInfo = PartIt.first;
-
-					if (PartInfo->IsModel())
-					{
-						ParseStepModel(PartInfo->mFileName);
-					}
-					else
-						continue;
-				}
-
-				break;
-			}
-		}
+		const lcModel* Model;
+		QString Name;
+		bool SelectedOnly;
 	};
 
-	const lcStep CurrentStep = lcGetActiveModel()->GetCurrentStep();
+	std::vector<ExportEntry> Models;
+	std::map<QString, const lcModel*> Names;
+	std::vector<std::shared_ptr<const lcEmbeddedData>> Assets;
+	std::map<QString, std::shared_ptr<const lcEmbeddedData>> AssetLookup;
 
-	bool MPD = mModels.size() > 1;
-
-	if (MPD)
+	std::function<lcResult<void>(const lcModel*, const QString&, bool)> Collect = [&](const lcModel* Model, const QString& Name, bool FilterSelection) -> lcResult<void>
 	{
-		lcPartsList StepParts;
+		const QString Key = NormalizeEmbeddedDataName(Name);
+		const auto Existing = Names.find(Key);
 
-		lcGetActiveModel()->GetPartsListForStep(CurrentStep, gDefaultColor, StepParts, true);
-
-		if (!StepParts.empty())
+		if (Existing != Names.end())
 		{
-			for (const auto& PartIt : StepParts)
-			{
-				const PieceInfo *PartInfo = PartIt.first;
+			if (Existing->second != Model)
+				return lcUnexpected(tr("Cannot export different submodels named '%1'.").arg(Name));
 
-				if (PartInfo->IsModel())
-				{
-					ParseStepModel(PartInfo->mFileName);
-				}
-				else
+			return lcResult<void>();
+		}
+
+		Names.emplace(Key, Model);
+		Models.push_back({ Model, Name, FilterSelection });
+
+		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+		{
+			if ((FilterSelection && !Piece->IsSelected()) || (LastStep && Piece->GetStepShow() > LastStep))
+				continue;
+
+			const PieceInfo* Info = Piece->mPieceInfo;
+			const lcModel* Child = nullptr;
+
+			if (Info && Info->IsModel())
+				Child = Info->GetModel();
+			else if (Info && Info->IsProject())
+				Child = Info->GetProject()->GetMainModel();
+
+			if (Child)
+			{
+				const lcResult<void> Result = Collect(Child, Piece->GetID(), false);
+
+				if (!Result)
+					return Result;
+			}
+		}
+
+		return lcResult<void>();
+	};
+
+	const lcResult<void> Collected = Collect(Root, Root->GetFileName(), SelectedOnly);
+
+	if (!Collected)
+		return lcUnexpected(Collected.error());
+
+	// A complete model export can retain the original document layout too.
+	bool WholeProject = !SelectedOnly && !LastStep && Root == GetMainModel() && Models.size() == mModels.size();
+
+	for (const ExportEntry& Entry : Models)
+		WholeProject &= Entry.Model->GetProject() == this && NormalizeEmbeddedDataName(Entry.Name) == NormalizeEmbeddedDataName(Entry.Model->GetFileName());
+
+	if (WholeProject)
+	{
+		QByteArray Bytes;
+		QTextStream Stream(&Bytes, QIODevice::WriteOnly);
+
+		if (!Save(Stream))
+			return lcUnexpected(tr("Could not serialize all model data."));
+
+		Stream.flush();
+		return Bytes;
+	}
+
+	std::vector<const Project*> Owners;
+	std::map<const Project*, std::set<QString>> RequiredNames;
+
+	for (const ExportEntry& Entry : Models)
+	{
+		const Project* Owner = Entry.Model->GetProject();
+
+		if (!Owner)
+			continue;
+
+		if (RequiredNames.find(Owner) == RequiredNames.end())
+			Owners.push_back(Owner);
+
+		std::set<QString>& Required = RequiredNames[Owner];
+		const std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Entry.Model, Entry.SelectedOnly, LastStep));
+
+		for (const std::string& Name : References)
+		{
+			const QString Bare = QString::fromLatin1(Name.c_str()) + QLatin1String(".png");
+			const QString Candidates[] = { QLatin1String("textures/") + Bare, Bare };
+
+			for (const QString& Candidate : Candidates)
+			{
+				const std::shared_ptr<const lcEmbeddedData> Data = Owner->FindEmbeddedData(Candidate);
+
+				if (!Data)
 					continue;
+
+				const QString Key = NormalizeEmbeddedDataName(Data->FileName);
+				const auto Existing = AssetLookup.find(Key);
+
+				if (Existing != AssetLookup.end() && !SameEmbeddedData(*Existing->second, *Data))
+					return lcUnexpected(tr("Cannot export different embedded data named '%1'.").arg(Data->FileName));
+
+				AssetLookup.emplace(Key, Data);
+				Required.insert(Key);
 			}
 		}
 	}
 
-	QTextStream Stream(&File);
+	for (const Project* Owner : Owners)
+		for (const std::shared_ptr<const lcEmbeddedData>& Data : Owner->mEmbeddedData)
+			if (RequiredNames[Owner].find(NormalizeEmbeddedDataName(Data->FileName)) != RequiredNames[Owner].end())
+				Assets.push_back(Data);
 
-	for (const std::unique_ptr<lcModel>& Model : mModels)
+	const bool MPD = Models.size() > 1 || !Assets.empty();
+	QByteArray Output;
+	const auto Append = [&Output](const QByteArray& Bytes)
 	{
-		if (!Models.contains(Model->GetProperties().mFileName))
-			continue;
+		if (!Output.isEmpty() && !Output.endsWith('\n') && !Output.endsWith('\r'))
+			Output += "\r\n";
 
-		const lcStep ModelStep = Model->GetCurrentStep();
+		Output += Bytes;
+	};
 
-		if (!Model->IsActive())
-			Model->SetTemporaryStep(CurrentStep);
+	for (const ExportEntry& Entry : Models)
+	{
+		const DocumentBlock* Original = nullptr;
+		const Project* Owner = Entry.Model->GetProject();
 
-		if (MPD)
-			Stream << QLatin1String("0 FILE ") << Model->GetProperties().mFileName << QLatin1String("\r\n");
+		if (Owner)
+			for (const DocumentBlock& Block : Owner->mDocumentBlocks)
+				if (Block.Model == Entry.Model && !Block.DuplicateModel)
+				{
+					Original = &Block;
+					break;
+				}
 
-		Model->SaveLDraw(Stream, false, CurrentStep);
-
-		if (MPD)
-			Stream << QLatin1String("0 NOFILE\r\n");
-
-		if (!Model->IsActive())
-		{
-			Model->SetTemporaryStep(ModelStep);
-			Model->CalculateStep(LC_STEP_MAX);
-		}
+		Append(SerializeStoredModel(Entry.Model, Entry.Name, Original, MPD, Entry.SelectedOnly, LastStep));
 	}
 
-	File.close();
+	for (const std::shared_ptr<const lcEmbeddedData>& Data : Assets)
+		Append(Data->RawBlock);
+
+	if (SelectedOnly)
+		Output.prepend("0 !LEOCAD CLIPBOARD PROJECT " + mClipboardIdentity.toString().toUtf8() + "\r\n");
+
+	return Output;
+}
+
+lcResult<lcModel*> Project::ImportClipboard(const QByteArray& FileData)
+{
+	Project Source(mIsPreview);
+	Source.mModels.clear();
+	lcGetPiecesLibrary()->ReleaseProjectPieces(&Source);
+	Source.SetDeferModelMeshRequests(true);
+	Source.mFileName = mFileName;
+	const QByteArray Marker("0 !LEOCAD CLIPBOARD PROJECT ");
+	const QByteArray FirstLine = FileData.left(FileData.indexOf('\n') == -1 ? FileData.size() : FileData.indexOf('\n')).trimmed();
+	const bool SameProject = FirstLine.startsWith(Marker) && QUuid(QString::fromUtf8(FirstLine.mid(Marker.size()))) == mClipboardIdentity;
+	Source.LoadLDrawDocument(FileData, this, SameProject);
+
+	if (Source.mModels.empty())
+		return lcUnexpected(tr("Clipboard contains no model."));
+
+	lcModel* Root = Source.GetMainModel();
+
+	for (const std::unique_ptr<lcModel>& Model : Source.mModels)
+		Model->QueueMeshBuild();
+
+	if (Root->GetPieces().empty())
+		return static_cast<lcModel*>(nullptr);
+
+	if (SameProject)
+	{
+		std::set<const lcModel*> Reachable;
+		std::function<void(const lcModel*)> Collect = [&](const lcModel* Model)
+		{
+			if (!Reachable.insert(Model).second)
+				return;
+
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->GetProject() == &Source)
+					Collect(Piece->mPieceInfo->GetModel());
+		};
+		Collect(Root);
+
+		Source.mModels.erase(std::remove_if(Source.mModels.begin(), Source.mModels.end(), [&Reachable](const std::unique_ptr<lcModel>& Model)
+		{
+			return Reachable.find(Model.get()) == Reachable.end();
+		}), Source.mModels.end());
+
+		// Live reused models already own their current assets. Keep snapshots only
+		// for definitions that were missing and therefore still need importing.
+		std::set<QString> Required;
+
+		for (const std::unique_ptr<lcModel>& Model : Source.mModels)
+		{
+			if (Model.get() == Root)
+				continue;
+
+			for (const std::string& Name : lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0)))
+			{
+				const QString Bare = QString::fromLatin1(Name.c_str()) + QLatin1String(".png");
+				Required.insert(NormalizeEmbeddedDataName(Bare));
+				Required.insert(NormalizeEmbeddedDataName(QLatin1String("textures/") + Bare));
+			}
+		}
+
+		Source.mEmbeddedData.erase(std::remove_if(Source.mEmbeddedData.begin(), Source.mEmbeddedData.end(), [&Required](const std::shared_ptr<const lcEmbeddedData>& Data)
+		{
+			return Required.find(NormalizeEmbeddedDataName(Data->FileName)) == Required.end();
+		}), Source.mEmbeddedData.end());
+
+		for (auto Entry = Source.mEmbeddedDataIndex.begin(); Entry != Source.mEmbeddedDataIndex.end();)
+			if (Required.find(Entry->first) == Required.end())
+				Entry = Source.mEmbeddedDataIndex.erase(Entry);
+			else
+				++Entry;
+	}
+
+	// Clipboard formatting is generated; only retain the actual assets and submodels.
+	Source.mDocumentBlocks.clear();
+	const lcResult<void> Result = MergeInternal({ &Source }, Root);
+
+	if (!Result)
+		return lcUnexpected(Result.error());
+
+	const auto Entry = std::find_if(mModels.begin(), mModels.end(), [Root](const std::unique_ptr<lcModel>& Model) { return Model.get() == Root; });
+	std::unique_ptr<lcModel> Wrapper = std::move(*Entry);
+	mModels.erase(Entry);
+
+	return Wrapper.release();
+}
+
+lcResult<void> Project::ExportCurrentStep(const QString& FileName)
+{
+	const lcModel* Model = lcGetActiveModel();
+	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, Model->GetCurrentStep());
+
+	if (!Bytes)
+		return lcUnexpected(Bytes.error());
+
+	QSaveFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly) || File.write(Bytes.value()) != Bytes.value().size() || !File.commit())
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(FileName).absolutePath());
-
 	return lcResult<void>();
 }
 
 lcResult<void> Project::ExportModel(const QString& FileName, lcModel* Model) const
 {
-	QFile File(FileName);
+	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, 0);
 
-	if (!File.open(QIODevice::WriteOnly))
+	if (!Bytes)
+		return lcUnexpected(Bytes.error());
+
+	QSaveFile File(FileName);
+
+	if (!File.open(QIODevice::WriteOnly) || File.write(Bytes.value()) != Bytes.value().size() || !File.commit())
 		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
-
-	QTextStream Stream(&File);
-
-	Model->SaveLDraw(Stream, false, 0);
 
 	return lcResult<void>();
 }

@@ -567,7 +567,12 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 			ProjectPath = QFileInfo(FileName).absolutePath();
 	}
 
-	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath });
+	std::map<QString, std::shared_ptr<const lcEmbeddedData>> EmbeddedData;
+
+	if (CurrentProject)
+		EmbeddedData = CurrentProject->GetEmbeddedDataLookup();
+
+	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath }, EmbeddedData);
 
 	if (!Texture)
 		return nullptr;
@@ -580,13 +585,14 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 	return nullptr;
 }
 
-lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories)
+lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData)
 {
 	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)
 		return nullptr;
 
 	QMutexLocker LoadLock(&mLoadMutex);
 
+	std::shared_ptr<const lcEmbeddedData> SelectedData;
 	QString FilePath;
 	QString ResolvedProjectPath;
 	int ArchiveType = -1;
@@ -598,6 +604,16 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 	// Complete the prefixed search before considering any unprefixed location.
 	for (const QString& Candidate : Candidates)
 	{
+		QString EmbeddedName = Candidate + QLatin1String(".png");
+		EmbeddedName.replace(QLatin1Char('\\'), QLatin1Char('/'));
+		const auto Embedded = EmbeddedData.find(QDir::cleanPath(EmbeddedName).toUpper());
+
+		if (Embedded != EmbeddedData.end())
+		{
+			SelectedData = Embedded->second;
+			break;
+		}
+
 		for (const QString& Directory : SearchDirectories)
 		{
 			if (Directory.isEmpty())
@@ -662,7 +678,7 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 
 	for (lcTexture* Texture : mTextures)
 	{
-		if (Texture->mFilePath != FilePath || Texture->mArchiveType != ArchiveType || Texture->mArchiveIndex != ArchiveIndex)
+		if (Texture->mEmbeddedData != SelectedData || Texture->mFilePath != FilePath || Texture->mArchiveType != ArchiveType || Texture->mArchiveIndex != ArchiveIndex)
 			continue;
 
 		Texture->AddRef();
@@ -670,17 +686,18 @@ lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const s
 		return Texture;
 	}
 
-	if (FilePath.isEmpty() && ArchiveIndex == -1)
+	if (!SelectedData && FilePath.isEmpty() && ArchiveIndex == -1)
 		return nullptr;
 
 	lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 
 	lcstrcpy(Texture->mName, TextureName);
+	Texture->mEmbeddedData = SelectedData;
 	Texture->mFilePath = FilePath;
 	Texture->mProjectPath = ResolvedProjectPath;
 	Texture->mArchiveType = ArchiveType;
 	Texture->mArchiveIndex = ArchiveIndex;
-	Texture->SetTemporary(!ResolvedProjectPath.isEmpty());
+	Texture->SetTemporary(bool(SelectedData) || !ResolvedProjectPath.isEmpty());
 	Texture->AddRef();
 
 	mTextures.push_back(Texture);
@@ -692,11 +709,23 @@ lcTextureSourceSnapshot lcPiecesLibrary::SnapshotTextureSource(const lcTexture* 
 {
 	lcTextureSourceSnapshot Source;
 
+	Source.EmbeddedData = Texture->mEmbeddedData;
 	Source.FilePath = Texture->mFilePath;
 	Source.ArchiveType = Texture->mArchiveType;
 	Source.ArchiveIndex = Texture->mArchiveIndex;
 
 	return Source;
+}
+
+lcResult<QByteArray> lcPiecesLibrary::DecodeEmbeddedData(const lcEmbeddedData& Data)
+{
+	if (!Data.Error.isEmpty())
+		return lcUnexpected(Data.Error);
+
+	if (!Data.HasValidEncoding())
+		return lcUnexpected(tr("Invalid Base64 data for embedded texture '%1'.").arg(Data.FileName));
+
+	return QByteArray::fromBase64(Data.EncodedData);
 }
 
 lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnapshot& Source)
@@ -707,7 +736,25 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnap
 
 	bool Loaded = false;
 
-	if (!Source.FilePath.isEmpty())
+	if (Source.EmbeddedData)
+	{
+		const lcResult<QByteArray> Decoded = DecodeEmbeddedData(*Source.EmbeddedData);
+
+		if (Decoded)
+		{
+			lcMemFile TextureFile;
+			const QByteArray& Bytes = Decoded.value();
+			TextureFile.WriteBuffer(Bytes.constData(), Bytes.size());
+			TextureFile.Seek(0, SEEK_SET);
+			Loaded = Result.DecodedImage->FileLoad(TextureFile);
+
+			if (!Loaded)
+				Result.ErrorDetails = tr("Could not decode embedded texture '%1'.").arg(Source.EmbeddedData->FileName);
+		}
+		else
+			Result.ErrorDetails = Decoded.error();
+	}
+	else if (!Source.FilePath.isEmpty())
 		Loaded = Result.DecodedImage->FileLoad(Source.FilePath);
 	else if (Source.ArchiveType >= 0 && Source.ArchiveType < static_cast<int>(lcZipFileType::Count) && Source.ArchiveIndex >= 0)
 	{
@@ -1801,6 +1848,9 @@ lcPartSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info)
 
 		const lcModel* Model = Info->GetModel();
 		Source.TextureSearchDirectories = Model->GetAssetSearchDirectories();
+
+		if (Model->GetProject())
+			Source.EmbeddedData = Model->GetProject()->GetEmbeddedDataLookup();
 	}
 
 	return Source;
@@ -2248,6 +2298,26 @@ void lcPiecesLibrary::UnloadUnusedParts()
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
+	if (Texture->mEmbeddedData)
+	{
+		const lcResult<QByteArray> Decoded = DecodeEmbeddedData(*Texture->mEmbeddedData);
+
+		if (!Decoded)
+		{
+			Texture->mState = lcTextureState::Failed;
+			Texture->mLoadFailure = lcTextureLoadError::DecodeFailed;
+			Texture->mLoadFailureDetails = Decoded.error();
+			return false;
+		}
+
+		lcMemFile TextureFile;
+		const QByteArray& Bytes = Decoded.value();
+		TextureFile.WriteBuffer(Bytes.constData(), Bytes.size());
+		TextureFile.Seek(0, SEEK_SET);
+
+		return Texture->Load(TextureFile);
+	}
+
 	if (!Texture->mFilePath.isEmpty())
 		return Texture->Load(Texture->mFilePath);
 

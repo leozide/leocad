@@ -2989,22 +2989,22 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_CUT:
 		if (ActiveModel)
-			ActiveModel->Cut();
+			ShowResultMessageBox(ActiveModel->Cut(), tr("Cannot Cut Model"));
 		break;
 
 	case LC_EDIT_COPY:
 		if (ActiveModel)
-			ActiveModel->Copy();
+			ShowResultMessageBox(ActiveModel->Copy(), tr("Cannot Copy Model"));
 		break;
 
 	case LC_EDIT_PASTE:
 		if (ActiveModel)
-			ActiveModel->Paste(true);
+			ShowResultMessageBox(ActiveModel->Paste(true), tr("Cannot Paste Model"));
 		break;
 
 	case LC_EDIT_PASTE_STEPS:
 		if (ActiveModel)
-			ActiveModel->Paste(false);
+			ShowResultMessageBox(ActiveModel->Paste(false), tr("Cannot Paste Model"));
 		break;
 
 	case LC_EDIT_FIND:

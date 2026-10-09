@@ -1327,7 +1327,89 @@ bool lcMeshLoader::LoadMesh(lcFile& File, lcMeshDataType MeshDataType)
 	return ReadMeshData(File, lcMatrix44Identity(), 16, false, MeshDataType);
 }
 
-bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSize)
+std::vector<std::string> lcMeshLoader::GetTextureReferences(const QByteArray& FileData)
+{
+	std::vector<std::string> Names;
+	const QList<QByteArray> Lines = FileData.split('\n');
+
+	for (int Index = 0; Index < Lines.size(); Index++)
+	{
+		QString Line = QString::fromUtf8(Lines[Index]).trimmed();
+		QTextStream Stream(&Line, QIODevice::ReadOnly);
+		QString LineType, Meta, Action, Projection;
+		Stream >> LineType >> Meta >> Action >> Projection;
+
+		if (LineType != QLatin1String("0") || Meta != QLatin1String("!TEXMAP") ||
+			(Action != QLatin1String("START") && Action != QLatin1String("NEXT")))
+			continue;
+
+		if (Action == QLatin1String("NEXT"))
+		{
+			int Next = Index + 1;
+
+			while (Next < Lines.size() && Lines[Next].trimmed().isEmpty())
+				Next++;
+
+			if (Next == Lines.size())
+				continue;
+
+			QString NextLine = QString::fromUtf8(Lines[Next]);
+			QTextStream NextStream(&NextLine, QIODevice::ReadOnly);
+			QString NextType;
+			NextStream >> NextType;
+
+			if (NextType == QLatin1String("0"))
+				continue;
+		}
+
+		int Parameters = 0;
+
+		if (Projection == QLatin1String("PLANAR"))
+			Parameters = 9;
+		else if (Projection == QLatin1String("CYLINDRICAL"))
+			Parameters = 10;
+		else if (Projection == QLatin1String("SPHERICAL"))
+			Parameters = 11;
+		else
+			continue;
+
+		bool Valid = true;
+
+		for (int Parameter = 0; Parameter < Parameters; Parameter++)
+		{
+			QString Token;
+			Stream >> Token;
+			bool Parsed;
+			Token.toFloat(&Parsed);
+			Valid &= Parsed;
+		}
+
+		if (!Valid)
+			continue;
+
+		const QByteArray Text = Stream.readAll().toLatin1();
+		char Name[LC_TEXTURE_NAME_LEN];
+
+		const char* End = nullptr;
+
+		if (!ParseTextureName(Text.constData(), Name, sizeof(Name), &End))
+			continue;
+
+		if (std::find(Names.begin(), Names.end(), Name) == Names.end())
+			Names.emplace_back(Name);
+
+		while (*End && *End <= 32)
+			End++;
+
+		if (!strncmp(End, "GLOSSMAP", 8) && (!End[8] || End[8] <= 32) &&
+			ParseTextureName(End + 8, Name, sizeof(Name), nullptr) && std::find(Names.begin(), Names.end(), Name) == Names.end())
+			Names.emplace_back(Name);
+	}
+
+	return Names;
+}
+
+bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSize, const char** EndOfName)
 {
 	while (*Text && *Text <= 32)
 		Text++;
@@ -1364,6 +1446,9 @@ bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSiz
 
 	if (Length > 4 && !memcmp(Name + Length - 4, ".PNG", 4))
 		Name[Length - 4] = 0;
+
+	if (EndOfName)
+		*EndOfName = Text + (Quoted ? 1 : 0);
 
 	return true;
 }
@@ -1465,7 +1550,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						int NameOffset = 0;
 						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &NameOffset);
 
-						if (Parsed != 9 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						if (Parsed != 9 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
 						{
 							mTextureStack.pop_back();
 							continue;
@@ -1490,7 +1575,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						int NameOffset = 0;
 						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle, &NameOffset);
 
-						if (Parsed != 10 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						if (Parsed != 10 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
 						{
 							mTextureStack.pop_back();
 							continue;
@@ -1516,7 +1601,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						int NameOffset = 0;
 						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle1, &Angle2, &NameOffset);
 
-						if (Parsed != 11 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name)))
+						if (Parsed != 11 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
 						{
 							mTextureStack.pop_back();
 							continue;

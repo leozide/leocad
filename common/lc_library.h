@@ -16,6 +16,7 @@ class lcThumbnailManager;
 class lcAssetLoader;
 struct lcPartSourceSnapshot;
 struct lcPartBuildResult;
+struct lcEmbeddedData;
 struct lcTextureSourceSnapshot;
 struct lcTextureBuildResult;
 
@@ -233,7 +234,7 @@ public:
 	// Release a returned reference with ReleaseTexture().
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	// UI-thread lookup/acquisition only, without decoding or upload; caller releases the reference.
-	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories);
+	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData);
 	lcTextureSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
 	// Worker decode service: returns private pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcTextureSourceSnapshot& Source);
@@ -319,6 +320,7 @@ protected:
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
+	static lcResult<QByteArray> DecodeEmbeddedData(const lcEmbeddedData& Data);
 	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
 	static bool IsStudPrimitive(const char* FileName);
 	static bool IsStudStylePrimitive(const char* FileName);

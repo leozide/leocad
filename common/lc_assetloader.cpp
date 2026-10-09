@@ -526,6 +526,9 @@ void lcAssetLoader::QueueTexture(lcTexture* Texture, Priority LoadPriority)
 
 QString lcAssetLoader::TextureFailureMessage(const lcTexture* Texture)
 {
+	if (!Texture->mLoadFailureDetails.isEmpty())
+		return Texture->mLoadFailureDetails;
+
 	switch (Texture->mLoadFailure)
 	{
 	case lcTextureLoadError::DecodeFailed:
@@ -589,6 +592,7 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 		Texture->DiscardDecodedImage();
 		Texture->mState = lcTextureState::Unrequested;
 		Texture->mLoadFailure = lcTextureLoadError::None;
+		Texture->mLoadFailureDetails.clear();
 
 		mLibrary->ReleaseTexture(Texture);
 	}
@@ -979,6 +983,7 @@ bool lcAssetLoader::ProcessCompletions()
 			{
 				Texture->mState = lcTextureState::Failed;
 				Texture->mLoadFailure = Completed.TextureResult.Error;
+				Texture->mLoadFailureDetails = Completed.TextureResult.ErrorDetails;
 
 				FinishTextureRequest(RequestedTexture);
 			}
@@ -1054,7 +1059,7 @@ bool lcAssetLoader::ProcessCompletions()
 					if (Section.TextureName.isEmpty())
 						continue;
 
-					Section.Texture = mLibrary->FindTextureDeferred(Section.TextureName.toLatin1().constData(), {});
+					Section.Texture = mLibrary->FindTextureDeferred(Section.TextureName.toLatin1().constData(), std::vector<QString>(), std::map<QString, std::shared_ptr<const lcEmbeddedData>>());
 
 					if (!Section.Texture)
 						RequestedSynth->Error = tr("Missing texture %1.").arg(Section.TextureName);
@@ -1117,7 +1122,7 @@ bool lcAssetLoader::ProcessCompletions()
 		{
 			const auto TextureLookup = [this, &RequestedPart](const char* Name)
 			{
-				return mLibrary->FindTextureDeferred(Name, RequestedPart->Source.TextureSearchDirectories);
+				return mLibrary->FindTextureDeferred(Name, RequestedPart->Source.TextureSearchDirectories, RequestedPart->Source.EmbeddedData);
 			};
 
 			if (Completed.Result.CacheData && !Completed.Result.Mesh)

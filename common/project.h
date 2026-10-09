@@ -44,6 +44,15 @@ struct lcSetInventoryItem
 	int ColorCode;
 };
 
+struct lcEmbeddedData
+{
+	bool HasValidEncoding() const;
+	QString FileName;
+	QByteArray EncodedData;
+	QByteArray RawBlock;
+	QString Error;
+};
+
 class Project
 {
 public:
@@ -60,6 +69,17 @@ public:
 		return mModels;
 	}
 
+	const std::vector<std::shared_ptr<const lcEmbeddedData>>& GetEmbeddedData() const
+	{
+		return mEmbeddedData;
+	}
+
+	const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& GetEmbeddedDataLookup() const
+	{
+		return mEmbeddedDataIndex;
+	}
+
+	std::shared_ptr<const lcEmbeddedData> FindEmbeddedData(const QString& FileName) const;
 	lcModel* GetModel(const QString& FileName) const;
 	PieceInfo* FindPiece(const std::string& Name) const;
 	void RegisterPiece(const std::string& Name, PieceInfo* Info);
@@ -116,7 +136,7 @@ public:
 
 	bool Load(const QString& FileName, bool ShowErrors);
 	lcResult<void> Save(const QString& FileName);
-	bool Save(QTextStream& Stream);
+	bool Save(QTextStream& Stream) const;
 	lcResult<void> Merge(const std::vector<Project*>& Sources);
 	bool ImportLDD(const QString& FileName);
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
@@ -126,6 +146,9 @@ public:
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 	lcResult<void> ExportCurrentStep(const QString& FileName);
+	lcResult<QByteArray> SerializeModel(const lcModel* Model, bool SelectedOnly, lcStep LastStep) const;
+	// Caller owns the returned model; imported dependencies remain in this project.
+	lcResult<lcModel*> ImportClipboard(const QByteArray& FileData);
 	lcResult<void> ExportModel(const QString& FileName, lcModel* Model) const;
 	lcResult<void> Export3DStudio(const QString& FileName);
 	lcResult<void> ExportBrickLink();
@@ -144,6 +167,25 @@ private:
 		bool Exists = false;
 		bool Readable = false;
 	};
+	struct DocumentBlock
+	{
+		lcModel* Model = nullptr;
+		std::shared_ptr<const lcEmbeddedData> Data;
+		QByteArray Raw;
+		QByteArray Baseline;
+		QString OriginalName;
+		bool ExplicitModel = false;
+		bool DuplicateModel = false;
+	};
+	static QByteArray SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep);
+	static QByteArray SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep);
+	static bool WriteRaw(QTextStream& Stream, const QByteArray& Bytes);
+	static bool SameEmbeddedData(const lcEmbeddedData& First, const lcEmbeddedData& Second);
+	static QString NormalizeEmbeddedDataName(const QString& FileName);
+	void LoadLDrawDocument(const QByteArray& FileData, const Project* ReferenceProject, bool ReuseExistingModels);
+	std::vector<QString> GetMergedAssetDirectories(const lcModel* Model) const;
+	lcResult<void> ValidateMergedTextureBindings(const Project& Source, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& MergedData, const lcModel* ClipboardRoot) const;
+	lcResult<void> MergeInternal(const std::vector<Project*>& Sources, const lcModel* ClipboardRoot);
 	static FileState ReadFileState(const QString& FileName);
 	bool HasFileChanged(const QString& Path);
 	static QString MakeExportNameFragment(const QString& Name);
@@ -156,6 +198,7 @@ protected:
 	std::vector<lcModelPartsEntry> GetModelParts();
 	void SetFileName(const QString& FileName);
 
+	QUuid mClipboardIdentity = QUuid::createUuid();
 	bool mIsPreview;
 	// External projects can parse their models before queuing direct meshes.
 	bool mDeferModelMeshRequests = false;
@@ -168,6 +211,10 @@ protected:
 	QFileSystemWatcher mFileWatcher;
 	QTimer mFileCheckTimer;
 
+	std::vector<DocumentBlock> mDocumentBlocks;
+	std::vector<std::shared_ptr<const lcEmbeddedData>> mEmbeddedData;
+	// First definition wins; retain duplicate blocks in mEmbeddedData for saving.
+	std::map<QString, std::shared_ptr<const lcEmbeddedData>> mEmbeddedDataIndex;
 	std::vector<std::unique_ptr<lcModel>> mModels;
 	// Maps normalized local filenames to PieceInfo objects visible in this project.
 	// This map does not own them; lcPiecesLibrary tracks and deletes them.

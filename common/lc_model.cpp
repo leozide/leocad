@@ -624,9 +624,6 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		if (SelectedOnly && !Piece->IsSelected())
 			continue;
 
-		if ((SavedStep = (LastStep != 0 && Piece->GetStepShow() > LastStep)))
-			break;
-
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
 		{
 			QString Line = mFileLines[CurrentLine];
@@ -643,7 +640,15 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 				if (Token == QLatin1String("STEP"))
 				{
 					if (Piece->GetStepShow() > Step)
+					{
+						if (LastStep && Step >= LastStep)
+						{
+							SavedStep = true;
+							break;
+						}
+
 						Step++;
+					}
 					else
 						Skip = true;
 				}
@@ -657,6 +662,9 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 			}
 			CurrentLine++;
 		}
+
+		if (SavedStep || (LastStep && Piece->GetStepShow() > LastStep))
+			break;
 
 		while (Piece->GetStepShow() > Step)
 		{
@@ -750,8 +758,18 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		{
 			LineStream >> Token;
 
-			if (Token == QLatin1String("STEP") && AddedSteps-- > 0)
-				Skip = true;
+			if (Token == QLatin1String("STEP"))
+			{
+				if (AddedSteps-- > 0)
+					Skip = true;
+				else
+				{
+					if (LastStep && Step >= LastStep)
+						break;
+
+					Step++;
+				}
+			}
 		}
 
 		if (!Skip)
@@ -774,45 +792,6 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 			Light->SaveLDraw(Stream);
 
 	Stream.flush();
-}
-
-int lcModel::SplitMPD(QIODevice& Device)
-{
-	qint64 ModelPos = Device.pos();
-
-	while (!Device.atEnd())
-	{
-		const qint64 Pos = Device.pos();
-		QString OriginalLine = Device.readLine();
-		QString Line = OriginalLine.trimmed();
-		QTextStream LineStream(&Line, QIODevice::ReadOnly);
-
-		QString Token;
-		LineStream >> Token;
-
-		if (Token == QLatin1String("0"))
-		{
-			LineStream >> Token;
-
-			if (Token == QLatin1String("FILE"))
-			{
-				if (!mProperties.mFileName.isEmpty())
-				{
-					Device.seek(Pos);
-					break;
-				}
-
-				SetFileName(LineStream.readAll().trimmed());
-				ModelPos = Pos;
-			}
-			else if (Token == QLatin1String("NOFILE"))
-			{
-				break;
-			}
-		}
-	}
-
-	return ModelPos;
 }
 
 void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
@@ -860,7 +839,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 				continue;
 			}
-			else if (Token == QLatin1String("NOFILE"))
+			else if (Token == QLatin1String("NOFILE") || Token == QLatin1String("!DATA"))
 			{
 				break;
 			}
@@ -1471,12 +1450,15 @@ void lcModel::Merge(std::unique_ptr<lcModel> Other)
 	gMainWindow->UpdateTimeline(false, false);
 }
 
-void lcModel::Cut()
+lcResult<void> lcModel::Cut()
 {
 	if (!AnyObjectsSelected())
-		return;
+		return lcResult<void>();
 
-	Copy();
+	const lcResult<void> Result = Copy();
+
+	if (!Result)
+		return Result;
 
 	BeginHistorySequence();
 	BeginEditHistory();
@@ -1488,28 +1470,46 @@ void lcModel::Cut()
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
+
+	return lcResult<void>();
 }
 
-void lcModel::Copy()
+lcResult<void> lcModel::Copy()
 {
-	QByteArray File;
-	QTextStream Stream(&File, QIODevice::WriteOnly);
+	if (mProject)
+	{
+		const lcResult<QByteArray> File = mProject->SerializeModel(this, true, 0);
 
-	SaveLDraw(Stream, true, 0);
+		if (!File)
+			return lcUnexpected(File.error());
 
-	gApplication->ExportClipboard(File);
+		gApplication->ExportClipboard(File.value());
+	}
+	else
+	{
+		QByteArray File;
+		QTextStream Stream(&File, QIODevice::WriteOnly);
+		SaveLDraw(Stream, true, 0);
+		gApplication->ExportClipboard(File);
+	}
+
+	return lcResult<void>();
 }
 
-void lcModel::Paste(bool PasteToCurrentStep)
+lcResult<void> lcModel::Paste(bool PasteToCurrentStep)
 {
 	if (gApplication->mClipboard.isEmpty())
-		return;
+		return lcResult<void>();
 
-	std::unique_ptr<lcModel> Model(new lcModel(QString(), nullptr, false));
+	const lcResult<lcModel*> Imported = lcGetActiveProject()->ImportClipboard(gApplication->mClipboard);
 
-	QBuffer Buffer(&gApplication->mClipboard);
-	Buffer.open(QIODevice::ReadOnly);
-	Model->LoadLDraw(Buffer, lcGetActiveProject());
+	if (!Imported)
+		return lcUnexpected(Imported.error());
+
+	std::unique_ptr<lcModel> Model(Imported.value());
+
+	if (!Model)
+		return lcResult<void>();
 
 	const std::vector<std::unique_ptr<lcPiece>>& PastedPieces = Model->mPieces;
 	std::vector<lcObject*> SelectedObjects;
@@ -1532,7 +1532,7 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	}
 
 	if (PastedPieces.empty())
-		return;
+		return lcResult<void>();
 
 	BeginHistorySequence();
 	BeginEditHistory();
@@ -1551,6 +1551,8 @@ void lcModel::Paste(bool PasteToCurrentStep)
 	EndHistorySequence(tr("Paste"));
 
 	gMainWindow->UpdateTimeline(false, false);
+
+	return lcResult<void>();
 }
 
 void lcModel::DuplicateSelectedPieces()

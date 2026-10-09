@@ -309,15 +309,14 @@ public:
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
 	bool LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory);
-	int SplitMPD(QIODevice& Device);
 	void Merge(std::unique_ptr<lcModel> Other);
 
 	void SetMinifig(const lcMinifig& Minifig);
 	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
 
-	void Cut();
-	void Copy();
-	void Paste(bool PasteToCurrentStep);
+	lcResult<void> Cut();
+	lcResult<void> Copy();
+	lcResult<void> Paste(bool PasteToCurrentStep);
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;

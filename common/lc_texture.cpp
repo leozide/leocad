@@ -242,6 +242,7 @@ void lcTexture::Upload(lcContext* Context)
 		mImages.clear();
 		mState = lcTextureState::Ready;
 		mLoadFailure = lcTextureLoadError::None;
+		mLoadFailureDetails.clear();
 	}
 	else
 	{
@@ -302,4 +303,5 @@ void lcTexture::Unload()
 	mTexture = 0;
 	mState = lcTextureState::Unrequested;
 	mLoadFailure = lcTextureLoadError::None;
+	mLoadFailureDetails.clear();
 }

@@ -20,6 +20,7 @@ struct lcPartSourceSnapshot
 	QString LibraryDirectory;
 	QString CachePath;
 	std::vector<QString> TextureSearchDirectories;
+	std::map<QString, std::shared_ptr<const lcEmbeddedData>> EmbeddedData;
 	QStringList InlineMeshLines;
 	bool InlineModel = false;
 	bool SkipCache = false;
@@ -52,6 +53,7 @@ struct lcPartBuildResult
 
 struct lcTextureSourceSnapshot
 {
+	std::shared_ptr<const lcEmbeddedData> EmbeddedData;
 	QString FilePath;
 	int ArchiveType = -1;
 	int ArchiveIndex = -1;
@@ -68,6 +70,7 @@ struct lcTextureBuildResult
 
 	std::unique_ptr<Image> DecodedImage;
 	lcTextureLoadError Error{};
+	QString ErrorDetails;
 };
 
 // Owned by lcPiecesLibrary. UI-thread entry points schedule private worker builds;

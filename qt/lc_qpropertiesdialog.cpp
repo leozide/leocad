@@ -6,6 +6,202 @@
 #include "lc_application.h"
 #include "pieceinf.h"
 
+class lcFrozenPartsView : public QTableView
+{
+public:
+	explicit lcFrozenPartsView(lcPartsTableWidget* PartsTable)
+		: QTableView(PartsTable), mPartsTable(PartsTable)
+	{
+	}
+
+protected:
+	QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& Index, const QEvent* Event = nullptr) const override
+	{
+		return mPartsTable->TrackSelectionCommand(Index, Event, QTableView::selectionCommand(Index, Event));
+	}
+
+	void setSelection(const QRect& Rect, QItemSelectionModel::SelectionFlags Command) override
+	{
+		if (!mPartsTable->SelectSharedRange(Command))
+			QTableView::setSelection(Rect, Command);
+	}
+
+private:
+	lcPartsTableWidget* mPartsTable;
+};
+
+lcPartsTableWidget::lcPartsTableWidget(QWidget* Parent)
+	: QTableWidget(Parent)
+{
+}
+
+void lcPartsTableWidget::FreezePartColumn()
+{
+	mPartColumnWidth = qMax(sizeHintForColumn(0), horizontalHeader()->sectionSizeHint(0));
+	horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
+	setTextElideMode(Qt::ElideRight);
+	for (int Row = 0; Row < rowCount(); Row++)
+		if (QTableWidgetItem* Item = item(Row, 0))
+			Item->setToolTip(Item->text());
+
+	// Both views share the data and selection, so sorting and row highlights stay in sync.
+	mFrozenColumn = new lcFrozenPartsView(this);
+	mFrozenColumn->setModel(model());
+	mFrozenColumn->setSelectionModel(selectionModel());
+	mFrozenColumn->setSelectionBehavior(QAbstractItemView::SelectRows);
+	mFrozenColumn->setSelectionMode(selectionMode());
+	mFrozenColumn->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	mFrozenColumn->setTextElideMode(Qt::ElideRight);
+	mFrozenColumn->setFocusPolicy(Qt::NoFocus);
+	mFrozenColumn->setFocusProxy(this);
+	mFrozenColumn->setFrameShape(QFrame::NoFrame);
+	mFrozenColumn->verticalHeader()->hide();
+	mFrozenColumn->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	mFrozenColumn->horizontalHeader()->setSectionsClickable(true);
+	mFrozenColumn->horizontalHeader()->setSortIndicatorShown(true);
+	mFrozenColumn->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	mFrozenColumn->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	mFrozenColumn->viewport()->installEventFilter(this);
+	mFrozenColumn->horizontalHeader()->viewport()->installEventFilter(this);
+	setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+	setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	mFrozenColumn->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+	for (int Column = 1; Column < columnCount(); Column++)
+		mFrozenColumn->hideColumn(Column);
+
+	for (int Row = 0; Row < rowCount(); Row++)
+		mFrozenColumn->setRowHeight(Row, rowHeight(Row));
+
+	connect(verticalScrollBar(), &QScrollBar::valueChanged, mFrozenColumn->verticalScrollBar(), &QScrollBar::setValue);
+	connect(mFrozenColumn->verticalScrollBar(), &QScrollBar::valueChanged, verticalScrollBar(), &QScrollBar::setValue);
+	connect(verticalHeader(), &QHeaderView::sectionResized, this, [this](int Row, int, int Height)
+	{
+		mFrozenColumn->setRowHeight(Row, Height);
+	});
+	connect(horizontalHeader(), &QHeaderView::sectionResized, this, [this](int Column, int, int)
+	{
+		if (Column == 0)
+			UpdateFrozenGeometry();
+	});
+	connect(horizontalHeader(), &QHeaderView::sortIndicatorChanged, mFrozenColumn->horizontalHeader(), &QHeaderView::setSortIndicator);
+	connect(mFrozenColumn->horizontalHeader(), &QHeaderView::sectionClicked, this, [this](int)
+	{
+		const Qt::SortOrder Order = horizontalHeader()->sortIndicatorSection() == 0 && horizontalHeader()->sortIndicatorOrder() == Qt::AscendingOrder
+			? Qt::DescendingOrder : Qt::AscendingOrder;
+		horizontalHeader()->setSortIndicator(0, Order);
+	});
+	mFrozenColumn->horizontalHeader()->setSortIndicator(horizontalHeader()->sortIndicatorSection(), horizontalHeader()->sortIndicatorOrder());
+
+	viewport()->stackUnder(mFrozenColumn);
+	UpdateFrozenGeometry();
+	mFrozenColumn->show();
+}
+
+bool lcPartsTableWidget::eventFilter(QObject* Object, QEvent* Event)
+{
+	if (mFrozenColumn && Event->type() == QEvent::Wheel &&
+		(Object == mFrozenColumn->viewport() || Object == mFrozenColumn->horizontalHeader()->viewport()))
+	{
+		QCoreApplication::sendEvent(viewport(), Event);
+		return true;
+	}
+
+	return QTableWidget::eventFilter(Object, Event);
+}
+
+QItemSelectionModel::SelectionFlags lcPartsTableWidget::TrackSelectionCommand(const QModelIndex& Index, const QEvent* Event, QItemSelectionModel::SelectionFlags Command) const
+{
+	// Qt keeps a separate range anchor in each view, even with a shared selection model.
+	mSelectionEnd = Index;
+	if (Command.testFlag(QItemSelectionModel::Current))
+	{
+		if (!mSelectionAnchor.isValid())
+			mSelectionAnchor = currentIndex().isValid() ? currentIndex() : Index;
+	}
+	else if (Command != QItemSelectionModel::NoUpdate || (Event && Event->type() == QEvent::MouseButtonPress))
+		mSelectionAnchor = Index;
+
+	return Command;
+}
+
+QItemSelectionModel::SelectionFlags lcPartsTableWidget::selectionCommand(const QModelIndex& Index, const QEvent* Event) const
+{
+	return TrackSelectionCommand(Index, Event, QTableWidget::selectionCommand(Index, Event));
+}
+
+bool lcPartsTableWidget::SelectSharedRange(QItemSelectionModel::SelectionFlags Command)
+{
+	if (!Command.testFlag(QItemSelectionModel::Current) || !mSelectionAnchor.isValid() || !mSelectionEnd.isValid())
+		return false;
+
+	const int FirstRow = qMin(mSelectionAnchor.row(), mSelectionEnd.row());
+	const int LastRow = qMax(mSelectionAnchor.row(), mSelectionEnd.row());
+	selectionModel()->select(QItemSelection(model()->index(FirstRow, 0), model()->index(LastRow, columnCount() - 1)), Command);
+	return true;
+}
+
+void lcPartsTableWidget::setSelection(const QRect& Rect, QItemSelectionModel::SelectionFlags Command)
+{
+	if (!SelectSharedRange(Command))
+		QTableWidget::setSelection(Rect, Command);
+}
+
+void lcPartsTableWidget::UpdateFrozenGeometry()
+{
+	if (!mFrozenColumn)
+		return;
+
+	// Reserve at least half the viewport for counts, while letting short names use less space.
+	const int PartWidth = qMin(mPartColumnWidth, qMax(1, viewport()->width() / 2));
+	if (columnWidth(0) != PartWidth)
+		setColumnWidth(0, PartWidth);
+
+	mFrozenColumn->setColumnWidth(0, columnWidth(0));
+	mFrozenColumn->horizontalHeader()->setFixedHeight(horizontalHeader()->height());
+	mFrozenColumn->setGeometry(viewport()->geometry().x(), frameWidth(), columnWidth(0), viewport()->height() + horizontalHeader()->height());
+}
+
+void lcPartsTableWidget::focusInEvent(QFocusEvent* Event)
+{
+	const bool HasCurrent = currentIndex().isValid();
+	QTableWidget::focusInEvent(Event);
+
+	// Receiving focus should not mark the first cell before the user chooses a row.
+	if (!HasCurrent)
+		selectionModel()->clearCurrentIndex();
+}
+
+void lcPartsTableWidget::resizeEvent(QResizeEvent* Event)
+{
+	QTableWidget::resizeEvent(Event);
+	UpdateFrozenGeometry();
+}
+
+void lcPartsTableWidget::EnsureCountVisible(const QModelIndex& Index)
+{
+	if (mFrozenColumn && Index.column() > 0 && visualRect(Index).left() < columnWidth(0))
+		horizontalScrollBar()->setValue(horizontalScrollBar()->value() + visualRect(Index).left() - columnWidth(0));
+}
+
+QModelIndex lcPartsTableWidget::moveCursor(CursorAction Action, Qt::KeyboardModifiers Modifiers)
+{
+	const QModelIndex Index = QTableWidget::moveCursor(Action, Modifiers);
+	EnsureCountVisible(Index);
+	return Index;
+}
+
+void lcPartsTableWidget::scrollTo(const QModelIndex& Index, ScrollHint Hint)
+{
+	if (!mFrozenColumn || Index.column() > 0)
+	{
+		QTableWidget::scrollTo(Index, Hint);
+		EnsureCountVisible(Index);
+	}
+	else
+		mFrozenColumn->scrollTo(Index, Hint);
+}
+
 class lcPartsTableWidgetItem : public QTableWidgetItem
 {
 public:
@@ -138,6 +334,8 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 	Item->mLast = true;
 	Item->setTextAlignment(Qt::AlignCenter);
 	PartsTable->setItem((int)InfoTotals.size(), ColorCount + 1, Item);
+
+	ui->PartsTable->FreezePartColumn();
 }
 
 lcPropertiesDialog::~lcPropertiesDialog()

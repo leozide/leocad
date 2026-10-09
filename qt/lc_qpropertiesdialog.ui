@@ -92,12 +92,15 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTableWidget" name="PartsTable">
+        <widget class="lcPartsTableWidget" name="PartsTable">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
          <property name="sortingEnabled">
           <bool>true</bool>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>75</number>
@@ -134,6 +137,13 @@
   <tabstop>CommentsEdit</tabstop>
   <tabstop>PartsTable</tabstop>
  </tabstops>
+ <customwidgets>
+  <customwidget>
+   <class>lcPartsTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>lc_qpropertiesdialog.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

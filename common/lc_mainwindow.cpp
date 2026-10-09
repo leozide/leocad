@@ -1029,18 +1029,19 @@ void lcMainWindow::UpdateAssets()
 	mStatusRequiredAssets.clear();
 	mStatusRequiredAssets.insert(Required.begin(), Required.end());
 
-	if (Required.empty() && GeneratedPieces.empty())
-	{
-		mStatusLoadSpinner->hide();
-		mStatusLoadFailureLabel->hide();
-		return;
-	}
-
 	int PendingParts = 0;
 	int PendingSynths = 0;
 	int FailedSynths = 0;
 	int Failed = 0;
 	QString FailureDetails;
+
+	for (const QString& Warning : Project->GetLoadWarningDetails())
+	{
+		if (!FailureDetails.isEmpty())
+			FailureDetails += QLatin1Char('\n');
+
+		FailureDetails += Warning;
+	}
 
 	for (const PieceInfo* Info : Required)
 	{
@@ -1095,7 +1096,7 @@ void lcMainWindow::UpdateAssets()
 	mStatusLoadSpinner->setToolTip(LoadingText);
 	mStatusLoadSpinner->setAccessibleDescription(LoadingText);
 
-	if (Failed)
+	if (!FailureDetails.isEmpty())
 	{
 		QString FailureText = tr("The model could not be fully loaded, some pieces may be missing.\n\n%1").arg(FailureDetails);
 

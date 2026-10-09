@@ -859,6 +859,7 @@ void Project::LoadLDrawDocument(const QByteArray& FileData, const Project* Refer
 
 		if (Existing != mModels.end())
 		{
+			AddLoadWarning(tr("Duplicate model '%1' was ignored; model names are case-insensitive.").arg(Block.FileName));
 			mDocumentBlocks[Block.LayoutIndex].Model = Existing->get();
 			mDocumentBlocks[Block.LayoutIndex].DuplicateModel = true;
 			continue;
@@ -1005,6 +1006,59 @@ bool Project::SameEmbeddedData(const lcEmbeddedData& First, const lcEmbeddedData
 	return FirstSize == SecondSize && !memcmp(First.EncodedData.constData(), Second.EncodedData.constData(), FirstSize);
 }
 
+void Project::AddLoadWarning(const QString& Warning)
+{
+	AddLoadWarning(LoadWarning{ mFileName.isEmpty() ? GetTitle() : mFileName, Warning });
+}
+
+void Project::AddLoadWarning(const LoadWarning& Warning)
+{
+	const auto Existing = std::find_if(mLoadWarnings.begin(), mLoadWarnings.end(), [&Warning](const LoadWarning& Current)
+	{
+		return Current.FileName == Warning.FileName && Current.Message == Warning.Message;
+	});
+
+	if (Existing == mLoadWarnings.end())
+		mLoadWarnings.push_back(Warning);
+}
+
+std::vector<QString> Project::GetLoadWarningDetails() const
+{
+	std::vector<QString> Details;
+	std::set<QString> SeenWarnings;
+	std::vector<const Project*> Projects{ this };
+	std::unordered_set<const Project*> SeenProjects{ this };
+
+	for (size_t ProjectIndex = 0; ProjectIndex < Projects.size(); ProjectIndex++)
+	{
+		const Project* Current = Projects[ProjectIndex];
+
+		for (const LoadWarning& Warning : Current->mLoadWarnings)
+		{
+			const QString Detail = QDir::toNativeSeparators(Warning.FileName) + QStringLiteral(": ") + Warning.Message;
+
+			if (SeenWarnings.insert(Detail).second)
+				Details.push_back(Detail);
+		}
+
+		for (const std::unique_ptr<lcModel>& Model : Current->mModels)
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+			{
+				const PieceInfo* Info = Piece->mPieceInfo;
+
+				if (!Info || !Info->IsProject())
+					continue;
+
+				const Project* Referenced = Info->GetProject();
+
+				if (Referenced && SeenProjects.insert(Referenced).second)
+					Projects.push_back(Referenced);
+			}
+	}
+
+	return Details;
+}
+
 bool Project::Load(const QString& FileName, bool ShowErrors)
 {
 	QWidget *parent = nullptr;
@@ -1031,6 +1085,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 	mModels.clear();
 	mDocumentBlocks.clear();
+	mLoadWarnings.clear();
 	mEmbeddedData.clear();
 	mEmbeddedDataIndex.clear();
 	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
@@ -1642,6 +1697,9 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		Source->mModels.clear();
 		mEmbeddedData.insert(mEmbeddedData.end(), Source->mEmbeddedData.begin(), Source->mEmbeddedData.end());
 		mDocumentBlocks.insert(mDocumentBlocks.end(), Source->mDocumentBlocks.begin(), Source->mDocumentBlocks.end());
+		for (const LoadWarning& Warning : Source->mLoadWarnings)
+			AddLoadWarning(Warning);
+
 		Source->mEmbeddedData.clear();
 		Source->mEmbeddedDataIndex.clear();
 		Source->mDocumentBlocks.clear();

@@ -135,6 +135,8 @@ public:
 	void ShowModelListDialog();
 
 	bool Load(const QString& FileName, bool ShowErrors);
+	void AddLoadWarning(const QString& Warning);
+	std::vector<QString> GetLoadWarningDetails() const;
 	lcResult<void> Save(const QString& FileName);
 	bool Save(QTextStream& Stream) const;
 	lcResult<void> Merge(const std::vector<Project*>& Sources);
@@ -161,6 +163,13 @@ public:
 	void UpdatePieceInfo(PieceInfo* Info) const;
 
 private:
+	struct LoadWarning
+	{
+		QString FileName;
+		QString Message;
+	};
+	void AddLoadWarning(const LoadWarning& Warning);
+
 	struct FileState
 	{
 		QByteArray Hash;
@@ -212,6 +221,7 @@ protected:
 	QTimer mFileCheckTimer;
 
 	std::vector<DocumentBlock> mDocumentBlocks;
+	std::vector<LoadWarning> mLoadWarnings;
 	std::vector<std::shared_ptr<const lcEmbeddedData>> mEmbeddedData;
 	// First definition wins; retain duplicate blocks in mEmbeddedData for saving.
 	std::map<QString, std::shared_ptr<const lcEmbeddedData>> mEmbeddedDataIndex;

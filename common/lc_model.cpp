@@ -1038,6 +1038,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->IncludesModel(this))
 				{
+					Project->AddLoadWarning(tr("Model '%1': reference to '%2' was ignored because it would create a circular reference.").arg(GetFileName(), PartId));
 					delete Piece;
 					Piece = nullptr;
 					continue;

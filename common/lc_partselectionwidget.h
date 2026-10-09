@@ -50,6 +50,8 @@ public:
 	QSize sizeHint(const QStyleOptionViewItem& Option, const QModelIndex& Index) const override;
 
 protected:
+	void initStyleOption(QStyleOptionViewItem* Option, const QModelIndex& Index) const override;
+
 	lcPartSelectionListModel* mListModel;
 };
 
@@ -200,6 +202,8 @@ public:
 
 	void startDrag(Qt::DropActions SupportedActions) override;
 	QSize sizeHint() const override;
+	QSize GetCellSize() const;
+	QSize GetPreferredSize(int MaximumWidth) const;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
 	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
@@ -230,6 +234,7 @@ public:
 
 signals:
 	void PartPicked(PieceInfo* Info);
+	void LayoutChanged();
 
 public slots:
 	void CustomContextMenuRequested(QPoint Pos);
@@ -253,6 +258,7 @@ protected slots:
 
 protected:
 	void SetIconSize(int Size);
+	void UpdateItemGeometry();
 	void SetPartFilterType(lcPartFilterType Option);
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
 
@@ -331,6 +337,7 @@ public:
 signals:
 	void PartPicked(PieceInfo* Info);
 	void CurrentPartChanged(PieceInfo* Info);
+	void LayoutChanged();
 
 public slots:
 	void AddToPalette();

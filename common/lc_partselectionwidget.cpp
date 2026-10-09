@@ -16,6 +16,20 @@
 
 Q_DECLARE_METATYPE(QList<int>)
 
+void lcPartSelectionItemDelegate::initStyleOption(QStyleOptionViewItem* Option, const QModelIndex& Index) const
+{
+	QStyledItemDelegate::initStyleOption(Option, Index);
+	Option->showDecorationSelected = true;
+
+	if (mListModel->GetIconSize())
+		Option->decorationSize = QSize(mListModel->GetIconSize(), mListModel->GetIconSize());
+
+	// Keep the rendered part colors when the style requests a selected icon.
+	const QPixmap Pixmap = qvariant_cast<QPixmap>(Index.data(Qt::DecorationRole));
+	if (!Pixmap.isNull())
+		Option->icon.addPixmap(Pixmap, QIcon::Selected);
+}
+
 void lcPartSelectionItemDelegate::paint(QPainter* Painter, const QStyleOptionViewItem& Option, const QModelIndex& Index) const
 {
 	mListModel->RequestThumbnail(Index.row());
@@ -27,12 +41,16 @@ QSize lcPartSelectionItemDelegate::sizeHint(const QStyleOptionViewItem& Option, 
 	QSize Size = QStyledItemDelegate::sizeHint(Option, Index);
 	int IconSize = mListModel->GetIconSize();
 
-	if (IconSize)
+	if (IconSize && !mListModel->IsListMode())
 	{
-		QWidget* Widget = (QWidget*)parent();
-		const int PixmapMargin = Widget->style()->pixelMetric(QStyle::PM_FocusFrameHMargin, &Option, Widget) + 1;
+		const QWidget* Widget = Option.widget;
+		if (!Widget)
+			Widget = qobject_cast<QWidget*>(parent());
+		QStyle* Style = Widget ? Widget->style() : QApplication::style();
+		const int PixmapMargin = Style->pixelMetric(QStyle::PM_FocusFrameHMargin, &Option, Widget) + 1;
 		int PixmapWidth = IconSize + 2 * PixmapMargin;
-		Size.setWidth(qMin(PixmapWidth, Size.width()));
+		Size.setWidth(PixmapWidth);
+		Size.setHeight(qMax(PixmapWidth, Size.height()));
 	}
 
 	return Size;
@@ -443,8 +461,6 @@ void lcPartSelectionListModel::ThumbnailReady(lcPartThumbnailId ThumbnailId, QPi
 			mParts[PartIndex].Pixmap = Pixmap;
 
 			emit dataChanged(index(PartIndex, 0), index(PartIndex, 0), { Qt::DecorationRole });
-
-			break;
 		}
 	}
 }
@@ -724,6 +740,7 @@ void lcPartSelectionListView::TogglePartNames()
 	bool Show = !mListModel->GetShowPartNames();
 	mListModel->SetShowPartNames(Show);
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_NAMES, Show);
+	UpdateItemGeometry();
 }
 
 void lcPartSelectionListView::ToggleDecoratedParts()
@@ -776,6 +793,7 @@ void lcPartSelectionListView::SetPartFilterType(lcPartFilterType Option)
 void lcPartSelectionListView::ToggleListMode()
 {
 	mListModel->ToggleListMode();
+	UpdateItemGeometry();
 }
 
 void lcPartSelectionListView::ToggleFixedColor()
@@ -810,13 +828,33 @@ void lcPartSelectionListView::SetIconSize(int Size)
 	mListModel->SetIconSize(Size, DeviceScale);
 	UpdateViewMode();
 
-	int Width = Size + 2 * frameWidth() + 6;
+	const int PixmapMargin = style()->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, this) + 1;
+	int Width = Size + 2 * frameWidth() + 2 * PixmapMargin;
 	if (verticalScrollBar())
 		Width += verticalScrollBar()->sizeHint().width();
-	int Height = Size + 2 * frameWidth() + 2;
+	int Height = qMax(Size, fontMetrics().height()) + 2 * frameWidth() + 2 * PixmapMargin;
 	if (horizontalScrollBar())
 		Height += horizontalScrollBar()->sizeHint().height();
 	setMinimumSize(mPartSelectionWidget->GetIsPopup() ? QSize(0, 0) : QSize(Width, Height));
+	UpdateItemGeometry();
+}
+
+void lcPartSelectionListView::UpdateItemGeometry()
+{
+	updateGeometry();
+
+	if (mPartSelectionWidget->GetIsPopup())
+	{
+		// Invalidate the layout item caches through the picker splitter.
+		for (QWidget* Widget = parentWidget(); Widget; Widget = Widget->parentWidget())
+		{
+			Widget->updateGeometry();
+			if (Widget == mPartSelectionWidget)
+				break;
+		}
+	}
+
+	emit LayoutChanged();
 }
 
 void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
@@ -841,17 +879,8 @@ void lcPartSelectionListView::startDrag(Qt::DropActions SupportedActions)
 	Drag->exec(Qt::CopyAction);
 }
 
-QSize lcPartSelectionListView::sizeHint() const
+QSize lcPartSelectionListView::GetCellSize() const
 {
-	if (model()->rowCount() == 0)
-		return QListView::sizeHint();
-
-	if (mListModel->GetIconSize() == NoIconSize)
-		return QSize(500, 350);
-
-	int Columns = 5;
-	int Rows = qMin(4, (model()->rowCount() + Columns - 1) / Columns);
-
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 	QStyleOptionViewItem Option;
 	initViewItemOption(&Option);
@@ -859,11 +888,62 @@ QSize lcPartSelectionListView::sizeHint() const
 	QStyleOptionViewItem Option = viewOptions();
 #endif
 
-	QSize CellSize = itemDelegate()->sizeHint(Option, model()->index(0,0));
-	QSize Size(CellSize.width() * Columns + frameWidth() * 2, CellSize.height() * Rows + frameWidth() * 2);
+	return itemDelegate()->sizeHint(Option, model()->index(0, 0));
+}
 
+QSize lcPartSelectionListView::sizeHint() const
+{
+	return GetPreferredSize(QWIDGETSIZE_MAX);
+}
+
+QSize lcPartSelectionListView::GetPreferredSize(int MaximumWidth) const
+{
+	if (model()->rowCount() == 0 && (mListModel->GetIconSize() == NoIconSize || mListModel->IsListMode()))
+		return QListView::sizeHint();
+
+	if (mListModel->GetIconSize() == NoIconSize)
+		return QSize(500, 350);
+
+	int Columns = mListModel->IsListMode() ? 1 : 4;
+	int MaximumRows = 4;
+
+	QSize CellSize = GetCellSize();
+	if (mPartSelectionWidget->GetIsPopup() && !mListModel->IsListMode())
+	{
+		switch (mListModel->GetIconSize())
+		{
+		case SmallIconSize:
+			Columns = 9;
+			MaximumRows = 5;
+			break;
+
+		case MediumIconSize:
+			Columns = 5;
+			MaximumRows = 4;
+			break;
+
+		case LargeIconSize:
+			Columns = 4;
+			MaximumRows = 3;
+			break;
+
+		case ExtraLargeIconSize:
+			Columns = 3;
+			MaximumRows = 4;
+			break;
+		}
+	}
+
+	int WidthOverhead = frameWidth() * 2;
 	if (verticalScrollBar())
-		Size += QSize(verticalScrollBar()->width() + 1, 0);
+		WidthOverhead += verticalScrollBar()->sizeHint().width() + 1;
+
+	const int Width = qMin(CellSize.width() * Columns + WidthOverhead, MaximumWidth);
+	if (mPartSelectionWidget->GetIsPopup() && !mListModel->IsListMode() && CellSize.width() > 0)
+		Columns = qMin(Columns, qMax(1, (Width - WidthOverhead) / CellSize.width()));
+
+	int Rows = model()->rowCount() ? qMin(MaximumRows, (model()->rowCount() + Columns - 1) / Columns) : MaximumRows;
+	QSize Size(Width, CellSize.height() * Rows + frameWidth() * 2);
 
 	return Size;
 }
@@ -940,6 +1020,7 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	setLayout(Layout);
 
 	connect(mPartsWidget, &lcPartSelectionListView::PartPicked, this, &lcPartSelectionWidget::PartViewPartPicked);
+	connect(mPartsWidget, &lcPartSelectionListView::LayoutChanged, this, &lcPartSelectionWidget::LayoutChanged);
 	connect(mPartsWidget->selectionModel(), &QItemSelectionModel::currentChanged, this, &lcPartSelectionWidget::PartViewSelectionChanged);
 	connect(mFilterWidget, &QLineEdit::textChanged, this, &lcPartSelectionWidget::FilterChanged);
 	connect(mCategoriesWidget, &QTreeWidget::currentItemChanged, this, &lcPartSelectionWidget::CategoryChanged);

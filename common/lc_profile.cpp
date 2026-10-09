@@ -118,7 +118,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ImageHeight", 720),                                            // LC_PROFILE_IMAGE_HEIGHT
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                                      // LC_PROFILE_IMAGE_EXTENSION
 	lcProfileEntry("Settings", "PartsListIcons", 64),                                          // LC_PROFILE_PARTS_LIST_ICONS
-	lcProfileEntry("Settings", "PartsListNames", 0),                                           // LC_PROFILE_PARTS_LIST_NAMES
+	lcProfileEntry("Settings", "PartsListNames", 1),                                           // LC_PROFILE_PARTS_LIST_NAMES
 	lcProfileEntry("Settings", "PartsListFixedColor", -1),                                     // LC_PROFILE_PARTS_LIST_COLOR
 	lcProfileEntry("Settings", "PartsListColorLocked", false),                                // LC_PROFILE_PARTS_LIST_COLOR_LOCKED
 	lcProfileEntry("Settings", "PartsListDecorated", 1),                                       // LC_PROFILE_PARTS_LIST_DECORATED

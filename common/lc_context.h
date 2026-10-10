@@ -54,6 +54,7 @@ enum class lcMaterialType
 	UnlitViewSphere,
 	FakeLitColor,
 	FakeLitTextureDecal,
+	OutlineComposite,
 	Count
 };
 
@@ -79,6 +80,7 @@ struct lcProgram
 	GLint LightPositionLocation;
 	GLint EyePositionLocation;
 	GLint HighlightParamsLocation;
+	GLint OutlineParamsLocation;
 	GLint TextHaloColorLocation;
 };
 
@@ -158,6 +160,11 @@ public:
 
 	void ClearColorAndDepth(const lcVector4& ClearColor);
 	void ClearDepth();
+	static bool SupportsSelectionOutline();
+	int GetMaxTextureSize();
+	std::unique_ptr<QOpenGLFramebufferObject> CreateFramebuffer(int Width, int Height);
+	bool GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFramebufferObject& VisibleFramebuffer);
+	void DrawOutline(QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFramebufferObject& VisibleFramebuffer, float DeviceScale);
 
 	void SetWorldMatrix(const lcMatrix44& WorldMatrix)
 	{
@@ -222,6 +229,14 @@ public:
 		mHighlightParamsDirty = true;
 	}
 
+	void SetOutlineParams(const lcVector4& PixelSizeRadiusOpacity, const lcVector4& SelectedColor, const lcVector4& FocusedColor)
+	{
+		mOutlineParams[0] = PixelSizeRadiusOpacity;
+		mOutlineParams[1] = SelectedColor;
+		mOutlineParams[2] = FocusedColor;
+		mOutlineParamsDirty = true;
+	}
+
 	void SetColor(float Red, float Green, float Blue, float Alpha);
 	void SetColorIndex(int ColorIndex);
 	void SetColorIndexTinted(int ColorIndex, const lcVector4& Tint, float Weight);
@@ -256,6 +271,7 @@ protected:
 
 	void CreateShaderPrograms();
 	void FlushState();
+	bool TryShareDepthAttachment(GLuint SourceFramebuffer, QOpenGLFramebufferObject& TargetFramebuffer);
 
 	void SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenum Type, GLboolean Normalized, GLsizei Stride, const void* Pointer);
 	void EnableVertexAttrib(lcProgramAttrib Attrib);
@@ -295,6 +311,7 @@ protected:
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
 	lcVector4 mHighlightParams[4];
+	lcVector4 mOutlineParams[3];
 	bool mColorDirty;
 	bool mTextHaloColorDirty;
 	bool mWorldMatrixDirty;
@@ -302,6 +319,7 @@ protected:
 	bool mProjectionMatrixDirty;
 	bool mViewProjectionMatrixDirty;
 	bool mHighlightParamsDirty;
+	bool mOutlineParamsDirty;
 
 	static std::unique_ptr<QOpenGLContext> mOffscreenContext;
 	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;

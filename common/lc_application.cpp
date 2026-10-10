@@ -26,6 +26,8 @@ void lcPreferences::LoadDefaults()
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
 	mShadingMode = static_cast<lcShadingMode>(lcGetProfileInt(LC_PROFILE_SHADING_MODE));
+	const int SelectionRenderMode = lcGetProfileInt(LC_PROFILE_SELECTION_RENDER_MODE);
+	mSelectionRenderMode = SelectionRenderMode == static_cast<int>(lcSelectionRenderMode::Tint) ? lcSelectionRenderMode::Tint : lcSelectionRenderMode::Outline;
 	mBackgroundGradient = lcGetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT);
 	mBackgroundSolidColor = lcGetProfileUInt(LC_PROFILE_BACKGROUND_COLOR);
 	mBackgroundGradientColorTop = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_TOP);
@@ -91,6 +93,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_FIXED_AXES, mFixedAxes);
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
 	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
+	lcSetProfileInt(LC_PROFILE_SELECTION_RENDER_MODE, static_cast<int>(mSelectionRenderMode));
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION, static_cast<int>(mAxisIconLocation));
 	lcSetProfileUInt(LC_PROFILE_TEXT_COLOR, mTextColor);

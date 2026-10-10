@@ -20,6 +20,12 @@ enum class lcColorTheme
 	System
 };
 
+enum class lcSelectionRenderMode
+{
+	Outline,
+	Tint
+};
+
 enum class lcAxisIconLocation
 {
 	TopLeft,
@@ -37,6 +43,7 @@ public:
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
+	lcSelectionRenderMode mSelectionRenderMode;
 	bool mBackgroundGradient;
 	quint32 mBackgroundSolidColor;
 	quint32 mBackgroundGradientColorTop;

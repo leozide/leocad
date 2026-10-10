@@ -13,6 +13,7 @@
 #include "lc_mainwindow.h"
 #include "lc_viewwidget.h"
 #include "lc_view.h"
+#include "lc_context.h"
 
 static const char* gLanguageLocales[] =
 {
@@ -250,6 +251,26 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
 
+	bool OutlineSupported = false;
+
+	{
+		lcScopedGLContextState GLState;
+		lcView* View = Widget->GetView();
+		View->MakeCurrent();
+		OutlineSupported = View->PrepareOutlineFramebuffers();
+	}
+
+	if (!OutlineSupported)
+	{
+		mOptions->Preferences.mSelectionRenderMode = lcSelectionRenderMode::Tint;
+		lcGetPreferences().mSelectionRenderMode = lcSelectionRenderMode::Tint;
+		ui->SelectionRenderMode->setToolTip(tr("Outline rendering is unavailable. Face tint and colored edges will be used."));
+	}
+
+	ui->SelectionRenderMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mSelectionRenderMode));
+	ui->SelectionRenderMode->setEnabled(OutlineSupported);
+	ui->SelectionRenderModeLabel->setEnabled(OutlineSupported);
+
 	auto SetButtonPixmap = [](quint32 Color, QToolButton* Button)
 	{
 		QPixmap Pixmap(12, 12);
@@ -385,6 +406,7 @@ void lcPreferencesDialog::accept()
 	}
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
+	mOptions->Preferences.mSelectionRenderMode = static_cast<lcSelectionRenderMode>(ui->SelectionRenderMode->currentIndex());
 
 	mOptions->StudStyle = static_cast<lcStudStyle>(ui->studStyleCombo->currentIndex());
 

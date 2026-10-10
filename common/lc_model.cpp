@@ -1672,7 +1672,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
+			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
 	}
 }
 
@@ -1692,7 +1692,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Focused, false);
+			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
 	}
 }
 
@@ -1910,7 +1910,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 
 		Scene.End();
 
-		Scene.Draw(Context);
+		Scene.Draw(Context, {});
 
 		View.UnbindRenderFramebuffer();
 		Image.Thumbnail = View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32);

@@ -51,6 +51,8 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 lcView::~lcView()
 {
+	DestroyOutlineFramebuffers();
+
 	mContext->DestroyVertexBuffer(mGridBuffer);
 
 	if (gMainWindow && mViewType == lcViewType::View)
@@ -829,10 +831,7 @@ lcResult<void> lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffi
 bool lcView::BeginRenderToImage(int Width, int Height)
 {
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
-	GLint MaxTexture;
-
-	Context->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTexture);
-	MaxTexture = qMin(MaxTexture, 2048);
+	int MaxTexture = qMin(Context->GetMaxTextureSize(), 2048);
 
 	const int Samples = QSurfaceFormat::defaultFormat().samples();
 	if (Samples > 1)
@@ -871,6 +870,67 @@ void lcView::EndRenderToImage()
 QImage lcView::GetRenderImage() const
 {
 	return mRenderImage;
+}
+
+void lcView::DestroyOutlineFramebuffers()
+{
+	mOutlineFullFramebuffer.reset();
+	mOutlineVisibleFramebuffer.reset();
+	mOutlineAttemptSize = QSize();
+}
+
+bool lcView::PrepareOutlineFramebuffers()
+{
+	QOpenGLContext* GLContext = mContext->GetGLContext();
+	
+	// Framebuffer objects are context-local under core/ARB OpenGL.
+	if (mOutlineGLContext != GLContext)
+	{
+		DestroyOutlineFramebuffers();
+		mOutlineGLContext = GLContext;
+	}
+
+	if (!GLContext || !lcContext::SupportsSelectionOutline() || mWidth <= 0 || mHeight <= 0)
+		return false;
+
+	const QSize Size(mWidth, mHeight);
+	
+	if (mOutlineAttemptSize == Size)
+		return mOutlineFullFramebuffer && mOutlineVisibleFramebuffer;
+
+	lcScopedGLContextState GLState;
+	
+	DestroyOutlineFramebuffers();
+	
+	mOutlineAttemptSize = Size;
+	mOutlineFullFramebuffer = mContext->CreateFramebuffer(mWidth, mHeight);
+	mOutlineVisibleFramebuffer = mContext->CreateFramebuffer(mWidth, mHeight);
+
+	if (!mOutlineFullFramebuffer || !mOutlineVisibleFramebuffer)
+	{
+		mOutlineFullFramebuffer.reset();
+		mOutlineVisibleFramebuffer.reset();
+		
+		qWarning("Selection outline framebuffer creation failed; using face tint and colored edges.");
+		
+		return false;
+	}
+
+	return true;
+}
+
+bool lcView::GenerateOutlineMasks()
+{
+	if (mOutlineFullFramebuffer && mOutlineVisibleFramebuffer &&
+		mContext->GenerateOutlineMasks(*mScene, *mOutlineFullFramebuffer, *mOutlineVisibleFramebuffer))
+		return true;
+
+	mOutlineFullFramebuffer.reset();
+	mOutlineVisibleFramebuffer.reset();
+
+	qWarning("Selection outline pass failed; using face tint and colored edges.");
+
+	return false;
 }
 
 void lcView::BindRenderFramebuffer()
@@ -933,9 +993,6 @@ void lcView::OnDraw()
 	
 	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps && mViewType == lcViewType::View);
 
-	if (DrawInterface)
-		mScene->SetPreTranslucentCallback([this]() { DrawGrid(); });
-
 	mScene->End();
 
 	int TotalTileRows = 1;
@@ -991,7 +1048,35 @@ void lcView::OnDraw()
 
 			mContext->SetLineWidth(Preferences.mLineWidth);
 
-			mScene->Draw(mContext);
+			const bool OutlineEnabled = DrawInterface && !mRenderFramebuffer && mRenderImage.isNull() &&
+				ShadingMode != lcShadingMode::Wireframe && Preferences.mSelectionRenderMode == lcSelectionRenderMode::Outline &&
+				mScene->HasSelectedMeshes() && PrepareOutlineFramebuffers();
+			
+			bool OutlineMasksReady = false;
+
+			mScene->SetSelectionRenderMode(OutlineEnabled ? lcSelectionRenderMode::Outline : lcSelectionRenderMode::Tint);
+			mScene->Draw(mContext, [this, OutlineEnabled, DrawInterface, &OutlineMasksReady]()
+			{
+				if (OutlineEnabled)
+					OutlineMasksReady = GenerateOutlineMasks();
+
+				if (DrawInterface)
+					DrawGrid();
+			});
+
+			if (OutlineEnabled && OutlineMasksReady)
+				mContext->DrawOutline(*mOutlineFullFramebuffer, *mOutlineVisibleFramebuffer, mWidget->GetDeviceScale());
+
+			if (OutlineEnabled && !OutlineMasksReady)
+			{
+				mScene->SetSelectionRenderMode(lcSelectionRenderMode::Tint);
+				
+				DrawBackground(CurrentTileRow, TotalTileRows, CurrentTileHeight);
+				
+				mContext->SetProjectionMatrix(GetProjectionMatrix());
+				
+				mScene->Draw(mContext, [this]() { DrawGrid(); });
+			}
 
 			if (!mRenderImage.isNull())
 			{

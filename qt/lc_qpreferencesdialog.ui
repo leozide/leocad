@@ -303,13 +303,6 @@
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="12" column="0">
-           <widget class="QCheckBox" name="MeshLOD">
-            <property name="text">
-             <string>Mesh LOD</string>
-            </property>
-           </widget>
-          </item>
           <item row="10" column="1">
            <widget class="QToolButton" name="FadeStepsColor">
             <property name="text">
@@ -336,10 +329,61 @@
             </item>
            </widget>
           </item>
+          <item row="12" column="0">
+           <widget class="QCheckBox" name="MeshLOD">
+            <property name="text">
+             <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
           <item row="10" column="0">
            <widget class="QCheckBox" name="FadeSteps">
             <property name="text">
              <string>Fade Previous Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="11" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="text">
+             <string>Highlight New Pieces</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="18" column="1">
+           <widget class="QToolButton" name="BlenderAddonSettingsButton">
+            <property name="text">
+             <string>Addon Settings...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="15" column="0">
+           <widget class="QLabel" name="SelectionRenderModeLabel">
+            <property name="text">
+             <string>Selection rendering:</string>
+            </property>
+            <property name="buddy">
+             <cstring>SelectionRenderMode</cstring>
             </property>
            </widget>
           </item>
@@ -359,31 +403,10 @@
             </property>
            </widget>
           </item>
-          <item row="12" column="2">
-           <widget class="QLabel" name="MeshLODLabel">
+          <item row="13" column="2">
+           <widget class="QToolButton" name="HighContrastButton">
             <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
-            <property name="text">
-             <string>Anti-aliasing</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Stud Style</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QCheckBox" name="HighlightNewParts">
-            <property name="text">
-             <string>Highlight New Pieces</string>
+             <string>Contrast Settings...</string>
             </property>
            </widget>
           </item>
@@ -391,6 +414,32 @@
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>Shading Mode:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="antiAliasingSamples">
+            <item>
+             <property name="text">
+              <string>2x</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4x</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8x</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="18" column="0">
+           <widget class="QLabel" name="label_39">
+            <property name="text">
+             <string>Blender LDraw Render:</string>
             </property>
            </widget>
           </item>
@@ -438,64 +487,45 @@
             </item>
            </widget>
           </item>
-          <item row="13" column="2">
-           <widget class="QToolButton" name="HighContrastButton">
-            <property name="text">
-             <string>Contrast Settings...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="antiAliasingSamples">
-            <item>
-             <property name="text">
-              <string>2x</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>4x</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8x</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QToolButton" name="HighlightNewPartsColor">
+          <item row="12" column="2">
+           <widget class="QLabel" name="MeshLODLabel">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="label_39">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
             <property name="text">
-             <string>Blender LDraw Render:</string>
+             <string>Anti-aliasing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>Stud Style</string>
             </property>
            </widget>
           </item>
           <item row="15" column="1">
-           <widget class="QToolButton" name="BlenderAddonSettingsButton">
-            <property name="text">
-             <string>Addon Settings...</string>
+           <widget class="QComboBox" name="SelectionRenderMode">
+            <property name="toolTip">
+             <string>Controls how selected pieces are rendered, the options are:
+- Outline with a faint selection-colored fill for obscured portions
+- Face tint and colored edges.
+Unsupported video cards use face tint and colored edges.</string>
             </property>
+            <item>
+             <property name="text">
+              <string>Outline</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Tint and Edges</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -1994,6 +2024,7 @@
   <tabstop>studStyleCombo</tabstop>
   <tabstop>HighContrastButton</tabstop>
   <tabstop>ShadingMode</tabstop>
+  <tabstop>SelectionRenderMode</tabstop>
   <tabstop>BlenderAddonSettingsButton</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>ConditionalLinesCheckBox</tabstop>
@@ -2073,8 +2104,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
-     <y>440</y>
+     <x>273</x>
+     <y>635</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -2089,8 +2120,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>329</x>
-     <y>440</y>
+     <x>341</x>
+     <y>635</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

@@ -2,11 +2,14 @@
 
 #include "lc_mesh.h"
 
+enum class lcSelectionRenderMode;
+
 enum class lcRenderMeshState : int
 {
 	Default,
 	Selected,
 	Focused,
+	Preview,
 	Faded,
 	Highlighted
 };
@@ -113,11 +116,6 @@ public:
 		mMeshLODDistance = Distance;
 	}
 
-	void SetPreTranslucentCallback(std::function<void()> Callback)
-	{
-		mPreTranslucentCallback = Callback;
-	}
-
 	lcMatrix44 ApplyActiveSubmodelTransform(const lcMatrix44& WorldMatrix) const
 	{
 		return !mActiveSubmodelInstance ? WorldMatrix : lcMul(WorldMatrix, mActiveSubmodelTransform);
@@ -132,10 +130,25 @@ public:
 		mInterfaceObjects.emplace_back(Object);
 	}
 
-	void Draw(lcContext* Context) const;
+	void Draw(lcContext* Context, const std::function<void()>& PreTranslucentCallback) const;
+	bool HasSelectedMeshes() const;
+	bool CanReuseSceneDepth() const;
+	void DrawOutlineMask(lcContext* Context) const;
+	void DrawOutlineOccluders(lcContext* Context) const;
+	void SetSelectionRenderMode(lcSelectionRenderMode SelectionRenderMode)
+	{
+		mSelectionRenderMode = SelectionRenderMode;
+	}
+
+	lcSelectionRenderMode GetSelectionRenderMode() const
+	{
+		return mSelectionRenderMode;
+	}
+
 	void DrawInterfaceObjects(lcContext* Context) const;
 
 protected:
+	void DrawOutlineGeometry(lcContext* Context, bool SelectedOnly) const;
 	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes, bool DrawFaded, bool DrawNonFaded) const;
 	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawFadePrepass, bool DrawFaded, bool DrawNonFaded) const;
 	void DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const;
@@ -145,6 +158,7 @@ protected:
 	lcPiece* mActiveSubmodelInstance = nullptr;
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
+	lcSelectionRenderMode mSelectionRenderMode;
 	bool mRequireCompleteAssets = false;
 	bool mRequireGeneratedMeshes = false;
 	bool mMissingAssets = false;
@@ -157,7 +171,6 @@ protected:
 	bool mHasFadedParts = false;
 	bool mTranslucentFade = false;
 
-	std::function<void()> mPreTranslucentCallback = nullptr;
 	std::vector<lcRenderMesh> mRenderMeshes;
 	std::vector<int> mOpaqueMeshes;
 	std::vector<lcTranslucentMeshInstance> mTranslucentMeshes;

@@ -60,6 +60,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "HighlightNewParts", 0),                                                    // LC_PROFILE_HIGHLIGHT_NEW_PARTS
 	lcProfileEntry("Settings", "HighlightNewPartsColor", LC_RGBA(255, 242, 0, 192)),                       // LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR
 	lcProfileEntry("Settings", "ShadingMode", static_cast<int>(lcShadingMode::DefaultLights)),             // LC_PROFILE_SHADING_MODE
+	lcProfileEntry("Settings", "SelectionRenderMode", static_cast<int>(lcSelectionRenderMode::Outline)),      // LC_PROFILE_SELECTION_RENDER_MODE
 	lcProfileEntry("Settings", "BackgroundGradient", false),                                               // LC_PROFILE_BACKGROUND_GRADIENT
 	lcProfileEntry("Settings", "BackgroundColor", LC_RGB(49, 52, 55)),                                     // LC_PROFILE_BACKGROUND_COLOR
 	lcProfileEntry("Settings", "GradientColorTop", LC_RGB(54, 72, 95)),                                    // LC_PROFILE_GRADIENT_COLOR_TOP

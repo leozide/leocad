@@ -28,6 +28,13 @@ lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 
 lcViewWidget::~lcViewWidget()
 {
+	if (context())
+		makeCurrent();
+
+	mView.reset();
+
+	if (context())
+		doneCurrent();
 }
 
 QSize lcViewWidget::sizeHint() const
@@ -42,11 +49,13 @@ lcView* lcViewWidget::GetView() const
 
 void lcViewWidget::SetView(lcView* View)
 {
+	if (context())
+		makeCurrent();
+
 	if (View)
 	{
 		if (context())
 		{
-			makeCurrent();
 			View->mContext->SetGLContext(context(), this);
 		}
 

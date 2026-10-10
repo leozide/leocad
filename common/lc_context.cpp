@@ -12,6 +12,7 @@
 #include "lc_viewmanipulator.h"
 #include "lc_stringcache.h"
 #include "lc_partselectionwidget.h"
+#include "lc_scene.h"
 
 #ifdef LC_OPENGLES
 #define glEnableClientState(...)
@@ -107,6 +108,9 @@ lcContext::lcContext()
 	mHighlightParams[1] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mHighlightParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mHighlightParams[3] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mOutlineParams[0] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mOutlineParams[1] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mOutlineParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
 	mTextHaloColorDirty = false;
 	mWorldMatrixDirty = false;
@@ -114,6 +118,7 @@ lcContext::lcContext()
 	mProjectionMatrixDirty = false;
 	mViewProjectionMatrixDirty = false;
 	mHighlightParamsDirty = false;
+	mOutlineParamsDirty = false;
 
 	mMaterialType = lcMaterialType::Count;
 }
@@ -147,6 +152,9 @@ bool lcContext::InitializeRenderer()
 
 	if (!gSupportsShaderObjects && lcGetPreferences().mDrawConditionalLines)
 		lcGetPreferences().mDrawConditionalLines = false;
+
+	if (!SupportsSelectionOutline())
+		lcGetPreferences().mSelectionRenderMode = lcSelectionRenderMode::Tint;
 
 	if (!gSupportsFramebufferObject)
 		gMainWindow->GetPartSelectionWidget()->DisableIconMode();
@@ -261,7 +269,8 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/unlit_vertex_color_vs.glsl",      // UnlitVertexColor
 		":/resources/shaders/unlit_view_sphere_vs.glsl",       // UnlitViewSphere
 		":/resources/shaders/fakelit_color_vs.glsl",           // FakeLitColor
-		":/resources/shaders/fakelit_texture_decal_vs.glsl"    // FakeLitTextureDecal
+		":/resources/shaders/fakelit_texture_decal_vs.glsl",   // FakeLitTextureDecal
+		":/resources/shaders/unlit_texture_modulate_vs.glsl"   // OutlineComposite
 	};
 
 	LC_ARRAY_SIZE_CHECK(VertexShaders, lcMaterialType::Count);
@@ -276,7 +285,8 @@ void lcContext::CreateShaderPrograms()
 		":/resources/shaders/unlit_vertex_color_ps.glsl",      // UnlitVertexColor
 		":/resources/shaders/unlit_view_sphere_ps.glsl",       // UnlitViewSphere
 		":/resources/shaders/fakelit_color_ps.glsl",           // FakeLitColor
-		":/resources/shaders/fakelit_texture_decal_ps.glsl"    // FakeLitTextureDecal
+		":/resources/shaders/fakelit_texture_decal_ps.glsl",   // FakeLitTextureDecal
+		":/resources/shaders/outline_composite_ps.glsl"      // OutlineComposite
 	};
 
 	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
@@ -295,22 +305,28 @@ void lcContext::CreateShaderPrograms()
 		glShaderSource(Shader, 1, &Source, nullptr);
 		glCompileShader(Shader);
 
-#ifndef QT_NO_DEBUG
 		GLint ShaderCompiled = 0;
 		glGetShaderiv(Shader, GL_COMPILE_STATUS, &ShaderCompiled);
 
 		if (ShaderCompiled == GL_FALSE)
 		{
+#ifndef QT_NO_DEBUG
 			GLint Length = 0;
+			QByteArray InfoLog;
+
 			glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &Length);
 
-			QByteArray InfoLog;
 			InfoLog.resize(Length);
+
 			glGetShaderInfoLog(Shader, Length, &Length, InfoLog.data());
 
 			qDebug() << InfoLog;
-		}
 #endif
+
+			glDeleteShader(Shader);
+
+			return 0;
+		}
 
 		return Shader;
 	};
@@ -319,6 +335,16 @@ void lcContext::CreateShaderPrograms()
 	{
 		const GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
 		const GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
+
+		if (!VertexShader || !FragmentShader)
+		{
+			glDeleteShader(VertexShader);
+			glDeleteShader(FragmentShader);
+
+			mPrograms[MaterialType].Object = 0;
+
+			continue;
+		}
 
 		GLuint Program = glCreateProgram();
 
@@ -347,24 +373,33 @@ void lcContext::CreateShaderPrograms()
 
 		if (IsLinked == GL_FALSE)
 		{
+#ifndef QT_NO_DEBUG
 			GLint Length = 0;
+			QByteArray InfoLog;
+
 			glGetProgramiv(Program, GL_INFO_LOG_LENGTH, &Length);
 
-			QByteArray InfoLog;
 			InfoLog.resize(Length);
+
 			glGetProgramInfoLog(Program, Length, &Length, InfoLog.data());
+#endif
 
 			glDeleteProgram(Program);
 			Program = 0;
 		}
 
 		mPrograms[MaterialType].Object = Program;
+		
+		if (!Program)
+			continue;
+		
 		mPrograms[MaterialType].WorldViewProjectionMatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
 		mPrograms[MaterialType].WorldMatrixLocation = glGetUniformLocation(Program, "WorldMatrix");
 		mPrograms[MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
 		mPrograms[MaterialType].LightPositionLocation = glGetUniformLocation(Program, "LightPosition");
 		mPrograms[MaterialType].EyePositionLocation = glGetUniformLocation(Program, "EyePosition");
 		mPrograms[MaterialType].HighlightParamsLocation = glGetUniformLocation(Program, "HighlightParams");
+		mPrograms[MaterialType].OutlineParamsLocation = glGetUniformLocation(Program, "OutlineParams");
 		mPrograms[MaterialType].TextHaloColorLocation = glGetUniformLocation(Program, "TextHaloColor");
 
 		const GLint TextureLocation = glGetUniformLocation(Program, "Texture");
@@ -373,6 +408,15 @@ void lcContext::CreateShaderPrograms()
 		{
 			glUseProgram(Program);
 			glUniform1i(TextureLocation, 0);
+			glUseProgram(0);
+		}
+
+		const GLint VisibleTextureLocation = glGetUniformLocation(Program, "VisibleTexture");
+		
+		if (VisibleTextureLocation != -1)
+		{
+			glUseProgram(Program);
+			glUniform1i(VisibleTextureLocation, 1);
 			glUseProgram(0);
 		}
 	}
@@ -507,6 +551,224 @@ void lcContext::ClearDepth()
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
+bool lcContext::SupportsSelectionOutline()
+{
+	return gSupportsShaderObjects && gSupportsFramebufferObject &&
+		mPrograms[static_cast<int>(lcMaterialType::UnlitColor)].Object &&
+		mPrograms[static_cast<int>(lcMaterialType::OutlineComposite)].Object;
+}
+
+int lcContext::GetMaxTextureSize()
+{
+	GLint MaxTextureSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MaxTextureSize);
+	return MaxTextureSize;
+}
+
+std::unique_ptr<QOpenGLFramebufferObject> lcContext::CreateFramebuffer(int Width, int Height)
+{
+	if (!gSupportsFramebufferObject || Width <= 0 || Height <= 0)
+		return nullptr;
+
+	const int MaxTextureSize = GetMaxTextureSize();
+	GLint MaxRenderbufferSize = 0;
+	
+	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &MaxRenderbufferSize);
+	
+	if (Width > MaxTextureSize || Height > MaxTextureSize || Width > MaxRenderbufferSize || Height > MaxRenderbufferSize)
+		return nullptr;
+
+	lcScopedGLContextState GLState;
+	QOpenGLFramebufferObjectFormat Format;
+	
+	Format.setAttachment(QOpenGLFramebufferObject::Depth);
+	
+	std::unique_ptr<QOpenGLFramebufferObject> Framebuffer = std::make_unique<QOpenGLFramebufferObject>(QSize(Width, Height), Format);
+
+	if (!Framebuffer->isValid())
+	{
+		glBindTexture(GL_TEXTURE_2D, mTexture2D);
+		
+		return nullptr;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, Framebuffer->texture());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, mTexture2D);
+	
+	return Framebuffer;
+}
+
+bool lcContext::TryShareDepthAttachment(GLuint SourceFramebuffer, QOpenGLFramebufferObject& TargetFramebuffer)
+{
+	// Share single-sample depth directly; other framebuffers use a depth prepass.
+	if (!SourceFramebuffer)
+		return false;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, SourceFramebuffer);
+	
+	GLint Samples = 0;
+	
+	glGetIntegerv(GL_SAMPLES, &Samples);
+	
+	if (Samples != 0)
+		return false;
+
+	GLint ObjectType = 0;
+	GLint DepthBuffer = 0;
+	
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ObjectType);
+	
+	if (ObjectType != GL_RENDERBUFFER)
+		return false;
+	
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &DepthBuffer);
+
+	GLint PreviousRenderbuffer = 0;
+	GLint Width = 0;
+	GLint Height = 0;
+	
+	glGetIntegerv(GL_RENDERBUFFER_BINDING, &PreviousRenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
+	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &Width);
+	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &Height);
+	glBindRenderbuffer(GL_RENDERBUFFER, PreviousRenderbuffer);
+	
+	if (QSize(Width, Height) != TargetFramebuffer.size())
+		return false;
+
+	TargetFramebuffer.bind();
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
+	
+	return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+}
+
+bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFramebufferObject& VisibleFramebuffer)
+{
+	lcScopedGLContextState GLState;
+	GLint SceneFramebuffer = 0;
+	GLint Viewport[4];
+	
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &SceneFramebuffer);
+	glGetIntegerv(GL_VIEWPORT, Viewport);
+	
+	const lcMatrix44 WorldMatrix = mWorldMatrix;
+	const lcMatrix44 ViewMatrix = mViewMatrix;
+	const lcMatrix44 ProjectionMatrix = mProjectionMatrix;
+	const float LineWidth = mLineWidth;
+
+	if (!FullFramebuffer.bind() || glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		return false;
+
+	SetDefaultState();
+	SetViewport(0, 0, FullFramebuffer.width(), FullFramebuffer.height());
+	ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
+	Scene.DrawOutlineMask(this);
+
+	const bool Success = VisibleFramebuffer.bind() && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+	
+	if (Success)
+	{
+		GLint OwnDepthBuffer = 0;
+		
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &OwnDepthBuffer);
+		
+		const bool SharedDepth = Scene.CanReuseSceneDepth() && TryShareDepthAttachment(SceneFramebuffer, VisibleFramebuffer);
+		
+		VisibleFramebuffer.bind();
+		
+		if (!SharedDepth)
+		{
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OwnDepthBuffer);
+			
+			ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
+			
+			EnableColorWrite(false);
+			SetPolygonOffset(lcPolygonOffset::Opaque);
+			
+			Scene.DrawOutlineOccluders(this);
+			
+			SetPolygonOffset(lcPolygonOffset::None);
+			EnableColorWrite(true);
+		}
+		else
+		{
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+
+		SetDepthWrite(false);
+		
+		Scene.DrawOutlineMask(this);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OwnDepthBuffer);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, SceneFramebuffer);
+
+	SetDefaultState();
+	SetWorldMatrix(WorldMatrix);
+	SetViewMatrix(ViewMatrix);
+	SetProjectionMatrix(ProjectionMatrix);
+	SetViewport(Viewport[0], Viewport[1], Viewport[2], Viewport[3]);
+	SetLineWidth(LineWidth);
+	
+	return Success;
+}
+
+void lcContext::DrawOutline(QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFramebufferObject& VisibleFramebuffer, float DeviceScale)
+{
+	const lcMatrix44 WorldMatrix = mWorldMatrix;
+	const lcMatrix44 ViewMatrix = mViewMatrix;
+	const lcMatrix44 ProjectionMatrix = mProjectionMatrix;
+	const float LineWidth = mLineWidth;
+
+	SetDepthWrite(false);
+	EnableDepthTest(false);
+	EnableColorBlend(true);
+	SetWorldMatrix(lcMatrix44Identity());
+	SetViewMatrix(lcMatrix44Identity());
+	SetProjectionMatrix(lcMatrix44Identity());
+	SetMaterial(lcMaterialType::OutlineComposite);
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	
+	SetOutlineParams(lcVector4(1.0f / FullFramebuffer.width(), 1.0f / FullFramebuffer.height(), 2.0f * DeviceScale, 0.3f),
+		lcVector4FromColor(Preferences.mObjectSelectedColor), lcVector4FromColor(Preferences.mObjectFocusedColor));
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, VisibleFramebuffer.texture());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, FullFramebuffer.texture());
+	mTexture2D = FullFramebuffer.texture();
+
+	const float Vertices[] =
+	{
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
+	};
+	
+	SetVertexBufferPointer(Vertices);
+	SetVertexFormat(0, 3, 0, 2, 0, false);
+	
+	DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
+	
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
+
+	SetDefaultState();
+	SetWorldMatrix(WorldMatrix);
+	SetViewMatrix(ViewMatrix);
+	SetProjectionMatrix(ProjectionMatrix);
+	SetLineWidth(LineWidth);
+}
+
 void lcContext::ClearResources()
 {
 	ClearVertexBuffer();
@@ -528,6 +790,7 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
 		mViewMatrixDirty = true;
 		mHighlightParamsDirty = true;
+		mOutlineParamsDirty = true;
 		mTextHaloColorDirty = true;
 	}
 }
@@ -1294,6 +1557,12 @@ void lcContext::FlushState()
 		{
 			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0].GetFloats());
 			mHighlightParamsDirty = false;
+		}
+
+		if (mOutlineParamsDirty && Program.OutlineParamsLocation != -1)
+		{
+			glUniform4fv(Program.OutlineParamsLocation, 3, mOutlineParams[0].GetFloats());
+			mOutlineParamsDirty = false;
 		}
 	}
 }

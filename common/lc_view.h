@@ -224,6 +224,7 @@ public:
 	static void DestroyResources(lcContext* Context);
 
 	void MakeCurrent();
+	bool PrepareOutlineFramebuffers();
 	void Redraw();
 
 	void SetOffscreenContext();
@@ -314,6 +315,9 @@ signals:
 	void FocusReceived();
 
 protected:
+	void DestroyOutlineFramebuffers();
+	bool GenerateOutlineMasks();
+
 	void DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const;
 	void DrawViewport() const;
 	void DrawAxes() const;
@@ -374,6 +378,10 @@ protected:
 
 	QImage mRenderImage;
 	std::unique_ptr<QOpenGLFramebufferObject> mRenderFramebuffer;
+	std::unique_ptr<QOpenGLFramebufferObject> mOutlineFullFramebuffer;
+	std::unique_ptr<QOpenGLFramebufferObject> mOutlineVisibleFramebuffer;
+	QSize mOutlineAttemptSize;
+	QPointer<QOpenGLContext> mOutlineGLContext;
 	bool mOverrideBackgroundColor = false;
 	quint32 mBackgroundColor = 0;
 

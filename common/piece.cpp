@@ -649,10 +649,13 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		Context->SetColor(SelectedColor);
 	}
 
-	Context->SetVertexBufferPointer(LineVerts);
-	Context->SetVertexFormatPosition(3);
+	if (Scene.GetSelectionRenderMode() == lcSelectionRenderMode::Tint)
+	{
+		Context->SetVertexBufferPointer(LineVerts);
+		Context->SetVertexFormatPosition(3);
 
-	Context->DrawPrimitives(GL_LINES, 0, 48);
+		Context->DrawPrimitives(GL_LINES, 0, 48);
+	}
 
 	if (IsPivotPointVisible())
 	{

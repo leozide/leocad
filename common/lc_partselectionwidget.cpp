@@ -68,22 +68,22 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	mCaseSensitiveFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_CASE_SENSITIVE_FILTER);
 	mFileNameFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_FILE_NAME_FILTER);
 	mPartDescriptionFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_PART_DESCRIPTION_FILTER);
-	mPartFilterType = static_cast<lcPartFilterType>(lcGetProfileInt(LC_PROFILE_PARTS_LIST_PART_FILTER));
+	mPartFilterType = lcGetProfilePartFilterType();
 
-	int ColorCodeInt = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR);
+	uint ColorCode = lcGetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR);
 	int LockedFlag = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED);
 
-	if (ColorCodeInt == -1 && LockedFlag == 0)
+	if (ColorCode == LC_COLOR_NOCOLOR && LockedFlag == 0)
 	{
 		mColorIndex = gMainWindow->mColorIndex;
 		mColorLocked = false;
 	}
 	else
 	{
-		uint ColorCodeValue = (ColorCodeInt == -1) ? lcGetColorCode(gMainWindow->mColorIndex) : static_cast<uint>(ColorCodeInt);
+		uint ColorCodeValue = (ColorCode == LC_COLOR_NOCOLOR) ? lcGetColorCode(gMainWindow->mColorIndex) : ColorCode;
 
 		mColorIndex = lcGetColorIndex(ColorCodeValue);
-		mColorLocked = (LockedFlag != 0) || (ColorCodeInt != -1);
+		mColorLocked = (LockedFlag != 0) || (ColorCode != LC_COLOR_NOCOLOR);
 	}
 
 	connect(lcGetPiecesLibrary()->GetThumbnailManager(), &lcThumbnailManager::ThumbnailReady, this, &lcPartSelectionListModel::ThumbnailReady);
@@ -128,7 +128,7 @@ void lcPartSelectionListModel::ToggleColorLocked()
 	else
 	{
 		lcSetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED, 0);
-		lcSetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR, 0);
+		lcRemoveProfileKey(LC_PROFILE_PARTS_LIST_COLOR);
 	}
 }
 
@@ -787,7 +787,7 @@ void lcPartSelectionListView::TogglePartDescriptionFilter()
 void lcPartSelectionListView::SetPartFilterType(lcPartFilterType Option)
 {
 	mListModel->SetPartFilterType(Option);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_PART_FILTER, static_cast<int>(Option));
+	lcSetProfilePartFilterType(Option);
 }
 
 void lcPartSelectionListView::ToggleListMode()

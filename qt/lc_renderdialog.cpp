@@ -49,7 +49,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 
 	mWidth = lcGetProfileInt(LC_PROFILE_RENDER_WIDTH);
 	mHeight = lcGetProfileInt(LC_PROFILE_RENDER_HEIGHT);
-	mQuality = static_cast<lcPOVRayRenderQuality>(lcGetProfileInt(LC_PROFILE_RENDER_QUALITY));
+	mQuality = lcGetProfileRenderQuality();
 	mScale = 1.0f;
 
 	ui->OutputEdit->setText(lcGetActiveProject()->GetImageFileName(false));
@@ -862,7 +862,7 @@ void lcRenderDialog::SettingsButtonClicked()
 
 		lcSetProfileInt(LC_PROFILE_RENDER_WIDTH, mWidth);
 		lcSetProfileInt(LC_PROFILE_RENDER_HEIGHT, mHeight);
-		lcSetProfileInt(LC_PROFILE_RENDER_QUALITY, static_cast<int>(mQuality));
+		lcSetProfileRenderQuality(mQuality);
 	}
 	else
 	{

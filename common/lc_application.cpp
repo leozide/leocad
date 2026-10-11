@@ -25,15 +25,14 @@ void lcPreferences::LoadDefaults()
 {
 	mFixedAxes = lcGetProfileInt(LC_PROFILE_FIXED_AXES);
 	mMouseSensitivity = lcGetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY);
-	mShadingMode = static_cast<lcShadingMode>(lcGetProfileInt(LC_PROFILE_SHADING_MODE));
-	const int SelectionRenderMode = lcGetProfileInt(LC_PROFILE_SELECTION_RENDER_MODE);
-	mSelectionRenderMode = SelectionRenderMode == static_cast<int>(lcSelectionRenderMode::Tint) ? lcSelectionRenderMode::Tint : lcSelectionRenderMode::Outline;
+	mShadingMode = lcGetProfileShadingMode();
+	mSelectionRenderMode = lcGetProfileSelectionRenderMode();
 	mBackgroundGradient = lcGetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT);
 	mBackgroundSolidColor = lcGetProfileUInt(LC_PROFILE_BACKGROUND_COLOR);
 	mBackgroundGradientColorTop = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_TOP);
 	mBackgroundGradientColorBottom = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
-	mAxisIconLocation = static_cast<lcAxisIconLocation>(lcGetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION));
+	mAxisIconLocation = lcGetProfileAxisIconLocation();
 	mTextColor = lcGetProfileUInt(LC_PROFILE_TEXT_COLOR);
 	mTextHaloColor = lcGetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR);
 	mMarqueeBorderColor = lcGetProfileUInt(LC_PROFILE_MARQUEE_BORDER_COLOR);
@@ -57,17 +56,17 @@ void lcPreferences::LoadDefaults()
 	mGridLineColor = lcGetProfileUInt(LC_PROFILE_GRID_LINE_COLOR);
 	mDrawGridOrigin = lcGetProfileInt(LC_PROFILE_GRID_ORIGIN);
 	mViewSphereEnabled = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED);
-	mViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION));
+	mViewSphereLocation = lcGetProfileViewSphereLocation();
 	mViewSphereSize = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE);
 	mViewSphereColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_COLOR);
 	mViewSphereTextColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR);
 	mViewSphereHighlightColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
-	mColorTheme = static_cast<lcColorTheme>(lcGetProfileInt(LC_PROFILE_COLOR_THEME));
+	mColorTheme = lcGetProfileColorTheme();
 	mPreviewViewSphereEnabled = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED);
 	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
-	mPreviewViewSphereLocation = static_cast<lcViewSphereLocation>(lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION));
+	mPreviewViewSphereLocation = lcGetProfilePreviewViewSphereLocation();
 	mDrawPreviewAxis = lcGetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES);
 	mStudCylinderColorEnabled = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED);
 	mStudCylinderColor = lcGetProfileUInt(LC_PROFILE_STUD_CYLINDER_COLOR);
@@ -92,10 +91,10 @@ void lcPreferences::SaveDefaults()
 {
 	lcSetProfileInt(LC_PROFILE_FIXED_AXES, mFixedAxes);
 	lcSetProfileInt(LC_PROFILE_MOUSE_SENSITIVITY, mMouseSensitivity);
-	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(mShadingMode));
-	lcSetProfileInt(LC_PROFILE_SELECTION_RENDER_MODE, static_cast<int>(mSelectionRenderMode));
+	lcSetProfileShadingMode(mShadingMode);
+	lcSetProfileSelectionRenderMode(mSelectionRenderMode);
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
-	lcSetProfileInt(LC_PROFILE_DRAW_AXES_LOCATION, static_cast<int>(mAxisIconLocation));
+	lcSetProfileAxisIconLocation(mAxisIconLocation);
 	lcSetProfileUInt(LC_PROFILE_TEXT_COLOR, mTextColor);
 	lcSetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR, mTextHaloColor);
 	lcSetProfileInt(LC_PROFILE_BACKGROUND_GRADIENT, mBackgroundGradient);
@@ -122,17 +121,18 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileUInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
 	lcSetProfileInt(LC_PROFILE_GRID_ORIGIN, mDrawGridOrigin);
-	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereSize ? 1 : 0);
-	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_LOCATION, static_cast<int>(mViewSphereLocation));
+	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereEnabled);
+	lcSetProfileViewSphereLocation(mViewSphereLocation);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE, mViewSphereSize);
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
-	lcSetProfileInt(LC_PROFILE_COLOR_THEME, static_cast<int>(mColorTheme));
+	lcSetProfileColorTheme(mColorTheme);
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED, mPreviewViewSphereEnabled);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
-	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, static_cast<int>(mPreviewViewSphereLocation));
+	lcSetProfilePreviewViewSphereLocation(mPreviewViewSphereLocation);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, mDrawPreviewAxis);
 	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED, mStudCylinderColorEnabled);
 	lcSetProfileUInt(LC_PROFILE_STUD_CYLINDER_COLOR, mStudCylinderColor);
@@ -381,7 +381,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 	Options.ShadingMode = Preferences.mShadingMode;
 	Options.LineWidth = Preferences.mLineWidth;
 	Options.AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	Options.StudStyle = static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE));
+	Options.StudStyle = lcGetProfileStudStyle();
 	Options.ImageStart = 0;
 	Options.ImageEnd = 0;
 	Options.CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
@@ -854,7 +854,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdErr += Message.arg(QString("--light-dark-value %1").arg(Options.PartColorValueLDIndex));
 	}
 
-	if (!lcIsHighContrast(Options.StudStyle) && !lcIsHighContrast(static_cast<lcStudStyle>(lcGetProfileInt(LC_PROFILE_STUD_STYLE))))
+	if (!lcIsHighContrast(Options.StudStyle) && !lcIsHighContrast(lcGetProfileStudStyle()))
 	{
 		QString const Message = tr("High contrast stud style is required for the '%1' option but is not enabled.\n");
 
@@ -1435,7 +1435,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileString(LC_PROFILE_LANGUAGE, Options.Language);
 	lcSetProfileInt(LC_PROFILE_CHECK_UPDATES, Options.CheckForUpdates);
 	lcSetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES, Options.AASamples);
-	lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
+	lcSetProfileStudStyle(Options.StudStyle);
 
 	if (LanguageChanged || LibraryChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
@@ -1479,7 +1479,7 @@ void lcApplication::ShowPreferencesDialog()
 
 	if (StudStyleChanged || StudCylinderColorEnabledChanged)
 	{
-		lcSetProfileInt(LC_PROFILE_STUD_STYLE, static_cast<int>(Options.StudStyle));
+		lcSetProfileStudStyle(Options.StudStyle);
 		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true, Options.Preferences.mStudCylinderColorEnabled);
 	}
 	else if (ColorConfigChanged || EdgeColorSettingsChanged)

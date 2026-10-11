@@ -1597,7 +1597,7 @@ void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result, const QStr
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 {
 	lcGetPreferences().mShadingMode = ShadingMode;
-	lcSetProfileInt(LC_PROFILE_SHADING_MODE, static_cast<int>(ShadingMode));
+	lcSetProfileShadingMode(ShadingMode);
 
 	UpdateShadingMode();
 

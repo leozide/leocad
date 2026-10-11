@@ -6,6 +6,9 @@
 #include "project.h"
 #include "lc_viewsphere.h"
 #include "lc_renderdialog.h"
+#include "lc_library.h"
+#include "lc_partselectionwidget.h"
+#include "lc_colors.h"
 
 lcProfileEntry::lcProfileEntry(const char* Section, const char* Key, int DefaultValue)
 {
@@ -120,16 +123,16 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                                      // LC_PROFILE_IMAGE_EXTENSION
 	lcProfileEntry("Settings", "PartsListIcons", 64),                                          // LC_PROFILE_PARTS_LIST_ICONS
 	lcProfileEntry("Settings", "PartsListNames", 1),                                           // LC_PROFILE_PARTS_LIST_NAMES
-	lcProfileEntry("Settings", "PartsListFixedColor", -1),                                     // LC_PROFILE_PARTS_LIST_COLOR
+	lcProfileEntry("Settings", "PartsListFixedColor", static_cast<uint>(LC_COLOR_NOCOLOR)),                                     // LC_PROFILE_PARTS_LIST_COLOR
 	lcProfileEntry("Settings", "PartsListColorLocked", false),                                // LC_PROFILE_PARTS_LIST_COLOR_LOCKED
 	lcProfileEntry("Settings", "PartsListDecorated", 1),                                       // LC_PROFILE_PARTS_LIST_DECORATED
 	lcProfileEntry("Settings", "PartsListAliases", 1),                                         // LC_PROFILE_PARTS_LIST_ALIASES
 	lcProfileEntry("Settings", "PartsListListMode", 0),                                        // LC_PROFILE_PARTS_LIST_LISTMODE
-	lcProfileEntry("Settings", "PartsListPartFilter", 0),                                      // LC_PROFILE_PARTS_LIST_PART_FILTER
+	lcProfileEntry("Settings", "PartsListPartFilter", static_cast<int>(lcPartFilterType::Default)),                                      // LC_PROFILE_PARTS_LIST_PART_FILTER
 	lcProfileEntry("Settings", "PartsListCaseSensitiveFilter", 0),                             // LC_PROFILE_PARTS_LIST_CASE_SENSITIVE_FILTER
 	lcProfileEntry("Settings", "PartsListFileNameFilter", 1),                                  // LC_PROFILE_PARTS_LIST_FILE_NAME_FILTER
 	lcProfileEntry("Settings", "PartsListPartDescriptionFilter", 1),                           // LC_PROFILE_PARTS_LIST_PART_DESCRIPTION_FILTER
-	lcProfileEntry("Settings", "StudStyle", 0),                                                // LC_PROFILE_STUD_STYLE
+	lcProfileEntry("Settings", "StudStyle", static_cast<int>(lcStudStyle::Plain)),                                                // LC_PROFILE_STUD_STYLE
 
 	lcProfileEntry("Defaults", "Author", ""),                                                  // LC_PROFILE_DEFAULT_AUTHOR_NAME
 	lcProfileEntry("Defaults", "AmbientColor", LC_RGB(75, 75, 75)),                            // LC_PROFILE_DEFAULT_AMBIENT_COLOR
@@ -190,7 +193,20 @@ int lcGetProfileInt(LC_PROFILE_KEY Key)
 	int* DefaultInt = std::get_if<int>(&Entry.mDefault);
 	int DefaultValue = DefaultInt ? *DefaultInt : 0;
 
-	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toInt();
+	const QVariant Stored = QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue);
+
+	if (Stored.userType() == QMetaType::Float || Stored.userType() == QMetaType::Double)
+		return DefaultValue;
+	if (Stored.userType() == QMetaType::ULongLong && Stored.toULongLong() > static_cast<qulonglong>(std::numeric_limits<int>::max()))
+		return DefaultValue;
+
+	bool Valid = false;
+	const qlonglong Value = Stored.toLongLong(&Valid);
+
+	if (Valid && Value >= std::numeric_limits<int>::min() && Value <= std::numeric_limits<int>::max())
+		return static_cast<int>(Value);
+
+	return DefaultValue;
 }
 
 uint lcGetProfileUInt(LC_PROFILE_KEY Key)
@@ -199,7 +215,27 @@ uint lcGetProfileUInt(LC_PROFILE_KEY Key)
 	uint* DefaultUInt = std::get_if<uint>(&Entry.mDefault);
 	uint DefaultValue = DefaultUInt ? *DefaultUInt : 0;
 
-	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toUInt();
+	const QVariant Stored = QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue);
+
+	if (Stored.userType() == QMetaType::Float || Stored.userType() == QMetaType::Double)
+		return DefaultValue;
+
+	if (Stored.userType() == QMetaType::Int || Stored.userType() == QMetaType::LongLong)
+	{
+		const qlonglong Value = Stored.toLongLong();
+
+		if (Value >= std::numeric_limits<qint32>::min() && Value <= static_cast<qlonglong>(std::numeric_limits<uint>::max()))
+			return static_cast<uint>(Value);
+		return DefaultValue;
+	}
+
+	bool Valid = false;
+	const qulonglong Value = Stored.toULongLong(&Valid);
+
+	if (Valid && Value <= std::numeric_limits<uint>::max())
+		return static_cast<uint>(Value);
+
+	return DefaultValue;
 }
 
 float lcGetProfileFloat(LC_PROFILE_KEY Key)
@@ -208,7 +244,10 @@ float lcGetProfileFloat(LC_PROFILE_KEY Key)
 	float* DefaultFloat = std::get_if<float>(&Entry.mDefault);
 	float DefaultValue = DefaultFloat ? *DefaultFloat : 0.0f;
 
-	return QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toFloat();
+	bool Valid = false;
+	const float Value = QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey), DefaultValue).toFloat(&Valid);
+
+	return Valid && std::isfinite(Value) ? Value : DefaultValue;
 }
 
 QString lcGetProfileString(LC_PROFILE_KEY Key)
@@ -255,6 +294,9 @@ void lcSetProfileUInt(LC_PROFILE_KEY Key, uint Value)
 
 void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value)
 {
+	if (!std::isfinite(Value))
+		return;
+
 	lcProfileEntry& Entry = gProfileEntries[Key];
 	QSettings Settings;
 
@@ -283,4 +325,205 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer)
 	QSettings Settings;
 
 	Settings.setValue(QString("%1/%2").arg(Entry.mSection, Entry.mKey), Buffer);
+}
+
+template<typename Enum>
+struct lcProfileEnumValue
+{
+	Enum Value;
+	const char* Token;
+	int LegacyValue;
+};
+
+// Tokens and legacy numbers remain stable when enum members are reordered.
+constexpr lcProfileEnumValue<lcShadingMode> ShadingModeValues[] =
+{
+	{ lcShadingMode::Wireframe, "Wireframe", 0 },
+	{ lcShadingMode::Flat, "Flat", 1 },
+	{ lcShadingMode::DefaultLights, "DefaultLights", 2 },
+	{ lcShadingMode::Full, "Full", 3 }
+};
+
+constexpr lcProfileEnumValue<lcSelectionRenderMode> SelectionRenderModeValues[] =
+{
+	{ lcSelectionRenderMode::Outline, "Outline", 0 },
+	{ lcSelectionRenderMode::Tint, "Tint", 1 }
+};
+
+constexpr lcProfileEnumValue<lcAxisIconLocation> AxisIconLocationValues[] =
+{
+	{ lcAxisIconLocation::TopLeft, "TopLeft", 0 },
+	{ lcAxisIconLocation::TopRight, "TopRight", 1 },
+	{ lcAxisIconLocation::BottomLeft, "BottomLeft", 2 },
+	{ lcAxisIconLocation::BottomRight, "BottomRight", 3 }
+};
+
+constexpr lcProfileEnumValue<lcViewSphereLocation> ViewSphereLocationValues[] =
+{
+	{ lcViewSphereLocation::TopLeft, "TopLeft", 0 },
+	{ lcViewSphereLocation::TopRight, "TopRight", 1 },
+	{ lcViewSphereLocation::BottomLeft, "BottomLeft", 2 },
+	{ lcViewSphereLocation::BottomRight, "BottomRight", 3 }
+};
+
+constexpr lcProfileEnumValue<lcColorTheme> ColorThemeValues[] =
+{
+	{ lcColorTheme::Dark, "Dark", 0 },
+	{ lcColorTheme::System, "System", 1 }
+};
+
+constexpr lcProfileEnumValue<lcStudStyle> StudStyleValues[] =
+{
+	{ lcStudStyle::Plain, "Plain", 0 },
+	{ lcStudStyle::ThinLinesLogo, "ThinLinesLogo", 1 },
+	{ lcStudStyle::OutlineLogo, "OutlineLogo", 2 },
+	{ lcStudStyle::SharpTopLogo, "SharpTopLogo", 3 },
+	{ lcStudStyle::RoundedTopLogo, "RoundedTopLogo", 4 },
+	{ lcStudStyle::FlattenedLogo, "FlattenedLogo", 5 },
+	{ lcStudStyle::HighContrast, "HighContrast", 6 },
+	{ lcStudStyle::HighContrastLogo, "HighContrastLogo", 7 }
+};
+
+constexpr lcProfileEnumValue<lcPartFilterType> PartFilterTypeValues[] =
+{
+	{ lcPartFilterType::Default, "Default", 0 },
+	{ lcPartFilterType::RegularExpression, "RegularExpression", 1 }
+};
+
+constexpr lcProfileEnumValue<lcPOVRayRenderQuality> RenderQualityValues[] =
+{
+	{ lcPOVRayRenderQuality::Low, "Low", 0 },
+	{ lcPOVRayRenderQuality::Medium, "Medium", 1 },
+	{ lcPOVRayRenderQuality::High, "High", 2 }
+};
+
+template<typename Enum, size_t N>
+static Enum lcReadProfileEnum(LC_PROFILE_KEY Key, const lcProfileEnumValue<Enum> (&Values)[N])
+{
+	const lcProfileEntry& Entry = gProfileEntries[Key];
+	const Enum Default = static_cast<Enum>(std::get<int>(Entry.mDefault));
+	const QString Token = QSettings().value(QString("%1/%2").arg(Entry.mSection, Entry.mKey)).toString();
+
+	for (const lcProfileEnumValue<Enum>& Value : Values)
+	{
+		if (Token == QLatin1String(Value.Token))
+			return Value.Value;
+	}
+
+	bool Valid = false;
+	const int LegacyValue = Token.toInt(&Valid);
+
+	if (Valid)
+	{
+		for (const lcProfileEnumValue<Enum>& Value : Values)
+		{
+			if (LegacyValue == Value.LegacyValue)
+				return Value.Value;
+		}
+	}
+
+	return Default;
+}
+
+template<typename Enum, size_t N>
+static void lcWriteProfileEnum(LC_PROFILE_KEY Key, Enum Value, const lcProfileEnumValue<Enum> (&Values)[N])
+{
+	for (const lcProfileEnumValue<Enum>& Entry : Values)
+	{
+		if (Value == Entry.Value)
+		{
+			lcSetProfileString(Key, QString::fromLatin1(Entry.Token));
+			return;
+		}
+	}
+}
+
+lcShadingMode lcGetProfileShadingMode()
+{
+	return lcReadProfileEnum(LC_PROFILE_SHADING_MODE, ShadingModeValues);
+}
+
+void lcSetProfileShadingMode(lcShadingMode Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_SHADING_MODE, Value, ShadingModeValues);
+}
+
+lcSelectionRenderMode lcGetProfileSelectionRenderMode()
+{
+	return lcReadProfileEnum(LC_PROFILE_SELECTION_RENDER_MODE, SelectionRenderModeValues);
+}
+
+void lcSetProfileSelectionRenderMode(lcSelectionRenderMode Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_SELECTION_RENDER_MODE, Value, SelectionRenderModeValues);
+}
+
+lcAxisIconLocation lcGetProfileAxisIconLocation()
+{
+	return lcReadProfileEnum(LC_PROFILE_DRAW_AXES_LOCATION, AxisIconLocationValues);
+}
+
+void lcSetProfileAxisIconLocation(lcAxisIconLocation Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_DRAW_AXES_LOCATION, Value, AxisIconLocationValues);
+}
+
+lcViewSphereLocation lcGetProfileViewSphereLocation()
+{
+	return lcReadProfileEnum(LC_PROFILE_VIEW_SPHERE_LOCATION, ViewSphereLocationValues);
+}
+
+void lcSetProfileViewSphereLocation(lcViewSphereLocation Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_VIEW_SPHERE_LOCATION, Value, ViewSphereLocationValues);
+}
+
+lcColorTheme lcGetProfileColorTheme()
+{
+	return lcReadProfileEnum(LC_PROFILE_COLOR_THEME, ColorThemeValues);
+}
+
+void lcSetProfileColorTheme(lcColorTheme Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_COLOR_THEME, Value, ColorThemeValues);
+}
+
+lcStudStyle lcGetProfileStudStyle()
+{
+	return lcReadProfileEnum(LC_PROFILE_STUD_STYLE, StudStyleValues);
+}
+
+void lcSetProfileStudStyle(lcStudStyle Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_STUD_STYLE, Value, StudStyleValues);
+}
+
+lcPartFilterType lcGetProfilePartFilterType()
+{
+	return lcReadProfileEnum(LC_PROFILE_PARTS_LIST_PART_FILTER, PartFilterTypeValues);
+}
+
+void lcSetProfilePartFilterType(lcPartFilterType Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_PARTS_LIST_PART_FILTER, Value, PartFilterTypeValues);
+}
+
+lcPOVRayRenderQuality lcGetProfileRenderQuality()
+{
+	return lcReadProfileEnum(LC_PROFILE_RENDER_QUALITY, RenderQualityValues);
+}
+
+void lcSetProfileRenderQuality(lcPOVRayRenderQuality Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_RENDER_QUALITY, Value, RenderQualityValues);
+}
+
+lcViewSphereLocation lcGetProfilePreviewViewSphereLocation()
+{
+	return lcReadProfileEnum(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, ViewSphereLocationValues);
+}
+
+void lcSetProfilePreviewViewSphereLocation(lcViewSphereLocation Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_PREVIEW_VIEW_SPHERE_LOCATION, Value, ViewSphereLocationValues);
 }

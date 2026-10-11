@@ -1,5 +1,14 @@
 #pragma once
 
+enum class lcShadingMode;
+enum class lcSelectionRenderMode;
+enum class lcAxisIconLocation;
+enum class lcViewSphereLocation;
+enum class lcColorTheme;
+enum class lcStudStyle;
+enum class lcPartFilterType;
+enum class lcPOVRayRenderQuality;
+
 enum LC_PROFILE_KEY
 {
 	// Settings.
@@ -156,3 +165,30 @@ void lcSetProfileFloat(LC_PROFILE_KEY Key, float Value);
 void lcSetProfileString(LC_PROFILE_KEY Key, const QString& Value);
 void lcSetProfileStringList(LC_PROFILE_KEY Key, const QStringList& Value);
 void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer);
+
+lcShadingMode lcGetProfileShadingMode();
+void lcSetProfileShadingMode(lcShadingMode Value);
+
+lcSelectionRenderMode lcGetProfileSelectionRenderMode();
+void lcSetProfileSelectionRenderMode(lcSelectionRenderMode Value);
+
+lcAxisIconLocation lcGetProfileAxisIconLocation();
+void lcSetProfileAxisIconLocation(lcAxisIconLocation Value);
+
+lcViewSphereLocation lcGetProfileViewSphereLocation();
+void lcSetProfileViewSphereLocation(lcViewSphereLocation Value);
+
+lcColorTheme lcGetProfileColorTheme();
+void lcSetProfileColorTheme(lcColorTheme Value);
+
+lcStudStyle lcGetProfileStudStyle();
+void lcSetProfileStudStyle(lcStudStyle Value);
+
+lcPartFilterType lcGetProfilePartFilterType();
+void lcSetProfilePartFilterType(lcPartFilterType Value);
+
+lcPOVRayRenderQuality lcGetProfileRenderQuality();
+void lcSetProfileRenderQuality(lcPOVRayRenderQuality Value);
+
+lcViewSphereLocation lcGetProfilePreviewViewSphereLocation();
+void lcSetProfilePreviewViewSphereLocation(lcViewSphereLocation Value);

@@ -1458,11 +1458,10 @@ lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, con
 			lcTexture* After = Library->FindTextureDeferred(Name.c_str(), AfterDirectories, MergedData);
 			bool Same = After != nullptr;
 
-			if (Same && Before->mEmbeddedData && After->mEmbeddedData)
-				Same = SameEmbeddedData(*Before->mEmbeddedData, *After->mEmbeddedData);
+			if (Same && Before->mSource.EmbeddedData && After->mSource.EmbeddedData)
+				Same = SameEmbeddedData(*Before->mSource.EmbeddedData, *After->mSource.EmbeddedData);
 			else if (Same)
-				Same = Before->mEmbeddedData == After->mEmbeddedData && Before->mFilePath == After->mFilePath &&
-					Before->mArchiveType == After->mArchiveType && Before->mArchiveIndex == After->mArchiveIndex;
+				Same = Before->mSource == After->mSource;
 
 			Library->ReleaseTexture(Before);
 

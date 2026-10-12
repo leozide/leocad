@@ -585,7 +585,7 @@ QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, cons
 	return QString();
 }
 
-lcFileSourceSnapshot lcPiecesLibrary::ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath)
+lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath)
 {
 	ProjectPath.clear();
 
@@ -595,7 +595,7 @@ lcFileSourceSnapshot lcPiecesLibrary::ResolveTextureSource(const char* TextureNa
 	QMutexLocker LoadLock(&mLoadMutex);
 
 	const bool ArchiveLibrary = static_cast<bool>(mZipFiles[static_cast<int>(lcZipFileType::Official)]);
-	lcFileSourceSnapshot Source;
+	lcFileSource Source;
 	const QString Name = QString::fromLatin1(TextureName);
 	const QString Candidates[] = { QLatin1String("textures/") + Name, Name };
 	const QString Folders[] = { QStringLiteral("p/"), QStringLiteral("parts/"), QStringLiteral("models/"), QStringLiteral("unofficial/p/"), QStringLiteral("unofficial/parts/") };
@@ -682,17 +682,12 @@ lcFileSourceSnapshot lcPiecesLibrary::ResolveTextureSource(const char* TextureNa
 lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData)
 {
 	QString ProjectPath;
-	const lcFileSourceSnapshot Source = ResolveTextureSource(TextureName, SearchDirectories, EmbeddedData, ProjectPath);
+	const lcFileSource Source = ResolveTextureSource(TextureName, SearchDirectories, EmbeddedData, ProjectPath);
 
 	return mTextureManager->AcquireTexture(TextureName, Source, ProjectPath);
 }
 
-lcFileSourceSnapshot lcPiecesLibrary::SnapshotTextureSource(const lcTexture* Texture) const
-{
-	return mTextureManager->SnapshotTextureSource(Texture);
-}
-
-lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSourceSnapshot& Source)
+lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSource& Source)
 {
 	const lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source);
 
@@ -712,7 +707,7 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSourceSnapsho
 	return Result;
 }
 
-lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenFile(const lcFileSourceSnapshot& Source)
+lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenFile(const lcFileSource& Source)
 {
 	if (Source.EmbeddedData)
 	{
@@ -2273,25 +2268,6 @@ void lcPiecesLibrary::UnloadUnusedParts()
 		if (Info->GetRefCount() == 0 && Info->mState != lcPieceInfoState::Unloaded)
 			ReleasePieceInfo(Info);
 	}
-}
-
-bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
-{
-	const lcFileSourceSnapshot Source = SnapshotTextureSource(Texture);
-	const lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source);
-
-	if (!File)
-	{
-		Texture->SetFailed(lcTextureLoadError::DecodeFailed, File.error());
-		return false;
-	}
-
-	const bool Loaded = mTextureManager->LoadTexture(Texture, *File.value());
-
-	if (!Loaded && Source.EmbeddedData)
-		Texture->SetFailed(Texture->mLoadFailure, tr("Could not decode embedded texture '%1'.").arg(Source.EmbeddedData->FileName));
-
-	return Loaded;
 }
 
 void lcPiecesLibrary::AddTextureReference(lcTexture* Texture)

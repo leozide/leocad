@@ -508,7 +508,7 @@ void lcAssetLoader::QueueTexture(lcTexture* Texture, Priority LoadPriority)
 
 	RequestedTexture->Texture = Texture;
 	RequestedTexture->Generation = mGeneration;
-	RequestedTexture->Source = mLibrary->SnapshotTextureSource(Texture);
+	RequestedTexture->Source = Texture->mSource;
 	RequestedTexture->LoadPriority = LoadPriority;
 	RequestedTexture->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
 

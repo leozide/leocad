@@ -118,7 +118,7 @@ private:
 	{
 		lcTexture* Texture;
 		quint64 Generation;
-		lcFileSourceSnapshot Source;
+		lcFileSource Source;
 		Priority LoadPriority;
 		qint64 EnqueuedAt;
 		bool Running = false;

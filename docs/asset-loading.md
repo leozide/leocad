@@ -93,16 +93,17 @@ indexed library files in the library, then asks the manager to acquire an identi
 for that resolved source. Resolution preserves the prefixed search order and
 canonicalizes disk paths. The project directory is passed separately to acquisition
 so the manager preserves temporary-texture metadata without searching files itself.
-Library texture APIs forward reference changes, snapshots, decoding, and the
-existing synchronous loading path to the manager. `FindTexture()` still gathers
-the explicit project's context and waits through the loader. Texture requests,
+Library texture APIs forward reference changes and decoding to the manager.
+`FindTexture()` still gathers the explicit project's context and waits through
+the loader. Texture requests,
 priority promotion, cancellation, upload/retries, and part dependency settlement
 remain in `lcAssetLoader`; its in-flight texture references are acquired through
-the manager. `lcFileSourceSnapshot` lives in `lc_library.h`; texture build results live
-in `lc_texturemanager.h`. File snapshots contain no project/texture metadata.
-The library's `SnapshotTextureSource()`, `BuildTextureData()`, and
-`AddTextureReference()` are private loader services, accessible through the
-existing `lcAssetLoader` friendship.
+the manager. `lcFileSource` lives in `lc_filesource.h`; texture build results live
+in `lc_texturemanager.h`. `lcTexture::mSource` stores this value; copies for workers do not snapshot file
+contents. Texture names, project directories, and temporary flags remain separate.
+The loader copies `lcTexture::mSource` into each texture request. The library's
+`BuildTextureData()` and `AddTextureReference()` are internal loader services,
+accessible through the existing `lcAssetLoader` friendship.
 
 The library calls `OpenFile()` on the reading thread and passes the opened
 `lcFile&` to the texture manager for decoding. `BuildTextureData()` continues to
@@ -126,12 +127,13 @@ memory files through `QImage::loadFromData()`, without an additional device adap
 or disk-to-memory copy. Disk cursor restoration runs on success and failure;
 memory decoding leaves the cursor unchanged and validates the remaining buffer
 length. Qt handles disk reads, seeking, EOF, and I/O errors. Files/cursors are
-private to each request, not shared between workers. The filename-based image
-entry point retains its existing behavior.
+private to each request, not shared between workers. Texture readiness waits use
+the same loader worker path; unused direct texture-loading overloads and their
+synchronous library/manager forwarding chain have been removed.
 
 `lcTexture::SetFailed()` assigns readiness and failure diagnostics together,
-clearing stale details when none are supplied. Synchronous loading and loader
-failures use the same setter. It retains decoded pixels for bounded upload
+clearing stale details when none are supplied. Decoding and upload failures use
+the same setter. It retains decoded pixels for bounded upload
 retries; terminal request handling explicitly discards them when required.
 
 `FindPiece()` returns a borrowed identity, without acquiring a reference. Lookup

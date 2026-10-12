@@ -1,32 +1,10 @@
 #include "lc_global.h"
 #include "lc_texture.h"
-#include "lc_application.h"
-#include "lc_library.h"
-#include "lc_file.h"
+#include "lc_context.h"
 #include "image.h"
 #include "lc_glextensions.h"
-#include "lc_string.h"
 
 lcTexture* gGridTexture;
-
-lcTexture* lcLoadTexture(const QString& FileName, int Flags)
-{
-	lcTexture* Texture = new lcTexture();
-
-	if (!Texture->Load(FileName, Flags))
-	{
-		delete Texture;
-		Texture = nullptr;
-	}
-	else
-	{
-		lcstrcpy(Texture->mName, QFileInfo(FileName).baseName().toLatin1());
-		Texture->mFilePath = FileName;
-		Texture->SetTemporary(true);
-	}
-
-	return Texture;
-}
 
 lcTexture::lcTexture(int Flags)
     : mFlags(Flags)
@@ -158,42 +136,6 @@ void lcTexture::CreateGridTexture()
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	Context->MakeCurrent();
 	Upload(Context);
-}
-
-bool lcTexture::Load()
-{
-	return lcGetPiecesLibrary()->LoadTexture(this);
-}
-
-bool lcTexture::Load(const QString& FileName, int Flags)
-{
-	Image Image;
-
-	if (!Image.FileLoad(FileName))
-	{
-		SetFailed(lcTextureLoadError::DecodeFailed, QString());
-
-		return false;
-	}
-
-	SetImage(std::move(Image), Flags);
-
-	return true;
-}
-
-bool lcTexture::Load(lcMemFile& File, int Flags)
-{
-	Image Image;
-
-	if (!Image.FileLoad(File))
-	{
-		SetFailed(lcTextureLoadError::DecodeFailed, QString());
-		return false;
-	}
-
-	SetImage(std::move(Image), Flags);
-
-	return true;
 }
 
 void lcTexture::SetImage(Image&& Image, int Flags)

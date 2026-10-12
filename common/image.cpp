@@ -199,15 +199,3 @@ bool Image::FileLoad(lcFile& File)
 
 	return true;
 }
-
-bool Image::FileLoad(const QString& FileName)
-{
-	QImage Image;
-
-	if (!Image.load(FileName))
-		return false;
-
-	CopyFromQImage(Image, *this);
-
-	return true;
-}

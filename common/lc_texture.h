@@ -16,6 +16,7 @@
 #define LC_TEXTURE_NAME_LEN 256
 
 #include "image.h"
+#include "lc_filesource.h"
 
 enum class lcTextureState
 {
@@ -37,8 +38,6 @@ enum class lcTextureLoadError
 	UploadFailed
 };
 
-struct lcEmbeddedData;
-
 class lcTexture
 {
 public:
@@ -52,8 +51,6 @@ public:
 
 	void CreateGridTexture();
 
-	bool Load(const QString& FileName, int Flags = 0);
-	bool Load(lcMemFile& File, int Flags = 0);
 	void SetImage(Image&& Image, int Flags = 0);
 	void SetImage(std::vector<Image>&& Images, int Flags = 0);
 	void AdoptDecodedImage(Image&& Image, int Flags = 0);
@@ -74,11 +71,6 @@ public:
 		mRefCount.ref();
 	}
 
-	int GetRefCount() const
-	{
-		return mRefCount.loadRelaxed();
-	}
-
 	// Reference bookkeeping belongs to lcTextureManager.
 	bool Release()
 	{
@@ -88,6 +80,11 @@ public:
 			Unload();
 
 		return InUse;
+	}
+
+	int GetRefCount() const
+	{
+		return mRefCount.loadRelaxed();
 	}
 
 	void SetTemporary(bool Temporary)
@@ -128,18 +125,14 @@ public:
 	int mWidth;
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN] = {};
-	std::shared_ptr<const lcEmbeddedData> mEmbeddedData;
-	QString mFilePath;    // Absolute PNG path for disk-backed textures; empty for archive or embedded textures.
+	lcFileSource mSource;
 	QString mProjectPath; // Directory used to scope temporary textures to their project.
-	int mArchiveType = -1;
-	int mArchiveIndex = -1;
 	GLuint mTexture = 0;
 	lcTextureState mState = lcTextureState::Unrequested;
 	lcTextureLoadError mLoadFailure = lcTextureLoadError::None;
 	QString mLoadFailureDetails;
 
 protected:
-	bool Load();
 	bool LoadImages();
 
 	bool mTemporary = false;
@@ -147,7 +140,5 @@ protected:
 	std::vector<Image> mImages;
 	int mFlags = 0;
 };
-
-lcTexture* lcLoadTexture(const QString& FileName, int Flags);
 
 extern lcTexture* gGridTexture;

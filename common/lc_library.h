@@ -4,6 +4,7 @@
 #include "lc_math.h"
 #include "lc_meshloader.h"
 #include "lc_result.h"
+#include "lc_filesource.h"
 
 class PieceInfo;
 class lcPiece;
@@ -19,15 +20,6 @@ struct lcPartSourceSnapshot;
 struct lcPartBuildResult;
 struct lcEmbeddedData;
 struct lcTextureBuildResult;
-
-// Copied before dispatch; opening a source never consults live project state.
-struct lcFileSourceSnapshot
-{
-	std::shared_ptr<const lcEmbeddedData> EmbeddedData;
-	QString FilePath;
-	int ArchiveType = -1;
-	int ArchiveIndex = -1;
-};
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 using lcLibraryLoadMutex = QRecursiveMutex;
@@ -243,7 +235,6 @@ public:
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	// UI-thread lookup/acquisition only, without decoding or upload; caller releases the reference.
 	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData);
-	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
@@ -257,7 +248,7 @@ public:
 
 	// Opens a resolved source on the reading thread, positioned at zero.
 	// Caller owns the file; archive replacement requires draining workers first.
-	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSourceSnapshot& Source);
+	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSource& Source);
 	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
 	void GetPieceFile(const char* FileName, std::function<void(lcFile& File)> Callback);
 
@@ -305,14 +296,6 @@ signals:
 	void GeneratedMeshSettled(PieceInfo* Info);
 	void ColorsLoaded();
 
-private:
-	lcFileSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
-	// Worker decode service: returns private pixels/errors without GL upload or publication.
-	lcTextureBuildResult BuildTextureData(const lcFileSourceSnapshot& Source);
-	void AddTextureReference(lcTexture* Texture);
-	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
-	lcFileSourceSnapshot ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath);
-
 protected:
 	friend class lcAssetLoader;
 
@@ -341,11 +324,15 @@ protected:
 	void UnloadPieceInfo(PieceInfo* Info);
 	void RegisterProjectPiece(Project* Project, const std::string& Name, PieceInfo* Info);
 
+	// Worker decode service: returns private pixels/errors without GL upload or publication.
+	lcTextureBuildResult BuildTextureData(const lcFileSource& Source);
+	void AddTextureReference(lcTexture* Texture);
+	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
+	lcFileSource ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath);
+
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
-	std::map<QString, QString> mTextureDiskEntries;
-	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
 	// Each project maps its local filenames to PieceInfo pointers. This map tracks the
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
@@ -367,9 +354,13 @@ protected:
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;
 
-	std::unique_ptr<lcTextureManager> mTextureManager;
 	std::unique_ptr<lcAssetLoader> mAssetLoader;
 	std::unique_ptr<lcThumbnailManager> mThumbnailManager;
+
+	std::unique_ptr<lcTextureManager> mTextureManager;
+	std::map<QString, QString> mTextureDiskEntries;
+	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
+
 	std::unique_ptr<lcMesh> mLoadingMesh;
 	bool mStreamingBuffersPending = false;
 	bool mBufferRepackScheduled = false;

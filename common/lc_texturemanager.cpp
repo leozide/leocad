@@ -1,6 +1,5 @@
 #include "lc_global.h"
 #include "lc_texturemanager.h"
-#include "lc_library.h"
 #include "lc_file.h"
 #include "lc_string.h"
 
@@ -28,7 +27,7 @@ void lcTextureManager::AddTextureReference(lcTexture* Texture)
 	Texture->AddRef();
 }
 
-lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFileSourceSnapshot& Source, const QString& ProjectPath)
+lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFileSource& Source, const QString& ProjectPath)
 {
 	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)
 		return nullptr;
@@ -40,7 +39,7 @@ lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFil
 
 	for (lcTexture* Texture : mTextures)
 	{
-		if (Texture->mEmbeddedData != Source.EmbeddedData || Texture->mFilePath != Source.FilePath || Texture->mArchiveType != Source.ArchiveType || Texture->mArchiveIndex != Source.ArchiveIndex)
+		if (Texture->mSource != Source)
 			continue;
 
 		Texture->AddRef();
@@ -51,29 +50,14 @@ lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFil
 	lcTexture* Texture = new lcTexture(LC_TEXTURE_MIPMAPS);
 
 	lcstrcpy(Texture->mName, TextureName);
-	Texture->mEmbeddedData = Source.EmbeddedData;
-	Texture->mFilePath = Source.FilePath;
+	Texture->mSource = Source;
 	Texture->mProjectPath = ProjectPath;
-	Texture->mArchiveType = Source.ArchiveType;
-	Texture->mArchiveIndex = Source.ArchiveIndex;
 	Texture->SetTemporary(bool(Source.EmbeddedData) || !ProjectPath.isEmpty());
 	Texture->AddRef();
 
 	mTextures.push_back(Texture);
 
 	return Texture;
-}
-
-lcFileSourceSnapshot lcTextureManager::SnapshotTextureSource(const lcTexture* Texture) const
-{
-	lcFileSourceSnapshot Source;
-
-	Source.EmbeddedData = Texture->mEmbeddedData;
-	Source.FilePath = Texture->mFilePath;
-	Source.ArchiveType = Texture->mArchiveType;
-	Source.ArchiveIndex = Texture->mArchiveIndex;
-
-	return Source;
 }
 
 lcTextureBuildResult lcTextureManager::BuildTextureData(lcFile& File)
@@ -99,21 +83,6 @@ lcTextureBuildResult lcTextureManager::DecodeTextureData(lcFile& File)
 	}
 
 	return Result;
-}
-
-bool lcTextureManager::LoadTexture(lcTexture* Texture, lcFile& File)
-{
-	lcTextureBuildResult Result = DecodeTextureData(File);
-
-	if (!Result.DecodedImage)
-	{
-		Texture->SetFailed(Result.Error, std::move(Result.ErrorDetails));
-		return false;
-	}
-
-	Texture->SetImage(std::move(*Result.DecodedImage));
-
-	return true;
 }
 
 void lcTextureManager::ReleaseTexture(lcTexture* Texture)

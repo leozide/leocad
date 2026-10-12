@@ -283,6 +283,7 @@ HEADERS += \
 	common/lc_edgecolordialog.h \
 	common/lc_editgroupsdialog.h \
 	common/lc_file.h \
+	common/lc_filesource.h \
 	common/lc_filter.h \
 	common/lc_findreplacewidget.h \
 	common/lc_glextensions.h \

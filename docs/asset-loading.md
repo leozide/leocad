@@ -280,6 +280,13 @@ then releases it. Library piece identities can remain in the catalog after their
 geometry unloads; unreferenced local leaf identities can be deleted. Model and
 external-project containers have their own teardown rules.
 
+The library unregisters identities before deleting them. `PieceInfo::Unload()`
+only clears its resources: it releases its mesh and owned external project,
+detaches its borrowed model pointer, and resets readiness and bounds. It never
+unregisters or deletes itself; the destructor uses the same resource cleanup.
+Bulk library unload destroys external projects before remaining local identities
+and the shared catalog, so project teardown can safely release child references.
+
 Texture requests likewise hold a reference, and staged/published mesh sections
 hold their texture dependencies. Cancellation removes unused queued texture work
 without releasing another mesh's texture. Failed assets remain terminal while

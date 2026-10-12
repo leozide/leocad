@@ -82,27 +82,34 @@ void lcPiecesLibrary::Unload()
 	mFailedPartErrors.clear();
 	mPieceErrorMutex.unlock();
 
+	// Destroy external projects before their model identities. Their teardown
+	// releases child references, including references to the shared catalog.
+	std::unordered_set<Project*> ExternalProjects;
+
+	for (const auto& Entry : mProjectPieces)
+		if (Entry.first->IsProject())
+			ExternalProjects.insert(Entry.first->GetProject());
+
+	for (;;)
+	{
+		const auto External = std::find_if(mProjectPieces.begin(), mProjectPieces.end(), [&ExternalProjects](const auto& Entry)
+		{
+			return Entry.first->IsProject() && ExternalProjects.find(Entry.second) == ExternalProjects.end();
+		});
+
+		if (External == mProjectPieces.end())
+			break;
+
+		RemovePiece(External->first);
+	}
+
+	while (!mProjectPieces.empty())
+		RemovePiece(mProjectPieces.begin()->first);
+
 	for (const auto& PieceIt : mPieces)
 		delete PieceIt.second;
 
 	mPieces.clear();
-
-	while (!mProjectPieces.empty())
-	{
-		PieceInfo* Info = mProjectPieces.begin()->first;
-		Project* Owner = mProjectPieces.begin()->second;
-
-		if (Owner)
-			Owner->UnregisterPiece(Info);
-
-		mProjectPieces.erase(Info);
-
-		const bool DeleteAfterUnload = !Info->IsModel() && !Info->IsProject();
-		Info->Unload();
-
-		if (DeleteAfterUnload)
-			delete Info;
-	}
 
 	mSources.clear();
 
@@ -240,22 +247,14 @@ void lcPiecesLibrary::RemovePiece(PieceInfo* Info)
 
 void lcPiecesLibrary::UnloadPieceInfo(PieceInfo* Info)
 {
-	const std::unordered_map<PieceInfo*, Project*>::iterator Local = mProjectPieces.find(Info);
-	const bool DeleteAfterUnload = !Info->IsLibraryPiece() && !Info->IsModel() && !Info->IsProject();
-
-	if (Local != mProjectPieces.end())
+	if (!Info->IsLibraryPiece())
 	{
-		if (Local->second)
-			Local->second->UnregisterPiece(Info);
-
-		mProjectPieces.erase(Local);
+		RemovePiece(Info);
+		return;
 	}
 
 	ClearPieceLoadError(Info);
 	Info->Unload();
-
-	if (DeleteAfterUnload)
-		RemovePiece(Info);
 }
 
 void lcPiecesLibrary::SetModelPieceName(PieceInfo* Info, const char* Name)

@@ -37,8 +37,7 @@ PieceInfo::~PieceInfo()
 {
 	delete mTrainTrackInfo;
 
-	if (mMesh)
-		Unload();
+	Unload();
 }
 
 void PieceInfo::SetSynthInfo(lcSynthInfo* SynthInfo)
@@ -191,14 +190,8 @@ void PieceInfo::Unload()
 	SetLoadingBoundingBox();
 	mModel = nullptr;
 
-	if (IsModel())
-		lcGetPiecesLibrary()->RemovePiece(this);
-	else if (IsProject())
-	{
-		delete mProject;
-		mProject = nullptr;
-		lcGetPiecesLibrary()->RemovePiece(this);
-	}
+	delete mProject;
+	mProject = nullptr;
 }
 
 bool PieceInfo::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const

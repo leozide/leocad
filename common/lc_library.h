@@ -178,7 +178,6 @@ public:
 	void RemoveTemporaryPieces();
 	void ReleaseProjectPieces(Project* OwnerProject);
 	void TransferProjectPieces(Project* Source, Project* Destination);
-	void RemovePiece(PieceInfo* Info);
 
 	void SetModelPieceName(PieceInfo* Info, const char* Name);
 	bool RenamePiece(PieceInfo* Info, const char* NewName);
@@ -328,6 +327,7 @@ protected:
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
+	void RemovePiece(PieceInfo* Info);
 	void UnloadPieceInfo(PieceInfo* Info);
 	void RegisterProjectPiece(Project* Project, const std::string& Name, PieceInfo* Info);
 

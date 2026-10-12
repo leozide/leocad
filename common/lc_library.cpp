@@ -730,6 +730,16 @@ lcResult<QByteArray> lcPiecesLibrary::DecodeEmbeddedData(const lcEmbeddedData& D
 
 lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnapshot& Source)
 {
+	lcTextureBuildResult Result = DecodeTextureData(Source);
+
+	if (Result.DecodedImage)
+		Result.DecodedImage->ResizePow2();
+
+	return Result;
+}
+
+lcTextureBuildResult lcPiecesLibrary::DecodeTextureData(const lcTextureSourceSnapshot& Source)
+{
 	lcTextureBuildResult Result;
 
 	Result.DecodedImage.reset(new Image);
@@ -773,9 +783,7 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcTextureSourceSnap
 			Loaded = Result.DecodedImage->FileLoad(TextureFile);
 	}
 
-	if (Loaded)
-		Result.DecodedImage->ResizePow2();
-	else
+	if (!Loaded)
 	{
 		Result.DecodedImage.reset();
 		Result.Error = lcTextureLoadError::DecodeFailed;
@@ -2298,41 +2306,19 @@ void lcPiecesLibrary::UnloadUnusedParts()
 
 bool lcPiecesLibrary::LoadTexture(lcTexture* Texture)
 {
-	if (Texture->mEmbeddedData)
+	lcTextureBuildResult Result = DecodeTextureData(SnapshotTextureSource(Texture));
+
+	if (!Result.DecodedImage)
 	{
-		const lcResult<QByteArray> Decoded = DecodeEmbeddedData(*Texture->mEmbeddedData);
-
-		if (!Decoded)
-		{
-			Texture->mState = lcTextureState::Failed;
-			Texture->mLoadFailure = lcTextureLoadError::DecodeFailed;
-			Texture->mLoadFailureDetails = Decoded.error();
-			return false;
-		}
-
-		lcMemFile TextureFile;
-		const QByteArray& Bytes = Decoded.value();
-		TextureFile.WriteBuffer(Bytes.constData(), Bytes.size());
-		TextureFile.Seek(0, SEEK_SET);
-
-		return Texture->Load(TextureFile);
+		Texture->mState = lcTextureState::Failed;
+		Texture->mLoadFailure = Result.Error;
+		Texture->mLoadFailureDetails = std::move(Result.ErrorDetails);
+		return false;
 	}
 
-	if (!Texture->mFilePath.isEmpty())
-		return Texture->Load(Texture->mFilePath);
+	Texture->SetImage(std::move(*Result.DecodedImage));
 
-	QMutexLocker Lock(&mTextureMutex);
-	const int Type = Texture->mArchiveType;
-
-	if (Type < 0 || Type >= static_cast<int>(lcZipFileType::Count) || Texture->mArchiveIndex < 0 || !mZipFiles[Type])
-		return false;
-
-	lcMemFile TextureFile;
-
-	if (!mZipFiles[Type]->ExtractFile(Texture->mArchiveIndex, TextureFile))
-		return false;
-
-	return Texture->Load(TextureFile);
+	return true;
 }
 
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)

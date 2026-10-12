@@ -321,6 +321,7 @@ protected:
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
 	static lcResult<QByteArray> DecodeEmbeddedData(const lcEmbeddedData& Data);
+	lcTextureBuildResult DecodeTextureData(const lcTextureSourceSnapshot& Source);
 	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
 	static bool IsStudPrimitive(const char* FileName);
 	static bool IsStudStylePrimitive(const char* FileName);

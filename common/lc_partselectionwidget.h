@@ -277,7 +277,7 @@ class lcPartSelectionWidget : public QWidget
 	Q_OBJECT
 
 public:
-	lcPartSelectionWidget(QWidget* Parent);
+	lcPartSelectionWidget(bool IsPopup, QWidget* Parent);
 
 	void UpdateThumbnails();
 	void SetDefaultPart();
@@ -294,14 +294,6 @@ public:
 	bool GetIsPopup() const
 	{
 		return mIsPopup;
-	}
-
-	void SetIsPopup(bool IsPopup)
-	{
-		mIsPopup = IsPopup;
-
-		if (mIsPopup)
-			mPartsWidget->setMinimumSize(0, 0);
 	}
 
 	int GetColorIndex() const

@@ -128,6 +128,11 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "PartsListDecorated", 1),                                       // LC_PROFILE_PARTS_LIST_DECORATED
 	lcProfileEntry("Settings", "PartsListAliases", 1),                                         // LC_PROFILE_PARTS_LIST_ALIASES
 	lcProfileEntry("Settings", "PartsListListMode", 0),                                        // LC_PROFILE_PARTS_LIST_LISTMODE
+	lcProfileEntry("Settings", "PartsPopupIcons", 64),                                             // LC_PROFILE_PARTS_POPUP_ICONS
+	lcProfileEntry("Settings", "PartsPopupNames", 1),                                              // LC_PROFILE_PARTS_POPUP_NAMES
+	lcProfileEntry("Settings", "PartsPopupDecorated", 1),                                          // LC_PROFILE_PARTS_POPUP_DECORATED
+	lcProfileEntry("Settings", "PartsPopupAliases", 1),                                            // LC_PROFILE_PARTS_POPUP_ALIASES
+	lcProfileEntry("Settings", "PartsPopupListMode", 0),                                           // LC_PROFILE_PARTS_POPUP_LISTMODE
 	lcProfileEntry("Settings", "PartsListPartFilter", static_cast<int>(lcPartFilterType::Default)),                                      // LC_PROFILE_PARTS_LIST_PART_FILTER
 	lcProfileEntry("Settings", "PartsListCaseSensitiveFilter", 0),                             // LC_PROFILE_PARTS_LIST_CASE_SENSITIVE_FILTER
 	lcProfileEntry("Settings", "PartsListFileNameFilter", 1),                                  // LC_PROFILE_PARTS_LIST_FILE_NAME_FILTER

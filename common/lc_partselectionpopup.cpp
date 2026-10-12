@@ -8,7 +8,7 @@ lcPartSelectionPopup::lcPartSelectionPopup(PieceInfo* InitialPart, QWidget* Pare
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
 
-	mPartSelectionWidget = new lcPartSelectionWidget(this);
+	mPartSelectionWidget = new lcPartSelectionWidget(true, this);
 	Layout->addWidget(mPartSelectionWidget);
 	mPartSelectionWidget->SetOrientation(Qt::Horizontal);
 
@@ -159,8 +159,6 @@ std::optional<PieceInfo*> lcShowPartSelectionPopup(PieceInfo* InitialPart, const
 	QWidgetAction* Action = new QWidgetAction(Menu.get());
 	lcPartSelectionPopup* Popup = new lcPartSelectionPopup(InitialPart, Menu.get());
 	lcPartSelectionWidget* PartSelectionWidget = Popup->GetPartSelectionWidget();
-
-	PartSelectionWidget->SetIsPopup(true);
 
 	if (CustomParts.empty())
 	{

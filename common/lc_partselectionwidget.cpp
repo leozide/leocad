@@ -60,18 +60,20 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 	: QAbstractListModel(Parent)
 {
 	mListView = (lcPartSelectionListView*)Parent;
+	const bool IsPopup = mListView->GetPartSelectionWidget()->GetIsPopup();
+
 	mIconSize = 0;
-	mShowPartNames = lcGetProfileInt(LC_PROFILE_PARTS_LIST_NAMES);
-	mListMode = lcGetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE);
-	mShowDecoratedParts = lcGetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED);
-	mShowPartAliases = lcGetProfileInt(LC_PROFILE_PARTS_LIST_ALIASES);
+	mShowPartNames = lcGetProfileInt(IsPopup ? LC_PROFILE_PARTS_POPUP_NAMES : LC_PROFILE_PARTS_LIST_NAMES);
+	mListMode = lcGetProfileInt(IsPopup ? LC_PROFILE_PARTS_POPUP_LISTMODE : LC_PROFILE_PARTS_LIST_LISTMODE);
+	mShowDecoratedParts = lcGetProfileInt(IsPopup ? LC_PROFILE_PARTS_POPUP_DECORATED : LC_PROFILE_PARTS_LIST_DECORATED);
+	mShowPartAliases = lcGetProfileInt(IsPopup ? LC_PROFILE_PARTS_POPUP_ALIASES : LC_PROFILE_PARTS_LIST_ALIASES);
 	mCaseSensitiveFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_CASE_SENSITIVE_FILTER);
 	mFileNameFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_FILE_NAME_FILTER);
 	mPartDescriptionFilter = lcGetProfileInt(LC_PROFILE_PARTS_LIST_PART_DESCRIPTION_FILTER);
 	mPartFilterType = lcGetProfilePartFilterType();
 
-	uint ColorCode = lcGetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR);
-	int LockedFlag = lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED);
+	uint ColorCode = IsPopup ? LC_COLOR_NOCOLOR : lcGetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR);
+	int LockedFlag = IsPopup ? 0 : lcGetProfileInt(LC_PROFILE_PARTS_LIST_COLOR_LOCKED);
 
 	if (ColorCode == LC_COLOR_NOCOLOR && LockedFlag == 0)
 	{
@@ -117,6 +119,9 @@ void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
 
 void lcPartSelectionListModel::ToggleColorLocked()
 {
+	if (mListView->GetPartSelectionWidget()->GetIsPopup())
+		return;
+
 	mColorLocked = !mColorLocked;
 
 	SetColorIndex(gMainWindow->mColorIndex);
@@ -137,7 +142,7 @@ void lcPartSelectionListModel::ToggleListMode()
 	mListMode = !mListMode;
 
 	mListView->UpdateViewMode();
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_LISTMODE, mListMode);
+	lcSetProfileInt(mListView->GetPartSelectionWidget()->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_LISTMODE : LC_PROFILE_PARTS_LIST_LISTMODE, mListMode);
 }
 
 void lcPartSelectionListModel::SetCategory(int CategoryIndex)
@@ -576,7 +581,7 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 
 	connect(gApplication, &lcApplication::RendererInitialized, this, &lcPartSelectionListView::UpdateIconSize);
 
-	mRequestedIconSize = lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS);
+	mRequestedIconSize = lcGetProfileInt(mPartSelectionWidget->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_ICONS : LC_PROFILE_PARTS_LIST_ICONS);
 	UpdateIconSize();
 }
 
@@ -742,7 +747,7 @@ void lcPartSelectionListView::TogglePartNames()
 {
 	bool Show = !mListModel->GetShowPartNames();
 	mListModel->SetShowPartNames(Show);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_NAMES, Show);
+	lcSetProfileInt(mPartSelectionWidget->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_NAMES : LC_PROFILE_PARTS_LIST_NAMES, Show);
 	UpdateItemGeometry();
 }
 
@@ -750,14 +755,14 @@ void lcPartSelectionListView::ToggleDecoratedParts()
 {
 	bool Show = !mListModel->GetShowDecoratedParts();
 	mListModel->SetShowDecoratedParts(Show);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_DECORATED, Show);
+	lcSetProfileInt(mPartSelectionWidget->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_DECORATED : LC_PROFILE_PARTS_LIST_DECORATED, Show);
 }
 
 void lcPartSelectionListView::TogglePartAliases()
 {
 	bool Show = !mListModel->GetShowPartAliases();
 	mListModel->SetShowPartAliases(Show);
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ALIASES, Show);
+	lcSetProfileInt(mPartSelectionWidget->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_ALIASES : LC_PROFILE_PARTS_LIST_ALIASES, Show);
 }
 
 void lcPartSelectionListView::ToggleRegularExpressionFilter()
@@ -820,7 +825,7 @@ void lcPartSelectionListView::UpdateViewMode()
 void lcPartSelectionListView::SetIconSize(int Size)
 {
 	mRequestedIconSize = Size;
-	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
+	lcSetProfileInt(mPartSelectionWidget->GetIsPopup() ? LC_PROFILE_PARTS_POPUP_ICONS : LC_PROFILE_PARTS_LIST_ICONS, Size);
 	UpdateIconSize();
 }
 
@@ -958,8 +963,8 @@ QSize lcPartSelectionListView::GetPreferredSize(int MaximumWidth) const
 	return Size;
 }
 
-lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
-	: QWidget(Parent)
+lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
+	: QWidget(Parent), mIsPopup(IsPopup)
 {
 	mSplitter = new QSplitter(this);
 	mSplitter->setOrientation(Qt::Vertical);
@@ -1022,6 +1027,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(QWidget* Parent)
 	connect(OptionsMenu, &QMenu::aboutToShow, this, &lcPartSelectionWidget::OptionsMenuAboutToShow);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget, this);
+	if (mIsPopup)
+		mPartsWidget->setMinimumSize(0, 0);
 	PartsLayout->addWidget(mPartsWidget);
 
 	QHBoxLayout* Layout = new QHBoxLayout(this);
@@ -1265,9 +1272,12 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	QMenu* Menu = (QMenu*)sender();
 	Menu->clear();
 
-	Menu->addAction(tr("Edit Palettes..."), this, &lcPartSelectionWidget::EditPartPalettes)->setEnabled(!mIsPopup);
+	if (!mIsPopup)
+	{
+		Menu->addAction(tr("Edit Palettes..."), this, &lcPartSelectionWidget::EditPartPalettes);
 
-	Menu->addSeparator();
+		Menu->addSeparator();
+	}
 
 	lcPartSelectionListModel* ListModel = mPartsWidget->GetListModel();
 
@@ -1327,9 +1337,12 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 			ListMode->setCheckable(true);
 			ListMode->setChecked(ListModel->IsListMode());
 
-			QAction* FixedColor = IconMenu->addAction(tr("Lock Color"), mPartsWidget, &lcPartSelectionListView::ToggleFixedColor);
-			FixedColor->setCheckable(true);
-			FixedColor->setChecked(ListModel->IsColorLocked());
+			if (!mIsPopup)
+			{
+				QAction* FixedColor = IconMenu->addAction(tr("Lock Color"), mPartsWidget, &lcPartSelectionListView::ToggleFixedColor);
+				FixedColor->setCheckable(true);
+				FixedColor->setChecked(ListModel->IsColorLocked());
+			}
 		}
 	}
 

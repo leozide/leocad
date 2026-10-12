@@ -685,7 +685,7 @@ void lcMainWindow::CreateToolBars()
 
 	mPartsToolBar = new QDockWidget(tr("Pieces"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
-	mPartSelectionWidget = new lcPartSelectionWidget(mPartsToolBar);
+	mPartSelectionWidget = new lcPartSelectionWidget(false, mPartsToolBar);
 	mPartsToolBar->setWidget(mPartSelectionWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
 

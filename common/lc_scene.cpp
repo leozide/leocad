@@ -440,13 +440,14 @@ void lcScene::Draw(lcContext* Context, const std::function<void()>& PreTransluce
 
 	const lcPreferences& Preferences = lcGetPreferences();
 	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth > 0.0f;
-	const bool DrawConditional = Preferences.mDrawConditionalLines && Preferences.mLineWidth > 0.0f;
+	const bool DrawConditional = Preferences.mDrawConditionalLines && Preferences.mLineWidth > 0.0f && lcContext::SupportsMaterial(lcMaterialType::UnlitColorConditional);
 
-//	lcShadingMode ShadingMode = Preferences.mShadingMode;
-//	if (ShadingMode == lcShadingMode::Wireframe && !mAllowWireframe)
-//		ShadingMode = lcShadingMode::Flat;
+	lcShadingMode ShadingMode = mShadingMode;
 
-	if (mShadingMode == lcShadingMode::Wireframe)
+	if (ShadingMode != lcShadingMode::Wireframe && ShadingMode != lcShadingMode::Flat && !lcContext::SupportsDefaultLights())
+		ShadingMode = lcShadingMode::Flat;
+
+	if (ShadingMode == lcShadingMode::Wireframe)
 	{
 		DrawOpaqueMeshes(Context, false, LC_MESH_LINES, true, true);
 
@@ -456,7 +457,7 @@ void lcScene::Draw(lcContext* Context, const std::function<void()>& PreTransluce
 		if (PreTranslucentCallback)
 			PreTranslucentCallback();
 	}
-	else if (mShadingMode == lcShadingMode::Flat)
+	else if (ShadingMode == lcShadingMode::Flat)
 	{
 		const int SolidPrimitiveTypes = LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES | (DrawLines ? LC_MESH_LINES : 0);
 

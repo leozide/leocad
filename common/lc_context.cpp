@@ -11,15 +11,9 @@
 #include "lc_viewsphere.h"
 #include "lc_viewmanipulator.h"
 #include "lc_stringcache.h"
-#include "lc_partselectionwidget.h"
 #include "lc_scene.h"
 
 #ifdef LC_OPENGLES
-#define glEnableClientState(...)
-#define glDisableClientState(...)
-#define glVertexPointer(...)
-#define glTexCoordPointer(...)
-#define glColorPointer(...)
 #define GL_ARRAY_BUFFER_ARB GL_ARRAY_BUFFER
 #define GL_ELEMENT_ARRAY_BUFFER_ARB GL_ELEMENT_ARRAY_BUFFER
 #define GL_STATIC_DRAW_ARB GL_STATIC_DRAW
@@ -28,6 +22,7 @@
 std::unique_ptr<QOpenGLContext> lcContext::mOffscreenContext;
 std::unique_ptr<QOffscreenSurface> lcContext::mOffscreenSurface;
 std::unique_ptr<lcContext> lcContext::mGlobalOffscreenContext;
+bool lcContext::mRenderResourcesCreated = false;
 lcProgram lcContext::mPrograms[static_cast<int>(lcMaterialType::Count)];
 
 lcScopedGLContextState::lcScopedGLContextState()
@@ -81,11 +76,6 @@ lcContext::lcContext()
 	mIndexBufferObject = 0;
 	mVertexBufferPointer = nullptr;
 	mIndexBufferPointer = nullptr;
-	mVertexBufferOffset = (char*)~0;
-
-	mNormalEnabled = false;
-	mTexCoordEnabled = false;
-	mColorEnabled = false;
 
 	mTexture2D = 0;
 	mTextureCubeMap = 0;
@@ -127,39 +117,60 @@ lcContext::~lcContext()
 {
 }
 
-bool lcContext::InitializeRenderer()
+lcResult<void> lcContext::InitializeRenderer(bool CreateRenderResources)
 {
-	if (!CreateOffscreenContext())
-		return false;
+	const lcResult<void> OffscreenResult = CreateOffscreenContext();
+
+	if (!OffscreenResult)
+		return lcUnexpected(OffscreenResult.error());
 
 	mGlobalOffscreenContext = std::unique_ptr<lcContext>(new(lcContext));
 
 	lcContext* Context = mGlobalOffscreenContext.get();
+
 	Context->SetOffscreenContext();
 
 	lcInitializeGLExtensions(mOffscreenContext.get());
 
-	gStringCache.Initialize(Context);
-	gTexFont.Initialize(Context);
+	if (!CreateRenderResources)
+		return lcResult<void>();
 
-	Context->CreateResources();
+	if (!Context->hasOpenGLFeature(QOpenGLFunctions::Shaders))
+	{
+		mGlobalOffscreenContext.reset();
+		DestroyOffscreenContext();
+
+		return lcUnexpected(QCoreApplication::translate("lcContext", "OpenGL shader support is required."));
+	}
+
+	const lcResult<void> ResourcesResult = Context->CreateResources();
+
+	if (!ResourcesResult)
+	{
+		Context->DestroyResources();
+		mGlobalOffscreenContext.reset();
+		DestroyOffscreenContext();
+
+		return lcUnexpected(ResourcesResult.error());
+	}
+
+	gStringCache.Initialize(Context);
+
+	if (SupportsMaterial(lcMaterialType::TextSDF))
+		gTexFont.Initialize(Context);
+
 	lcView::CreateResources(Context);
 	lcViewManipulator::CreateResources(Context);
-	lcViewSphere::CreateResources(Context);
 
-	if (!gSupportsShaderObjects && lcGetPreferences().mShadingMode == lcShadingMode::DefaultLights)
-		lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+	if (SupportsMaterial(lcMaterialType::UnlitViewSphere))
+		lcViewSphere::CreateResources(Context);
 
-	if (!gSupportsShaderObjects && lcGetPreferences().mDrawConditionalLines)
-		lcGetPreferences().mDrawConditionalLines = false;
+	mRenderResourcesCreated = true;
 
 	if (!SupportsSelectionOutline())
 		lcGetPreferences().mSelectionRenderMode = lcSelectionRenderMode::Tint;
 
-	if (!gSupportsFramebufferObject)
-		gMainWindow->GetPartSelectionWidget()->DisableIconMode();
-
-	return true;
+	return lcResult<void>();
 }
 
 void lcContext::ShutdownRenderer()
@@ -170,13 +181,18 @@ void lcContext::ShutdownRenderer()
 	mGlobalOffscreenContext->MakeCurrent();
 	lcContext* Context = mGlobalOffscreenContext.get();
 
-	gStringCache.Reset();
-	gTexFont.Reset();
+	if (mRenderResourcesCreated)
+	{
+		gStringCache.Reset();
+		gTexFont.Reset();
 
-	lcView::DestroyResources(Context);
-	Context->DestroyResources();
-	lcViewManipulator::DestroyResources(Context);
-	lcViewSphere::DestroyResources(Context);
+		lcView::DestroyResources(Context);
+		Context->DestroyResources();
+		lcViewManipulator::DestroyResources(Context);
+		lcViewSphere::DestroyResources(Context);
+
+		mRenderResourcesCreated = false;
+	}
 
 	mGlobalOffscreenContext.reset();
 
@@ -188,35 +204,29 @@ lcContext* lcContext::GetGlobalOffscreenContext()
 	return mGlobalOffscreenContext.get();
 }
 
-bool lcContext::CreateOffscreenContext()
+lcResult<void> lcContext::CreateOffscreenContext()
 {
 	std::unique_ptr<QOpenGLContext> OffscreenContext(new QOpenGLContext());
-
-	if (!OffscreenContext)
-		return false;
 
 	OffscreenContext->setShareContext(QOpenGLContext::globalShareContext());
 
 	if (!OffscreenContext->create() || !OffscreenContext->isValid())
-		return false;
+		return lcUnexpected(QCoreApplication::translate("lcContext", "Could not create the OpenGL context."));
 
 	std::unique_ptr<QOffscreenSurface> OffscreenSurface(new QOffscreenSurface());
-
-	if (!OffscreenSurface)
-		return false;
 
 	OffscreenSurface->create();
 
 	if (!OffscreenSurface->isValid())
-		return false;
+		return lcUnexpected(QCoreApplication::translate("lcContext", "Could not create the offscreen OpenGL surface."));
 
 	if (!OffscreenContext->makeCurrent(OffscreenSurface.get()))
-		return false;
+		return lcUnexpected(QCoreApplication::translate("lcContext", "Could not make the offscreen OpenGL context current."));
 
 	mOffscreenContext = std::move(OffscreenContext);
 	mOffscreenSurface = std::move(OffscreenSurface);
 
-	return true;
+	return lcResult<void>();
 }
 
 void lcContext::DestroyOffscreenContext()
@@ -225,7 +235,7 @@ void lcContext::DestroyOffscreenContext()
 	mOffscreenContext.reset();
 }
 
-void lcContext::CreateShaderPrograms()
+lcResult<void> lcContext::CreateShaderPrograms()
 {
 	const char* ShaderPrefix =
 	{
@@ -291,17 +301,21 @@ void lcContext::CreateShaderPrograms()
 
 	LC_ARRAY_SIZE_CHECK(FragmentShaders, lcMaterialType::Count);
 
-	const auto LoadShader = [this, ShaderPrefix](const char* FileName, GLuint ShaderType) -> GLuint
+	const auto LoadShader = [this, ShaderPrefix](const char* FileName, GLuint ShaderType) -> lcResult<GLuint>
 	{
 		QFile ShaderFile(FileName);
 
 		if (!ShaderFile.open(QIODevice::ReadOnly))
-			return 0;
+			return lcUnexpected(QCoreApplication::translate("lcContext", "Could not read shader %1: %2").arg(QString::fromUtf8(FileName), ShaderFile.errorString()));
 
 		QByteArray Data = ShaderPrefix + ShaderFile.readAll();
 		const char* Source = Data.constData();
 
 		const GLuint Shader = glCreateShader(ShaderType);
+
+		if (!Shader)
+			return lcUnexpected(QCoreApplication::translate("lcContext", "Could not create shader %1.").arg(QString::fromUtf8(FileName)));
+
 		glShaderSource(Shader, 1, &Source, nullptr);
 		glCompileShader(Shader);
 
@@ -310,22 +324,17 @@ void lcContext::CreateShaderPrograms()
 
 		if (ShaderCompiled == GL_FALSE)
 		{
-#ifndef QT_NO_DEBUG
 			GLint Length = 0;
-			QByteArray InfoLog;
-
 			glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &Length);
 
-			InfoLog.resize(Length);
+			QByteArray InfoLog(Length, '\0');
 
-			glGetShaderInfoLog(Shader, Length, &Length, InfoLog.data());
-
-			qDebug() << InfoLog;
-#endif
+			if (Length > 0)
+				glGetShaderInfoLog(Shader, Length, nullptr, InfoLog.data());
 
 			glDeleteShader(Shader);
 
-			return 0;
+			return lcUnexpected(QCoreApplication::translate("lcContext", "Could not compile shader %1:\n%2").arg(QString::fromUtf8(FileName), QString::fromUtf8(InfoLog.constData())));
 		}
 
 		return Shader;
@@ -333,20 +342,74 @@ void lcContext::CreateShaderPrograms()
 
 	for (int MaterialType = 0; MaterialType < static_cast<int>(lcMaterialType::Count); MaterialType++)
 	{
-		const GLuint VertexShader = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
-		const GLuint FragmentShader = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
+		bool Optional = false;
 
-		if (!VertexShader || !FragmentShader)
+		switch (static_cast<lcMaterialType>(MaterialType))
+		{
+		case lcMaterialType::UnlitColorConditional:
+		case lcMaterialType::TextSDF:
+		case lcMaterialType::UnlitViewSphere:
+		case lcMaterialType::FakeLitColor:
+		case lcMaterialType::FakeLitTextureDecal:
+		case lcMaterialType::OutlineComposite:
+			Optional = true;
+			break;
+
+		case lcMaterialType::UnlitColor:
+		case lcMaterialType::UnlitTextureModulate:
+		case lcMaterialType::UnlitTextureDecal:
+		case lcMaterialType::UnlitVertexColor:
+		case lcMaterialType::Count:
+			break;
+		}
+
+		const lcResult<GLuint> VertexResult = LoadShader(VertexShaders[MaterialType], GL_VERTEX_SHADER);
+
+		if (!VertexResult)
+		{
+			if (Optional)
+			{
+				qWarning().noquote() << VertexResult.error();
+				continue;
+			}
+
+			return lcUnexpected(VertexResult.error());
+		}
+
+		const GLuint VertexShader = VertexResult.value();
+		const lcResult<GLuint> FragmentResult = LoadShader(FragmentShaders[MaterialType], GL_FRAGMENT_SHADER);
+
+		if (!FragmentResult)
+		{
+			glDeleteShader(VertexShader);
+
+			if (Optional)
+			{
+				qWarning().noquote() << FragmentResult.error();
+				continue;
+			}
+
+			return lcUnexpected(FragmentResult.error());
+		}
+
+		const GLuint FragmentShader = FragmentResult.value();
+		const GLuint Program = glCreateProgram();
+
+		if (!Program)
 		{
 			glDeleteShader(VertexShader);
 			glDeleteShader(FragmentShader);
 
-			mPrograms[MaterialType].Object = 0;
+			const QString Error = QCoreApplication::translate("lcContext", "Could not create the shader program for %1 and %2.").arg(QString::fromUtf8(VertexShaders[MaterialType]), QString::fromUtf8(FragmentShaders[MaterialType]));
 
-			continue;
+			if (Optional)
+			{
+				qWarning().noquote() << Error;
+				continue;
+			}
+
+			return lcUnexpected(Error);
 		}
-
-		GLuint Program = glCreateProgram();
 
 		glAttachShader(Program, VertexShader);
 		glAttachShader(Program, FragmentShader);
@@ -373,26 +436,29 @@ void lcContext::CreateShaderPrograms()
 
 		if (IsLinked == GL_FALSE)
 		{
-#ifndef QT_NO_DEBUG
 			GLint Length = 0;
-			QByteArray InfoLog;
-
 			glGetProgramiv(Program, GL_INFO_LOG_LENGTH, &Length);
 
-			InfoLog.resize(Length);
+			QByteArray InfoLog(Length, '\0');
 
-			glGetProgramInfoLog(Program, Length, &Length, InfoLog.data());
-#endif
+			if (Length > 0)
+				glGetProgramInfoLog(Program, Length, nullptr, InfoLog.data());
 
 			glDeleteProgram(Program);
-			Program = 0;
+
+			const QString Error = QCoreApplication::translate("lcContext", "Could not link the shader program for %1 and %2:\n%3").arg(QString::fromUtf8(VertexShaders[MaterialType]), QString::fromUtf8(FragmentShaders[MaterialType]), QString::fromUtf8(InfoLog.constData()));
+
+			if (Optional)
+			{
+				qWarning().noquote() << Error;
+				continue;
+			}
+
+			return lcUnexpected(Error);
 		}
 
 		mPrograms[MaterialType].Object = Program;
-		
-		if (!Program)
-			continue;
-		
+
 		mPrograms[MaterialType].WorldViewProjectionMatrixLocation = glGetUniformLocation(Program, "WorldViewProjectionMatrix");
 		mPrograms[MaterialType].WorldMatrixLocation = glGetUniformLocation(Program, "WorldMatrix");
 		mPrograms[MaterialType].MaterialColorLocation = glGetUniformLocation(Program, "MaterialColor");
@@ -412,7 +478,7 @@ void lcContext::CreateShaderPrograms()
 		}
 
 		const GLint VisibleTextureLocation = glGetUniformLocation(Program, "VisibleTexture");
-		
+
 		if (VisibleTextureLocation != -1)
 		{
 			glUseProgram(Program);
@@ -420,21 +486,17 @@ void lcContext::CreateShaderPrograms()
 			glUseProgram(0);
 		}
 	}
+
+	return lcResult<void>();
 }
 
-void lcContext::CreateResources()
+lcResult<void> lcContext::CreateResources()
 {
-	if (!gSupportsShaderObjects)
-		return;
-
-	CreateShaderPrograms();
+	return CreateShaderPrograms();
 }
 
 void lcContext::DestroyResources()
 {
-	if (!gSupportsShaderObjects)
-		return;
-
 	for (int MaterialType = 0; MaterialType < static_cast<int>(lcMaterialType::Count); MaterialType++)
 	{
 		glDeleteProgram(mPrograms[MaterialType].Object);
@@ -494,24 +556,20 @@ void lcContext::SetDefaultState()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 
-	if (gSupportsShaderObjects)
-	{
-		SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
-		EnableVertexAttrib(lcProgramAttrib::Position);
+	SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
+	EnableVertexAttrib(lcProgramAttrib::Position);
 
-		DisableVertexAttrib(lcProgramAttrib::Normal);
-		SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
-		DisableVertexAttrib(lcProgramAttrib::TexCoord);
-		SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
-		DisableVertexAttrib(lcProgramAttrib::Color);
-		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
-	}
+	DisableVertexAttrib(lcProgramAttrib::Normal);
+	SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
+	DisableVertexAttrib(lcProgramAttrib::TexCoord);
+	SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
+	DisableVertexAttrib(lcProgramAttrib::Color);
+	SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 
 	mVertexBufferObject = 0;
 	mIndexBufferObject = 0;
 	mVertexBufferPointer = nullptr;
 	mIndexBufferPointer = nullptr;
-	mVertexBufferOffset = (char*)~0;
 
 	for (int AttribIndex = 0; AttribIndex < static_cast<int>(lcProgramAttrib::Count); AttribIndex++)
 		mVertexAttribState[AttribIndex] = lcVertexAttribState();
@@ -533,11 +591,8 @@ void lcContext::SetDefaultState()
 	glLineWidth(1.0f);
 	mLineWidth = 1.0f;
 
-	if (gSupportsShaderObjects)
-	{
-		glUseProgram(0);
-		mMaterialType = lcMaterialType::Count;
-	}
+	glUseProgram(0);
+	mMaterialType = lcMaterialType::Count;
 }
 
 void lcContext::ClearColorAndDepth(const lcVector4& ClearColor)
@@ -553,7 +608,7 @@ void lcContext::ClearDepth()
 
 bool lcContext::SupportsSelectionOutline()
 {
-	return gSupportsShaderObjects && gSupportsFramebufferObject &&
+	return gSupportsFramebufferObject &&
 		mPrograms[static_cast<int>(lcMaterialType::UnlitColor)].Object &&
 		mPrograms[static_cast<int>(lcMaterialType::OutlineComposite)].Object;
 }
@@ -572,23 +627,23 @@ std::unique_ptr<QOpenGLFramebufferObject> lcContext::CreateFramebuffer(int Width
 
 	const int MaxTextureSize = GetMaxTextureSize();
 	GLint MaxRenderbufferSize = 0;
-	
+
 	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &MaxRenderbufferSize);
-	
+
 	if (Width > MaxTextureSize || Height > MaxTextureSize || Width > MaxRenderbufferSize || Height > MaxRenderbufferSize)
 		return nullptr;
 
 	lcScopedGLContextState GLState;
 	QOpenGLFramebufferObjectFormat Format;
-	
+
 	Format.setAttachment(QOpenGLFramebufferObject::Depth);
-	
+
 	std::unique_ptr<QOpenGLFramebufferObject> Framebuffer = std::make_unique<QOpenGLFramebufferObject>(QSize(Width, Height), Format);
 
 	if (!Framebuffer->isValid())
 	{
 		glBindTexture(GL_TEXTURE_2D, mTexture2D);
-		
+
 		return nullptr;
 	}
 
@@ -598,7 +653,7 @@ std::unique_ptr<QOpenGLFramebufferObject> lcContext::CreateFramebuffer(int Width
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, mTexture2D);
-	
+
 	return Framebuffer;
 }
 
@@ -609,40 +664,40 @@ bool lcContext::TryShareDepthAttachment(GLuint SourceFramebuffer, QOpenGLFramebu
 		return false;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, SourceFramebuffer);
-	
+
 	GLint Samples = 0;
-	
+
 	glGetIntegerv(GL_SAMPLES, &Samples);
-	
+
 	if (Samples != 0)
 		return false;
 
 	GLint ObjectType = 0;
 	GLint DepthBuffer = 0;
-	
+
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &ObjectType);
-	
+
 	if (ObjectType != GL_RENDERBUFFER)
 		return false;
-	
+
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &DepthBuffer);
 
 	GLint PreviousRenderbuffer = 0;
 	GLint Width = 0;
 	GLint Height = 0;
-	
+
 	glGetIntegerv(GL_RENDERBUFFER_BINDING, &PreviousRenderbuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, DepthBuffer);
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &Width);
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &Height);
 	glBindRenderbuffer(GL_RENDERBUFFER, PreviousRenderbuffer);
-	
+
 	if (QSize(Width, Height) != TargetFramebuffer.size())
 		return false;
 
 	TargetFramebuffer.bind();
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBuffer);
-	
+
 	return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
@@ -651,10 +706,10 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 	lcScopedGLContextState GLState;
 	GLint SceneFramebuffer = 0;
 	GLint Viewport[4];
-	
+
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &SceneFramebuffer);
 	glGetIntegerv(GL_VIEWPORT, Viewport);
-	
+
 	const lcMatrix44 WorldMatrix = mWorldMatrix;
 	const lcMatrix44 ViewMatrix = mViewMatrix;
 	const lcMatrix44 ProjectionMatrix = mProjectionMatrix;
@@ -669,28 +724,28 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 	Scene.DrawOutlineMask(this);
 
 	const bool Success = VisibleFramebuffer.bind() && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
-	
+
 	if (Success)
 	{
 		GLint OwnDepthBuffer = 0;
-		
+
 		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &OwnDepthBuffer);
-		
+
 		const bool SharedDepth = Scene.CanReuseSceneDepth() && TryShareDepthAttachment(SceneFramebuffer, VisibleFramebuffer);
-		
+
 		VisibleFramebuffer.bind();
-		
+
 		if (!SharedDepth)
 		{
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OwnDepthBuffer);
-			
+
 			ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
-			
+
 			EnableColorWrite(false);
 			SetPolygonOffset(lcPolygonOffset::Opaque);
-			
+
 			Scene.DrawOutlineOccluders(this);
-			
+
 			SetPolygonOffset(lcPolygonOffset::None);
 			EnableColorWrite(true);
 		}
@@ -701,9 +756,9 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 		}
 
 		SetDepthWrite(false);
-		
+
 		Scene.DrawOutlineMask(this);
-		
+
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OwnDepthBuffer);
 	}
 
@@ -715,7 +770,7 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 	SetProjectionMatrix(ProjectionMatrix);
 	SetViewport(Viewport[0], Viewport[1], Viewport[2], Viewport[3]);
 	SetLineWidth(LineWidth);
-	
+
 	return Success;
 }
 
@@ -735,7 +790,7 @@ void lcContext::DrawOutline(QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFr
 	SetMaterial(lcMaterialType::OutlineComposite);
 
 	const lcPreferences& Preferences = lcGetPreferences();
-	
+
 	SetOutlineParams(lcVector4(1.0f / FullFramebuffer.width(), 1.0f / FullFramebuffer.height(), 2.0f * DeviceScale, 0.3f),
 		lcVector4FromColor(Preferences.mObjectSelectedColor), lcVector4FromColor(Preferences.mObjectFocusedColor));
 
@@ -752,12 +807,12 @@ void lcContext::DrawOutline(QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFr
 		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
 	};
-	
+
 	SetVertexBufferPointer(Vertices);
 	SetVertexFormat(0, 3, 0, 2, 0, false);
-	
+
 	DrawPrimitives(GL_TRIANGLE_STRIP, 0, 4);
-	
+
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -783,16 +838,13 @@ void lcContext::SetMaterial(lcMaterialType MaterialType)
 
 	mMaterialType = MaterialType;
 
-	if (gSupportsShaderObjects)
-	{
-		glUseProgram(mPrograms[static_cast<int>(MaterialType)].Object);
-		mColorDirty = true;
-		mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
-		mViewMatrixDirty = true;
-		mHighlightParamsDirty = true;
-		mOutlineParamsDirty = true;
-		mTextHaloColorDirty = true;
-	}
+	glUseProgram(mPrograms[static_cast<int>(MaterialType)].Object);
+	mColorDirty = true;
+	mWorldMatrixDirty = true; // todo: change dirty to a bitfield and set the lighting constants dirty here
+	mViewMatrixDirty = true;
+	mHighlightParamsDirty = true;
+	mOutlineParamsDirty = true;
+	mTextHaloColorDirty = true;
 }
 
 void lcContext::SetViewport(int x, int y, int Width, int Height)
@@ -1245,7 +1297,6 @@ void lcContext::DestroyIndexBuffer(lcIndexBuffer& IndexBuffer)
 void lcContext::ClearVertexBuffer()
 {
 	mVertexBufferPointer = nullptr;
-	mVertexBufferOffset = (char*)~0;
 
 	if (mVertexBufferObject)
 	{
@@ -1253,17 +1304,14 @@ void lcContext::ClearVertexBuffer()
 		mVertexBufferObject = 0;
 	}
 
-	if (gSupportsShaderObjects)
-	{
-		SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
+	SetVertexAttribPointer(lcProgramAttrib::Position, 3, GL_FLOAT, false, 0, nullptr);
 
-		DisableVertexAttrib(lcProgramAttrib::Normal);
-		SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
-		DisableVertexAttrib(lcProgramAttrib::TexCoord);
-		SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
-		DisableVertexAttrib(lcProgramAttrib::Color);
-		SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
-	}
+	DisableVertexAttrib(lcProgramAttrib::Normal);
+	SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, 0, nullptr);
+	DisableVertexAttrib(lcProgramAttrib::TexCoord);
+	SetVertexAttribPointer(lcProgramAttrib::TexCoord, 2, GL_FLOAT, false, 0, nullptr);
+	DisableVertexAttrib(lcProgramAttrib::Color);
+	SetVertexAttribPointer(lcProgramAttrib::Color, 4, GL_FLOAT, false, 0, nullptr);
 }
 
 void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
@@ -1277,13 +1325,11 @@ void lcContext::SetVertexBuffer(lcVertexBuffer VertexBuffer)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBufferObject);
 			mVertexBufferObject = VertexBufferObject;
-			mVertexBufferOffset = (char*)~0;
 		}
 	}
 	else
 	{
 		mVertexBufferPointer = (char*)VertexBuffer.Pointer;
-		mVertexBufferOffset = (char*)~0;
 	}
 }
 
@@ -1296,7 +1342,6 @@ void lcContext::SetVertexBufferPointer(const void* VertexBuffer)
 	}
 
 	mVertexBufferPointer = (char*)VertexBuffer;
-	mVertexBufferOffset = (char*)~0;
 }
 
 void lcContext::SetVertexAttribPointer(lcProgramAttrib Attrib, GLint Size, GLenum Type, GLboolean Normalized, GLsizei Stride, const void* Pointer)
@@ -1346,13 +1391,10 @@ void lcContext::SetVertexFormatPosition(int PositionSize)
 	const int VertexSize = PositionSize * sizeof(float);
 	const char* VertexBufferPointer = mVertexBufferPointer;
 
-	if (gSupportsShaderObjects)
-	{
-		SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-		DisableVertexAttrib(lcProgramAttrib::Normal);
-		DisableVertexAttrib(lcProgramAttrib::TexCoord);
-		DisableVertexAttrib(lcProgramAttrib::Color);
-	}
+	SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+	DisableVertexAttrib(lcProgramAttrib::Normal);
+	DisableVertexAttrib(lcProgramAttrib::TexCoord);
+	DisableVertexAttrib(lcProgramAttrib::Color);
 }
 
 void lcContext::SetVertexFormatConditional(int BufferOffset)
@@ -1360,17 +1402,14 @@ void lcContext::SetVertexFormatConditional(int BufferOffset)
 	constexpr int VertexSize = 12 * sizeof(float);
 	const char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
-	if (gSupportsShaderObjects)
-	{
-		SetVertexAttribPointer(lcProgramAttrib::ControlPoint1, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-		EnableVertexAttrib(lcProgramAttrib::ControlPoint1);
-		SetVertexAttribPointer(lcProgramAttrib::ControlPoint2, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 3 * sizeof(float));
-		EnableVertexAttrib(lcProgramAttrib::ControlPoint2);
-		SetVertexAttribPointer(lcProgramAttrib::ControlPoint3, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 6 * sizeof(float));
-		EnableVertexAttrib(lcProgramAttrib::ControlPoint3);
-		SetVertexAttribPointer(lcProgramAttrib::ControlPoint4, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 9 * sizeof(float));
-		EnableVertexAttrib(lcProgramAttrib::ControlPoint4);
-	}
+	SetVertexAttribPointer(lcProgramAttrib::ControlPoint1, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+	EnableVertexAttrib(lcProgramAttrib::ControlPoint1);
+	SetVertexAttribPointer(lcProgramAttrib::ControlPoint2, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 3 * sizeof(float));
+	EnableVertexAttrib(lcProgramAttrib::ControlPoint2);
+	SetVertexAttribPointer(lcProgramAttrib::ControlPoint3, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 6 * sizeof(float));
+	EnableVertexAttrib(lcProgramAttrib::ControlPoint3);
+	SetVertexAttribPointer(lcProgramAttrib::ControlPoint4, 3, GL_FLOAT, false, VertexSize, VertexBufferPointer + 9 * sizeof(float));
+	EnableVertexAttrib(lcProgramAttrib::ControlPoint4);
 }
 
 void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSize, int TexCoordSize, int ColorSize, bool EnableNormals)
@@ -1378,43 +1417,40 @@ void lcContext::SetVertexFormat(int BufferOffset, int PositionSize, int NormalSi
 	const int VertexSize = (PositionSize + TexCoordSize) * sizeof(float) + NormalSize * sizeof(quint32) + ColorSize;
 	const char* VertexBufferPointer = mVertexBufferPointer + BufferOffset;
 
-	if (gSupportsShaderObjects)
+	int Offset = 0;
+
+	SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
+	EnableVertexAttrib(lcProgramAttrib::Position);
+
+	Offset += PositionSize * sizeof(float);
+
+	if (NormalSize && EnableNormals)
 	{
-		int Offset = 0;
-
-		SetVertexAttribPointer(lcProgramAttrib::Position, PositionSize, GL_FLOAT, false, VertexSize, VertexBufferPointer);
-		EnableVertexAttrib(lcProgramAttrib::Position);
-
-		Offset += PositionSize * sizeof(float);
-
-		if (NormalSize && EnableNormals)
-		{
-			SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
-			EnableVertexAttrib(lcProgramAttrib::Normal);
-		}
-		else
-			DisableVertexAttrib(lcProgramAttrib::Normal);
-
-		Offset += NormalSize * sizeof(quint32);
-
-		if (TexCoordSize)
-		{
-			SetVertexAttribPointer(lcProgramAttrib::TexCoord, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
-			EnableVertexAttrib(lcProgramAttrib::TexCoord);
-		}
-		else
-			DisableVertexAttrib(lcProgramAttrib::TexCoord);
-
-		Offset += TexCoordSize * sizeof(float);
-
-		if (ColorSize)
-		{
-			SetVertexAttribPointer(lcProgramAttrib::Color, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
-			EnableVertexAttrib(lcProgramAttrib::Color);
-		}
-		else
-			DisableVertexAttrib(lcProgramAttrib::Color);
+		SetVertexAttribPointer(lcProgramAttrib::Normal, 4, GL_BYTE, true, VertexSize, VertexBufferPointer + Offset);
+		EnableVertexAttrib(lcProgramAttrib::Normal);
 	}
+	else
+		DisableVertexAttrib(lcProgramAttrib::Normal);
+
+	Offset += NormalSize * sizeof(quint32);
+
+	if (TexCoordSize)
+	{
+		SetVertexAttribPointer(lcProgramAttrib::TexCoord, TexCoordSize, GL_FLOAT, false, VertexSize, VertexBufferPointer + Offset);
+		EnableVertexAttrib(lcProgramAttrib::TexCoord);
+	}
+	else
+		DisableVertexAttrib(lcProgramAttrib::TexCoord);
+
+	Offset += TexCoordSize * sizeof(float);
+
+	if (ColorSize)
+	{
+		SetVertexAttribPointer(lcProgramAttrib::Color, ColorSize, GL_UNSIGNED_BYTE, true, VertexSize, VertexBufferPointer + Offset);
+		EnableVertexAttrib(lcProgramAttrib::Color);
+	}
+	else
+		DisableVertexAttrib(lcProgramAttrib::Color);
 }
 
 void lcContext::ClearIndexBuffer()
@@ -1470,7 +1506,6 @@ void lcContext::BindMesh(const lcMesh* Mesh)
 			glBindBuffer(GL_ARRAY_BUFFER_ARB, VertexBufferObject);
 			mVertexBufferObject = VertexBufferObject;
 			mVertexBufferPointer = nullptr;
-			mVertexBufferOffset = (char*)~0;
 		}
 
 		if (IndexBufferObject != mIndexBufferObject)
@@ -1496,74 +1531,70 @@ void lcContext::BindMesh(const lcMesh* Mesh)
 
 		mVertexBufferPointer = (char*)Mesh->mVertexData;
 		mIndexBufferPointer = (char*)Mesh->mIndexData;
-		mVertexBufferOffset = (char*)~0;
 	}
 }
 
 void lcContext::FlushState()
 {
-	if (gSupportsShaderObjects)
+	const lcProgram& Program = mPrograms[static_cast<int>(mMaterialType)];
+
+	if (mWorldMatrixDirty || mViewMatrixDirty || mProjectionMatrixDirty)
 	{
-		const lcProgram& Program = mPrograms[static_cast<int>(mMaterialType)];
-
-		if (mWorldMatrixDirty || mViewMatrixDirty || mProjectionMatrixDirty)
+		if (mViewProjectionMatrixDirty)
 		{
-			if (mViewProjectionMatrixDirty)
+			mViewProjectionMatrix = lcMul(mViewMatrix, mProjectionMatrix);
+			mViewProjectionMatrixDirty = false;
+		}
+
+		if (mWorldMatrixDirty)
+		{
+			if (Program.WorldMatrixLocation != -1)
+				glUniformMatrix4fv(Program.WorldMatrixLocation, 1, false, mWorldMatrix.GetFloats());
+		}
+
+		if (mViewMatrixDirty)
+		{
+			const lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
+			lcVector3 ViewPosition = lcMul30(-mViewMatrix.GetTranslation(), InverseViewMatrix);
+
+			if (Program.LightPositionLocation != -1)
 			{
-				mViewProjectionMatrix = lcMul(mViewMatrix, mProjectionMatrix);
-				mViewProjectionMatrixDirty = false;
+				lcVector3 LightPosition = ViewPosition + lcMul30(lcVector3(300.0f, 300.0f, 0.0f), InverseViewMatrix);
+				glUniform3fv(Program.LightPositionLocation, 1, LightPosition.GetFloats());
 			}
 
-			if (mWorldMatrixDirty)
-			{
-				if (Program.WorldMatrixLocation != -1)
-					glUniformMatrix4fv(Program.WorldMatrixLocation, 1, false, mWorldMatrix.GetFloats());
-			}
-
-			if (mViewMatrixDirty)
-			{
-				const lcMatrix44 InverseViewMatrix = lcMatrix44AffineInverse(mViewMatrix);
-				lcVector3 ViewPosition = lcMul30(-mViewMatrix.GetTranslation(), InverseViewMatrix);
-
-				if (Program.LightPositionLocation != -1)
-				{
-					lcVector3 LightPosition = ViewPosition + lcMul30(lcVector3(300.0f, 300.0f, 0.0f), InverseViewMatrix);
-					glUniform3fv(Program.LightPositionLocation, 1, LightPosition.GetFloats());
-				}
-
-				if (Program.EyePositionLocation != -1)
-					glUniform3fv(Program.EyePositionLocation, 1, ViewPosition.GetFloats());
-			}
-
-			glUniformMatrix4fv(Program.WorldViewProjectionMatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix).GetFloats());
-			mWorldMatrixDirty = false;
-			mViewMatrixDirty = false;
-			mProjectionMatrixDirty = false;
+			if (Program.EyePositionLocation != -1)
+				glUniform3fv(Program.EyePositionLocation, 1, ViewPosition.GetFloats());
 		}
 
-		if (mColorDirty && Program.MaterialColorLocation != -1)
-		{
-			glUniform4fv(Program.MaterialColorLocation, 1, mColor.GetFloats());
-			mColorDirty = false;
-		}
+		glUniformMatrix4fv(Program.WorldViewProjectionMatrixLocation, 1, false, lcMul(mWorldMatrix, mViewProjectionMatrix).GetFloats());
+		mWorldMatrixDirty = false;
+		mViewMatrixDirty = false;
+		mProjectionMatrixDirty = false;
+	}
 
-		if (mTextHaloColorDirty && Program.TextHaloColorLocation != -1)
-		{
-			glUniform4fv(Program.TextHaloColorLocation, 1, mTextHaloColor.GetFloats());
-			mTextHaloColorDirty = false;
-		}
+	if (mColorDirty && Program.MaterialColorLocation != -1)
+	{
+		glUniform4fv(Program.MaterialColorLocation, 1, mColor.GetFloats());
+		mColorDirty = false;
+	}
 
-		if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
-		{
-			glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0].GetFloats());
-			mHighlightParamsDirty = false;
-		}
+	if (mTextHaloColorDirty && Program.TextHaloColorLocation != -1)
+	{
+		glUniform4fv(Program.TextHaloColorLocation, 1, mTextHaloColor.GetFloats());
+		mTextHaloColorDirty = false;
+	}
 
-		if (mOutlineParamsDirty && Program.OutlineParamsLocation != -1)
-		{
-			glUniform4fv(Program.OutlineParamsLocation, 3, mOutlineParams[0].GetFloats());
-			mOutlineParamsDirty = false;
-		}
+	if (mHighlightParamsDirty && Program.HighlightParamsLocation != -1)
+	{
+		glUniform4fv(Program.HighlightParamsLocation, 4, mHighlightParams[0].GetFloats());
+		mHighlightParamsDirty = false;
+	}
+
+	if (mOutlineParamsDirty && Program.OutlineParamsLocation != -1)
+	{
+		glUniform4fv(Program.OutlineParamsLocation, 3, mOutlineParams[0].GetFloats());
+		mOutlineParamsDirty = false;
 	}
 }
 

@@ -2,6 +2,7 @@
 
 #include "lc_math.h"
 #include "lc_mesh.h"
+#include "lc_result.h"
 
 class lcVertexBuffer
 {
@@ -64,11 +65,11 @@ enum class lcProgramAttrib
 	Normal,
 	TexCoord,
 	Color,
-	ControlPoint1 = 0,
-	ControlPoint2,
-	ControlPoint3,
-	ControlPoint4,
-	Count
+	Count,
+	ControlPoint1 = Position,
+	ControlPoint2 = Normal,
+	ControlPoint3 = TexCoord,
+	ControlPoint4 = Color
 };
 
 struct lcProgram
@@ -137,11 +138,11 @@ public:
 	lcContext& operator=(const lcContext&) = delete;
 	lcContext& operator=(lcContext&&) = delete;
 
-	static bool InitializeRenderer();
+	static lcResult<void> InitializeRenderer(bool CreateRenderResources);
 	static void ShutdownRenderer();
 	static lcContext* GetGlobalOffscreenContext();
 
-	void CreateResources();
+	lcResult<void> CreateResources();
 	void DestroyResources();
 
 	void SetDefaultState();
@@ -160,6 +161,17 @@ public:
 
 	void ClearColorAndDepth(const lcVector4& ClearColor);
 	void ClearDepth();
+
+	static bool SupportsMaterial(lcMaterialType MaterialType)
+	{
+		return mPrograms[static_cast<int>(MaterialType)].Object != 0;
+	}
+
+	static bool SupportsDefaultLights()
+	{
+		return SupportsMaterial(lcMaterialType::FakeLitColor) && SupportsMaterial(lcMaterialType::FakeLitTextureDecal);
+	}
+
 	static bool SupportsSelectionOutline();
 	int GetMaxTextureSize();
 	std::unique_ptr<QOpenGLFramebufferObject> CreateFramebuffer(int Width, int Height);
@@ -266,10 +278,10 @@ public:
 	void BindMesh(const lcMesh* Mesh);
 
 protected:
-	static bool CreateOffscreenContext();
+	static lcResult<void> CreateOffscreenContext();
 	static void DestroyOffscreenContext();
 
-	void CreateShaderPrograms();
+	lcResult<void> CreateShaderPrograms();
 	void FlushState();
 	bool TryShareDepthAttachment(GLuint SourceFramebuffer, QOpenGLFramebufferObject& TargetFramebuffer);
 
@@ -284,12 +296,8 @@ protected:
 	GLuint mIndexBufferObject;
 	const char* mVertexBufferPointer;
 	const char* mIndexBufferPointer;
-	const char* mVertexBufferOffset;
 
 	lcMaterialType mMaterialType;
-	bool mNormalEnabled;
-	bool mTexCoordEnabled;
-	bool mColorEnabled;
 
 	lcVertexAttribState mVertexAttribState[static_cast<int>(lcProgramAttrib::Count)];
 
@@ -325,6 +333,7 @@ protected:
 	static std::unique_ptr<QOffscreenSurface> mOffscreenSurface;
 	static std::unique_ptr<lcContext> mGlobalOffscreenContext;
 
+	static bool mRenderResourcesCreated;
 	static lcProgram mPrograms[static_cast<int>(lcMaterialType::Count)];
 
 	Q_DECLARE_TR_FUNCTIONS(lcContext);

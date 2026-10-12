@@ -205,6 +205,9 @@ public:
 	lcPreferences mPreferences;
 	QByteArray mClipboard;
 
+signals:
+	void RendererInitialized();
+
 protected:
 	void UpdateStyle();
 	QString GetTabLayoutKey() const;

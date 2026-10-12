@@ -258,6 +258,7 @@ protected slots:
 
 protected:
 	void SetIconSize(int Size);
+	void UpdateIconSize();
 	void UpdateItemGeometry();
 	void SetPartFilterType(lcPartFilterType Option);
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
@@ -265,6 +266,7 @@ protected:
 	lcPartSelectionListModel* mListModel = nullptr;
 	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
 	PieceInfo* mContextInfo = nullptr;
+	int mRequestedIconSize = NoIconSize;
 	lcPartCategoryType mCategoryType = lcPartCategoryType::AllParts;
 	int mCategoryIndex = 0;
 	std::map<std::pair<lcPartCategoryType, int>, int> mLastCategoryRow;
@@ -284,7 +286,6 @@ public:
 	void UpdateCategories();
 	void LoadState(QSettings& Settings);
 	void SaveState(QSettings& Settings);
-	void DisableIconMode();
 	void SetOrientation(Qt::Orientation Orientation);
 	void SetCurrentPart(PieceInfo* Info);
 	void SetCategory(lcPartCategoryType Type, int Index);

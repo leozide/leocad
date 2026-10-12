@@ -574,7 +574,10 @@ lcPartSelectionListView::lcPartSelectionListView(QWidget* Parent, lcPartSelectio
 	connect(this, &QListView::doubleClicked, this, &lcPartSelectionListView::DoubleClicked);
 	connect(this, &QListView::customContextMenuRequested, this, &lcPartSelectionListView::CustomContextMenuRequested);
 
-	SetIconSize(lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS));
+	connect(gApplication, &lcApplication::RendererInitialized, this, &lcPartSelectionListView::UpdateIconSize);
+
+	mRequestedIconSize = lcGetProfileInt(LC_PROFILE_PARTS_LIST_ICONS);
+	UpdateIconSize();
 }
 
 void lcPartSelectionListView::keyPressEvent(QKeyEvent* KeyEvent)
@@ -816,8 +819,15 @@ void lcPartSelectionListView::UpdateViewMode()
 
 void lcPartSelectionListView::SetIconSize(int Size)
 {
-	setIconSize(QSize(Size, Size));
+	mRequestedIconSize = Size;
 	lcSetProfileInt(LC_PROFILE_PARTS_LIST_ICONS, Size);
+	UpdateIconSize();
+}
+
+void lcPartSelectionListView::UpdateIconSize()
+{
+	const int Size = gSupportsFramebufferObject ? mRequestedIconSize : NoIconSize;
+	setIconSize(QSize(Size, Size));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 	float DeviceScale = devicePixelRatioF();
@@ -1081,11 +1091,6 @@ void lcPartSelectionWidget::SaveState(QSettings& Settings)
 {
 	QList<int> Sizes = mSplitter->sizes();
 	Settings.setValue("PartSelectionSplitter", QVariant::fromValue(Sizes));
-}
-
-void lcPartSelectionWidget::DisableIconMode()
-{
-	mPartsWidget->SetNoIcons();
 }
 
 void lcPartSelectionWidget::SetCurrentPart(PieceInfo* Info)

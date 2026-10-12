@@ -145,12 +145,6 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->edgeLines->setChecked(mOptions->Preferences.mDrawEdgeLines);
 	ui->ConditionalLinesCheckBox->setChecked(mOptions->Preferences.mDrawConditionalLines);
 
-	if (!gSupportsShaderObjects)
-	{
-		ui->ConditionalLinesCheckBox->setChecked(false);
-		ui->ConditionalLinesCheckBox->setEnabled(false);
-	}
-
 	lcViewWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
 	QOpenGLContext* Context = Widget->context();
 	QOpenGLFunctions* Functions = Context->functions();
@@ -247,9 +241,35 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 
 	ui->studStyleCombo->setCurrentIndex(static_cast<int>(mOptions->StudStyle));
 
-	if (!gSupportsShaderObjects)
-		ui->ShadingMode->removeItem(static_cast<int>(lcShadingMode::DefaultLights));
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));
+
+	if (!lcContext::SupportsDefaultLights())
+	{
+		QStandardItemModel* ShadingModel = qobject_cast<QStandardItemModel*>(ui->ShadingMode->model());
+		QStandardItem* DefaultLightsItem = ShadingModel->item(static_cast<int>(lcShadingMode::DefaultLights));
+		DefaultLightsItem->setEnabled(false);
+
+		const QString Message = tr("Default Lights is unavailable. Flat shading is used instead.");
+		DefaultLightsItem->setToolTip(Message);
+		ui->ShadingMode->setToolTip(Message);
+	}
+
+	if (!lcContext::SupportsMaterial(lcMaterialType::UnlitViewSphere))
+	{
+		const std::array<QWidget*, 7> Controls =
+		{
+			ui->ViewSphereSizeCombo, ui->ViewSphereLocationCombo,
+			ui->PreviewViewSphereSizeCombo, ui->PreviewViewSphereLocationCombo,
+			ui->ViewSphereColorButton, ui->ViewSphereTextColorButton, ui->ViewSphereHighlightColorButton
+		};
+		const QString Message = tr("View sphere rendering is unavailable.");
+
+		for (QWidget* Control : Controls)
+		{
+			Control->setEnabled(false);
+			Control->setToolTip(Message);
+		}
+	}
 
 	bool OutlineSupported = false;
 
@@ -710,12 +730,12 @@ void lcPreferencesDialog::GridLinesToggled()
 
 void lcPreferencesDialog::PreviewViewSphereSizeComboCurrentIndexChanged(int Index)
 {
-	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0);
+	ui->PreviewViewSphereLocationCombo->setEnabled(Index != 0 && lcContext::SupportsMaterial(lcMaterialType::UnlitViewSphere));
 }
 
 void lcPreferencesDialog::ViewSphereSizeComboCurrentIndexChanged(int Index)
 {
-	ui->ViewSphereLocationCombo->setEnabled(Index != 0);
+	ui->ViewSphereLocationCombo->setEnabled(Index != 0 && lcContext::SupportsMaterial(lcMaterialType::UnlitViewSphere));
 }
 
 void lcPreferencesDialog::AutomateEdgeColorToggled()

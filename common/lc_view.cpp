@@ -1167,24 +1167,27 @@ void lcView::OnDraw()
 		TimerAverage += Result;
 	TimerAverage /= TimerResults.size();
 
-	mContext->SetWorldMatrix(lcMatrix44Identity());
-	mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
-	mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
+	if (gTexFont.IsLoaded())
+	{
+		mContext->SetWorldMatrix(lcMatrix44Identity());
+		mContext->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
+		mContext->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mWidth, 0.0f, mHeight, -1.0f, 1.0f));
 
-	QString Line = QString("GPU: %1 CPU: %2").arg(QString::number(QueryAverage / 1000000.0, 'f', 2), QString::number(TimerAverage / 1000000.0, 'f', 2));
+		QString Line = QString("GPU: %1 CPU: %2").arg(QString::number(QueryAverage / 1000000.0, 'f', 2), QString::number(TimerAverage / 1000000.0, 'f', 2));
 
-	mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
-	mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
-	mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
-	mContext->BindTexture2D(gTexFont.GetTexture());
+		mContext->SetMaterial(lcMaterialType::TextSDF);
+		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
+		mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
+		mContext->BindTexture2D(gTexFont.GetTexture());
 
-	mContext->EnableDepthTest(false);
-	mContext->EnableColorBlend(true);
+		mContext->EnableDepthTest(false);
+		mContext->EnableColorBlend(true);
 
-	gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, Line.toLatin1().constData());
+		gTexFont.PrintText(mContext, 3.0f, (float)mHeight - 1.0f - 6.0f, 0.0f, Line.toLatin1().constData());
 
-	mContext->EnableColorBlend(false);
-	mContext->EnableDepthTest(true);
+		mContext->EnableColorBlend(false);
+		mContext->EnableDepthTest(true);
+	}
 
 	Redraw();
 #endif
@@ -1308,15 +1311,16 @@ void lcView::DrawViewport() const
 
 	QString CameraName = mCamera->GetName();
 
-	if (!CameraName.isEmpty())
+	if (!CameraName.isEmpty() && gTexFont.IsLoaded())
 	{
-		mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
+		mContext->SetMaterial(lcMaterialType::TextSDF);
 		mContext->SetColor(lcVector4FromColor(lcGetPreferences().mTextColor));
 		mContext->SetTextHaloColor(lcVector4FromColor(lcGetPreferences().mTextHaloColor));
 		mContext->BindTexture2D(gTexFont.GetTexture());
 
 		mContext->EnableColorBlend(true);
 
+		// TODO: Make TexFont support Unicode camera names instead of converting them to Latin-1.
 		gTexFont.PrintText(mContext, 3.0f, (float)Height - 1.0f - 6.0f, 0.0f, CameraName.toLatin1().constData());
 
 		mContext->EnableColorBlend(false);
@@ -1417,7 +1421,10 @@ void lcView::DrawAxes() const
 	mContext->DrawIndexedPrimitives(GL_LINES, 6, GL_UNSIGNED_SHORT, 0);
 	mContext->DrawIndexedPrimitives(GL_TRIANGLES, 72, GL_UNSIGNED_SHORT, 6 * 2);
 
-	mContext->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
+	if (!gTexFont.IsLoaded())
+		return;
+
+	mContext->SetMaterial(lcMaterialType::TextSDF);
 	mContext->SetViewMatrix(TranslationMatrix);
 	mContext->BindTexture2D(gTexFont.GetTexture());
 	mContext->EnableColorBlend(true);

@@ -5,7 +5,6 @@
 #include "lc_context.h"
 #include "lc_stringcache.h"
 #include "lc_application.h"
-#include "lc_glextensions.h"
 #include "image.h"
 #include "lc_texture.h"
 
@@ -46,6 +45,8 @@ void lcViewSphere::UpdateSettings()
 	case lcViewType::Count:
 		break;
 	}
+
+	mEnabled = mEnabled && lcContext::SupportsMaterial(lcMaterialType::UnlitViewSphere);
 }
 
 lcMatrix44 lcViewSphere::GetViewMatrix() const
@@ -74,23 +75,11 @@ void lcViewSphere::CreateResources(lcContext* Context)
 
 	QImage PainterImage(SourceCellSize, SourceCellSize, QImage::Format_ARGB32);
 	QPainter Painter;
-	QFont Font("Helvetica", gSupportsShaderObjects ? 36 : 20);
-	const bool UseSDF = gSupportsShaderObjects;
+	QFont Font("Helvetica", 36);
 	Image AtlasImage;
-	std::vector<Image> BitmapFaces;
-	if (UseSDF)
-	{
-		AtlasImage.Allocate(AtlasWidth, AtlasHeight, lcPixelFormat::A8);
-		memset(AtlasImage.mData, 0, AtlasWidth * AtlasHeight);
-	}
-	else
-		BitmapFaces.reserve(6);
-	const QTransform BitmapTransforms[6] =
-	{
-		QTransform(0, 1, 1, 0, 0, 0), QTransform(0, -1, -1, 0, SourceCellSize, SourceCellSize),
-		QTransform(-1, 0, 0, 1, SourceCellSize, 0), QTransform(1, 0, 0, -1, 0, SourceCellSize),
-		QTransform(1, 0, 0, -1, 0, SourceCellSize), QTransform(-1, 0, 0, 1, SourceCellSize, 0)
-	};
+	AtlasImage.Allocate(AtlasWidth, AtlasHeight, lcPixelFormat::A8);
+	memset(AtlasImage.mData, 0, AtlasWidth * AtlasHeight);
+
 	auto ConvertToSDF = [](Image& TextureImage)
 	{
 		constexpr int Size = 128, Count = Size * Size;
@@ -116,23 +105,18 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		Image TextureImage;
 		TextureImage.Allocate(SourceCellSize, SourceCellSize, lcPixelFormat::A8);
 		QFont LabelFont = Font;
-		if (UseSDF)
-		{
-			// The shader displays the middle 80% of each cell. Leave six pixels
-			// on either side for the SDF halo, including for translated labels.
-			constexpr int MaxLabelWidth = 90;
-			while (LabelFont.pointSize() > 1 && QFontMetrics(LabelFont).horizontalAdvance(ViewNames[ViewIdx]) > MaxLabelWidth)
-				LabelFont.setPointSize(LabelFont.pointSize() - 1);
-		}
+		// The shader displays the middle 80% of each cell. Leave six pixels
+		// on either side for the SDF halo, including for translated labels.
+		constexpr int MaxLabelWidth = 90;
+		while (LabelFont.pointSize() > 1 && QFontMetrics(LabelFont).horizontalAdvance(ViewNames[ViewIdx]) > MaxLabelWidth)
+			LabelFont.setPointSize(LabelFont.pointSize() - 1);
 
 		Painter.begin(&PainterImage);
-		Painter.setRenderHint(QPainter::TextAntialiasing, UseSDF);
+		Painter.setRenderHint(QPainter::TextAntialiasing);
 		Painter.fillRect(0, 0, PainterImage.width(), PainterImage.height(), QColor(0, 0, 0));
 		Painter.setBrush(QColor(255, 255, 255));
 		Painter.setPen(QColor(255, 255, 255));
 		Painter.setFont(LabelFont);
-		if (!UseSDF)
-			Painter.setTransform(BitmapTransforms[ViewIdx]);
 		Painter.drawText(0, 0, PainterImage.width(), PainterImage.height(), Qt::AlignCenter, ViewNames[ViewIdx]);
 		Painter.end();
 
@@ -143,27 +127,19 @@ void lcViewSphere::CreateResources(lcContext* Context)
 			for (int x = 0; x < SourceCellSize; x++)
 				*Dest++ = qRed(PainterImage.pixel(x, y));
 		}
-		if (UseSDF)
-		{
-			ConvertToSDF(TextureImage);
-			// Keep the middle band and its SDF margin in a vertical atlas.
-			const int AtlasY = ViewIdx * CellHeight;
-			for (int y = 0; y < CellHeight; y++)
-				memcpy(AtlasImage.mData + (AtlasY + y) * AtlasWidth,
-					TextureImage.mData + (CellBottom + y) * SourceCellSize, SourceCellSize);
-		}
-		else
-			BitmapFaces.emplace_back(std::move(TextureImage));
+		ConvertToSDF(TextureImage);
+		// Keep the middle band and its SDF margin in a vertical atlas.
+		const int AtlasY = ViewIdx * CellHeight;
+		for (int y = 0; y < CellHeight; y++)
+			memcpy(AtlasImage.mData + (AtlasY + y) * AtlasWidth,
+				TextureImage.mData + (CellBottom + y) * SourceCellSize, SourceCellSize);
 	}
 
-	if (UseSDF)
-		mTexture->SetImage(std::move(AtlasImage), LC_TEXTURE_LINEAR);
-	else
-		mTexture->SetImage(std::move(BitmapFaces), LC_TEXTURE_CUBEMAP | LC_TEXTURE_LINEAR);
+	mTexture->SetImage(std::move(AtlasImage), LC_TEXTURE_LINEAR);
 
 	const int SphereVertexCount = (mSubdivisions + 1) * (mSubdivisions + 1) * 6;
 	mSphereIndexCount = mSubdivisions * mSubdivisions * 6 * 6;
-	std::vector<float> Verts(SphereVertexCount * (UseSDF ? 6 : 3));
+	std::vector<float> Verts(SphereVertexCount * 6);
 	std::vector<GLushort> Indices(mSphereIndexCount);
 
 	lcMatrix44 Transforms[6] =
@@ -197,12 +173,9 @@ void lcViewSphere::CreateResources(lcContext* Context)
 				*CurVert++ = SphereVert.x;
 				*CurVert++ = SphereVert.y;
 				*CurVert++ = SphereVert.z;
-				if (UseSDF)
-				{
-					*CurVert++ = x / static_cast<float>(mSubdivisions);
-					*CurVert++ = y / static_cast<float>(mSubdivisions);
-					*CurVert++ = static_cast<float>(FaceIdx);
-				}
+				*CurVert++ = x / static_cast<float>(mSubdivisions);
+				*CurVert++ = y / static_cast<float>(mSubdivisions);
+				*CurVert++ = static_cast<float>(FaceIdx);
 			}
 		}
 	}
@@ -262,10 +235,7 @@ void lcViewSphere::Draw()
 	Context->EnableCullFace(true);
 
 	Context->SetVertexBuffer(mVertexBuffer);
-	if (gSupportsShaderObjects)
-		Context->SetVertexFormat(0, 3, 0, 3, 0, false);
-	else
-		Context->SetVertexFormatPosition(3);
+	Context->SetVertexFormat(0, 3, 0, 3, 0, false);
 	Context->SetIndexBuffer(mIndexBuffer);
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
@@ -279,10 +249,7 @@ void lcViewSphere::Draw()
 	Context->DrawIndexedPrimitives(GL_TRIANGLES, mSphereIndexCount, GL_UNSIGNED_SHORT, 0);
 
 	Context->SetMaterial(lcMaterialType::UnlitViewSphere);
-	if (gSupportsShaderObjects)
-		Context->BindTexture2D(mTexture);
-	else
-		Context->BindTextureCubeMap(mTexture);
+	Context->BindTexture2D(mTexture);
 
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(GetViewMatrix());

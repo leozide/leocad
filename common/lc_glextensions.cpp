@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_glextensions.h"
 
-bool gSupportsShaderObjects;
 bool gSupportsVertexBufferObject;
 bool gSupportsFramebufferObject;
 bool gSupportsBlendFuncSeparate;
@@ -60,5 +59,4 @@ void lcInitializeGLExtensions(const QOpenGLContext* Context)
 	gSupportsVertexBufferObject = Functions->hasOpenGLFeature(QOpenGLFunctions::Buffers);
 	gSupportsFramebufferObject = Functions->hasOpenGLFeature(QOpenGLFunctions::Framebuffers);
 	gSupportsBlendFuncSeparate = Functions->hasOpenGLFeature(QOpenGLFunctions::BlendFuncSeparate);
-	gSupportsShaderObjects = Functions->hasOpenGLFeature(QOpenGLFunctions::Shaders);
 }

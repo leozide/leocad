@@ -946,6 +946,8 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	if (Options.Exit)
 		return lcStartupMode::Success;
 
+	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
+
 #ifdef Q_OS_IOS
 	if (Options.SaveImage)
 	{
@@ -955,14 +957,22 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 #endif
 
 #ifndef Q_OS_IOS
-	if (!lcContext::InitializeRenderer())
+	const bool CreateRenderResources = !SaveAndExit || Options.SaveImage || Options.SaveHTML;
+	const lcResult<void> RendererResult = lcContext::InitializeRenderer(CreateRenderResources);
+
+	if (!RendererResult)
 	{
-		StdErr << tr("Error creating OpenGL context.\n");
+		StdErr << RendererResult.error() << '\n';
+
+		if (!SaveAndExit)
+			QMessageBox::critical(nullptr, tr("LeoCAD"), RendererResult.error());
+
 		return lcStartupMode::Error;
 	}
+
+	emit RendererInitialized();
 #endif
 
-	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
 	bool OutputFailed = false;
 
 	if (!SaveAndExit)
@@ -1332,11 +1342,16 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		gMainWindow->GetPartSelectionWidget()->SetDefaultPart();
 
 #ifdef Q_OS_IOS
-		if (!lcContext::InitializeRenderer())
+		const lcResult<void> RendererResult = lcContext::InitializeRenderer(true);
+
+		if (!RendererResult)
 		{
-			StdErr << tr("Error creating OpenGL context.\n");
+			StdErr << RendererResult.error() << '\n';
+			QMessageBox::critical(gMainWindow, tr("LeoCAD"), RendererResult.error());
 			return lcStartupMode::Error;
 		}
+
+		emit RendererInitialized();
 #endif
 
 		gMainWindow->show();

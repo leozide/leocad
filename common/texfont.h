@@ -10,11 +10,6 @@ public:
 		return mTexture != nullptr;
 	}
 
-	bool IsSDF() const
-	{
-		return mSDF;
-	}
-
 	lcTexture* GetTexture() const
 	{
 		return mTexture;
@@ -39,7 +34,6 @@ protected:
 	int mTextureWidth;
 	int mTextureHeight;
 	int mFontHeight;
-	bool mSDF = false;
 };
 
 extern TexFont gTexFont;

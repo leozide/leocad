@@ -959,7 +959,7 @@ void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrack
 
 void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVector3& MouseToolDistance, const std::optional<lcRotationDiscInfo>& RotationDisc, const lcMatrix44& WorldMatrix, float OverlayScale) const
 {
-	if (TrackButton == lcTrackButton::None || !RotationDisc)
+	if (TrackButton == lcTrackButton::None || !RotationDisc || !gTexFont.IsLoaded())
 		return;
 
 	lcContext* Context = mView->mContext;
@@ -978,7 +978,7 @@ void lcViewManipulator::DrawRotationText(lcTrackButton TrackButton, const lcVect
 	const lcVector3 ScreenPos = mView->ProjectPoint(lcMul31(TextPosition, RotatedWorldMatrix));
 	const float UIScale = mView->GetUIScale();
 
-	Context->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
+	Context->SetMaterial(lcMaterialType::TextSDF);
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));
@@ -1045,10 +1045,13 @@ void lcViewManipulator::DrawMoveDistance(lcTrackButton TrackButton, lcTrackTool 
 	Context->SetVertexFormatPosition(3);
 	Context->DrawPrimitives(GL_TRIANGLES, 0, 18);
 
+	if (!gTexFont.IsLoaded())
+		return;
+
 	const lcVector3 ScreenPos = mView->ProjectPoint(TextPosition);
 	const float UIScale = mView->GetUIScale();
 
-	Context->SetMaterial(gTexFont.IsSDF() ? lcMaterialType::TextSDF : lcMaterialType::UnlitTextureModulate);
+	Context->SetMaterial(lcMaterialType::TextSDF);
 	Context->SetWorldMatrix(lcMatrix44Identity());
 	Context->SetViewMatrix(lcMatrix44Translation(lcVector3(0.375, 0.375, 0.0)));
 	Context->SetProjectionMatrix(lcMatrix44Ortho(0.0f, mView->GetWidth() / UIScale, 0.0f, mView->GetHeight() / UIScale, -1.0f, 1.0f));

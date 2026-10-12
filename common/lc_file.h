@@ -513,6 +513,11 @@ public:
 		mFile.setFileName(FileName);
 	}
 
+	QFile& GetFile()
+	{
+		return mFile;
+	}
+
 	long GetPosition() const override
 	{
 		return mFile.pos();

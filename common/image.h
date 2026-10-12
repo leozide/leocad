@@ -27,7 +27,8 @@ public:
 	int GetBPP() const;
 	bool HasAlpha() const;
 
-	bool FileLoad(lcMemFile& File);
+	// Reads disk or memory files from the current position, preserving the cursor.
+	bool FileLoad(lcFile& File);
 	bool FileLoad(const QString& FileName);
 
 	void Resize(int Width, int Height);

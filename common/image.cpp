@@ -164,14 +164,35 @@ void Image::Resize(int width, int height)
 	mHeight = height;
 }
 
-bool Image::FileLoad(lcMemFile& File)
+bool Image::FileLoad(lcFile& File)
 {
 	QImage Image;
 
-	const unsigned char* Buffer = File.mBuffer + File.mPosition;
-	const size_t BufferLength = File.mFileSize - File.mPosition;
+	if (lcMemFile* MemoryFile = dynamic_cast<lcMemFile*>(&File))
+	{
+		if (!MemoryFile->mBuffer || MemoryFile->mPosition >= MemoryFile->mFileSize)
+			return false;
 
-	if (!Image.loadFromData(Buffer, (int)BufferLength))
+		const size_t Length = MemoryFile->mFileSize - MemoryFile->mPosition;
+
+		if (Length > static_cast<size_t>(std::numeric_limits<int>::max()) || !Image.loadFromData(MemoryFile->mBuffer + MemoryFile->mPosition, static_cast<int>(Length)))
+			return false;
+	}
+	else if (lcDiskFile* DiskFile = dynamic_cast<lcDiskFile*>(&File))
+	{
+		QFile& Device = DiskFile->GetFile();
+		const qint64 Position = Device.pos();
+
+		if (Position < 0)
+			return false;
+
+		const bool Loaded = Image.load(&Device, nullptr);
+		const bool Restored = Device.seek(Position);
+
+		if (!Loaded || !Restored)
+			return false;
+	}
+	else
 		return false;
 
 	CopyFromQImage(Image, *this);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_library.h"
+#include "lc_texturemanager.h"
 #include "piece.h"
 
 class PieceInfo;
@@ -49,28 +50,6 @@ struct lcPartBuildResult
 	bool EmptyGeometry = false;
 	QStringList TextureDependencies;
 	QString Error;
-};
-
-struct lcTextureSourceSnapshot
-{
-	std::shared_ptr<const lcEmbeddedData> EmbeddedData;
-	QString FilePath;
-	int ArchiveType = -1;
-	int ArchiveIndex = -1;
-};
-
-struct lcTextureBuildResult
-{
-	lcTextureBuildResult() = default;
-	~lcTextureBuildResult();
-	lcTextureBuildResult(lcTextureBuildResult&&) = default;
-	lcTextureBuildResult& operator=(lcTextureBuildResult&&) = default;
-	lcTextureBuildResult(const lcTextureBuildResult&) = delete;
-	lcTextureBuildResult& operator=(const lcTextureBuildResult&) = delete;
-
-	std::unique_ptr<Image> DecodedImage;
-	lcTextureLoadError Error{};
-	QString ErrorDetails;
 };
 
 // Owned by lcPiecesLibrary. UI-thread entry points schedule private worker builds;
@@ -139,7 +118,7 @@ private:
 	{
 		lcTexture* Texture;
 		quint64 Generation;
-		lcTextureSourceSnapshot Source;
+		lcFileSourceSnapshot Source;
 		Priority LoadPriority;
 		qint64 EnqueuedAt;
 		bool Running = false;

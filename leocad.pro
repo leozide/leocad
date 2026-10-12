@@ -237,6 +237,7 @@ SOURCES += \
 	common/lc_stringcache.cpp \
 	common/lc_synth.cpp \
 	common/lc_texture.cpp \
+	common/lc_texturemanager.cpp \
 	common/lc_thumbnailmanager.cpp \
 	common/lc_timelinewidget.cpp \
 	common/lc_traintrack.cpp \
@@ -320,6 +321,7 @@ HEADERS += \
 	common/lc_stringcache.h \
 	common/lc_synth.h \
 	common/lc_texture.h \
+	common/lc_texturemanager.h \
 	common/lc_thumbnailmanager.h \
 	common/lc_timelinewidget.h \
 	common/lc_traintrack.h \

@@ -2,6 +2,7 @@
 #include "lc_texture.h"
 #include "lc_application.h"
 #include "lc_library.h"
+#include "lc_file.h"
 #include "image.h"
 #include "lc_glextensions.h"
 #include "lc_string.h"
@@ -170,8 +171,7 @@ bool lcTexture::Load(const QString& FileName, int Flags)
 
 	if (!Image.FileLoad(FileName))
 	{
-		mState = lcTextureState::Failed;
-		mLoadFailure = lcTextureLoadError::DecodeFailed;
+		SetFailed(lcTextureLoadError::DecodeFailed, QString());
 
 		return false;
 	}
@@ -187,8 +187,7 @@ bool lcTexture::Load(lcMemFile& File, int Flags)
 
 	if (!Image.FileLoad(File))
 	{
-		mState = lcTextureState::Failed;
-		mLoadFailure = lcTextureLoadError::DecodeFailed;
+		SetFailed(lcTextureLoadError::DecodeFailed, QString());
 		return false;
 	}
 
@@ -217,6 +216,13 @@ void lcTexture::AdoptDecodedImage(Image&& Image, int Flags)
 void lcTexture::DiscardDecodedImage()
 {
 	mImages.clear();
+}
+
+void lcTexture::SetFailed(lcTextureLoadError Error, QString Details)
+{
+	mState = lcTextureState::Failed;
+	mLoadFailure = Error;
+	mLoadFailureDetails = std::move(Details);
 }
 
 void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
@@ -253,8 +259,7 @@ void lcTexture::Upload(lcContext* Context)
 			mTexture = 0;
 		}
 
-		mState = lcTextureState::Failed;
-		mLoadFailure = lcTextureLoadError::UploadFailed;
+		SetFailed(lcTextureLoadError::UploadFailed, QString());
 	}
 }
 

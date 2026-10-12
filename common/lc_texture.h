@@ -58,6 +58,8 @@ public:
 	void SetImage(std::vector<Image>&& Images, int Flags = 0);
 	void AdoptDecodedImage(Image&& Image, int Flags = 0);
 	void DiscardDecodedImage();
+	// Records a failure without discarding pixels retained for upload retries.
+	void SetFailed(lcTextureLoadError Error, QString Details);
 	void Upload(lcContext* Context);
 	void Unload();
 
@@ -66,7 +68,7 @@ public:
 		return mTexture != 0 || !mImages.empty();
 	}
 
-	// Only to be called by lcPiecesLibrary.
+	// Reference bookkeeping belongs to lcTextureManager.
 	void AddRef()
 	{
 		mRefCount.ref();
@@ -77,7 +79,7 @@ public:
 		return mRefCount.loadRelaxed();
 	}
 
-	// Only to be called by lcPiecesLibrary.
+	// Reference bookkeeping belongs to lcTextureManager.
 	bool Release()
 	{
 		const bool InUse = mRefCount.deref();

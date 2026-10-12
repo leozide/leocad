@@ -14,11 +14,20 @@ class lcZipFile;
 class lcLibraryMeshData;
 class lcThumbnailManager;
 class lcAssetLoader;
+class lcTextureManager;
 struct lcPartSourceSnapshot;
 struct lcPartBuildResult;
 struct lcEmbeddedData;
-struct lcTextureSourceSnapshot;
 struct lcTextureBuildResult;
+
+// Copied before dispatch; opening a source never consults live project state.
+struct lcFileSourceSnapshot
+{
+	std::shared_ptr<const lcEmbeddedData> EmbeddedData;
+	QString FilePath;
+	int ArchiveType = -1;
+	int ArchiveIndex = -1;
+};
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 using lcLibraryLoadMutex = QRecursiveMutex;
@@ -234,9 +243,6 @@ public:
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	// UI-thread lookup/acquisition only, without decoding or upload; caller releases the reference.
 	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData);
-	lcTextureSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
-	// Worker decode service: returns private pixels/errors without GL upload or publication.
-	lcTextureBuildResult BuildTextureData(const lcTextureSourceSnapshot& Source);
 	bool LoadTexture(lcTexture* Texture);
 	void ReleaseTexture(lcTexture* Texture);
 
@@ -249,6 +255,9 @@ public:
 	std::vector<PieceInfo*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
 	std::string GetPartId(const PieceInfo* Info) const;
 
+	// Opens a resolved source on the reading thread, positioned at zero.
+	// Caller owns the file; archive replacement requires draining workers first.
+	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSourceSnapshot& Source);
 	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
 	void GetPieceFile(const char* FileName, std::function<void(lcFile& File)> Callback);
 
@@ -283,10 +292,6 @@ public:
 	std::map<std::string, PieceInfo*> mPieces;
 	int mNumOfficialPieces;
 
-	std::vector<lcTexture*> mTextures;
-	std::map<QString, QString> mTextureDiskEntries;
-	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
-
 	QDir mLibraryDir;
 
 	bool mBuffersDirty;
@@ -299,6 +304,14 @@ signals:
 	void PartLoadFailed(PieceInfo* Info, const QString& Error);
 	void GeneratedMeshSettled(PieceInfo* Info);
 	void ColorsLoaded();
+
+private:
+	lcFileSourceSnapshot SnapshotTextureSource(const lcTexture* Texture) const;
+	// Worker decode service: returns private pixels/errors without GL upload or publication.
+	lcTextureBuildResult BuildTextureData(const lcFileSourceSnapshot& Source);
+	void AddTextureReference(lcTexture* Texture);
+	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
+	lcFileSourceSnapshot ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath);
 
 protected:
 	friend class lcAssetLoader;
@@ -319,9 +332,6 @@ protected:
 	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
-	static lcResult<QByteArray> DecodeEmbeddedData(const lcEmbeddedData& Data);
-	lcTextureBuildResult DecodeTextureData(const lcTextureSourceSnapshot& Source);
-	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
 	static bool IsStudPrimitive(const char* FileName);
 	static bool IsStudStylePrimitive(const char* FileName);
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
@@ -334,6 +344,8 @@ protected:
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
+	std::map<QString, QString> mTextureDiskEntries;
+	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
 	// Each project maps its local filenames to PieceInfo pointers. This map tracks the
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
@@ -348,8 +360,6 @@ protected:
 	std::unordered_map<QThread*, std::vector<lcLibraryPrimitive*>> mPrimitiveLoadStacks;
 	std::unordered_map<lcLibraryPrimitive*, lcLibraryPrimitive*> mPrimitiveDependencies;
 
-	// Serializes texture source access, including archive extraction by workers.
-	QMutex mTextureMutex;
 	// Sparse errors avoid storing a QString in every catalog identity.
 	mutable QMutex mPieceErrorMutex;
 	std::unordered_map<const PieceInfo*, QString> mFailedPartErrors;
@@ -357,6 +367,7 @@ protected:
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;
 
+	std::unique_ptr<lcTextureManager> mTextureManager;
 	std::unique_ptr<lcAssetLoader> mAssetLoader;
 	std::unique_ptr<lcThumbnailManager> mThumbnailManager;
 	std::unique_ptr<lcMesh> mLoadingMesh;

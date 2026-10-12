@@ -76,7 +76,8 @@ new evidence and update this record with any agreed change.
 
 | Owner | Responsibility | Source |
 | --- | --- | --- |
-| `lcPiecesLibrary` | Asset identities, references, source discovery, archives, primitive and mesh caches, settings, shared mesh buffers, and public forwarding APIs. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
+| `lcPiecesLibrary` | Piece identities and references, all source discovery and lookup, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and public forwarding APIs. Owns the texture manager and supplies its archive reader. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
+| `lcTextureManager` | Texture identities and references, snapshots, and private CPU decoding of resolved sources. | [lc_texturemanager.h](../common/lc_texturemanager.h), [lc_texturemanager.cpp](../common/lc_texturemanager.cpp) |
 | `lcAssetLoader` | Pending requests, worker scheduling, private results, texture upload, publication, cancellation, readiness waits, and deferred settlement notifications. | [lc_assetloader.h](../common/lc_assetloader.h), [lc_assetloader.cpp](../common/lc_assetloader.cpp) |
 | `PieceInfo` / `lcTexture` | Published geometry or texture data, readiness state, and asset metadata. | [pieceinf.h](../common/pieceinf.h), [lc_texture.h](../common/lc_texture.h) |
 | Projects, models, and views | Project-local names, required-asset traversal, generated-piece ownership, bounds, fallback display, cameras, and redraws. | [project.cpp](../common/project.cpp), [lc_model.cpp](../common/lc_model.cpp), [piece.cpp](../common/piece.cpp) |
@@ -85,6 +86,53 @@ The library owns the loader. Call library entry points from the UI thread for
 asset acquisition, release, scheduling, waiting, and invalidation. Workers use
 source snapshots and the library's build services; they do not consult the
 active project or publish into live models.
+
+The texture manager is owned by the library and owns the only texture registry.
+`FindTextureDeferred()` resolves embedded data, project-directory files, and
+indexed library files in the library, then asks the manager to acquire an identity
+for that resolved source. Resolution preserves the prefixed search order and
+canonicalizes disk paths. The project directory is passed separately to acquisition
+so the manager preserves temporary-texture metadata without searching files itself.
+Library texture APIs forward reference changes, snapshots, decoding, and the
+existing synchronous loading path to the manager. `FindTexture()` still gathers
+the explicit project's context and waits through the loader. Texture requests,
+priority promotion, cancellation, upload/retries, and part dependency settlement
+remain in `lcAssetLoader`; its in-flight texture references are acquired through
+the manager. `lcFileSourceSnapshot` lives in `lc_library.h`; texture build results live
+in `lc_texturemanager.h`. File snapshots contain no project/texture metadata.
+The library's `SnapshotTextureSource()`, `BuildTextureData()`, and
+`AddTextureReference()` are private loader services, accessible through the
+existing `lcAssetLoader` friendship.
+
+The library calls `OpenFile()` on the reading thread and passes the opened
+`lcFile&` to the texture manager for decoding. `BuildTextureData()` continues to
+run on a worker, so file opening and archive extraction stay on that worker. The
+manager stores no file-reader callback or library instance.
+Success returns an owned `lcFile` positioned at zero: disk sources retain
+an open `lcDiskFile`, archive entries and decoded embedded data use `lcMemFile`.
+Opening never searches for another source or parses its contents. Failures carry
+an error; the caller retains the result while consuming the file. Archive access
+is unlocked before image decoding, and returned memory files are independent of
+their archive or embedded source. Each `lcZipFile` serializes its own extraction;
+the library adds no archive-wide mutex. Archive replacement and closure remain
+protected by draining/pausing workers first. Texture identities use the
+manager's own mutex; source indexes and source resolution belong to the library.
+Library unload drains loader work, destroys meshes that release texture references,
+clears the texture manager, then closes archives. Workers must be drained before
+the manager is cleared or archive indexes are replaced.
+
+`Image::FileLoad(lcFile&)` decodes disk files through their existing `QFile` and
+memory files through `QImage::loadFromData()`, without an additional device adapter
+or disk-to-memory copy. Disk cursor restoration runs on success and failure;
+memory decoding leaves the cursor unchanged and validates the remaining buffer
+length. Qt handles disk reads, seeking, EOF, and I/O errors. Files/cursors are
+private to each request, not shared between workers. The filename-based image
+entry point retains its existing behavior.
+
+`lcTexture::SetFailed()` assigns readiness and failure diagnostics together,
+clearing stale details when none are supplied. Synchronous loading and loader
+failures use the same setter. It retains decoded pixels for bounded upload
+retries; terminal request handling explicitly discards them when required.
 
 `FindPiece()` returns a borrowed identity, without acquiring a reference. Lookup
 checks the supplied project's name index, then the shared library catalog, then

@@ -13,7 +13,6 @@
 constexpr QEvent::Type lcAssetLoaderCompletionEvent = static_cast<QEvent::Type>(QEvent::User + 1);
 
 lcPartBuildResult::~lcPartBuildResult() = default;
-lcTextureBuildResult::~lcTextureBuildResult() = default;
 
 lcAssetLoader::lcAssetLoader(lcPiecesLibrary* Library)
 	: mLibrary(Library)
@@ -502,7 +501,7 @@ void lcAssetLoader::QueueTexture(lcTexture* Texture, Priority LoadPriority)
 		return;
 	}
 
-	Texture->AddRef();
+	mLibrary->AddTextureReference(Texture);
 	Texture->mState = lcTextureState::Queued;
 
 	std::shared_ptr<TextureRequest> RequestedTexture = std::make_shared<TextureRequest>();
@@ -785,14 +784,12 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 			Texture->Upload(Context);
 		else
 		{
-			Texture->mState = lcTextureState::Failed;
-			Texture->mLoadFailure = lcTextureLoadError::ContextActivationFailed;
+			Texture->SetFailed(lcTextureLoadError::ContextActivationFailed, QString());
 		}
 	}
 	else
 	{
-		Texture->mState = lcTextureState::Failed;
-		Texture->mLoadFailure = lcTextureLoadError::ContextUnavailable;
+		Texture->SetFailed(lcTextureLoadError::ContextUnavailable, QString());
 	}
 
 	if (PreviousContext && PreviousSurface)
@@ -824,11 +821,12 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 
 	if (!Texture->IsReady())
 	{
-		Texture->mState = lcTextureState::Failed;
+		lcTextureLoadError Error = Texture->mLoadFailure;
 
-		if (Texture->mLoadFailure == lcTextureLoadError::None)
-			Texture->mLoadFailure = lcTextureLoadError::UploadFailed;
+		if (Error == lcTextureLoadError::None)
+			Error = lcTextureLoadError::UploadFailed;
 
+		Texture->SetFailed(Error, Texture->mLoadFailureDetails);
 		Texture->DiscardDecodedImage();
 	}
 
@@ -981,9 +979,7 @@ bool lcAssetLoader::ProcessCompletions()
 			}
 			else
 			{
-				Texture->mState = lcTextureState::Failed;
-				Texture->mLoadFailure = Completed.TextureResult.Error;
-				Texture->mLoadFailureDetails = Completed.TextureResult.ErrorDetails;
+				Texture->SetFailed(Completed.TextureResult.Error, std::move(Completed.TextureResult.ErrorDetails));
 
 				FinishTextureRequest(RequestedTexture);
 			}

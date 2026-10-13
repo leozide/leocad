@@ -3,7 +3,6 @@
 #include "texfont.h"
 #include "lc_context.h"
 #include "lc_texture.h"
-#include "image.h"
 
 static const unsigned char GlyphData[] =
 {
@@ -33,9 +32,8 @@ bool TexFont::Initialize(lcContext* Context)
 
 	constexpr int Scale = 4, Padding = 8, TileWidth = 96, TileHeight = 80;
 	mTextureWidth = mTextureHeight = 1024;
-	Image Image;
-	Image.Allocate(mTextureWidth, mTextureHeight, lcPixelFormat::L8A8);
-	memset(Image.mData, 0, static_cast<size_t>(mTextureWidth) * mTextureHeight * 2);
+	QImage Image(mTextureWidth, mTextureHeight, QImage::Format_Alpha8);
+	Image.fill(0);
 
 	QFont Font(QStringLiteral("Arial"));
 	Font.setPixelSize(56);
@@ -94,8 +92,8 @@ bool TexFont::Initialize(lcContext* Context)
 			{
 				const int SignedDistance = (ToOutside[y * MaskWidth + x] - ToInk[y * MaskWidth + x]) / 3;
 				const unsigned char Value = static_cast<unsigned char>(lcClamp(128 + SignedDistance * 8, 0, 255));
-				unsigned char* Pixel = Image.mData + ((TileY + y) * mTextureWidth + TileX + x) * 2;
-				Pixel[0] = Pixel[1] = Value;
+				unsigned char* Pixel = Image.scanLine(TileY + y) + TileX + x;
+				*Pixel = Value;
 			}
 
 		mGlyphs[Glyph].Width = Advance / static_cast<float>(Scale);

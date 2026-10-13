@@ -1,5 +1,7 @@
 #pragma once
 
+#define LC_IMAGE_TRANSPARENT 0x2000
+
 enum class lcShadingMode;
 enum class lcSelectionRenderMode;
 enum class lcAxisIconLocation;

@@ -999,11 +999,32 @@ void lcContext::ClearTexture2D()
 
 void lcContext::ClearTextureCubeMap()
 {
-	if (mTexture2D == 0)
+	if (mTextureCubeMap == 0)
 		return;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mTextureCubeMap = 0;
+}
+
+void lcContext::UploadTextureImage(GLenum Target, int Level, GLenum Format, const QImage& Image)
+{
+	const size_t RowBytes = static_cast<size_t>(Image.width()) * (Image.depth() / 8);
+	const size_t AlignedRowBytes = (RowBytes + 3) & ~size_t(3);
+
+	if (static_cast<size_t>(Image.bytesPerLine()) == AlignedRowBytes)
+	{
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		glTexImage2D(Target, Level, Format, Image.width(), Image.height(), 0, Format, GL_UNSIGNED_BYTE, Image.constBits());
+	}
+	else
+	{
+		std::vector<quint8> PackedPixels(RowBytes * Image.height());
+		for (int Row = 0; Row < Image.height(); Row++)
+			memcpy(PackedPixels.data() + Row * RowBytes, Image.constScanLine(Row), RowBytes);
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(Target, Level, Format, Image.width(), Image.height(), 0, Format, GL_UNSIGNED_BYTE, PackedPixels.data());
+	}
 }
 
 bool lcContext::UploadTexture(lcTexture* Texture)
@@ -1011,6 +1032,9 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 	for (int Error = 0; Error < 16 && glGetError() != GL_NO_ERROR; Error++)
 	{
 	}
+
+	GLint UnpackAlignment;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &UnpackAlignment);
 
 	if (!Texture->mTexture)
 		glGenTextures(1, &Texture->mTexture);
@@ -1025,6 +1049,19 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 	const int FilterFlags = Flags & LC_TEXTURE_FILTER_MASK;
 	const int FilterIndex = FilterFlags >> LC_TEXTURE_FILTER_SHIFT;
 	const int MipIndex = Flags & LC_TEXTURE_MIPMAPS ? 0 : 1;
+
+	const auto FinishUpload = [this, Flags, UnpackAlignment](bool Success)
+	{
+		if ((Flags & LC_TEXTURE_CUBEMAP) == 0)
+			ClearTexture2D();
+		else
+			ClearTextureCubeMap();
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, UnpackAlignment);
+
+		const bool NoError = glGetError() == GL_NO_ERROR;
+		return Success && NoError;
+	};
 
 	unsigned int Faces, Target;
 
@@ -1045,7 +1082,6 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 	glTexParameteri(Target, GL_TEXTURE_WRAP_T, (Flags & LC_TEXTURE_WRAPV) ? GL_REPEAT : GL_CLAMP_TO_EDGE);
 	glTexParameteri(Target, GL_TEXTURE_MIN_FILTER, Filters[MipIndex][FilterIndex]);
 	glTexParameteri(Target, GL_TEXTURE_MAG_FILTER, Filters[1][FilterIndex]);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	if (Flags & LC_TEXTURE_CUBEMAP)
 	{
@@ -1058,22 +1094,17 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 		glTexParameterf(Target, GL_TEXTURE_MAX_ANISOTROPY_EXT, lcMin(4.0f, gMaxAnisotropy));
 
 	int Format;
-	switch (Texture->GetImage(0).mFormat)
+	switch (Texture->GetImage(0).format())
 	{
 	default:
-	case lcPixelFormat::Invalid:
-		Format = 0;
-		break;
-	case lcPixelFormat::A8:
+		return FinishUpload(false);
+	case QImage::Format_Alpha8:
 		Format = GL_ALPHA;
 		break;
-	case lcPixelFormat::L8A8:
-		Format = GL_LUMINANCE_ALPHA;
-		break;
-	case lcPixelFormat::R8G8B8:
+	case QImage::Format_RGB888:
 		Format = GL_RGB;
 		break;
-	case lcPixelFormat::R8G8B8A8:
+	case QImage::Format_RGBA8888:
 		Format = GL_RGBA;
 		break;
 	}
@@ -1087,15 +1118,15 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 
 	for (size_t FaceIdx = 0; FaceIdx < Faces; FaceIdx++)
 	{
-		const void* ImageData = Texture->GetImage(CurrentImage).mData;
+		const QImage& Image = Texture->GetImage(CurrentImage);
 
-		glTexImage2D(Target, 0, Format, Texture->mWidth, Texture->mHeight, 0, Format, GL_UNSIGNED_BYTE, ImageData);
+		UploadTextureImage(Target, 0, Format, Image);
 
 		if (LoadMipmaps)
 		{
 			int Width = Texture->mWidth;
 			int Height = Texture->mHeight;
-			int Components = Texture->GetImage(CurrentImage).GetBPP();
+			int Components = Image.depth() / 8;
 			GLubyte* MipBuffer = nullptr;
 
 			if (!HasMipmaps)
@@ -1103,9 +1134,11 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 				MipBuffer = new GLubyte[Width * Height * Components];
 
 				if (!MipBuffer)
-					return false;
+					return FinishUpload(false);
 
-				memcpy(MipBuffer, ImageData, Width * Height * Components);
+				const size_t RowBytes = static_cast<size_t>(Width) * Components;
+				for (int Row = 0; Row < Height; Row++)
+					memcpy(MipBuffer + Row * RowBytes, Image.constScanLine(Row), RowBytes);
 			}
 
 			for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
@@ -1142,13 +1175,14 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 						}
 					}
 
+					glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 					glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, MipBuffer);
 				}
 				else
 				{
-					const void* Data = Texture->GetImage(++CurrentImage).mData;
+					const QImage& MipImage = Texture->GetImage(++CurrentImage);
 
-					glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, Data);
+					UploadTextureImage(Target, Level, Format, MipImage);
 				}
 			}
 
@@ -1163,12 +1197,7 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 		Target++;
 	}
 
-	if ((Flags & LC_TEXTURE_CUBEMAP) == 0)
-		ClearTexture2D();
-	else
-		ClearTextureCubeMap();
-
-	return glGetError() == GL_NO_ERROR;
+	return FinishUpload(true);
 }
 
 void lcContext::SetColor(float Red, float Green, float Blue, float Alpha)

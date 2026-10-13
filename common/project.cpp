@@ -7,7 +7,6 @@
 #include "camera.h"
 #include "project.h"
 #include "lc_instructions.h"
-#include "image.h"
 #include "light.h"
 #include "lc_mainwindow.h"
 #include "lc_view.h"

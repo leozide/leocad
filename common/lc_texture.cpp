@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_texture.h"
 #include "lc_context.h"
-#include "image.h"
 #include "lc_glextensions.h"
 
 lcTexture* gGridTexture;
@@ -20,45 +19,43 @@ void lcTexture::CreateGridTexture()
 {
 	constexpr int NumLevels = 9;
 	mImages.resize(NumLevels);
-	quint8* Previous = nullptr;
+	const QImage* Previous = nullptr;
 
 	for (int ImageLevel = 0; ImageLevel < NumLevels; ImageLevel++)
 	{
-		Image& GridImage = mImages[ImageLevel];
+		QImage& GridImage = mImages[ImageLevel];
 		const int GridSize = 256 >> ImageLevel;
-		GridImage.Allocate(GridSize, GridSize, lcPixelFormat::A8);
+		GridImage = QImage(GridSize, GridSize, QImage::Format_Alpha8);
 
 		if (Previous)
 		{
-			const int PreviousGridSize = 2 * GridSize;
-
 			for (int y = 0; y < GridSize - 1; y++)
 			{
 				for (int x = 0; x < GridSize - 1; x++)
 				{
-					const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					const quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize] > 64 ? 255 : 0;
-					const quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
-					const quint8 d = Previous[x * 2 + 1 + (y * 2 + 1) * PreviousGridSize] > 64 ? 255 : 0;
-					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
+					const quint8 a = Previous->constScanLine(y * 2)[x * 2] > 64 ? 255 : 0;
+					const quint8 b = Previous->constScanLine(y * 2)[x * 2 + 1] > 64 ? 255 : 0;
+					const quint8 c = Previous->constScanLine(y * 2 + 1)[x * 2] > 64 ? 255 : 0;
+					const quint8 d = Previous->constScanLine(y * 2 + 1)[x * 2 + 1] > 64 ? 255 : 0;
+					GridImage.scanLine(y)[x] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
-				const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				const quint8 c = Previous[x * 2 + (y * 2 + 1) * PreviousGridSize];
-				GridImage.mData[x + y * GridSize] = (a + c) / 2;
+				const quint8 a = Previous->constScanLine(y * 2)[x * 2];
+				const quint8 c = Previous->constScanLine(y * 2 + 1)[x * 2];
+				GridImage.scanLine(y)[x] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
 			for (int x = 0; x < GridSize - 1; x++)
 			{
-				const quint8 a = Previous[x * 2 + y * 2 * PreviousGridSize];
-				const quint8 b = Previous[x * 2 + 1 + y * 2 * PreviousGridSize];
-				GridImage.mData[x + y * GridSize] = (a + b) / 2;
+				const quint8 a = Previous->constScanLine(y * 2)[x * 2];
+				const quint8 b = Previous->constScanLine(y * 2)[x * 2 + 1];
+				GridImage.scanLine(y)[x] = (a + b) / 2;
 			}
 
 			int x = GridSize - 1;
-			GridImage.mData[x + y * GridSize] = Previous[x + y * PreviousGridSize];
+			GridImage.scanLine(y)[x] = Previous->constScanLine(y)[x];
 		}
 		else
 		{
@@ -104,13 +101,13 @@ void lcTexture::CreateGridTexture()
 					const quint8 b = TempBuffer[x + 1 + y * GridSize];
 					const quint8 c = TempBuffer[x + (y + 1) * GridSize];
 					const quint8 d = TempBuffer[x + 1 + (y + 1) * GridSize];
-					GridImage.mData[x + y * GridSize] = (a + b + c + d) / 4;
+					GridImage.scanLine(y)[x] = (a + b + c + d) / 4;
 				}
 
 				int x = GridSize - 1;
 				const quint8 a = TempBuffer[x + y * GridSize];
 				const quint8 c = TempBuffer[x + (y + 1) * GridSize];
-				GridImage.mData[x + y * GridSize] = (a + c) / 2;
+				GridImage.scanLine(y)[x] = (a + c) / 2;
 			}
 
 			int y = GridSize - 1;
@@ -118,15 +115,15 @@ void lcTexture::CreateGridTexture()
 			{
 				const quint8 a = TempBuffer[x + y * GridSize];
 				const quint8 b = TempBuffer[x + 1 + y * GridSize];
-				GridImage.mData[x + y * GridSize] = (a + b) / 2;
+				GridImage.scanLine(y)[x] = (a + b) / 2;
 			}
 
 			int x = GridSize - 1;
-			GridImage.mData[x + y * GridSize] = TempBuffer[x + y * GridSize];
+			GridImage.scanLine(y)[x] = TempBuffer[x + y * GridSize];
 			delete[] TempBuffer;
 		}
 
-		Previous = GridImage.mData;
+		Previous = &GridImage;
 	}
 
 	mRefCount = 1;
@@ -138,19 +135,48 @@ void lcTexture::CreateGridTexture()
 	Upload(Context);
 }
 
-void lcTexture::SetImage(Image&& Image, int Flags)
+QImage lcTexture::PrepareImage(QImage Image)
 {
-	mImages.clear();
-	mImages.emplace_back(std::move(Image));
-	mFlags = Flags;
+	if (Image.isNull())
+		return QImage();
 
-	LoadImages();
+	QImage::Format Format = QImage::Format_Alpha8;
+	if (Image.format() != QImage::Format_Alpha8)
+		Format = Image.hasAlphaChannel() ? QImage::Format_RGBA8888 : QImage::Format_RGB888;
+	int Width = 1;
+	int Height = 1;
+
+	while (Width <= Image.width() / 2 && Width < 32768)
+		Width *= 2;
+	while (Height <= Image.height() / 2 && Height < 32768)
+		Height *= 2;
+
+	if (Width != Image.width() || Height != Image.height())
+		Image = Image.scaled(Width, Height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+	return Image.convertToFormat(Format);
 }
 
-void lcTexture::AdoptDecodedImage(Image&& Image, int Flags)
+void lcTexture::SetImage(QImage SourceImage, int Flags)
 {
+	AdoptDecodedImage(std::move(SourceImage), Flags);
+
+	if (mState == lcTextureState::Decoded)
+		LoadImages();
+}
+
+void lcTexture::AdoptDecodedImage(QImage SourceImage, int Flags)
+{
+	QImage TextureImage = PrepareImage(std::move(SourceImage));
+
+	if (TextureImage.isNull())
+	{
+		SetFailed(lcTextureLoadError::DecodeFailed, QString());
+		return;
+	}
+
 	mImages.clear();
-	mImages.emplace_back(std::move(Image));
+	mImages.emplace_back(std::move(TextureImage));
 	mFlags = Flags;
 	mState = lcTextureState::Decoded;
 }
@@ -167,7 +193,7 @@ void lcTexture::SetFailed(lcTextureLoadError Error, QString Details)
 	mLoadFailureDetails = std::move(Details);
 }
 
-void lcTexture::SetImage(std::vector<Image>&& Images, int Flags)
+void lcTexture::SetImage(std::vector<QImage>&& Images, int Flags)
 {
 	mImages = std::move(Images);
 	mFlags = Flags;
@@ -180,8 +206,8 @@ void lcTexture::Upload(lcContext* Context)
 	if (!NeedsUpload())
 		return;
 
-	mWidth = mImages[0].mWidth;
-	mHeight = mImages[0].mHeight;
+	mWidth = mImages[0].width();
+	mHeight = mImages[0].height();
 
 	const bool Uploaded = Context->UploadTexture(this);
 
@@ -207,8 +233,16 @@ void lcTexture::Upload(lcContext* Context)
 
 bool lcTexture::LoadImages()
 {
-	for (Image& Image : mImages)
-		Image.ResizePow2();
+	for (QImage& Image : mImages)
+	{
+		Image = PrepareImage(std::move(Image));
+
+		if (Image.isNull())
+		{
+			SetFailed(lcTextureLoadError::DecodeFailed, QString());
+			return false;
+		}
+	}
 
 	mState = lcTextureState::Decoded;
 

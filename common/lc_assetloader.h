@@ -10,7 +10,6 @@ class lcMesh;
 class lcSynthInfo;
 class lcMemFile;
 class lcLibraryMeshData;
-class Image;
 class lcTexture;
 enum class lcTextureLoadError;
 

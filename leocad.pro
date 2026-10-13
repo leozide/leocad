@@ -174,7 +174,6 @@ ios {
 SOURCES += \
 	common/camera.cpp \
 	common/group.cpp \
-	common/image.cpp \
 	common/lc_modelhistory.cpp \
 	common/light.cpp \
 	common/minifig.cpp \
@@ -255,7 +254,6 @@ SOURCES += \
 HEADERS += \
 	common/camera.h \
 	common/group.h \
-	common/image.h \
 	common/lc_modelhistory.h \
 	common/lc_result.h \
 	common/light.h \

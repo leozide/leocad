@@ -701,7 +701,7 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSource& Sourc
 
 	lcTextureBuildResult Result = mTextureManager->BuildTextureData(*File.value());
 
-	if (!Result.DecodedImage && Source.EmbeddedData)
+	if (Result.DecodedImage.isNull() && Source.EmbeddedData)
 		Result.ErrorDetails = tr("Could not decode embedded texture '%1'.").arg(Source.EmbeddedData->FileName);
 
 	return Result;

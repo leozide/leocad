@@ -44,14 +44,13 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 	if (!Update)
 		return;
 
-	Image TextureImage;
-	TextureImage.Allocate(256, 256, lcPixelFormat::L8A8);
+	QImage TextureImage(256, 256, QImage::Format_Alpha8);
 
 	QImage Image(128, 128, QImage::Format_ARGB32);
 	QPainter Painter;
 	QFont Font("Helvetica", 20);
 	int DestX = 0, DestY = 0, DestHeight = 0;
-	memset(TextureImage.mData, 0, TextureImage.mWidth * TextureImage.mHeight * 2);
+	TextureImage.fill(0);
 
 	for (auto& Entry : mStrings)
 	{
@@ -65,7 +64,7 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 		Painter.drawText(0, 0, Image.width(), Image.height(), 0, Entry.first, &SourceRect);
 		Painter.end();
 
-		if (DestX + SourceRect.width() + 2 > TextureImage.mWidth)
+		if (DestX + SourceRect.width() + 2 > TextureImage.width())
 		{
 			DestX = 0;
 			DestY += DestHeight + 2;
@@ -74,25 +73,24 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 
 		lcStringCacheEntry& String = Entry.second;
 
-		if (SourceRect.width() + 2 > TextureImage.mWidth || DestY + SourceRect.height() + 2 > TextureImage.mHeight || DestY + SourceRect.height() + 2 > TextureImage.mHeight)
+		if (SourceRect.width() + 2 > TextureImage.width() || DestY + SourceRect.height() + 2 > TextureImage.height() || DestY + SourceRect.height() + 2 > TextureImage.height())
 		{
 			memset(&String, 0, sizeof(String));
 			break;
 		}
 
-		String.Top = TextureImage.mHeight - DestY - 2;
+		String.Top = TextureImage.height() - DestY - 2;
 		String.Bottom = String.Top - SourceRect.height() + 1;
 		String.Left = DestX + 1;
 		String.Right = String.Left + SourceRect.width() - 2;
 
 		for (int y = SourceRect.top(); y < SourceRect.bottom(); y++)
 		{
-			unsigned char* Dest = TextureImage.mData + ((String.Top - y) * TextureImage.mWidth + String.Left) * 2;
+			unsigned char* Dest = TextureImage.scanLine(String.Top - y) + String.Left;
 
 			for (int x = SourceRect.left(); x < SourceRect.right(); x++)
 			{
-				*Dest = *(Dest + 1) = qRed(Image.pixel(x, y));
-				Dest += 2;
+				*Dest++ = qRed(Image.pixel(x, y));
 			}
 		}
 

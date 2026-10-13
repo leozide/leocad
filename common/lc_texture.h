@@ -15,7 +15,6 @@
 
 #define LC_TEXTURE_NAME_LEN 256
 
-#include "image.h"
 #include "lc_filesource.h"
 
 enum class lcTextureState
@@ -50,10 +49,11 @@ public:
 	lcTexture& operator=(lcTexture&&) = delete;
 
 	void CreateGridTexture();
+	static QImage PrepareImage(QImage Image);
 
-	void SetImage(Image&& Image, int Flags = 0);
-	void SetImage(std::vector<Image>&& Images, int Flags = 0);
-	void AdoptDecodedImage(Image&& Image, int Flags = 0);
+	void SetImage(QImage Image, int Flags);
+	void SetImage(std::vector<QImage>&& Images, int Flags);
+	void AdoptDecodedImage(QImage Image, int Flags);
 	void DiscardDecodedImage();
 	// Records a failure without discarding pixels retained for upload retries.
 	void SetFailed(lcTextureLoadError Error, QString Details);
@@ -112,7 +112,7 @@ public:
 		return mFlags;
 	}
 
-	const Image& GetImage(int Index) const
+	const QImage& GetImage(int Index) const
 	{
 		return mImages[Index];
 	}
@@ -137,7 +137,7 @@ protected:
 
 	bool mTemporary = false;
 	QAtomicInt mRefCount = 0;
-	std::vector<Image> mImages;
+	std::vector<QImage> mImages;
 	int mFlags = 0;
 };
 

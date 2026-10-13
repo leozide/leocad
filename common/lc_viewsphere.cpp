@@ -5,7 +5,6 @@
 #include "lc_context.h"
 #include "lc_stringcache.h"
 #include "lc_application.h"
-#include "image.h"
 #include "lc_texture.h"
 
 lcTexture* lcViewSphere::mTexture;
@@ -76,15 +75,14 @@ void lcViewSphere::CreateResources(lcContext* Context)
 	QImage PainterImage(SourceCellSize, SourceCellSize, QImage::Format_ARGB32);
 	QPainter Painter;
 	QFont Font("Helvetica", 36);
-	Image AtlasImage;
-	AtlasImage.Allocate(AtlasWidth, AtlasHeight, lcPixelFormat::A8);
-	memset(AtlasImage.mData, 0, AtlasWidth * AtlasHeight);
+	QImage AtlasImage(AtlasWidth, AtlasHeight, QImage::Format_Alpha8);
+	AtlasImage.fill(0);
 
-	auto ConvertToSDF = [](Image& TextureImage)
+	auto ConvertToSDF = [](QImage& TextureImage)
 	{
 		constexpr int Size = 128, Count = Size * Size;
 		std::vector<int> ToInk(Count), ToOutside(Count);
-		for (int i = 0; i < Count; i++) { ToInk[i] = TextureImage.mData[i] >= 128 ? 0 : 1 << 20; ToOutside[i] = TextureImage.mData[i] >= 128 ? 1 << 20 : 0; }
+		for (int i = 0; i < Count; i++) { ToInk[i] = TextureImage.constScanLine(i / Size)[i % Size] >= 128 ? 0 : 1 << 20; ToOutside[i] = TextureImage.constScanLine(i / Size)[i % Size] >= 128 ? 1 << 20 : 0; }
 		auto Relax = [](std::vector<int>& Distance, bool Reverse)
 		{
 			for (int y = Reverse ? Size - 1 : 0; Reverse ? y >= 0 : y < Size; y += Reverse ? -1 : 1)
@@ -97,13 +95,12 @@ void lcViewSphere::CreateResources(lcContext* Context)
 				}
 		};
 		Relax(ToInk, false); Relax(ToInk, true); Relax(ToOutside, false); Relax(ToOutside, true);
-		for (int i = 0; i < Count; i++) TextureImage.mData[i] = static_cast<unsigned char>(lcClamp(128 + (ToOutside[i] - ToInk[i]) / 3 * 16, 0, 255));
+		for (int i = 0; i < Count; i++) TextureImage.scanLine(i / Size)[i % Size] = static_cast<unsigned char>(lcClamp(128 + (ToOutside[i] - ToInk[i]) / 3 * 16, 0, 255));
 	};
 
 	for (int ViewIdx = 0; ViewIdx < 6; ViewIdx++)
 	{
-		Image TextureImage;
-		TextureImage.Allocate(SourceCellSize, SourceCellSize, lcPixelFormat::A8);
+		QImage TextureImage(SourceCellSize, SourceCellSize, QImage::Format_Alpha8);
 		QFont LabelFont = Font;
 		// The shader displays the middle 80% of each cell. Leave six pixels
 		// on either side for the SDF halo, including for translated labels.
@@ -122,7 +119,7 @@ void lcViewSphere::CreateResources(lcContext* Context)
 
 		for (int y = 0; y < SourceCellSize; y++)
 		{
-			unsigned char* Dest = TextureImage.mData + (SourceCellSize - y - 1) * TextureImage.mWidth;
+			unsigned char* Dest = TextureImage.scanLine(SourceCellSize - y - 1);
 
 			for (int x = 0; x < SourceCellSize; x++)
 				*Dest++ = qRed(PainterImage.pixel(x, y));
@@ -131,8 +128,8 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		// Keep the middle band and its SDF margin in a vertical atlas.
 		const int AtlasY = ViewIdx * CellHeight;
 		for (int y = 0; y < CellHeight; y++)
-			memcpy(AtlasImage.mData + (AtlasY + y) * AtlasWidth,
-				TextureImage.mData + (CellBottom + y) * SourceCellSize, SourceCellSize);
+			memcpy(AtlasImage.scanLine(AtlasY + y),
+				TextureImage.constScanLine(CellBottom + y), SourceCellSize);
 	}
 
 	mTexture->SetImage(std::move(AtlasImage), LC_TEXTURE_LINEAR);

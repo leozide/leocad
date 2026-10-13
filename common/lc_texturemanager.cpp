@@ -64,8 +64,13 @@ lcTextureBuildResult lcTextureManager::BuildTextureData(lcFile& File)
 {
 	lcTextureBuildResult Result = DecodeTextureData(File);
 
-	if (Result.DecodedImage)
-		Result.DecodedImage->ResizePow2();
+	if (!Result.DecodedImage.isNull())
+	{
+		Result.DecodedImage = lcTexture::PrepareImage(std::move(Result.DecodedImage));
+
+		if (Result.DecodedImage.isNull())
+			Result.Error = lcTextureLoadError::DecodeFailed;
+	}
 
 	return Result;
 }
@@ -74,11 +79,34 @@ lcTextureBuildResult lcTextureManager::DecodeTextureData(lcFile& File)
 {
 	lcTextureBuildResult Result;
 
-	Result.DecodedImage.reset(new Image);
+	bool Loaded = false;
 
-	if (!Result.DecodedImage->FileLoad(File))
+	if (lcMemFile* MemoryFile = dynamic_cast<lcMemFile*>(&File))
 	{
-		Result.DecodedImage.reset();
+		if (MemoryFile->mBuffer && MemoryFile->mPosition < MemoryFile->mFileSize)
+		{
+			const size_t Length = MemoryFile->mFileSize - MemoryFile->mPosition;
+
+			if (Length <= static_cast<size_t>(std::numeric_limits<int>::max()))
+				Loaded = Result.DecodedImage.loadFromData(MemoryFile->mBuffer + MemoryFile->mPosition, static_cast<int>(Length));
+		}
+	}
+	else if (lcDiskFile* DiskFile = dynamic_cast<lcDiskFile*>(&File))
+	{
+		QFile& Device = DiskFile->GetFile();
+		const qint64 Position = Device.pos();
+
+		if (Position >= 0)
+		{
+			Loaded = Result.DecodedImage.load(&Device, nullptr);
+			const bool Restored = Device.seek(Position);
+			Loaded = Loaded && Restored;
+		}
+	}
+
+	if (!Loaded || Result.DecodedImage.isNull())
+	{
+		Result.DecodedImage = QImage();
 		Result.Error = lcTextureLoadError::DecodeFailed;
 	}
 

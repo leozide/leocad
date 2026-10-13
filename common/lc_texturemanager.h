@@ -14,7 +14,7 @@ struct lcTextureBuildResult
 	lcTextureBuildResult(const lcTextureBuildResult&) = delete;
 	lcTextureBuildResult& operator=(const lcTextureBuildResult&) = delete;
 
-	std::unique_ptr<Image> DecodedImage;
+	QImage DecodedImage;
 	lcTextureLoadError Error{};
 	QString ErrorDetails;
 };
@@ -42,6 +42,7 @@ public:
 	void ReleaseTexture(lcTexture* Texture);
 
 	// Worker-safe private CPU build; never publishes or uploads the result.
+	// Decodes from the current file position without advancing its cursor.
 	lcTextureBuildResult BuildTextureData(lcFile& File);
 
 private:

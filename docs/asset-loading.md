@@ -122,7 +122,7 @@ Library unload drains loader work, destroys meshes that release texture referenc
 clears the texture manager, then closes archives. Workers must be drained before
 the manager is cleared or archive indexes are replaced.
 
-`Image::FileLoad(lcFile&)` decodes disk files through their existing `QFile` and
+`lcTextureManager::DecodeTextureData(lcFile&)` decodes disk files through their existing `QFile` and
 memory files through `QImage::loadFromData()`, without an additional device adapter
 or disk-to-memory copy. Disk cursor restoration runs on success and failure;
 memory decoding leaves the cursor unchanged and validates the remaining buffer
@@ -130,6 +130,15 @@ length. Qt handles disk reads, seeking, EOF, and I/O errors. Files/cursors are
 private to each request, not shared between workers. Texture readiness waits use
 the same loader worker path; unused direct texture-loading overloads and their
 synchronous library/manager forwarding chain have been removed.
+
+Decoded worker results hold a `QImage`, normalized to RGB888 or RGBA8888 and
+scaled with Qt's smooth transformation to the existing power-of-two dimensions.
+Textures retain the decoded `QImage` through upload without a second pixel buffer.
+Uploads honor Qt's scanline alignment, packing unusual row strides only when
+needed. CPU mipmap generation copies pixel rows without padding into its existing
+working buffer; its filtering, OpenGL formats, and shaders remain unchanged.
+Each transfer sets its required unpack alignment, and texture upload restores
+the caller's unpack alignment on every exit. Pack alignment is left unchanged.
 
 `lcTexture::SetFailed()` assigns readiness and failure diagnostics together,
 clearing stale details when none are supplied. Decoding and upload failures use

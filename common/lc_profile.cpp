@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include "lc_profile.h"
 #include "lc_context.h"
-#include "image.h"
 #include "lc_model.h"
 #include "project.h"
 #include "lc_viewsphere.h"

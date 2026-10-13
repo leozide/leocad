@@ -282,6 +282,7 @@ protected:
 	static void DestroyOffscreenContext();
 
 	lcResult<void> CreateShaderPrograms();
+	void UploadTextureImage(GLenum Target, int Level, GLenum Format, const QImage& Image);
 	void FlushState();
 	bool TryShareDepthAttachment(GLuint SourceFramebuffer, QOpenGLFramebufferObject& TargetFramebuffer);
 

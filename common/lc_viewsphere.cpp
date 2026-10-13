@@ -133,6 +133,7 @@ void lcViewSphere::CreateResources(lcContext* Context)
 	}
 
 	mTexture->SetImage(std::move(AtlasImage), LC_TEXTURE_LINEAR);
+	mTexture->Upload(Context);
 
 	const int SphereVertexCount = (mSubdivisions + 1) * (mSubdivisions + 1) * 6;
 	mSphereIndexCount = mSubdivisions * mSubdivisions * 6 * 6;

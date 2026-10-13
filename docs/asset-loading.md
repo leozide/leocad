@@ -139,6 +139,9 @@ needed. CPU mipmap generation copies pixel rows without padding into its existin
 working buffer; its filtering, OpenGL formats, and shaders remain unchanged.
 Each transfer sets its required unpack alignment, and texture upload restores
 the caller's unpack alignment on every exit. Pack alignment is left unchanged.
+`SetImage()` and `SetImages()` only prepare and store pixels. Generated texture
+callers upload explicitly, while the loader controls upload attempts and retries.
+`SetImages()` retains cube-map faces and supplied mip levels.
 
 `lcTexture::SetFailed()` assigns readiness and failure diagnostics together,
 clearing stale details when none are supplied. Decoding and upload failures use

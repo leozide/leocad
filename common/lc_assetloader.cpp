@@ -974,7 +974,7 @@ bool lcAssetLoader::ProcessCompletions()
 				mLibrary->ReleaseTexture(Texture);
 			else if (!Completed.TextureResult.DecodedImage.isNull())
 			{
-				Texture->AdoptDecodedImage(std::move(Completed.TextureResult.DecodedImage), LC_TEXTURE_MIPMAPS);
+				Texture->SetImage(std::move(Completed.TextureResult.DecodedImage), LC_TEXTURE_MIPMAPS);
 				if (Texture->NeedsUpload())
 					UploadTextureRequest(RequestedTexture);
 				else

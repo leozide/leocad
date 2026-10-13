@@ -14,7 +14,7 @@ public:
 	void Initialize(lcContext* Context);
 	void Reset();
 
-	void CacheStrings(const QStringList& Strings);
+	void CacheStrings(lcContext* Context, const QStringList& Strings);
 	void GetStringDimensions(int* cx, int* cy, const QString& String) const;
 	void DrawStrings(lcContext* Context, const lcMatrix44* Transforms, const QStringList& Strings) const;
 

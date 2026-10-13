@@ -1186,14 +1186,10 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 				}
 			}
 
-			if (Texture->GetImageCount() == Faces)
-				CurrentImage++;
-
 			delete[] MipBuffer;
 		}
-		else
-			CurrentImage++;
 
+		CurrentImage++;
 		Target++;
 	}
 

@@ -52,8 +52,7 @@ public:
 	static QImage PrepareImage(QImage Image);
 
 	void SetImage(QImage Image, int Flags);
-	void SetImage(std::vector<QImage>&& Images, int Flags);
-	void AdoptDecodedImage(QImage Image, int Flags);
+	void SetImages(std::vector<QImage>&& Images, int Flags);
 	void DiscardDecodedImage();
 	// Records a failure without discarding pixels retained for upload retries.
 	void SetFailed(lcTextureLoadError Error, QString Details);
@@ -133,8 +132,6 @@ public:
 	QString mLoadFailureDetails;
 
 protected:
-	bool LoadImages();
-
 	bool mTemporary = false;
 	QAtomicInt mRefCount = 0;
 	std::vector<QImage> mImages;

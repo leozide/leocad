@@ -159,14 +159,6 @@ QImage lcTexture::PrepareImage(QImage Image)
 
 void lcTexture::SetImage(QImage SourceImage, int Flags)
 {
-	AdoptDecodedImage(std::move(SourceImage), Flags);
-
-	if (mState == lcTextureState::Decoded)
-		LoadImages();
-}
-
-void lcTexture::AdoptDecodedImage(QImage SourceImage, int Flags)
-{
 	QImage TextureImage = PrepareImage(std::move(SourceImage));
 
 	if (TextureImage.isNull())
@@ -193,12 +185,28 @@ void lcTexture::SetFailed(lcTextureLoadError Error, QString Details)
 	mLoadFailureDetails = std::move(Details);
 }
 
-void lcTexture::SetImage(std::vector<QImage>&& Images, int Flags)
+void lcTexture::SetImages(std::vector<QImage>&& Images, int Flags)
 {
+	if (Images.empty())
+	{
+		SetFailed(lcTextureLoadError::DecodeFailed, QString());
+		return;
+	}
+
+	for (QImage& Image : Images)
+	{
+		Image = PrepareImage(std::move(Image));
+
+		if (Image.isNull())
+		{
+			SetFailed(lcTextureLoadError::DecodeFailed, QString());
+			return;
+		}
+	}
+
 	mImages = std::move(Images);
 	mFlags = Flags;
-
-	LoadImages();
+	mState = lcTextureState::Decoded;
 }
 
 void lcTexture::Upload(lcContext* Context)
@@ -229,33 +237,6 @@ void lcTexture::Upload(lcContext* Context)
 
 		SetFailed(lcTextureLoadError::UploadFailed, QString());
 	}
-}
-
-bool lcTexture::LoadImages()
-{
-	for (QImage& Image : mImages)
-	{
-		Image = PrepareImage(std::move(Image));
-
-		if (Image.isNull())
-		{
-			SetFailed(lcTextureLoadError::DecodeFailed, QString());
-			return false;
-		}
-	}
-
-	mState = lcTextureState::Decoded;
-
-	if (QThread::currentThread() == qApp->thread())
-	{
-		lcContext* Context = lcContext::GetGlobalOffscreenContext();
-
-		Context->MakeCurrent();
-
-		Upload(Context);
-	}
-
-	return true;
 }
 
 void lcTexture::Unload()

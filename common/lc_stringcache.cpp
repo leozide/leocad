@@ -28,7 +28,7 @@ void lcStringCache::Reset()
 	mTexture = nullptr;
 }
 
-void lcStringCache::CacheStrings(const QStringList& Strings)
+void lcStringCache::CacheStrings(lcContext* Context, const QStringList& Strings)
 {
 	bool Update = false;
 
@@ -99,6 +99,7 @@ void lcStringCache::CacheStrings(const QStringList& Strings)
 	}
 
 	mTexture->SetImage(std::move(TextureImage), LC_TEXTURE_LINEAR);
+	mTexture->Upload(Context);
 }
 
 void lcStringCache::GetStringDimensions(int* cx, int* cy, const QString& String) const

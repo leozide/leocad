@@ -2,8 +2,7 @@
 
 #include "lc_texture.h"
 
-class lcFile;
-
+// Image pixels and any error produced while preparing a texture.
 struct lcTextureBuildResult
 {
 	lcTextureBuildResult() = default;
@@ -15,12 +14,12 @@ struct lcTextureBuildResult
 	lcTextureBuildResult& operator=(const lcTextureBuildResult&) = delete;
 
 	QImage DecodedImage;
-	lcTextureLoadError Error{};
+	lcTextureLoadError Error = lcTextureLoadError::None;
 	QString ErrorDetails;
 };
 
-// Owns texture identities, references, and CPU decoding of resolved sources.
-// lcAssetLoader owns pending requests and asynchronous upload/publication.
+// Creates and reuses textures, tracks their references, and prepares image data.
+// The asset loader handles scheduling, OpenGL uploads, and retries.
 class lcTextureManager
 {
 public:
@@ -32,20 +31,30 @@ public:
 	lcTextureManager& operator=(const lcTextureManager&) = delete;
 	lcTextureManager& operator=(lcTextureManager&&) = delete;
 
-	// The owner drains workers and releases mesh dependencies before clearing.
+	// Deletes all managed textures, regardless of reference count.
+	// Stop workers and release mesh references before calling.
 	void Clear();
 
-	// UI-thread acquisition only; each returned reference must be released.
+	// Returns an existing texture for this source or creates one.
+	// Call on the UI thread and release the returned reference when done.
+	// Returns nullptr for an invalid name or missing source.
 	lcTexture* AcquireTexture(const char* Name, const lcFileSource& Source, const QString& ProjectPath);
 
+	// Keeps a texture alive for another owner.
 	void AddTextureReference(lcTexture* Texture);
+
+	// Releases an owner's reference. Unloads unused textures and
+	// deletes temporary textures when their last reference is released.
 	void ReleaseTexture(lcTexture* Texture);
 
-	// Worker-safe private CPU build; never publishes or uploads the result.
-	// Decodes from the current file position without advancing its cursor.
+	// Decodes and prepares image pixels for a later OpenGL upload.
+	// Preserves the file position. Workers must use separate file instances.
+	// Returns a DecodeFailed error if loading or preparation fails.
 	lcTextureBuildResult BuildTextureData(lcFile& File);
 
 private:
+	// Reads an image from the current file position without advancing it.
+	// Supports memory and disk files; returns DecodeFailed on failure.
 	lcTextureBuildResult DecodeTextureData(lcFile& File);
 
 	QMutex mMutex;

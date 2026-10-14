@@ -35,6 +35,7 @@ struct lcPieceBuildResult
 {
 	lcPieceBuildResult() = default;
 	~lcPieceBuildResult();
+
 	lcPieceBuildResult(lcPieceBuildResult&&) = default;
 	lcPieceBuildResult& operator=(lcPieceBuildResult&&) = default;
 	lcPieceBuildResult(const lcPieceBuildResult&) = delete;
@@ -59,7 +60,7 @@ public:
 	lcAssetLoader(lcPiecesLibrary* Library);
 	~lcAssetLoader() override;
 
-	// Load a piece the library has already acquired for the caller; this adds no consumer reference.
+	// Load a piece the library has already acquired for the caller. Adds no consumer reference.
 	// Low and Normal return immediately; true does not mean the piece is ready yet.
 	// Blocking promotes urgent work, waits until loading settles, and returns whether it succeeded.
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
@@ -68,7 +69,7 @@ public:
 	// Cancel any older request and keep the previous mesh visible while the replacement is built.
 	void QueueSynthMesh(lcPiece* Piece);
 
-	// Start or promote loading as needed, then wait. Returns true if all pieces are ready.
+	// Start or promote loading, then wait and returns true if all pieces are ready. Adds no consumer references.
 	// Waits for these identities only, without traversing container children or generated meshes.
 	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
 
@@ -174,7 +175,7 @@ private:
 	};
 
 	// UI-thread delivery retains the load hold after publication, until callbacks finish.
-	struct Notification
+	struct PieceNotification
 	{
 		std::shared_ptr<PieceRequest> RequestedPiece;
 		bool Loaded;
@@ -229,23 +230,19 @@ private:
 	// Private build data passes between worker and UI phases through completions.
 	QMutex mQueueMutex;
 	QWaitCondition mResultReady;
-	// Serializes full queue drains; scoped readiness waits do not acquire this mutex.
-	QMutex mDrainMutex;
-	PieceRequestMap mRequests;
+	PieceRequestMap mPieceRequests;
 	TextureRequestMap mTextureRequests;
 	SynthRequestMap mSynthRequests;
 	// UI-thread diagnostics and instance tracking; these do not own the pieces.
 	std::unordered_map<const lcPiece*, QString> mFailedSynthErrors;
 	std::unordered_set<lcPiece*> mSynthPieces;
 	// Pending worker phases remain here while paused; mPaused prevents dispatch.
-	std::deque<std::shared_ptr<PieceRequest>> mQueue;
+	std::deque<std::shared_ptr<PieceRequest>> mPieceQueue;
 	std::deque<std::shared_ptr<TextureRequest>> mTextureQueue;
 	std::deque<std::shared_ptr<SynthRequest>> mSynthQueue;
 	std::deque<Completion> mCompletions;
-	std::deque<std::shared_ptr<PieceRequest>> mStarted;
-	std::deque<std::shared_ptr<TextureRequest>> mStartedTextures;
 	// UI-thread only; public signals are deferred until outside synchronous waits.
-	std::deque<Notification> mNotifications;
+	std::deque<PieceNotification> mPieceNotifications;
 	std::deque<SynthNotification> mSynthNotifications;
 	std::vector<QFuture<void>> mFutures;
 	int mActiveWorkers = 0;

@@ -37,7 +37,8 @@ enum class lcLibraryCacheFlag : quint32
 	Directory = 0x0002
 };
 
-lcPiecesLibrary::lcPiecesLibrary()
+lcPiecesLibrary::lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
+	: mStudStyle(StudStyle), mStudCylinderColorEnabled(StudCylinderColorEnabled)
 {
 	mTextureManager = std::make_unique<lcTextureManager>();
 	mAssetLoader = std::unique_ptr<lcAssetLoader>(new lcAssetLoader(this));
@@ -53,8 +54,6 @@ lcPiecesLibrary::lcPiecesLibrary()
 	mNumOfficialPieces = 0;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
-	mStudStyle = lcGetProfileStudStyle();
-	mStudCylinderColorEnabled = lcGetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED);
 }
 
 lcPiecesLibrary::~lcPiecesLibrary()
@@ -2279,7 +2278,7 @@ bool lcPiecesLibrary::SupportsStudStyle() const
 	return true;
 }
 
-void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool StudCylinderColorEnabled)
+void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 {
 	if (mStudStyle == StudStyle && mStudCylinderColorEnabled == StudCylinderColorEnabled)
 		return;
@@ -2289,7 +2288,6 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 	mAssetLoader->PauseQueuedWork();
 
 	mStudStyle = StudStyle;
-
 	mStudCylinderColorEnabled = StudCylinderColorEnabled;
 
 	LoadColors();
@@ -2308,47 +2306,40 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 		}
 	}
 
+	const auto ReloadPiece = [this](PieceInfo* Info)
+	{
+		if (Info->mState != lcPieceInfoState::Loaded || !Info->GetMesh() || !(Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud))
+			return;
+
+		if (Info->IsModel())
+		{
+			Info->ReleaseMesh();
+			Info->mState = lcPieceInfoState::Unloaded;
+
+			mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
+		}
+		else if (!Info->IsProject())
+		{
+			Info->Unload();
+			mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
+		}
+
+		mBuffersDirty = true;
+	};
+
+	for (const std::map<std::string, PieceInfo*>::value_type& PieceIt : mPieces)
+		ReloadPiece(PieceIt.second);
+
+	for (const std::unordered_map<PieceInfo*, Project*>::value_type& Local : mProjectPieces)
+		ReloadPiece(Local.first);
+
 	mLoadMutex.unlock();
 
-	if (Reload)
-	{
-		mLoadMutex.lock();
-
-		const auto ReloadPiece = [this](PieceInfo* Info)
-		{
-			if (Info->mState != lcPieceInfoState::Loaded || !Info->GetMesh() || !(Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud))
-				return;
-
-			if (Info->IsModel())
-			{
-				Info->ReleaseMesh();
-				Info->mState = lcPieceInfoState::Unloaded;
-
-				mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
-			}
-			else if (!Info->IsProject())
-			{
-				Info->Unload();
-				mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
-			}
-
-			mBuffersDirty = true;
-		};
-
-		for (const std::map<std::string, PieceInfo*>::value_type& PieceIt : mPieces)
-			ReloadPiece(PieceIt.second);
-
-		for (const std::unordered_map<PieceInfo*, Project*>::value_type& Local : mProjectPieces)
-			ReloadPiece(Local.first);
-
-		mLoadMutex.unlock();
-		mAssetLoader->ReloadSynthMeshes();
-	}
+	mAssetLoader->ReloadSynthMeshes();
 
 	mAssetLoader->ResumeQueuedWork();
 
-	if (Reload)
-		WaitForLoadQueue();
+	WaitForLoadQueue();
 }
 
 bool lcPiecesLibrary::IsPrimitive(const char* Name) const
@@ -2720,8 +2711,9 @@ bool lcPiecesLibrary::LoadBuiltinPieces()
 		}
 	}
 
-	lcLoadDefaultColors(lcStudStyle::Plain);
+	lcLoadDefaultColors(mStudStyle);
 	UpdateLoadingMeshColors();
+	UpdateStudStyleSource();
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);

@@ -333,10 +333,10 @@ void lcApplication::ExportClipboard(const QByteArray& Clipboard)
 	SetClipboard(Clipboard);
 }
 
-bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths)
+bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 {
 	if (mLibrary == nullptr)
-		mLibrary = new lcPiecesLibrary();
+		mLibrary = new lcPiecesLibrary(StudStyle, StudCylinderColorEnabled);
 
 	const bool ShowProgress = gMainWindow != nullptr;
 
@@ -985,7 +985,21 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		lcLoadDefaultMouseShortcuts();
 	}
 
-	if (!LoadPartsLibrary(Options.LibraryPaths.isEmpty() ? LibraryPaths : Options.LibraryPaths, !Options.LibraryPaths.isEmpty()))
+	mPreferences.mShadingMode = Options.ShadingMode;
+	mPreferences.mLineWidth = Options.LineWidth;
+	mPreferences.mStudCylinderColorEnabled = Options.StudCylinderColorEnabled;
+	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
+	mPreferences.mPartEdgeColorEnabled = Options.PartEdgeColorEnabled;
+	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
+	mPreferences.mBlackEdgeColorEnabled = Options.BlackEdgeColorEnabled;
+	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
+	mPreferences.mDarkEdgeColorEnabled = Options.DarkEdgeColorEnabled;
+	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
+	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
+	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
+	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
+
+	if (!LoadPartsLibrary(Options.LibraryPaths.isEmpty() ? LibraryPaths : Options.LibraryPaths, !Options.LibraryPaths.isEmpty(), Options.StudStyle, Options.StudCylinderColorEnabled))
 	{
 		QString Message;
 
@@ -1002,22 +1016,6 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			StdErr.flush();
 		}
 	}
-
-	mPreferences.mShadingMode = Options.ShadingMode;
-	mPreferences.mLineWidth = Options.LineWidth;
-	mPreferences.mStudCylinderColorEnabled = Options.StudCylinderColorEnabled;
-	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
-	mPreferences.mPartEdgeColorEnabled = Options.PartEdgeColorEnabled;
-	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
-	mPreferences.mBlackEdgeColorEnabled = Options.BlackEdgeColorEnabled;
-	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
-	mPreferences.mDarkEdgeColorEnabled = Options.DarkEdgeColorEnabled;
-	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
-	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
-	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
-	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
-
-	lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, false, Options.StudCylinderColorEnabled);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();
@@ -1492,18 +1490,14 @@ void lcApplication::ShowPreferencesDialog()
 		}
 	}
 
-	if (StudStyleChanged || StudCylinderColorEnabledChanged)
-	{
-		lcSetProfileStudStyle(Options.StudStyle);
-		lcGetPiecesLibrary()->SetStudStyle(Options.StudStyle, true, Options.Preferences.mStudCylinderColorEnabled);
-	}
-	else if (ColorConfigChanged || EdgeColorSettingsChanged)
-	{
-		if (ColorConfigChanged)
-			lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
+	// UpdateStudStyleAndColors() reloads colors too; both paths must see the newly selected config.
+	if (ColorConfigChanged)
+		lcSetProfileString(LC_PROFILE_COLOR_CONFIG, Options.ColorConfigPath);
 
+	if (StudStyleChanged || StudCylinderColorEnabledChanged)
+		lcGetPiecesLibrary()->UpdateStudStyleAndColors(Options.StudStyle, Options.Preferences.mStudCylinderColorEnabled);
+	else if (ColorConfigChanged || EdgeColorSettingsChanged)
 		lcGetPiecesLibrary()->LoadColors();
-	}
 
 	gMainWindow->SetShadingMode(Options.Preferences.mShadingMode);
 	lcView::UpdateAllViews();

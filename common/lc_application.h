@@ -195,7 +195,7 @@ public:
 	void ShowPreferencesDialog();
 	void SaveTabLayout() const;
 
-	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths);
+	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 
 	void SetClipboard(const QByteArray& Clipboard);
 	void ExportClipboard(const QByteArray& Clipboard);

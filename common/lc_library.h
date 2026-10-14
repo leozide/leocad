@@ -159,7 +159,7 @@ class lcPiecesLibrary : public QObject
 	Q_OBJECT
 
 public:
-	lcPiecesLibrary();
+	lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	~lcPiecesLibrary();
 
 	lcPiecesLibrary(const lcPiecesLibrary&) = delete;
@@ -193,7 +193,8 @@ public:
 	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
 	void NotifyConsumersChanged();
-	// Start or promote loading as needed, then wait with temporary holds; false means failure/cancellation.
+	// Start or promote loading, then wait. Adds no consumer references.
+	// Returns false for failed or cancelled pieces.
 	// Does not traverse container children or wait for per-instance synth geometry.
 	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
 	// Also settles container children/synths and updates bounds; caller retains the identity.
@@ -254,7 +255,7 @@ public:
 	lcResult<void> LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudStyle() const;
-	void SetStudStyle(lcStudStyle StudStyle, bool Reload, bool StudCylinderColorEnabled);
+	void UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 
 	lcStudStyle GetStudStyle() const
 	{

@@ -339,8 +339,8 @@ buffer upload is not part of asset readiness.
 `LoadPieceInfo()` acquires one reference even if loading fails. Always pair it
 with `ReleasePieceInfo()`. Its asynchronous return value means the call did not
 wait, not that the asset loaded. `AddPieceReference()` retains an identity without
-starting work. `WaitForPieces()` deduplicates its input, temporarily holds
-each part, and releases those holds before returning.
+starting work. `WaitForPieces()` deduplicates its input without acquiring consumer
+references; callers retain every required identity and its owner through the wait.
 
 A part request owns an additional in-flight reference. Removing one instance
 cannot destroy an asset still used by another instance or pending work. On the
@@ -404,7 +404,9 @@ shares its request rather than submitting another build.
 
 `WaitForPieces()` starts or promotes loading as needed, then waits for the supplied
 identities, not the entire library. It returns false for failed or cancelled
-requirements and does not expand model containers itself. `WaitForSynthMeshes()`
+requirements and does not expand model containers itself. Callers retain every
+required identity through the wait; it does not acquire consumer references.
+`WaitForSynthMeshes()`
 promotes and waits for queued generations of the specified instances; callers
 start generations with `QueueSynthMesh()`. The loader's `WaitForTexture()` starts
 or promotes decoding as needed and waits through upload and retries.
@@ -421,7 +423,7 @@ workers, including unrelated assets; it is not a scoped success check.
 | Retain and start ordinary asynchronous work | `LoadPieceInfo()` with `lcPieceLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain and synchronously load one identity | `LoadPieceInfo()` with `lcPieceLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain without starting work | `AddPieceReference()`, paired with `ReleasePieceInfo()`. This does not make geometry ready. |
-| Wait for an explicit part set | `WaitForPieces()` (use `{ Info }` for one identity), check the boolean for strict consumers. Temporary holds end before return, so the caller still needs ownership if it will use the assets afterward. |
+| Wait for an explicit part set | `WaitForPieces()` (use `{ Info }` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
 | Wait for one identity and its container geometry | `EnsurePieceAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
 | Replace/wait for generated geometry | `QueueSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
@@ -521,6 +523,14 @@ path demotes request priorities.
 Pending jobs remain in the normal piece, texture, and synth queues while paused;
 `mPaused` prevents dispatch. Resume refreshes queued piece source snapshots before
 allowing workers to take jobs again.
+
+The library constructor receives the effective startup stud settings; application
+color preferences are applied before loading sources and colors, including the
+built-in fallback library. `UpdateStudStyleAndColors()` handles runtime changes and always
+rebuilds affected geometry and drains the resulting work when settings change.
+The preferences dialog saves a changed color-config path before this setter runs,
+so simultaneous stud/color changes load the new configuration once. Color-only
+changes call `LoadColors()` directly.
 
 Stud-style changes pause dispatch, finish running phases, discard staging built
 with old settings, refresh sources, and rebuild affected published meshes and

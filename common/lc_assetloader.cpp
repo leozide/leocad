@@ -37,8 +37,8 @@ bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPrior
 	else if (LoadPriority != lcPieceLoadPriority::Low)
 	{
 		mQueueMutex.lock();
-		const auto It = mRequests.find(Info);
-		if (It != mRequests.end())
+		const auto It = mPieceRequests.find(Info);
+		if (It != mPieceRequests.end())
 			PromoteRequestPriorityLocked(It->second, LoadPriority);
 		mQueueMutex.unlock();
 	}
@@ -53,9 +53,9 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriori
 	if (mStopping)
 		return;
 
-	const auto Existing = mRequests.find(Info);
+	const auto Existing = mPieceRequests.find(Info);
 
-	if (Existing != mRequests.end())
+	if (Existing != mPieceRequests.end())
 	{
 		PromoteRequestPriorityLocked(Existing->second, LoadPriority);
 
@@ -88,9 +88,9 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriori
 	RequestedPiece->LoadPriority = LoadPriority;
 	RequestedPiece->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
 
-	mRequests.emplace(Info, RequestedPiece);
+	mPieceRequests.emplace(Info, RequestedPiece);
 
-	mQueue.push_back(RequestedPiece);
+	mPieceQueue.push_back(RequestedPiece);
 	StartWorkersLocked();
 
 	emit mLibrary->AssetRequestsChanged();
@@ -191,7 +191,7 @@ void lcAssetLoader::StartWorkersLocked()
 	}), mFutures.end());
 
 	const int MaxWorkers = qMax(1, qMin(4, QThread::idealThreadCount()));
-	const int Queued = static_cast<int>(mQueue.size() + mTextureQueue.size() + mSynthQueue.size());
+	const int Queued = static_cast<int>(mPieceQueue.size() + mTextureQueue.size() + mSynthQueue.size());
 	const int Additional = mPaused || mStopping ? 0 : qMin(MaxWorkers - mActiveWorkers, Queued);
 
 	for (int Worker = 0; Worker < Additional; Worker++)
@@ -212,7 +212,7 @@ void lcAssetLoader::RunWorker()
 		{
 			QMutexLocker QueueLock(&mQueueMutex);
 
-			if (mStopping || mPaused || (mQueue.empty() && mTextureQueue.empty() && mSynthQueue.empty()))
+			if (mStopping || mPaused || (mPieceQueue.empty() && mTextureQueue.empty() && mSynthQueue.empty()))
 			{
 				mActiveWorkers--;
 				mResultReady.wakeAll();
@@ -234,19 +234,18 @@ void lcAssetLoader::RunWorker()
 				return Score(Left) < Score(Right) || (Score(Left) == Score(Right) && Left->EnqueuedAt > Right->EnqueuedAt);
 			};
 
-			auto PartBest = std::max_element(mQueue.begin(), mQueue.end(), Less);
+			auto PartBest = std::max_element(mPieceQueue.begin(), mPieceQueue.end(), Less);
 			auto TextureBest = std::max_element(mTextureQueue.begin(), mTextureQueue.end(), Less);
 			auto SynthBest = std::max_element(mSynthQueue.begin(), mSynthQueue.end(), Less);
 
-			if (TextureBest != mTextureQueue.end() && (PartBest == mQueue.end() || !Less(*TextureBest, *PartBest)) &&
+			if (TextureBest != mTextureQueue.end() && (PartBest == mPieceQueue.end() || !Less(*TextureBest, *PartBest)) &&
 				(SynthBest == mSynthQueue.end() || !Less(*TextureBest, *SynthBest)))
 			{
 				RequestedTexture = *TextureBest;
 				mTextureQueue.erase(TextureBest);
 				RequestedTexture->Running = true;
-				mStartedTextures.push_back(RequestedTexture);
 			}
-			else if (SynthBest != mSynthQueue.end() && (PartBest == mQueue.end() || !Less(*SynthBest, *PartBest)))
+			else if (SynthBest != mSynthQueue.end() && (PartBest == mPieceQueue.end() || !Less(*SynthBest, *PartBest)))
 			{
 				RequestedSynth = *SynthBest;
 				mSynthQueue.erase(SynthBest);
@@ -255,9 +254,8 @@ void lcAssetLoader::RunWorker()
 			else
 			{
 				RequestedPiece = *PartBest;
-				mQueue.erase(PartBest);
+				mPieceQueue.erase(PartBest);
 				RequestedPiece->Running = true;
-				mStarted.push_back(RequestedPiece);
 			}
 		}
 
@@ -333,30 +331,25 @@ bool lcAssetLoader::ProcessCompletions()
 	{
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		while (!mStarted.empty())
+		// Reflect worker starts in asset states on the UI thread.
+		if (!mStopping)
 		{
-			const std::shared_ptr<PieceRequest> RequestedPiece = mStarted.front();
+			for (const PieceRequestMap::value_type& Entry : mPieceRequests)
+			{
+				const std::shared_ptr<PieceRequest>& RequestedPiece = Entry.second;
 
-			mStarted.pop_front();
+				if (RequestedPiece->Running && RequestedPiece->Info->mState == lcPieceInfoState::Queued)
+					RequestedPiece->Info->mState = lcPieceInfoState::Loading;
+			}
 
-			const auto It = mRequests.find(RequestedPiece->Info);
+			for (const TextureRequestMap::value_type& Entry : mTextureRequests)
+			{
+				const std::shared_ptr<TextureRequest>& RequestedTexture = Entry.second;
 
-			if (!mStopping && It != mRequests.end() && It->second == RequestedPiece && RequestedPiece->Info->mState == lcPieceInfoState::Queued)
-				RequestedPiece->Info->mState = lcPieceInfoState::Loading;
+				if (RequestedTexture->Running && RequestedTexture->Texture->mState == lcTextureState::Queued)
+					RequestedTexture->Texture->mState = lcTextureState::Decoding;
+			}
 		}
-
-		while (!mStartedTextures.empty())
-		{
-			const std::shared_ptr<TextureRequest> RequestedTexture = mStartedTextures.front();
-
-			mStartedTextures.pop_front();
-
-			const auto It = mTextureRequests.find(RequestedTexture->Texture);
-
-			if (!mStopping && It != mTextureRequests.end() && It->second == RequestedTexture && RequestedTexture->Texture->mState == lcTextureState::Queued)
-				RequestedTexture->Texture->mState = lcTextureState::Decoding;
-		}
-
 	}
 
 	constexpr int MaxCompletionsPerPump = 16;
@@ -446,10 +439,10 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 	bool Stale;
 
 	mQueueMutex.lock();
-	const auto It = mRequests.find(Info);
-	Stale = mStopping || RequestedPiece->Obsolete || Completed.Result.Generation != mGeneration || It == mRequests.end() || It->second != RequestedPiece;
-	if (Stale && It != mRequests.end() && It->second == RequestedPiece)
-		mRequests.erase(It);
+	const auto It = mPieceRequests.find(Info);
+	Stale = mStopping || RequestedPiece->Obsolete || Completed.Result.Generation != mGeneration || It == mPieceRequests.end() || It->second != RequestedPiece;
+	if (Stale && It != mPieceRequests.end() && It->second == RequestedPiece)
+		mPieceRequests.erase(It);
 	mQueueMutex.unlock();
 
 	RequestedPiece->Running = false;
@@ -461,7 +454,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 		if (!Stale)
 		{
 			mQueueMutex.lock();
-			mRequests.erase(Info);
+			mPieceRequests.erase(Info);
 			mQueueMutex.unlock();
 		}
 
@@ -491,7 +484,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 			QMutexLocker QueueLock(&mQueueMutex);
 
-			mQueue.push_back(RequestedPiece);
+			mPieceQueue.push_back(RequestedPiece);
 			StartWorkersLocked();
 
 			return;
@@ -506,7 +499,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 			QMutexLocker QueueLock(&mQueueMutex);
 
-			mQueue.push_back(RequestedPiece);
+			mPieceQueue.push_back(RequestedPiece);
 			StartWorkersLocked();
 
 			return;
@@ -810,7 +803,7 @@ void lcAssetLoader::FinishPiecesWithSettledTextures()
 	{
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		for (const PieceRequestMap::value_type& Entry : mRequests)
+		for (const PieceRequestMap::value_type& Entry : mPieceRequests)
 			if (Entry.second->StagedMesh)
 				Waiting.push_back(Entry.second);
 	}
@@ -878,16 +871,16 @@ void lcAssetLoader::FinishPiece(const std::shared_ptr<PieceRequest>& RequestedPi
 	}
 
 	mQueueMutex.lock();
-	const auto It = mRequests.find(Info);
-	if (It != mRequests.end() && It->second == RequestedPiece)
-		mRequests.erase(It);
+	const auto It = mPieceRequests.find(Info);
+	if (It != mPieceRequests.end() && It->second == RequestedPiece)
+		mPieceRequests.erase(It);
 	RequestedPiece->Terminal = true;
 	RequestedPiece->Succeeded = Loaded;
 	mResultReady.wakeAll();
 	mQueueMutex.unlock();
 
 	mLibrary->ScheduleBufferRepack();
-	mNotifications.push_back({ RequestedPiece, Loaded, std::move(LoadError) });
+	mPieceNotifications.push_back({ RequestedPiece, Loaded, std::move(LoadError) });
 
 	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 }
@@ -934,11 +927,11 @@ void lcAssetLoader::DispatchNotifications()
 
 	constexpr int MaxNotificationsPerPump = 32;
 
-	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mNotifications.empty(); Delivered++)
+	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mPieceNotifications.empty(); Delivered++)
 	{
-		Notification Notification = std::move(mNotifications.front());
+		PieceNotification Notification = std::move(mPieceNotifications.front());
 
-		mNotifications.pop_front();
+		mPieceNotifications.pop_front();
 
 		PieceInfo* Info = Notification.RequestedPiece->Info;
 
@@ -987,7 +980,7 @@ void lcAssetLoader::DispatchNotifications()
 		mLibrary->ReleasePieceLoadHold(Info);
 	}
 
-	if (!mNotifications.empty() || !mSynthNotifications.empty())
+	if (!mPieceNotifications.empty() || !mSynthNotifications.empty())
 		QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 
 	if (!SettledSynths.empty())
@@ -1006,6 +999,7 @@ bool lcAssetLoader::event(QEvent* Event)
 
 	return QObject::event(Event);
 }
+
 void lcAssetLoader::WaitForResultsLocked()
 {
 	if (!mCompletions.empty())
@@ -1041,9 +1035,9 @@ bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
 	{
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		const auto It = mRequests.find(Info);
+		const auto It = mPieceRequests.find(Info);
 
-		if (It != mRequests.end())
+		if (It != mPieceRequests.end())
 		{
 			RequestedPiece = It->second;
 
@@ -1089,9 +1083,6 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
 
 	for (PieceInfo* Info : Required)
-		mLibrary->AddPieceReference(Info);
-
-	for (PieceInfo* Info : Required)
 	{
 		if (Info->mState != lcPieceInfoState::Unloaded)
 			continue;
@@ -1107,9 +1098,9 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 
 		for (PieceInfo* Info : Required)
 		{
-			const auto It = mRequests.find(Info);
+			const auto It = mPieceRequests.find(Info);
 
-			if (It == mRequests.end())
+			if (It == mPieceRequests.end())
 				continue;
 
 			PromoteRequestPriorityLocked(It->second, lcPieceLoadPriority::Blocking);
@@ -1122,9 +1113,6 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 
 	for (PieceInfo* Info : Required)
 		Ready = WaitForRequest(Info) && Ready;
-
-	for (PieceInfo* Info : Required)
-		mLibrary->ReleasePieceInfo(Info);
 
 	return Ready;
 }
@@ -1225,15 +1213,13 @@ void lcAssetLoader::WaitForLoadQueue()
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	QMutexLocker DrainLock(&mDrainMutex);
-
 	for (;;)
 	{
 		ProcessCompletions();
 
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		if (mRequests.empty() && mTextureRequests.empty() && mSynthRequests.empty() && mActiveWorkers == 0 && mCompletions.empty())
+		if (mPieceRequests.empty() && mTextureRequests.empty() && mSynthRequests.empty() && mActiveWorkers == 0 && mCompletions.empty())
 			break;
 
 		WaitForResultsLocked();
@@ -1248,7 +1234,7 @@ void lcAssetLoader::WaitForLoadQueue()
 bool lcAssetLoader::HasPendingWork()
 {
 	mQueueMutex.lock();
-	const bool Pending = !mRequests.empty() || !mTextureRequests.empty() || !mSynthRequests.empty() || !mCompletions.empty();
+	const bool Pending = !mPieceRequests.empty() || !mTextureRequests.empty() || !mSynthRequests.empty() || !mCompletions.empty();
 	mQueueMutex.unlock();
 
 	return Pending;
@@ -1294,21 +1280,21 @@ void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
 	{
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		const auto It = mRequests.find(Info);
+		const auto It = mPieceRequests.find(Info);
 
-		if (It != mRequests.end())
+		if (It != mPieceRequests.end())
 		{
 			Removed = It->second;
 			Removed->Obsolete = true;
 			Removed->Terminal = true;
 			Removed->Succeeded = false;
 			ReleaseHold = !Removed->Running;
-			mRequests.erase(It);
+			mPieceRequests.erase(It);
 
-			mQueue.erase(std::remove(mQueue.begin(), mQueue.end(), Removed), mQueue.end());
+			mPieceQueue.erase(std::remove(mPieceQueue.begin(), mPieceQueue.end(), Removed), mPieceQueue.end());
 		}
 
-		for (Notification& Pending : mNotifications)
+		for (PieceNotification& Pending : mPieceNotifications)
 			if (Pending.RequestedPiece->Info == Info)
 				Pending.RequestedPiece->Obsolete = true;
 
@@ -1343,9 +1329,9 @@ void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
 	{
 		QMutexLocker QueueLock(&mQueueMutex);
 
-		const auto It = mRequests.find(Info);
+		const auto It = mPieceRequests.find(Info);
 
-		if (It == mRequests.end())
+		if (It == mPieceRequests.end())
 			return;
 
 		const std::shared_ptr<PieceRequest>& RequestedPiece = It->second;
@@ -1361,9 +1347,9 @@ void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
 
 		Info->mState = lcPieceInfoState::Cancelled;
 
-		mRequests.erase(It);
+		mPieceRequests.erase(It);
 
-		mQueue.erase(std::remove(mQueue.begin(), mQueue.end(), Removed), mQueue.end());
+		mPieceQueue.erase(std::remove(mPieceQueue.begin(), mPieceQueue.end(), Removed), mPieceQueue.end());
 
 		mResultReady.wakeAll();
 	}
@@ -1487,7 +1473,7 @@ void lcAssetLoader::PauseQueuedWork()
 
 	// A mesh awaiting textures was built with the previous stud settings.
 	// Rebuild it after the settings change instead of publishing stale geometry.
-	for (const PieceRequestMap::value_type& Entry : mRequests)
+	for (const PieceRequestMap::value_type& Entry : mPieceRequests)
 	{
 		const std::shared_ptr<PieceRequest>& RequestedPiece = Entry.second;
 
@@ -1505,7 +1491,7 @@ void lcAssetLoader::PauseQueuedWork()
 		RequestedPiece->StagedMesh.reset();
 		RequestedPiece->Info->mState = lcPieceInfoState::Queued;
 		RequestedPiece->Running = false;
-		mQueue.push_back(RequestedPiece);
+		mPieceQueue.push_back(RequestedPiece);
 	}
 
 	// Pending generated meshes are restarted after the new stud style is installed.
@@ -1532,7 +1518,7 @@ void lcAssetLoader::ResumeQueuedWork()
 
 	QMutexLocker QueueLock(&mQueueMutex);
 
-	for (const std::shared_ptr<PieceRequest>& RequestedPiece : mQueue)
+	for (const std::shared_ptr<PieceRequest>& RequestedPiece : mPieceQueue)
 	{
 		const bool SkipCache = RequestedPiece->Source.SkipCache;
 
@@ -1560,13 +1546,13 @@ void lcAssetLoader::CancelAndDrain()
 
 		mStopping = true;
 		mGeneration++;
-		mQueue.clear();
+		mPieceQueue.clear();
 		mTextureQueue.clear();
 		mSynthQueue.clear();
 		mSynthPieces.clear();
 		mFailedSynthErrors.clear();
 
-		for (auto It = mRequests.begin(); It != mRequests.end();)
+		for (auto It = mPieceRequests.begin(); It != mPieceRequests.end();)
 		{
 			if (It->second->Running)
 			{
@@ -1581,7 +1567,7 @@ void lcAssetLoader::CancelAndDrain()
 
 				Cancelled.push_back(It->second);
 
-				It = mRequests.erase(It);
+				It = mPieceRequests.erase(It);
 			}
 		}
 
@@ -1622,11 +1608,11 @@ void lcAssetLoader::CancelAndDrain()
 
 	WaitForLoadQueue();
 
-	while (!mNotifications.empty())
+	while (!mPieceNotifications.empty())
 	{
-		Notification Notification = std::move(mNotifications.front());
+		PieceNotification Notification = std::move(mPieceNotifications.front());
 
-		mNotifications.pop_front();
+		mPieceNotifications.pop_front();
 
 		mLibrary->ReleasePieceLoadHold(Notification.RequestedPiece->Info);
 	}

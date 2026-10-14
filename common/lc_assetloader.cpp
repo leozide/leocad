@@ -26,36 +26,27 @@ lcAssetLoader::~lcAssetLoader()
 	CancelAndDrain();
 }
 
-bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
+bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
-
-	mLibrary->AddPieceReference(Info);
 
 	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 		Info->mState = lcPieceInfoState::Loaded;
 	else if (Info->mState == lcPieceInfoState::Unloaded)
-		EnqueuePiece(Info, Flags.testFlag(lcPieceLoadFlag::Visible) ? Priority::Visible : Priority::Background);
-	else if (Flags.testFlag(lcPieceLoadFlag::Visible))
+		EnqueuePiece(Info, LoadPriority);
+	else if (LoadPriority != lcPieceLoadPriority::Low)
 	{
 		mQueueMutex.lock();
 		const auto It = mRequests.find(Info);
 		if (It != mRequests.end())
-			PromoteRequestPriorityLocked(It->second, Priority::Visible);
+			PromoteRequestPriorityLocked(It->second, LoadPriority);
 		mQueueMutex.unlock();
 	}
 
-	return !Flags.testFlag(lcPieceLoadFlag::Wait) || WaitForRequest(Info);
+	return LoadPriority != lcPieceLoadPriority::Blocking || WaitForRequest(Info);
 }
 
-void lcAssetLoader::QueuePiece(PieceInfo* Info)
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	EnqueuePiece(Info, Priority::Background);
-}
-
-void lcAssetLoader::EnqueuePiece(PieceInfo* Info, Priority LoadPriority)
+void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
 	QMutexLocker QueueLock(&mQueueMutex);
 
@@ -105,7 +96,7 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, Priority LoadPriority)
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, Priority LoadPriority)
+void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority)
 {
 	RequestedPiece->LoadPriority = std::max(RequestedPiece->LoadPriority, LoadPriority);
 
@@ -140,7 +131,7 @@ void lcAssetLoader::QueueSynthMesh(lcPiece* Piece)
 	RequestedSynth->Piece = Piece;
 	RequestedSynth->SynthInfo = SynthInfo;
 	RequestedSynth->ControlPoints = Piece->GetControlPoints();
-	RequestedSynth->LoadPriority = Priority::Visible;
+	RequestedSynth->LoadPriority = lcPieceLoadPriority::Normal;
 	RequestedSynth->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
 	RequestedSynth->Generation = mGeneration;
 
@@ -159,7 +150,7 @@ void lcAssetLoader::QueueSynthMesh(lcPiece* Piece)
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::QueueTexture(lcTexture* Texture, Priority LoadPriority)
+void lcAssetLoader::QueueTexture(lcTexture* Texture, lcPieceLoadPriority LoadPriority)
 {
 	QMutexLocker QueueLock(&mQueueMutex);
 
@@ -234,7 +225,7 @@ void lcAssetLoader::RunWorker()
 			const auto Score = [Now](const auto& Item)
 			{
 				// Each ten seconds of waiting promotes one priority level.
-				return qMin<qint64>(static_cast<qint64>(Priority::Blocking),
+				return qMin<qint64>(static_cast<qint64>(lcPieceLoadPriority::Blocking),
 					static_cast<qint64>(Item->LoadPriority) + qMax<qint64>(0, Now - Item->EnqueuedAt) / 10000);
 			};
 
@@ -661,7 +652,7 @@ void lcAssetLoader::ResolveMeshColors(lcLibraryMeshData& MeshData, std::vector<b
 }
 
 bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const std::vector<QString>& SearchDirectories,
-	const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, Priority LoadPriority, QString& Error)
+	const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcPieceLoadPriority LoadPriority, QString& Error)
 {
 	for (lcMeshLod& Lod : Mesh.mLods)
 		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
@@ -1056,7 +1047,7 @@ bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
 		{
 			RequestedPiece = It->second;
 
-			PromoteRequestPriorityLocked(RequestedPiece, Priority::Blocking);
+			PromoteRequestPriorityLocked(RequestedPiece, lcPieceLoadPriority::Blocking);
 		}
 		StartWorkersLocked();
 	}
@@ -1088,16 +1079,11 @@ bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
 	return RequestedPiece->Succeeded;
 }
 
-bool lcAssetLoader::EnsurePieceReady(PieceInfo* Info)
-{
-	return EnsurePiecesReady({ Info });
-}
-
-bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
+bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	std::vector<PieceInfo*> Required = Parts;
+	std::vector<PieceInfo*> Required = Pieces;
 	std::sort(Required.begin(), Required.end());
 
 	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
@@ -1113,7 +1099,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 		if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 			Info->mState = lcPieceInfoState::Loaded;
 		else
-			EnqueuePiece(Info, Priority::Blocking);
+			EnqueuePiece(Info, lcPieceLoadPriority::Blocking);
 	}
 
 	{
@@ -1126,7 +1112,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 			if (It == mRequests.end())
 				continue;
 
-			PromoteRequestPriorityLocked(It->second, Priority::Blocking);
+			PromoteRequestPriorityLocked(It->second, lcPieceLoadPriority::Blocking);
 		}
 
 		StartWorkersLocked();
@@ -1143,7 +1129,7 @@ bool lcAssetLoader::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
 	return Ready;
 }
 
-bool lcAssetLoader::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
+bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1160,7 +1146,7 @@ bool lcAssetLoader::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
 				continue;
 
 			const std::shared_ptr<SynthRequest>& RequestedSynth = It->second;
-			RequestedSynth->LoadPriority = Priority::Blocking;
+			RequestedSynth->LoadPriority = lcPieceLoadPriority::Blocking;
 			Required.push_back(RequestedSynth);
 
 			if (RequestedSynth->StagedMesh)
@@ -1170,7 +1156,7 @@ bool lcAssetLoader::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
 						const TextureRequestMap::iterator TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
 
 						if (TextureIt != mTextureRequests.end())
-							TextureIt->second->LoadPriority = Priority::Blocking;
+							TextureIt->second->LoadPriority = lcPieceLoadPriority::Blocking;
 					}
 		}
 
@@ -1208,14 +1194,14 @@ bool lcAssetLoader::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
 	return true;
 }
 
-bool lcAssetLoader::EnsureTextureReady(lcTexture* Texture)
+bool lcAssetLoader::WaitForTexture(lcTexture* Texture)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	if (Texture->IsReady())
 		return true;
 
-	QueueTexture(Texture, Priority::Blocking);
+	QueueTexture(Texture, lcPieceLoadPriority::Blocking);
 
 	for (;;)
 	{
@@ -1295,7 +1281,7 @@ void lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
 
 	Info->mState = lcPieceInfoState::Unloaded;
 
-	EnqueuePiece(Info, Priority::Visible);
+	EnqueuePiece(Info, lcPieceLoadPriority::Normal);
 }
 
 void lcAssetLoader::InvalidatePiece(PieceInfo* Info)

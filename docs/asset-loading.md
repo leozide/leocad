@@ -289,8 +289,9 @@ sequenceDiagram
     participant Library as Library
     participant Loader as Loader / UI thread
     participant Worker as Qt worker
-    Caller->>Library: LoadPieceInfo(Info, Flags)
-    Library->>Loader: Acquire reference and queue/promote
+    Caller->>Library: LoadPieceInfo(Info, LoadPriority)
+    Library->>Library: Acquire consumer reference
+    Library->>Loader: Queue/promote
     Loader->>Worker: Immutable source snapshot
     Worker-->>Loader: Private mesh data or cached mesh
     Loader->>Loader: Resolve global colors
@@ -338,7 +339,7 @@ buffer upload is not part of asset readiness.
 `LoadPieceInfo()` acquires one reference even if loading fails. Always pair it
 with `ReleasePieceInfo()`. Its asynchronous return value means the call did not
 wait, not that the asset loaded. `AddPieceReference()` retains an identity without
-starting work. `EnsurePiecesReady()` deduplicates its input, temporarily holds
+starting work. `WaitForPieces()` deduplicates its input, temporarily holds
 each part, and releases those holds before returning.
 
 A part request owns an additional in-flight reference. Removing one instance
@@ -384,10 +385,13 @@ ownership.
 
 ## Scheduling and waits
 
-Priorities only promote: `Background < Visible < Blocking`. Ordinary thumbnail
-requests start Background; asynchronous model pieces and generated meshes start
-Visible, regardless of step. Synchronous waits promote their required requests
-and pending texture dependencies to Blocking. Shared textures retain the highest
+Priorities only promote: `Low < Normal < Blocking`. Ordinary thumbnail
+requests start Low; asynchronous model pieces and generated meshes start
+Normal, regardless of step. Synchronous waits promote their required requests
+and pending texture dependencies to Blocking. The same `lcPieceLoadPriority` enum
+is used at the loading entry point and throughout the scheduler. `LoadPieceInfo()`
+waits only for Blocking; Low and Normal return immediately. Internal queueing
+uses priority solely to rank work and does not wait. Shared textures retain the highest
 promotion received from any parent or direct wait. There is no consumer identity
 map, priority demotion, or step-based scheduling. Priority lasts until that request
 completes or is cancelled, not merely until the requesting view closes.
@@ -398,10 +402,12 @@ level per ten seconds of waiting, capped at Blocking, with oldest work winning
 ties. Completion processing uses promoted priorities. Acquiring a pending asset
 shares its request rather than submitting another build.
 
-`EnsurePieceReady()` / `EnsurePiecesReady()` wait for the supplied identities,
-not the entire library, and return false for failed or cancelled requirements.
-They do not expand model containers themselves. `EnsureSynthMeshesReady()` waits
-for the specified instances; `EnsureTextureReady()` waits through upload.
+`WaitForPieces()` starts or promotes loading as needed, then waits for the supplied
+identities, not the entire library. It returns false for failed or cancelled
+requirements and does not expand model containers itself. `WaitForSynthMeshes()`
+promotes and waits for queued generations of the specified instances; callers
+start generations with `QueueSynthMesh()`. The loader's `WaitForTexture()` starts
+or promotes decoding as needed and waits through upload and retries.
 `lcModel::WaitForAssets()` combines recursive part and synth waits and updates
 bounds, but deliberately ignores their failure results. `EnsureAssetsReady()`
 adds strict failure reporting. `WaitForLoadQueue()` drains all pending work and
@@ -412,13 +418,14 @@ workers, including unrelated assets; it is not a scoped success check.
 | Need | API and lifetime contract |
 | --- | --- |
 | Resolve a name | `FindPiece()` with the intended project and explicit `CreateMissing` / `SearchProjectFolder` arguments. The returned pointer is borrowed; retain it before keeping it beyond its owner's lifetime. |
-| Retain and start ordinary asynchronous work | `LoadPieceInfo()` without `lcPieceLoadFlag::Wait`; add `Visible` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and start ordinary asynchronous work | `LoadPieceInfo()` with `lcPieceLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and synchronously load one identity | `LoadPieceInfo()` with `lcPieceLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain without starting work | `AddPieceReference()`, paired with `ReleasePieceInfo()`. This does not make geometry ready. |
-| Wait for an explicit part set | `EnsurePiecesReady()` (or `EnsurePieceReady()`), check the boolean for strict consumers. Temporary holds end before return, so the caller still needs ownership if it will use the assets afterward. |
+| Wait for an explicit part set | `WaitForPieces()` (use `{ Info }` for one identity), check the boolean for strict consumers. Temporary holds end before return, so the caller still needs ownership if it will use the assets afterward. |
 | Wait for one identity and its container geometry | `EnsurePieceAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
-| Replace/wait for generated geometry | `QueueSynthMesh()` / `EnsureSynthMeshesReady()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
-| Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting; `EnsureTextureReady()` waits through GPU upload. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
+| Replace/wait for generated geometry | `QueueSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
+| Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting. The loader handles GPU upload readiness internally. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
 | Synchronize an entire library operation | `WaitForLoadQueue()`; reserve this for operations that truly need all work drained, such as settings changes. Ordinary previews must use scoped waits. |
 
 Scoped waits may process unrelated completions while pumping publication, but

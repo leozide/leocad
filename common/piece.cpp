@@ -86,7 +86,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 
 	mPieceInfo = Info;
 	if (mPieceInfo)
-		Library->LoadPieceInfo(mPieceInfo, Wait ? lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible : lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(mPieceInfo, Wait ? lcPieceLoadPriority::Blocking : lcPieceLoadPriority::Normal);
 
 	if (!ID.isEmpty())
 		mID = ID;

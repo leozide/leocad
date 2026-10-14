@@ -393,7 +393,7 @@ void lcModel::CreatePieceInfo(Project* Project)
 	// until its source lines have been parsed and QueueMeshBuild() runs.
 	if (!Project->DefersModelMeshRequests())
 	{
-		Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadFlag::Visible : lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadPriority::Normal : lcPieceLoadPriority::Blocking);
 		Library->ReleasePieceInfo(mPieceInfo);
 	}
 
@@ -518,8 +518,8 @@ void lcModel::WaitForAssets() const
 	const std::vector<PieceInfo*> Required = GetRequiredPieces();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	Library->EnsurePiecesReady(Required);
-	Library->EnsureSynthMeshesReady(GetRequiredSynthPieces());
+	Library->WaitForPieces(Required);
+	Library->WaitForSynthMeshes(GetRequiredSynthPieces());
 
 	// Temporary minifigure and thumbnail models have no container piece to update.
 	if (mPieceInfo)
@@ -1369,7 +1369,7 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Required.push_back(Piece->mPieceInfo);
 
-	if (!Library->EnsurePiecesReady(Required))
+	if (!Library->WaitForPieces(Required))
 		return false;
 
 	Library->mBuffersDirty = true;
@@ -3125,7 +3125,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 		lcGetPiecesLibrary()->EnsurePieceAssetsReady(Last->mPieceInfo);
 
 		if (Last->mPieceInfo->GetSynthInfo())
-			lcGetPiecesLibrary()->EnsureSynthMeshesReady({ Last });
+			lcGetPiecesLibrary()->WaitForSynthMeshes({ Last });
 	}
 
 	const lcBoundingBox& PieceInfoBoundingBox = Info->GetBoundingBox();
@@ -3418,11 +3418,11 @@ void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& Preview
 
 	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
 	{
-		Library->LoadPieceInfo(InfoTransform.Info, lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(InfoTransform.Info, lcPieceLoadPriority::Normal);
 		Required.push_back(InfoTransform.Info);
 	}
 
-	Library->EnsurePiecesReady(Required);
+	Library->WaitForPieces(Required);
 
 	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);

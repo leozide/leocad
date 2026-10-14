@@ -215,7 +215,7 @@ void MinifigWizard::LoadTemplate(const QString& TemplateName)
 		mMinifig.Parts[PartIndex] = Info;
 
 		if (Info)
-			Library->LoadPieceInfo(Info, lcPieceLoadFlag::Visible);
+			Library->LoadPieceInfo(Info, lcPieceLoadPriority::Normal);
 	}
 
 	std::vector<PieceInfo*> Required;
@@ -224,7 +224,7 @@ void MinifigWizard::LoadTemplate(const QString& TemplateName)
 		if (Info)
 			Required.push_back(Info);
 
-	Library->EnsurePiecesReady(Required);
+	Library->WaitForPieces(Required);
 
 	Calculate();
 }
@@ -513,7 +513,7 @@ void MinifigWizard::SetPieceInfo(int Type, PieceInfo* Info)
 	mMinifig.Parts[Type] = Info;
 
 	if (mMinifig.Parts[Type])
-		Library->LoadPieceInfo(mMinifig.Parts[Type], lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(mMinifig.Parts[Type], lcPieceLoadPriority::Blocking);
 
 	Calculate();
 }

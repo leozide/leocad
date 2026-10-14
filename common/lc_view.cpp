@@ -493,7 +493,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	lcGetPiecesLibrary()->EnsurePieceAssetsReady(Info);
 
 	if (MovingPiece && Info->GetSynthInfo())
-		lcGetPiecesLibrary()->EnsureSynthMeshesReady({ MovingPiece });
+		lcGetPiecesLibrary()->WaitForSynthMeshes({ MovingPiece });
 
 	lcObjectRayTest ObjectRayTest = RayTest(true, IgnoreSelected);
 
@@ -507,7 +507,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		lcGetPiecesLibrary()->EnsurePieceAssetsReady(MouseInfo);
 
 		if (MouseInfo->GetSynthInfo())
-			lcGetPiecesLibrary()->EnsureSynthMeshesReady({ MousePiece });
+			lcGetPiecesLibrary()->WaitForSynthMeshes({ MousePiece });
 
 		if (!Retest)
 			break;

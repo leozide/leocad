@@ -111,7 +111,7 @@ void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
 		if (Info->mState != lcPieceInfoState::Unloaded)
 			continue;
 
-		Library->LoadPieceInfo(Info, lcPieceLoadFlag::Visible);
+		Library->LoadPieceInfo(Info, lcPieceLoadPriority::Normal);
 		Library->ReleasePieceInfo(Info);
 	}
 
@@ -294,7 +294,7 @@ bool lcPreview::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 	}
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	bool Ready = Library->LoadPieceInfo(Info, lcPieceLoadFlag::Wait | lcPieceLoadFlag::Visible);
+	bool Ready = Library->LoadPieceInfo(Info, lcPieceLoadPriority::Blocking);
 
 	if (Ready && Info->IsModel())
 		Ready = static_cast<bool>(Info->GetModel()->EnsureAssetsReady());

@@ -136,7 +136,7 @@ void lcThumbnailManager::RefreshRequiredPieces(lcPartThumbnail& Thumbnail)
 	for (PieceInfo* Info : Required)
 	{
 		if (Previous.erase(Info) == 0)
-			mLibrary->LoadPieceInfo(Info, lcPieceLoadFlag::None);
+			mLibrary->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
 	}
 
 	for (PieceInfo* Info : Previous)

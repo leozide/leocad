@@ -75,15 +75,14 @@ enum class lcPrimitiveState
 	Loaded
 };
 
-enum class lcPieceLoadFlag
+// Scheduling urgency. LoadPieceInfo() also waits when Blocking is requested.
+// Queued requests only promote and keep their priority until completion or cancellation.
+enum class lcPieceLoadPriority
 {
-	None = 0,
-	Wait = 1 << 0,
-	Visible = 1 << 1
+	Low,      // Background work, such as thumbnails and settings rebuilds.
+	Normal,   // Visible or interactive work.
+	Blocking  // Assets required by a synchronous operation.
 };
-
-Q_DECLARE_FLAGS(lcPieceLoadFlags, lcPieceLoadFlag)
-Q_DECLARE_OPERATORS_FOR_FLAGS(lcPieceLoadFlags)
 
 class lcLibraryPrimitive
 {
@@ -191,26 +190,24 @@ public:
 
 	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
 	// Acquires one reference even on failure; always pair with ReleasePieceInfo().
-	// Without Wait, true does not establish readiness. See docs/asset-loading.md.
-	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
+	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
+	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
 	void NotifyConsumersChanged();
-	// Wait for these identities only, with temporary holds; false means failure/cancellation.
+	// Start or promote loading as needed, then wait with temporary holds; false means failure/cancellation.
 	// Does not traverse container children or wait for per-instance synth geometry.
-	bool EnsurePieceReady(PieceInfo* Info);
-	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
 	// Also settles container children/synths and updates bounds; caller retains the identity.
 	bool EnsurePieceAssetsReady(PieceInfo* Info);
 	// Replaces any pending generation for this instance; snapshots control points for workers.
 	void QueueSynthMesh(lcPiece* Piece);
 	void CancelSynthMesh(lcPiece* Piece);
-	// Caller keeps the instances alive through the wait; false means missing generated geometry.
-	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
+	// Promote and wait for queued generations; false means missing or outdated generated geometry.
+	// Call QueueSynthMesh() to start a generation; keep the instances alive through the wait.
+	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPiece(PieceInfo* Info);
 	// Obsoletes pending work and resets readiness without acquiring a reference.
 	void InvalidatePiece(PieceInfo* Info);
-	// Waits through GPU upload; caller retains the texture, and false means not ready.
-	bool EnsureTextureReady(lcTexture* Texture);
 	// Releases one reference and lets the loader cancel unused queued work.
 	void ReleasePieceInfo(PieceInfo* Info);
 	// Lifetime hold only: does not start loading or establish readiness.

@@ -526,7 +526,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 	if (!Texture)
 		return nullptr;
 
-	if (EnsureTextureReady(Texture))
+	if (mAssetLoader->WaitForTexture(Texture))
 		return Texture;
 
 	ReleaseTexture(Texture);
@@ -1650,9 +1650,13 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags)
+bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
-	return mAssetLoader->LoadPieceInfo(Info, Flags);
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	AddPieceReference(Info);
+
+	return mAssetLoader->LoadPieceInfo(Info, LoadPriority);
 }
 
 void lcPiecesLibrary::NotifyConsumersChanged()
@@ -1660,14 +1664,9 @@ void lcPiecesLibrary::NotifyConsumersChanged()
 	emit AssetRequestsChanged();
 }
 
-bool lcPiecesLibrary::EnsurePieceReady(PieceInfo* Info)
-{
-	return mAssetLoader->EnsurePieceReady(Info);
-}
-
 bool lcPiecesLibrary::EnsurePieceAssetsReady(PieceInfo* Info)
 {
-	const bool PieceReady = EnsurePieceReady(Info);
+	const bool PieceReady = WaitForPieces({ Info });
 
 	if (Info->IsModel())
 		return static_cast<bool>(Info->GetModel()->EnsureAssetsReady()) && PieceReady;
@@ -1683,9 +1682,9 @@ bool lcPiecesLibrary::EnsurePieceAssetsReady(PieceInfo* Info)
 	return PieceReady;
 }
 
-bool lcPiecesLibrary::EnsurePiecesReady(const std::vector<PieceInfo*>& Parts)
+bool lcPiecesLibrary::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 {
-	return mAssetLoader->EnsurePiecesReady(Parts);
+	return mAssetLoader->WaitForPieces(Pieces);
 }
 
 void lcPiecesLibrary::QueueSynthMesh(lcPiece* Piece)
@@ -1699,9 +1698,9 @@ void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
 		mAssetLoader->CancelSynthMesh(Piece);
 }
 
-bool lcPiecesLibrary::EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces)
+bool lcPiecesLibrary::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 {
-	return mAssetLoader->EnsureSynthMeshesReady(Pieces);
+	return mAssetLoader->WaitForSynthMeshes(Pieces);
 }
 
 QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
@@ -1723,11 +1722,6 @@ void lcPiecesLibrary::InvalidatePiece(PieceInfo* Info)
 		Info->mState = lcPieceInfoState::Unloaded;
 		ClearPieceLoadError(Info);
 	}
-}
-
-bool lcPiecesLibrary::EnsureTextureReady(lcTexture* Texture)
-{
-	return mAssetLoader->EnsureTextureReady(Texture);
 }
 
 void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
@@ -2327,17 +2321,15 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 
 			if (Info->IsModel())
 			{
-				lcModel* Model = Info->GetModel();
-				Info->SetModel(Model);
 				Info->ReleaseMesh();
 				Info->mState = lcPieceInfoState::Unloaded;
 
-				mAssetLoader->QueuePiece(Info);
+				mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
 			}
 			else if (!Info->IsProject())
 			{
 				Info->Unload();
-				mAssetLoader->QueuePiece(Info);
+				mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
 			}
 
 			mBuffersDirty = true;

@@ -14,7 +14,7 @@ class lcTexture;
 enum class lcTextureLoadError;
 
 // Copied on the UI thread so workers do not consult live models or project lookup.
-struct lcPartSourceSnapshot
+struct lcPieceSourceSnapshot
 {
 	QString FileName;
 	QString LibraryDirectory;
@@ -31,14 +31,14 @@ struct lcPartSourceSnapshot
 };
 
 // Private worker output; meshes and dependencies are published only on the UI thread.
-struct lcPartBuildResult
+struct lcPieceBuildResult
 {
-	lcPartBuildResult() = default;
-	~lcPartBuildResult();
-	lcPartBuildResult(lcPartBuildResult&&) = default;
-	lcPartBuildResult& operator=(lcPartBuildResult&&) = default;
-	lcPartBuildResult(const lcPartBuildResult&) = delete;
-	lcPartBuildResult& operator=(const lcPartBuildResult&) = delete;
+	lcPieceBuildResult() = default;
+	~lcPieceBuildResult();
+	lcPieceBuildResult(lcPieceBuildResult&&) = default;
+	lcPieceBuildResult& operator=(lcPieceBuildResult&&) = default;
+	lcPieceBuildResult(const lcPieceBuildResult&) = delete;
+	lcPieceBuildResult& operator=(const lcPieceBuildResult&) = delete;
 
 	quint64 Generation = 0;
 	std::unique_ptr<lcLibraryMeshData> MeshData;
@@ -59,24 +59,35 @@ public:
 	lcAssetLoader(lcPiecesLibrary* Library);
 	~lcAssetLoader() override;
 
+	// Start using a piece: acquire a reference and load it if needed. Release it with ReleasePieceInfo().
+	// Visible raises its loading priority. Wait blocks until loading settles and returns whether it succeeded;
+	// without Wait, this returns true immediately, even if the piece is not ready yet.
 	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadFlags Flags);
-	void QueuePiece(PieceInfo* Info, bool Priority);
-	bool EnsurePieceReady(PieceInfo* Info);
-	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Parts);
+
+	// Queue a background build for a piece the caller already owns, without acquiring a consumer reference or waiting.
+	// Reuse any existing request, keeping its priority.
+	void QueuePiece(PieceInfo* Info);
+
+	// Build this instance's generated mesh from its current control points in the background.
+	// Cancel any older request and keep the previous mesh visible while the replacement is built.
 	void QueueSynthMesh(lcPiece* Piece);
-	void CancelSynthMesh(lcPiece* Piece);
+
+	bool EnsurePieceReady(PieceInfo* Info);
+	bool EnsurePiecesReady(const std::vector<PieceInfo*>& Pieces);
 	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
-	QString GetSynthMeshError(const lcPiece* Piece) const;
-	void ReloadSynthMeshes();
-	void QueueModelPiece(PieceInfo* Info);
-	void InvalidatePiece(PieceInfo* Info);
 	bool EnsureTextureReady(lcTexture* Texture);
 	void WaitForLoadQueue();
-	void CancelAndDrain();
+	bool HasPendingWork();
+	QString GetSynthMeshError(const lcPiece* Piece) const;
+
+	void RebuildModelPiece(PieceInfo* Info);
+	void InvalidatePiece(PieceInfo* Info);
+	void OnConsumerReleased(PieceInfo* Info);
+	void CancelSynthMesh(lcPiece* Piece);
+	void ReloadSynthMeshes();
 	void PauseQueuedWork();
 	void ResumeQueuedWork();
-	void OnConsumerReleased(PieceInfo* Info);
-	bool HasPendingWork();
+	void CancelAndDrain();
 
 private:
 	enum class Priority
@@ -89,11 +100,11 @@ private:
 
 	// Owns one PieceInfo load hold through completion and deferred notification.
 	// Parsing and conversion are separate worker phases; textures settle before publication.
-	struct Request
+	struct PieceRequest
 	{
 		PieceInfo* Info;
 		quint64 Generation;
-		lcPartSourceSnapshot Source;
+		lcPieceSourceSnapshot Source;
 		Priority LoadPriority;
 		qint64 EnqueuedAt;
 		bool Running = false;   // A worker phase is outstanding, including its completion.
@@ -144,15 +155,15 @@ private:
 		QString Error;
 	};
 
-	using PartRequestMap = std::map<PieceInfo*, std::shared_ptr<Request>>;
+	using PieceRequestMap = std::map<PieceInfo*, std::shared_ptr<PieceRequest>>;
 	using TextureRequestMap = std::map<lcTexture*, std::shared_ptr<TextureRequest>>;
 	using SynthRequestMap = std::map<lcPiece*, std::shared_ptr<SynthRequest>>;
 
 	// Workers hand off one private result here; no live asset is published by a worker.
 	struct Completion
 	{
-		std::shared_ptr<Request> RequestedPart;
-		lcPartBuildResult Result;
+		std::shared_ptr<PieceRequest> RequestedPiece;
+		lcPieceBuildResult Result;
 		std::shared_ptr<TextureRequest> RequestedTexture;
 		lcTextureBuildResult TextureResult;
 		std::shared_ptr<SynthRequest> RequestedSynth;
@@ -163,7 +174,7 @@ private:
 	// UI-thread delivery retains the load hold after publication, until callbacks finish.
 	struct Notification
 	{
-		std::shared_ptr<Request> RequestedPart;
+		std::shared_ptr<PieceRequest> RequestedPiece;
 		bool Loaded;
 		QString Error;
 	};
@@ -175,28 +186,41 @@ private:
 		PieceInfo* Info;
 	};
 
+	// Enqueue and promote requests. Workers read copied sources and private build data.
 	// Acquires mQueueMutex internally; callers must not already hold it.
 	void EnqueuePiece(PieceInfo* Info, Priority LoadPriority);
 	// Caller holds mQueueMutex.
-	void PromoteRequestPriorityLocked(const std::shared_ptr<Request>& RequestedPart, Priority LoadPriority);
+	void PromoteRequestPriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, Priority LoadPriority);
 	void QueueTexture(lcTexture* Texture, Priority LoadPriority);
-	static QString TextureFailureMessage(const lcTexture* Texture);
-	void CancelUnusedTextureRequests();
 	// Caller holds mQueueMutex.
 	void StartWorkersLocked();
-	void LoadQueuedPieces();
+	void RunWorker();
+
+	// UI-thread completion handling: colors, conversion, texture dependencies, publication.
 	bool ProcessCompletions();
-	void DispatchNotifications();
-	void FinishPart(const std::shared_ptr<Request>& RequestedPart);
-	void CheckWaitingParts();
-	void CheckWaitingSynths();
-	void FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSynth);
+	void CompletePiece(Completion& Completed);
+	void CompleteSynth(Completion& Completed);
+	void CompleteTexture(Completion& Completed);
+	static void ResolveMeshColors(lcLibraryMeshData& MeshData, std::vector<bool>& ColorTranslucency, int& DefaultColorIndex);
+	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const std::vector<QString>& SearchDirectories,
+		const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, Priority LoadPriority, QString& Error);
+	static bool MeshTexturesSettled(const lcMesh& Mesh, QString& Error);
+	static QString TextureFailureMessage(const lcTexture* Texture);
 	void UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
 	void FinishTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
+	void FinishPiecesWithSettledTextures();
+	void FinishSynthsWithSettledTextures();
+	void FinishPiece(const std::shared_ptr<PieceRequest>& RequestedPiece);
+	void FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSynth);
+
+	// Notify only from the event handler, after synchronous waits have returned.
+	void DispatchNotifications();
+	bool event(QEvent* Event) override;
 	// Caller holds mQueueMutex; the condition wait releases it and reacquires it on return.
 	void WaitForResultsLocked();
 	bool WaitForRequest(PieceInfo* Info);
-	bool event(QEvent* Event) override;
+
+	void CancelUnusedTextureRequests();
 
 	lcPiecesLibrary* const mLibrary;
 	// Protects scheduling maps/queues, worker counts, and result handoff.
@@ -205,20 +229,18 @@ private:
 	QWaitCondition mResultReady;
 	// Serializes full queue drains; scoped readiness waits do not acquire this mutex.
 	QMutex mDrainMutex;
-	PartRequestMap mRequests;
+	PieceRequestMap mRequests;
 	TextureRequestMap mTextureRequests;
 	SynthRequestMap mSynthRequests;
 	// UI-thread diagnostics and instance tracking; these do not own the pieces.
 	std::unordered_map<const lcPiece*, QString> mFailedSynthErrors;
 	std::unordered_set<lcPiece*> mSynthPieces;
-	std::deque<std::shared_ptr<Request>> mQueue;
-	std::deque<std::shared_ptr<Request>> mPausedQueue;
+	// Pending worker phases remain here while paused; mPaused prevents dispatch.
+	std::deque<std::shared_ptr<PieceRequest>> mQueue;
 	std::deque<std::shared_ptr<TextureRequest>> mTextureQueue;
-	std::deque<std::shared_ptr<TextureRequest>> mPausedTextureQueue;
 	std::deque<std::shared_ptr<SynthRequest>> mSynthQueue;
-	std::deque<std::shared_ptr<SynthRequest>> mPausedSynthQueue;
 	std::deque<Completion> mCompletions;
-	std::deque<std::shared_ptr<Request>> mStarted;
+	std::deque<std::shared_ptr<PieceRequest>> mStarted;
 	std::deque<std::shared_ptr<TextureRequest>> mStartedTextures;
 	// UI-thread only; public signals are deferred until outside synchronous waits.
 	std::deque<Notification> mNotifications;

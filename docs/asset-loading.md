@@ -275,6 +275,14 @@ caller omits unavailable geometry, while the loading indicator exposes errors.
 
 ## A request from acquisition to notification
 
+The loader implementation follows this lifecycle: request acquisition and queueing,
+worker scheduling and `RunWorker()`, UI-thread `ProcessCompletions()` dispatch to
+`CompletePiece()`, `CompleteSynth()`, or `CompleteTexture()`, dependency settlement
+and publication, then deferred notifications. Readiness waits follow these paths;
+invalidation, pause/resume, and shutdown are grouped at the end of the file.
+Piece and synth handlers share color preparation and texture dependency checks,
+while keeping their distinct ownership and publication rules explicit.
+
 ```mermaid
 sequenceDiagram
     participant Caller as Caller / UI thread
@@ -502,6 +510,10 @@ Opening a candidate retains the current project until parsing succeeds. A failed
 open discards the candidate. A successful switch releases old owners, cancels
 old-only queued work, and preserves shared asset identities and requests. Neither
 path demotes request priorities.
+
+Pending jobs remain in the normal piece, texture, and synth queues while paused;
+`mPaused` prevents dispatch. Resume refreshes queued piece source snapshots before
+allowing workers to take jobs again.
 
 Stud-style changes pause dispatch, finish running phases, discard staging built
 with old settings, refresh sources, and rebuild affected published meshes and

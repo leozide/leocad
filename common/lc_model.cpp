@@ -434,7 +434,7 @@ bool lcModel::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
 void lcModel::QueueMeshBuild()
 {
 	mPieceInfo->SetModel(this);
-	lcGetPiecesLibrary()->QueueModelPiece(mPieceInfo);
+	lcGetPiecesLibrary()->RebuildModelPiece(mPieceInfo);
 }
 
 void lcModel::UpdateAllViews() const

@@ -16,8 +16,8 @@ class lcLibraryMeshData;
 class lcThumbnailManager;
 class lcAssetLoader;
 class lcTextureManager;
-struct lcPartSourceSnapshot;
-struct lcPartBuildResult;
+struct lcPieceSourceSnapshot;
+struct lcPieceBuildResult;
 struct lcEmbeddedData;
 struct lcTextureBuildResult;
 
@@ -206,7 +206,7 @@ public:
 	// Caller keeps the instances alive through the wait; false means missing generated geometry.
 	bool EnsureSynthMeshesReady(const std::vector<lcPiece*>& Pieces);
 	QString GetSynthMeshError(const lcPiece* Piece) const;
-	void QueueModelPiece(PieceInfo* Info);
+	void RebuildModelPiece(PieceInfo* Info);
 	// Obsoletes pending work and resets readiness without acquiring a reference.
 	void InvalidatePiece(PieceInfo* Info);
 	// Waits through GPU upload; caller retains the texture, and false means not ready.
@@ -223,10 +223,10 @@ public:
 	QString GetPieceLoadError(const PieceInfo* Info) const;
 	void ClearPieceLoadError(const PieceInfo* Info);
 	bool LoadBuiltinPieces();
-	lcPartSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
+	lcPieceSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
 	// Worker build service: returns private CPU data/errors without publishing asset state.
-	lcPartBuildResult BuildPieceData(const lcPartSourceSnapshot& Source);
-	void SaveBuiltPieceCache(const lcPartSourceSnapshot& Source, lcMesh& Mesh);
+	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
+	void SaveBuiltPieceCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
 	// UI-thread drain of all work, including unrelated assets; not a success check.
 	void WaitForLoadQueue();
 

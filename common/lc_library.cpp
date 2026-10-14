@@ -1709,9 +1709,9 @@ QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
 	return mAssetLoader ? mAssetLoader->GetSynthMeshError(Piece) : QString();
 }
 
-void lcPiecesLibrary::QueueModelPiece(PieceInfo* Info)
+void lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
 {
-	mAssetLoader->QueueModelPiece(Info);
+	mAssetLoader->RebuildModelPiece(Info);
 }
 
 void lcPiecesLibrary::InvalidatePiece(PieceInfo* Info)
@@ -1803,9 +1803,9 @@ void lcPiecesLibrary::WaitForLoadQueue()
 	mAssetLoader->WaitForLoadQueue();
 }
 
-lcPartSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info) const
+lcPieceSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info) const
 {
-	lcPartSourceSnapshot Source;
+	lcPieceSourceSnapshot Source;
 
 	Source.FileName = QString::fromLatin1(Info->mFileName);
 	Source.LibraryDirectory = mLibraryDir.absolutePath();
@@ -1830,9 +1830,9 @@ lcPartSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info)
 	return Source;
 }
 
-lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& Source)
+lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& Source)
 {
-	lcPartBuildResult Result;
+	lcPieceBuildResult Result;
 
 	if (mCancelLoading.load())
 	{
@@ -1953,7 +1953,7 @@ lcPartBuildResult lcPiecesLibrary::BuildPieceData(const lcPartSourceSnapshot& So
 	return Result;
 }
 
-void lcPiecesLibrary::SaveBuiltPieceCache(const lcPartSourceSnapshot& Source, lcMesh& Mesh)
+void lcPiecesLibrary::SaveBuiltPieceCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh)
 {
 	if (Source.ZipFileType == lcZipFileType::Count)
 		return;
@@ -2332,12 +2332,12 @@ void lcPiecesLibrary::SetStudStyle(lcStudStyle StudStyle, bool Reload, bool Stud
 				Info->ReleaseMesh();
 				Info->mState = lcPieceInfoState::Unloaded;
 
-				mAssetLoader->QueuePiece(Info, false);
+				mAssetLoader->QueuePiece(Info);
 			}
 			else if (!Info->IsProject())
 			{
 				Info->Unload();
-				mAssetLoader->QueuePiece(Info, false);
+				mAssetLoader->QueuePiece(Info);
 			}
 
 			mBuffersDirty = true;

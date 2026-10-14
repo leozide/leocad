@@ -324,7 +324,6 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, Priority LoadPriority)
 	std::shared_ptr<Request> RequestedPart = std::make_shared<Request>();
 
 	RequestedPart->Info = Info;
-	RequestedPart->Id = mNextRequestId++;
 	RequestedPart->Generation = mGeneration;
 	RequestedPart->Source = mLibrary->SnapshotPieceSource(Info);
 	RequestedPart->LoadPriority = LoadPriority;
@@ -452,7 +451,6 @@ void lcAssetLoader::LoadQueuedPieces()
 				}
 			}
 
-			Completed.Result.RequestId = RequestedPart->Id;
 			Completed.Result.Generation = RequestedPart->Generation;
 		}
 		else if (RequestedTexture)

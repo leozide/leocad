@@ -40,7 +40,6 @@ struct lcPartBuildResult
 	lcPartBuildResult(const lcPartBuildResult&) = delete;
 	lcPartBuildResult& operator=(const lcPartBuildResult&) = delete;
 
-	quint64 RequestId = 0;
 	quint64 Generation = 0;
 	std::unique_ptr<lcLibraryMeshData> MeshData;
 	std::unique_ptr<lcMesh> Mesh;
@@ -93,7 +92,6 @@ private:
 	struct Request
 	{
 		PieceInfo* Info;
-		quint64 Id;
 		quint64 Generation;
 		lcPartSourceSnapshot Source;
 		Priority LoadPriority;
@@ -227,7 +225,6 @@ private:
 	std::deque<SynthNotification> mSynthNotifications;
 	std::vector<QFuture<void>> mFutures;
 	int mActiveWorkers = 0;
-	quint64 mNextRequestId = 1;
 	quint64 mGeneration = 1;
 	bool mPaused = false;
 	bool mStopping = false;

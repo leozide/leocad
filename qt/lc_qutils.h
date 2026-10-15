@@ -2,6 +2,10 @@
 
 #include <QObject>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 class lcPartSelectionWidget;
 class lcPartSelectionListView;
 struct lcTrainTrackConnectionType;

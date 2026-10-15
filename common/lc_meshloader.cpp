@@ -803,24 +803,6 @@ void lcLibraryMeshData::GenerateTexturedVertices()
 	}
 }
 
-QStringList lcLibraryMeshData::GetTextureDependencies() const
-{
-	QStringList Dependencies;
-
-	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
-	{
-		if (!Material->Name[0])
-			continue;
-
-		const QString Name = QString::fromLatin1(Material->Name);
-
-		if (!Dependencies.contains(Name))
-			Dependencies.append(Name);
-	}
-
-	return Dependencies;
-}
-
 lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup)
 {
 	ResolveColors();

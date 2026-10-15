@@ -233,6 +233,9 @@ The diagram shows the normal paths. Mesh parsing and conversion are separate
 worker phases, so a part can return to `Queued` between phases. Invalidation or
 unloading resets readiness; cancellation and stale-result disposal also have
 request-level terminal flags, independent of the published asset state.
+Queued piece and synth requests use the presence of `MeshData` to select
+conversion; an empty pointer selects parsing or generation. `Running` tracks
+outstanding worker phases through completion processing.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
 textures are ready. Valid empty geometry may also settle successfully. A missing
@@ -306,11 +309,12 @@ sequenceDiagram
 
 Texture-free meshes skip decoding/upload; cached meshes skip source parsing and
 conversion. Both paths use the same dependency and publication rules. Cache
-reads and mesh deserialization run on workers; source mesh color indices are
-resolved on the UI thread before conversion uses a color snapshot. A corrupt
-mesh cache is rebuilt privately. Failed builds are not saved as successful mesh
-caches. Temporary disk textures are scoped by their resolved file identity, so
-same-name PNGs in different project directories remain distinct.
+reads and mesh deserialization run in the library's worker build service; cache
+bytes stay local, and the result records whether it came from cache. Source mesh
+color indices are resolved on the UI thread before conversion uses a color
+snapshot. A corrupt mesh cache is rebuilt privately. Failed builds are not saved
+as successful mesh caches. Temporary disk textures are scoped by their resolved
+file identity, so same-name PNGs in different project directories remain distinct.
 
 Mesh cache validity includes the cache format, source checksums, stud style, and
 stud-cylinder color setting. Style flags propagate through nested primitive
@@ -539,8 +543,9 @@ Published ordinary meshes are rebuilt selectively using `HasStyleStud`, includin
 flags propagated from nested includes; a style change does not indiscriminately
 invalidate every library mesh. Pending snapshots must still be refreshed so
 obsolete settings cannot publish later.
-Library reload and destruction call `CancelAndDrain()` before destroying sources,
-registries, or GL resources. It advances the generation, cancels pending work,
+Library reload and destruction destroy the loader before releasing sources,
+registries, or GL resources. The loader destructor calls its private
+`CancelAndDrain()`, which stops dispatch, cancels pending work,
 joins workers, discards obsolete results, and releases notification holds without
 requiring successful upload or delivering public settlement signals.
 
@@ -591,7 +596,7 @@ suite.
   GL upload, or settlement callbacks. Condition waits release the queue mutex
   while sleeping. Do not hold library locks needed by workers while draining.
 - Preserve in-flight holds through stale-result disposal and deferred notification.
-  Validate request identity/generation before publishing; deleting an owner must
+  Validate request identity and cancellation before publishing; deleting an owner must
   not let a worker or callback access that deleted model/piece.
 - Preserve unresolved dependency names and diagnostics through caches. A failed
   include/texture must never be treated as successful partial asset loading.

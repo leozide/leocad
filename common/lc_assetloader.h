@@ -8,7 +8,6 @@ class PieceInfo;
 class lcPiece;
 class lcMesh;
 class lcSynthInfo;
-class lcMemFile;
 class lcLibraryMeshData;
 class lcTexture;
 enum class lcTextureLoadError;
@@ -41,13 +40,11 @@ struct lcPieceBuildResult
 	lcPieceBuildResult(const lcPieceBuildResult&) = delete;
 	lcPieceBuildResult& operator=(const lcPieceBuildResult&) = delete;
 
-	quint64 Generation = 0;
 	std::unique_ptr<lcLibraryMeshData> MeshData;
 	std::unique_ptr<lcMesh> Mesh;
-	std::unique_ptr<lcMemFile> CacheData;
 	std::vector<quint32> ColorCodes;
+	bool FromCache = false;
 	bool EmptyGeometry = false;
-	QStringList TextureDependencies;
 	QString Error;
 };
 
@@ -98,7 +95,6 @@ public:
 	void ReloadSynthMeshes();
 	void PauseQueuedWork();
 	void ResumeQueuedWork();
-	void CancelAndDrain();
 
 private:
 	// Owns one PieceInfo load hold through completion and deferred notification.
@@ -106,7 +102,6 @@ private:
 	struct PieceRequest
 	{
 		PieceInfo* Info;
-		quint64 Generation;
 		lcPieceSourceSnapshot Source;
 		lcPieceLoadPriority LoadPriority;
 		qint64 EnqueuedAt;
@@ -114,8 +109,7 @@ private:
 		bool Obsolete = false;  // Its result must not publish, even if the build succeeds.
 		bool Terminal = false;  // The wait has settled; this does not imply success.
 		bool Succeeded = false; // Published successfully, including valid empty geometry.
-		bool ConvertingMesh = false;
-		std::unique_ptr<lcLibraryMeshData> MeshData;
+		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
 		std::vector<bool> ColorTranslucency;
 		int DefaultColorIndex = 0;
 		std::unique_ptr<lcMesh> StagedMesh;
@@ -128,7 +122,6 @@ private:
 	struct TextureRequest
 	{
 		lcTexture* Texture;
-		quint64 Generation;
 		lcFileSource Source;
 		lcPieceLoadPriority LoadPriority;
 		qint64 EnqueuedAt;
@@ -146,12 +139,10 @@ private:
 		std::vector<lcPieceControlPoint> ControlPoints;
 		lcPieceLoadPriority LoadPriority;
 		qint64 EnqueuedAt;
-		quint64 Generation;
 		bool Running = false;
 		std::atomic_bool Cancelled = false;
 		bool Terminal = false;
-		bool ConvertingMesh = false;
-		std::unique_ptr<lcLibraryMeshData> MeshData;
+		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
 		std::vector<bool> ColorTranslucency;
 		int DefaultColorIndex = 0;
 		std::unique_ptr<lcMesh> StagedMesh;
@@ -178,7 +169,6 @@ private:
 	struct PieceNotification
 	{
 		std::shared_ptr<PieceRequest> RequestedPiece;
-		bool Loaded;
 		QString Error;
 	};
 
@@ -224,6 +214,7 @@ private:
 	bool WaitForRequest(PieceInfo* Info);
 
 	void CancelUnusedTextureRequests();
+	void CancelAndDrain();
 
 	lcPiecesLibrary* const mLibrary;
 	// Protects scheduling maps/queues, worker counts, and result handoff.
@@ -246,7 +237,6 @@ private:
 	std::deque<SynthNotification> mSynthNotifications;
 	std::vector<QFuture<void>> mFutures;
 	int mActiveWorkers = 0;
-	quint64 mGeneration = 1;
 	bool mPaused = false;
 	bool mStopping = false;
 

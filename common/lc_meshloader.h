@@ -168,7 +168,6 @@ public:
 	lcMesh* CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup = {});
 	void ResolveColors();
 	lcMesh* CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
-	QStringList GetTextureDependencies() const;
 	void AddVertices(lcMeshDataType MeshDataType, size_t VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, size_t IndexCount, quint32** IndexBuffer);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);

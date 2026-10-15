@@ -83,7 +83,6 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriori
 	std::shared_ptr<PieceRequest> RequestedPiece = std::make_shared<PieceRequest>();
 
 	RequestedPiece->Info = Info;
-	RequestedPiece->Generation = mGeneration;
 	RequestedPiece->Source = mLibrary->SnapshotPieceSource(Info);
 	RequestedPiece->LoadPriority = LoadPriority;
 	RequestedPiece->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
@@ -133,7 +132,6 @@ void lcAssetLoader::QueueSynthMesh(lcPiece* Piece)
 	RequestedSynth->ControlPoints = Piece->GetControlPoints();
 	RequestedSynth->LoadPriority = lcPieceLoadPriority::Normal;
 	RequestedSynth->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
-	RequestedSynth->Generation = mGeneration;
 
 	QMutexLocker QueueLock(&mQueueMutex);
 
@@ -172,7 +170,6 @@ void lcAssetLoader::QueueTexture(lcTexture* Texture, lcPieceLoadPriority LoadPri
 	std::shared_ptr<TextureRequest> RequestedTexture = std::make_shared<TextureRequest>();
 
 	RequestedTexture->Texture = Texture;
-	RequestedTexture->Generation = mGeneration;
 	RequestedTexture->Source = Texture->mSource;
 	RequestedTexture->LoadPriority = LoadPriority;
 	RequestedTexture->EnqueuedAt = QDateTime::currentMSecsSinceEpoch();
@@ -268,7 +265,7 @@ void lcAssetLoader::RunWorker()
 		{
 			Completed.RequestedPiece = RequestedPiece;
 
-			if (RequestedPiece->ConvertingMesh)
+			if (RequestedPiece->MeshData)
 			{
 				Completed.Result.Mesh.reset(RequestedPiece->MeshData->CreateMeshResolved(RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex, nullptr));
 				RequestedPiece->MeshData.reset();
@@ -277,19 +274,7 @@ void lcAssetLoader::RunWorker()
 					Completed.Result.Error = tr("Could not prepare piece %1 for rendering.").arg(RequestedPiece->Source.FileName);
 			}
 			else
-			{
 				Completed.Result = mLibrary->BuildPieceData(RequestedPiece->Source);
-
-				if (Completed.Result.CacheData)
-				{
-					Completed.Result.Mesh.reset(new lcMesh);
-
-					if (!Completed.Result.Mesh->FileLoad(*Completed.Result.CacheData, Completed.Result.ColorCodes))
-						Completed.Result.Mesh.reset();
-				}
-			}
-
-			Completed.Result.Generation = RequestedPiece->Generation;
 		}
 		else if (RequestedTexture)
 		{
@@ -302,7 +287,7 @@ void lcAssetLoader::RunWorker()
 
 			if (RequestedSynth->Cancelled.load(std::memory_order_relaxed))
 				RequestedSynth->MeshData.reset();
-			else if (RequestedSynth->ConvertingMesh)
+			else if (RequestedSynth->MeshData)
 			{
 				Completed.SynthMesh.reset(RequestedSynth->MeshData->CreateMeshResolved(RequestedSynth->ColorTranslucency, RequestedSynth->DefaultColorIndex, &RequestedSynth->Cancelled));
 				RequestedSynth->MeshData.reset();
@@ -440,7 +425,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 	mQueueMutex.lock();
 	const auto It = mPieceRequests.find(Info);
-	Stale = mStopping || RequestedPiece->Obsolete || Completed.Result.Generation != mGeneration || It == mPieceRequests.end() || It->second != RequestedPiece;
+	Stale = mStopping || RequestedPiece->Obsolete || It == mPieceRequests.end() || It->second != RequestedPiece;
 	if (Stale && It != mPieceRequests.end() && It->second == RequestedPiece)
 		mPieceRequests.erase(It);
 	mQueueMutex.unlock();
@@ -476,7 +461,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 	if (RequestedPiece->Error.isEmpty())
 	{
-		if (Completed.Result.CacheData && !Completed.Result.Mesh)
+		if (Completed.Result.FromCache && !Completed.Result.Mesh)
 		{
 			// Rebuild a corrupt cache privately on a worker, then use the normal commit path.
 			RequestedPiece->Source.SkipCache = true;
@@ -494,7 +479,6 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 			// Register color indices on the UI thread, then queue the expensive mesh conversion.
 			ResolveMeshColors(*Completed.Result.MeshData, RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex);
 			RequestedPiece->MeshData = std::move(Completed.Result.MeshData);
-			RequestedPiece->ConvertingMesh = true;
 			Info->mState = lcPieceInfoState::Queued;
 
 			QMutexLocker QueueLock(&mQueueMutex);
@@ -506,7 +490,6 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 		}
 		else if (Completed.Result.Mesh)
 		{
-			RequestedPiece->ConvertingMesh = false;
 			RequestedPiece->ColorTranslucency.clear();
 			RequestedPiece->StagedMesh = std::move(Completed.Result.Mesh);
 			size_t ColorIndex = 0;
@@ -517,12 +500,12 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 				{
 					lcMeshSection& Section = Lod.Sections[SectionIdx];
 
-					if (Completed.Result.CacheData)
+					if (Completed.Result.FromCache)
 						Section.ColorIndex = lcGetColorIndex(Completed.Result.ColorCodes[ColorIndex++]);
 				}
 			}
 
-			RequestedPiece->SaveCache = !Completed.Result.CacheData;
+			RequestedPiece->SaveCache = !Completed.Result.FromCache;
 		}
 	}
 
@@ -550,7 +533,7 @@ void lcAssetLoader::CompleteSynth(Completion& Completed)
 
 	mQueueMutex.lock();
 	const SynthRequestMap::iterator It = mSynthRequests.find(RequestedSynth->Piece);
-	Stale = mStopping || RequestedSynth->Cancelled.load(std::memory_order_relaxed) || RequestedSynth->Generation != mGeneration ||
+	Stale = mStopping || RequestedSynth->Cancelled.load(std::memory_order_relaxed) ||
 		It == mSynthRequests.end() || It->second != RequestedSynth;
 	if (Stale && It != mSynthRequests.end() && It->second == RequestedSynth)
 		mSynthRequests.erase(It);
@@ -569,7 +552,6 @@ void lcAssetLoader::CompleteSynth(Completion& Completed)
 		// Resolve global colors here, then send expensive conversion back to a worker.
 		ResolveMeshColors(*Completed.SynthMeshData, RequestedSynth->ColorTranslucency, RequestedSynth->DefaultColorIndex);
 		RequestedSynth->MeshData = std::move(Completed.SynthMeshData);
-		RequestedSynth->ConvertingMesh = true;
 
 		QMutexLocker QueueLock(&mQueueMutex);
 
@@ -586,7 +568,6 @@ void lcAssetLoader::CompleteSynth(Completion& Completed)
 		return;
 	}
 
-	RequestedSynth->ConvertingMesh = false;
 	RequestedSynth->ColorTranslucency.clear();
 	RequestedSynth->StagedMesh = std::move(Completed.SynthMesh);
 
@@ -605,8 +586,7 @@ void lcAssetLoader::CompleteTexture(Completion& Completed)
 
 	mQueueMutex.lock();
 	const auto It = mTextureRequests.find(Texture);
-	Stale = mStopping || RequestedTexture->Generation != mGeneration ||
-		It == mTextureRequests.end() || It->second != RequestedTexture;
+	Stale = mStopping || It == mTextureRequests.end() || It->second != RequestedTexture;
 	if (Stale && It != mTextureRequests.end() && It->second == RequestedTexture)
 		mTextureRequests.erase(It);
 	RequestedTexture->Running = false;
@@ -880,7 +860,7 @@ void lcAssetLoader::FinishPiece(const std::shared_ptr<PieceRequest>& RequestedPi
 	mQueueMutex.unlock();
 
 	mLibrary->ScheduleBufferRepack();
-	mPieceNotifications.push_back({ RequestedPiece, Loaded, std::move(LoadError) });
+	mPieceNotifications.push_back({ RequestedPiece, std::move(LoadError) });
 
 	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 }
@@ -945,7 +925,7 @@ void lcAssetLoader::DispatchNotifications()
 		QPointer<lcAssetLoader> LoaderGuard(this);
 		QPointer<lcPiecesLibrary> LibraryGuard(mLibrary);
 
-		if (Notification.Loaded)
+		if (Notification.RequestedPiece->Succeeded)
 			emit mLibrary->PartLoaded(Info);
 		else
 			emit mLibrary->PartLoadFailed(Info, Notification.Error);
@@ -1477,11 +1457,10 @@ void lcAssetLoader::PauseQueuedWork()
 	{
 		const std::shared_ptr<PieceRequest>& RequestedPiece = Entry.second;
 
-		if (RequestedPiece->ConvertingMesh)
+		if (RequestedPiece->MeshData)
 		{
 			RequestedPiece->MeshData.reset();
 			RequestedPiece->ColorTranslucency.clear();
-			RequestedPiece->ConvertingMesh = false;
 			RequestedPiece->Info->mState = lcPieceInfoState::Queued;
 		}
 
@@ -1499,13 +1478,12 @@ void lcAssetLoader::PauseQueuedWork()
 	{
 		const std::shared_ptr<SynthRequest>& RequestedSynth = Entry.second;
 
-		if (!RequestedSynth->StagedMesh && !RequestedSynth->ConvertingMesh)
+		if (!RequestedSynth->StagedMesh && !RequestedSynth->MeshData)
 			continue;
 
 		RequestedSynth->MeshData.reset();
 		RequestedSynth->StagedMesh.reset();
 		RequestedSynth->ColorTranslucency.clear();
-		RequestedSynth->ConvertingMesh = false;
 
 		if (std::find(mSynthQueue.begin(), mSynthQueue.end(), RequestedSynth) == mSynthQueue.end())
 			mSynthQueue.push_back(RequestedSynth);
@@ -1545,7 +1523,6 @@ void lcAssetLoader::CancelAndDrain()
 		QMutexLocker QueueLock(&mQueueMutex);
 
 		mStopping = true;
-		mGeneration++;
 		mPieceQueue.clear();
 		mTextureQueue.clear();
 		mSynthQueue.clear();

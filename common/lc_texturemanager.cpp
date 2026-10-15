@@ -51,7 +51,6 @@ lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFil
 
 	lcstrcpy(Texture->mName, TextureName);
 	Texture->mSource = Source;
-	Texture->mProjectPath = ProjectPath;
 	Texture->SetTemporary(bool(Source.EmbeddedData) || !ProjectPath.isEmpty());
 	Texture->AddRef();
 

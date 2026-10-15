@@ -60,7 +60,6 @@ lcPiecesLibrary::~lcPiecesLibrary()
 {
 	mThumbnailManager.reset();
 	mCancelLoading.store(true);
-	mAssetLoader->CancelAndDrain();
 	mAssetLoader.reset();
 	Unload();
 	ReleaseBuffers();
@@ -73,11 +72,7 @@ void lcPiecesLibrary::Unload()
 	if (HadLoader && mThumbnailManager)
 		mThumbnailManager->Clear();
 
-	if (mAssetLoader)
-	{
-		mAssetLoader->CancelAndDrain();
-		mAssetLoader.reset();
-	}
+	mAssetLoader.reset();
 
 	mPieceErrorMutex.lock();
 	mFailedPartErrors.clear();
@@ -1866,25 +1861,26 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		}
 
 		if (Result.MeshData)
-		{
-			Result.TextureDependencies = Result.MeshData->GetTextureDependencies();
 			Result.MeshData->SetMeshLoader(nullptr);
-		}
 
 		return Result;
 	}
 
 	if (!Source.SkipCache && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
 	{
-		std::unique_ptr<lcMemFile> CacheData(new lcMemFile);
+		lcMemFile CacheData;
 
-		if (ReadArchiveCacheFile(Source.CachePath, *CacheData))
+		if (ReadArchiveCacheFile(Source.CachePath, CacheData))
 		{
 			qint32 Flags;
 
-			if (CacheData->ReadBuffer(&Flags, sizeof(Flags)) == sizeof(Flags) && Flags == MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled))
+			if (CacheData.ReadBuffer(&Flags, sizeof(Flags)) == sizeof(Flags) && Flags == MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled))
 			{
-				Result.CacheData = std::move(CacheData);
+				Result.FromCache = true;
+				Result.Mesh.reset(new lcMesh);
+
+				if (!Result.Mesh->FileLoad(CacheData, Result.ColorCodes))
+					Result.Mesh.reset();
 
 				return Result;
 			}
@@ -1938,10 +1934,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		Result.MeshData.reset();
 
 	if (Result.MeshData)
-	{
-		Result.TextureDependencies = Result.MeshData->GetTextureDependencies();
 		Result.MeshData->SetMeshLoader(nullptr);
-	}
 
 	return Result;
 }

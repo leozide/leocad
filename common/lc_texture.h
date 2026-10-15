@@ -125,7 +125,6 @@ public:
 	int mHeight;
 	char mName[LC_TEXTURE_NAME_LEN] = {};
 	lcFileSource mSource;
-	QString mProjectPath; // Directory used to scope temporary textures to their project.
 	GLuint mTexture = 0;
 	lcTextureState mState = lcTextureState::Unrequested;
 	lcTextureLoadError mLoadFailure = lcTextureLoadError::None;

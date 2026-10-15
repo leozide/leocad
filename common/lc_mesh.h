@@ -34,7 +34,7 @@ struct lcVertexConditional
 
 struct lcMeshSection
 {
-	int ColorIndex;
+	int ColorIndex; // Holds a color code until FinalizeSections() converts it to an index.
 	int DrawOffset; // Index-buffer byte offset, or first conditional vertex.
 	int DrawCount;  // Index count, or conditional vertex count.
 	lcMeshPrimitiveType PrimitiveType;
@@ -84,8 +84,12 @@ public:
 	void Create(quint16 (&NumSections)[LC_NUM_MESH_LODS], int VertexCount, int TexturedVertexCount, int ConditionalVertexCount, int IndexCount);
 	void CreateBox();
 
-	bool FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes);
+	bool FileLoad(lcMemFile& File);
 	bool FileSave(lcMemFile& File);
+
+	// Set colors and flags, then sort sections using the current palette on the UI thread.
+	// Converts stored color codes to indices once, before publishing the mesh.
+	void FinalizeSections();
 
 	template<typename IndexType>
 	void ExportPOVRay(lcFile& File, const char* MeshName, const char** ColorTable);

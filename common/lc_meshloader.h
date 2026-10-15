@@ -165,9 +165,8 @@ public:
 		mMeshLoader = MeshLoader;
 	}
 
-	lcMesh* CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup = {});
-	void ResolveColors();
-	lcMesh* CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
+	// Build private geometry with color codes; the UI thread calls FinalizeSections().
+	lcMesh* CreateMesh(const std::atomic_bool* Cancelled);
 	void AddVertices(lcMeshDataType MeshDataType, size_t VertexCount, int* BaseVertex, lcMeshLoaderVertex** VertexBuffer);
 	void AddIndices(lcMeshDataType MeshDataType, lcMeshPrimitiveType PrimitiveType, quint32 ColorCode, size_t IndexCount, quint32** IndexBuffer);
 	void AddMeshData(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex);
@@ -192,8 +191,7 @@ protected:
 	quint32 AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoords);
 
 	template<typename IndexType>
-	bool WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
-	lcMesh* CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled);
+	bool WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int (&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::atomic_bool* Cancelled);
 
 	static bool UpdateMeshBoundingBox(lcMesh* Mesh, const std::atomic_bool* Cancelled);
 	template<typename IndexType>

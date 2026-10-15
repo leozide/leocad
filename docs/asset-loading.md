@@ -283,7 +283,7 @@ worker scheduling and `RunWorker()`, UI-thread `ProcessCompletions()` dispatch t
 `ProcessPieceCompletion()`, `ProcessSynthCompletion()`, or `ProcessTextureCompletion()`, dependency settlement
 and publication, then deferred notifications. Readiness waits follow these paths;
 invalidation, pause/resume, and shutdown are grouped at the end of the file.
-Piece and synth handlers share color preparation and texture dependency checks,
+Piece and synth handlers share mesh color finalization and texture dependency checks,
 while keeping their distinct ownership and publication rules explicit.
 
 ```mermaid
@@ -297,9 +297,9 @@ sequenceDiagram
     Library->>Loader: Queue/promote
     Loader->>Worker: Immutable source snapshot
     Worker-->>Loader: Private mesh data or cached mesh
-    Loader->>Loader: Resolve global colors
     Loader->>Worker: Convert source mesh data
     Worker-->>Loader: Private mesh
+    Loader->>Loader: Set section colors, update flags, and sort sections
     Loader->>Loader: Resolve textures and queue decode if needed
     Loader->>Worker: Texture source snapshot
     Worker-->>Loader: Decoded CPU image
@@ -310,9 +310,13 @@ sequenceDiagram
 Texture-free meshes skip decoding/upload; cached meshes skip source parsing and
 conversion. Both paths use the same dependency and publication rules. Cache
 reads and mesh deserialization run in the library's worker build service; cache
-bytes stay local, and the result records whether it came from cache. Source mesh
-color indices are resolved on the UI thread before conversion uses a color
-snapshot. A corrupt mesh cache is rebuilt privately. Failed builds are not saved
+bytes stay local, and the result records whether it came from cache. Private mesh
+sections store color codes in `ColorIndex` until finalization converts them to
+indices. Fresh pieces, synths, and cached meshes all use
+`FinalizeSections()` on the UI thread to resolve color indices, refresh
+solid/translucent/default flags, and sort sections using the current palette.
+Workers build geometry without reading global colors or keeping palette snapshots.
+A corrupt mesh cache is rebuilt privately. Failed builds are not saved
 as successful mesh caches. Temporary disk textures are scoped by their resolved
 file identity, so same-name PNGs in different project directories remain distinct.
 

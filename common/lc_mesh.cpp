@@ -432,10 +432,8 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		ExportWavefrontIndices<GLuint>(File, DefaultColorIndex, VertexOffset);
 }
 
-bool lcMesh::FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes)
+bool lcMesh::FileLoad(lcMemFile& File)
 {
-	ColorCodes.clear();
-
 	quint32 FileId, FileVersion, Flags;
 
 	if (File.ReadU32(&FileId, 1) != 1 || FileId != LC_MESH_FILE_ID || File.ReadU32(&FileVersion, 1) != 1 ||
@@ -487,8 +485,7 @@ bool lcMesh::FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes)
 				File.ReadU32(&DrawCount, 1) != 1 || File.ReadU16(&PrimtiveType, 1) != 1)
 				return false;
 
-			Section.ColorIndex = 0;
-			ColorCodes.push_back(ColorCode);
+			Section.ColorIndex = static_cast<int>(ColorCode);
 			Section.DrawOffset = DrawOffset;
 			Section.DrawCount = DrawCount;
 			Section.PrimitiveType = (lcMeshPrimitiveType)PrimtiveType;
@@ -536,6 +533,56 @@ bool lcMesh::FileLoad(lcMemFile& File, std::vector<quint32>& ColorCodes)
 	}
 
 	return true;
+}
+
+void lcMesh::FinalizeSections()
+{
+	mFlags &= ~(lcMeshFlag::HasDefault | lcMeshFlag::HasSolid | lcMeshFlag::HasTranslucent);
+
+	for (lcMeshLod& Lod : mLods)
+	{
+		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
+		{
+			lcMeshSection& Section = Lod.Sections[SectionIdx];
+			Section.ColorIndex = lcGetColorIndex(static_cast<quint32>(Section.ColorIndex));
+
+			if (Section.PrimitiveType != LC_MESH_TRIANGLES && Section.PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
+				continue;
+
+			if (Section.ColorIndex == gDefaultColor)
+				mFlags |= lcMeshFlag::HasDefault;
+			else if (lcIsColorTranslucent(Section.ColorIndex))
+				mFlags |= lcMeshFlag::HasTranslucent;
+			else
+				mFlags |= lcMeshFlag::HasSolid;
+		}
+
+		if (Lod.NumSections > 1)
+			std::sort(Lod.Sections, Lod.Sections + Lod.NumSections, [](const lcMeshSection& Left, const lcMeshSection& Right)
+			{
+				if (Left.PrimitiveType != Right.PrimitiveType)
+				{
+					const lcMeshPrimitiveType PrimitiveOrder[] =
+					{
+						LC_MESH_TRIANGLES,
+						LC_MESH_TEXTURED_TRIANGLES,
+						LC_MESH_LINES,
+						LC_MESH_CONDITIONAL_LINES
+					};
+
+					return std::find(std::begin(PrimitiveOrder), std::end(PrimitiveOrder), Left.PrimitiveType) <
+						std::find(std::begin(PrimitiveOrder), std::end(PrimitiveOrder), Right.PrimitiveType);
+				}
+
+				const bool LeftTranslucent = lcIsColorTranslucent(Left.ColorIndex);
+				const bool RightTranslucent = lcIsColorTranslucent(Right.ColorIndex);
+
+				if (LeftTranslucent != RightTranslucent)
+					return !LeftTranslucent;
+
+				return Left.ColorIndex > Right.ColorIndex;
+			});
+	}
 }
 
 bool lcMesh::FileSave(lcMemFile& File)

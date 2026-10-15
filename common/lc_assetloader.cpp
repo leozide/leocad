@@ -267,7 +267,7 @@ void lcAssetLoader::RunWorker()
 
 			if (RequestedPiece->MeshData)
 			{
-				Completed.PieceResult.Mesh.reset(RequestedPiece->MeshData->CreateMeshResolved(RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex, nullptr));
+				Completed.PieceResult.Mesh.reset(RequestedPiece->MeshData->CreateMesh(nullptr));
 				RequestedPiece->MeshData.reset();
 
 				if (!Completed.PieceResult.Mesh)
@@ -289,7 +289,7 @@ void lcAssetLoader::RunWorker()
 				RequestedSynth->MeshData.reset();
 			else if (RequestedSynth->MeshData)
 			{
-				Completed.SynthMesh.reset(RequestedSynth->MeshData->CreateMeshResolved(RequestedSynth->ColorTranslucency, RequestedSynth->DefaultColorIndex, &RequestedSynth->Cancelled));
+				Completed.SynthMesh.reset(RequestedSynth->MeshData->CreateMesh(&RequestedSynth->Cancelled));
 				RequestedSynth->MeshData.reset();
 			}
 			else
@@ -476,8 +476,7 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 		}
 		else if (Completed.PieceResult.MeshData)
 		{
-			// Register color indices on the UI thread, then queue the expensive mesh conversion.
-			ResolveMeshColors(*Completed.PieceResult.MeshData, RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex);
+			// Queue the expensive geometry conversion; colors are finalized after it completes.
 			RequestedPiece->MeshData = std::move(Completed.PieceResult.MeshData);
 			Info->mState = lcPieceInfoState::Queued;
 
@@ -490,20 +489,9 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 		}
 		else if (Completed.PieceResult.Mesh)
 		{
-			RequestedPiece->ColorTranslucency.clear();
 			RequestedPiece->StagedMesh = std::move(Completed.PieceResult.Mesh);
-			size_t ColorIndex = 0;
 
-			for (lcMeshLod& Lod : RequestedPiece->StagedMesh->mLods)
-			{
-				for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
-				{
-					lcMeshSection& Section = Lod.Sections[SectionIdx];
-
-					if (Completed.PieceResult.FromCache)
-						Section.ColorIndex = lcGetColorIndex(Completed.PieceResult.ColorCodes[ColorIndex++]);
-				}
-			}
+			RequestedPiece->StagedMesh->FinalizeSections();
 
 			RequestedPiece->SaveCache = !Completed.PieceResult.FromCache;
 		}
@@ -549,8 +537,7 @@ void lcAssetLoader::ProcessSynthCompletion(Completion& Completed)
 
 	if (Completed.SynthMeshData)
 	{
-		// Resolve global colors here, then send expensive conversion back to a worker.
-		ResolveMeshColors(*Completed.SynthMeshData, RequestedSynth->ColorTranslucency, RequestedSynth->DefaultColorIndex);
+		// Queue the expensive geometry conversion; colors are finalized after it completes.
 		RequestedSynth->MeshData = std::move(Completed.SynthMeshData);
 
 		QMutexLocker QueueLock(&mQueueMutex);
@@ -568,8 +555,8 @@ void lcAssetLoader::ProcessSynthCompletion(Completion& Completed)
 		return;
 	}
 
-	RequestedSynth->ColorTranslucency.clear();
 	RequestedSynth->StagedMesh = std::move(Completed.SynthMesh);
+	RequestedSynth->StagedMesh->FinalizeSections();
 
 	const bool Ready = ResolveAndQueueMeshTextures(*RequestedSynth->StagedMesh, std::vector<QString>(),
 		std::map<QString, std::shared_ptr<const lcEmbeddedData>>(), RequestedSynth->LoadPriority, RequestedSynth->Error);
@@ -609,19 +596,6 @@ void lcAssetLoader::ProcessTextureCompletion(Completion& Completed)
 
 		FinishTexture(RequestedTexture);
 	}
-}
-
-void lcAssetLoader::ResolveMeshColors(lcLibraryMeshData& MeshData, std::vector<bool>& ColorTranslucency, int& DefaultColorIndex)
-{
-	// Global color registration belongs on the UI thread; conversion uses this copied palette.
-	MeshData.ResolveColors();
-	ColorTranslucency.clear();
-	ColorTranslucency.reserve(gColorList.size());
-
-	for (const lcColor& Color : gColorList)
-		ColorTranslucency.push_back(Color.Translucent);
-
-	DefaultColorIndex = gDefaultColor;
 }
 
 bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const std::vector<QString>& SearchDirectories,
@@ -1457,7 +1431,6 @@ void lcAssetLoader::PauseQueuedWork()
 		if (RequestedPiece->MeshData)
 		{
 			RequestedPiece->MeshData.reset();
-			RequestedPiece->ColorTranslucency.clear();
 			RequestedPiece->Info->mState = lcPieceInfoState::Queued;
 		}
 
@@ -1480,7 +1453,6 @@ void lcAssetLoader::PauseQueuedWork()
 
 		RequestedSynth->MeshData.reset();
 		RequestedSynth->StagedMesh.reset();
-		RequestedSynth->ColorTranslucency.clear();
 
 		if (std::find(mSynthQueue.begin(), mSynthQueue.end(), RequestedSynth) == mSynthQueue.end())
 			mSynthQueue.push_back(RequestedSynth);

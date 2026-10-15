@@ -42,7 +42,6 @@ struct lcPieceBuildResult
 
 	std::unique_ptr<lcLibraryMeshData> MeshData;
 	std::unique_ptr<lcMesh> Mesh;
-	std::vector<quint32> ColorCodes;
 	bool FromCache = false;
 	bool EmptyGeometry = false;
 	QString Error;
@@ -113,8 +112,6 @@ private:
 		bool Terminal = false;  // The wait has settled; this does not imply success.
 		bool Succeeded = false; // Published successfully, including valid empty geometry.
 		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
-		std::vector<bool> ColorTranslucency;
-		int DefaultColorIndex = 0;
 		std::unique_ptr<lcMesh> StagedMesh;
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
@@ -146,8 +143,6 @@ private:
 		std::atomic_bool Cancelled = false;
 		bool Terminal = false;
 		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
-		std::vector<bool> ColorTranslucency;
-		int DefaultColorIndex = 0;
 		std::unique_ptr<lcMesh> StagedMesh;
 		QString Error;
 	};
@@ -197,7 +192,6 @@ private:
 	void ProcessPieceCompletion(Completion& Completed);
 	void ProcessSynthCompletion(Completion& Completed);
 	void ProcessTextureCompletion(Completion& Completed);
-	static void ResolveMeshColors(lcLibraryMeshData& MeshData, std::vector<bool>& ColorTranslucency, int& DefaultColorIndex);
 	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const std::vector<QString>& SearchDirectories,
 		const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcPieceLoadPriority LoadPriority, QString& Error);
 	static bool MeshTexturesSettled(const lcMesh& Mesh, QString& Error);

@@ -606,39 +606,6 @@ lcMeshLoaderMaterial* lcLibraryMeshData::GetTexturedMaterial(quint32 ColorCode, 
 	return Material;
 }
 
-static bool lcMeshLoaderFinalSectionCompare(const lcMeshLoaderFinalSection& a, const lcMeshLoaderFinalSection& b, const std::vector<bool>& ColorTranslucency)
-{
-	if (a.PrimitiveType != b.PrimitiveType)
-	{
-		const lcMeshPrimitiveType PrimitiveOrder[LC_MESH_NUM_PRIMITIVE_TYPES] =
-		{
-			LC_MESH_TRIANGLES,
-			LC_MESH_TEXTURED_TRIANGLES,
-			LC_MESH_LINES,
-			LC_MESH_CONDITIONAL_LINES
-		};
-
-		for (int PrimitiveType = 0; PrimitiveType < LC_MESH_NUM_PRIMITIVE_TYPES; PrimitiveType++)
-		{
-			const lcMeshPrimitiveType Primitive = PrimitiveOrder[PrimitiveType];
-
-			if (a.PrimitiveType == Primitive)
-				return true;
-
-			if (b.PrimitiveType == Primitive)
-				return false;
-		}
-	}
-
-	const bool TranslucentA = ColorTranslucency[a.Color];
-	const bool TranslucentB = ColorTranslucency[b.Color];
-
-	if (TranslucentA != TranslucentB)
-		return !TranslucentA;
-
-	return a.Color > b.Color;
-}
-
 quint32 lcLibraryMeshData::AddTexturedVertex(const lcVector3& Position, const lcVector3& Normal, const lcVector2& TexCoords)
 {
 	for (int VertexIndex = static_cast<int>(mTexturedVertices.size()) - 1; VertexIndex >= 0; VertexIndex--)
@@ -803,33 +770,7 @@ void lcLibraryMeshData::GenerateTexturedVertices()
 	}
 }
 
-lcMesh* lcLibraryMeshData::CreateMesh(const std::function<lcTexture*(const char*)>& TextureLookup)
-{
-	ResolveColors();
-
-	std::vector<bool> ColorTranslucency;
-	ColorTranslucency.reserve(gColorList.size());
-
-	for (const lcColor& Color : gColorList)
-		ColorTranslucency.push_back(Color.Translucent);
-
-	return CreateMeshInternal(TextureLookup, ColorTranslucency, gDefaultColor, nullptr);
-}
-
-void lcLibraryMeshData::ResolveColors()
-{
-	for (const std::unique_ptr<lcMeshLoaderMaterial>& Material : mMaterials)
-		Material->Color = lcGetColorIndex(Material->Color);
-}
-
-lcMesh* lcLibraryMeshData::CreateMeshResolved(const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
-{
-	// Keep project texture lookup on the UI thread after conversion.
-	const std::function<lcTexture*(const char*)> DeferTexture = [](const char*) -> lcTexture* { return nullptr; };
-	return CreateMeshInternal(DeferTexture, ColorTranslucency, DefaultColorIndex, Cancelled);
-}
-
-lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
+lcMesh* lcLibraryMeshData::CreateMesh(const std::atomic_bool* Cancelled)
 {
 	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
 		return nullptr;
@@ -890,10 +831,6 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 		}
 
 		NumSections[LodIdx] = static_cast<quint16>(FinalSections[LodIdx].size());
-		std::sort(FinalSections[LodIdx].begin(), FinalSections[LodIdx].end(), [&ColorTranslucency](const lcMeshLoaderFinalSection& Left, const lcMeshLoaderFinalSection& Right)
-		{
-			return lcMeshLoaderFinalSectionCompare(Left, Right, ColorTranslucency);
-		});
 	}
 
 	if (Cancelled && Cancelled->load(std::memory_order_relaxed))
@@ -962,9 +899,9 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 	bool SectionsWritten;
 
 	if (Mesh->mIndexType == GL_UNSIGNED_SHORT)
-		SectionsWritten = WriteSections<quint16>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex, Cancelled);
+		SectionsWritten = WriteSections<quint16>(Mesh, FinalSections, BaseVertices, Cancelled);
 	else
-		SectionsWritten = WriteSections<quint32>(Mesh, FinalSections, BaseVertices, TextureLookup, ColorTranslucency, DefaultColorIndex, Cancelled);
+		SectionsWritten = WriteSections<quint32>(Mesh, FinalSections, BaseVertices, Cancelled);
 
 	if (!SectionsWritten)
 	{
@@ -1063,7 +1000,7 @@ lcMesh* lcLibraryMeshData::CreateMeshInternal(const std::function<lcTexture*(con
 }
 
 template<typename IndexType>
-bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::function<lcTexture*(const char*)>& TextureLookup, const std::vector<bool>& ColorTranslucency, int DefaultColorIndex, const std::atomic_bool* Cancelled)
+bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoaderFinalSection> (&FinalSections)[LC_NUM_MESH_LODS], int(&BaseVertices)[LC_NUM_MESHDATA_TYPES], const std::atomic_bool* Cancelled)
 {
 	int NumIndices = 0;
 
@@ -1077,22 +1014,12 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 			const lcMeshLoaderFinalSection& FinalSection = FinalSections[LodIdx][SectionIndex];
 			lcMeshSection& DstSection = Mesh->mLods[LodIdx].Sections[SectionIndex];
 
-			DstSection.ColorIndex = FinalSection.Color;
+			DstSection.ColorIndex = static_cast<int>(FinalSection.Color);
 			DstSection.PrimitiveType = FinalSection.PrimitiveType;
 			DstSection.DrawCount = 0;
 			DstSection.TextureName = QString::fromLatin1(FinalSection.Name);
 
-			if (!FinalSection.Name[0])
-				DstSection.Texture = nullptr;
-			else
-			{
-				if (TextureLookup)
-					DstSection.Texture = TextureLookup(FinalSection.Name);
-				else if (mMeshLoader)
-					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, mMeshLoader->mCurrentProject, mMeshLoader->SearchProjectFolder());
-				else
-					DstSection.Texture = lcGetPiecesLibrary()->FindTexture(FinalSection.Name, nullptr, false);
-			}
+			DstSection.Texture = nullptr;
 
 			DstSection.DrawOffset = NumIndices * sizeof(IndexType);
 
@@ -1156,19 +1083,7 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 					if (!AddSection(Section.get(), MeshDataType))
 						return false;
 
-			if (DstSection.PrimitiveType == LC_MESH_TRIANGLES || DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
-			{
-				if (DstSection.ColorIndex == DefaultColorIndex)
-					Mesh->mFlags |= lcMeshFlag::HasDefault;
-				else
-				{
-					if (ColorTranslucency[DstSection.ColorIndex])
-						Mesh->mFlags |= lcMeshFlag::HasTranslucent;
-					else
-						Mesh->mFlags |= lcMeshFlag::HasSolid;
-				}
-			}
-			else
+			if (DstSection.PrimitiveType != LC_MESH_TRIANGLES && DstSection.PrimitiveType != LC_MESH_TEXTURED_TRIANGLES)
 				Mesh->mFlags |= lcMeshFlag::HasLines;
 
 			if (DstSection.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)

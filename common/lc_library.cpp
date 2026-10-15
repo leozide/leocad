@@ -1874,7 +1874,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 				Result.FromCache = true;
 				Result.Mesh.reset(new lcMesh);
 
-				if (!Result.Mesh->FileLoad(CacheData, Result.ColorCodes))
+				if (!Result.Mesh->FileLoad(CacheData))
 					Result.Mesh.reset();
 
 				return Result;

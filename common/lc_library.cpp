@@ -1644,13 +1644,13 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-bool lcPiecesLibrary::LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
+bool lcPiecesLibrary::RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	AddPieceReference(Info);
 
-	return mAssetLoader->LoadPieceInfo(Info, LoadPriority);
+	return mAssetLoader->RequestPieceLoad(Info, LoadPriority);
 }
 
 void lcPiecesLibrary::NotifyConsumersChanged()
@@ -1681,9 +1681,9 @@ bool lcPiecesLibrary::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 	return mAssetLoader->WaitForPieces(Pieces);
 }
 
-void lcPiecesLibrary::QueueSynthMesh(lcPiece* Piece)
+void lcPiecesLibrary::RequestSynthMesh(lcPiece* Piece)
 {
-	mAssetLoader->QueueSynthMesh(Piece);
+	mAssetLoader->RequestSynthMesh(Piece);
 }
 
 void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
@@ -1734,8 +1734,8 @@ void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
 			UnloadPieceInfo(Info);
 	}
 
-	if (Remaining != 0 && mAssetLoader)
-		mAssetLoader->OnConsumerReleased(Info);
+	if (Remaining == 1 && mAssetLoader)
+		mAssetLoader->CancelPieceLoad(Info);
 }
 
 void lcPiecesLibrary::AddPieceReference(PieceInfo* Info)
@@ -1784,11 +1784,6 @@ void lcPiecesLibrary::ClearPieceLoadError(const PieceInfo* Info)
 	QMutexLocker ErrorLock(&mPieceErrorMutex);
 
 	mFailedPartErrors.erase(Info);
-}
-
-void lcPiecesLibrary::WaitForLoadQueue()
-{
-	mAssetLoader->WaitForLoadQueue();
 }
 
 lcPieceSourceSnapshot lcPiecesLibrary::SnapshotPieceSource(const PieceInfo* Info) const
@@ -2309,12 +2304,12 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 			Info->ReleaseMesh();
 			Info->mState = lcPieceInfoState::Unloaded;
 
-			mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
+			mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Low);
 		}
 		else if (!Info->IsProject())
 		{
 			Info->Unload();
-			mAssetLoader->LoadPieceInfo(Info, lcPieceLoadPriority::Low);
+			mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Low);
 		}
 
 		mBuffersDirty = true;
@@ -2328,11 +2323,11 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	mLoadMutex.unlock();
 
-	mAssetLoader->ReloadSynthMeshes();
+	mAssetLoader->RebuildSynthMeshes();
 
 	mAssetLoader->ResumeQueuedWork();
 
-	WaitForLoadQueue();
+	mAssetLoader->WaitForAllWork();
 }
 
 bool lcPiecesLibrary::IsPrimitive(const char* Name) const

@@ -26,27 +26,27 @@ lcAssetLoader::~lcAssetLoader()
 	CancelAndDrain();
 }
 
-bool lcAssetLoader::LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
+bool lcAssetLoader::RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 		Info->mState = lcPieceInfoState::Loaded;
 	else if (Info->mState == lcPieceInfoState::Unloaded)
-		EnqueuePiece(Info, LoadPriority);
+		QueuePiece(Info, LoadPriority);
 	else if (LoadPriority != lcPieceLoadPriority::Low)
 	{
 		mQueueMutex.lock();
 		const auto It = mPieceRequests.find(Info);
 		if (It != mPieceRequests.end())
-			PromoteRequestPriorityLocked(It->second, LoadPriority);
+			PromotePiecePriorityLocked(It->second, LoadPriority);
 		mQueueMutex.unlock();
 	}
 
-	return LoadPriority != lcPieceLoadPriority::Blocking || WaitForRequest(Info);
+	return LoadPriority != lcPieceLoadPriority::Blocking || WaitForPieceRequest(Info);
 }
 
-void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
+void lcAssetLoader::QueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
 {
 	QMutexLocker QueueLock(&mQueueMutex);
 
@@ -57,7 +57,7 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriori
 
 	if (Existing != mPieceRequests.end())
 	{
-		PromoteRequestPriorityLocked(Existing->second, LoadPriority);
+		PromotePiecePriorityLocked(Existing->second, LoadPriority);
 
 		return;
 	}
@@ -95,7 +95,7 @@ void lcAssetLoader::EnqueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriori
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority)
+void lcAssetLoader::PromotePiecePriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority)
 {
 	RequestedPiece->LoadPriority = std::max(RequestedPiece->LoadPriority, LoadPriority);
 
@@ -114,7 +114,7 @@ void lcAssetLoader::PromoteRequestPriorityLocked(const std::shared_ptr<PieceRequ
 	}
 }
 
-void lcAssetLoader::QueueSynthMesh(lcPiece* Piece)
+void lcAssetLoader::RequestSynthMesh(lcPiece* Piece)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -231,28 +231,28 @@ void lcAssetLoader::RunWorker()
 				return Score(Left) < Score(Right) || (Score(Left) == Score(Right) && Left->EnqueuedAt > Right->EnqueuedAt);
 			};
 
-			auto PartBest = std::max_element(mPieceQueue.begin(), mPieceQueue.end(), Less);
+			auto PieceBest = std::max_element(mPieceQueue.begin(), mPieceQueue.end(), Less);
 			auto TextureBest = std::max_element(mTextureQueue.begin(), mTextureQueue.end(), Less);
 			auto SynthBest = std::max_element(mSynthQueue.begin(), mSynthQueue.end(), Less);
 
-			if (TextureBest != mTextureQueue.end() && (PartBest == mPieceQueue.end() || !Less(*TextureBest, *PartBest)) &&
+			if (TextureBest != mTextureQueue.end() && (PieceBest == mPieceQueue.end() || !Less(*TextureBest, *PieceBest)) &&
 				(SynthBest == mSynthQueue.end() || !Less(*TextureBest, *SynthBest)))
 			{
 				RequestedTexture = *TextureBest;
 				mTextureQueue.erase(TextureBest);
-				RequestedTexture->Running = true;
+				RequestedTexture->AwaitingCompletion = true;
 			}
-			else if (SynthBest != mSynthQueue.end() && (PartBest == mPieceQueue.end() || !Less(*SynthBest, *PartBest)))
+			else if (SynthBest != mSynthQueue.end() && (PieceBest == mPieceQueue.end() || !Less(*SynthBest, *PieceBest)))
 			{
 				RequestedSynth = *SynthBest;
 				mSynthQueue.erase(SynthBest);
-				RequestedSynth->Running = true;
+				RequestedSynth->AwaitingCompletion = true;
 			}
 			else
 			{
-				RequestedPiece = *PartBest;
-				mPieceQueue.erase(PartBest);
-				RequestedPiece->Running = true;
+				RequestedPiece = *PieceBest;
+				mPieceQueue.erase(PieceBest);
+				RequestedPiece->AwaitingCompletion = true;
 			}
 		}
 
@@ -267,14 +267,14 @@ void lcAssetLoader::RunWorker()
 
 			if (RequestedPiece->MeshData)
 			{
-				Completed.Result.Mesh.reset(RequestedPiece->MeshData->CreateMeshResolved(RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex, nullptr));
+				Completed.PieceResult.Mesh.reset(RequestedPiece->MeshData->CreateMeshResolved(RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex, nullptr));
 				RequestedPiece->MeshData.reset();
 
-				if (!Completed.Result.Mesh)
-					Completed.Result.Error = tr("Could not prepare piece %1 for rendering.").arg(RequestedPiece->Source.FileName);
+				if (!Completed.PieceResult.Mesh)
+					Completed.PieceResult.Error = tr("Could not prepare piece %1 for rendering.").arg(RequestedPiece->Source.FileName);
 			}
 			else
-				Completed.Result = mLibrary->BuildPieceData(RequestedPiece->Source);
+				Completed.PieceResult = mLibrary->BuildPieceData(RequestedPiece->Source);
 		}
 		else if (RequestedTexture)
 		{
@@ -323,7 +323,7 @@ bool lcAssetLoader::ProcessCompletions()
 			{
 				const std::shared_ptr<PieceRequest>& RequestedPiece = Entry.second;
 
-				if (RequestedPiece->Running && RequestedPiece->Info->mState == lcPieceInfoState::Queued)
+				if (RequestedPiece->AwaitingCompletion && RequestedPiece->Info->mState == lcPieceInfoState::Queued)
 					RequestedPiece->Info->mState = lcPieceInfoState::Loading;
 			}
 
@@ -331,7 +331,7 @@ bool lcAssetLoader::ProcessCompletions()
 			{
 				const std::shared_ptr<TextureRequest>& RequestedTexture = Entry.second;
 
-				if (RequestedTexture->Running && RequestedTexture->Texture->mState == lcTextureState::Queued)
+				if (RequestedTexture->AwaitingCompletion && RequestedTexture->Texture->mState == lcTextureState::Queued)
 					RequestedTexture->Texture->mState = lcTextureState::Decoding;
 			}
 		}
@@ -397,11 +397,11 @@ bool lcAssetLoader::ProcessCompletions()
 		}
 
 		if (Completed.RequestedTexture)
-			CompleteTexture(Completed);
+			ProcessTextureCompletion(Completed);
 		else if (Completed.RequestedSynth)
-			CompleteSynth(Completed);
+			ProcessSynthCompletion(Completed);
 		else
-			CompletePiece(Completed);
+			ProcessPieceCompletion(Completed);
 	}
 
 	mQueueMutex.lock();
@@ -417,7 +417,7 @@ bool lcAssetLoader::ProcessCompletions()
 	return Progress;
 }
 
-void lcAssetLoader::CompletePiece(Completion& Completed)
+void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 {
 	const std::shared_ptr<PieceRequest>& RequestedPiece = Completed.RequestedPiece;
 	PieceInfo* Info = RequestedPiece->Info;
@@ -430,7 +430,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 		mPieceRequests.erase(It);
 	mQueueMutex.unlock();
 
-	RequestedPiece->Running = false;
+	RequestedPiece->AwaitingCompletion = false;
 
 	const bool HasConsumer = mLibrary->HasPieceConsumers(Info);
 
@@ -456,12 +456,12 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 		return;
 	}
 
-	RequestedPiece->Error = Completed.Result.Error;
-	RequestedPiece->EmptyGeometry = Completed.Result.EmptyGeometry;
+	RequestedPiece->Error = Completed.PieceResult.Error;
+	RequestedPiece->EmptyGeometry = Completed.PieceResult.EmptyGeometry;
 
 	if (RequestedPiece->Error.isEmpty())
 	{
-		if (Completed.Result.FromCache && !Completed.Result.Mesh)
+		if (Completed.PieceResult.FromCache && !Completed.PieceResult.Mesh)
 		{
 			// Rebuild a corrupt cache privately on a worker, then use the normal commit path.
 			RequestedPiece->Source.SkipCache = true;
@@ -474,11 +474,11 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 			return;
 		}
-		else if (Completed.Result.MeshData)
+		else if (Completed.PieceResult.MeshData)
 		{
 			// Register color indices on the UI thread, then queue the expensive mesh conversion.
-			ResolveMeshColors(*Completed.Result.MeshData, RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex);
-			RequestedPiece->MeshData = std::move(Completed.Result.MeshData);
+			ResolveMeshColors(*Completed.PieceResult.MeshData, RequestedPiece->ColorTranslucency, RequestedPiece->DefaultColorIndex);
+			RequestedPiece->MeshData = std::move(Completed.PieceResult.MeshData);
 			Info->mState = lcPieceInfoState::Queued;
 
 			QMutexLocker QueueLock(&mQueueMutex);
@@ -488,10 +488,10 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 
 			return;
 		}
-		else if (Completed.Result.Mesh)
+		else if (Completed.PieceResult.Mesh)
 		{
 			RequestedPiece->ColorTranslucency.clear();
-			RequestedPiece->StagedMesh = std::move(Completed.Result.Mesh);
+			RequestedPiece->StagedMesh = std::move(Completed.PieceResult.Mesh);
 			size_t ColorIndex = 0;
 
 			for (lcMeshLod& Lod : RequestedPiece->StagedMesh->mLods)
@@ -500,12 +500,12 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 				{
 					lcMeshSection& Section = Lod.Sections[SectionIdx];
 
-					if (Completed.Result.FromCache)
-						Section.ColorIndex = lcGetColorIndex(Completed.Result.ColorCodes[ColorIndex++]);
+					if (Completed.PieceResult.FromCache)
+						Section.ColorIndex = lcGetColorIndex(Completed.PieceResult.ColorCodes[ColorIndex++]);
 				}
 			}
 
-			RequestedPiece->SaveCache = !Completed.Result.FromCache;
+			RequestedPiece->SaveCache = !Completed.PieceResult.FromCache;
 		}
 	}
 
@@ -526,7 +526,7 @@ void lcAssetLoader::CompletePiece(Completion& Completed)
 	FinishPiece(RequestedPiece);
 }
 
-void lcAssetLoader::CompleteSynth(Completion& Completed)
+void lcAssetLoader::ProcessSynthCompletion(Completion& Completed)
 {
 	const std::shared_ptr<SynthRequest>& RequestedSynth = Completed.RequestedSynth;
 	bool Stale;
@@ -537,7 +537,7 @@ void lcAssetLoader::CompleteSynth(Completion& Completed)
 		It == mSynthRequests.end() || It->second != RequestedSynth;
 	if (Stale && It != mSynthRequests.end() && It->second == RequestedSynth)
 		mSynthRequests.erase(It);
-	RequestedSynth->Running = false;
+	RequestedSynth->AwaitingCompletion = false;
 	mResultReady.wakeAll();
 	mQueueMutex.unlock();
 
@@ -578,7 +578,7 @@ void lcAssetLoader::CompleteSynth(Completion& Completed)
 		FinishSynth(RequestedSynth);
 }
 
-void lcAssetLoader::CompleteTexture(Completion& Completed)
+void lcAssetLoader::ProcessTextureCompletion(Completion& Completed)
 {
 	const std::shared_ptr<TextureRequest>& RequestedTexture = Completed.RequestedTexture;
 	lcTexture* Texture = RequestedTexture->Texture;
@@ -589,7 +589,7 @@ void lcAssetLoader::CompleteTexture(Completion& Completed)
 	Stale = mStopping || It == mTextureRequests.end() || It->second != RequestedTexture;
 	if (Stale && It != mTextureRequests.end() && It->second == RequestedTexture)
 		mTextureRequests.erase(It);
-	RequestedTexture->Running = false;
+	RequestedTexture->AwaitingCompletion = false;
 	mResultReady.wakeAll();
 	mQueueMutex.unlock();
 
@@ -601,13 +601,13 @@ void lcAssetLoader::CompleteTexture(Completion& Completed)
 		if (Texture->NeedsUpload())
 			UploadTextureRequest(RequestedTexture);
 		else
-			FinishTextureRequest(RequestedTexture);
+			FinishTexture(RequestedTexture);
 	}
 	else
 	{
 		Texture->SetFailed(Completed.TextureResult.Error, std::move(Completed.TextureResult.ErrorDetails));
 
-		FinishTextureRequest(RequestedTexture);
+		FinishTexture(RequestedTexture);
 	}
 }
 
@@ -758,10 +758,10 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 		Texture->DiscardDecodedImage();
 	}
 
-	FinishTextureRequest(RequestedTexture);
+	FinishTexture(RequestedTexture);
 }
 
-void lcAssetLoader::FinishTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture)
+void lcAssetLoader::FinishTexture(const std::shared_ptr<TextureRequest>& RequestedTexture)
 {
 	mQueueMutex.lock();
 	const auto It = mTextureRequests.find(RequestedTexture->Texture);
@@ -874,9 +874,9 @@ void lcAssetLoader::FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSy
 	Piece->SetGeneratedMesh(Loaded ? RequestedSynth->StagedMesh.release() : nullptr);
 
 	if (Loaded)
-		mFailedSynthErrors.erase(Piece);
+		mSynthErrors.erase(Piece);
 	else
-		mFailedSynthErrors.insert_or_assign(Piece, RequestedSynth->Error);
+		mSynthErrors.insert_or_assign(Piece, RequestedSynth->Error);
 
 	if (!Loaded)
 	{
@@ -1006,7 +1006,7 @@ void lcAssetLoader::WaitForResultsLocked()
 	}
 }
 
-bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
+bool lcAssetLoader::WaitForPieceRequest(PieceInfo* Info)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1021,7 +1021,7 @@ bool lcAssetLoader::WaitForRequest(PieceInfo* Info)
 		{
 			RequestedPiece = It->second;
 
-			PromoteRequestPriorityLocked(RequestedPiece, lcPieceLoadPriority::Blocking);
+			PromotePiecePriorityLocked(RequestedPiece, lcPieceLoadPriority::Blocking);
 		}
 		StartWorkersLocked();
 	}
@@ -1070,7 +1070,7 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 		if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
 			Info->mState = lcPieceInfoState::Loaded;
 		else
-			EnqueuePiece(Info, lcPieceLoadPriority::Blocking);
+			QueuePiece(Info, lcPieceLoadPriority::Blocking);
 	}
 
 	{
@@ -1083,7 +1083,7 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 			if (It == mPieceRequests.end())
 				continue;
 
-			PromoteRequestPriorityLocked(It->second, lcPieceLoadPriority::Blocking);
+			PromotePiecePriorityLocked(It->second, lcPieceLoadPriority::Blocking);
 		}
 
 		StartWorkersLocked();
@@ -1092,7 +1092,7 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 	bool Ready = true;
 
 	for (PieceInfo* Info : Required)
-		Ready = WaitForRequest(Info) && Ready;
+		Ready = WaitForPieceRequest(Info) && Ready;
 
 	return Ready;
 }
@@ -1189,7 +1189,7 @@ bool lcAssetLoader::WaitForTexture(lcTexture* Texture)
 	return Texture->IsReady();
 }
 
-void lcAssetLoader::WaitForLoadQueue()
+void lcAssetLoader::WaitForAllWork()
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1222,9 +1222,9 @@ bool lcAssetLoader::HasPendingWork()
 
 QString lcAssetLoader::GetSynthMeshError(const lcPiece* Piece) const
 {
-	const std::unordered_map<const lcPiece*, QString>::const_iterator It = mFailedSynthErrors.find(Piece);
+	const std::unordered_map<const lcPiece*, QString>::const_iterator It = mSynthErrors.find(Piece);
 
-	return It != mFailedSynthErrors.end() ? It->second : QString();
+	return It != mSynthErrors.end() ? It->second : QString();
 }
 
 void lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
@@ -1233,7 +1233,7 @@ void lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
 	Q_ASSERT(Info->IsModel());
 
 	if (Info->IsLoading())
-		WaitForRequest(Info);
+		WaitForPieceRequest(Info);
 
 	Info->ReleaseMesh();
 	mLibrary->ClearPieceLoadError(Info);
@@ -1247,7 +1247,7 @@ void lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
 
 	Info->mState = lcPieceInfoState::Unloaded;
 
-	EnqueuePiece(Info, lcPieceLoadPriority::Normal);
+	QueuePiece(Info, lcPieceLoadPriority::Normal);
 }
 
 void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
@@ -1268,7 +1268,7 @@ void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
 			Removed->Obsolete = true;
 			Removed->Terminal = true;
 			Removed->Succeeded = false;
-			ReleaseHold = !Removed->Running;
+			ReleaseHold = !Removed->AwaitingCompletion;
 			mPieceRequests.erase(It);
 
 			mPieceQueue.erase(std::remove(mPieceQueue.begin(), mPieceQueue.end(), Removed), mPieceQueue.end());
@@ -1281,13 +1281,13 @@ void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
 		mResultReady.wakeAll();
 	}
 
-	if (Removed && !Removed->Running)
+	if (Removed && !Removed->AwaitingCompletion)
 		Removed->StagedMesh.reset();
 
 	Info->mState = lcPieceInfoState::Unloaded;
 	mLibrary->ClearPieceLoadError(Info);
 
-	// Running work retains its load hold until its stale completion arrives.
+	// Work awaiting completion retains its load hold until its stale completion arrives.
 	if (ReleaseHold)
 		mLibrary->ReleasePieceLoadHold(Info);
 
@@ -1297,13 +1297,10 @@ void lcAssetLoader::InvalidatePiece(PieceInfo* Info)
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
+void lcAssetLoader::CancelPieceLoad(PieceInfo* Info)
 {
 	// Ordinary running builds finish privately; discard them if their last consumer is gone.
 	Q_ASSERT(QThread::currentThread() == thread());
-
-	if (mLibrary->HasPieceConsumers(Info))
-		return;
 
 	std::shared_ptr<PieceRequest> Removed;
 	{
@@ -1316,7 +1313,7 @@ void lcAssetLoader::OnConsumerReleased(PieceInfo* Info)
 
 		const std::shared_ptr<PieceRequest>& RequestedPiece = It->second;
 
-		if (RequestedPiece->Running)
+		if (RequestedPiece->AwaitingCompletion)
 			return;
 
 		RequestedPiece->Obsolete = true;
@@ -1347,7 +1344,7 @@ void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	mSynthPieces.erase(Piece);
-	mFailedSynthErrors.erase(Piece);
+	mSynthErrors.erase(Piece);
 
 	for (SynthNotification& Pending : mSynthNotifications)
 		if (Pending.RequestedSynth->Piece == Piece)
@@ -1371,7 +1368,7 @@ void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 		mResultReady.wakeAll();
 	}
 
-	if (!Removed->Running)
+	if (!Removed->AwaitingCompletion)
 	{
 		Removed->StagedMesh.reset();
 		CancelUnusedTextureRequests();
@@ -1390,7 +1387,7 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 			const std::shared_ptr<TextureRequest>& RequestedTexture = It->second;
 
 			// A queued request owns one reference; all others belong to consumers.
-			if (RequestedTexture->Running || RequestedTexture->Texture->GetRefCount() > 1)
+			if (RequestedTexture->AwaitingCompletion || RequestedTexture->Texture->GetRefCount() > 1)
 			{
 				++It;
 				continue;
@@ -1420,7 +1417,7 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 	}
 }
 
-void lcAssetLoader::ReloadSynthMeshes()
+void lcAssetLoader::RebuildSynthMeshes()
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1469,7 +1466,7 @@ void lcAssetLoader::PauseQueuedWork()
 
 		RequestedPiece->StagedMesh.reset();
 		RequestedPiece->Info->mState = lcPieceInfoState::Queued;
-		RequestedPiece->Running = false;
+		RequestedPiece->AwaitingCompletion = false;
 		mPieceQueue.push_back(RequestedPiece);
 	}
 
@@ -1527,11 +1524,11 @@ void lcAssetLoader::CancelAndDrain()
 		mTextureQueue.clear();
 		mSynthQueue.clear();
 		mSynthPieces.clear();
-		mFailedSynthErrors.clear();
+		mSynthErrors.clear();
 
 		for (auto It = mPieceRequests.begin(); It != mPieceRequests.end();)
 		{
-			if (It->second->Running)
+			if (It->second->AwaitingCompletion)
 			{
 				It->second->Obsolete = true;
 				++It;
@@ -1550,7 +1547,7 @@ void lcAssetLoader::CancelAndDrain()
 
 		for (auto It = mTextureRequests.begin(); It != mTextureRequests.end();)
 		{
-			if (It->second->Running)
+			if (It->second->AwaitingCompletion)
 				++It;
 			else
 			{
@@ -1562,7 +1559,7 @@ void lcAssetLoader::CancelAndDrain()
 
 		for (SynthRequestMap::iterator It = mSynthRequests.begin(); It != mSynthRequests.end();)
 		{
-			if (It->second->Running)
+			if (It->second->AwaitingCompletion)
 			{
 				It->second->Cancelled.store(true, std::memory_order_relaxed);
 				++It;
@@ -1583,7 +1580,7 @@ void lcAssetLoader::CancelAndDrain()
 	for (const std::shared_ptr<TextureRequest>& RequestedTexture : CancelledTextures)
 		mLibrary->ReleaseTexture(RequestedTexture->Texture);
 
-	WaitForLoadQueue();
+	WaitForAllWork();
 
 	while (!mPieceNotifications.empty())
 	{

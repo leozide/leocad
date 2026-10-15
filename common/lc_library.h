@@ -75,7 +75,7 @@ enum class lcPrimitiveState
 	Loaded
 };
 
-// Scheduling urgency. LoadPieceInfo() also waits when Blocking is requested.
+// Scheduling urgency. RequestPieceLoad() also waits when Blocking is requested.
 // Queued requests only promote and keep their priority until completion or cancellation.
 enum class lcPieceLoadPriority
 {
@@ -191,7 +191,7 @@ public:
 	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
 	// Acquires one reference even on failure; always pair with ReleasePieceInfo().
 	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
-	bool LoadPieceInfo(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
+	bool RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
 	void NotifyConsumersChanged();
 	// Start or promote loading, then wait. Adds no consumer references.
 	// Returns false for failed or cancelled pieces.
@@ -200,10 +200,10 @@ public:
 	// Also settles container children/synths and updates bounds; caller retains the identity.
 	bool EnsurePieceAssetsReady(PieceInfo* Info);
 	// Replaces any pending generation for this instance; snapshots control points for workers.
-	void QueueSynthMesh(lcPiece* Piece);
+	void RequestSynthMesh(lcPiece* Piece);
 	void CancelSynthMesh(lcPiece* Piece);
 	// Promote and wait for queued generations; false means missing or outdated generated geometry.
-	// Call QueueSynthMesh() to start a generation; keep the instances alive through the wait.
+	// Call RequestSynthMesh() to start a generation; keep the instances alive through the wait.
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPiece(PieceInfo* Info);
@@ -225,8 +225,6 @@ public:
 	// Worker build service: returns private CPU data/errors without publishing asset state.
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
 	void SaveBuiltPieceCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
-	// UI-thread drain of all work, including unrelated assets; not a success check.
-	void WaitForLoadQueue();
 
 	// UI-thread lookup and upload wait; returns a ready reference or nullptr on failure.
 	// Release a returned reference with ReleaseTexture().

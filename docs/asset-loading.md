@@ -234,7 +234,7 @@ worker phases, so a part can return to `Queued` between phases. Invalidation or
 unloading resets readiness; cancellation and stale-result disposal also have
 request-level terminal flags, independent of the published asset state.
 Queued piece and synth requests use the presence of `MeshData` to select
-conversion; an empty pointer selects parsing or generation. `Running` tracks
+conversion; an empty pointer selects parsing or generation. `AwaitingCompletion` tracks
 outstanding worker phases through completion processing.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
@@ -280,7 +280,7 @@ caller omits unavailable geometry, while the loading indicator exposes errors.
 
 The loader implementation follows this lifecycle: request acquisition and queueing,
 worker scheduling and `RunWorker()`, UI-thread `ProcessCompletions()` dispatch to
-`CompletePiece()`, `CompleteSynth()`, or `CompleteTexture()`, dependency settlement
+`ProcessPieceCompletion()`, `ProcessSynthCompletion()`, or `ProcessTextureCompletion()`, dependency settlement
 and publication, then deferred notifications. Readiness waits follow these paths;
 invalidation, pause/resume, and shutdown are grouped at the end of the file.
 Piece and synth handlers share color preparation and texture dependency checks,
@@ -292,7 +292,7 @@ sequenceDiagram
     participant Library as Library
     participant Loader as Loader / UI thread
     participant Worker as Qt worker
-    Caller->>Library: LoadPieceInfo(Info, LoadPriority)
+    Caller->>Library: RequestPieceLoad(Info, LoadPriority)
     Library->>Library: Acquire consumer reference
     Library->>Loader: Queue/promote
     Loader->>Worker: Immutable source snapshot
@@ -340,7 +340,7 @@ buffer upload is not part of asset readiness.
 
 ## References, cancellation, and generated geometry
 
-`LoadPieceInfo()` acquires one reference even if loading fails. Always pair it
+`RequestPieceLoad()` acquires one reference even if loading fails. Always pair it
 with `ReleasePieceInfo()`. Its asynchronous return value means the call did not
 wait, not that the asset loaded. `AddPieceReference()` retains an identity without
 starting work. `WaitForPieces()` deduplicates its input without acquiring consumer
@@ -369,7 +369,7 @@ retained; drawing does not retry them. Explicit invalidation or unloading can
 permit a later request.
 
 Synth meshes are **per `lcPiece` instance**, separate from the shared library
-mesh. `QueueSynthMesh()` copies control points and retains the shared synth
+mesh. `RequestSynthMesh()` copies control points and retains the shared synth
 definition. Replacing or deleting the piece cancels its old request; workers
 check an atomic cancellation flag and stale results cannot replace newer meshes.
 Initial generation displays a cube. Control-point edits retain the previous
@@ -393,7 +393,7 @@ Priorities only promote: `Low < Normal < Blocking`. Ordinary thumbnail
 requests start Low; asynchronous model pieces and generated meshes start
 Normal, regardless of step. Synchronous waits promote their required requests
 and pending texture dependencies to Blocking. The same `lcPieceLoadPriority` enum
-is used at the loading entry point and throughout the scheduler. `LoadPieceInfo()`
+is used at the loading entry point and throughout the scheduler. `RequestPieceLoad()`
 waits only for Blocking; Low and Normal return immediately. Internal queueing
 uses priority solely to rank work and does not wait. Shared textures retain the highest
 promotion received from any parent or direct wait. There is no consumer identity
@@ -412,11 +412,11 @@ requirements and does not expand model containers itself. Callers retain every
 required identity through the wait; it does not acquire consumer references.
 `WaitForSynthMeshes()`
 promotes and waits for queued generations of the specified instances; callers
-start generations with `QueueSynthMesh()`. The loader's `WaitForTexture()` starts
+start generations with `RequestSynthMesh()`. The loader's `WaitForTexture()` starts
 or promotes decoding as needed and waits through upload and retries.
 `lcModel::WaitForAssets()` combines recursive part and synth waits and updates
 bounds, but deliberately ignores their failure results. `EnsureAssetsReady()`
-adds strict failure reporting. `WaitForLoadQueue()` drains all pending work and
+adds strict failure reporting. The loader's `WaitForAllWork()` drains all pending work and
 workers, including unrelated assets; it is not a scoped success check.
 
 ### Choosing an API
@@ -424,15 +424,15 @@ workers, including unrelated assets; it is not a scoped success check.
 | Need | API and lifetime contract |
 | --- | --- |
 | Resolve a name | `FindPiece()` with the intended project and explicit `CreateMissing` / `SearchProjectFolder` arguments. The returned pointer is borrowed; retain it before keeping it beyond its owner's lifetime. |
-| Retain and start ordinary asynchronous work | `LoadPieceInfo()` with `lcPieceLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
-| Retain and synchronously load one identity | `LoadPieceInfo()` with `lcPieceLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and start ordinary asynchronous work | `RequestPieceLoad()` with `lcPieceLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and synchronously load one identity | `RequestPieceLoad()` with `lcPieceLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain without starting work | `AddPieceReference()`, paired with `ReleasePieceInfo()`. This does not make geometry ready. |
 | Wait for an explicit part set | `WaitForPieces()` (use `{ Info }` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
 | Wait for one identity and its container geometry | `EnsurePieceAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
-| Replace/wait for generated geometry | `QueueSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
+| Replace/wait for generated geometry | `RequestSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
 | Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting. The loader handles GPU upload readiness internally. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
-| Synchronize an entire library operation | `WaitForLoadQueue()`; reserve this for operations that truly need all work drained, such as settings changes. Ordinary previews must use scoped waits. |
+| Synchronize an entire library operation | The library calls the loader's `WaitForAllWork()` internally for settings changes. Ordinary previews must use scoped waits. |
 
 Scoped waits may process unrelated completions while pumping publication, but
 their completion condition depends only on the requested assets. They cannot

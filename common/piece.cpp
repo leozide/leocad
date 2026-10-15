@@ -86,7 +86,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 
 	mPieceInfo = Info;
 	if (mPieceInfo)
-		Library->LoadPieceInfo(mPieceInfo, Wait ? lcPieceLoadPriority::Blocking : lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(mPieceInfo, Wait ? lcPieceLoadPriority::Blocking : lcPieceLoadPriority::Normal);
 
 	if (!ID.isEmpty())
 		mID = ID;
@@ -1564,7 +1564,7 @@ void lcPiece::UpdateMesh()
 	mSynthPending = mPieceInfo && mPieceInfo->GetSynthInfo();
 
 	if (mSynthPending)
-		lcGetPiecesLibrary()->QueueSynthMesh(this);
+		lcGetPiecesLibrary()->RequestSynthMesh(this);
 	else
 	{
 		delete mMesh;

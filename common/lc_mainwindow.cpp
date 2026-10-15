@@ -2024,7 +2024,7 @@ void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 	mCurrentPieceInfo = Info;
 
 	if (mCurrentPieceInfo)
-		Library->LoadPieceInfo(mCurrentPieceInfo, lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(mCurrentPieceInfo, lcPieceLoadPriority::Normal);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()

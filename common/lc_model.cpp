@@ -393,7 +393,7 @@ void lcModel::CreatePieceInfo(Project* Project)
 	// until its source lines have been parsed and QueueMeshBuild() runs.
 	if (!Project->DefersModelMeshRequests())
 	{
-		Library->LoadPieceInfo(mPieceInfo, mIsPreview ? lcPieceLoadPriority::Normal : lcPieceLoadPriority::Blocking);
+		Library->RequestPieceLoad(mPieceInfo, mIsPreview ? lcPieceLoadPriority::Normal : lcPieceLoadPriority::Blocking);
 		Library->ReleasePieceInfo(mPieceInfo);
 	}
 
@@ -3418,7 +3418,7 @@ void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& Preview
 
 	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
 	{
-		Library->LoadPieceInfo(InfoTransform.Info, lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(InfoTransform.Info, lcPieceLoadPriority::Normal);
 		Required.push_back(InfoTransform.Info);
 	}
 

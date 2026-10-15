@@ -4,6 +4,7 @@
 #include "lc_application.h"
 #include "lc_file.h"
 #include "lc_meshloader.h"
+#include "lc_mesh.h"
 #include "pieceinf.h"
 #include <locale.h>
 
@@ -1591,7 +1592,7 @@ void lcSynthInfoUniversalJoint::AddParts(lcMemFile& File, lcLibraryMeshData&, co
 	File.WriteBuffer(Line, strlen(Line));
 }
 
-std::unique_ptr<lcLibraryMeshData> lcSynthInfo::BuildMeshData(const std::vector<lcPieceControlPoint>& ControlPoints, const std::atomic_bool& Cancelled) const
+std::unique_ptr<lcMesh> lcSynthInfo::BuildMesh(const std::vector<lcPieceControlPoint>& ControlPoints, const std::atomic_bool& Cancelled) const
 {
 	if (Cancelled.load(std::memory_order_relaxed))
 		return nullptr;
@@ -1603,10 +1604,10 @@ std::unique_ptr<lcLibraryMeshData> lcSynthInfo::BuildMeshData(const std::vector<
 	if (Cancelled.load(std::memory_order_relaxed))
 		return nullptr;
 
-	std::unique_ptr<lcLibraryMeshData> MeshData(new lcLibraryMeshData);
+	lcLibraryMeshData MeshData;
 	lcMemFile File; // todo: rewrite this to pass the parts directly
 
-	AddParts(File, *MeshData, Sections, &Cancelled);
+	AddParts(File, MeshData, Sections, &Cancelled);
 
 	if (Cancelled.load(std::memory_order_relaxed))
 		return nullptr;
@@ -1614,14 +1615,11 @@ std::unique_ptr<lcLibraryMeshData> lcSynthInfo::BuildMeshData(const std::vector<
 	File.WriteU8(0);
 	File.Seek(0, SEEK_SET);
 
-	lcMeshLoader MeshLoader(*MeshData, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
+	lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
 	MeshLoader.SetCancellationFlag(&Cancelled);
 
-	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED) && !MeshData->IsEmpty() && !Cancelled.load(std::memory_order_relaxed))
-	{
-		MeshData->SetMeshLoader(nullptr);
-		return MeshData;
-	}
+	if (MeshLoader.LoadMesh(File, LC_MESHDATA_SHARED) && !MeshData.IsEmpty() && !Cancelled.load(std::memory_order_relaxed))
+		return std::unique_ptr<lcMesh>(MeshData.CreateMesh(&Cancelled));
 
 	return nullptr;
 }

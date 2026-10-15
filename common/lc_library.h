@@ -222,7 +222,7 @@ public:
 	void ClearPieceLoadError(const PieceInfo* Info);
 	bool LoadBuiltinPieces();
 	lcPieceSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
-	// Worker build service: returns private CPU data/errors without publishing asset state.
+	// Worker build service: returns a converted private mesh or an error without publishing asset state.
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
 	void SaveBuiltPieceCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
 

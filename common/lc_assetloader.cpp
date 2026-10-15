@@ -14,7 +14,7 @@ constexpr QEvent::Type lcAssetLoaderCompletionEvent = static_cast<QEvent::Type>(
 
 lcPieceBuildResult::~lcPieceBuildResult() = default;
 
-// Normal part flow: enqueue -> build -> resolve colors -> convert -> settle textures -> publish -> notify.
+// Normal part flow: enqueue -> build and convert -> finalize sections -> settle textures -> publish -> notify.
 // Workers own private build data. Publication and deferred notifications stay on the UI thread.
 lcAssetLoader::lcAssetLoader(lcPiecesLibrary* Library)
 	: mLibrary(Library)
@@ -265,16 +265,7 @@ void lcAssetLoader::RunWorker()
 		{
 			Completed.RequestedPiece = RequestedPiece;
 
-			if (RequestedPiece->MeshData)
-			{
-				Completed.PieceResult.Mesh.reset(RequestedPiece->MeshData->CreateMesh(nullptr));
-				RequestedPiece->MeshData.reset();
-
-				if (!Completed.PieceResult.Mesh)
-					Completed.PieceResult.Error = tr("Could not prepare piece %1 for rendering.").arg(RequestedPiece->Source.FileName);
-			}
-			else
-				Completed.PieceResult = mLibrary->BuildPieceData(RequestedPiece->Source);
+			Completed.PieceResult = mLibrary->BuildPieceData(RequestedPiece->Source);
 		}
 		else if (RequestedTexture)
 		{
@@ -285,15 +276,7 @@ void lcAssetLoader::RunWorker()
 		{
 			Completed.RequestedSynth = RequestedSynth;
 
-			if (RequestedSynth->Cancelled.load(std::memory_order_relaxed))
-				RequestedSynth->MeshData.reset();
-			else if (RequestedSynth->MeshData)
-			{
-				Completed.SynthMesh.reset(RequestedSynth->MeshData->CreateMesh(&RequestedSynth->Cancelled));
-				RequestedSynth->MeshData.reset();
-			}
-			else
-				Completed.SynthMeshData = RequestedSynth->SynthInfo->BuildMeshData(RequestedSynth->ControlPoints, RequestedSynth->Cancelled);
+			Completed.SynthMesh = RequestedSynth->SynthInfo->BuildMesh(RequestedSynth->ControlPoints, RequestedSynth->Cancelled);
 		}
 
 		{
@@ -459,42 +442,13 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 	RequestedPiece->Error = Completed.PieceResult.Error;
 	RequestedPiece->EmptyGeometry = Completed.PieceResult.EmptyGeometry;
 
-	if (RequestedPiece->Error.isEmpty())
+	if (RequestedPiece->Error.isEmpty() && Completed.PieceResult.Mesh)
 	{
-		if (Completed.PieceResult.FromCache && !Completed.PieceResult.Mesh)
-		{
-			// Rebuild a corrupt cache privately on a worker, then use the normal commit path.
-			RequestedPiece->Source.SkipCache = true;
-			Info->mState = lcPieceInfoState::Queued;
+		RequestedPiece->StagedMesh = std::move(Completed.PieceResult.Mesh);
 
-			QMutexLocker QueueLock(&mQueueMutex);
+		RequestedPiece->StagedMesh->FinalizeSections();
 
-			mPieceQueue.push_back(RequestedPiece);
-			StartWorkersLocked();
-
-			return;
-		}
-		else if (Completed.PieceResult.MeshData)
-		{
-			// Queue the expensive geometry conversion; colors are finalized after it completes.
-			RequestedPiece->MeshData = std::move(Completed.PieceResult.MeshData);
-			Info->mState = lcPieceInfoState::Queued;
-
-			QMutexLocker QueueLock(&mQueueMutex);
-
-			mPieceQueue.push_back(RequestedPiece);
-			StartWorkersLocked();
-
-			return;
-		}
-		else if (Completed.PieceResult.Mesh)
-		{
-			RequestedPiece->StagedMesh = std::move(Completed.PieceResult.Mesh);
-
-			RequestedPiece->StagedMesh->FinalizeSections();
-
-			RequestedPiece->SaveCache = !Completed.PieceResult.FromCache;
-		}
+		RequestedPiece->SaveCache = !Completed.PieceResult.FromCache;
 	}
 
 	// A private mesh cannot be published until all its declared textures settle.
@@ -532,19 +486,6 @@ void lcAssetLoader::ProcessSynthCompletion(Completion& Completed)
 	if (Stale)
 	{
 		RequestedSynth->Terminal = true;
-		return;
-	}
-
-	if (Completed.SynthMeshData)
-	{
-		// Queue the expensive geometry conversion; colors are finalized after it completes.
-		RequestedSynth->MeshData = std::move(Completed.SynthMeshData);
-
-		QMutexLocker QueueLock(&mQueueMutex);
-
-		mSynthQueue.push_back(RequestedSynth);
-		StartWorkersLocked();
-
 		return;
 	}
 
@@ -1314,7 +1255,7 @@ void lcAssetLoader::CancelPieceLoad(PieceInfo* Info)
 
 void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 {
-	// Remove queued work immediately; running synth phases notice cancellation cooperatively.
+	// Remove queued work immediately; running synth builds notice cancellation cooperatively.
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	mSynthPieces.erase(Piece);
@@ -1428,18 +1369,11 @@ void lcAssetLoader::PauseQueuedWork()
 	{
 		const std::shared_ptr<PieceRequest>& RequestedPiece = Entry.second;
 
-		if (RequestedPiece->MeshData)
-		{
-			RequestedPiece->MeshData.reset();
-			RequestedPiece->Info->mState = lcPieceInfoState::Queued;
-		}
-
 		if (!RequestedPiece->StagedMesh)
 			continue;
 
 		RequestedPiece->StagedMesh.reset();
 		RequestedPiece->Info->mState = lcPieceInfoState::Queued;
-		RequestedPiece->AwaitingCompletion = false;
 		mPieceQueue.push_back(RequestedPiece);
 	}
 
@@ -1448,10 +1382,9 @@ void lcAssetLoader::PauseQueuedWork()
 	{
 		const std::shared_ptr<SynthRequest>& RequestedSynth = Entry.second;
 
-		if (!RequestedSynth->StagedMesh && !RequestedSynth->MeshData)
+		if (!RequestedSynth->StagedMesh)
 			continue;
 
-		RequestedSynth->MeshData.reset();
 		RequestedSynth->StagedMesh.reset();
 
 		if (std::find(mSynthQueue.begin(), mSynthQueue.end(), RequestedSynth) == mSynthQueue.end())
@@ -1466,12 +1399,7 @@ void lcAssetLoader::ResumeQueuedWork()
 	QMutexLocker QueueLock(&mQueueMutex);
 
 	for (const std::shared_ptr<PieceRequest>& RequestedPiece : mPieceQueue)
-	{
-		const bool SkipCache = RequestedPiece->Source.SkipCache;
-
 		RequestedPiece->Source = mLibrary->SnapshotPieceSource(RequestedPiece->Info);
-		RequestedPiece->Source.SkipCache = SkipCache;
-	}
 
 	mPaused = false;
 	StartWorkersLocked();

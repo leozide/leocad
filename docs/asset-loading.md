@@ -229,13 +229,13 @@ flowchart LR
     end
 ```
 
-The diagram shows the normal paths. Mesh parsing and conversion are separate
-worker phases, so a part can return to `Queued` between phases. Invalidation or
-unloading resets readiness; cancellation and stale-result disposal also have
-request-level terminal flags, independent of the published asset state.
-Queued piece and synth requests use the presence of `MeshData` to select
-conversion; an empty pointer selects parsing or generation. `AwaitingCompletion` tracks
-outstanding worker phases through completion processing.
+The diagram shows the normal paths. Parsing or synth generation and geometry
+conversion run consecutively in one worker job. Intermediate `lcLibraryMeshData`
+stays local to the library's `BuildPieceData()` or the synth definition's `BuildMesh()`;
+both return a private converted mesh for UI-thread finalization.
+Invalidation or unloading resets readiness; cancellation and stale-result disposal
+also have request-level terminal flags, independent of the published asset state.
+`AwaitingCompletion` tracks an outstanding worker job through completion processing.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
 textures are ready. Valid empty geometry may also settle successfully. A missing
@@ -296,8 +296,7 @@ sequenceDiagram
     Library->>Library: Acquire consumer reference
     Library->>Loader: Queue/promote
     Loader->>Worker: Immutable source snapshot
-    Worker-->>Loader: Private mesh data or cached mesh
-    Loader->>Worker: Convert source mesh data
+    Worker->>Worker: Parse/generate and convert, or read cached mesh
     Worker-->>Loader: Private mesh
     Loader->>Loader: Set section colors, update flags, and sort sections
     Loader->>Loader: Resolve textures and queue decode if needed
@@ -316,7 +315,7 @@ indices. Fresh pieces, synths, and cached meshes all use
 `FinalizeSections()` on the UI thread to resolve color indices, refresh
 solid/translucent/default flags, and sort sections using the current palette.
 Workers build geometry without reading global colors or keeping palette snapshots.
-A corrupt mesh cache is rebuilt privately. Failed builds are not saved
+A corrupt mesh cache falls back to source parsing in the same worker job. Failed builds are not saved
 as successful mesh caches. Temporary disk textures are scoped by their resolved
 file identity, so same-name PNGs in different project directories remain distinct.
 
@@ -540,7 +539,7 @@ The preferences dialog saves a changed color-config path before this setter runs
 so simultaneous stud/color changes load the new configuration once. Color-only
 changes call `LoadColors()` directly.
 
-Stud-style changes pause dispatch, finish running phases, discard staging built
+Stud-style changes pause dispatch, finish running jobs, discard staging built
 with old settings, refresh sources, and rebuild affected published meshes and
 generated geometry. The existing style-change path resumes and drains work.
 Published ordinary meshes are rebuilt selectively using `HasStyleStud`, including

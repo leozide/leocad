@@ -8,7 +8,6 @@ class PieceInfo;
 class lcPiece;
 class lcMesh;
 class lcSynthInfo;
-class lcLibraryMeshData;
 class lcTexture;
 enum class lcTextureLoadError;
 
@@ -22,7 +21,6 @@ struct lcPieceSourceSnapshot
 	std::map<QString, std::shared_ptr<const lcEmbeddedData>> EmbeddedData;
 	QStringList InlineMeshLines;
 	bool InlineModel = false;
-	bool SkipCache = false;
 	lcZipFileType ZipFileType = lcZipFileType::Count;
 	int ZipFileIndex = -1;
 	lcStudStyle StudStyle = lcStudStyle::Plain;
@@ -40,7 +38,6 @@ struct lcPieceBuildResult
 	lcPieceBuildResult(const lcPieceBuildResult&) = delete;
 	lcPieceBuildResult& operator=(const lcPieceBuildResult&) = delete;
 
-	std::unique_ptr<lcLibraryMeshData> MeshData;
 	std::unique_ptr<lcMesh> Mesh;
 	bool FromCache = false;
 	bool EmptyGeometry = false;
@@ -100,18 +97,17 @@ public:
 
 private:
 	// Owns one PieceInfo load hold through completion and deferred notification.
-	// Parsing and conversion are separate worker phases; textures settle before publication.
+	// One worker job builds and converts geometry; textures settle before publication.
 	struct PieceRequest
 	{
 		PieceInfo* Info;
 		lcPieceSourceSnapshot Source;
 		lcPieceLoadPriority LoadPriority;
 		qint64 EnqueuedAt;
-		bool AwaitingCompletion = false;   // A worker phase is outstanding, including its completion.
+		bool AwaitingCompletion = false;   // A worker job is outstanding, including its completion.
 		bool Obsolete = false;  // Its result must not publish, even if the build succeeds.
 		bool Terminal = false;  // The wait has settled; this does not imply success.
 		bool Succeeded = false; // Published successfully, including valid empty geometry.
-		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
 		std::unique_ptr<lcMesh> StagedMesh;
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
@@ -142,7 +138,6 @@ private:
 		bool AwaitingCompletion = false;
 		std::atomic_bool Cancelled = false;
 		bool Terminal = false;
-		std::unique_ptr<lcLibraryMeshData> MeshData; // Present when the next worker phase is mesh conversion.
 		std::unique_ptr<lcMesh> StagedMesh;
 		QString Error;
 	};
@@ -159,7 +154,6 @@ private:
 		std::shared_ptr<TextureRequest> RequestedTexture;
 		lcTextureBuildResult TextureResult;
 		std::shared_ptr<SynthRequest> RequestedSynth;
-		std::unique_ptr<lcLibraryMeshData> SynthMeshData;
 		std::unique_ptr<lcMesh> SynthMesh;
 	};
 
@@ -187,7 +181,7 @@ private:
 	void StartWorkersLocked();
 	void RunWorker();
 
-	// UI-thread completion handling: colors, conversion, texture dependencies, publication.
+	// UI-thread completion handling: colors, texture dependencies, publication.
 	bool ProcessCompletions();
 	void ProcessPieceCompletion(Completion& Completed);
 	void ProcessSynthCompletion(Completion& Completed);
@@ -214,24 +208,30 @@ private:
 	void CancelAndDrain();
 
 	lcPiecesLibrary* const mLibrary;
+
 	// Protects scheduling maps/queues, worker counts, and result handoff.
 	// Private build data passes between worker and UI phases through completions.
 	QMutex mQueueMutex;
 	QWaitCondition mResultReady;
+
 	PieceRequestMap mPieceRequests;
 	TextureRequestMap mTextureRequests;
 	SynthRequestMap mSynthRequests;
+
 	// UI-thread diagnostics and instance tracking; these do not own the pieces.
 	std::unordered_map<const lcPiece*, QString> mSynthErrors;
 	std::unordered_set<lcPiece*> mSynthPieces;
-	// Pending worker phases remain here while paused; mPaused prevents dispatch.
+
 	std::deque<std::shared_ptr<PieceRequest>> mPieceQueue;
 	std::deque<std::shared_ptr<TextureRequest>> mTextureQueue;
 	std::deque<std::shared_ptr<SynthRequest>> mSynthQueue;
+
 	std::deque<Completion> mCompletions;
+
 	// UI-thread only; public signals are deferred until outside synchronous waits.
 	std::deque<PieceNotification> mPieceNotifications;
 	std::deque<SynthNotification> mSynthNotifications;
+
 	std::vector<QFuture<void>> mFutures;
 	int mActiveWorkers = 0;
 	bool mPaused = false;

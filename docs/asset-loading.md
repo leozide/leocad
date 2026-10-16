@@ -234,8 +234,13 @@ conversion run consecutively in one worker job. Intermediate `lcLibraryMeshData`
 stays local to the library's `BuildPieceData()` or the synth definition's `BuildMesh()`;
 both return a private converted mesh for UI-thread finalization.
 Invalidation or unloading resets readiness; cancellation and stale-result disposal
-also have request-level terminal flags, independent of the published asset state.
-`AwaitingCompletion` tracks an outstanding worker job through completion processing.
+also have finished request states, independent of the published asset state.
+Requests live only in the piece, texture, and synth maps. Workers scan entries
+whose scheduling state is `Queued`, then mark the selected request
+`AwaitingCompletion`. UI-thread completion processing moves it to
+`AwaitingPublication`, covering texture dependencies and upload retries. Completed
+requests leave the maps with state `Succeeded`, `Failed`, or `Cancelled`.
+Obsolete-result suppression and the synth worker cancellation token remain separate.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
 textures are ready. Valid empty geometry may also settle successfully. A missing
@@ -527,7 +532,7 @@ open discards the candidate. A successful switch releases old owners, cancels
 old-only queued work, and preserves shared asset identities and requests. Neither
 path demotes request priorities.
 
-Pending jobs remain in the normal piece, texture, and synth queues while paused;
+Pending jobs remain marked `Queued` in their request maps while paused;
 `mPaused` prevents dispatch. Resume refreshes queued piece source snapshots before
 allowing workers to take jobs again.
 
@@ -595,8 +600,8 @@ suite.
 - Keep workers on copied source/settings/control-point data and private results.
   Published meshes, texture pointers, global color registration, GL upload,
   model mutations, and consumer notifications belong on the UI thread.
-- Protect queue decisions with the loader mutex; release it before publication,
-  GL upload, or settlement callbacks. Condition waits release the queue mutex
+- Protect scheduling decisions with the request mutex; release it before publication,
+  GL upload, or settlement callbacks. Condition waits release the request mutex
   while sleeping. Do not hold library locks needed by workers while draining.
 - Preserve in-flight holds through stale-result disposal and deferred notification.
   Validate request identity and cancellation before publishing; deleting an owner must

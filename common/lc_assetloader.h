@@ -96,48 +96,59 @@ public:
 	void ResumeQueuedWork();
 
 private:
+	// Request lifecycle; obsolete results and cooperative cancellation are tracked separately.
+	enum class RequestState
+	{
+		Queued,
+		AwaitingCompletion, // A worker job or its completion is outstanding.
+		AwaitingPublication, // UI-thread completion, texture dependencies, or upload retries.
+		Succeeded,
+		Failed,
+		Cancelled
+	};
+
+	struct RequestBase
+	{
+		lcPieceLoadPriority LoadPriority;
+		qint64 QueuedAt;
+		RequestState State = RequestState::Queued;
+
+		bool IsFinished() const
+		{
+			return State == RequestState::Succeeded || State == RequestState::Failed || State == RequestState::Cancelled;
+		}
+	};
+
 	// Owns one PieceInfo load hold through completion and deferred notification.
 	// One worker job builds and converts geometry; textures settle before publication.
-	struct PieceRequest
+	struct PieceRequest : RequestBase
 	{
 		PieceInfo* Info;
 		lcPieceSourceSnapshot Source;
-		lcPieceLoadPriority LoadPriority;
-		qint64 EnqueuedAt;
-		bool AwaitingCompletion = false;   // A worker job is outstanding, including its completion.
-		bool Obsolete = false;  // Its result must not publish, even if the build succeeds.
-		bool Terminal = false;  // The wait has settled; this does not imply success.
-		bool Succeeded = false; // Published successfully, including valid empty geometry.
 		std::unique_ptr<lcMesh> StagedMesh;
+		bool Obsolete = false;  // Its result must not publish, even if the build succeeds.
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
 		QString Error;
 	};
 
 	// Holds a texture reference through CPU decoding and UI-thread upload/retries.
-	struct TextureRequest
+	struct TextureRequest : RequestBase
 	{
 		lcTexture* Texture;
 		lcFileSource Source;
-		lcPieceLoadPriority LoadPriority;
-		qint64 EnqueuedAt;
-		bool AwaitingCompletion = false;
 		int UploadAttempts = 0;
 		qint64 RetryAt = 0;
 	};
 
 	// The instance cancels before destruction; workers use the copied definition/controls.
 	// Cancelled is also checked during expensive generation and conversion.
-	struct SynthRequest
+	struct SynthRequest : RequestBase
 	{
 		lcPiece* Piece;
 		std::shared_ptr<const lcSynthInfo> SynthInfo;
 		std::vector<lcPieceControlPoint> ControlPoints;
-		lcPieceLoadPriority LoadPriority;
-		qint64 EnqueuedAt;
-		bool AwaitingCompletion = false;
 		std::atomic_bool Cancelled = false;
-		bool Terminal = false;
 		std::unique_ptr<lcMesh> StagedMesh;
 		QString Error;
 	};
@@ -172,12 +183,12 @@ private:
 	};
 
 	// Queue and promote requests. Workers read copied sources and private build data.
-	// Acquires mQueueMutex internally; callers must not already hold it.
+	// Acquires mRequestMutex internally; callers must not already hold it.
 	void QueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
-	// Caller holds mQueueMutex.
+	// Caller holds mRequestMutex.
 	void PromotePiecePriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority);
 	void QueueTexture(lcTexture* Texture, lcPieceLoadPriority LoadPriority);
-	// Caller holds mQueueMutex.
+	// Caller holds mRequestMutex.
 	void StartWorkersLocked();
 	void RunWorker();
 
@@ -186,8 +197,7 @@ private:
 	void ProcessPieceCompletion(Completion& Completed);
 	void ProcessSynthCompletion(Completion& Completed);
 	void ProcessTextureCompletion(Completion& Completed);
-	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const std::vector<QString>& SearchDirectories,
-		const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcPieceLoadPriority LoadPriority, QString& Error);
+	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcPieceLoadPriority LoadPriority, QString& Error);
 	static bool MeshTexturesSettled(const lcMesh& Mesh, QString& Error);
 	static QString TextureFailureMessage(const lcTexture* Texture);
 	void UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
@@ -200,7 +210,7 @@ private:
 	// Notify only from the event handler, after synchronous waits have returned.
 	void DispatchNotifications();
 	bool event(QEvent* Event) override;
-	// Caller holds mQueueMutex; the condition wait releases it and reacquires it on return.
+	// Caller holds mRequestMutex; the condition wait releases it and reacquires it on return.
 	void WaitForResultsLocked();
 	bool WaitForPieceRequest(PieceInfo* Info);
 
@@ -209,9 +219,9 @@ private:
 
 	lcPiecesLibrary* const mLibrary;
 
-	// Protects scheduling maps/queues, worker counts, and result handoff.
+	// Protects request maps/states, worker counts, and result handoff.
 	// Private build data passes between worker and UI phases through completions.
-	QMutex mQueueMutex;
+	QMutex mRequestMutex;
 	QWaitCondition mResultReady;
 
 	PieceRequestMap mPieceRequests;
@@ -221,10 +231,6 @@ private:
 	// UI-thread diagnostics and instance tracking; these do not own the pieces.
 	std::unordered_map<const lcPiece*, QString> mSynthErrors;
 	std::unordered_set<lcPiece*> mSynthPieces;
-
-	std::deque<std::shared_ptr<PieceRequest>> mPieceQueue;
-	std::deque<std::shared_ptr<TextureRequest>> mTextureQueue;
-	std::deque<std::shared_ptr<SynthRequest>> mSynthQueue;
 
 	std::deque<Completion> mCompletions;
 

@@ -255,6 +255,8 @@ public:
 	lcResult<void> LoadPrimitive(lcLibraryPrimitive* Primitive);
 
 	bool SupportsStudStyle() const;
+
+	// Drain running jobs before changing settings; queue replacement meshes for asynchronous loading.
 	void UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 
 	lcStudStyle GetStudStyle() const
@@ -334,6 +336,10 @@ protected:
 	// Each project maps its local filenames to PieceInfo pointers. This map tracks the
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
+
+	// UI-thread live synth instances, including completed and failed generations.
+	// Instances unregister before destruction; the library does not own them.
+	std::unordered_set<lcPiece*> mSynthPieces;
 
 	// Protects identity/reference bookkeeping.
 	// Recursive because library release and lookup paths can reenter this lock.

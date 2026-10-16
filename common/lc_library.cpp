@@ -73,6 +73,7 @@ void lcPiecesLibrary::Unload()
 		mThumbnailManager->Clear();
 
 	mAssetLoader.reset();
+	mSynthPieces.clear();
 
 	mPieceErrorMutex.lock();
 	mFailedPartErrors.clear();
@@ -1683,11 +1684,22 @@ bool lcPiecesLibrary::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 
 void lcPiecesLibrary::RequestSynthMesh(lcPiece* Piece)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	if (Piece->mPieceInfo && Piece->mPieceInfo->GetSynthInfo())
+		mSynthPieces.insert(Piece);
+	else
+		mSynthPieces.erase(Piece);
+
 	mAssetLoader->RequestSynthMesh(Piece);
 }
 
 void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	mSynthPieces.erase(Piece);
+
 	if (mAssetLoader)
 		mAssetLoader->CancelSynthMesh(Piece);
 }
@@ -1704,7 +1716,12 @@ QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
 
 void lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
 {
-	mAssetLoader->RebuildModelPiece(Info);
+	Q_ASSERT(QThread::currentThread() == thread());
+	Q_ASSERT(Info->IsModel());
+
+	mAssetLoader->InvalidatePieceLoad(Info);
+	Info->ReleaseMesh();
+	mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Normal);
 }
 
 void lcPiecesLibrary::InvalidatePieceLoad(PieceInfo* Info)
@@ -2321,11 +2338,12 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	mLoadMutex.unlock();
 
-	mAssetLoader->RebuildSynthMeshes();
+	const std::vector<lcPiece*> SynthPieces(mSynthPieces.begin(), mSynthPieces.end());
+
+	for (lcPiece* Piece : SynthPieces)
+		Piece->RefreshGeneratedMesh();
 
 	mAssetLoader->ResumeQueuedWork();
-
-	mAssetLoader->WaitForAllWork();
 }
 
 bool lcPiecesLibrary::IsPrimitive(const char* Name) const

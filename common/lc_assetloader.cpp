@@ -138,7 +138,6 @@ void lcAssetLoader::RequestSynthMesh(lcPiece* Piece)
 	if (mStopping)
 		return;
 
-	mSynthPieces.insert(Piece);
 	mSynthRequests.emplace(Piece, RequestedSynth);
 
 	DispatchJobs();
@@ -1064,29 +1063,6 @@ QString lcAssetLoader::GetSynthMeshError(const lcPiece* Piece) const
 	return It != mSynthErrors.end() ? It->second : QString();
 }
 
-void lcAssetLoader::RebuildModelPiece(PieceInfo* Info)
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-	Q_ASSERT(Info->IsModel());
-
-	if (Info->IsLoading())
-		WaitForPieceRequest(Info);
-
-	Info->ReleaseMesh();
-	mLibrary->ClearPieceLoadError(Info);
-
-	if (!Info->GetModel()->HasDirectGeometry())
-	{
-		Info->mState = lcPieceInfoState::Loaded;
-		emit mLibrary->AssetRequestsChanged();
-		return;
-	}
-
-	Info->mState = lcPieceInfoState::Unloaded;
-
-	QueuePieceLoad(Info, lcPieceLoadPriority::Normal);
-}
-
 void lcAssetLoader::InvalidatePieceLoad(PieceInfo* Info)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
@@ -1126,7 +1102,6 @@ void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 	// Remove queued work immediately; running synth builds notice cancellation cooperatively.
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	mSynthPieces.erase(Piece);
 	mSynthErrors.erase(Piece);
 
 	for (SynthNotification& Pending : mSynthNotifications)
@@ -1207,16 +1182,6 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 	}
 }
 
-void lcAssetLoader::RebuildSynthMeshes()
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	const std::vector<lcPiece*> Pieces(mSynthPieces.begin(), mSynthPieces.end());
-
-	for (lcPiece* Piece : Pieces)
-		Piece->RefreshGeneratedMesh();
-}
-
 void lcAssetLoader::PauseQueuedWork()
 {
 	Q_ASSERT(QThread::currentThread() == thread());
@@ -1285,7 +1250,6 @@ void lcAssetLoader::Shutdown()
 	std::deque<std::shared_ptr<TextureRequest>> CancelledTextures;
 
 	mStopping = true;
-	mSynthPieces.clear();
 	mSynthErrors.clear();
 
 	for (auto It = mPieceRequests.begin(); It != mPieceRequests.end();)

@@ -382,7 +382,10 @@ permit a later request.
 
 Synth meshes are **per `lcPiece` instance**, separate from the shared library
 mesh. `RequestSynthMesh()` copies control points and retains the shared synth
-definition. Replacing or deleting the piece cancels its old request; workers
+definition. The library tracks live synth instances, including completed and failed
+generations, so settings changes can refresh them. Instances unregister before
+destruction; the loader owns pending requests and generation errors.
+Replacing or deleting the piece cancels its old request; workers
 check an atomic cancellation flag and stale results cannot replace newer meshes.
 Initial generation displays a cube. Control-point edits retain the previous
 generated mesh until replacement settles; that older mesh does not satisfy a
@@ -433,8 +436,8 @@ start generations with `RequestSynthMesh()`. The loader's `WaitForTexture()` sta
 or promotes decoding as needed and waits through upload and retries.
 `lcModel::WaitForAssets()` combines recursive part and synth waits and updates
 bounds, but deliberately ignores their failure results. `EnsureAssetsReady()`
-adds strict failure reporting. The loader's `WaitForAllWork()` drains all pending work and
-workers, including unrelated assets; it is not a scoped success check.
+adds strict failure reporting. During shutdown, the loader's private
+`WaitForAllWork()` drains pending work and joins workers; it is not a scoped success check.
 
 ### Choosing an API
 
@@ -449,7 +452,6 @@ workers, including unrelated assets; it is not a scoped success check.
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
 | Replace/wait for generated geometry | `RequestSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
 | Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting. The loader handles GPU upload readiness internally. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
-| Synchronize an entire library operation | The library calls the loader's `WaitForAllWork()` internally for settings changes. Ordinary previews must use scoped waits. |
 
 Scoped waits may process unrelated completions while pumping publication, but
 their completion condition depends only on the requested assets. They cannot
@@ -548,14 +550,15 @@ dispatching jobs again.
 The library constructor receives the effective startup stud settings; application
 color preferences are applied before loading sources and colors, including the
 built-in fallback library. `UpdateStudStyleAndColors()` handles runtime changes and always
-rebuilds affected geometry and drains the resulting work when settings change.
+queues affected geometry for asynchronous rebuilding when settings change.
 The preferences dialog saves a changed color-config path before this setter runs,
 so simultaneous stud/color changes load the new configuration once. Color-only
 changes call `LoadColors()` directly.
 
 Stud-style changes pause dispatch, finish running jobs, discard staging built
 with old settings, refresh sources, and rebuild affected published meshes and
-generated geometry. The existing style-change path resumes and drains work.
+generated geometry. The library refreshes its registered synth instances and resumes
+dispatch without waiting for replacements or previously queued work to finish.
 Published ordinary meshes are rebuilt selectively using `HasStyleStud`, including
 flags propagated from nested includes; a style change does not indiscriminately
 invalidate every library mesh. Pending snapshots must still be refreshed so

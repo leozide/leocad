@@ -78,24 +78,27 @@ public:
 	// Call RequestSynthMesh() to start a generation; the caller keeps the instances alive through the wait.
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 
-	// Start or promote decoding as needed, then wait through upload and retries. The caller retains the texture.
-	bool WaitForTexture(lcTexture* Texture);
-
-	// Drain all pending work, including unrelated assets. Completion does not imply success.
-	void WaitForAllWork();
-
-	// True while piece, texture, or generated-mesh requests or worker completions remain unsettled.
-	// Includes paused work and upload retries; deferred notifications alone do not count.
-	bool HasPendingWork();
+	// Cancel this instance's generation and suppress its deferred notifications.
+	// Running jobs stop cooperatively; any published mesh is kept.
+	void CancelSynthMesh(lcPiece* Piece);
 
 	// Returns this instance's recorded generation error, or an empty string if none is recorded.
 	// An empty string does not establish readiness; check the generated mesh separately.
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 
-	void RebuildModelPiece(PieceInfo* Info);
-	void CancelSynthMesh(lcPiece* Piece);
-	void RebuildSynthMeshes();
+	// Start or promote decoding as needed, then wait through upload and retries. The caller retains the texture.
+	bool WaitForTexture(lcTexture* Texture);
+
+	// True while piece, texture, or generated-mesh requests or worker completions remain unsettled.
+	// Includes paused work and upload retries; deferred notifications alone do not count.
+	bool HasPendingWork();
+
+	// Pause dispatch and drain assigned jobs before shared library data changes.
+	// Discard meshes still awaiting textures so they can be rebuilt with the new settings.
 	void PauseQueuedWork();
+
+	// Refresh queued piece source snapshots and resume dispatch with the current settings.
+	// Does not wait for pending work to finish.
 	void ResumeQueuedWork();
 
 private:
@@ -232,33 +235,41 @@ private:
 	// Drop queued texture work and upload retries that have no remaining consumers.
 	void CancelUnusedTextureRequests();
 
+	// Drain pending work and join workers during shutdown; completion does not imply success.
+	void WaitForAllWork();
+
 	// Stop dispatch, cancel pending work, join workers, and release loader-owned references.
 	void Shutdown();
 
 	lcPiecesLibrary* const mLibrary;
 
-	// Only completion handoff needs a mutex; scheduling state and job counts are UI-thread owned.
-	QMutex mCompletionMutex;
-	QWaitCondition mCompletionReady;
-
+	// UI-thread scheduling state.
 	PieceRequestMap mPieceRequests;
 	TextureRequestMap mTextureRequests;
 	SynthRequestMap mSynthRequests;
 
-	// UI-thread diagnostics and instance tracking; these do not own the pieces.
-	std::unordered_map<const lcPiece*, QString> mSynthErrors;
-	std::unordered_set<lcPiece*> mSynthPieces;
+	// UI-thread job bookkeeping; futures may include finished jobs awaiting cleanup.
+	std::vector<QFuture<void>> mFutures;
+	int mActiveJobs = 0; // Includes completed jobs until the UI consumes their results.
 
+	// Temporarily suspend dispatch while shared library data changes.
+	bool mPaused = false;
+
+	// Permanently stop accepting work and discard results during shutdown.
+	bool mStopping = false;
+
+	// Worker-to-UI result handoff; the mutex protects the completion queue.
+	// Workers wake synchronous UI waits when they enqueue a completion.
+	QMutex mCompletionMutex;
+	QWaitCondition mCompletionReady;
 	std::deque<Completion> mCompletions;
 
 	// UI-thread only; public signals are deferred until outside synchronous waits.
 	std::deque<PieceNotification> mPieceNotifications;
 	std::deque<SynthNotification> mSynthNotifications;
 
-	std::vector<QFuture<void>> mFutures;
-	int mActiveJobs = 0; // Includes completed jobs until the UI consumes their results.
-	bool mPaused = false;
-	bool mStopping = false;
+	// UI-thread errors for failed synth generations.
+	std::unordered_map<const lcPiece*, QString> mSynthErrors;
 
 	Q_DECLARE_TR_FUNCTIONS(lcAssetLoader)
 };

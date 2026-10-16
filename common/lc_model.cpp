@@ -275,7 +275,7 @@ lcModel::~lcModel()
 				gMainWindow->SetCurrentPieceInfo(nullptr);
 
 			// Keep the name indexed while placements still reference the deleted model.
-			lcGetPiecesLibrary()->InvalidatePiece(mPieceInfo);
+			lcGetPiecesLibrary()->InvalidatePieceLoad(mPieceInfo);
 			mPieceInfo->DetachContainer();
 			mPieceInfo->SetFailed(tr("Model '%1' was deleted.").arg(QString::fromLatin1(mPieceInfo->mFileName)));
 			lcGetPiecesLibrary()->NotifyConsumersChanged();

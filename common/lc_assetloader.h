@@ -44,7 +44,7 @@ struct lcPieceBuildResult
 	QString Error;
 };
 
-// Owned by lcPiecesLibrary. UI-thread entry points schedule private worker builds;
+// Owned by lcPiecesLibrary. Instance methods run on the UI thread and schedule private worker builds;
 // UI-thread completion processing resolves colors, uploads textures, and publishes meshes.
 // See docs/asset-loading.md for readiness, ownership, and caller policies.
 class lcAssetLoader : public QObject
@@ -65,6 +65,10 @@ public:
 	// Called when the last consumer releases the piece. Cancels queued work;
 	// running work finishes privately and is discarded if the piece is still unused.
 	void CancelPieceLoad(PieceInfo* Info);
+
+	// Discard pending load results and notifications, reset the state to Unloaded, and clear errors.
+	// Keeps the current mesh; the caller decides whether to unload it or request another load.
+	void InvalidatePieceLoad(PieceInfo* Info);
 
 	// Build this instance's generated mesh from its current control points in the background.
 	// Cancel any older request and keep the previous mesh visible while the replacement is built.
@@ -89,14 +93,13 @@ public:
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 
 	void RebuildModelPiece(PieceInfo* Info);
-	void InvalidatePiece(PieceInfo* Info);
 	void CancelSynthMesh(lcPiece* Piece);
 	void RebuildSynthMeshes();
 	void PauseQueuedWork();
 	void ResumeQueuedWork();
 
 private:
-	// Request lifecycle; obsolete results and cooperative cancellation are tracked separately.
+	// UI-thread request lifecycle; synth workers use a separate cooperative cancellation token.
 	enum class RequestState
 	{
 		Queued,
@@ -126,7 +129,6 @@ private:
 		PieceInfo* Info;
 		lcPieceSourceSnapshot Source;
 		std::unique_ptr<lcMesh> StagedMesh;
-		bool Obsolete = false;  // Its result must not publish, even if the build succeeds.
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
 		QString Error;
@@ -182,47 +184,62 @@ private:
 		PieceInfo* Info;
 	};
 
-	// Queue and promote requests. Workers read copied sources and private build data.
-	// Acquires mRequestMutex internally; callers must not already hold it.
-	void QueuePiece(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
-	// Caller holds mRequestMutex.
-	void PromotePiecePriorityLocked(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority);
-	void QueueTexture(lcTexture* Texture, lcPieceLoadPriority LoadPriority);
-	// Caller holds mRequestMutex.
-	void StartWorkersLocked();
-	void RunWorker();
+	// Queue and promote requests on the UI thread.
+	void QueuePieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
+	void QueueTextureLoad(lcTexture* Texture, lcPieceLoadPriority LoadPriority);
+	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority);
 
-	// UI-thread completion handling: colors, texture dependencies, publication.
+	// Fill available job slots using queued request priority and age.
+	void DispatchJobs();
+
+	// Process a bounded batch of results and upload retries, then start more jobs.
+	// Returns whether any result or retry was processed; consumer signals remain deferred.
 	bool ProcessCompletions();
+
+	// Handle worker results on the UI thread.
 	void ProcessPieceCompletion(Completion& Completed);
 	void ProcessSynthCompletion(Completion& Completed);
 	void ProcessTextureCompletion(Completion& Completed);
+
+	// Mesh texture dependencies: true means settled; failures are reported in Error.
 	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcPieceLoadPriority LoadPriority, QString& Error);
 	static bool MeshTexturesSettled(const lcMesh& Mesh, QString& Error);
-	static QString TextureFailureMessage(const lcTexture* Texture);
+
+	// Texture upload, bounded retries, and dependency settlement.
 	void UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
-	void FinishTexture(const std::shared_ptr<TextureRequest>& RequestedTexture);
+	void CompleteTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
+	static QString TextureFailureMessage(const lcTexture* Texture);
+
+	// Publish pieces and generated meshes after their texture dependencies settle.
 	void FinishPiecesWithSettledTextures();
 	void FinishSynthsWithSettledTextures();
-	void FinishPiece(const std::shared_ptr<PieceRequest>& RequestedPiece);
-	void FinishSynth(const std::shared_ptr<SynthRequest>& RequestedSynth);
+	void CompletePieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
+	void CompleteSynthRequest(const std::shared_ptr<SynthRequest>& RequestedSynth);
 
-	// Notify only from the event handler, after synchronous waits have returned.
-	void DispatchNotifications();
-	bool event(QEvent* Event) override;
-	// Caller holds mRequestMutex; the condition wait releases it and reacquires it on return.
-	void WaitForResultsLocked();
+	// Promote this piece and wait for its request to settle without delivering consumer signals.
 	bool WaitForPieceRequest(PieceInfo* Info);
 
+	// Sleep until a worker completion arrives or the next texture upload retry is due.
+	void WaitForCompletionOrRetry();
+
+	// Process completion events and deliver deferred consumer signals outside synchronous waits.
+	bool event(QEvent* Event) override;
+	void DispatchNotifications();
+
+	// Remove a request; outstanding worker completions retain their load hold.
+	void DiscardPieceRequest(std::shared_ptr<PieceRequest> Request);
+
+	// Drop queued texture work and upload retries that have no remaining consumers.
 	void CancelUnusedTextureRequests();
-	void CancelAndDrain();
+
+	// Stop dispatch, cancel pending work, join workers, and release loader-owned references.
+	void Shutdown();
 
 	lcPiecesLibrary* const mLibrary;
 
-	// Protects request maps/states, worker counts, and result handoff.
-	// Private build data passes between worker and UI phases through completions.
-	QMutex mRequestMutex;
-	QWaitCondition mResultReady;
+	// Only completion handoff needs a mutex; scheduling state and job counts are UI-thread owned.
+	QMutex mCompletionMutex;
+	QWaitCondition mCompletionReady;
 
 	PieceRequestMap mPieceRequests;
 	TextureRequestMap mTextureRequests;
@@ -239,7 +256,7 @@ private:
 	std::deque<SynthNotification> mSynthNotifications;
 
 	std::vector<QFuture<void>> mFutures;
-	int mActiveWorkers = 0;
+	int mActiveJobs = 0; // Includes completed jobs until the UI consumes their results.
 	bool mPaused = false;
 	bool mStopping = false;
 

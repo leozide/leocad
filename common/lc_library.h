@@ -199,6 +199,10 @@ public:
 	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
 	// Also settles container children/synths and updates bounds; caller retains the identity.
 	bool EnsurePieceAssetsReady(PieceInfo* Info);
+
+	// Obsoletes pending work and resets readiness without acquiring a reference.
+	void InvalidatePieceLoad(PieceInfo* Info);
+
 	// Replaces any pending generation for this instance; snapshots control points for workers.
 	void RequestSynthMesh(lcPiece* Piece);
 	void CancelSynthMesh(lcPiece* Piece);
@@ -207,8 +211,6 @@ public:
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPiece(PieceInfo* Info);
-	// Obsoletes pending work and resets readiness without acquiring a reference.
-	void InvalidatePiece(PieceInfo* Info);
 	// Releases one reference and lets the loader cancel unused queued work.
 	void ReleasePieceInfo(PieceInfo* Info);
 	// Lifetime hold only: does not start loading or establish readiness.

@@ -363,7 +363,7 @@ PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Pro
 	}
 
 	if (Reused)
-		mAssetLoader->InvalidatePiece(Info);
+		mAssetLoader->InvalidatePieceLoad(Info);
 
 	return Info;
 }
@@ -473,7 +473,7 @@ bool lcPiecesLibrary::RemapProjectPiece(PieceInfo* Info, const QString& ProjectD
 	if (!Info->IsProject() && !Candidate.isFile())
 		return false;
 
-	InvalidatePiece(Info);
+	InvalidatePieceLoad(Info);
 
 	if (Candidate.isFile())
 	{
@@ -1707,10 +1707,10 @@ void lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
 	mAssetLoader->RebuildModelPiece(Info);
 }
 
-void lcPiecesLibrary::InvalidatePiece(PieceInfo* Info)
+void lcPiecesLibrary::InvalidatePieceLoad(PieceInfo* Info)
 {
 	if (mAssetLoader)
-		mAssetLoader->InvalidatePiece(Info);
+		mAssetLoader->InvalidatePieceLoad(Info);
 	else
 	{
 		Info->mState = lcPieceInfoState::Unloaded;

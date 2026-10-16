@@ -235,12 +235,15 @@ stays local to the library's `BuildPieceData()` or the synth definition's `Build
 both return a private converted mesh for UI-thread finalization.
 Invalidation or unloading resets readiness; cancellation and stale-result disposal
 also have finished request states, independent of the published asset state.
-Requests live only in the piece, texture, and synth maps. Workers scan entries
-whose scheduling state is `Queued`, then mark the selected request
-`AwaitingCompletion`. UI-thread completion processing moves it to
-`AwaitingPublication`, covering texture dependencies and upload retries. Completed
-requests leave the maps with state `Succeeded`, `Failed`, or `Cancelled`.
-Obsolete-result suppression and the synth worker cancellation token remain separate.
+Requests live only in the piece, texture, and synth maps. The UI thread scans
+entries whose scheduling state is `Queued`, marks the selected request
+`AwaitingCompletion`, and starts one QtConcurrent job for that request. Workers
+only build their assigned request and hand back a completion. UI-thread
+completion processing moves the request to `AwaitingPublication`, covering texture
+dependencies and upload retries. Completed requests leave the maps with state `Succeeded`, `Failed`, or `Cancelled`.
+Request identity and shutdown state reject stale worker results. Invalidation marks
+deferred piece notifications `Cancelled` to suppress delivery. Synth workers retain
+a separate cooperative cancellation token.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
 textures are ready. Valid empty geometry may also settle successfully. A missing
@@ -284,7 +287,8 @@ caller omits unavailable geometry, while the loading indicator exposes errors.
 ## A request from acquisition to notification
 
 The loader implementation follows this lifecycle: request acquisition and queueing,
-worker scheduling and `RunWorker()`, UI-thread `ProcessCompletions()` dispatch to
+UI-thread scheduling in `DispatchJobs()`, one worker build per request, then
+UI-thread `ProcessCompletions()` dispatch to
 `ProcessPieceCompletion()`, `ProcessSynthCompletion()`, or `ProcessTextureCompletion()`, dependency settlement
 and publication, then deferred notifications. Readiness waits follow these paths;
 invalidation, pause/resume, and shutdown are grouped at the end of the file.
@@ -408,10 +412,15 @@ promotion received from any parent or direct wait. There is no consumer identity
 map, priority demotion, or step-based scheduling. Priority lasts until that request
 completes or is cancelled, not merely until the requesting view closes.
 
-At most four QtConcurrent drain workers run (fewer if the machine reports fewer
-threads). Running work is nonpreemptive. Queued work gains one scheduling priority
-level per ten seconds of waiting, capped at Blocking, with oldest work winning
-ties. Completion processing uses promoted priorities. Acquiring a pending asset
+The UI thread limits outstanding QtConcurrent jobs to half the reported hardware
+thread count, with a minimum of one and no fixed upper cap. A job slot is released
+when the UI consumes its worker completion, before resolving texture dependencies.
+Meshes waiting for textures and texture upload retries occupy no job slot. Request
+maps, priorities, lifecycle states, and job counts belong to the UI thread; only
+completion handoff uses the loader mutex. Running work is nonpreemptive. Queued
+work gains one scheduling priority level per ten seconds of waiting, capped at
+Blocking, with oldest work winning ties. Completion processing uses promoted
+priorities. Acquiring a pending asset
 shares its request rather than submitting another build.
 
 `WaitForPieces()` starts or promotes loading as needed, then waits for the supplied
@@ -534,7 +543,7 @@ path demotes request priorities.
 
 Pending jobs remain marked `Queued` in their request maps while paused;
 `mPaused` prevents dispatch. Resume refreshes queued piece source snapshots before
-allowing workers to take jobs again.
+dispatching jobs again.
 
 The library constructor receives the effective startup stud settings; application
 color preferences are applied before loading sources and colors, including the
@@ -553,7 +562,7 @@ invalidate every library mesh. Pending snapshots must still be refreshed so
 obsolete settings cannot publish later.
 Library reload and destruction destroy the loader before releasing sources,
 registries, or GL resources. The loader destructor calls its private
-`CancelAndDrain()`, which stops dispatch, cancels pending work,
+`Shutdown()`, which stops dispatch, cancels pending work,
 joins workers, discards obsolete results, and releases notification holds without
 requiring successful upload or delivering public settlement signals.
 
@@ -600,9 +609,10 @@ suite.
 - Keep workers on copied source/settings/control-point data and private results.
   Published meshes, texture pointers, global color registration, GL upload,
   model mutations, and consumer notifications belong on the UI thread.
-- Protect scheduling decisions with the request mutex; release it before publication,
-  GL upload, or settlement callbacks. Condition waits release the request mutex
-  while sleeping. Do not hold library locks needed by workers while draining.
+- Keep scheduling decisions and request state on the UI thread. Protect completion
+  handoff with the completion mutex; release it before publication, GL upload, or
+  settlement callbacks. Check for a completion and sleep under the same mutex to
+  avoid lost wakeups. Do not hold library locks needed by workers while draining.
 - Preserve in-flight holds through stale-result disposal and deferred notification.
   Validate request identity and cancellation before publishing; deleting an owner must
   not let a worker or callback access that deleted model/piece.

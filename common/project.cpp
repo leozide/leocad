@@ -469,7 +469,7 @@ void Project::ShowModelListDialog()
 
 			// A new model can reuse this PieceInfo. A renamed model keeps its own
 			// PieceInfo, so references to the deleted model are rebound below.
-			lcGetPiecesLibrary()->InvalidatePiece(OldModel->GetPieceInfo());
+			lcGetPiecesLibrary()->InvalidatePieceLoad(OldModel->GetPieceInfo());
 			OldModel->GetPieceInfo()->DetachContainer();
 			OldModel->GetPieceInfo()->SetFailed(tr("Model '%1' was deleted.").arg(Model->GetFileName()));
 
@@ -1174,7 +1174,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 		else
 		{
 			if (mDeferModelMeshRequests)
-				lcGetPiecesLibrary()->InvalidatePiece(Model->GetPieceInfo());
+				lcGetPiecesLibrary()->InvalidatePieceLoad(Model->GetPieceInfo());
 
 			Model->QueueMeshBuild();
 		}
@@ -1282,7 +1282,7 @@ lcResult<void> Project::Save(const QString& FileName)
 			if (!Model->HasDirectGeometry())
 				continue;
 
-			Library->InvalidatePiece(Model->GetPieceInfo());
+			Library->InvalidatePieceLoad(Model->GetPieceInfo());
 			Model->QueueMeshBuild();
 			ChangedPieces.push_back(Model->GetPieceInfo());
 		}

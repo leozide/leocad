@@ -1,48 +1,14 @@
 #pragma once
 
-#include "lc_library.h"
-#include "lc_texturemanager.h"
-#include "piece.h"
+#include "lc_assettypes.h"
 
 class PieceInfo;
+class lcPiecesLibrary;
 class lcPiece;
+struct lcPieceControlPoint;
 class lcMesh;
 class lcSynthInfo;
 class lcTexture;
-enum class lcTextureLoadError;
-
-// Copied on the UI thread so workers do not consult live models or project lookup.
-struct lcPieceSourceSnapshot
-{
-	QString FileName;
-	QString LibraryDirectory;
-	QString CachePath;
-	std::vector<QString> TextureSearchDirectories;
-	std::map<QString, std::shared_ptr<const lcEmbeddedData>> EmbeddedData;
-	QStringList InlineMeshLines;
-	bool InlineModel = false;
-	lcZipFileType ZipFileType = lcZipFileType::Count;
-	int ZipFileIndex = -1;
-	lcStudStyle StudStyle = lcStudStyle::Plain;
-	bool StudCylinderColorEnabled = false;
-};
-
-// Private worker output; meshes and dependencies are published only on the UI thread.
-struct lcPieceBuildResult
-{
-	lcPieceBuildResult() = default;
-	~lcPieceBuildResult();
-
-	lcPieceBuildResult(lcPieceBuildResult&&) = default;
-	lcPieceBuildResult& operator=(lcPieceBuildResult&&) = default;
-	lcPieceBuildResult(const lcPieceBuildResult&) = delete;
-	lcPieceBuildResult& operator=(const lcPieceBuildResult&) = delete;
-
-	std::unique_ptr<lcMesh> Mesh;
-	bool FromCache = false;
-	bool EmptyGeometry = false;
-	QString Error;
-};
 
 // Owned by lcPiecesLibrary. Instance methods run on the UI thread and schedule private worker builds;
 // UI-thread completion processing resolves colors, uploads textures, and publishes meshes.
@@ -53,41 +19,37 @@ public:
 	lcAssetLoader(lcPiecesLibrary* Library);
 	~lcAssetLoader() override;
 
-	// Load a piece the library has already acquired for the caller. Adds no consumer reference.
-	// Low and Normal return immediately; true does not mean the piece is ready yet.
-	// Blocking promotes urgent work, waits until loading settles, and returns whether it succeeded.
-	bool RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
+	// Queue or promote a piece the library has marked Loading. Adds no consumer reference.
+	// Priority controls scheduling only; the library handles blocking waits and asset readiness.
+	void RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
 
-	// Start or promote loading, then wait and returns true if all pieces are ready. Adds no consumer references.
-	// Waits for these identities only, without traversing container children or generated meshes.
+	// Promote and wait for requests active at entry; false means a request failed or was cancelled.
+	// The library checks final asset readiness, including identities with no active request.
+	// Adds no consumer references and does not traverse container children or generated meshes.
 	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
 
-	// Called when the last consumer releases the piece. Cancels queued work;
+	// Called when the last consumer releases the piece. Cancels queued work and reports it to the library;
 	// running work finishes privately and is discarded if the piece is still unused.
 	void CancelPieceLoad(PieceInfo* Info);
 
-	// Discard pending load results and notifications, reset the state to Unloaded, and clear errors.
-	// Keeps the current mesh; the caller decides whether to unload it or request another load.
+	// Discard pending load results and notifications after the library invalidates readiness.
+	// Asset meshes, readiness, and errors belong to the library.
 	void InvalidatePieceLoad(PieceInfo* Info);
 
-	// Build this instance's generated mesh from its current control points in the background.
+	// Build this instance's generated mesh from definition/control-point snapshots supplied by the library.
 	// Cancel any older request and keep the previous mesh visible while the replacement is built.
-	void RequestSynthMesh(lcPiece* Piece);
+	void RequestSynthMesh(lcPiece* Piece, PieceInfo* Info, std::shared_ptr<const lcSynthInfo> SynthInfo, std::vector<lcPieceControlPoint> ControlPoints);
 
-	// Promote and wait for queued generations. Returns true if every required generated mesh is current.
-	// Call RequestSynthMesh() to start a generation; the caller keeps the instances alive through the wait.
+	// Promote and wait for generations active at entry; false means a generation failed or was cancelled.
+	// The library checks final generated-mesh readiness. The caller keeps the instances alive through the wait.
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 
 	// Cancel this instance's generation and suppress its deferred notifications.
 	// Running jobs stop cooperatively; any published mesh is kept.
 	void CancelSynthMesh(lcPiece* Piece);
 
-	// Returns this instance's recorded generation error, or an empty string if none is recorded.
-	// An empty string does not establish readiness; check the generated mesh separately.
-	QString GetSynthMeshError(const lcPiece* Piece) const;
-
 	// Start or promote decoding as needed, then wait through upload and retries. The caller retains the texture.
-	bool WaitForTexture(lcTexture* Texture);
+	bool WaitForTexture(lcTexture* Texture, lcFileSource Source);
 
 	// True while piece, texture, or generated-mesh requests or worker completions remain unsettled.
 	// Includes paused work and upload retries; deferred notifications alone do not count.
@@ -115,7 +77,7 @@ private:
 
 	struct RequestBase
 	{
-		lcPieceLoadPriority LoadPriority;
+		lcLoadPriority LoadPriority;
 		qint64 QueuedAt;
 		RequestState State = RequestState::Queued;
 
@@ -151,6 +113,7 @@ private:
 	struct SynthRequest : RequestBase
 	{
 		lcPiece* Piece;
+		PieceInfo* Info; // Borrowed from the instance until cancellation or publication.
 		std::shared_ptr<const lcSynthInfo> SynthInfo;
 		std::vector<lcPieceControlPoint> ControlPoints;
 		std::atomic_bool Cancelled = false;
@@ -188,9 +151,8 @@ private:
 	};
 
 	// Queue and promote requests on the UI thread.
-	void QueuePieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
-	void QueueTextureLoad(lcTexture* Texture, lcPieceLoadPriority LoadPriority);
-	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority);
+	void QueueTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority);
+	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcLoadPriority LoadPriority);
 
 	// Fill available job slots using queued request priority and age.
 	void DispatchJobs();
@@ -205,13 +167,12 @@ private:
 	void ProcessTextureCompletion(Completion& Completed);
 
 	// Mesh texture dependencies: true means settled; failures are reported in Error.
-	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcPieceLoadPriority LoadPriority, QString& Error);
+	bool ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcLoadPriority LoadPriority, QString& Error);
 	static bool MeshTexturesSettled(const lcMesh& Mesh, QString& Error);
 
 	// Texture upload, bounded retries, and dependency settlement.
 	void UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
 	void CompleteTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture);
-	static QString TextureFailureMessage(const lcTexture* Texture);
 
 	// Publish pieces and generated meshes after their texture dependencies settle.
 	void FinishPiecesWithSettledTextures();
@@ -219,8 +180,8 @@ private:
 	void CompletePieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
 	void CompleteSynthRequest(const std::shared_ptr<SynthRequest>& RequestedSynth);
 
-	// Promote this piece and wait for its request to settle without delivering consumer signals.
-	bool WaitForPieceRequest(PieceInfo* Info);
+	// Wait for a captured request to settle without delivering consumer signals.
+	bool WaitForPieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
 
 	// Sleep until a worker completion arrives or the next texture upload retry is due.
 	void WaitForCompletionOrRetry();
@@ -267,9 +228,6 @@ private:
 	// UI-thread only; public signals are deferred until outside synchronous waits.
 	std::deque<PieceNotification> mPieceNotifications;
 	std::deque<SynthNotification> mSynthNotifications;
-
-	// UI-thread errors for failed synth generations.
-	std::unordered_map<const lcPiece*, QString> mSynthErrors;
 
 	Q_DECLARE_TR_FUNCTIONS(lcAssetLoader)
 };

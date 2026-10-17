@@ -136,7 +136,7 @@ void lcThumbnailManager::RefreshRequiredPieces(lcPartThumbnail& Thumbnail)
 	for (PieceInfo* Info : Required)
 	{
 		if (Previous.erase(Info) == 0)
-			mLibrary->RequestPieceLoad(Info, lcPieceLoadPriority::Low);
+			mLibrary->RequestPieceLoad(Info, lcLoadPriority::Low);
 	}
 
 	for (PieceInfo* Info : Previous)
@@ -161,13 +161,13 @@ void lcThumbnailManager::UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartTh
 
 	for (const PieceInfo* Info : Thumbnail.Required)
 	{
-		if (Info->mState == lcPieceInfoState::Failed || Info->mState == lcPieceInfoState::Cancelled)
+		if (Info->mState == lcAssetState::Failed || Info->mState == lcAssetState::Unloaded)
 		{
 			DrawFailedThumbnail(ThumbnailId, Thumbnail);
 			return;
 		}
 
-		if (Info->mState != lcPieceInfoState::Loaded)
+		if (Info->mState != lcAssetState::Loaded)
 			Pending = true;
 	}
 
@@ -388,7 +388,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 		RefreshRequiredPieces(Thumbnail);
 
 		for (const PieceInfo* Required : Thumbnail.Required)
-			if (Required->mState != lcPieceInfoState::Loaded && Required->mState != lcPieceInfoState::Failed && Required->mState != lcPieceInfoState::Cancelled)
+			if (Required->IsLoading())
 				return;
 
 		DrawFailedThumbnail(ThumbnailId, Thumbnail);

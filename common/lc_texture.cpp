@@ -128,7 +128,7 @@ void lcTexture::CreateGridTexture()
 
 	mRefCount = 1;
 	mFlags = LC_TEXTURE_WRAPU | LC_TEXTURE_WRAPV | LC_TEXTURE_MIPMAPS | LC_TEXTURE_ANISOTROPIC;
-	mState = lcTextureState::Decoded;
+	mState = lcAssetState::Loading;
 
 	lcContext* Context = lcContext::GetGlobalOffscreenContext();
 	Context->MakeCurrent();
@@ -170,7 +170,7 @@ void lcTexture::SetImage(QImage SourceImage, int Flags)
 	mImages.clear();
 	mImages.emplace_back(std::move(TextureImage));
 	mFlags = Flags;
-	mState = lcTextureState::Decoded;
+	mState = lcAssetState::Loading;
 }
 
 void lcTexture::DiscardDecodedImage()
@@ -180,9 +180,38 @@ void lcTexture::DiscardDecodedImage()
 
 void lcTexture::SetFailed(lcTextureLoadError Error, QString Details)
 {
-	mState = lcTextureState::Failed;
+	mState = lcAssetState::Failed;
 	mLoadFailure = Error;
 	mLoadFailureDetails = std::move(Details);
+}
+
+QString lcTexture::GetLoadError() const
+{
+	if (mState != lcAssetState::Failed)
+		return QString();
+
+	if (!mLoadFailureDetails.isEmpty())
+		return mLoadFailureDetails;
+
+	switch (mLoadFailure)
+	{
+	case lcTextureLoadError::DecodeFailed:
+		return tr("Could not load texture %1.").arg(QString::fromLatin1(mName));
+
+	case lcTextureLoadError::ContextActivationFailed:
+		return tr("Could not make the shared GL context current for texture upload.");
+
+	case lcTextureLoadError::ContextUnavailable:
+		return tr("No shared GL context is available for texture upload.");
+
+	case lcTextureLoadError::UploadFailed:
+		return tr("Texture upload failed.");
+
+	case lcTextureLoadError::None:
+		return tr("Texture %1 failed to load.").arg(QString::fromLatin1(mName));
+	}
+
+	return tr("Texture %1 failed to load.").arg(QString::fromLatin1(mName));
 }
 
 void lcTexture::SetImages(std::vector<QImage>&& Images, int Flags)
@@ -206,7 +235,7 @@ void lcTexture::SetImages(std::vector<QImage>&& Images, int Flags)
 
 	mImages = std::move(Images);
 	mFlags = Flags;
-	mState = lcTextureState::Decoded;
+	mState = lcAssetState::Loading;
 }
 
 void lcTexture::Upload(lcContext* Context)
@@ -222,7 +251,7 @@ void lcTexture::Upload(lcContext* Context)
 	if (Uploaded && mTexture)
 	{
 		mImages.clear();
-		mState = lcTextureState::Ready;
+		mState = lcAssetState::Loaded;
 		mLoadFailure = lcTextureLoadError::None;
 		mLoadFailureDetails.clear();
 	}
@@ -263,7 +292,7 @@ void lcTexture::Unload()
 	}
 
 	mTexture = 0;
-	mState = lcTextureState::Unrequested;
+	mState = lcAssetState::Unloaded;
 	mLoadFailure = lcTextureLoadError::None;
 	mLoadFailureDetails.clear();
 }

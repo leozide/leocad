@@ -393,7 +393,7 @@ void lcModel::CreatePieceInfo(Project* Project)
 	// until its source lines have been parsed and QueueMeshBuild() runs.
 	if (!Project->DefersModelMeshRequests())
 	{
-		Library->RequestPieceLoad(mPieceInfo, mIsPreview ? lcPieceLoadPriority::Normal : lcPieceLoadPriority::Blocking);
+		Library->RequestPieceLoad(mPieceInfo, mIsPreview ? lcLoadPriority::Normal : lcLoadPriority::Blocking);
 		Library->ReleasePieceInfo(mPieceInfo);
 	}
 
@@ -538,7 +538,7 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 
 	for (const PieceInfo* Info : Required)
 	{
-		if (Info->mState == lcPieceInfoState::Loaded)
+		if (Info->mState == lcAssetState::Loaded)
 			continue;
 
 		const QString Error = Library->GetPieceLoadError(Info);
@@ -1805,7 +1805,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 	{
 		const PieceInfo* Info = PartIt.first;
 
-		if (!KeepMissingParts && !Info->IsModel() && !Info->IsProject() && (Info->mState != lcPieceInfoState::Loaded || !Info->GetMesh()))
+		if (!KeepMissingParts && !Info->IsModel() && !Info->IsProject() && (Info->mState != lcAssetState::Loaded || !Info->GetMesh()))
 			continue;
 
 		for (const auto& ColorIt : PartIt.second)
@@ -2199,7 +2199,7 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 {
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcAssetState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)
@@ -3418,7 +3418,7 @@ void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& Preview
 
 	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
 	{
-		Library->RequestPieceLoad(InfoTransform.Info, lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(InfoTransform.Info, lcLoadPriority::Normal);
 		Required.push_back(InfoTransform.Info);
 	}
 
@@ -4879,7 +4879,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints(lcGeometryBoundsMode 
 	std::vector<lcVector3> Points;
 	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcAssetState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)

@@ -267,6 +267,7 @@ HEADERS += \
 	common/lc_application.h \
 	common/lc_arraydialog.h \
 	common/lc_assetloader.h \
+	common/lc_assettypes.h \
 	common/lc_blenderpreferences.h \
 	common/lc_bricklink.h \
 	common/lc_category.h \
@@ -281,7 +282,6 @@ HEADERS += \
 	common/lc_edgecolordialog.h \
 	common/lc_editgroupsdialog.h \
 	common/lc_file.h \
-	common/lc_filesource.h \
 	common/lc_filter.h \
 	common/lc_findreplacewidget.h \
 	common/lc_glextensions.h \

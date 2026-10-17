@@ -86,7 +86,7 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 
 	mPieceInfo = Info;
 	if (mPieceInfo)
-		Library->RequestPieceLoad(mPieceInfo, Wait ? lcPieceLoadPriority::Blocking : lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(mPieceInfo, Wait ? lcLoadPriority::Blocking : lcLoadPriority::Normal);
 
 	if (!ID.isEmpty())
 		mID = ID;
@@ -1508,7 +1508,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	if (!mMesh || mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (!mMesh || mPieceInfo->mState != lcAssetState::Loaded)
 		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
 		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceInfo, mMesh, ColorIndex });
@@ -1575,7 +1575,7 @@ void lcPiece::UpdateMesh()
 
 lcMesh* lcPiece::GetDisplayMesh() const
 {
-	if (!mPieceInfo || mPieceInfo->mState != lcPieceInfoState::Loaded)
+	if (!mPieceInfo || mPieceInfo->mState != lcAssetState::Loaded)
 		return nullptr;
 
 	if (mMesh)

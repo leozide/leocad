@@ -4,7 +4,7 @@
 #include "lc_math.h"
 #include "lc_meshloader.h"
 #include "lc_result.h"
-#include "lc_filesource.h"
+#include "lc_assettypes.h"
 
 class PieceInfo;
 class lcPiece;
@@ -16,10 +16,7 @@ class lcLibraryMeshData;
 class lcThumbnailManager;
 class lcAssetLoader;
 class lcTextureManager;
-struct lcPieceSourceSnapshot;
-struct lcPieceBuildResult;
 struct lcEmbeddedData;
-struct lcTextureBuildResult;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 using lcLibraryLoadMutex = QRecursiveMutex;
@@ -73,15 +70,6 @@ enum class lcPrimitiveState
 	NotLoaded,
 	Loading,
 	Loaded
-};
-
-// Scheduling urgency. RequestPieceLoad() also waits when Blocking is requested.
-// Queued requests only promote and keep their priority until completion or cancellation.
-enum class lcPieceLoadPriority
-{
-	Low,      // Background work, such as thumbnails and settings rebuilds.
-	Normal,   // Visible or interactive work.
-	Blocking  // Assets required by a synchronous operation.
 };
 
 class lcLibraryPrimitive
@@ -191,7 +179,7 @@ public:
 	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
 	// Acquires one reference even on failure; always pair with ReleasePieceInfo().
 	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
-	bool RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority);
+	bool RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
 	void NotifyConsumersChanged();
 	// Start or promote loading, then wait. Adds no consumer references.
 	// Returns false for failed or cancelled pieces.
@@ -209,6 +197,7 @@ public:
 	// Promote and wait for queued generations; false means missing or outdated generated geometry.
 	// Call RequestSynthMesh() to start a generation; keep the instances alive through the wait.
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
+	// Last generation error, or an empty string; an empty error does not imply readiness.
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPiece(PieceInfo* Info);
 	// Releases one reference and lets the loader cancel unused queued work.
@@ -231,8 +220,8 @@ public:
 	// UI-thread lookup and upload wait; returns a ready reference or nullptr on failure.
 	// Release a returned reference with ReleaseTexture().
 	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
-	// UI-thread lookup/acquisition only, without decoding or upload; caller releases the reference.
-	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData);
+	// UI-thread lookup/acquisition only; also returns the resolved source for loading. Caller releases the reference.
+	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source);
 	void ReleaseTexture(lcTexture* Texture);
 
 	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
@@ -299,6 +288,18 @@ signals:
 protected:
 	friend class lcAssetLoader;
 
+	// Prepare asset readiness and request work without acquiring a consumer reference or waiting.
+	void StartPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
+	// The loader calls this only when cancelling the current request, before releasing its hold.
+	void PieceLoadCancelled(PieceInfo* Info);
+
+	// Publish current results on the UI thread; the loader rejects stale requests first.
+	// A successful piece result may have no mesh when its geometry is empty.
+	bool PublishPieceMesh(PieceInfo* Info, std::unique_ptr<lcMesh> Mesh, QString Error);
+	bool PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error);
+	// Apply decoded pixels or a decode failure; upload scheduling and retries stay in the loader.
+	void PublishTexture(lcTexture* Texture, lcTextureBuildResult Result);
+
 	lcResult<Project*> LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests);
 	lcResult<void> LoadPrimitiveData(lcLibraryPrimitive* Primitive);
 
@@ -337,9 +338,9 @@ protected:
 	// project for each local PieceInfo, or nullptr after that project is destroyed.
 	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
 
-	// UI-thread live synth instances, including completed and failed generations.
+	// UI-thread live synth instances and their last generation errors (empty on success or retry).
 	// Instances unregister before destruction; the library does not own them.
-	std::unordered_set<lcPiece*> mSynthPieces;
+	std::unordered_map<lcPiece*, QString> mSynthPieces;
 
 	// Protects identity/reference bookkeeping.
 	// Recursive because library release and lookup paths can reenter this lock.

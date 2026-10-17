@@ -502,7 +502,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	{
 		lcPiece* MousePiece = reinterpret_cast<lcPiece*>(ObjectRayTest.ObjectSection.Object);
 		PieceInfo* MouseInfo = MousePiece->mPieceInfo;
-		const bool Retest = MouseInfo->mState != lcPieceInfoState::Loaded || MouseInfo->IsModel() || MouseInfo->IsProject() || MousePiece->IsGeneratedMeshPending();
+		const bool Retest = MouseInfo->mState != lcAssetState::Loaded || MouseInfo->IsModel() || MouseInfo->IsProject() || MousePiece->IsGeneratedMeshPending();
 
 		lcGetPiecesLibrary()->EnsurePieceAssetsReady(MouseInfo);
 

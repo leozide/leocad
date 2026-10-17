@@ -20,7 +20,7 @@ PieceInfo::PieceInfo(bool IsLibraryPiece)
 	mZipFileIndex = -1;
 	mFolderType = -1;
 	mFolderIndex = -1;
-	mState = lcPieceInfoState::Unloaded;
+	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();
 	mFileName[0] = 0;
 	m_strDescription[0] = 0;
@@ -54,10 +54,10 @@ void PieceInfo::SetMesh(lcMesh* Mesh)
 
 lcMesh* PieceInfo::GetDisplayMesh() const
 {
-	if (mState == lcPieceInfoState::Loaded)
+	if (mState == lcAssetState::Loaded)
 		return mMesh;
 
-	if ((IsLoading() || mState == lcPieceInfoState::Failed) &&
+	if ((IsLoading() || mState == lcAssetState::Failed) &&
 		((!IsModel() && !IsProject()) || (IsModel() && mModel->HasDirectGeometry())))
 		return lcGetPiecesLibrary()->GetLoadingMesh();
 
@@ -70,7 +70,7 @@ void PieceInfo::SetFailed(QString Error)
 	if (!IsModel() && !IsProject())
 		SetLoadingBoundingBox();
 
-	mState = lcPieceInfoState::Failed;
+	mState = lcAssetState::Failed;
 
 	if (IsModel())
 	{
@@ -111,7 +111,7 @@ void PieceInfo::SetModel(lcModel* Model)
 		delete PreviousProject;
 		delete mMesh;
 		mMesh = nullptr;
-		mState = lcPieceInfoState::Unloaded;
+		mState = lcAssetState::Unloaded;
 		lcGetPiecesLibrary()->ClearPieceLoadError(this);
 	}
 
@@ -127,7 +127,7 @@ void PieceInfo::CreateProject(Project* NewProject, const char* PieceName)
 		mType = lcPieceInfoType::Project;
 		mModel = nullptr;
 		mProject = NewProject;
-		mState = lcPieceInfoState::Loaded;
+		mState = lcAssetState::Loaded;
 		ReleaseMesh();
 		delete PreviousProject;
 	}
@@ -186,7 +186,7 @@ void PieceInfo::ReleaseMesh()
 void PieceInfo::Unload()
 {
 	ReleaseMesh();
-	mState = lcPieceInfoState::Unloaded;
+	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();
 	mModel = nullptr;
 
@@ -317,7 +317,7 @@ void PieceInfo::ZoomExtents(float FoV, float AspectRatio, lcMatrix44& Projection
 
 void PieceInfo::AddRenderMesh(lcScene& Scene)
 {
-	if (mState != lcPieceInfoState::Loaded)
+	if (mState != lcAssetState::Loaded)
 	{
 		if (Scene.GetRequireCompleteAssets())
 			Scene.MarkMissingAssets();
@@ -330,7 +330,7 @@ void PieceInfo::AddRenderMesh(lcScene& Scene)
 
 void PieceInfo::AddRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int ColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
-	if (mState != lcPieceInfoState::Loaded)
+	if (mState != lcAssetState::Loaded)
 	{
 		if (Scene->GetRequireCompleteAssets())
 			Scene->MarkMissingAssets();
@@ -431,7 +431,7 @@ void PieceInfo::AddSubModelBoundingBoxPoints(const lcMatrix44& WorldMatrix, std:
 			return;
 		}
 
-		if (mState != lcPieceInfoState::Loaded || !mMesh)
+		if (mState != lcAssetState::Loaded || !mMesh)
 			return;
 	}
 

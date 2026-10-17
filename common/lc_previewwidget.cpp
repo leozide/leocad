@@ -108,10 +108,10 @@ void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
 
 	for (PieceInfo* Info : Required)
 	{
-		if (Info->mState != lcPieceInfoState::Unloaded)
+		if (Info->mState != lcAssetState::Unloaded)
 			continue;
 
-		Library->RequestPieceLoad(Info, lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(Info, lcLoadPriority::Normal);
 		Library->ReleasePieceInfo(Info);
 	}
 
@@ -158,7 +158,7 @@ void lcPreviewDockWidget::RefreshPendingAssets()
 
 	for (const PieceInfo* Info : Required)
 	{
-		if (Info->mState == lcPieceInfoState::Failed || Info->mState == lcPieceInfoState::Cancelled)
+		if (Info->mState == lcAssetState::Failed || Info->mState == lcAssetState::Unloaded)
 		{
 			mAssetRefreshPending = false;
 			mViewWidget->hide();
@@ -166,7 +166,7 @@ void lcPreviewDockWidget::RefreshPendingAssets()
 			return;
 		}
 
-		if (Info->mState != lcPieceInfoState::Loaded)
+		if (Info->mState != lcAssetState::Loaded)
 		{
 			mAssetRefreshPending = true;
 			mViewWidget->hide();
@@ -294,7 +294,7 @@ bool lcPreview::SetCurrentPiece(PieceInfo* Info, int ColorCode)
 	}
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	bool Ready = Library->RequestPieceLoad(Info, lcPieceLoadPriority::Blocking);
+	bool Ready = Library->RequestPieceLoad(Info, lcLoadPriority::Blocking);
 
 	if (Ready && Info->IsModel())
 		Ready = static_cast<bool>(Info->GetModel()->EnsureAssetsReady());

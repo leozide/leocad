@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include "lc_assettypes.h"
 #include "lc_math.h"
 
 enum class lcPieceInfoType
@@ -11,17 +12,6 @@ enum class lcPieceInfoType
 };
 
 #define LC_PIECE_NAME_LEN 256
-
-enum class lcPieceInfoState
-{
-	Unloaded,
-	Queued,
-	Loading,
-	AwaitingTextures,
-	Loaded,
-	Failed,
-	Cancelled
-};
 
 struct lcModelPartsEntry
 {
@@ -125,7 +115,7 @@ public:
 
 	bool IsLoading() const
 	{
-		return mState == lcPieceInfoState::Queued || mState == lcPieceInfoState::Loading || mState == lcPieceInfoState::AwaitingTextures;
+		return mState == lcAssetState::Loading;
 	}
 
 	bool IsModel() const
@@ -205,7 +195,7 @@ public:
 	char m_strDescription[256];
 	lcZipFileType mZipFileType;
 	int mZipFileIndex;
-	lcPieceInfoState mState;
+	lcAssetState mState;
 	int mFolderType;
 	int mFolderIndex;
 

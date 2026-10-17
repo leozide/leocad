@@ -37,6 +37,16 @@ enum class lcLibraryCacheFlag : quint32
 	Directory = 0x0002
 };
 
+lcPieceSourceSnapshot::lcPieceSourceSnapshot()
+	: ZipFileType(lcZipFileType::Count), StudStyle(lcStudStyle::Plain)
+{
+}
+
+lcPieceBuildResult::lcPieceBuildResult() = default;
+lcPieceBuildResult::~lcPieceBuildResult() = default;
+lcPieceBuildResult::lcPieceBuildResult(lcPieceBuildResult&&) noexcept = default;
+lcPieceBuildResult& lcPieceBuildResult::operator=(lcPieceBuildResult&&) noexcept = default;
+
 lcPiecesLibrary::lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 	: mStudStyle(StudStyle), mStudCylinderColorEnabled(StudCylinderColorEnabled)
 {
@@ -314,7 +324,7 @@ bool lcPiecesLibrary::RenamePiece(PieceInfo* Info, const char* NewName)
 		mPieces[PieceName] = Info;
 
 	LoadLock.unlock();
-	if (Info->mState != lcPieceInfoState::Failed)
+	if (Info->mState != lcAssetState::Failed)
 		ClearPieceLoadError(Info);
 
 	return true;
@@ -364,7 +374,7 @@ PieceInfo* lcPiecesLibrary::CreateModelPiece(const char* PieceName, Project* Pro
 	}
 
 	if (Reused)
-		mAssetLoader->InvalidatePieceLoad(Info);
+		InvalidatePieceLoad(Info);
 
 	return Info;
 }
@@ -516,12 +526,13 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 	if (CurrentProject)
 		EmbeddedData = CurrentProject->GetEmbeddedDataLookup();
 
-	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath }, EmbeddedData);
+	lcFileSource Source;
+	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath }, EmbeddedData, Source);
 
 	if (!Texture)
 		return nullptr;
 
-	if (mAssetLoader->WaitForTexture(Texture))
+	if (mAssetLoader->WaitForTexture(Texture, std::move(Source)))
 		return Texture;
 
 	ReleaseTexture(Texture);
@@ -674,10 +685,10 @@ lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, cons
 	return Source;
 }
 
-lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData)
+lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source)
 {
 	QString ProjectPath;
-	const lcFileSource Source = ResolveTextureSource(TextureName, SearchDirectories, EmbeddedData, ProjectPath);
+	Source = ResolveTextureSource(TextureName, SearchDirectories, EmbeddedData, ProjectPath);
 
 	return mTextureManager->AcquireTexture(TextureName, Source, ProjectPath);
 }
@@ -1645,13 +1656,54 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-bool lcPiecesLibrary::RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
+bool lcPiecesLibrary::RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	AddPieceReference(Info);
 
-	return mAssetLoader->RequestPieceLoad(Info, LoadPriority);
+	StartPieceLoad(Info, LoadPriority);
+
+	return LoadPriority != lcLoadPriority::Blocking || WaitForPieces({ Info });
+}
+
+void lcPiecesLibrary::StartPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
+	{
+		Info->mState = lcAssetState::Loaded;
+		ClearPieceLoadError(Info);
+		return;
+	}
+
+	if (Info->mState == lcAssetState::Unloaded)
+	{
+		Info->mState = lcAssetState::Loading;
+		ClearPieceLoadError(Info);
+
+		const lcBoundingBox& Box = GetLoadingMesh()->mBoundingBox;
+
+		if (!Info->IsModel())
+			Info->SetBoundingBox(Box.Min, Box.Max);
+		else
+		{
+			const lcBoundingBox& ModelBox = Info->GetBoundingBox();
+			Info->SetBoundingBox(lcMin(ModelBox.Min, Box.Min), lcMax(ModelBox.Max, Box.Max));
+		}
+	}
+
+	if (Info->IsLoading())
+		mAssetLoader->RequestPieceLoad(Info, LoadPriority);
+}
+
+void lcPiecesLibrary::PieceLoadCancelled(PieceInfo* Info)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	Info->mState = lcAssetState::Unloaded;
+	ClearPieceLoadError(Info);
 }
 
 void lcPiecesLibrary::NotifyConsumersChanged()
@@ -1679,19 +1731,37 @@ bool lcPiecesLibrary::EnsurePieceAssetsReady(PieceInfo* Info)
 
 bool lcPiecesLibrary::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 {
-	return mAssetLoader->WaitForPieces(Pieces);
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	for (PieceInfo* Info : Pieces)
+		if (Info->mState == lcAssetState::Unloaded)
+			StartPieceLoad(Info, lcLoadPriority::Blocking);
+
+	const bool RequestsSucceeded = mAssetLoader->WaitForPieces(Pieces);
+
+	for (const PieceInfo* Info : Pieces)
+		if (Info->mState != lcAssetState::Loaded)
+			return false;
+
+	return RequestsSucceeded;
 }
 
 void lcPiecesLibrary::RequestSynthMesh(lcPiece* Piece)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	if (Piece->mPieceInfo && Piece->mPieceInfo->GetSynthInfo())
-		mSynthPieces.insert(Piece);
-	else
-		mSynthPieces.erase(Piece);
+	PieceInfo* Info = Piece->mPieceInfo;
+	std::shared_ptr<const lcSynthInfo> SynthInfo = Info ? Info->GetSynthInfoShared() : nullptr;
 
-	mAssetLoader->RequestSynthMesh(Piece);
+	if (!SynthInfo)
+	{
+		CancelSynthMesh(Piece);
+		return;
+	}
+
+	mSynthPieces.insert_or_assign(Piece, QString());
+
+	mAssetLoader->RequestSynthMesh(Piece, Info, std::move(SynthInfo), Piece->GetControlPoints());
 }
 
 void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
@@ -1706,12 +1776,75 @@ void lcPiecesLibrary::CancelSynthMesh(lcPiece* Piece)
 
 bool lcPiecesLibrary::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 {
-	return mAssetLoader->WaitForSynthMeshes(Pieces);
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	const bool RequestsSucceeded = mAssetLoader->WaitForSynthMeshes(Pieces);
+
+	for (const lcPiece* Piece : Pieces)
+		if (Piece->mPieceInfo && Piece->mPieceInfo->GetSynthInfo() && !Piece->HasGeneratedMesh())
+			return false;
+
+	return RequestsSucceeded;
 }
 
 QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
 {
-	return mAssetLoader ? mAssetLoader->GetSynthMeshError(Piece) : QString();
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	const auto It = mSynthPieces.find(const_cast<lcPiece*>(Piece));
+
+	return It != mSynthPieces.end() ? It->second : QString();
+}
+
+bool lcPiecesLibrary::PublishPieceMesh(PieceInfo* Info, std::unique_ptr<lcMesh> Mesh, QString Error)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	const bool Loaded = Error.isEmpty();
+
+	if (Loaded)
+	{
+		if (Mesh)
+			Info->SetMesh(Mesh.release());
+
+		Info->mState = lcAssetState::Loaded;
+		ClearPieceLoadError(Info);
+	}
+	else
+		Info->SetFailed(std::move(Error));
+
+	ScheduleBufferRepack();
+
+	return Loaded;
+}
+
+bool lcPiecesLibrary::PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	const bool Loaded = Error.isEmpty() && Mesh;
+
+	if (!Loaded && Error.isEmpty())
+		Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
+
+	Piece->SetGeneratedMesh(Loaded ? Mesh.release() : nullptr);
+
+	const auto It = mSynthPieces.find(Piece);
+
+	if (It != mSynthPieces.end())
+		It->second = Loaded ? QString() : std::move(Error);
+
+	return Loaded;
+}
+
+void lcPiecesLibrary::PublishTexture(lcTexture* Texture, lcTextureBuildResult Result)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	if (!Result.DecodedImage.isNull())
+		Texture->SetImage(std::move(Result.DecodedImage), LC_TEXTURE_MIPMAPS);
+	else
+		Texture->SetFailed(Result.Error, std::move(Result.ErrorDetails));
 }
 
 void lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
@@ -1719,20 +1852,20 @@ void lcPiecesLibrary::RebuildModelPiece(PieceInfo* Info)
 	Q_ASSERT(QThread::currentThread() == thread());
 	Q_ASSERT(Info->IsModel());
 
-	mAssetLoader->InvalidatePieceLoad(Info);
+	InvalidatePieceLoad(Info);
 	Info->ReleaseMesh();
-	mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Normal);
+	StartPieceLoad(Info, lcLoadPriority::Normal);
 }
 
 void lcPiecesLibrary::InvalidatePieceLoad(PieceInfo* Info)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	Info->mState = lcAssetState::Unloaded;
+	ClearPieceLoadError(Info);
+
 	if (mAssetLoader)
 		mAssetLoader->InvalidatePieceLoad(Info);
-	else
-	{
-		Info->mState = lcPieceInfoState::Unloaded;
-		ClearPieceLoadError(Info);
-	}
 }
 
 void lcPiecesLibrary::ReleasePieceInfo(PieceInfo* Info)
@@ -2261,7 +2394,7 @@ void lcPiecesLibrary::UnloadUnusedParts()
 	for (const auto& PieceIt : mPieces)
 	{
 		PieceInfo* Info = PieceIt.second;
-		if (Info->GetRefCount() == 0 && Info->mState != lcPieceInfoState::Unloaded)
+		if (Info->GetRefCount() == 0 && Info->mState != lcAssetState::Unloaded)
 			ReleasePieceInfo(Info);
 	}
 }
@@ -2311,20 +2444,20 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	const auto ReloadPiece = [this](PieceInfo* Info)
 	{
-		if (Info->mState != lcPieceInfoState::Loaded || !Info->GetMesh() || !(Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud))
+		if (Info->mState != lcAssetState::Loaded || !Info->GetMesh() || !(Info->GetMesh()->mFlags & lcMeshFlag::HasStyleStud))
 			return;
 
 		if (Info->IsModel())
 		{
 			Info->ReleaseMesh();
-			Info->mState = lcPieceInfoState::Unloaded;
+			Info->mState = lcAssetState::Unloaded;
 
-			mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Low);
+			StartPieceLoad(Info, lcLoadPriority::Low);
 		}
 		else if (!Info->IsProject())
 		{
 			Info->Unload();
-			mAssetLoader->RequestPieceLoad(Info, lcPieceLoadPriority::Low);
+			StartPieceLoad(Info, lcLoadPriority::Low);
 		}
 
 		mBuffersDirty = true;
@@ -2338,7 +2471,11 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	mLoadMutex.unlock();
 
-	const std::vector<lcPiece*> SynthPieces(mSynthPieces.begin(), mSynthPieces.end());
+	std::vector<lcPiece*> SynthPieces;
+	SynthPieces.reserve(mSynthPieces.size());
+
+	for (const auto& Entry : mSynthPieces)
+		SynthPieces.push_back(Entry.first);
 
 	for (lcPiece* Piece : SynthPieces)
 		Piece->RefreshGeneratedMesh();

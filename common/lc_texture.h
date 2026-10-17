@@ -15,27 +15,7 @@
 
 #define LC_TEXTURE_NAME_LEN 256
 
-#include "lc_filesource.h"
-
-enum class lcTextureState
-{
-	Unrequested,
-	Queued,
-	Decoding,
-	Decoded,
-	RetryPending,
-	Ready,
-	Failed
-};
-
-enum class lcTextureLoadError
-{
-	None,
-	DecodeFailed,
-	ContextActivationFailed,
-	ContextUnavailable,
-	UploadFailed
-};
+#include "lc_assettypes.h"
 
 class lcTexture
 {
@@ -56,6 +36,8 @@ public:
 	void DiscardDecodedImage();
 	// Records a failure without discarding pixels retained for upload retries.
 	void SetFailed(lcTextureLoadError Error, QString Details);
+	// Failure details or a fallback message; empty unless loading has failed.
+	QString GetLoadError() const;
 	void Upload(lcContext* Context);
 	void Unload();
 
@@ -98,12 +80,12 @@ public:
 
 	bool NeedsUpload() const
 	{
-		return mState == lcTextureState::Decoded && mTexture == 0 && !mImages.empty();
+		return mTexture == 0 && !mImages.empty() && mState != lcAssetState::Failed;
 	}
 
 	bool IsReady() const
 	{
-		return mState == lcTextureState::Ready && mTexture != 0;
+		return mState == lcAssetState::Loaded && mTexture != 0;
 	}
 
 	int GetFlags() const
@@ -126,7 +108,7 @@ public:
 	char mName[LC_TEXTURE_NAME_LEN] = {};
 	lcFileSource mSource;
 	GLuint mTexture = 0;
-	lcTextureState mState = lcTextureState::Unrequested;
+	lcAssetState mState = lcAssetState::Unloaded;
 	lcTextureLoadError mLoadFailure = lcTextureLoadError::None;
 	QString mLoadFailureDetails;
 
@@ -135,6 +117,8 @@ protected:
 	QAtomicInt mRefCount = 0;
 	std::vector<QImage> mImages;
 	int mFlags = 0;
+
+	Q_DECLARE_TR_FUNCTIONS(lcTexture)
 };
 
 extern lcTexture* gGridTexture;

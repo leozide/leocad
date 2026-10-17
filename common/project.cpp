@@ -147,7 +147,7 @@ bool Project::CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Inc
 	// The callers have already matched filenames. Two missing part references
 	// can share an identity, while failed library parts and models cannot.
 	if (!Existing->IsProject() && !Incoming->IsProject())
-		return Existing->mState == lcPieceInfoState::Failed && Incoming->mState == lcPieceInfoState::Failed;
+		return Existing->mState == lcAssetState::Failed && Incoming->mState == lcAssetState::Failed;
 
 	if (!Existing->IsProject() || !Incoming->IsProject())
 		return false;
@@ -1169,7 +1169,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			PieceInfo* Info = Model->GetPieceInfo();
 
 			Info->ReleaseMesh();
-			Info->mState = lcPieceInfoState::Unloaded;
+			lcGetPiecesLibrary()->InvalidatePieceLoad(Info);
 		}
 		else
 		{
@@ -1449,18 +1449,20 @@ lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, con
 
 		for (const std::string& Name : References)
 		{
-			lcTexture* Before = Library->FindTextureDeferred(Name.c_str(), BeforeDirectories, Source.mEmbeddedDataIndex);
+			lcFileSource BeforeSource;
+			lcTexture* Before = Library->FindTextureDeferred(Name.c_str(), BeforeDirectories, Source.mEmbeddedDataIndex, BeforeSource);
 
 			if (!Before)
 				continue;
 
-			lcTexture* After = Library->FindTextureDeferred(Name.c_str(), AfterDirectories, MergedData);
+			lcFileSource AfterSource;
+			lcTexture* After = Library->FindTextureDeferred(Name.c_str(), AfterDirectories, MergedData, AfterSource);
 			bool Same = After != nullptr;
 
-			if (Same && Before->mSource.EmbeddedData && After->mSource.EmbeddedData)
-				Same = SameEmbeddedData(*Before->mSource.EmbeddedData, *After->mSource.EmbeddedData);
+			if (Same && BeforeSource.EmbeddedData && AfterSource.EmbeddedData)
+				Same = SameEmbeddedData(*BeforeSource.EmbeddedData, *AfterSource.EmbeddedData);
 			else if (Same)
-				Same = Before->mSource == After->mSource;
+				Same = BeforeSource == AfterSource;
 
 			Library->ReleaseTexture(Before);
 
@@ -1800,7 +1802,7 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	ModelParts.erase(std::remove_if(ModelParts.begin(), ModelParts.end(), [](const lcModelPartsEntry& ModelPart)
 	{
-		return ModelPart.Info->mState != lcPieceInfoState::Loaded ||
+		return ModelPart.Info->mState != lcAssetState::Loaded ||
 			(ModelPart.Info->GetSynthInfo() && !ModelPart.Mesh) ||
 			(!ModelPart.Mesh && !ModelPart.Info->GetMesh());
 	}), ModelParts.end());

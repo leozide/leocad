@@ -4,15 +4,11 @@
 #include "lc_file.h"
 #include "lc_library.h"
 #include "lc_mesh.h"
-#include "lc_model.h"
 #include "lc_texture.h"
 #include "lc_synth.h"
 #include "piece.h"
-#include "pieceinf.h"
 
 constexpr QEvent::Type lcAssetLoaderCompletionEvent = static_cast<QEvent::Type>(QEvent::User + 1);
-
-lcPieceBuildResult::~lcPieceBuildResult() = default;
 
 // Normal part flow: queue -> build and convert -> finalize sections -> settle textures -> publish -> notify.
 // Workers own private build data. Publication and deferred notifications stay on the UI thread.
@@ -29,25 +25,7 @@ lcAssetLoader::~lcAssetLoader()
 	Shutdown();
 }
 
-bool lcAssetLoader::RequestPieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
-		Info->mState = lcPieceInfoState::Loaded;
-	else if (Info->mState == lcPieceInfoState::Unloaded)
-		QueuePieceLoad(Info, LoadPriority);
-	else if (LoadPriority != lcPieceLoadPriority::Low)
-	{
-		const auto It = mPieceRequests.find(Info);
-		if (It != mPieceRequests.end())
-			PromotePiecePriority(It->second, LoadPriority);
-	}
-
-	return LoadPriority != lcPieceLoadPriority::Blocking || WaitForPieceRequest(Info);
-}
-
-void lcAssetLoader::QueuePieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPriority)
+void lcAssetLoader::RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -65,22 +43,6 @@ void lcAssetLoader::QueuePieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPrio
 
 	mLibrary->AddPieceReference(Info); // The request owns a separate in-flight hold.
 
-	Info->mState = lcPieceInfoState::Queued;
-
-	if (!Info->IsModel() && !Info->IsProject())
-	{
-		const lcBoundingBox& Box = mLibrary->GetLoadingMesh()->mBoundingBox;
-		Info->SetBoundingBox(Box.Min, Box.Max);
-	}
-	else if (Info->IsModel() && Info->GetModel()->HasDirectGeometry())
-	{
-		const lcBoundingBox& Box = mLibrary->GetLoadingMesh()->mBoundingBox;
-		const lcBoundingBox& ModelBox = Info->GetBoundingBox();
-		Info->SetBoundingBox(lcMin(ModelBox.Min, Box.Min), lcMax(ModelBox.Max, Box.Max));
-	}
-
-	mLibrary->ClearPieceLoadError(Info);
-
 	std::shared_ptr<PieceRequest> RequestedPiece = std::make_shared<PieceRequest>();
 
 	RequestedPiece->Info = Info;
@@ -95,7 +57,7 @@ void lcAssetLoader::QueuePieceLoad(PieceInfo* Info, lcPieceLoadPriority LoadPrio
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcPieceLoadPriority LoadPriority)
+void lcAssetLoader::PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -116,23 +78,21 @@ void lcAssetLoader::PromotePiecePriority(const std::shared_ptr<PieceRequest>& Re
 	}
 }
 
-void lcAssetLoader::RequestSynthMesh(lcPiece* Piece)
+void lcAssetLoader::RequestSynthMesh(lcPiece* Piece, PieceInfo* Info, std::shared_ptr<const lcSynthInfo> SynthInfo, std::vector<lcPieceControlPoint> ControlPoints)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	CancelSynthMesh(Piece);
-
-	PieceInfo* Info = Piece->mPieceInfo;
-	const std::shared_ptr<const lcSynthInfo> SynthInfo = Info ? Info->GetSynthInfoShared() : nullptr;
 
 	if (!SynthInfo)
 		return;
 
 	std::shared_ptr<SynthRequest> RequestedSynth = std::make_shared<SynthRequest>();
 	RequestedSynth->Piece = Piece;
-	RequestedSynth->SynthInfo = SynthInfo;
-	RequestedSynth->ControlPoints = Piece->GetControlPoints();
-	RequestedSynth->LoadPriority = lcPieceLoadPriority::Normal;
+	RequestedSynth->Info = Info;
+	RequestedSynth->SynthInfo = std::move(SynthInfo);
+	RequestedSynth->ControlPoints = std::move(ControlPoints);
+	RequestedSynth->LoadPriority = lcLoadPriority::Normal;
 	RequestedSynth->QueuedAt = QDateTime::currentMSecsSinceEpoch();
 
 	if (mStopping)
@@ -145,11 +105,11 @@ void lcAssetLoader::RequestSynthMesh(lcPiece* Piece)
 	emit mLibrary->AssetRequestsChanged();
 }
 
-void lcAssetLoader::QueueTextureLoad(lcTexture* Texture, lcPieceLoadPriority LoadPriority)
+void lcAssetLoader::QueueTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	if (mStopping || Texture->IsReady() || Texture->mState == lcTextureState::Failed)
+	if (mStopping || Texture->IsReady() || Texture->mState == lcAssetState::Failed)
 		return;
 
 	const auto Existing = mTextureRequests.find(Texture);
@@ -162,12 +122,12 @@ void lcAssetLoader::QueueTextureLoad(lcTexture* Texture, lcPieceLoadPriority Loa
 	}
 
 	mLibrary->AddTextureReference(Texture);
-	Texture->mState = lcTextureState::Queued;
+	Texture->mState = lcAssetState::Loading;
 
 	std::shared_ptr<TextureRequest> RequestedTexture = std::make_shared<TextureRequest>();
 
 	RequestedTexture->Texture = Texture;
-	RequestedTexture->Source = Texture->mSource;
+	RequestedTexture->Source = std::move(Source);
 	RequestedTexture->LoadPriority = LoadPriority;
 	RequestedTexture->QueuedAt = QDateTime::currentMSecsSinceEpoch();
 
@@ -197,7 +157,7 @@ void lcAssetLoader::DispatchJobs()
 		const auto Score = [Now](const auto& Item)
 		{
 			// Each ten seconds of waiting promotes one priority level.
-			return qMin<qint64>(static_cast<qint64>(lcPieceLoadPriority::Blocking),
+			return qMin<qint64>(static_cast<qint64>(lcLoadPriority::Blocking),
 				static_cast<qint64>(Item->LoadPriority) + qMax<qint64>(0, Now - Item->QueuedAt) / 10000);
 		};
 
@@ -227,7 +187,6 @@ void lcAssetLoader::DispatchJobs()
 			RequestedPiece.reset();
 			RequestedSynth.reset();
 			RequestedTexture->State = RequestState::AwaitingCompletion;
-			RequestedTexture->Texture->mState = lcTextureState::Decoding;
 		}
 		else if (RequestedSynth && (!RequestedPiece || !Less(RequestedSynth, RequestedPiece)))
 		{
@@ -240,7 +199,6 @@ void lcAssetLoader::DispatchJobs()
 			RequestedTexture.reset();
 			RequestedSynth.reset();
 			RequestedPiece->State = RequestState::AwaitingCompletion;
-			RequestedPiece->Info->mState = lcPieceInfoState::Loading;
 		}
 		else
 			break;
@@ -374,22 +332,21 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 	const std::shared_ptr<PieceRequest>& RequestedPiece = Completed.RequestedPiece;
 	PieceInfo* Info = RequestedPiece->Info;
 	const auto It = mPieceRequests.find(Info);
-	const bool Stale = mStopping || It == mPieceRequests.end() || It->second != RequestedPiece;
-	if (Stale && It != mPieceRequests.end() && It->second == RequestedPiece)
-		mPieceRequests.erase(It);
+	const bool Current = It != mPieceRequests.end() && It->second == RequestedPiece;
+	const bool Stale = mStopping || !Current;
 	RequestedPiece->State = Stale ? RequestState::Cancelled : RequestState::AwaitingPublication;
 
 	const bool HasConsumer = mLibrary->HasPieceConsumers(Info);
 
 	if (Stale || !HasConsumer)
 	{
-		if (!Stale)
-			mPieceRequests.erase(Info);
+		if (Current)
+		{
+			mPieceRequests.erase(It);
+			mLibrary->PieceLoadCancelled(Info);
+		}
 
 		RequestedPiece->State = RequestState::Cancelled;
-
-		if (HasConsumer && !Stale)
-			Info->mState = lcPieceInfoState::Cancelled;
 
 		mLibrary->ReleasePieceLoadHold(Info);
 
@@ -415,11 +372,7 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 			RequestedPiece->LoadPriority, RequestedPiece->Error);
 
 		if (RequestedPiece->Error.isEmpty() && !Ready)
-		{
-			Info->mState = lcPieceInfoState::AwaitingTextures;
-
 			return;
-		}
 	}
 
 	CompletePieceRequest(RequestedPiece);
@@ -442,7 +395,6 @@ void lcAssetLoader::ProcessSynthCompletion(Completion& Completed)
 
 	if (!Completed.SynthMesh)
 	{
-		RequestedSynth->Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(RequestedSynth->Piece->mPieceInfo->mFileName));
 		CompleteSynthRequest(RequestedSynth);
 		return;
 	}
@@ -470,24 +422,20 @@ void lcAssetLoader::ProcessTextureCompletion(Completion& Completed)
 	RequestedTexture->State = Stale ? RequestState::Cancelled : RequestState::AwaitingPublication;
 
 	if (Stale)
+	{
 		mLibrary->ReleaseTexture(Texture);
-	else if (!Completed.TextureResult.DecodedImage.isNull())
-	{
-		Texture->SetImage(std::move(Completed.TextureResult.DecodedImage), LC_TEXTURE_MIPMAPS);
-		if (Texture->NeedsUpload())
-			UploadTextureRequest(RequestedTexture);
-		else
-			CompleteTextureRequest(RequestedTexture);
+		return;
 	}
-	else
-	{
-		Texture->SetFailed(Completed.TextureResult.Error, std::move(Completed.TextureResult.ErrorDetails));
 
+	mLibrary->PublishTexture(Texture, std::move(Completed.TextureResult));
+
+	if (Texture->NeedsUpload())
+		UploadTextureRequest(RequestedTexture);
+	else
 		CompleteTextureRequest(RequestedTexture);
-	}
 }
 
-bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcPieceLoadPriority LoadPriority, QString& Error)
+bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourceSnapshot& Source, lcLoadPriority LoadPriority, QString& Error)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -499,10 +447,11 @@ bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourc
 			if (Section.TextureName.isEmpty())
 				continue;
 
-			Section.Texture = mLibrary->FindTextureDeferred(Section.TextureName.toLatin1().constData(), Source.TextureSearchDirectories, Source.EmbeddedData);
+			lcFileSource TextureSource;
+			Section.Texture = mLibrary->FindTextureDeferred(Section.TextureName.toLatin1().constData(), Source.TextureSearchDirectories, Source.EmbeddedData, TextureSource);
 
-			if (Section.Texture && !Section.Texture->IsReady() && Section.Texture->mState != lcTextureState::Failed)
-				QueueTextureLoad(Section.Texture, LoadPriority);
+			if (Section.Texture && !Section.Texture->IsReady() && Section.Texture->mState != lcAssetState::Failed)
+				QueueTextureLoad(Section.Texture, std::move(TextureSource), LoadPriority);
 		}
 
 	return MeshTexturesSettled(Mesh, Error);
@@ -523,39 +472,13 @@ bool lcAssetLoader::MeshTexturesSettled(const lcMesh& Mesh, QString& Error)
 				if (!Section.TextureName.isEmpty())
 					Error = tr("Missing texture %1.").arg(Section.TextureName);
 			}
-			else if (Texture->mState == lcTextureState::Failed)
-				Error = TextureFailureMessage(Texture);
+			else if (Texture->mState == lcAssetState::Failed)
+				Error = Texture->GetLoadError();
 			else if (!Texture->IsReady())
 				Ready = false;
 		}
 
 	return Ready;
-}
-
-QString lcAssetLoader::TextureFailureMessage(const lcTexture* Texture)
-{
-	if (!Texture->mLoadFailureDetails.isEmpty())
-		return Texture->mLoadFailureDetails;
-
-	switch (Texture->mLoadFailure)
-	{
-	case lcTextureLoadError::DecodeFailed:
-		return tr("Could not load texture %1.").arg(QString::fromLatin1(Texture->mName));
-
-	case lcTextureLoadError::ContextActivationFailed:
-		return tr("Could not make the shared GL context current for texture upload.");
-
-	case lcTextureLoadError::ContextUnavailable:
-		return tr("No shared GL context is available for texture upload.");
-
-	case lcTextureLoadError::UploadFailed:
-		return tr("Texture upload failed.");
-
-	case lcTextureLoadError::None:
-		return tr("Texture %1 failed to load.").arg(QString::fromLatin1(Texture->mName));
-	}
-
-	return tr("Texture %1 failed to load.").arg(QString::fromLatin1(Texture->mName));
 }
 
 void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& RequestedTexture)
@@ -565,7 +488,6 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 	lcTexture* Texture = RequestedTexture->Texture;
 
 	RequestedTexture->UploadAttempts++;
-	Texture->mState = lcTextureState::Decoded;
 
 	QOpenGLContext* PreviousContext = QOpenGLContext::currentContext();
 	QSurface* PreviousSurface = PreviousContext ? PreviousContext->surface() : nullptr;
@@ -596,7 +518,7 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 	if (!Texture->IsReady() && RequestedTexture->UploadAttempts < MaxUploadAttempts)
 	{
 		// Only the loader may retry. Keep dependent parts awaiting this texture.
-		Texture->mState = lcTextureState::RetryPending;
+		Texture->mState = lcAssetState::Loading;
 
 		const int Delay = RequestedTexture->UploadAttempts == 1 ? 50 : 200;
 
@@ -688,33 +610,24 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	PieceInfo* Info = RequestedPiece->Info;
-	const bool Loaded = RequestedPiece->Error.isEmpty() && (RequestedPiece->StagedMesh || RequestedPiece->EmptyGeometry);
-	QString LoadError;
+	QString LoadError = RequestedPiece->Error;
 
-	if (Loaded)
-	{
-		if (RequestedPiece->SaveCache && RequestedPiece->StagedMesh)
-			mLibrary->SaveBuiltPieceCache(RequestedPiece->Source, *RequestedPiece->StagedMesh);
+	if (LoadError.isEmpty() && !RequestedPiece->StagedMesh && !RequestedPiece->EmptyGeometry)
+		LoadError = tr("Could not load part %1.").arg(RequestedPiece->Source.FileName);
 
-		if (RequestedPiece->StagedMesh)
-			Info->SetMesh(RequestedPiece->StagedMesh.release());
+	if (LoadError.isEmpty() && RequestedPiece->SaveCache && RequestedPiece->StagedMesh)
+		mLibrary->SaveBuiltPieceCache(RequestedPiece->Source, *RequestedPiece->StagedMesh);
 
-		Info->mState = lcPieceInfoState::Loaded;
-		mLibrary->ClearPieceLoadError(Info);
-	}
-	else
-	{
-		LoadError = RequestedPiece->Error.isEmpty() ? tr("Could not load part %1.").arg(RequestedPiece->Source.FileName) : RequestedPiece->Error;
+	const bool Loaded = mLibrary->PublishPieceMesh(Info, std::move(RequestedPiece->StagedMesh), LoadError);
 
-		Info->SetFailed(LoadError);
-	}
+	if (!Loaded)
+		CancelUnusedTextureRequests();
 
 	const auto It = mPieceRequests.find(Info);
 	if (It != mPieceRequests.end() && It->second == RequestedPiece)
 		mPieceRequests.erase(It);
 	RequestedPiece->State = Loaded ? RequestState::Succeeded : RequestState::Failed;
 
-	mLibrary->ScheduleBufferRepack();
 	mPieceNotifications.push_back({ RequestedPiece, std::move(LoadError) });
 
 	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
@@ -725,21 +638,11 @@ void lcAssetLoader::CompleteSynthRequest(const std::shared_ptr<SynthRequest>& Re
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	lcPiece* Piece = RequestedSynth->Piece;
-	PieceInfo* Info = Piece->mPieceInfo;
-	const bool Loaded = RequestedSynth->Error.isEmpty() && RequestedSynth->StagedMesh;
-
-	Piece->SetGeneratedMesh(Loaded ? RequestedSynth->StagedMesh.release() : nullptr);
-
-	if (Loaded)
-		mSynthErrors.erase(Piece);
-	else
-		mSynthErrors.insert_or_assign(Piece, RequestedSynth->Error);
+	PieceInfo* Info = RequestedSynth->Info;
+	const bool Loaded = mLibrary->PublishSynthMesh(Piece, std::move(RequestedSynth->StagedMesh), RequestedSynth->Error);
 
 	if (!Loaded)
-	{
-		RequestedSynth->StagedMesh.reset();
 		CancelUnusedTextureRequests();
-	}
 
 	const SynthRequestMap::iterator It = mSynthRequests.find(Piece);
 
@@ -867,25 +770,9 @@ void lcAssetLoader::WaitForCompletionOrRetry()
 	}
 }
 
-bool lcAssetLoader::WaitForPieceRequest(PieceInfo* Info)
+bool lcAssetLoader::WaitForPieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
-
-	std::shared_ptr<PieceRequest> RequestedPiece;
-
-	const auto It = mPieceRequests.find(Info);
-
-	if (It != mPieceRequests.end())
-	{
-		RequestedPiece = It->second;
-
-		PromotePiecePriority(RequestedPiece, lcPieceLoadPriority::Blocking);
-	}
-
-	DispatchJobs();
-
-	if (!RequestedPiece)
-		return Info->mState == lcPieceInfoState::Loaded;
 
 	QOpenGLContext* const PreviousContext = QOpenGLContext::currentContext();
 	QSurface* const PreviousSurface = PreviousContext ? PreviousContext->surface() : nullptr;
@@ -915,16 +802,7 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 
 	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
 
-	for (PieceInfo* Info : Required)
-	{
-		if (Info->mState != lcPieceInfoState::Unloaded)
-			continue;
-
-		if (Info->IsProject() || (Info->IsModel() && !Info->GetModel()->HasDirectGeometry()))
-			Info->mState = lcPieceInfoState::Loaded;
-		else
-			QueuePieceLoad(Info, lcPieceLoadPriority::Blocking);
-	}
+	std::vector<std::shared_ptr<PieceRequest>> Requests;
 
 	for (PieceInfo* Info : Required)
 	{
@@ -933,15 +811,16 @@ bool lcAssetLoader::WaitForPieces(const std::vector<PieceInfo*>& Pieces)
 		if (It == mPieceRequests.end())
 			continue;
 
-		PromotePiecePriority(It->second, lcPieceLoadPriority::Blocking);
+		PromotePiecePriority(It->second, lcLoadPriority::Blocking);
+		Requests.push_back(It->second);
 	}
 
 	DispatchJobs();
 
 	bool Ready = true;
 
-	for (PieceInfo* Info : Required)
-		Ready = WaitForPieceRequest(Info) && Ready;
+	for (const std::shared_ptr<PieceRequest>& RequestedPiece : Requests)
+		Ready = WaitForPieceRequest(RequestedPiece) && Ready;
 
 	return Ready;
 }
@@ -960,7 +839,7 @@ bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 			continue;
 
 		const std::shared_ptr<SynthRequest>& RequestedSynth = It->second;
-		RequestedSynth->LoadPriority = lcPieceLoadPriority::Blocking;
+		RequestedSynth->LoadPriority = lcLoadPriority::Blocking;
 		Required.push_back(RequestedSynth);
 
 		if (RequestedSynth->StagedMesh)
@@ -970,7 +849,7 @@ bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 					const TextureRequestMap::iterator TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
 
 					if (TextureIt != mTextureRequests.end())
-						TextureIt->second->LoadPriority = lcPieceLoadPriority::Blocking;
+						TextureIt->second->LoadPriority = lcLoadPriority::Blocking;
 				}
 	}
 
@@ -978,6 +857,8 @@ bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 
 	QOpenGLContext* const PreviousContext = QOpenGLContext::currentContext();
 	QSurface* const PreviousSurface = PreviousContext ? PreviousContext->surface() : nullptr;
+
+	bool Ready = true;
 
 	for (const std::shared_ptr<SynthRequest>& RequestedSynth : Required)
 	{
@@ -990,32 +871,30 @@ bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 
 			WaitForCompletionOrRetry();
 		}
+
+		Ready = RequestedSynth->State == RequestState::Succeeded && Ready;
 	}
 
 	if (PreviousContext && PreviousSurface && (QOpenGLContext::currentContext() != PreviousContext || PreviousContext->surface() != PreviousSurface))
 		PreviousContext->makeCurrent(PreviousSurface);
 
-	for (lcPiece* Piece : Pieces)
-		if (Piece->mPieceInfo && Piece->mPieceInfo->GetSynthInfo() && !Piece->HasGeneratedMesh())
-			return false;
-
-	return true;
+	return Ready;
 }
 
-bool lcAssetLoader::WaitForTexture(lcTexture* Texture)
+bool lcAssetLoader::WaitForTexture(lcTexture* Texture, lcFileSource Source)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	if (Texture->IsReady())
 		return true;
 
-	QueueTextureLoad(Texture, lcPieceLoadPriority::Blocking);
+	QueueTextureLoad(Texture, std::move(Source), lcLoadPriority::Blocking);
 
 	for (;;)
 	{
 		ProcessCompletions();
 
-		if (Texture->IsReady() || Texture->mState == lcTextureState::Failed)
+		if (Texture->IsReady() || Texture->mState == lcAssetState::Failed)
 			break;
 
 		if (mStopping || mTextureRequests.find(Texture) == mTextureRequests.end())
@@ -1054,15 +933,6 @@ bool lcAssetLoader::HasPendingWork()
 	return !mPieceRequests.empty() || !mTextureRequests.empty() || !mSynthRequests.empty() || mActiveJobs != 0;
 }
 
-QString lcAssetLoader::GetSynthMeshError(const lcPiece* Piece) const
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	const std::unordered_map<const lcPiece*, QString>::const_iterator It = mSynthErrors.find(Piece);
-
-	return It != mSynthErrors.end() ? It->second : QString();
-}
-
 void lcAssetLoader::InvalidatePieceLoad(PieceInfo* Info)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
@@ -1070,9 +940,6 @@ void lcAssetLoader::InvalidatePieceLoad(PieceInfo* Info)
 	for (PieceNotification& Pending : mPieceNotifications)
 		if (Pending.RequestedPiece->Info == Info)
 			Pending.RequestedPiece->State = RequestState::Cancelled;
-
-	Info->mState = lcPieceInfoState::Unloaded;
-	mLibrary->ClearPieceLoadError(Info);
 
 	const auto It = mPieceRequests.find(Info);
 
@@ -1092,7 +959,7 @@ void lcAssetLoader::CancelPieceLoad(PieceInfo* Info)
 	if (It == mPieceRequests.end() || It->second->State == RequestState::AwaitingCompletion)
 		return;
 
-	Info->mState = lcPieceInfoState::Cancelled;
+	mLibrary->PieceLoadCancelled(Info);
 
 	DiscardPieceRequest(It->second);
 }
@@ -1101,8 +968,6 @@ void lcAssetLoader::CancelSynthMesh(lcPiece* Piece)
 {
 	// Remove queued work immediately; running synth builds notice cancellation cooperatively.
 	Q_ASSERT(QThread::currentThread() == thread());
-
-	mSynthErrors.erase(Piece);
 
 	for (SynthNotification& Pending : mSynthNotifications)
 		if (Pending.RequestedSynth->Piece == Piece)
@@ -1174,9 +1039,6 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 		lcTexture* Texture = RequestedTexture->Texture;
 
 		Texture->DiscardDecodedImage();
-		Texture->mState = lcTextureState::Unrequested;
-		Texture->mLoadFailure = lcTextureLoadError::None;
-		Texture->mLoadFailureDetails.clear();
 
 		mLibrary->ReleaseTexture(Texture);
 	}
@@ -1210,7 +1072,6 @@ void lcAssetLoader::PauseQueuedWork()
 
 		RequestedPiece->StagedMesh.reset();
 		RequestedPiece->State = RequestState::Queued;
-		RequestedPiece->Info->mState = lcPieceInfoState::Queued;
 	}
 
 	// Pending generated meshes are restarted after the new stud style is installed.
@@ -1250,7 +1111,6 @@ void lcAssetLoader::Shutdown()
 	std::deque<std::shared_ptr<TextureRequest>> CancelledTextures;
 
 	mStopping = true;
-	mSynthErrors.clear();
 
 	for (auto It = mPieceRequests.begin(); It != mPieceRequests.end();)
 	{
@@ -1259,7 +1119,7 @@ void lcAssetLoader::Shutdown()
 		else
 		{
 			It->second->State = RequestState::Cancelled;
-			It->second->Info->mState = lcPieceInfoState::Cancelled;
+			mLibrary->PieceLoadCancelled(It->second->Info);
 
 			Cancelled.push_back(It->second);
 

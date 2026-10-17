@@ -1045,7 +1045,7 @@ void lcMainWindow::UpdateAssets()
 
 	for (const PieceInfo* Info : Required)
 	{
-		if (Info->mState == lcPieceInfoState::Failed)
+		if (Info->mState == lcAssetState::Failed)
 		{
 			Failed++;
 
@@ -1059,7 +1059,7 @@ void lcMainWindow::UpdateAssets()
 
 			FailureDetails += QString::fromLatin1(Info->mFileName) + QStringLiteral(": ") + Error;
 		}
-		else if (Info->mState != lcPieceInfoState::Loaded)
+		else if (Info->mState != lcAssetState::Loaded)
 			PendingParts++;
 	}
 
@@ -2024,7 +2024,7 @@ void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
 	mCurrentPieceInfo = Info;
 
 	if (mCurrentPieceInfo)
-		Library->RequestPieceLoad(mCurrentPieceInfo, lcPieceLoadPriority::Normal);
+		Library->RequestPieceLoad(mCurrentPieceInfo, lcLoadPriority::Normal);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()

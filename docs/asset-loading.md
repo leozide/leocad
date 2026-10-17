@@ -90,7 +90,9 @@ active project or publish into live models.
 The texture manager is owned by the library and owns the only texture registry.
 `FindTextureDeferred()` resolves embedded data, project-directory files, and
 indexed library files in the library, then asks the manager to acquire an identity
-for that resolved source. Resolution preserves the prefixed search order and
+for that resolved source. The lookup returns the source snapshot alongside the
+acquired identity so callers can pass it to loader requests without reading texture fields.
+Resolution preserves the prefixed search order and
 canonicalizes disk paths. The project directory is passed separately to acquisition
 so the manager preserves temporary-texture metadata without searching files itself.
 Library texture APIs forward reference changes and decoding to the manager.
@@ -98,10 +100,13 @@ Library texture APIs forward reference changes and decoding to the manager.
 the loader. Texture requests,
 priority promotion, cancellation, upload/retries, and part dependency settlement
 remain in `lcAssetLoader`; its in-flight texture references are acquired through
-the manager. `lcFileSource` lives in `lc_filesource.h`; texture build results live
-in `lc_texturemanager.h`. `lcTexture::mSource` stores this value; copies for workers do not snapshot file
-contents. Texture names, project directories, and temporary flags remain separate.
-The loader copies `lcTexture::mSource` into each texture request. The library's
+the manager. Shared readiness, priority, file-source and piece-source snapshots,
+build results, and `lcTextureLoadError` live in `lc_assettypes.h`. Stud-style and
+archive-type enums remain in `lc_library.h` and are forward-declared by the shared
+header; the piece snapshot constructor supplies their defaults out of line.
+`lcTexture::mSource` stores the source identity; copies for workers do not snapshot
+file contents. Texture names, project directories, and temporary flags remain separate.
+Callers pass the resolved source into each texture request. The library's
 `BuildTextureData()` and `AddTextureReference()` are internal loader services,
 accessible through the existing `lcAssetLoader` friendship.
 
@@ -212,22 +217,29 @@ events.
 
 ```mermaid
 flowchart LR
-    subgraph Part["PieceInfo request"]
-        U[Unloaded] --> Q[Queued] --> L[Loading]
-        L --> A[AwaitingTextures] --> R[Loaded]
-        L --> R
+    subgraph Part["PieceInfo readiness (library)"]
+        U[Unloaded] --> L[Loading]
+        L --> R[Loaded]
         L --> F[Failed]
-        A --> F
-        Q --> C[Cancelled]
+        L -->|Cancelled or invalidated| U
+        R -->|Invalidated or unloaded| U
+        F -->|Invalidated or unloaded| U
     end
-    subgraph Texture["Texture request"]
-        TU[Unrequested] --> TQ[Queued] --> TD[Decoding]
-        TD --> TC[Decoded] --> TR[Ready]
-        TD --> TF[Failed]
-        TC --> TP[RetryPending] --> TC
-        TC --> TF
+    subgraph Texture["Texture readiness"]
+        TU[Unloaded] --> TL[Loading]
+        TL --> TR[Loaded]
+        TL --> TF[Failed]
+        TL -->|Cancelled| TU
     end
 ```
+
+The library owns `PieceInfo` readiness. `Loading` covers queued work, worker execution,
+and texture dependencies; callers do not observe the loader's scheduling states.
+The loader never writes `PieceInfo::mState`: the library marks accepted loads,
+publishes success or failure, and resets current cancellations to `Unloaded`.
+Disposal of an obsolete request never changes a replacement's readiness.
+`PieceInfo` initializes readiness and maintains it during structural operations
+such as unloading or model/project reassignment.
 
 The diagram shows the normal paths. Parsing or synth generation and geometry
 conversion run consecutively in one worker job. Intermediate `lcLibraryMeshData`
@@ -250,12 +262,25 @@ textures are ready. Valid empty geometry may also settle successfully. A missing
 include or declared texture is a failure, even if some geometry was built.
 Texture names remain in mesh sections and cache data when lookup fails.
 
-A texture is ready only when `IsReady()` reports `Ready` with a nonzero GL
+A texture is ready only when `IsReady()` reports `Loaded` with a nonzero GL
 texture. CPU pixels, `HasImageData()`, and `!NeedsUpload()` do not establish
 readiness. The completion pump uploads through the global shared offscreen
 context without requiring the part to be drawn. Upload failures retry at most
 three times, with 50 ms and 200 ms delays; decoding failures settle immediately.
 Loader-decoded textures receive `LC_TEXTURE_MIPMAPS`.
+
+Textures use the same `Unloaded`, `Loading`, `Loaded`, and `Failed` readiness states
+as pieces. `Loading` spans queueing, decoding, upload, and retries; detailed progress
+and retry deadlines live in the request. Image storage indicates whether decoded
+pixels are available for upload. Upload retries retain `Loading` readiness and
+pixels. An upload failure becomes terminal `Failed` readiness only after retries
+are exhausted.
+
+The loader rejects stale completions and settles dependencies before asking the
+library to publish piece or synth meshes and their diagnostics. It also passes
+decoded texture pixels or decode failures to the library for publication; texture
+upload scheduling and retries remain in the loader. Request states, cleanup, and
+deferred notification scheduling belong to the loader.
 
 **Container readiness is not recursive readiness.** A Project `PieceInfo`, or a
 Model without direct geometry, can be `Loaded` while its children are pending
@@ -267,14 +292,16 @@ requirements, including nested and external models, with cycle protection.
 
 Part error text lives in the library's sparse `mFailedPartErrors` map, queried
 through `GetPieceLoadError()`, rather than an empty string in every catalog part.
-Synth error text is likewise sparse in the loader and available through
-`GetSynthMeshError()`. Entries must be cleared when their identity is unloaded,
-deleted, invalidated, or successfully rebuilt; synth cancellation also clears
-its entry. Pointer-keyed errors must not survive destruction and later attach
+Synth error text lives in the library's live-instance registry and is available
+through `GetSynthMeshError()`. A new generation clears the previous error;
+settlement records failure or clears the error on success. Cancellation removes
+the instance's registry entry. Part errors are cleared when their identity is
+unloaded, deleted, invalidated, or successfully rebuilt.
+Pointer-keyed errors must not survive destruction and later attach
 to a different object allocated at the same address.
 
-Textures store a compact `lcTextureLoadError` enum. The loader's static
-`TextureFailureMessage()` translates it into user-facing text when reporting a
+Textures store a compact `lcTextureLoadError` enum. `lcTexture::GetLoadError()`
+translates it into user-facing text when reporting a
 dependency failure. Missing includes and texture names remain in diagnostics;
 an empty error string alone does not prove readiness. Preserve translatable
 messages and check state/result rather than parsing error text.
@@ -381,10 +408,13 @@ retained; drawing does not retry them. Explicit invalidation or unloading can
 permit a later request.
 
 Synth meshes are **per `lcPiece` instance**, separate from the shared library
-mesh. `RequestSynthMesh()` copies control points and retains the shared synth
-definition. The library tracks live synth instances, including completed and failed
-generations, so settings changes can refresh them. Instances unregister before
-destruction; the loader owns pending requests and generation errors.
+mesh. The library's `RequestSynthMesh()` copies control points and retains the shared
+synth definition, passing both snapshots and the base `PieceInfo` identity to the loader.
+The loader treats `lcPiece` pointers as identities without reading instance fields.
+The library tracks live synth instances, including completed and failed generations,
+so settings changes can refresh them. Instances unregister before destruction.
+The library retains settled generation errors; the loader owns pending
+requests and their in-progress errors.
 Replacing or deleting the piece cancels its old request; workers
 check an atomic cancellation flag and stale results cannot replace newer meshes.
 Initial generation displays a cube. Control-point edits retain the previous
@@ -407,9 +437,11 @@ ownership.
 Priorities only promote: `Low < Normal < Blocking`. Ordinary thumbnail
 requests start Low; asynchronous model pieces and generated meshes start
 Normal, regardless of step. Synchronous waits promote their required requests
-and pending texture dependencies to Blocking. The same `lcPieceLoadPriority` enum
-is used at the loading entry point and throughout the scheduler. `RequestPieceLoad()`
-waits only for Blocking; Low and Normal return immediately. Internal queueing
+and pending texture dependencies to Blocking. The same `lcLoadPriority` enum
+is used at the loading entry point and throughout the scheduler. The library's `RequestPieceLoad()`
+waits only for Blocking; Low and Normal return immediately. The loader's entry point
+only queues or promotes requests; the library prepares readiness and starts unloaded
+requirements before delegating waits. Internal queueing
 uses priority solely to rank work and does not wait. Shared textures retain the highest
 promotion received from any parent or direct wait. There is no consumer identity
 map, priority demotion, or step-based scheduling. Priority lasts until that request
@@ -432,7 +464,12 @@ requirements and does not expand model containers itself. Callers retain every
 required identity through the wait; it does not acquire consumer references.
 `WaitForSynthMeshes()`
 promotes and waits for queued generations of the specified instances; callers
-start generations with `RequestSynthMesh()`. The loader's `WaitForTexture()` starts
+start generations with `RequestSynthMesh()`. The loader retains the requests present
+at wait entry and reports their outcomes; the library combines those outcomes with
+final asset readiness, including assets with no pending request. Synth fallback
+error text is produced by library publication. `PieceInfo` pointers are identities
+to the loader; it does not read their fields or call their methods.
+The loader's `WaitForTexture()` starts
 or promotes decoding as needed and waits through upload and retries.
 `lcModel::WaitForAssets()` combines recursive part and synth waits and updates
 bounds, but deliberately ignores their failure results. `EnsureAssetsReady()`
@@ -444,8 +481,8 @@ adds strict failure reporting. During shutdown, the loader's private
 | Need | API and lifetime contract |
 | --- | --- |
 | Resolve a name | `FindPiece()` with the intended project and explicit `CreateMissing` / `SearchProjectFolder` arguments. The returned pointer is borrowed; retain it before keeping it beyond its owner's lifetime. |
-| Retain and start ordinary asynchronous work | `RequestPieceLoad()` with `lcPieceLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
-| Retain and synchronously load one identity | `RequestPieceLoad()` with `lcPieceLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and start ordinary asynchronous work | `RequestPieceLoad()` with `lcLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceInfo()`, including failures. |
+| Retain and synchronously load one identity | `RequestPieceLoad()` with `lcLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceInfo()`, including failures. |
 | Retain without starting work | `AddPieceReference()`, paired with `ReleasePieceInfo()`. This does not make geometry ready. |
 | Wait for an explicit part set | `WaitForPieces()` (use `{ Info }` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
 | Wait for one identity and its container geometry | `EnsurePieceAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |

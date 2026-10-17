@@ -2,22 +2,6 @@
 
 #include "lc_texture.h"
 
-// Image pixels and any error produced while preparing a texture.
-struct lcTextureBuildResult
-{
-	lcTextureBuildResult() = default;
-	~lcTextureBuildResult();
-
-	lcTextureBuildResult(lcTextureBuildResult&&) = default;
-	lcTextureBuildResult& operator=(lcTextureBuildResult&&) = default;
-	lcTextureBuildResult(const lcTextureBuildResult&) = delete;
-	lcTextureBuildResult& operator=(const lcTextureBuildResult&) = delete;
-
-	QImage DecodedImage;
-	lcTextureLoadError Error = lcTextureLoadError::None;
-	QString ErrorDetails;
-};
-
 // Creates and reuses textures, tracks their references, and prepares image data.
 // The asset loader handles scheduling, OpenGL uploads, and retries.
 class lcTextureManager

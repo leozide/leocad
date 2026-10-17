@@ -1149,8 +1149,8 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 			while (!lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), ModelName.toLatin1().constData()))
 			{
-				const QString Extension = FileInfo.suffix().isEmpty() ? QString() : QLatin1Char('.') + FileInfo.suffix();
-				const QString NameSuffix = QLatin1Char(' ') + QString::number(Suffix++) + Extension;
+				const QString FileExtension = FileInfo.suffix().isEmpty() ? QString() : QLatin1Char('.') + FileInfo.suffix();
+				const QString NameSuffix = QLatin1Char(' ') + QString::number(Suffix++) + FileExtension;
 				const int BaseLength = LC_PIECE_NAME_LEN - 1 - NameSuffix.length();
 				ModelName = FileInfo.completeBaseName().left(BaseLength) + NameSuffix;
 			}

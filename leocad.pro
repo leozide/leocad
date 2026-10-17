@@ -50,7 +50,7 @@ win32-msvc* {
 } else {
 	PRECOMPILED_HEADER = common/lc_global.h
 	LIBS += -lz
-	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
+	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wshadow
 	QMAKE_CXXFLAGS += -Werror=unused-result
 }
 

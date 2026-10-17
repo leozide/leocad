@@ -1031,7 +1031,6 @@ void lcMainWindow::UpdateAssets()
 
 	int PendingParts = 0;
 	int PendingSynths = 0;
-	int FailedSynths = 0;
 	int Failed = 0;
 	QString FailureDetails;
 
@@ -1070,7 +1069,6 @@ void lcMainWindow::UpdateAssets()
 		else if (!Piece->HasGeneratedMesh())
 		{
 			Failed++;
-			FailedSynths++;
 
 			QString Error = lcGetPiecesLibrary()->GetSynthMeshError(Piece);
 

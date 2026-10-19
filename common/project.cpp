@@ -493,7 +493,7 @@ void Project::ShowModelListDialog()
 
 		const QString OldName = Model->GetFileName();
 
-		if (!lcGetPiecesLibrary()->RenamePieceData(Model->GetPieceData(), Entry.Name.toLatin1().constData()))
+		if (!lcGetPiecesLibrary()->RenameModelPieceData(Model->GetPieceData(), Entry.Name.toLatin1().constData()))
 		{
 			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
 			return;
@@ -1147,7 +1147,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			QString ModelName = FileInfo.fileName();
 			int Suffix = 2;
 
-			while (!lcGetPiecesLibrary()->RenamePieceData(Model->GetPieceData(), ModelName.toLatin1().constData()))
+			while (!lcGetPiecesLibrary()->RenameModelPieceData(Model->GetPieceData(), ModelName.toLatin1().constData()))
 			{
 				const QString FileExtension = FileInfo.suffix().isEmpty() ? QString() : QLatin1Char('.') + FileInfo.suffix();
 				const QString NameSuffix = QLatin1Char(' ') + QString::number(Suffix++) + FileExtension;
@@ -1625,10 +1625,10 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		if (Planned.FinalName == Planned.Model->GetFileName())
 			continue;
 
-		if (!Library->RenamePieceData(Planned.Model->GetPieceData(), Planned.FinalName.toLatin1().constData()))
+		if (!Library->RenameModelPieceData(Planned.Model->GetPieceData(), Planned.FinalName.toLatin1().constData()))
 		{
 			for (std::vector<const ModelPlan*>::reverse_iterator It = AppliedRenames.rbegin(); It != AppliedRenames.rend(); It++)
-				Library->RenamePieceData((*It)->Model->GetPieceData(), (*It)->Model->GetFileName().toLatin1().constData());
+				Library->RenameModelPieceData((*It)->Model->GetPieceData(), (*It)->Model->GetFileName().toLatin1().constData());
 
 			return lcUnexpected(tr("Could not reserve submodel name '%1'.").arg(Planned.FinalName));
 		}

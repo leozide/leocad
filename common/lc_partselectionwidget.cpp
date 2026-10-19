@@ -158,7 +158,7 @@ void lcPartSelectionListModel::SetCategory(int CategoryIndex)
 		Library->GetCategoryEntries(CategoryIndex, false, SingleParts, GroupedParts);
 	else
 	{
-		Library->GetParts(SingleParts);
+		SingleParts = Library->GetParts();
 
 		lcModel* ActiveModel = gMainWindow->GetActiveModel();
 

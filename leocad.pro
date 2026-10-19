@@ -225,6 +225,7 @@ SOURCES += \
 	common/lc_partselectionpopup.cpp \
 	common/lc_partselectionwidget.cpp \
 	common/lc_piecedata.cpp \
+	common/lc_piecemanager.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
 	common/lc_propertieswidget.cpp \
@@ -309,6 +310,7 @@ HEADERS += \
 	common/lc_partselectionpopup.h \
 	common/lc_partselectionwidget.h \
 	common/lc_piecedata.h \
+	common/lc_piecemanager.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_propertieswidget.h \

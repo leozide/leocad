@@ -821,10 +821,8 @@ void lcPreferencesDialog::UpdateParts()
 	}
 	else
 	{
-		for (const auto& PartIt : Library->mPieces)
+		for (lcPieceData* PieceData : Library->GetParts())
 		{
-			lcPieceData* PieceData = PartIt.second;
-
 			for (CategoryIndex = 0; CategoryIndex < static_cast<int>(mOptions->Categories.size()); CategoryIndex++)
 			{
 				if (Library->PieceDataInCategory(PieceData, mOptions->Categories[CategoryIndex].Keywords.constData()))

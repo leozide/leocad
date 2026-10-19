@@ -13,9 +13,6 @@ class lcTrainTrackInfo;
 struct lcTrainTrackConnectionType;
 class lcZipFile;
 class lcLibraryMeshData;
-class lcThumbnailManager;
-class lcAssetLoader;
-class lcTextureManager;
 struct lcEmbeddedData;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -139,7 +136,8 @@ struct lcLibrarySource
 	std::map<std::string, lcLibraryPrimitive*> Primitives;
 };
 
-// Owns catalog/local identities, sources, references, and shared render buffers.
+// Manages piece lifetimes, sources, references, and shared render buffers.
+// Its piece manager stores library/local registrations.
 // Its asset loader owns pending work; workers build privately and the UI thread publishes.
 // See docs/asset-loading.md for the loading and lifetime contracts.
 class lcPiecesLibrary : public QObject
@@ -168,11 +166,11 @@ public:
 	void TransferProjectPieceData(Project* Source, Project* Destination);
 
 	void SetModelPieceDataName(lcPieceData* PieceData, const char* Name);
-	bool RenamePieceData(lcPieceData* PieceData, const char* NewName);
+	bool RenameModelPieceData(lcPieceData* PieceData, const char* NewName);
 	static std::string NormalizePieceDataName(const char* PieceName);
 	// Returns one scoped model reference, ready to transfer to the model.
 	lcPieceDataRef AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused);
-	// Borrowed registered lookup: project names, then the shared catalog. No I/O or creation.
+	// Borrowed registered lookup: project names, then the shared library. No I/O or creation.
 	lcPieceData* FindPieceData(const char* PieceName, Project* Project);
 	// Resolves or creates an identity and returns one scoped reference; does not ensure readiness.
 	lcPieceDataRef AcquirePieceData(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
@@ -226,7 +224,7 @@ public:
 	bool PieceDataInCategory(lcPieceData* PieceData, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<lcPieceData*>& SinglePieces, std::vector<lcPieceData*>& GroupedPieces);
 	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<lcPieceData*>& SinglePieces, std::vector<lcPieceData*>& GroupedPieces);
-	void GetParts(std::vector<lcPieceData*>& Parts) const;
+	std::vector<lcPieceData*> GetParts() const;
 	std::vector<lcPieceData*> GetVisibleTrainTrackParts(const lcTrainTrackConnectionType& ConnectionType) const;
 
 	std::vector<lcPieceData*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
@@ -252,11 +250,7 @@ public:
 		return mStudStyle;
 	}
 
-	void SetOfficialPieceLibrary()
-	{
-		if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-			mNumOfficialPieces = (int)mPieces.size();
-	}
+	void SetOfficialPieceLibrary();
 
 	bool ShouldCancelLoading() const
 	{
@@ -268,7 +262,6 @@ public:
 	void UnloadUnusedParts();
 	lcMesh* GetLoadingMesh() const;
 
-	std::map<std::string, lcPieceData*> mPieces;
 	int mNumOfficialPieces;
 
 	QDir mLibraryDir;
@@ -339,9 +332,7 @@ protected:
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
-	// Each project maps its local filenames to lcPieceData pointers. This map tracks the
-	// project for each local lcPieceData, or nullptr after that project is destroyed.
-	std::unordered_map<lcPieceData*, Project*> mProjectPieces;
+	std::unique_ptr<lcPieceManager> mPieceManager;
 
 	// UI-thread live synth instances and their last generation errors (empty on success or retry).
 	// Instances unregister before destruction; the library does not own them.
@@ -357,7 +348,7 @@ protected:
 	std::unordered_map<QThread*, std::vector<lcLibraryPrimitive*>> mPrimitiveLoadStacks;
 	std::unordered_map<lcLibraryPrimitive*, lcLibraryPrimitive*> mPrimitiveDependencies;
 
-	// Sparse errors avoid storing a QString in every catalog identity.
+	// Sparse errors avoid storing a QString in every library identity.
 	mutable QMutex mPieceErrorMutex;
 	std::unordered_map<const lcPieceData*, QString> mFailedPartErrors;
 

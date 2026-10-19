@@ -119,6 +119,11 @@ enum class lcRenderMeshState : int;
 enum class lcTrackTool;
 enum class lcTrackButton;
 
+class lcThumbnailManager;
+class lcAssetLoader;
+class lcTextureManager;
+class lcPieceManager;
+
 class lcFile;
 class lcMemFile;
 class lcDiskFile;

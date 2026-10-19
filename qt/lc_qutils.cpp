@@ -201,15 +201,12 @@ lcPieceIdStringModel::lcPieceIdStringModel(lcModel* Model, QObject* Parent)
 	: QAbstractListModel(Parent)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	mSortedPieces.reserve(Library->mPieces.size());
+	mSortedPieces = Library->GetParts();
 
-	for (const auto& PartIt : Library->mPieces)
+	mSortedPieces.erase(std::remove_if(mSortedPieces.begin(), mSortedPieces.end(), [Model](lcPieceData* PieceData)
 	{
-		lcPieceData* PieceData = PartIt.second;
-
-		if (!PieceData->IsModel() || !PieceData->GetModel()->IncludesModel(Model))
-			mSortedPieces.push_back(PartIt.second);
-	}
+		return PieceData->IsModel() && PieceData->GetModel()->IncludesModel(Model);
+	}), mSortedPieces.end());
 
 	auto PieceCompare = [](lcPieceData* PieceData1, lcPieceData* PieceData2)
 	{

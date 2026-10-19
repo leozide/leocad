@@ -61,7 +61,7 @@ new evidence and update this record with any agreed change.
 
 | Decision | Rationale and alternatives set aside |
 | --- | --- |
-| Keep identities, sources, references, and shared buffers in the library; pending work belongs to its loader. | One registry and one completion path avoid competing lifetime/readiness authorities. Do not create a second asset registry in the loader. |
+| Keep identity registries in the library-owned piece/texture managers; the library coordinates sources, lifetimes and shared buffers, and its loader owns pending work. | One registry and one completion path avoid competing lifetime/readiness authorities. Do not create a second asset registry in the loader. |
 | Use the existing Qt worker pool and shared offscreen GL context, with UI-thread publication. | Reuses existing infrastructure and keeps model mutation, color registration, upload, and rendering sequential. Do not publish assets from workers or introduce a separate renderer/context for loading. |
 | Use promotion-only priorities and existing reference counts. | Models open at their last step; precise consumer demotion added bookkeeping for little demonstrated benefit. Per-consumer pointer maps, step-based priorities, outgoing-project demotion, and scoped priority removal were deliberately set aside. Accept briefly elevated work after a requesting view closes. |
 | Treat missing geometry as `Failed`; keep structural type and library membership separate. | A separate Placeholder/Missing type or readiness value duplicates failure state. Cubes are shared display fallbacks, not stored asset meshes. Library membership is established explicitly by the `lcPieceData` constructor. |
@@ -76,7 +76,8 @@ new evidence and update this record with any agreed change.
 
 | Owner | Responsibility | Source |
 | --- | --- | --- |
-| `lcPiecesLibrary` | Piece identities and references, all source discovery and lookup, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and public forwarding APIs. Owns the texture manager and supplies its archive reader. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
+| `lcPiecesLibrary` | Piece creation, references and deletion, source discovery, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and public forwarding APIs. Owns the piece and texture managers and supplies archive readers. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
+| `lcPieceManager` | Library/local registration storage, borrowed lookup and project-index updates, ordered library enumeration, all-identity snapshots and copied include-source metadata. No source discovery, reference-count changes or deletion. | [lc_piecemanager.h](../common/lc_piecemanager.h), [lc_piecemanager.cpp](../common/lc_piecemanager.cpp) |
 | `lcTextureManager` | Texture identities and references, snapshots, and private CPU decoding of resolved sources. | [lc_texturemanager.h](../common/lc_texturemanager.h), [lc_texturemanager.cpp](../common/lc_texturemanager.cpp) |
 | `lcAssetLoader` | Pending requests, worker scheduling, private results, texture upload, publication, cancellation, readiness waits, and deferred settlement notifications. | [lc_assetloader.h](../common/lc_assetloader.h), [lc_assetloader.cpp](../common/lc_assetloader.cpp) |
 | `lcPieceData` / `lcTexture` | Published geometry or texture data, readiness state, and asset metadata. | [lc_piecedata.h](../common/lc_piecedata.h), [lc_texture.h](../common/lc_texture.h) |
@@ -86,6 +87,17 @@ The library owns the loader. Call library entry points from the UI thread for
 asset acquisition, release, scheduling, waiting, and invalidation. Workers use
 source snapshots and the library's build services; they do not consult the
 active project or publish into live models.
+
+The piece manager stores the only library and local piece registries. Its methods
+receive normalized names; the library retains normalization, creation, acquisition,
+reference counts, unload/deletion, errors and overall teardown ordering. The
+library's existing recursive load mutex still serializes compound registry changes
+and worker metadata reads. Startup discovery and UI enumeration keep their existing
+thread/lifetime guarantees; borrowed snapshots do not retain identities. Library
+snapshots preserve name-map order for description-cache compatibility. Reentrant
+teardown removes registrations before deletion and queries the current local
+registry after each deletion. Moving lifetime policy and synchronization into the
+manager is separate from this registry extraction.
 
 The texture manager is owned by the library and owns the only texture registry.
 `AcquireTexture()` resolves embedded data, project-directory files, and
@@ -160,7 +172,7 @@ the same setter. It retains decoded pixels for bounded upload
 retries; terminal request handling explicitly discards them when required.
 
 `FindPieceData(Name, Project)` returns a borrowed registered identity from
-the supplied project's name index or the shared library catalog. It does no file
+the supplied project's name index or the shared library registry. It does no file
 I/O, creates no identities, and acquires no reference.
 `AcquirePieceData(Name, Project, CreateMissing, SearchProjectFolder)` resolves
 or creates an identity and returns one scoped `lcPieceDataRef`, without ensuring mesh
@@ -184,7 +196,7 @@ when resolving a candidate project, external file, or preview.
 
 This scope lets different open/candidate/preview projects use the same submodel
 name without replacing one another's identities. Containers remain structurally
-Model or Project even when their direct mesh fails. The shared catalog remains
+Model or Project even when their direct mesh fails. The shared library remains
 separate; worker primitive/part includes must not accidentally resolve through
 a project's name index.
 
@@ -302,7 +314,7 @@ requirements, including nested and external models, with cycle protection.
 ### Diagnostics and retries
 
 Part error text lives in the library's sparse `mFailedPartErrors` map, queried
-through `GetPieceDataLoadError()`, rather than an empty string in every catalog part.
+through `GetPieceDataLoadError()`, rather than an empty string in every library part.
 Synth error text lives in the library's live-instance registry and is available
 through `GetSynthMeshError()`. A new generation clears the previous error;
 settlement records failure or clears the error on success. Cancellation removes
@@ -441,7 +453,7 @@ cannot destroy an asset still used by another instance or pending work. On the
 last consumer release, queued work is removed; running ordinary part work is
 allowed to finish and its result is discarded if no consumer survives. Successful
 or failed publication keeps the request's hold through deferred notification,
-then releases it. Library piece identities can remain in the catalog after their
+then releases it. Library piece identities can remain in the library after their
 geometry unloads; unreferenced local leaf identities can be deleted. Model and
 external-project containers have their own teardown rules.
 
@@ -450,7 +462,7 @@ only clears its resources: it releases its mesh and owned external project,
 detaches its borrowed model pointer, and resets readiness and bounds. It never
 unregisters or deletes itself; the destructor uses the same resource cleanup.
 Bulk library unload destroys external projects before remaining local identities
-and the shared catalog, so project teardown can safely release child references.
+and the shared library, so project teardown can safely release child references.
 
 Texture requests likewise hold a reference, and staged/published mesh sections
 hold their texture dependencies. Cancellation removes unused queued texture work
@@ -480,7 +492,7 @@ model's unavailable direct geometry can display a local cube while its children
 remain independently visible/selectable. Failed containers retain their
 structure; deleting a model or external project detaches its pointers explicitly.
 Undo restores external references using project-folder lookup, not only the
-library catalog. Placeholder appearance must never change piece type or asset
+library registry. Placeholder appearance must never change piece type or asset
 ownership.
 
 ## Scheduling and waits
@@ -614,7 +626,7 @@ shared `lcPieceData` mesh. Failed entries and unfinished/failed synth replacemen
 are filtered out. A retained editing mesh is not exported as the new generation.
 This list is separate from `GetPartsList()` inventory traversal: changing export
 collection must not remove missing references from inventories or turn direct
-model geometry into an ordinary catalog part.
+model geometry into an ordinary library part.
 
 Project-local filenames are not necessarily safe export identifiers. COLLADA
 and POV-Ray identifiers use `Project::MakeExportNameFragment()` and

@@ -81,38 +81,7 @@ void lcPiecesLibrary::Unload()
 	mFailedPartErrors.clear();
 	mPieceErrorMutex.unlock();
 
-	// Destroy external projects before their model identities. Their teardown
-	// releases child references, including references to the shared library.
-	std::unordered_set<Project*> ExternalProjects;
-
-	for (const auto& [PieceData, Owner] : mPieceManager->GetProjectPieceData())
-		if (PieceData->IsProject())
-			ExternalProjects.insert(PieceData->GetProject());
-
-	for (;;)
-	{
-		lcPieceData* External = nullptr;
-
-		for (const auto& [PieceData, Owner] : mPieceManager->GetProjectPieceData())
-		{
-			if (PieceData->IsProject() && ExternalProjects.find(Owner) == ExternalProjects.end())
-			{
-				External = PieceData;
-				break;
-			}
-		}
-
-		if (!External)
-			break;
-
-		RemovePieceData(External);
-	}
-
-	while (lcPieceData* PieceData = mPieceManager->GetFirstProjectPieceData())
-		RemovePieceData(PieceData);
-
-	for (lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
-		RemovePieceData(PieceData);
+	mPieceManager->Clear();
 
 	mSources.clear();
 
@@ -135,107 +104,36 @@ void lcPiecesLibrary::RemoveTemporaryPieceData()
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	for (lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
-	{
-		if (!PieceData->IsLibraryPiece() && PieceData->GetRefCount() == 0)
-			RemovePieceData(PieceData);
-	}
-
-	std::vector<lcPieceData*> Unused;
-
-	for (const auto& [PieceData, Owner] : mPieceManager->GetProjectPieceData())
-	{
-		if (PieceData->GetRefCount() == 0)
-			Unused.push_back(PieceData);
-	}
-
-	for (lcPieceData* PieceData : Unused)
-		UnloadPieceData(PieceData);
+	mPieceManager->RemoveTemporaryPieceData();
 }
 
 void lcPiecesLibrary::ReleaseProjectPieceData(Project* OwnerProject)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
-	std::vector<lcPieceData*> Unused;
 
-	for (lcPieceData* PieceData : mPieceManager->ReleaseProjectPieceData(OwnerProject))
-	{
-		if (PieceData->GetRefCount() == 0)
-			Unused.push_back(PieceData);
-	}
-
-	for (lcPieceData* PieceData : Unused)
-		UnloadPieceData(PieceData);
+	mPieceManager->ReleaseProjectPieceData(OwnerProject);
 }
 
 void lcPiecesLibrary::TransferProjectPieceData(Project* Source, Project* Destination)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
-	std::vector<lcPieceData*> Unused;
 
-	for (lcPieceData* PieceData : mPieceManager->TransferProjectPieceData(Source, Destination))
-	{
-		if (PieceData->GetRefCount() == 0)
-			Unused.push_back(PieceData);
-	}
-
-	for (lcPieceData* PieceData : Unused)
-		UnloadPieceData(PieceData);
-}
-
-void lcPiecesLibrary::RegisterProjectPieceData(Project* Project, const std::string& Name, lcPieceData* PieceData)
-{
-	QMutexLocker LoadLock(&mLoadMutex);
-	mPieceManager->RegisterProjectPieceData(Project, Name, PieceData);
-}
-
-void lcPiecesLibrary::RemovePieceData(lcPieceData* PieceData)
-{
-	ClearPieceDataLoadError(PieceData);
-	{
-		QMutexLocker LoadLock(&mLoadMutex);
-
-		mPieceManager->UnregisterPieceData(PieceData);
-	}
-
-	delete PieceData;
-}
-
-void lcPiecesLibrary::UnloadPieceData(lcPieceData* PieceData)
-{
-	if (!PieceData->IsLibraryPiece())
-	{
-		RemovePieceData(PieceData);
-		return;
-	}
-
-	ClearPieceDataLoadError(PieceData);
-	PieceData->Unload();
+	mPieceManager->TransferProjectPieceData(Source, Destination);
 }
 
 void lcPiecesLibrary::SetModelPieceDataName(lcPieceData* PieceData, const char* Name)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	strncpy(PieceData->mFileName, Name, sizeof(PieceData->mFileName) - 1);
-	PieceData->mFileName[sizeof(PieceData->mFileName) - 1] = 0;
-	strncpy(PieceData->m_strDescription, Name, sizeof(PieceData->m_strDescription) - 1);
-	PieceData->m_strDescription[sizeof(PieceData->m_strDescription) - 1] = 0;
+	mPieceManager->SetModelPieceDataName(PieceData, Name);
 }
 
 bool lcPiecesLibrary::RenameModelPieceData(lcPieceData* PieceData, const char* NewName)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	const std::string NewPieceName = NormalizePieceDataName(NewName);
-
-	if (!mPieceManager->RenameModelPieceData(PieceData, NewPieceName))
+	if (!mPieceManager->RenameModelPieceData(PieceData, NewName))
 		return false;
-
-	strncpy(PieceData->mFileName, NewName, sizeof(PieceData->mFileName));
-	PieceData->mFileName[sizeof(PieceData->mFileName) - 1] = 0;
-	strncpy(PieceData->m_strDescription, NewName, sizeof(PieceData->m_strDescription));
-	PieceData->m_strDescription[sizeof(PieceData->m_strDescription) - 1] = 0;
 
 	LoadLock.unlock();
 	if (PieceData->mState != lcAssetState::Failed)
@@ -246,45 +144,16 @@ bool lcPiecesLibrary::RenameModelPieceData(lcPieceData* PieceData, const char* N
 
 std::string lcPiecesLibrary::NormalizePieceDataName(const char* PieceName)
 {
-	std::string Name;
-	Name.reserve(LC_PIECE_NAME_LEN - 1);
-
-	for (const char* Src = PieceName; *Src && Name.size() < LC_PIECE_NAME_LEN - 1; Src++)
-	{
-		if (*Src == '\\')
-			Name.push_back('/');
-		else if (*Src >= 'a' && *Src <= 'z')
-			Name.push_back(*Src + 'A' - 'a');
-		else
-			Name.push_back(*Src);
-	}
-
-	return Name;
+	return lcPieceManager::NormalizePieceDataName(PieceName);
 }
 
 lcPieceDataRef lcPiecesLibrary::AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused)
 {
-	const std::string Name = NormalizePieceDataName(PieceName);
 	lcPieceData* PieceData;
-	Reused = false;
 
-	{
-		QMutexLocker LoadLock(&mLoadMutex);
-
-		PieceData = Project->FindPieceData(Name);
-
-		if (!PieceData || PieceData->IsModel())
-		{
-			PieceData = new lcPieceData(false);
-			PieceData->CreatePart(PieceName);
-			mPieceManager->RegisterProjectPieceData(Project, Name, PieceData);
-		}
-		else
-			Reused = true;
-
-		// Keep a local piece alive while a pending load finishes and the model takes its reference.
-		PieceData->AddRef();
-	}
+	mLoadMutex.lock();
+	PieceData = mPieceManager->AcquireModelPieceData(PieceName, Project, Reused);
+	mLoadMutex.unlock();
 
 	lcPieceDataRef PieceDataRef = lcPieceDataRef::Adopt(PieceData, this);
 
@@ -342,8 +211,6 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 			ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
 	}
 
-	const std::string Name = NormalizePieceDataName(PieceName);
-
 	if (!ProjectPath.isEmpty())
 	{
 		QFileInfo ProjectFile = QFileInfo(ProjectPath + QDir::separator() + PieceName);
@@ -354,10 +221,10 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 
 			if (ExternalProject)
 			{
-				lcPieceData* PieceData = new lcPieceData(false);
+				QMutexLocker LoadLock(&mLoadMutex);
+				lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
 
 				PieceData->CreateProject(ExternalProject.value(), PieceName);
-				RegisterProjectPieceData(CurrentProject, Name, PieceData);
 
 				return lcPieceDataRef(PieceData, this);
 			}
@@ -368,18 +235,10 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 
 	if (CreateMissing)
 	{
-		lcPieceData* PieceData = new lcPieceData(false);
+		QMutexLocker LoadLock(&mLoadMutex);
+		lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
 
-		PieceData->CreatePart(PieceName);
 		PieceData->SetFailed(LoadError.isEmpty() ? tr("Could not find piece '%1'.").arg(QString::fromLatin1(PieceName)) : LoadError);
-
-		if (CurrentProject)
-			RegisterProjectPieceData(CurrentProject, Name, PieceData);
-		else
-		{
-			QMutexLocker LoadLock(&mLoadMutex);
-			mPieceManager->RegisterLibraryPieceData(Name, PieceData);
-		}
 
 		return lcPieceDataRef(PieceData, this);
 	}
@@ -903,12 +762,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 				if (!PieceData)
 				{
-					PieceData = new lcPieceData(true);
-
-					strncpy(PieceData->mFileName, FileInfo.file_name + (Name - NameBuffer), sizeof(PieceData->mFileName)-1);
-					PieceData->mFileName[sizeof(PieceData->mFileName) - 1] = 0;
-
-					mPieceManager->RegisterLibraryPieceData(Name, PieceData);
+					PieceData = mPieceManager->CreateLibraryPieceData(Name, FileInfo.file_name + (Name - NameBuffer));
 				}
 
 				PieceData->SetZipFile(ZipFileType, FileIdx);
@@ -1136,17 +990,12 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			}
 			*Dst = 0;
 
-			if (FolderIdx > 0 && mPieceManager->FindLibraryPieceData(Name))
+			if (FolderIdx > 0 && mPieceManager->FindPieceData(Name, nullptr))
 				continue;
 
-			lcPieceData* PieceData = new lcPieceData(true);
-
-			strncpy(PieceData->mFileName, FileString, sizeof(PieceData->mFileName));
-			PieceData->mFileName[sizeof(PieceData->mFileName) - 1] = 0;
+			lcPieceData* PieceData = mPieceManager->CreateLibraryPieceData(Name, FileString.constData());
 			PieceData->mFolderType = FolderIdx;
 			PieceData->mFolderIndex = FileIdx;
-
-			mPieceManager->RegisterLibraryPieceData(Name, PieceData);
 		}
 	}
 
@@ -1797,17 +1646,9 @@ void lcPiecesLibrary::ReleasePieceData(lcPieceData* PieceData)
 {
 	int Remaining;
 
-	{
-		QMutexLocker LoadLock(&mLoadMutex);
-
-		if (PieceData->GetRefCount() == 0)
-			return;
-
-		Remaining = PieceData->Release();
-
-		if (Remaining == 0)
-			UnloadPieceData(PieceData);
-	}
+	mLoadMutex.lock();
+	Remaining = mPieceManager->ReleasePieceData(PieceData);
+	mLoadMutex.unlock();
 
 	if (Remaining == 1 && mAssetLoader)
 		mAssetLoader->CancelPieceLoad(PieceData);
@@ -1817,14 +1658,14 @@ void lcPiecesLibrary::AddPieceDataReference(lcPieceData* PieceData)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	PieceData->AddRef();
+	mPieceManager->AddPieceDataReference(PieceData);
 }
 
 bool lcPiecesLibrary::HasPieceDataConsumers(const lcPieceData* PieceData)
 {
 	QMutexLocker LoadLock(&mLoadMutex);
 
-	return PieceData->GetRefCount() > 1;
+	return mPieceManager->HasPieceDataConsumers(PieceData);
 }
 
 void lcPiecesLibrary::SetPieceDataLoadError(const lcPieceData* PieceData, QString Error)
@@ -2693,7 +2534,7 @@ std::vector<lcPieceData*> lcPiecesLibrary::GetPartsFromSet(const std::vector<std
 
 	for (const std::string& PartId : PartIds)
 	{
-		if (lcPieceData* PieceData = mPieceManager->FindLibraryPieceData(PartId))
+		if (lcPieceData* PieceData = mPieceManager->FindPieceData(PartId, nullptr))
 			Parts.push_back(PieceData);
 	}
 

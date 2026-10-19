@@ -76,8 +76,8 @@ new evidence and update this record with any agreed change.
 
 | Owner | Responsibility | Source |
 | --- | --- | --- |
-| `lcPiecesLibrary` | Piece creation, references and deletion, source discovery, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and public forwarding APIs. Owns the piece and texture managers and supplies archive readers. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
-| `lcPieceManager` | Library/local registration storage, borrowed lookup and project-index updates, ordered library enumeration, all-identity snapshots and copied include-source metadata. No source discovery, reference-count changes or deletion. | [lc_piecemanager.h](../common/lc_piecemanager.h), [lc_piecemanager.cpp](../common/lc_piecemanager.cpp) |
+| `lcPiecesLibrary` | Acquisition/lifetime facade, source discovery, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and loader coordination. Owns the piece and texture managers and supplies archive readers. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
+| `lcPieceManager` | Piece creation/reuse, library/local registrations and project indexes, normalization/renaming, references, zero-reference unload/deletion, temporary cleanup, ordered teardown, borrowed snapshots and copied include-source metadata. No source discovery or scheduling. | [lc_piecemanager.h](../common/lc_piecemanager.h), [lc_piecemanager.cpp](../common/lc_piecemanager.cpp) |
 | `lcTextureManager` | Texture identities and references, snapshots, and private CPU decoding of resolved sources. | [lc_texturemanager.h](../common/lc_texturemanager.h), [lc_texturemanager.cpp](../common/lc_texturemanager.cpp) |
 | `lcAssetLoader` | Pending requests, worker scheduling, private results, texture upload, publication, cancellation, readiness waits, and deferred settlement notifications. | [lc_assetloader.h](../common/lc_assetloader.h), [lc_assetloader.cpp](../common/lc_assetloader.cpp) |
 | `lcPieceData` / `lcTexture` | Published geometry or texture data, readiness state, and asset metadata. | [lc_piecedata.h](../common/lc_piecedata.h), [lc_texture.h](../common/lc_texture.h) |
@@ -88,16 +88,23 @@ asset acquisition, release, scheduling, waiting, and invalidation. Workers use
 source snapshots and the library's build services; they do not consult the
 active project or publish into live models.
 
-The piece manager stores the only library and local piece registries. Its methods
-receive normalized names; the library retains normalization, creation, acquisition,
-reference counts, unload/deletion, errors and overall teardown ordering. The
-library's existing recursive load mutex still serializes compound registry changes
-and worker metadata reads. Startup discovery and UI enumeration keep their existing
-thread/lifetime guarantees; borrowed snapshots do not retain identities. Library
-snapshots preserve name-map order for description-cache compatibility. Reentrant
-teardown removes registrations before deletion and queries the current local
-registry after each deletion. Moving lifetime policy and synchronization into the
-manager is separate from this registry extraction.
+The piece manager owns library and local registrations and their lifetime policy.
+It creates/reuses identities, maintains name and project indexes, normalizes and
+renames names, changes reference counts, and unloads or deletes identities at zero.
+Library discovery supplies source metadata; the library still resolves external
+files, adopts model references, invalidates reused data and schedules loading.
+Scoped references remain bound to the library facade. After a manager release,
+the library invokes loader cancellation only for a live identity with one remaining
+reference, after releasing its existing recursive load mutex.
+
+That mutex still serializes compound registry/lifetime operations and worker
+metadata reads; moving synchronization and sparse errors is a separate step.
+Startup discovery and UI enumeration keep their existing thread/lifetime
+guarantees. Borrowed snapshots do not retain identities, and ordered library
+snapshots preserve description-cache compatibility. Manager `Clear()` destroys
+external projects before remaining local and shared identities, removing
+registrations before destruction can reenter. The library drains workers first
+and keeps texture resources and archives alive until piece teardown completes.
 
 The texture manager is owned by the library and owns the only texture registry.
 `AcquireTexture()` resolves embedded data, project-directory files, and
@@ -189,7 +196,7 @@ texture search directories are snapshotted before dispatch.
 
 `Project::mPieceIndex` maps normalized local filenames to borrowed `lcPieceData`
 pointers. "Project-local names" means lookup visibility, not object ownership:
-the library tracks local identities separately in `mProjectPieces`, and reference
+the piece manager tracks local identities separately in `mProjectPieces`, and reference
 counts govern their lifetime. Models know their owning project from construction;
 temporary models can have no project. Do not use the active project implicitly
 when resolving a candidate project, external file, or preview.
@@ -315,6 +322,9 @@ requirements, including nested and external models, with cycle protection.
 
 Part error text lives in the library's sparse `mFailedPartErrors` map, queried
 through `GetPieceDataLoadError()`, rather than an empty string in every library part.
+`lcPieceData::Unload()` clears its sparse error through the existing library facade
+before releasing resources, so manager deletion and direct unload cannot leave a
+stale error for a retained or recycled identity.
 Synth error text lives in the library's live-instance registry and is available
 through `GetSynthMeshError()`. A new generation clears the previous error;
 settlement records failure or clears the error on success. Cancellation removes
@@ -457,8 +467,8 @@ then releases it. Library piece identities can remain in the library after their
 geometry unloads; unreferenced local leaf identities can be deleted. Model and
 external-project containers have their own teardown rules.
 
-The library unregisters identities before deleting them. `lcPieceData::Unload()`
-only clears its resources: it releases its mesh and owned external project,
+The piece manager unregisters identities before deleting them. `lcPieceData::Unload()`
+clears its sparse error and resources: it releases its mesh and owned external project,
 detaches its borrowed model pointer, and resets readiness and bounds. It never
 unregisters or deletes itself; the destructor uses the same resource cleanup.
 Bulk library unload destroys external projects before remaining local identities

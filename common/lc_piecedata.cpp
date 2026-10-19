@@ -4,6 +4,7 @@
 #include "lc_colors.h"
 #include "lc_texture.h"
 #include "lc_piecedata.h"
+#include "lc_string.h"
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_model.h"
@@ -90,8 +91,7 @@ void lcPieceData::DetachContainer()
 	mType = Type::Part;
 	mModel = nullptr;
 	mProject = nullptr;
-	strncpy(m_strDescription, mFileName, sizeof(m_strDescription) - 1);
-	m_strDescription[sizeof(m_strDescription) - 1] = 0;
+	lcstrcpy(m_strDescription, mFileName);
 	delete PreviousProject;
 
 	ReleaseMesh();
@@ -132,10 +132,8 @@ void lcPieceData::CreateProject(Project* NewProject, const char* PieceName)
 		delete PreviousProject;
 	}
 
-	strncpy(mFileName, PieceName, sizeof(mFileName) - 1);
-	mFileName[sizeof(mFileName) - 1] = 0;
-	strncpy(m_strDescription, NewProject->GetFileName().toLatin1().data(), sizeof(m_strDescription) - 1);
-	m_strDescription[sizeof(m_strDescription) - 1] = 0;
+	lcstrcpy(mFileName, PieceName);
+	lcstrcpy(m_strDescription, NewProject->GetFileName().toLatin1().data());
 }
 
 bool lcPieceData::IsProjectPiece() const
@@ -168,10 +166,8 @@ bool lcPieceData::IncludesModel(const lcModel* Model) const
 
 void lcPieceData::CreatePart(const char* Name)
 {
-	strncpy(mFileName, Name, sizeof(mFileName));
-	mFileName[sizeof(mFileName) - 1] = 0;
-	strncpy(m_strDescription, Name, sizeof(m_strDescription));
-	m_strDescription[sizeof(m_strDescription) - 1] = 0;
+	lcstrcpy(mFileName, Name);
+	lcstrcpy(m_strDescription, Name);
 }
 
 void lcPieceData::ReleaseMesh()
@@ -185,6 +181,8 @@ void lcPieceData::ReleaseMesh()
 
 void lcPieceData::Unload()
 {
+	lcGetPiecesLibrary()->ClearPieceDataLoadError(this);
+
 	ReleaseMesh();
 	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();

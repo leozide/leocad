@@ -5,6 +5,7 @@
 #include "lc_meshloader.h"
 #include "lc_result.h"
 #include "lc_assettypes.h"
+#include "lc_string.h"
 
 class lcPieceData;
 class lcPiece;
@@ -75,8 +76,7 @@ public:
 	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile)
 		: mFileName(std::move(FileName))
 	{
-		strncpy(mName, Name, sizeof(mName)-1);
-		mName[sizeof(mName) - 1] = 0;
+		lcstrcpy(mName, Name);
 
 		mZipFileType = ZipFileType;
 		mZipFileIndex = ZipFileIndex;
@@ -318,9 +318,6 @@ protected:
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
-	void RemovePieceData(lcPieceData* PieceData);
-	void UnloadPieceData(lcPieceData* PieceData);
-	void RegisterProjectPieceData(Project* Project, const std::string& Name, lcPieceData* PieceData);
 
 	// Worker decode service: returns private pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcFileSource& Source);

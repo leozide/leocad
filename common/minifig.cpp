@@ -7,6 +7,7 @@
 #include "lc_application.h"
 #include "lc_file.h"
 #include "lc_profile.h"
+#include "lc_string.h"
 
 const char* MinifigWizard::mSectionNames[LC_MFW_NUMITEMS] =
 {
@@ -111,8 +112,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 		if (!FoundSection)
 		{
 			lcMinifigPieceInfo MinifigInfo;
-			strncpy(MinifigInfo.Description, "None", sizeof(MinifigInfo.Description));
-			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
+			lcstrcpy(MinifigInfo.Description, "None");
 			MinifigInfo.Offset = lcMatrix44Identity();
 			MinifigInfo.PieceData = nullptr;
 
@@ -174,8 +174,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			OffsetMatrix[13] =  Mat[11];
 
 			lcMinifigPieceInfo MinifigInfo;
-			strncpy(MinifigInfo.Description, DescriptionStart, sizeof(MinifigInfo.Description));
-			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
+			lcstrcpy(MinifigInfo.Description, DescriptionStart);
 			MinifigInfo.Offset = Offset;
 			MinifigInfo.PieceData = PieceData;
 

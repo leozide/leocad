@@ -99,9 +99,8 @@ static std::vector<lcColor> lcParseColorFile(lcFile& File)
 		Color.Edge[3] = 1.0f;
 
 		GetToken(Ptr, Token);
-		strncpy(Color.Name, Token, sizeof(Color.Name));
-		Color.Name[LC_MAX_COLOR_NAME - 1] = 0;
-		strncpy(Color.SafeName, Color.Name, sizeof(Color.SafeName));
+		lcstrcpy(Color.Name, Token);
+		lcstrcpy(Color.SafeName, Color.Name);
 
 		for (char* Underscore = strchr((char*)Color.Name, '_'); Underscore; Underscore = strchr(Underscore, '_'))
 			*Underscore = ' ';

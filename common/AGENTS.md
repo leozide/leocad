@@ -3,6 +3,7 @@
 - Keep the file lists in `leocad.pro` alphabetically sorted within their existing groups.
 - Get Qt and std includes through the precompiled header, `lc_global.h`.
 - Prefer std containers, use Qt containers where a Qt API boundary makes them useful.
+- Prefer `lcstrcpy()` and `lcstrcat()` from `lc_string.h` for bounded C-string copies and concatenation. Use the array overloads when possible; avoid `strncpy()` plus manual null termination. Keep standard functions where no suitable `lc` helper exists.
 - Avoid using `auto` for ordinary variable types. Template iterators, lambdas, and structured bindings may use it for readability.
 - Do not nest ternary expressions. Use explicit branches when a choice needs another condition.
 - Prefer a private static member function over a file-scope helper when the function belongs to a class and does not use instance state.

@@ -94,9 +94,9 @@ void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
 	if (mLockAction->isChecked() || mRefreshingModel)
 		return;
 
-	const std::vector<lcPieceData*> Required = mPreview->GetModel()->GetRequiredPieceData();
+	const std::vector<lcPieceDataRef> RequiredPieceData = mPreview->GetModel()->GetRequiredPieceData();
 
-	if (std::find(Required.begin(), Required.end(), Model->GetPieceData()) == Required.end())
+	if (std::find(RequiredPieceData.begin(), RequiredPieceData.end(), Model->GetPieceData()) == RequiredPieceData.end())
 		return;
 
 	mRefreshingModel = true;
@@ -106,13 +106,12 @@ void lcPreviewDockWidget::RefreshModel(const lcModel* Model)
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	for (lcPieceData* PieceData : Required)
+	for (const lcPieceDataRef& RequiredData : RequiredPieceData)
 	{
-		if (PieceData->mState != lcAssetState::Unloaded)
+		if (RequiredData->mState != lcAssetState::Unloaded)
 			continue;
 
-		Library->RequestPieceDataLoad(PieceData, lcLoadPriority::Normal);
-		Library->ReleasePieceData(PieceData);
+		Library->RequestPieceDataLoad(RequiredData.Get(), lcLoadPriority::Normal);
 	}
 
 	std::vector<lcModel*> UpdatedModels;
@@ -128,10 +127,10 @@ void lcPreviewDockWidget::RefreshAfterAssetChange(const std::vector<lcPieceData*
 	if (mPreview->GetModel()->GetPieces().empty())
 		return;
 
-	const std::vector<lcPieceData*> Required = mPreview->GetModel()->GetRequiredPieceData();
-	bool Affected = std::any_of(Required.begin(), Required.end(), [&ChangedPieces](lcPieceData* PieceData)
+	const std::vector<lcPieceDataRef> RequiredPieceData = mPreview->GetModel()->GetRequiredPieceData();
+	bool Affected = std::any_of(RequiredPieceData.begin(), RequiredPieceData.end(), [&ChangedPieces](const lcPieceDataRef& RequiredData)
 	{
-		return std::find(ChangedPieces.begin(), ChangedPieces.end(), PieceData) != ChangedPieces.end();
+		return std::find(ChangedPieces.begin(), ChangedPieces.end(), RequiredData) != ChangedPieces.end();
 	});
 
 	if (!Affected)
@@ -154,11 +153,11 @@ void lcPreviewDockWidget::RefreshAfterAssetChange(const std::vector<lcPieceData*
 
 void lcPreviewDockWidget::RefreshPendingAssets()
 {
-	const std::vector<lcPieceData*> Required = mPreview->GetModel()->GetRequiredPieceData();
+	const std::vector<lcPieceDataRef> RequiredPieceData = mPreview->GetModel()->GetRequiredPieceData();
 
-	for (const lcPieceData* PieceData : Required)
+	for (const lcPieceDataRef& RequiredData : RequiredPieceData)
 	{
-		if (PieceData->mState == lcAssetState::Failed || PieceData->mState == lcAssetState::Unloaded)
+		if (RequiredData->mState == lcAssetState::Failed || RequiredData->mState == lcAssetState::Unloaded)
 		{
 			mAssetRefreshPending = false;
 			mViewWidget->hide();
@@ -166,7 +165,7 @@ void lcPreviewDockWidget::RefreshPendingAssets()
 			return;
 		}
 
-		if (PieceData->mState != lcAssetState::Loaded)
+		if (RequiredData->mState != lcAssetState::Loaded)
 		{
 			mAssetRefreshPending = true;
 			mViewWidget->hide();
@@ -294,7 +293,9 @@ bool lcPreview::SetCurrentPiece(lcPieceData* PieceData, int ColorCode)
 	}
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	bool Ready = Library->RequestPieceDataLoad(PieceData, lcLoadPriority::Blocking);
+	const lcPieceDataRef PieceDataRef(PieceData);
+
+	bool Ready = Library->WaitForPieceData(PieceDataRef);
 
 	if (Ready && PieceData->IsModel())
 		Ready = static_cast<bool>(PieceData->GetModel()->EnsureAssetsReady());
@@ -303,7 +304,6 @@ bool lcPreview::SetCurrentPiece(lcPieceData* PieceData, int ColorCode)
 
 	if (!Ready)
 	{
-		Library->ReleasePieceData(PieceData);
 		ClearPreview();
 
 		return false;
@@ -320,7 +320,6 @@ bool lcPreview::SetCurrentPiece(lcPieceData* PieceData, int ColorCode)
 
 	mModel->UpdatePieceData(UpdatedModels);
 
-	Library->ReleasePieceData(PieceData);
 	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, true);
 
 	return true;
@@ -350,24 +349,19 @@ void lcPreview::UpdatePreview()
 	{
 		if (ModelPiece->mPieceData)
 		{
-			PieceData = ModelPiece->mPieceData;
+			PieceData = ModelPiece->mPieceData.Get();
 			ColorCode = ModelPiece->GetColorCode();
 			break;
 		}
 	}
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	if (PieceData)
-		Library->AddPieceDataReference(PieceData);
+	lcPieceDataRef PreviousPieceData(PieceData);
 
 	ClearPreview();
 
 	if (PieceData && ColorCode > -1)
 		SetCurrentPiece(PieceData, ColorCode);
 
-	if (PieceData)
-		Library->ReleasePieceData(PieceData);
 }
 
 void lcPreview::RefreshDescription()

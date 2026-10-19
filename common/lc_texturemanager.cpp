@@ -3,8 +3,6 @@
 #include "lc_file.h"
 #include "lc_string.h"
 
-lcTextureBuildResult::~lcTextureBuildResult() = default;
-
 lcTextureManager::~lcTextureManager()
 {
 	Clear();

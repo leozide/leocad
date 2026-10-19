@@ -26,9 +26,14 @@ lcPiece::lcPiece()
 }
 
 lcPiece::lcPiece(lcPieceData* PieceData)
+	: lcPiece(lcPieceDataRef(PieceData))
+{
+}
+
+lcPiece::lcPiece(lcPieceDataRef PieceDataRef)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceData(PieceData, QString(), true, true);
+	SetPieceData(std::move(PieceDataRef), QString(), true, true);
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
 	mPivotMatrix = lcMatrix44Identity();
@@ -63,30 +68,36 @@ lcPiece::~lcPiece()
 	if (mPieceData)
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		Library->ReleasePieceData(mPieceData);
+		mPieceData.Reset();
 		Library->NotifyAssetStatusChanged();
 	}
 
 	delete mMesh;
 }
 
-void lcPiece::SetPieceData(lcPieceData* PieceData, const QString& ID, bool Wait, bool UpdateSynthInfo)
+void lcPiece::SetPieceData(lcPieceDataRef PieceDataRef, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	lcPieceData* PreviousPieceData = mPieceData;
+	const bool DataChanged = mPieceData != PieceDataRef;
 
-	if (PreviousPieceData != PieceData || UpdateSynthInfo)
+	if (DataChanged || UpdateSynthInfo)
 		Library->CancelSynthMesh(this);
 
-	if (PreviousPieceData != PieceData)
+	if (DataChanged)
 	{
 		delete mMesh;
 		mMesh = nullptr;
 	}
 
-	mPieceData = PieceData;
+	lcPieceDataRef PreviousData(std::move(mPieceData));
+	mPieceData = std::move(PieceDataRef);
 	if (mPieceData)
-		Library->RequestPieceDataLoad(mPieceData, Wait ? lcLoadPriority::Blocking : lcLoadPriority::Normal);
+	{
+		if (Wait)
+			Library->WaitForPieceData(mPieceData);
+		else
+			Library->RequestPieceDataLoad(mPieceData.Get(), lcLoadPriority::Normal);
+	}
 
 	if (!ID.isEmpty())
 		mID = ID;
@@ -106,8 +117,10 @@ void lcPiece::SetPieceData(lcPieceData* PieceData, const QString& ID, bool Wait,
 
 		UpdateMesh();
 	}
-	else if (PreviousPieceData && PreviousPieceData != PieceData)
+	else if (PreviousData && DataChanged)
 		UpdateMesh();
+
+	PreviousData.Reset();
 
 	Library->NotifyAssetStatusChanged();
 }
@@ -117,9 +130,7 @@ bool lcPiece::SetPieceId(lcPieceData* PieceData)
 	if (mPieceData == PieceData)
 		return false;
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	Library->ReleasePieceData(mPieceData);
-	SetPieceData(PieceData, QString(), true, true);
+	SetPieceData(lcPieceDataRef(PieceData), QString(), true, true);
 
 	return true;
 }
@@ -333,8 +344,7 @@ bool lcPiece::FileLoad(lcFile& file, Project* Project)
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 	lcstrcat(name, ".dat");
 
-	lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(name, Project, true, false);
-	SetPieceData(PieceData, QString(), true, true);
+	SetPieceData(lcGetPiecesLibrary()->AcquirePieceData(name, Project, true, false), QString(), true, true);
 
 	// 11 (0.77)
 	if (version < 11)
@@ -532,7 +542,7 @@ bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, flo
 	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane))
 		return false;
 
-	PieceRayTest.PieceData = mPieceData;
+	PieceRayTest.PieceData = mPieceData.Get();
 	PieceRayTest.Transform = lcMatrix44Identity();
 
 	return true;
@@ -742,7 +752,7 @@ QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	switch (PropertyId)
 	{
 	case lcObjectPropertyId::PieceId:
-		return QVariant::fromValue<void*>(mPieceData);
+		return QVariant::fromValue<void*>(mPieceData.Get());
 
 	case lcObjectPropertyId::PieceColor:
 		return GetColorIndex();
@@ -1033,16 +1043,13 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(mID.toLatin1(), Model->GetProject(), true, true);
+	lcPieceDataRef RestoredData = lcGetPiecesLibrary()->AcquirePieceData(mID.toLatin1(), Model->GetProject(), true, true);
 
-	if (mPieceData != PieceData)
+	if (mPieceData != RestoredData)
 	{
 		const bool NewPiece = !mPieceData;
 
-		if (mPieceData)
-			lcGetPiecesLibrary()->ReleasePieceData(mPieceData);
-
-		SetPieceData(PieceData, mID, true, false);
+		SetPieceData(std::move(RestoredData), mID, true, false);
 
 		if (NewPiece)
 			UpdateMesh();
@@ -1511,7 +1518,7 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (!mMesh || mPieceData->mState != lcAssetState::Loaded)
 		mPieceData->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
-		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceData, mMesh, ColorIndex });
+		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceData.Get(), mMesh, ColorIndex });
 }
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const

@@ -153,11 +153,16 @@ clearing stale details when none are supplied. Decoding and upload failures use
 the same setter. It retains decoded pixels for bounded upload
 retries; terminal request handling explicitly discards them when required.
 
-`FindPieceData()` returns a borrowed identity, without acquiring a reference. Lookup
-checks the supplied project's name index, then the shared library catalog, then
-optionally an external file beside the project. Creating a missing identity
-records `Failed`. `AcquireModelPieceData()` differs: it returns one acquired reference
-for the model to release. Library membership is independent of readiness and
+`FindPieceData(Name, Project)` returns a borrowed registered identity from
+the supplied project's name index or the shared library catalog. It does no file
+I/O, creates no identities, and acquires no reference.
+`AcquirePieceData(Name, Project, CreateMissing, SearchProjectFolder)` resolves
+or creates an identity and returns one scoped `lcPieceDataRef`, without ensuring mesh
+readiness. It may load an external project beside the current project; creating a
+missing identity records `Failed`. `lcPieceDataRef(Piece)` retains an
+existing borrowed identity, and accepts null. `AcquireModelPieceData()` returns
+one scoped reference for the model to adopt using `Release()`.
+Library membership is independent of readiness and
 Part/Model/Project type. Project-local names cannot replace another project's
 names. Worker include resolution uses library sources, while model geometry and
 texture search directories are snapshotted before dispatch.
@@ -328,8 +333,8 @@ sequenceDiagram
     participant Library as Library
     participant Loader as Loader / UI thread
     participant Worker as Qt worker
+    Caller->>Library: AcquirePieceData(...) returns scoped consumer reference
     Caller->>Library: RequestPieceDataLoad(PieceData, LoadPriority)
-    Library->>Library: Acquire consumer reference
     Library->>Loader: Queue/promote
     Loader->>Worker: Immutable source snapshot
     Worker->>Worker: Parse/generate and convert, or read cached mesh
@@ -379,13 +384,44 @@ buffer upload is not part of asset readiness.
 
 ## References, cancellation, and generated geometry
 
-`RequestPieceDataLoad()` acquires one reference even if loading fails. Always pair it
-with `ReleasePieceData()`. Its asynchronous return value means the call did not
-wait, not that the asset loaded. `AddPieceDataReference()` retains an identity without
-starting work. `WaitForPieceData()` deduplicates its input without acquiring consumer
-references; callers retain every required identity and its owner through the wait.
+`lcPieceDataRef` and `lcTextureRef` alias the shared `lcAssetRef<T>` template in
+`lc_assettypes.h`. Both are copyable scoped references.
+Construction from a borrowed pointer and copying acquire one reference; moving
+transfers the reference without retaining it. Assignment retains the new identity
+before releasing the old one. Destruction or `Reset()` releases one reference
+through its owning library; `Get()` borrows and `Release()` transfers ownership
+to an owner responsible for explicitly releasing it. The library has a private
+adoption path for references already acquired during model creation.
+Use and destroy handles on the UI thread before the library unloads. Empty handles
+are safe. `==` and `!=` compare pointer identity between handles or with a
+borrowed pointer in either order, including null, without changing reference counts.
+Use `Get()` when passing a borrowed pointer to an API.
 
-A part request owns an additional in-flight reference. Removing one instance
+`lcPiece::SetPieceData()` accepts an `lcPieceDataRef` by value, adopts that
+reference, and releases the previous identity. Passing an lvalue copies and retains;
+passing a moved handle transfers the reference. Its raw-pointer constructor is a
+borrowing convenience that acquires its own reference. Placed pieces and models
+store their definition handles directly, as do the current selection, minifig
+parts, and thumbnail dependencies. Stored insertion previews use owning
+`lcPreviewInsertPieceInfo` entries, while transient `lcInsertPieceInfo` queries
+remain borrowed. Project-remapping owners also retain scoped references.
+`AddPieceDataReference()` is the internal retain primitive used by the scoped reference.
+
+`RequestPieceDataLoad()` starts or promotes work without acquiring a
+consumer reference, and returns immediately for every priority, including Blocking.
+Repeated requests add no consumer references. Callers retain the identity while
+they need it. Use `WaitForPieceData()` or `EnsurePieceDataAssetsReady()`
+for synchronous loading. Both wait APIs take handles by const reference without acquiring consumer
+references. Callers retain every required identity and its owner throughout the
+wait. `lcModel::GetRequiredPieceData()` and its project counterpart return
+owning handle vectors, deduplicated by identity; releasing a result releases its
+snapshot references.
+
+A part request owns an additional in-flight `lcPieceDataRef`; synth notifications also
+own a scoped definition reference. Request handles are explicitly reset at the
+UI-thread completion, cancellation, and notification boundaries, before shared
+request storage can be destroyed on a worker thread. Moves preserve the single
+loader hold without introducing additional consumer counts. Removing one instance
 cannot destroy an asset still used by another instance or pending work. On the
 last consumer release, queued work is removed; running ordinary part work is
 allowed to finish and its result is discarded if no consumer survives. Successful
@@ -438,10 +474,10 @@ Priorities only promote: `Low < Normal < Blocking`. Ordinary thumbnail
 requests start Low; asynchronous model pieces and generated meshes start
 Normal, regardless of step. Synchronous waits promote their required requests
 and pending texture dependencies to Blocking. The same `lcLoadPriority` enum
-is used at the loading entry point and throughout the scheduler. The library's `RequestPieceDataLoad()`
-waits only for Blocking; Low and Normal return immediately. The loader's entry point
-only queues or promotes requests; the library prepares readiness and starts unloaded
-requirements before delegating waits. Internal queueing
+is used at the loading entry point and throughout the scheduler. `RequestPieceDataLoad()`
+only starts or promotes work and never waits, even with Blocking priority. Call
+`WaitForPieceData()` or `EnsurePieceDataAssetsReady()` for synchronous loading.
+The library prepares readiness and starts unloaded requirements before delegating waits. Internal queueing
 uses priority solely to rank work and does not wait. Shared textures retain the highest
 promotion received from any parent or direct wait. There is no consumer identity
 map, priority demotion, or step-based scheduling. Priority lasts until that request
@@ -480,11 +516,12 @@ adds strict failure reporting. During shutdown, the loader's private
 
 | Need | API and lifetime contract |
 | --- | --- |
-| Resolve a name | `FindPieceData()` with the intended project and explicit `CreateMissing` / `SearchProjectFolder` arguments. The returned pointer is borrowed; retain it before keeping it beyond its owner's lifetime. |
-| Retain and start ordinary asynchronous work | `RequestPieceDataLoad()` with `lcLoadPriority::Low` for background work or `Normal` for model/view work. Pair every acquisition with `ReleasePieceData()`, including failures. |
-| Retain and synchronously load one identity | `RequestPieceDataLoad()` with `lcLoadPriority::Blocking`; check its return value and pair the acquisition with `ReleasePieceData()`, including failures. |
-| Retain without starting work | `AddPieceDataReference()`, paired with `ReleasePieceData()`. This does not make geometry ready. |
-| Wait for an explicit part set | `WaitForPieceData()` (use `{ PieceData }` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
+| Find a registered identity | `FindPieceData(Name, Project)` returns a borrowed identity without I/O or creation; retain it before keeping it beyond its owner's lifetime. |
+| Resolve or create a piece identity | `AcquirePieceData(Name, Project, CreateMissing, SearchProjectFolder)` returns a scoped reference without ensuring mesh readiness. |
+| Start ordinary asynchronous work | Retain the identity, then call `RequestPieceDataLoad()` with `lcLoadPriority::Low` for background work or `Normal` for model/view work. Existing owners need no extra reference for another request. |
+| Retain and synchronously load one identity | Keep an `lcPieceDataRef` from `AcquirePieceData()`, then call `WaitForPieceData(PieceDataRef)` and check its return value. |
+| Retain without starting work | `lcPieceDataRef(Piece)` returns a scoped reference. This does not make geometry ready. |
+| Wait for an explicit part set | `WaitForPieceData(PieceDataRefs)` (use `WaitForPieceData(PieceDataRef)` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
 | Wait for one identity and its container geometry | `EnsurePieceDataAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
 | Replace/wait for generated geometry | `RequestSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |

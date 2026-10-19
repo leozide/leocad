@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_math.h"
+#include "lc_assettypes.h"
 #include "lc_commands.h"
 #include "lc_objectproperty.h"
 #include "lc_result.h"
@@ -70,6 +71,19 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(lcModelTransformFlags)
 struct lcInsertPieceInfo
 {
 	lcPieceData* PieceData;
+	lcMatrix44 Transform;
+	int ColorIndex;
+};
+
+// Stored insertion previews own their definitions; lcInsertPieceInfo remains borrowed.
+struct lcPreviewInsertPieceInfo
+{
+	explicit lcPreviewInsertPieceInfo(const lcInsertPieceInfo& Info)
+		: PieceData(Info.PieceData), Transform(Info.Transform), ColorIndex(Info.ColorIndex)
+	{
+	}
+
+	lcPieceDataRef PieceData;
 	lcMatrix44 Transform;
 	int ColorIndex;
 };
@@ -187,14 +201,14 @@ public:
 	void QueueMeshBuild();
 	void UpdateAllViews() const;
 	void RefreshPreview() const;
-	std::vector<lcPieceData*> GetRequiredPieceData() const;
+	std::vector<lcPieceDataRef> GetRequiredPieceData() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	void WaitForAssets() const;
 	lcResult<void> EnsureAssetsReady() const;
 
 	lcPieceData* GetPieceData() const
 	{
-		return mPieceData;
+		return mPieceData.Get();
 	}
 
 	const std::vector<std::unique_ptr<lcPiece>>& GetPieces() const
@@ -329,7 +343,7 @@ public:
 	void UpdateSelectedPiecesTrainTrackConnections();
 	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);
 
-	const std::vector<lcInsertPieceInfo>& GetPreviewInsertPieceInfo() const
+	const std::vector<lcPreviewInsertPieceInfo>& GetPreviewInsertPieceInfo() const
 	{
 		return mPreviewInsertPieceInfo;
 	}
@@ -506,7 +520,7 @@ protected:
 	// Their order and the current-directory preference are saved with the model.
 	std::vector<QString> mAssetSourceDirectories;
 	bool mPreferCurrentAssetDirectory = true;
-	lcPieceData* mPieceData;
+	lcPieceDataRef mPieceData;
 
 	bool mIsPreview;
 	bool mActive;
@@ -517,7 +531,7 @@ protected:
 	bool mMouseToolMovePositionValid = false;
 	bool mMouseToolMoveUsesFocus = false;
 	bool mMouseToolFirstMove;
-	std::vector<lcInsertPieceInfo> mPreviewInsertPieceInfo;
+	std::vector<lcPreviewInsertPieceInfo> mPreviewInsertPieceInfo;
 
 	std::vector<std::unique_ptr<lcPiece>> mPieces;
 	std::vector<std::unique_ptr<lcCamera>> mCameras;

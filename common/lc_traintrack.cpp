@@ -76,7 +76,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 
 		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
 		{
-			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr, false, false);
+			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr);
 
 			if (PieceData)
 				PieceData->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, true));
@@ -86,7 +86,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 
 		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
 		{
-			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr, false, false);
+			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr);
 
 			if (PieceData)
 				PieceData->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, false));
@@ -102,7 +102,7 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 		size_t Group = qHash(SleepersIt.key());
 		QString PartId = SleepersIt->toString();
 
-		lcPieceData* SleeperPieceData = Library->FindPieceData(PartId.toLatin1(), nullptr, false, false);
+		lcPieceData* SleeperPieceData = Library->FindPieceData(PartId.toLatin1(), nullptr);
 
 		if (SleeperPieceData)
 			mSleepers[Group] = SleeperPieceData;
@@ -245,7 +245,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 		if (!SleeperPieceData)
 			return Pieces;
 
-		std::optional<lcMatrix44> SleeperTransform = GetConnectionTransform(CurrentPiece->mPieceData, CurrentPiece->mModelWorld, ConnectionIndex, SleeperPieceData, 0);
+		std::optional<lcMatrix44> SleeperTransform = GetConnectionTransform(CurrentPiece->mPieceData.Get(), CurrentPiece->mModelWorld, ConnectionIndex, SleeperPieceData, 0);
 
 		if (!SleeperTransform)
 			return Pieces;
@@ -260,7 +260,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 	}
 	else
 	{
-		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceData, CurrentPiece->mModelWorld, ConnectionIndex, PieceData, NewConnectionIndex);
+		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceData.Get(), CurrentPiece->mModelWorld, ConnectionIndex, PieceData, NewConnectionIndex);
 
 		if (Transform)
 			Pieces.emplace_back(lcInsertPieceInfo{ PieceData, Transform.value(), ColorIndex });

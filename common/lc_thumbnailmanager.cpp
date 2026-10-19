@@ -27,9 +27,6 @@ void lcThumbnailManager::Clear()
 	mModel.reset();
 	mPendingGeneratedModels.clear();
 
-	for (auto &[ThumbnailId, Thumbnail] : mThumbnails)
-		ReleaseRequiredPieces(Thumbnail);
-
 	mThumbnails.clear();
 }
 
@@ -41,9 +38,9 @@ void lcThumbnailManager::RefreshPieces(const std::vector<lcPieceData*>& ChangedP
 	for (std::map<lcPartThumbnailId, lcPartThumbnail>::value_type& Entry : mThumbnails)
 	{
 		const lcPartThumbnail& Thumbnail = Entry.second;
-		const bool RequiredChanged = std::any_of(Thumbnail.Required.begin(), Thumbnail.Required.end(), [&Changed](lcPieceData* PieceData)
+		const bool RequiredChanged = std::any_of(Thumbnail.RequiredPieceData.begin(), Thumbnail.RequiredPieceData.end(), [&Changed](const lcPieceDataRef& RequiredData)
 		{
-			return Changed.find(PieceData) != Changed.end();
+			return Changed.find(RequiredData.Get()) != Changed.end();
 		});
 
 		if (Changed.find(Thumbnail.PieceData) == Changed.end() && !RequiredChanged)
@@ -102,8 +99,6 @@ void lcThumbnailManager::ReleaseThumbnail(lcPartThumbnailId ThumbnailId)
 	{
 		mPendingGeneratedModels.erase(ThumbnailId);
 
-		ReleaseRequiredPieces(Thumbnail);
-
 		mThumbnails.erase(ThumbnailIt);
 	}
 }
@@ -114,8 +109,9 @@ void lcThumbnailManager::RefreshRequiredPieces(lcPartThumbnail& Thumbnail)
 
 	if (Thumbnail.PieceData->IsModel())
 	{
-		std::vector<lcPieceData*> ModelRequired = Thumbnail.PieceData->GetModel()->GetRequiredPieceData();
-		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+		std::vector<lcPieceDataRef> ModelPieceData = Thumbnail.PieceData->GetModel()->GetRequiredPieceData();
+		for (const lcPieceDataRef& ModelData : ModelPieceData)
+			Required.push_back(ModelData.Get());
 	}
 	else if (Thumbnail.PieceData->IsProject())
 	{
@@ -123,34 +119,37 @@ void lcThumbnailManager::RefreshRequiredPieces(lcPartThumbnail& Thumbnail)
 
 		if (Model)
 		{
-			std::vector<lcPieceData*> ModelRequired = Model->GetRequiredPieceData();
-			Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+			std::vector<lcPieceDataRef> ModelPieceData = Model->GetRequiredPieceData();
+			for (const lcPieceDataRef& ModelData : ModelPieceData)
+				Required.push_back(ModelData.Get());
 		}
 	}
 
 	std::sort(Required.begin(), Required.end());
 	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
 
-	std::unordered_set<lcPieceData*> Previous(Thumbnail.Required.begin(), Thumbnail.Required.end());
+	std::unordered_map<lcPieceData*, size_t> Previous;
+
+	for (size_t Index = 0; Index < Thumbnail.RequiredPieceData.size(); Index++)
+		Previous.emplace(Thumbnail.RequiredPieceData[Index].Get(), Index);
+
+	std::vector<lcPieceDataRef> RequiredPieceData;
+	RequiredPieceData.reserve(Required.size());
 
 	for (lcPieceData* PieceData : Required)
 	{
-		if (Previous.erase(PieceData) == 0)
+		const auto It = Previous.find(PieceData);
+
+		if (It != Previous.end())
+			RequiredPieceData.push_back(std::move(Thumbnail.RequiredPieceData[It->second]));
+		else
+		{
+			RequiredPieceData.emplace_back(PieceData);
 			mLibrary->RequestPieceDataLoad(PieceData, lcLoadPriority::Low);
+		}
 	}
 
-	for (lcPieceData* PieceData : Previous)
-		mLibrary->ReleasePieceData(PieceData);
-
-	Thumbnail.Required = std::move(Required);
-}
-
-void lcThumbnailManager::ReleaseRequiredPieces(lcPartThumbnail& Thumbnail)
-{
-	for (lcPieceData* PieceData : Thumbnail.Required)
-		mLibrary->ReleasePieceData(PieceData);
-
-	Thumbnail.Required.clear();
+	Thumbnail.RequiredPieceData = std::move(RequiredPieceData);
 }
 
 void lcThumbnailManager::UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail)
@@ -159,15 +158,15 @@ void lcThumbnailManager::UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartTh
 
 	bool Pending = false;
 
-	for (const lcPieceData* PieceData : Thumbnail.Required)
+	for (const lcPieceDataRef& RequiredData : Thumbnail.RequiredPieceData)
 	{
-		if (PieceData->mState == lcAssetState::Failed || PieceData->mState == lcAssetState::Unloaded)
+		if (RequiredData->mState == lcAssetState::Failed || RequiredData->mState == lcAssetState::Unloaded)
 		{
 			DrawFailedThumbnail(ThumbnailId, Thumbnail);
 			return;
 		}
 
-		if (PieceData->mState != lcAssetState::Loaded)
+		if (RequiredData->mState != lcAssetState::Loaded)
 			Pending = true;
 	}
 
@@ -190,7 +189,10 @@ void lcThumbnailManager::PartLoaded(lcPieceData* PieceData)
 	std::vector<lcPartThumbnailId> Ready;
 
 	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Pixmap.isNull() && std::find(Thumbnail.Required.begin(), Thumbnail.Required.end(), PieceData) != Thumbnail.Required.end())
+		if (Thumbnail.Pixmap.isNull() && std::any_of(Thumbnail.RequiredPieceData.begin(), Thumbnail.RequiredPieceData.end(), [PieceData](const lcPieceDataRef& RequiredData)
+		{
+			return RequiredData == PieceData;
+		}))
 			Ready.push_back(ThumbnailId);
 
 	for (lcPartThumbnailId ThumbnailId : Ready)
@@ -207,7 +209,10 @@ void lcThumbnailManager::PartLoadFailed(lcPieceData* PieceData)
 	std::vector<lcPartThumbnailId> Failed;
 
 	for (const auto& [ThumbnailId, Thumbnail] : mThumbnails)
-		if (Thumbnail.Pixmap.isNull() && std::find(Thumbnail.Required.begin(), Thumbnail.Required.end(), PieceData) != Thumbnail.Required.end())
+		if (Thumbnail.Pixmap.isNull() && std::any_of(Thumbnail.RequiredPieceData.begin(), Thumbnail.RequiredPieceData.end(), [PieceData](const lcPieceDataRef& RequiredData)
+		{
+			return RequiredData == PieceData;
+		}))
 			Failed.push_back(ThumbnailId);
 
 	for (lcPartThumbnailId ThumbnailId : Failed)
@@ -296,7 +301,7 @@ void lcThumbnailManager::DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPa
 
 	Thumbnail.Pixmap.setDevicePixelRatio(Thumbnail.DeviceScale);
 
-	ReleaseRequiredPieces(Thumbnail);
+	Thumbnail.RequiredPieceData.clear();
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
 	SchedulePendingThumbnails();
@@ -387,8 +392,8 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	{
 		RefreshRequiredPieces(Thumbnail);
 
-		for (const lcPieceData* Required : Thumbnail.Required)
-			if (Required->IsLoading())
+		for (const lcPieceDataRef& RequiredData : Thumbnail.RequiredPieceData)
+			if (RequiredData->IsLoading())
 				return;
 
 		DrawFailedThumbnail(ThumbnailId, Thumbnail);
@@ -441,7 +446,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 
 	Thumbnail.Pixmap = QPixmap::fromImage(Image).scaled(ScaledSize, ScaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-	ReleaseRequiredPieces(Thumbnail);
+	Thumbnail.RequiredPieceData.clear();
 
 	emit ThumbnailReady(ThumbnailId, Thumbnail.Pixmap);
 	SchedulePendingThumbnails();

@@ -64,11 +64,7 @@ lcMainWindow::~lcMainWindow()
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	disconnect(Library, nullptr, this, nullptr);
 
-	if (mInsertPieceData)
-	{
-		Library->ReleasePieceData(mInsertPieceData);
-		mInsertPieceData = nullptr;
-	}
+	mInsertPieceData.Reset();
 
 	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
 		lcSetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIndex), mRecentFiles[FileIndex]);
@@ -1023,11 +1019,12 @@ void lcMainWindow::UpdateAssets()
 
 	lcView::UpdateProjectViews(Project);
 
-	const std::vector<lcPieceData*> Required = Project->GetRequiredPieceData();
+	const std::vector<lcPieceDataRef> RequiredPieceData = Project->GetRequiredPieceData();
 	const std::vector<lcPiece*> GeneratedPieces = Project->GetRequiredSynthPieces();
 
 	mStatusRequiredAssets.clear();
-	mStatusRequiredAssets.insert(Required.begin(), Required.end());
+	for (const lcPieceDataRef& RequiredData : RequiredPieceData)
+		mStatusRequiredAssets.insert(RequiredData.Get());
 
 	int PendingParts = 0;
 	int PendingSynths = 0;
@@ -1042,8 +1039,9 @@ void lcMainWindow::UpdateAssets()
 		FailureDetails += Warning;
 	}
 
-	for (const lcPieceData* PieceData : Required)
+	for (const lcPieceDataRef& RequiredData : RequiredPieceData)
 	{
+		const lcPieceData* PieceData = RequiredData.Get();
 		if (PieceData->mState == lcAssetState::Failed)
 		{
 			Failed++;
@@ -1082,7 +1080,7 @@ void lcMainWindow::UpdateAssets()
 		}
 	}
 
-	const int Total = static_cast<int>(Required.size() + GeneratedPieces.size());
+	const int Total = static_cast<int>(RequiredPieceData.size() + GeneratedPieces.size());
 	const int Pending = PendingParts + PendingSynths;
 	QString LoadingText;
 
@@ -2014,15 +2012,10 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 
 void lcMainWindow::SetInsertPieceData(lcPieceData* PieceData)
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	mInsertPieceData = lcPieceDataRef(PieceData);
 
 	if (mInsertPieceData)
-		Library->ReleasePieceData(mInsertPieceData);
-
-	mInsertPieceData = PieceData;
-
-	if (mInsertPieceData)
-		Library->RequestPieceDataLoad(mInsertPieceData, lcLoadPriority::Normal);
+		lcGetPiecesLibrary()->RequestPieceDataLoad(mInsertPieceData.Get(), lcLoadPriority::Normal);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()
@@ -2286,7 +2279,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		int ColorIndex = Piece->GetColorIndex();
 		quint32 ColorCode = lcGetColorCode(ColorIndex);
 
-		PreviewPiece(Piece->mPieceData, ColorCode, false);
+		PreviewPiece(Piece->mPieceData.Get(), ColorCode, false);
 	}
 
 	QString Message;

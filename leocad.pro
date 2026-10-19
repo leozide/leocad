@@ -185,6 +185,7 @@ SOURCES += \
 	common/lc_application.cpp \
 	common/lc_arraydialog.cpp \
 	common/lc_assetloader.cpp \
+	common/lc_assettypes.cpp \
 	common/lc_blenderpreferences.cpp \
 	common/lc_bricklink.cpp \
 	common/lc_category.cpp \

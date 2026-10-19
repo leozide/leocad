@@ -1043,7 +1043,7 @@ std::vector<QString> Project::GetLoadWarningDetails() const
 		for (const std::unique_ptr<lcModel>& Model : Current->mModels)
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 			{
-				const lcPieceData* PieceData = Piece->mPieceData;
+				const lcPieceData* PieceData = Piece->mPieceData.Get();
 
 				if (!PieceData || !PieceData->IsProject())
 					continue;
@@ -1259,7 +1259,7 @@ lcResult<void> Project::Save(const QString& FileName)
 	if (DirectoryChanged)
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		std::vector<lcPieceData*> LocalPieces;
+		std::vector<lcPieceDataRef> LocalPieceData;
 		std::vector<lcPieceData*> ChangedPieces;
 
 		for (const std::map<std::string, lcPieceData*>::value_type& Entry : mPieceIndex)
@@ -1269,13 +1269,12 @@ lcResult<void> Project::Save(const QString& FileName)
 			if (PieceData->IsModel())
 				continue;
 
-			Library->AddPieceDataReference(PieceData);
-			LocalPieces.push_back(PieceData);
+			LocalPieceData.push_back(lcPieceDataRef(PieceData));
 		}
 
-		for (lcPieceData* PieceData : LocalPieces)
-			if (Library->RemapProjectPieceData(PieceData, DestinationDirectory, mIsPreview))
-				ChangedPieces.push_back(PieceData);
+		for (const lcPieceDataRef& LocalData : LocalPieceData)
+			if (Library->RemapProjectPieceData(LocalData.Get(), DestinationDirectory, mIsPreview))
+				ChangedPieces.push_back(LocalData.Get());
 
 		for (const std::unique_ptr<lcModel>& Model : mModels)
 		{
@@ -1304,8 +1303,6 @@ lcResult<void> Project::Save(const QString& FileName)
 				gMainWindow->GetPreviewWidget()->RefreshAfterAssetChange(ChangedPieces);
 		}
 
-		for (lcPieceData* PieceData : LocalPieces)
-			Library->ReleasePieceData(PieceData);
 	}
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
@@ -1543,7 +1540,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 		{
 			if (Piece->mPieceData && !Piece->mPieceData->IsModel())
-				NonModelPieces.emplace(lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData()), Piece->mPieceData);
+				NonModelPieces.emplace(lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData()), Piece->mPieceData.Get());
 		}
 	}
 
@@ -1587,7 +1584,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 			{
 				const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData());
 
-				if (!RegisterSourcePiece(Name, Piece->mPieceData))
+				if (!RegisterSourcePiece(Name, Piece->mPieceData.Get()))
 					return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
 			}
 		}
@@ -1608,7 +1605,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 				const bool ReservedOriginal = FinalName != OriginalName && OriginalModelNames.find(Name) != OriginalModelNames.end();
 				const bool Duplicate = DestinationModelNames.find(Name) != DestinationModelNames.end() || NonModelPieces.find(Name) != NonModelPieces.end() ||
 					PlannedModelNames.find(Name) != PlannedModelNames.end() || ReservedOriginal ||
-					Library->FindPieceData(FinalName.toLatin1().constData(), nullptr, false, false) != nullptr;
+					Library->FindPieceData(FinalName.toLatin1().constData(), nullptr) != nullptr;
 
 				if (!Duplicate)
 				{
@@ -1657,7 +1654,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		{
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 			{
-				lcPieceData* Incoming = Piece->mPieceData;
+				lcPieceData* Incoming = Piece->mPieceData.Get();
 
 				if (!Incoming || Incoming->IsModel())
 					continue;
@@ -1669,8 +1666,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 					continue;
 
 				const QString PieceId = Piece->GetID();
-				Piece->SetPieceData(Existing, PieceId, false, false);
-				Library->ReleasePieceData(Incoming);
+				Piece->SetPieceData(lcPieceDataRef(Existing), PieceId, false, false);
 			}
 		}
 
@@ -1810,20 +1806,20 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 	return ModelParts;
 }
 
-std::vector<lcPieceData*> Project::GetRequiredPieceData() const
+std::vector<lcPieceDataRef> Project::GetRequiredPieceData() const
 {
-	std::vector<lcPieceData*> Required;
+	std::vector<lcPieceDataRef> RequiredPieceData;
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		std::vector<lcPieceData*> ModelRequired = Model->GetRequiredPieceData();
-		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
+		std::vector<lcPieceDataRef> ModelPieceData = Model->GetRequiredPieceData();
+		RequiredPieceData.insert(RequiredPieceData.end(), ModelPieceData.begin(), ModelPieceData.end());
 	}
 
-	std::sort(Required.begin(), Required.end());
-	Required.erase(std::unique(Required.begin(), Required.end()), Required.end());
+	std::sort(RequiredPieceData.begin(), RequiredPieceData.end());
+	RequiredPieceData.erase(std::unique(RequiredPieceData.begin(), RequiredPieceData.end()), RequiredPieceData.end());
 
-	return Required;
+	return RequiredPieceData;
 }
 
 std::vector<lcPiece*> Project::GetRequiredSynthPieces() const
@@ -1885,7 +1881,7 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 			if ((FilterSelection && !Piece->IsSelected()) || (LastStep && Piece->GetStepShow() > LastStep))
 				continue;
 
-			const lcPieceData* PieceData = Piece->mPieceData;
+			const lcPieceData* PieceData = Piece->mPieceData.Get();
 			const lcModel* Child = nullptr;
 
 			if (PieceData && PieceData->IsModel())
@@ -3749,7 +3745,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 			lcstrcat(Src, ".dat");
 
-			lcPieceData* PieceData = Library->FindPieceData(Src, nullptr, false, false);
+			lcPieceData* PieceData = Library->FindPieceData(Src, nullptr);
 			if (!PieceData)
 				continue;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_math.h"
+#include "lc_assettypes.h"
 
 enum LC_MFW_TYPES
 {
@@ -33,7 +34,7 @@ struct lcMinifigPieceInfo
 
 struct lcMinifig
 {
-	lcPieceData* Parts[LC_MFW_NUMITEMS];
+	lcPieceDataRef PieceData[LC_MFW_NUMITEMS];
 	int ColorIndices[LC_MFW_NUMITEMS];
 	float Angles[LC_MFW_NUMITEMS];
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];

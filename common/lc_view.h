@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lc_assettypes.h"
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_commands.h"
@@ -288,7 +289,7 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
-	std::pair<std::vector<lcInsertPieceInfo>, bool> GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, lcPieceData* PieceData, lcPiece* MovingPiece) const;
+	std::pair<std::vector<lcInsertPieceInfo>, bool> GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectRayTest RayTest(bool PiecesOnly, bool IgnoreSelected) const;

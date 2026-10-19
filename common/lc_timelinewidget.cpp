@@ -594,7 +594,7 @@ void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
 	if (!Piece)
 		return;
 
-	lcPieceData* PieceData = Piece->mPieceData;
+	lcPieceData* PieceData = Piece->mPieceData.Get();
 
 	if (!PieceData)
 		return;

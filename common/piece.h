@@ -5,6 +5,7 @@ class lcPieceData;
 #include "object.h"
 #include "lc_colors.h"
 #include "lc_math.h"
+#include "lc_assettypes.h"
 
 #define LC_MAX_CONTROL_POINTS 1000
 
@@ -60,6 +61,7 @@ class lcPiece : public lcObject
 public:
 	lcPiece();
 	lcPiece(lcPieceData* PieceData);
+	lcPiece(lcPieceDataRef PieceDataRef);
 	lcPiece(const lcPiece& Other);
 	virtual ~lcPiece();
 
@@ -161,7 +163,7 @@ public:
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void SetPieceData(lcPieceData* PieceData, const QString& ID, bool Wait, bool UpdateSynthInfo);
+	void SetPieceData(lcPieceDataRef PieceDataRef, const QString& ID, bool Wait, bool UpdateSynthInfo);
 	bool SetPieceId(lcPieceData* PieceData);
 	bool FileLoad(lcFile& file, Project* Project);
 
@@ -278,7 +280,7 @@ public:
 	}
 
 public:
-	lcPieceData* mPieceData = nullptr;
+	lcPieceDataRef mPieceData;
 
 	lcMatrix44 mModelWorld;
 	lcMatrix44 mPivotMatrix = lcMatrix44Identity();

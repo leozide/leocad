@@ -37,16 +37,6 @@ enum class lcLibraryCacheFlag : quint32
 	Directory = 0x0002
 };
 
-lcPieceSourceSnapshot::lcPieceSourceSnapshot()
-	: ZipFileType(lcZipFileType::Count), StudStyle(lcStudStyle::Plain)
-{
-}
-
-lcPieceBuildResult::lcPieceBuildResult() = default;
-lcPieceBuildResult::~lcPieceBuildResult() = default;
-lcPieceBuildResult::lcPieceBuildResult(lcPieceBuildResult&&) noexcept = default;
-lcPieceBuildResult& lcPieceBuildResult::operator=(lcPieceBuildResult&&) noexcept = default;
-
 lcPiecesLibrary::lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 	: mStudStyle(StudStyle), mStudCylinderColorEnabled(StudCylinderColorEnabled)
 {
@@ -348,7 +338,7 @@ std::string lcPiecesLibrary::NormalizePieceDataName(const char* PieceName)
 	return Name;
 }
 
-lcPieceData* lcPiecesLibrary::AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused)
+lcPieceDataRef lcPiecesLibrary::AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused)
 {
 	const std::string Name = NormalizePieceDataName(PieceName);
 	lcPieceData* PieceData;
@@ -373,10 +363,12 @@ lcPieceData* lcPiecesLibrary::AcquireModelPieceData(const char* PieceName, Proje
 		PieceData->AddRef();
 	}
 
+	lcPieceDataRef PieceDataRef = lcPieceDataRef::Adopt(PieceData, this);
+
 	if (Reused)
 		InvalidatePieceDataLoad(PieceData);
 
-	return PieceData;
+	return PieceDataRef;
 }
 
 lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests)
@@ -404,30 +396,36 @@ lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInf
 	return ExternalProject;
 }
 
-lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
+lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* CurrentProject)
 {
 	const std::string Name = NormalizePieceDataName(PieceName);
-	QString ProjectPath;
-	QString LoadError;
+	QMutexLocker LoadLock(&mLoadMutex);
 
 	if (CurrentProject)
-	{
-		QMutexLocker LoadLock(&mLoadMutex);
-
 		if (lcPieceData* PieceData = CurrentProject->FindPieceData(Name))
 			return PieceData;
 
-		if (SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
-			ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
-	}
+	const std::map<std::string, lcPieceData*>::const_iterator PieceIt = mPieces.find(Name);
+
+	return PieceIt != mPieces.end() ? PieceIt->second : nullptr;
+}
+
+lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
+{
+	QString ProjectPath;
+	QString LoadError;
 
 	{
 		QMutexLocker LoadLock(&mLoadMutex);
-		const std::map<std::string, lcPieceData*>::const_iterator PieceIt = mPieces.find(Name);
 
-		if (PieceIt != mPieces.end())
-			return PieceIt->second;
+		if (lcPieceData* PieceData = FindPieceData(PieceName, CurrentProject))
+			return lcPieceDataRef(PieceData, this);
+
+		if (CurrentProject && SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
+			ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
 	}
+
+	const std::string Name = NormalizePieceDataName(PieceName);
 
 	if (!ProjectPath.isEmpty())
 	{
@@ -444,7 +442,7 @@ lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* Curr
 				PieceData->CreateProject(ExternalProject.value(), PieceName);
 				RegisterProjectPieceData(CurrentProject, Name, PieceData);
 
-				return PieceData;
+				return lcPieceDataRef(PieceData, this);
 			}
 			else
 				LoadError = ExternalProject.error();
@@ -466,10 +464,10 @@ lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* Curr
 			mPieces[Name] = PieceData;
 		}
 
-		return PieceData;
+		return lcPieceDataRef(PieceData, this);
 	}
 
-	return nullptr;
+	return lcPieceDataRef();
 }
 
 bool lcPiecesLibrary::RemapProjectPieceData(lcPieceData* PieceData, const QString& ProjectDirectory, bool IsPreview)
@@ -975,7 +973,7 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 			if (memcmp(Name, "S/", 2))
 			{
-				lcPieceData* PieceData = FindPieceData(Name, nullptr, false, false);
+				lcPieceData* PieceData = FindPieceData(Name, nullptr);
 
 				if (!PieceData)
 				{
@@ -1656,18 +1654,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 	return WriteArchiveCacheFile(FileName, IndexFile);
 }
 
-bool lcPiecesLibrary::RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority)
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	AddPieceDataReference(PieceData);
-
-	StartPieceLoad(PieceData, LoadPriority);
-
-	return LoadPriority != lcLoadPriority::Blocking || WaitForPieceData({ PieceData });
-}
-
-void lcPiecesLibrary::StartPieceLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority)
+void lcPiecesLibrary::RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1711,9 +1698,9 @@ void lcPiecesLibrary::NotifyAssetStatusChanged()
 	emit AssetStatusChanged();
 }
 
-bool lcPiecesLibrary::EnsurePieceDataAssetsReady(lcPieceData* PieceData)
+bool lcPiecesLibrary::EnsurePieceDataAssetsReady(const lcPieceDataRef& PieceData)
 {
-	const bool PieceReady = WaitForPieceData({ PieceData });
+	const bool PieceReady = WaitForPieceData(PieceData);
 
 	if (PieceData->IsModel())
 		return static_cast<bool>(PieceData->GetModel()->EnsureAssetsReady()) && PieceReady;
@@ -1722,25 +1709,44 @@ bool lcPiecesLibrary::EnsurePieceDataAssetsReady(lcPieceData* PieceData)
 	{
 		const bool ProjectReady = static_cast<bool>(PieceData->GetProject()->EnsureAssetsReady());
 
-		PieceData->GetProject()->UpdatePieceData(PieceData);
+		PieceData->GetProject()->UpdatePieceData(PieceData.Get());
 		return ProjectReady && PieceReady;
 	}
 
 	return PieceReady;
 }
 
-bool lcPiecesLibrary::WaitForPieceData(const std::vector<lcPieceData*>& Pieces)
+bool lcPiecesLibrary::WaitForPieceData(const lcPieceDataRef& PieceDataRef)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	for (lcPieceData* PieceData : Pieces)
-		if (PieceData->mState == lcAssetState::Unloaded)
-			StartPieceLoad(PieceData, lcLoadPriority::Blocking);
+	if (PieceDataRef->mState == lcAssetState::Unloaded)
+		RequestPieceDataLoad(PieceDataRef.Get(), lcLoadPriority::Blocking);
+
+	const bool RequestsSucceeded = mAssetLoader->WaitForPieces({ PieceDataRef.Get() });
+
+	return RequestsSucceeded && PieceDataRef->mState == lcAssetState::Loaded;
+}
+
+bool lcPiecesLibrary::WaitForPieceData(const std::vector<lcPieceDataRef>& PieceDataRefs)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	std::vector<lcPieceData*> Pieces;
+	Pieces.reserve(PieceDataRefs.size());
+
+	for (const lcPieceDataRef& PieceDataRef : PieceDataRefs)
+	{
+		if (PieceDataRef->mState == lcAssetState::Unloaded)
+			RequestPieceDataLoad(PieceDataRef.Get(), lcLoadPriority::Blocking);
+
+		Pieces.push_back(PieceDataRef.Get());
+	}
 
 	const bool RequestsSucceeded = mAssetLoader->WaitForPieces(Pieces);
 
-	for (const lcPieceData* PieceData : Pieces)
-		if (PieceData->mState != lcAssetState::Loaded)
+	for (const lcPieceDataRef& PieceDataRef : PieceDataRefs)
+		if (PieceDataRef->mState != lcAssetState::Loaded)
 			return false;
 
 	return RequestsSucceeded;
@@ -1750,7 +1756,7 @@ void lcPiecesLibrary::RequestSynthMesh(lcPiece* Piece)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	lcPieceData* PieceData = Piece->mPieceData;
+	lcPieceData* PieceData = Piece->mPieceData.Get();
 	std::shared_ptr<const lcSynthInfo> SynthInfo = PieceData ? PieceData->GetSynthInfoShared() : nullptr;
 
 	if (!SynthInfo)
@@ -1854,7 +1860,7 @@ void lcPiecesLibrary::RebuildModelPieceData(lcPieceData* PieceData)
 
 	InvalidatePieceDataLoad(PieceData);
 	PieceData->ReleaseMesh();
-	StartPieceLoad(PieceData, lcLoadPriority::Normal);
+	RequestPieceDataLoad(PieceData, lcLoadPriority::Normal);
 }
 
 void lcPiecesLibrary::InvalidatePieceDataLoad(lcPieceData* PieceData)
@@ -1900,14 +1906,6 @@ bool lcPiecesLibrary::HasPieceDataConsumers(const lcPieceData* PieceData)
 	QMutexLocker LoadLock(&mLoadMutex);
 
 	return PieceData->GetRefCount() > 1;
-}
-
-void lcPiecesLibrary::ReleasePieceDataLoadHold(lcPieceData* PieceData)
-{
-	QMutexLocker LoadLock(&mLoadMutex);
-
-	if (PieceData->Release() == 0)
-		UnloadPieceData(PieceData);
 }
 
 void lcPiecesLibrary::SetPieceDataLoadError(const lcPieceData* PieceData, QString Error)
@@ -2452,12 +2450,12 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 			PieceData->ReleaseMesh();
 			PieceData->mState = lcAssetState::Unloaded;
 
-			StartPieceLoad(PieceData, lcLoadPriority::Low);
+			RequestPieceDataLoad(PieceData, lcLoadPriority::Low);
 		}
 		else if (!PieceData->IsProject())
 		{
 			PieceData->Unload();
-			StartPieceLoad(PieceData, lcLoadPriority::Low);
+			RequestPieceDataLoad(PieceData, lcLoadPriority::Low);
 		}
 
 		mBuffersDirty = true;
@@ -2738,7 +2736,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 			*strchr(ParentName, 'P') = '\0';
 			lcstrcat(ParentName, ".dat");
 
-			Parent = FindPieceData(ParentName, nullptr, false, false);
+			Parent = FindPieceData(ParentName, nullptr);
 
 			if (Parent)
 			{

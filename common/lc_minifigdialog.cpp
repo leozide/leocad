@@ -206,7 +206,7 @@ void lcMinifigDialog::TemplateComboBoxCurrentTextChanged(const QString& Template
 	{
 		if (!Template.Parts[PartIdx].isEmpty())
 		{
-			lcPieceData* PieceData = mMinifigWizard->mMinifig.Parts[PartIdx];
+			lcPieceData* PieceData = mMinifigWizard->mMinifig.PieceData[PartIdx].Get();
 
 			if (PieceData)
 			{
@@ -368,7 +368,7 @@ void lcMinifigDialog::PieceButtonClicked()
 		return;
 
 	int ItemIndex = static_cast<int>(std::distance(mPieceButtons.begin(), Search));
-	lcPieceData* CurrentPieceData = mMinifigWizard->mMinifig.Parts[ItemIndex];
+	lcPieceData* CurrentPieceData = mMinifigWizard->mMinifig.PieceData[ItemIndex].Get();
 
 	QPoint Position = PieceButton->mapToGlobal(PieceButton->rect().bottomLeft());
 	std::vector<std::pair<lcPieceData*, std::string>> Parts;

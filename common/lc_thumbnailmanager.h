@@ -1,12 +1,14 @@
 #pragma once
 
+#include "lc_assettypes.h"
+
 class lcPiecesLibrary;
 
 struct lcPartThumbnail
 {
 	QPixmap Pixmap;
 	lcPieceData* PieceData;
-	std::vector<lcPieceData*> Required;
+	std::vector<lcPieceDataRef> RequiredPieceData;
 	int ColorIndex;
 	int Size;
 	float DeviceScale;
@@ -41,7 +43,6 @@ protected slots:
 
 protected:
 	void RefreshRequiredPieces(lcPartThumbnail& Thumbnail);
-	void ReleaseRequiredPieces(lcPartThumbnail& Thumbnail);
 	void UpdateThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);
 	void DrawFailedThumbnail(lcPartThumbnailId ThumbnailId, lcPartThumbnail& Thumbnail);

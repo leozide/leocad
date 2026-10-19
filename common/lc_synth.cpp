@@ -173,7 +173,7 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: FlexibleHoses)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoFlexibleHose(HoseInfo.Length, HoseInfo.NumSections, HoseInfo.EdgePart2));
@@ -224,7 +224,7 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: FlexSystemHoses)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections));
@@ -272,7 +272,7 @@ void lcSynthInit()
 
 	for (const auto& TubeInfo: PneumaticTubes)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(TubeInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(TubeInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections, "71533k02.dat"));
@@ -281,7 +281,7 @@ void lcSynthInit()
 		RegularInfo.PartID[7] = '2';
 		RegularInfo.Length -= 40.0f;
 
-		PieceData = Library->FindPieceData(RegularInfo.PartID, nullptr, false, false);
+		PieceData = Library->FindPieceData(RegularInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoPneumaticTube(RegularInfo.Length, RegularInfo.NumSections, "71533k01.dat"));
@@ -318,7 +318,7 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: RibbedHoses)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoRibbedHose(HoseInfo.Length, HoseInfo.NumSections));
@@ -343,7 +343,7 @@ void lcSynthInit()
 
 	for (const auto& AxleInfo: FlexibleAxles)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(AxleInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(AxleInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoFlexibleAxle(AxleInfo.Length, AxleInfo.NumSections));
@@ -364,7 +364,7 @@ void lcSynthInit()
 
 	for (const auto& StringInfo: BraidedStrings)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(StringInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(StringInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoBraidedString(StringInfo.Length, StringInfo.NumSections));
@@ -385,7 +385,7 @@ void lcSynthInit()
 
 	for (const auto& AbsorberInfo: ShockAbsorbers)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(AbsorberInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(AbsorberInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoShockAbsorber(AbsorberInfo.SpringPart));
@@ -414,7 +414,7 @@ void lcSynthInit()
 
 	for (const auto& ActuatorInfo: Actuators)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(ActuatorInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(ActuatorInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.BodyPart, ActuatorInfo.PistonPart,
@@ -439,7 +439,7 @@ void lcSynthInit()
 
 	for (const auto& JointInfo: UniversalJoints)
 	{
-		lcPieceData* PieceData = Library->FindPieceData(JointInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(JointInfo.PartID, nullptr);
 
 		if (PieceData)
 			PieceData->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndOffset, JointInfo.EndPart, JointInfo.CenterPart));

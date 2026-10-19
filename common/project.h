@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_application.h"
+#include "lc_assettypes.h"
 #include "lc_result.h"
 
 #define LC_HTML_SINGLEPAGE    0x01
@@ -144,7 +145,7 @@ public:
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
 	lcResult<void> SaveImage(const lcImageDialogOptions& Options);
-	std::vector<lcPieceData*> GetRequiredPieceData() const;
+	std::vector<lcPieceDataRef> GetRequiredPieceData() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 	lcResult<void> ExportCurrentStep(const QString& FileName);

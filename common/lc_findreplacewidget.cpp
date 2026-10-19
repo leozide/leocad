@@ -111,7 +111,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	{
 		lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-		Params.FindPieceData = Focus->mPieceData;
+		Params.FindPieceData = Focus->mPieceData.Get();
 		Params.FindColorIndex = Focus->GetColorIndex();
 
 		FindColorPicker->SetCurrentColor(Params.FindColorIndex);

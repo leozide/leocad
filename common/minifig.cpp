@@ -48,7 +48,6 @@ MinifigWizard::MinifigWizard()
 
 	for (int PartIndex = 0; PartIndex < LC_MFW_NUMITEMS; PartIndex++)
 	{
-		mMinifig.Parts[PartIndex] = nullptr;
 		mMinifig.ColorIndices[PartIndex] = gDefaultColor;
 		mMinifig.Angles[PartIndex] = 0.0f;
 		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
@@ -57,12 +56,6 @@ MinifigWizard::MinifigWizard()
 
 MinifigWizard::~MinifigWizard()
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-
-	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
-		if (mMinifig.Parts[i])
-			Library->ReleasePieceData(mMinifig.Parts[i]); // todo: don't call ReleasePieceData here because it may release textures and they need a GL context current
-
 	SaveTemplates();
 }
 
@@ -152,7 +145,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			*NameEnd = 0;
 			NameEnd++;
 
-			lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(NameStart, nullptr, false, false);
+			lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(NameStart, nullptr);
 			if (!PieceData && *NameStart)
 				continue;
 
@@ -207,24 +200,19 @@ void MinifigWizard::LoadTemplate(const QString& TemplateName)
 		mMinifig.Angles[PartIndex] = Template.Angles[PartIndex];
 		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
 
-		if (mMinifig.Parts[PartIndex])
-			Library->ReleasePieceData(mMinifig.Parts[PartIndex]);
+		mMinifig.PieceData[PartIndex] = Library->AcquirePieceData(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
 
-		lcPieceData* PieceData = Library->FindPieceData(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
-
-		mMinifig.Parts[PartIndex] = PieceData;
-
-		if (PieceData)
-			Library->RequestPieceDataLoad(PieceData, lcLoadPriority::Normal);
+		if (mMinifig.PieceData[PartIndex])
+			Library->RequestPieceDataLoad(mMinifig.PieceData[PartIndex].Get(), lcLoadPriority::Normal);
 	}
 
-	std::vector<lcPieceData*> Required;
+	std::vector<lcPieceDataRef> RequiredPieceData;
 
-	for (lcPieceData* PieceData : mMinifig.Parts)
+	for (const lcPieceDataRef& PieceData : mMinifig.PieceData)
 		if (PieceData)
-			Required.push_back(PieceData);
+			RequiredPieceData.push_back(PieceData);
 
-	Library->WaitForPieceData(Required);
+	Library->WaitForPieceData(RequiredPieceData);
 
 	Calculate();
 }
@@ -326,26 +314,26 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	lcMatrix44 Root, Mat, Mat2;
 
-	lcPieceData** Parts = mMinifig.Parts;
+	const lcPieceDataRef* PieceData = mMinifig.PieceData;
 	const float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
-	const bool DroidTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "30375.dat");
-	const bool SkeletonTorso = Parts[LC_MFW_BODY] && !qstricmp(Parts[LC_MFW_BODY]->mFileName, "6260.dat");
+	const bool DroidTorso = PieceData[LC_MFW_BODY] && !qstricmp(PieceData[LC_MFW_BODY]->mFileName, "30375.dat");
+	const bool SkeletonTorso = PieceData[LC_MFW_BODY] && !qstricmp(PieceData[LC_MFW_BODY]->mFileName, "6260.dat");
 
-	if (Parts[LC_MFW_BODY3])
+	if (PieceData[LC_MFW_BODY3])
 		Root = lcMatrix44Translation(lcVector3(0, 0, 74.0f));
 	else
 		Root = lcMatrix44Translation(lcVector3(0, 0, 72.0f));
 	Matrices[LC_MFW_BODY] = lcMul(mSettings[LC_MFW_BODY][GetSelectionIndex(LC_MFW_BODY)].Offset, Root);
 
-	if (Parts[LC_MFW_NECK])
+	if (PieceData[LC_MFW_NECK])
 	{
 		Matrices[LC_MFW_NECK] = lcMul(mSettings[LC_MFW_NECK][GetSelectionIndex(LC_MFW_NECK)].Offset, Root);
 		HeadOffset = 0.08f;
 	}
 
-	if (Parts[LC_MFW_HEAD])
+	if (PieceData[LC_MFW_HEAD])
 	{
 		Mat = lcMatrix44RotationZ(-LC_DTOR * Angles[LC_MFW_HEAD]);
 		Mat.SetTranslation(lcVector3(0.0f, 0.0f, 24.0f + HeadOffset));
@@ -353,21 +341,21 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_HEAD] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_HATS])
+	if (PieceData[LC_MFW_HATS])
 	{
 		Mat = lcMatrix44RotationZ(-LC_DTOR * Angles[LC_MFW_HATS]);
 		Mat = lcMul(mSettings[LC_MFW_HATS][GetSelectionIndex(LC_MFW_HATS)].Offset, Mat);
 		Matrices[LC_MFW_HATS] = lcMul(Mat, Matrices[LC_MFW_HEAD]);
 	}
 
-	if (Parts[LC_MFW_HATS2])
+	if (PieceData[LC_MFW_HATS2])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_HATS2]);
 		Mat = lcMul(mSettings[LC_MFW_HATS2][GetSelectionIndex(LC_MFW_HATS2)].Offset, Mat);
 		Matrices[LC_MFW_HATS2] = lcMul(Mat, Matrices[LC_MFW_HATS]);
 	}
 
-	if (Parts[LC_MFW_RARM])
+	if (PieceData[LC_MFW_RARM])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_RARM]);
 
@@ -382,7 +370,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_RARM] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_RHAND])
+	if (PieceData[LC_MFW_RHAND])
 	{
 		Mat = lcMatrix44RotationY(-LC_DTOR * Angles[LC_MFW_RHAND]);
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
@@ -392,7 +380,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_RHAND] = lcMul(Mat, Matrices[LC_MFW_RARM]);
 	}
 
-	if (Parts[LC_MFW_RHANDA])
+	if (PieceData[LC_MFW_RHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RHANDA]);
 		Mat.SetTranslation(lcVector3(0, -9.25f, 0));
@@ -401,7 +389,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_RHANDA] = lcMul(Mat, Matrices[LC_MFW_RHAND]);
 	}
 
-	if (Parts[LC_MFW_LARM])
+	if (PieceData[LC_MFW_LARM])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_LARM]);
 
@@ -416,7 +404,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_LARM] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_LHAND])
+	if (PieceData[LC_MFW_LHAND])
 	{
 		Mat = lcMatrix44RotationY(-LC_DTOR * Angles[LC_MFW_LHAND]);
 		Mat2 = lcMatrix44RotationX(LC_DTOR * 45);
@@ -426,7 +414,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_LHAND] = lcMul(Mat, Matrices[LC_MFW_LARM]);
 	}
 
-	if (Parts[LC_MFW_LHANDA])
+	if (PieceData[LC_MFW_LHANDA])
 	{
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LHANDA]);
 		Mat.SetTranslation(lcVector3(0, -9.25f, 0));
@@ -435,7 +423,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_LHANDA] = lcMul(Mat, Matrices[LC_MFW_LHAND]);
 	}
 
-	if (Parts[LC_MFW_BODY2])
+	if (PieceData[LC_MFW_BODY2])
 	{
 		Mat = lcMatrix44Identity();
 		Mat.SetTranslation(lcVector3(0, 0, -32.0f));
@@ -443,7 +431,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_BODY2] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_BODY3])
+	if (PieceData[LC_MFW_BODY3])
 	{
 		Mat = lcMatrix44Identity();
 		Mat.SetTranslation(lcVector3(0, 0, -32.0f));
@@ -451,7 +439,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_BODY3] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_RLEG])
+	if (PieceData[LC_MFW_RLEG])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_RLEG]);
 		Mat.SetTranslation(lcVector3(0, 0, -44.0f));
@@ -459,7 +447,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_RLEG] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_RLEGA])
+	if (PieceData[LC_MFW_RLEGA])
 	{
 		const lcVector3 Center(-10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_RLEGA]);
@@ -470,7 +458,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_RLEGA] = lcMul(Mat, Matrices[LC_MFW_RLEG]);
 	}
 
-	if (Parts[LC_MFW_LLEG])
+	if (PieceData[LC_MFW_LLEG])
 	{
 		Mat = lcMatrix44RotationX(-LC_DTOR * Angles[LC_MFW_LLEG]);
 		Mat.SetTranslation(lcVector3(0, 0, -44.0f));
@@ -478,7 +466,7 @@ void MinifigWizard::Calculate()
 		Matrices[LC_MFW_LLEG] = lcMul(Mat, Root);
 	}
 
-	if (Parts[LC_MFW_LLEGA])
+	if (PieceData[LC_MFW_LLEGA])
 	{
 		const lcVector3 Center(10.0f, -1.0f, -28.0f);
 		Mat = lcMatrix44RotationZ(LC_DTOR * Angles[LC_MFW_LLEGA]);
@@ -497,7 +485,7 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 	const std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
 	for (size_t Index = 0; Index < InfoArray.size(); Index++)
-		if (InfoArray[Index].PieceData == mMinifig.Parts[Type])
+		if (InfoArray[Index].PieceData == mMinifig.PieceData[Type])
 			return (int)Index;
 
 	return 0;
@@ -505,15 +493,10 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 
 void MinifigWizard::SetPieceData(int Type, lcPieceData* PieceData)
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	mMinifig.PieceData[Type] = lcPieceDataRef(PieceData);
 
-	if (mMinifig.Parts[Type])
-		Library->ReleasePieceData(mMinifig.Parts[Type]);
-
-	mMinifig.Parts[Type] = PieceData;
-
-	if (mMinifig.Parts[Type])
-		Library->RequestPieceDataLoad(mMinifig.Parts[Type], lcLoadPriority::Blocking);
+	if (mMinifig.PieceData[Type])
+		lcGetPiecesLibrary()->WaitForPieceData(mMinifig.PieceData[Type]);
 
 	Calculate();
 }

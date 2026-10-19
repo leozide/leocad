@@ -87,11 +87,12 @@ private:
 		}
 	};
 
-	// Owns one lcPieceData load hold through completion and deferred notification.
+	// Owns one definition reference through completion and deferred notification.
+	// Reset on the UI thread before worker-shared request storage can be destroyed.
 	// One worker job builds and converts geometry; textures settle before publication.
 	struct PieceRequest : RequestBase
 	{
-		lcPieceData* PieceData;
+		lcPieceDataRef PieceData;
 		lcPieceSourceSnapshot Source;
 		std::unique_ptr<lcMesh> StagedMesh;
 		bool EmptyGeometry = false;
@@ -147,7 +148,7 @@ private:
 	struct SynthNotification
 	{
 		std::shared_ptr<SynthRequest> RequestedSynth;
-		lcPieceData* PieceData;
+		lcPieceDataRef PieceData;
 	};
 
 	// Queue and promote requests on the UI thread.

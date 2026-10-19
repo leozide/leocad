@@ -151,15 +151,17 @@ bool lcImportLXFMLFile(const QString& FileData, Project* Project, std::vector<lc
 				QString LegoID = PartElement.attribute(QLatin1String("designID"));
 				int Material = PartElement.attribute(QLatin1String("materials")).split(',').first().toInt();
 
-				lcPieceData* PieceData = nullptr;
+				lcPieceDataRef PieceData;
 				const auto BrickIt = BrickTable.find(LegoID.toInt());
+
 				if (BrickIt != BrickTable.end())
-					PieceData = lcGetPiecesLibrary()->FindPieceData(BrickIt->second.c_str(), Project, true, false);
+					PieceData = lcGetPiecesLibrary()->AcquirePieceData(BrickIt->second.c_str(), Project, true, false);
 				else
-					PieceData = lcGetPiecesLibrary()->FindPieceData(LegoID.toLatin1() + ".dat", Project, true, false);
+					PieceData = lcGetPiecesLibrary()->AcquirePieceData(LegoID.toLatin1() + ".dat", Project, true, false);
 
 				const auto ColorIt = MaterialTable.find(Material);
 				int ColorCode = 16;
+
 				if (ColorIt != MaterialTable.end())
 					ColorCode = ColorIt->second;
 
@@ -179,7 +181,7 @@ bool lcImportLXFMLFile(const QString& FileData, Project* Project, std::vector<lc
 										 lcVector4(-WorldMatrix[2][0], WorldMatrix[2][1], WorldMatrix[2][2], 0.0f), lcVector4(WorldMatrix[3][0] * 25.0f, -WorldMatrix[3][1] * 25.0f, -WorldMatrix[3][2] * 25.0f, 1.0f));
 
 				lcPiece* Piece = new lcPiece(nullptr);
-				Piece->SetPieceData(PieceData, QString(), false, true);
+				Piece->SetPieceData(std::move(PieceData), QString(), false, true);
 				Piece->Initialize(lcMatrix44LDrawToLeoCAD(WorldMatrix), 1);
 				Piece->SetColorCode(ColorCode);
 				Pieces.push_back(Piece);

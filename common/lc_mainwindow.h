@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_application.h"
+#include "lc_assettypes.h"
 #include "lc_shortcuts.h"
 #include "lc_result.h"
 #include "lc_commands.h"
@@ -140,7 +141,7 @@ public:
 		return mSelectionMode;
 	}
 
-	lcPieceData* GetInsertPieceData() const
+	const lcPieceDataRef& GetInsertPieceData() const
 	{
 		return mInsertPieceData;
 	}
@@ -347,7 +348,7 @@ protected:
 	int mAngleSnapIndex;
 	bool mRelativeTransform = true;
 	bool mLocalTransform = false;
-	lcPieceData* mInsertPieceData = nullptr;
+	lcPieceDataRef mInsertPieceData;
 	lcSelectionMode mSelectionMode;
 	int mMousePressTabIndex = -1;
 

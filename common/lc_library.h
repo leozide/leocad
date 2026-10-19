@@ -170,23 +170,26 @@ public:
 	void SetModelPieceDataName(lcPieceData* PieceData, const char* Name);
 	bool RenamePieceData(lcPieceData* PieceData, const char* NewName);
 	static std::string NormalizePieceDataName(const char* PieceName);
-	// Returns one acquired model reference, paired with ReleasePieceData().
-	lcPieceData* AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused);
-	// Returns a borrowed identity; lookup does not acquire a reference or ensure readiness.
-	lcPieceData* FindPieceData(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
+	// Returns one scoped model reference, ready to transfer to the model.
+	lcPieceDataRef AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused);
+	// Borrowed registered lookup: project names, then the shared catalog. No I/O or creation.
+	lcPieceData* FindPieceData(const char* PieceName, Project* Project);
+	// Resolves or creates an identity and returns one scoped reference; does not ensure readiness.
+	lcPieceDataRef AcquirePieceData(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
 	bool RemapProjectPieceData(lcPieceData* PieceData, const QString& ProjectDirectory, bool IsPreview);
 
 	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
-	// Acquires one reference even on failure; always pair with ReleasePieceData().
-	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
-	bool RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
+	// Start or promote loading asynchronously. Adds no consumer references and never waits.
+	// Priority controls scheduling only; the caller retains the identity through completion or cancellation.
+	void RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
 	void NotifyAssetStatusChanged();
 	// Start or promote loading, then wait. Adds no consumer references.
 	// Returns false for failed or cancelled pieces.
 	// Does not traverse container children or wait for per-instance synth geometry.
-	bool WaitForPieceData(const std::vector<lcPieceData*>& Pieces);
+	bool WaitForPieceData(const lcPieceDataRef& PieceDataRef);
+	bool WaitForPieceData(const std::vector<lcPieceDataRef>& PieceDataRefs);
 	// Also settles container children/synths and updates bounds; caller retains the identity.
-	bool EnsurePieceDataAssetsReady(lcPieceData* PieceData);
+	bool EnsurePieceDataAssetsReady(const lcPieceDataRef& PieceData);
 
 	// Obsoletes pending work and resets readiness without acquiring a reference.
 	void InvalidatePieceDataLoad(lcPieceData* PieceData);
@@ -200,14 +203,8 @@ public:
 	// Last generation error, or an empty string; an empty error does not imply readiness.
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPieceData(lcPieceData* PieceData);
-	// Releases one reference and lets the loader cancel unused queued work.
-	void ReleasePieceData(lcPieceData* PieceData);
-	// Lifetime hold only: does not start loading or establish readiness.
-	void AddPieceDataReference(lcPieceData* PieceData);
 	// Loader helper: assumes a pending request/notification owns one in-flight hold.
 	bool HasPieceDataConsumers(const lcPieceData* PieceData);
-	// Releases that in-flight hold without triggering consumer-release cancellation.
-	void ReleasePieceDataLoadHold(lcPieceData* PieceData);
 	void SetPieceDataLoadError(const lcPieceData* PieceData, QString Error);
 	QString GetPieceDataLoadError(const lcPieceData* PieceData) const;
 	void ClearPieceDataLoadError(const lcPieceData* PieceData);
@@ -287,9 +284,14 @@ signals:
 
 protected:
 	friend class lcAssetLoader;
+	template<typename T> friend class lcAssetRef;
 
-	// Prepare asset readiness and request work without acquiring a consumer reference or waiting.
-	void StartPieceLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
+	// Internal lifetime primitive for scoped acquisitions and loader holds. Never starts work.
+	void AddPieceDataReference(lcPieceData* PieceData);
+
+	// Releases one reference and lets the loader cancel unused queued work.
+	void ReleasePieceData(lcPieceData* PieceData);
+
 	// The loader calls this only when cancelling the current request, before releasing its hold.
 	void PieceDataLoadCancelled(lcPieceData* PieceData);
 

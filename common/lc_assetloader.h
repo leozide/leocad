@@ -2,7 +2,7 @@
 
 #include "lc_assettypes.h"
 
-class PieceInfo;
+class lcPieceData;
 class lcPiecesLibrary;
 class lcPiece;
 struct lcPieceControlPoint;
@@ -21,24 +21,24 @@ public:
 
 	// Queue or promote a piece the library has marked Loading. Adds no consumer reference.
 	// Priority controls scheduling only; the library handles blocking waits and asset readiness.
-	void RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
+	void RequestPieceLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
 
 	// Promote and wait for requests active at entry; false means a request failed or was cancelled.
 	// The library checks final asset readiness, including identities with no active request.
 	// Adds no consumer references and does not traverse container children or generated meshes.
-	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
+	bool WaitForPieces(const std::vector<lcPieceData*>& Pieces);
 
 	// Called when the last consumer releases the piece. Cancels queued work and reports it to the library;
 	// running work finishes privately and is discarded if the piece is still unused.
-	void CancelPieceLoad(PieceInfo* Info);
+	void CancelPieceLoad(lcPieceData* PieceData);
 
 	// Discard pending load results and notifications after the library invalidates readiness.
 	// Asset meshes, readiness, and errors belong to the library.
-	void InvalidatePieceLoad(PieceInfo* Info);
+	void InvalidatePieceLoad(lcPieceData* PieceData);
 
 	// Build this instance's generated mesh from definition/control-point snapshots supplied by the library.
 	// Cancel any older request and keep the previous mesh visible while the replacement is built.
-	void RequestSynthMesh(lcPiece* Piece, PieceInfo* Info, std::shared_ptr<const lcSynthInfo> SynthInfo, std::vector<lcPieceControlPoint> ControlPoints);
+	void RequestSynthMesh(lcPiece* Piece, lcPieceData* PieceData, std::shared_ptr<const lcSynthInfo> SynthInfo, std::vector<lcPieceControlPoint> ControlPoints);
 
 	// Promote and wait for generations active at entry; false means a generation failed or was cancelled.
 	// The library checks final generated-mesh readiness. The caller keeps the instances alive through the wait.
@@ -87,11 +87,11 @@ private:
 		}
 	};
 
-	// Owns one PieceInfo load hold through completion and deferred notification.
+	// Owns one lcPieceData load hold through completion and deferred notification.
 	// One worker job builds and converts geometry; textures settle before publication.
 	struct PieceRequest : RequestBase
 	{
-		PieceInfo* Info;
+		lcPieceData* PieceData;
 		lcPieceSourceSnapshot Source;
 		std::unique_ptr<lcMesh> StagedMesh;
 		bool EmptyGeometry = false;
@@ -113,7 +113,7 @@ private:
 	struct SynthRequest : RequestBase
 	{
 		lcPiece* Piece;
-		PieceInfo* Info; // Borrowed from the instance until cancellation or publication.
+		lcPieceData* PieceData; // Borrowed from the instance until cancellation or publication.
 		std::shared_ptr<const lcSynthInfo> SynthInfo;
 		std::vector<lcPieceControlPoint> ControlPoints;
 		std::atomic_bool Cancelled = false;
@@ -121,7 +121,7 @@ private:
 		QString Error;
 	};
 
-	using PieceRequestMap = std::map<PieceInfo*, std::shared_ptr<PieceRequest>>;
+	using PieceRequestMap = std::map<lcPieceData*, std::shared_ptr<PieceRequest>>;
 	using TextureRequestMap = std::map<lcTexture*, std::shared_ptr<TextureRequest>>;
 	using SynthRequestMap = std::map<lcPiece*, std::shared_ptr<SynthRequest>>;
 
@@ -147,11 +147,11 @@ private:
 	struct SynthNotification
 	{
 		std::shared_ptr<SynthRequest> RequestedSynth;
-		PieceInfo* Info;
+		lcPieceData* PieceData;
 	};
 
 	// Queue and promote requests on the UI thread.
-	void QueueTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority);
+	void RequestTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority);
 	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcLoadPriority LoadPriority);
 
 	// Fill available job slots using queued request priority and age.

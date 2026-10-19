@@ -3,7 +3,7 @@
 #include "lc_mesh.h"
 #include "lc_previewwidget.h"
 #include "piece.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "camera.h"
 #include "project.h"
 #include "lc_instructions.h"
@@ -71,7 +71,7 @@ Project::Project(bool IsPreview)
 {
 	mModified = false;
 	mActiveModel = new lcModel(tr(mIsPreview ? "Preview.ldr" : "New Model.ldr"), this, mIsPreview);
-	mActiveModel->CreatePieceInfo(this);
+	mActiveModel->CreatePieceData(this);
 	mActiveModel->SetSaved();
 	mModels.emplace_back(mActiveModel);
 
@@ -94,49 +94,49 @@ Project::Project(bool IsPreview)
 Project::~Project()
 {
 	mModels.clear();
-	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
+	lcGetPiecesLibrary()->ReleaseProjectPieceData(this);
 }
 
-PieceInfo* Project::FindPiece(const std::string& Name) const
+lcPieceData* Project::FindPieceData(const std::string& Name) const
 {
-	const std::map<std::string, PieceInfo*>::const_iterator It = mPieceIndex.find(Name);
+	const std::map<std::string, lcPieceData*>::const_iterator It = mPieceIndex.find(Name);
 
 	return It == mPieceIndex.end() ? nullptr : It->second;
 }
 
-void Project::RegisterPiece(const std::string& Name, PieceInfo* Info)
+void Project::RegisterPieceData(const std::string& Name, lcPieceData* PieceData)
 {
-	mPieceIndex[Name] = Info;
+	mPieceIndex[Name] = PieceData;
 }
 
-void Project::UnregisterPiece(PieceInfo* Info)
+void Project::UnregisterPieceData(lcPieceData* PieceData)
 {
-	for (std::map<std::string, PieceInfo*>::iterator It = mPieceIndex.begin(); It != mPieceIndex.end();)
+	for (std::map<std::string, lcPieceData*>::iterator It = mPieceIndex.begin(); It != mPieceIndex.end();)
 	{
-		if (It->second == Info)
+		if (It->second == PieceData)
 			It = mPieceIndex.erase(It);
 		else
 			It++;
 	}
 }
 
-void Project::ClearPieceIndex()
+void Project::ClearPieceDataIndex()
 {
 	mPieceIndex.clear();
 }
 
-void Project::TransferPieceIndexTo(Project* Destination)
+void Project::TransferPieceDataIndexTo(Project* Destination)
 {
-	for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+	for (const std::map<std::string, lcPieceData*>::value_type& Entry : mPieceIndex)
 	{
-		if (!Destination->FindPiece(Entry.first))
-			Destination->RegisterPiece(Entry.first, Entry.second);
+		if (!Destination->FindPieceData(Entry.first))
+			Destination->RegisterPieceData(Entry.first, Entry.second);
 	}
 
 	mPieceIndex.clear();
 }
 
-bool Project::CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming)
+bool Project::CanShareMergePieceData(const lcPieceData* Existing, const lcPieceData* Incoming)
 {
 	if (Existing == Incoming)
 		return true;
@@ -225,7 +225,7 @@ void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 		std::vector<lcModel*> UpdatedModels;
 		UpdatedModels.reserve(mModels.size());
 		for (const std::unique_ptr<lcModel> &Model : mModels)
-			Model->UpdatePieceInfo(UpdatedModels);
+			Model->UpdatePieceData(UpdatedModels);
 	}
 
 	mActiveModel = ActiveModel;
@@ -320,11 +320,11 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 		if (!CurrentName.isEmpty())
 		{
-			const std::string PieceName = lcPiecesLibrary::NormalizePieceName(Name.toLatin1().constData());
-			PieceInfo* ExistingPiece = FindPiece(PieceName);
+			const std::string PieceName = lcPiecesLibrary::NormalizePieceDataName(Name.toLatin1().constData());
+			lcPieceData* ExistingPiece = FindPieceData(PieceName);
 			lcModel* CurrentModel = GetModel(CurrentName);
 
-			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceInfo()) &&
+			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceData()) &&
 				(!ExistingPiece->IsModel() || ExistingModels.contains(Name, Qt::CaseInsensitive)))
 			{
 				QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project, please enter a unique name.").arg(Name));
@@ -352,7 +352,7 @@ lcModel* Project::CreateNewModel(bool ShowModel)
 
 	mModified = true;
 	lcModel* Model = new lcModel(Name, this, false);
-	Model->CreatePieceInfo(this);
+	Model->CreatePieceData(this);
 	Model->SetSaved();
 	mModels.emplace_back(Model);
 
@@ -383,7 +383,7 @@ void Project::ShowModelListDialog()
 
 	std::vector<std::unique_ptr<lcModel>> NewModels;
 	std::vector<lcModelListDialogEntry> Results = Dialog.GetResults();
-	std::vector<std::pair<PieceInfo*, PieceInfo*>> Replacements;
+	std::vector<std::pair<lcPieceData*, lcPieceData*>> Replacements;
 	std::vector<lcModel*> ChangedModels;
 	std::vector<lcModelPieceRename> Renames;
 	std::set<std::string> FinalNames;
@@ -407,7 +407,7 @@ void Project::ShowModelListDialog()
 	// Validate the final names before changing any model or index entry.
 	for (const lcModelListDialogEntry& Entry : Results)
 	{
-		const std::string Name = lcPiecesLibrary::NormalizePieceName(Entry.Name.toLatin1().constData());
+		const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Entry.Name.toLatin1().constData());
 
 		if (!FinalNames.insert(Name).second)
 		{
@@ -418,14 +418,14 @@ void Project::ShowModelListDialog()
 		if (!Entry.ExistingModel || Entry.ExistingModel->GetFileName() == Entry.Name)
 			continue;
 
-		PieceInfo* Occupant = FindPiece(Name);
+		lcPieceData* Occupant = FindPieceData(Name);
 
-		if (!Occupant || Occupant == Entry.ExistingModel->GetPieceInfo())
+		if (!Occupant || Occupant == Entry.ExistingModel->GetPieceData())
 			continue;
 
 		const bool Vacated = std::any_of(mModels.begin(), mModels.end(), [&Results, Occupant, &Name](const std::unique_ptr<lcModel>& OldModel)
 		{
-			if (OldModel->GetPieceInfo() != Occupant)
+			if (OldModel->GetPieceData() != Occupant)
 				return false;
 
 			const std::vector<lcModelListDialogEntry>::const_iterator Result = std::find_if(Results.begin(), Results.end(), [OldModel = OldModel.get()](const lcModelListDialogEntry& CheckEntry)
@@ -433,7 +433,7 @@ void Project::ShowModelListDialog()
 				return CheckEntry.ExistingModel == OldModel;
 			});
 
-			return Result == Results.end() || lcPiecesLibrary::NormalizePieceName(Result->Name.toLatin1().constData()) != Name;
+			return Result == Results.end() || lcPiecesLibrary::NormalizePieceDataName(Result->Name.toLatin1().constData()) != Name;
 		});
 
 		if (!Vacated)
@@ -455,28 +455,28 @@ void Project::ShowModelListDialog()
 		if (Kept != Results.end())
 		{
 			if (Kept->Name != Model->GetFileName())
-				UnregisterPiece(Model->GetPieceInfo());
+				UnregisterPieceData(Model->GetPieceData());
 
 			continue;
 		}
 
-		const std::string OldName = lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData());
+		const std::string OldName = lcPiecesLibrary::NormalizePieceDataName(Model->GetFileName().toLatin1().constData());
 
 		for (const lcModelListDialogEntry& Entry : Results)
 		{
-			if (lcPiecesLibrary::NormalizePieceName(Entry.Name.toLatin1().constData()) != OldName)
+			if (lcPiecesLibrary::NormalizePieceDataName(Entry.Name.toLatin1().constData()) != OldName)
 				continue;
 
-			// A new model can reuse this PieceInfo. A renamed model keeps its own
-			// PieceInfo, so references to the deleted model are rebound below.
-			lcGetPiecesLibrary()->InvalidatePieceLoad(OldModel->GetPieceInfo());
-			OldModel->GetPieceInfo()->DetachContainer();
-			OldModel->GetPieceInfo()->SetFailed(tr("Model '%1' was deleted.").arg(Model->GetFileName()));
+			// A new model can reuse this lcPieceData. A renamed model keeps its own
+			// lcPieceData, so references to the deleted model are rebound below.
+			lcGetPiecesLibrary()->InvalidatePieceDataLoad(OldModel->GetPieceData());
+			OldModel->GetPieceData()->DetachContainer();
+			OldModel->GetPieceData()->SetFailed(tr("Model '%1' was deleted.").arg(Model->GetFileName()));
 
 			if (Entry.ExistingModel)
 			{
-				UnregisterPiece(OldModel->GetPieceInfo());
-				Replacements.emplace_back(OldModel->GetPieceInfo(), Entry.ExistingModel->GetPieceInfo());
+				UnregisterPieceData(OldModel->GetPieceData());
+				Replacements.emplace_back(OldModel->GetPieceData(), Entry.ExistingModel->GetPieceData());
 			}
 
 			break;
@@ -493,14 +493,14 @@ void Project::ShowModelListDialog()
 
 		const QString OldName = Model->GetFileName();
 
-		if (!lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), Entry.Name.toLatin1().constData()))
+		if (!lcGetPiecesLibrary()->RenamePieceData(Model->GetPieceData(), Entry.Name.toLatin1().constData()))
 		{
 			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
 			return;
 		}
 
 		Model->SetFileName(Entry.Name);
-		Renames.push_back({ Model->GetPieceInfo(), OldName, Entry.Name });
+		Renames.push_back({ Model->GetPieceData(), OldName, Entry.Name });
 
 		mModified = true;
 	}
@@ -539,7 +539,7 @@ void Project::ShowModelListDialog()
 				Model->SetFileName(Entry.Name);
 			}
 
-			Model->CreatePieceInfo(this);
+			Model->CreatePieceData(this);
 			Model->SetSaved();
 
 			mModified = true;
@@ -547,18 +547,18 @@ void Project::ShowModelListDialog()
 		NewModels.emplace_back(Model);
 	}
 
-	for (const std::pair<PieceInfo*, PieceInfo*>& Replacement : Replacements)
+	for (const std::pair<lcPieceData*, lcPieceData*>& Replacement : Replacements)
 	{
 		for (const std::unique_ptr<lcModel>& Model : NewModels)
 		{
-			if (Model->RebindPieceInfo(Replacement.first, Replacement.second) && std::find(ChangedModels.begin(), ChangedModels.end(), Model.get()) == ChangedModels.end())
+			if (Model->RebindPieceData(Replacement.first, Replacement.second) && std::find(ChangedModels.begin(), ChangedModels.end(), Model.get()) == ChangedModels.end())
 				ChangedModels.push_back(Model.get());
 		}
 
-		if (gMainWindow->GetCurrentPieceInfo() == Replacement.first)
-			gMainWindow->SetCurrentPieceInfo(Replacement.second);
+		if (gMainWindow->GetInsertPieceData() == Replacement.first)
+			gMainWindow->SetInsertPieceData(Replacement.second);
 
-		gMainWindow->GetPreviewWidget()->RebindPieceInfo(Replacement.first, Replacement.second);
+		gMainWindow->GetPreviewWidget()->RebindPieceData(Replacement.first, Replacement.second);
 	}
 
 	for (std::unique_ptr<lcModel>& Model : mModels)
@@ -866,12 +866,12 @@ void Project::LoadLDrawDocument(const QByteArray& FileData, const Project* Refer
 
 		if (ReuseExistingModels && ReferenceProject && !Models.empty())
 		{
-			const std::string Name = lcPiecesLibrary::NormalizePieceName(Block.FileName.toLatin1().constData());
-			PieceInfo* ExistingInfo = ReferenceProject->FindPiece(Name);
+			const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Block.FileName.toLatin1().constData());
+			lcPieceData* ExistingPieceData = ReferenceProject->FindPieceData(Name);
 
-			if (ExistingInfo && (ExistingInfo->IsModel() || ExistingInfo->IsProject()))
+			if (ExistingPieceData && (ExistingPieceData->IsModel() || ExistingPieceData->IsProject()))
 			{
-				RegisterPiece(Name, ExistingInfo);
+				RegisterPieceData(Name, ExistingPieceData);
 				continue;
 			}
 		}
@@ -879,16 +879,16 @@ void Project::LoadLDrawDocument(const QByteArray& FileData, const Project* Refer
 		std::unique_ptr<lcModel> Model(new lcModel(Block.FileName, this, mIsPreview));
 		Models.emplace_back(&Block, Model.get());
 		mModels.emplace_back(std::move(Model));
-		mModels.back()->CreatePieceInfo(this);
+		mModels.back()->CreatePieceData(this);
 		mDocumentBlocks[Block.LayoutIndex].Model = mModels.back().get();
 		mDocumentBlocks[Block.LayoutIndex].OriginalName = Block.FileName;
 	}
 
 	// Legacy clipboard references can use destination pieces when no definition was copied.
 	if (ReferenceProject)
-		for (const auto& [Name, Info] : ReferenceProject->mPieceIndex)
-			if (!FindPiece(Name))
-				RegisterPiece(Name, Info);
+		for (const auto& [Name, PieceData] : ReferenceProject->mPieceIndex)
+			if (!FindPieceData(Name))
+				RegisterPieceData(Name, PieceData);
 
 	// Every model and asset is registered before geometry resolves references.
 	for (const std::pair<const ModelBlock*, lcModel*>& Entry : Models)
@@ -1043,12 +1043,12 @@ std::vector<QString> Project::GetLoadWarningDetails() const
 		for (const std::unique_ptr<lcModel>& Model : Current->mModels)
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 			{
-				const PieceInfo* Info = Piece->mPieceInfo;
+				const lcPieceData* PieceData = Piece->mPieceData;
 
-				if (!Info || !Info->IsProject())
+				if (!PieceData || !PieceData->IsProject())
 					continue;
 
-				const Project* Referenced = Info->GetProject();
+				const Project* Referenced = PieceData->GetProject();
 
 				if (Referenced && SeenProjects.insert(Referenced).second)
 					Projects.push_back(Referenced);
@@ -1087,7 +1087,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	mLoadWarnings.clear();
 	mEmbeddedData.clear();
 	mEmbeddedDataIndex.clear();
-	lcGetPiecesLibrary()->ReleaseProjectPieces(this);
+	lcGetPiecesLibrary()->ReleaseProjectPieceData(this);
 	SetFileName(FileName);
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
@@ -1124,7 +1124,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 		if (Model->LoadBinary(&MemFile))
 		{
 			mModels.emplace_back(Model);
-			Model->CreatePieceInfo(this);
+			Model->CreatePieceData(this);
 			Model->SetSaved();
 		}
 		else
@@ -1147,7 +1147,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 			QString ModelName = FileInfo.fileName();
 			int Suffix = 2;
 
-			while (!lcGetPiecesLibrary()->RenamePiece(Model->GetPieceInfo(), ModelName.toLatin1().constData()))
+			while (!lcGetPiecesLibrary()->RenamePieceData(Model->GetPieceData(), ModelName.toLatin1().constData()))
 			{
 				const QString FileExtension = FileInfo.suffix().isEmpty() ? QString() : QLatin1Char('.') + FileInfo.suffix();
 				const QString NameSuffix = QLatin1Char(' ') + QString::number(Suffix++) + FileExtension;
@@ -1166,15 +1166,15 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	{
 		if (mIsPreview)
 		{
-			PieceInfo* Info = Model->GetPieceInfo();
+			lcPieceData* PieceData = Model->GetPieceData();
 
-			Info->ReleaseMesh();
-			lcGetPiecesLibrary()->InvalidatePieceLoad(Info);
+			PieceData->ReleaseMesh();
+			lcGetPiecesLibrary()->InvalidatePieceDataLoad(PieceData);
 		}
 		else
 		{
 			if (mDeferModelMeshRequests)
-				lcGetPiecesLibrary()->InvalidatePieceLoad(Model->GetPieceInfo());
+				lcGetPiecesLibrary()->InvalidatePieceDataLoad(Model->GetPieceData());
 
 			Model->QueueMeshBuild();
 		}
@@ -1183,7 +1183,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	if (!mIsPreview)
 	{
 		for (const std::unique_ptr<lcModel>& Model : mModels)
-			Model->UpdatePieceInfo(UpdatedModels);
+			Model->UpdatePieceData(UpdatedModels);
 	}
 
 	mModified = false;
@@ -1259,32 +1259,32 @@ lcResult<void> Project::Save(const QString& FileName)
 	if (DirectoryChanged)
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		std::vector<PieceInfo*> LocalPieces;
-		std::vector<PieceInfo*> ChangedPieces;
+		std::vector<lcPieceData*> LocalPieces;
+		std::vector<lcPieceData*> ChangedPieces;
 
-		for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+		for (const std::map<std::string, lcPieceData*>::value_type& Entry : mPieceIndex)
 		{
-			PieceInfo* Info = Entry.second;
+			lcPieceData* PieceData = Entry.second;
 
-			if (Info->IsModel())
+			if (PieceData->IsModel())
 				continue;
 
-			Library->AddPieceReference(Info);
-			LocalPieces.push_back(Info);
+			Library->AddPieceDataReference(PieceData);
+			LocalPieces.push_back(PieceData);
 		}
 
-		for (PieceInfo* Info : LocalPieces)
-			if (Library->RemapProjectPiece(Info, DestinationDirectory, mIsPreview))
-				ChangedPieces.push_back(Info);
+		for (lcPieceData* PieceData : LocalPieces)
+			if (Library->RemapProjectPieceData(PieceData, DestinationDirectory, mIsPreview))
+				ChangedPieces.push_back(PieceData);
 
 		for (const std::unique_ptr<lcModel>& Model : mModels)
 		{
 			if (!Model->HasDirectGeometry())
 				continue;
 
-			Library->InvalidatePieceLoad(Model->GetPieceInfo());
+			Library->InvalidatePieceDataLoad(Model->GetPieceData());
 			Model->QueueMeshBuild();
-			ChangedPieces.push_back(Model->GetPieceInfo());
+			ChangedPieces.push_back(Model->GetPieceData());
 		}
 
 		if (!ChangedPieces.empty())
@@ -1293,8 +1293,8 @@ lcResult<void> Project::Save(const QString& FileName)
 
 			for (const std::unique_ptr<lcModel>& Model : mModels)
 			{
-				Model->UpdatePieceInfo(UpdatedModels);
-				ChangedPieces.push_back(Model->GetPieceInfo());
+				Model->UpdatePieceData(UpdatedModels);
+				ChangedPieces.push_back(Model->GetPieceData());
 			}
 
 			Library->GetThumbnailManager()->RefreshPieces(ChangedPieces);
@@ -1304,8 +1304,8 @@ lcResult<void> Project::Save(const QString& FileName)
 				gMainWindow->GetPreviewWidget()->RefreshAfterAssetChange(ChangedPieces);
 		}
 
-		for (PieceInfo* Info : LocalPieces)
-			Library->ReleasePieceInfo(Info);
+		for (lcPieceData* PieceData : LocalPieces)
+			Library->ReleasePieceData(PieceData);
 	}
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
@@ -1438,7 +1438,7 @@ lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, con
 
 		std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0));
 
-		if (const lcMesh* Mesh = Model->GetPieceInfo()->GetMesh())
+		if (const lcMesh* Mesh = Model->GetPieceData()->GetMesh())
 			for (const lcMeshLod& Lod : Mesh->mLods)
 				for (int SectionIndex = 0; SectionIndex < Lod.NumSections; SectionIndex++)
 					if (!Lod.Sections[SectionIndex].TextureName.isEmpty())
@@ -1485,7 +1485,7 @@ lcResult<void> Project::Merge(const std::vector<Project*>& Sources)
 lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, const lcModel* ClipboardRoot)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::map<std::string, PieceInfo*> NonModelPieces;
+	std::map<std::string, lcPieceData*> NonModelPieces;
 	std::set<std::string> DestinationModelNames;
 	std::set<std::string> OriginalModelNames;
 	std::set<std::string> PlannedModelNames;
@@ -1528,7 +1528,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 	}
 
 
-	for (const std::map<std::string, PieceInfo*>::value_type& Entry : mPieceIndex)
+	for (const std::map<std::string, lcPieceData*>::value_type& Entry : mPieceIndex)
 	{
 		if (Entry.second->IsModel())
 			DestinationModelNames.insert(Entry.first);
@@ -1538,18 +1538,18 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		DestinationModelNames.insert(lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData()));
+		DestinationModelNames.insert(lcPiecesLibrary::NormalizePieceDataName(Model->GetFileName().toLatin1().constData()));
 
 		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 		{
-			if (Piece->mPieceInfo && !Piece->mPieceInfo->IsModel())
-				NonModelPieces.emplace(lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData()), Piece->mPieceInfo);
+			if (Piece->mPieceData && !Piece->mPieceData->IsModel())
+				NonModelPieces.emplace(lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData()), Piece->mPieceData);
 		}
 	}
 
-	const auto RegisterSourcePiece = [&NonModelPieces, &DestinationModelNames, &ConflictName](const std::string& Name, PieceInfo* Info)
+	const auto RegisterSourcePiece = [&NonModelPieces, &DestinationModelNames, &ConflictName](const std::string& Name, lcPieceData* PieceData)
 	{
-		if (!Info || Info->IsModel())
+		if (!PieceData || PieceData->IsModel())
 			return true;
 
 		if (DestinationModelNames.find(Name) != DestinationModelNames.end())
@@ -1558,22 +1558,22 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 			return false;
 		}
 
-		const std::map<std::string, PieceInfo*>::const_iterator Existing = NonModelPieces.find(Name);
+		const std::map<std::string, lcPieceData*>::const_iterator Existing = NonModelPieces.find(Name);
 
-		if (Existing != NonModelPieces.end() && !CanShareMergePiece(Existing->second, Info))
+		if (Existing != NonModelPieces.end() && !CanShareMergePieceData(Existing->second, PieceData))
 		{
 			ConflictName = QString::fromStdString(Name);
 			return false;
 		}
 
-		NonModelPieces.emplace(Name, Info);
+		NonModelPieces.emplace(Name, PieceData);
 		return true;
 	};
 
 	// Validate the identities behind every piece name before changing any project.
 	for (Project* Source : Sources)
 	{
-		for (const std::map<std::string, PieceInfo*>::value_type& Entry : Source->mPieceIndex)
+		for (const std::map<std::string, lcPieceData*>::value_type& Entry : Source->mPieceIndex)
 		{
 			if (!RegisterSourcePiece(Entry.first, Entry.second))
 				return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
@@ -1581,13 +1581,13 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 
 		for (const std::unique_ptr<lcModel>& Model : Source->mModels)
 		{
-			OriginalModelNames.insert(lcPiecesLibrary::NormalizePieceName(Model->GetFileName().toLatin1().constData()));
+			OriginalModelNames.insert(lcPiecesLibrary::NormalizePieceDataName(Model->GetFileName().toLatin1().constData()));
 
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 			{
-				const std::string Name = lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData());
+				const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData());
 
-				if (!RegisterSourcePiece(Name, Piece->mPieceInfo))
+				if (!RegisterSourcePiece(Name, Piece->mPieceData))
 					return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
 			}
 		}
@@ -1604,11 +1604,11 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 
 			for (;;)
 			{
-				const std::string Name = lcPiecesLibrary::NormalizePieceName(FinalName.toLatin1().constData());
+				const std::string Name = lcPiecesLibrary::NormalizePieceDataName(FinalName.toLatin1().constData());
 				const bool ReservedOriginal = FinalName != OriginalName && OriginalModelNames.find(Name) != OriginalModelNames.end();
 				const bool Duplicate = DestinationModelNames.find(Name) != DestinationModelNames.end() || NonModelPieces.find(Name) != NonModelPieces.end() ||
 					PlannedModelNames.find(Name) != PlannedModelNames.end() || ReservedOriginal ||
-					Library->FindPiece(FinalName.toLatin1().constData(), nullptr, false, false) != nullptr;
+					Library->FindPieceData(FinalName.toLatin1().constData(), nullptr, false, false) != nullptr;
 
 				if (!Duplicate)
 				{
@@ -1633,10 +1633,10 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		if (Planned.FinalName == Planned.Model->GetFileName())
 			continue;
 
-		if (!Library->RenamePiece(Planned.Model->GetPieceInfo(), Planned.FinalName.toLatin1().constData()))
+		if (!Library->RenamePieceData(Planned.Model->GetPieceData(), Planned.FinalName.toLatin1().constData()))
 		{
 			for (std::vector<const ModelPlan*>::reverse_iterator It = AppliedRenames.rbegin(); It != AppliedRenames.rend(); It++)
-				Library->RenamePiece((*It)->Model->GetPieceInfo(), (*It)->Model->GetFileName().toLatin1().constData());
+				Library->RenamePieceData((*It)->Model->GetPieceData(), (*It)->Model->GetFileName().toLatin1().constData());
 
 			return lcUnexpected(tr("Could not reserve submodel name '%1'.").arg(Planned.FinalName));
 		}
@@ -1657,20 +1657,20 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		{
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 			{
-				PieceInfo* Incoming = Piece->mPieceInfo;
+				lcPieceData* Incoming = Piece->mPieceData;
 
 				if (!Incoming || Incoming->IsModel())
 					continue;
 
-				const std::string Name = lcPiecesLibrary::NormalizePieceName(Piece->GetID().toLatin1().constData());
-				PieceInfo* Existing = FindPiece(Name);
+				const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData());
+				lcPieceData* Existing = FindPieceData(Name);
 
-				if (!Existing || Existing == Incoming || !CanShareMergePiece(Existing, Incoming))
+				if (!Existing || Existing == Incoming || !CanShareMergePieceData(Existing, Incoming))
 					continue;
 
 				const QString PieceId = Piece->GetID();
-				Piece->SetPieceInfo(Existing, PieceId, false, false);
-				Library->ReleasePieceInfo(Incoming);
+				Piece->SetPieceData(Existing, PieceId, false, false);
+				Library->ReleasePieceData(Incoming);
 			}
 		}
 
@@ -1680,7 +1680,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 
 			if (Planned.FinalName != Model->GetFileName())
 			{
-				Renames.push_back({ Model->GetPieceInfo(), Model->GetFileName(), Planned.FinalName });
+				Renames.push_back({ Model->GetPieceData(), Model->GetFileName(), Planned.FinalName });
 				Model->SetFileName(Planned.FinalName);
 			}
 
@@ -1693,7 +1693,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		for (lcModel* Model : ImportedModels)
 			Model->RenamePieces(Renames);
 
-		Library->TransferProjectPieces(Source, this);
+		Library->TransferProjectPieceData(Source, this);
 		Source->mModels.clear();
 		mEmbeddedData.insert(mEmbeddedData.end(), Source->mEmbeddedData.begin(), Source->mEmbeddedData.end());
 		mDocumentBlocks.insert(mDocumentBlocks.end(), Source->mDocumentBlocks.begin(), Source->mDocumentBlocks.end());
@@ -1738,13 +1738,13 @@ bool Project::ImportLDD(const QString& FileName)
 	mModels.emplace_back(std::move(NewModel));
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
-		Model->CreatePieceInfo(this);
+		Model->CreatePieceData(this);
 
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
-		Model->UpdatePieceInfo(UpdatedModels);
+		Model->UpdatePieceData(UpdatedModels);
 
 	mModified = false;
 
@@ -1771,13 +1771,13 @@ bool Project::ImportInventory(const std::vector<lcSetInventoryItem>& SetInventor
 	mModels.emplace_back(std::move(NewModel));
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
-		Model->CreatePieceInfo(this);
+		Model->CreatePieceData(this);
 
 	std::vector<lcModel*> UpdatedModels;
 	UpdatedModels.reserve(mModels.size());
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
-		Model->UpdatePieceInfo(UpdatedModels);
+		Model->UpdatePieceData(UpdatedModels);
 
 	mModified = false;
 
@@ -1802,21 +1802,21 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	ModelParts.erase(std::remove_if(ModelParts.begin(), ModelParts.end(), [](const lcModelPartsEntry& ModelPart)
 	{
-		return ModelPart.Info->mState != lcAssetState::Loaded ||
-			(ModelPart.Info->GetSynthInfo() && !ModelPart.Mesh) ||
-			(!ModelPart.Mesh && !ModelPart.Info->GetMesh());
+		return ModelPart.PieceData->mState != lcAssetState::Loaded ||
+			(ModelPart.PieceData->GetSynthInfo() && !ModelPart.Mesh) ||
+			(!ModelPart.Mesh && !ModelPart.PieceData->GetMesh());
 	}), ModelParts.end());
 
 	return ModelParts;
 }
 
-std::vector<PieceInfo*> Project::GetRequiredPieces() const
+std::vector<lcPieceData*> Project::GetRequiredPieceData() const
 {
-	std::vector<PieceInfo*> Required;
+	std::vector<lcPieceData*> Required;
 
 	for (const std::unique_ptr<lcModel>& Model : mModels)
 	{
-		std::vector<PieceInfo*> ModelRequired = Model->GetRequiredPieces();
+		std::vector<lcPieceData*> ModelRequired = Model->GetRequiredPieceData();
 		Required.insert(Required.end(), ModelRequired.begin(), ModelRequired.end());
 	}
 
@@ -1885,13 +1885,13 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 			if ((FilterSelection && !Piece->IsSelected()) || (LastStep && Piece->GetStepShow() > LastStep))
 				continue;
 
-			const PieceInfo* Info = Piece->mPieceInfo;
+			const lcPieceData* PieceData = Piece->mPieceData;
 			const lcModel* Child = nullptr;
 
-			if (Info && Info->IsModel())
-				Child = Info->GetModel();
-			else if (Info && Info->IsProject())
-				Child = Info->GetProject()->GetMainModel();
+			if (PieceData && PieceData->IsModel())
+				Child = PieceData->GetModel();
+			else if (PieceData && PieceData->IsProject())
+				Child = PieceData->GetProject()->GetMainModel();
 
 			if (Child)
 			{
@@ -2012,7 +2012,7 @@ lcResult<lcModel*> Project::ImportClipboard(const QByteArray& FileData)
 {
 	Project Source(mIsPreview);
 	Source.mModels.clear();
-	lcGetPiecesLibrary()->ReleaseProjectPieces(&Source);
+	lcGetPiecesLibrary()->ReleaseProjectPieceData(&Source);
 	Source.SetDeferModelMeshRequests(true);
 	Source.mFileName = mFileName;
 	const QByteArray Marker("0 !LEOCAD CLIPBOARD PROJECT ");
@@ -2040,8 +2040,8 @@ lcResult<lcModel*> Project::ImportClipboard(const QByteArray& FileData)
 				return;
 
 			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
-				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->GetProject() == &Source)
-					Collect(Piece->mPieceInfo->GetModel());
+				if (Piece->mPieceData->IsModel() && Piece->mPieceData->GetModel()->GetProject() == &Source)
+					Collect(Piece->mPieceData->GetModel());
 		};
 		Collect(Root);
 
@@ -2482,7 +2482,7 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 	int NumPieces = 0;
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh || Mesh->mIndexType == GL_UNSIGNED_INT)
 			continue;
@@ -2748,7 +2748,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
@@ -2756,7 +2756,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 		if (MeshIDs.find(Mesh) != MeshIDs.end())
 			continue;
 
-		const QString BaseName = QLatin1String("Part_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.Info->mFileName));
+		const QString BaseName = QLatin1String("Part_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.PieceData->mFileName));
 		const QString ID = MakeUniqueExportIdentifier(BaseName, UsedMeshIDs, QString());
 		MeshIDs.emplace(Mesh, ID);
 		const int NumVertices = Mesh->mNumVertices + Mesh->mNumTexturedVertices;
@@ -2887,7 +2887,7 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
@@ -2967,14 +2967,14 @@ lcResult<void> Project::ExportCSV(const QString& FileName)
 
 	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.first;
+		const lcPieceData* PieceData = PartIt.first;
 
 		for (const auto& ColorIt : PartIt.second)
 		{
-			std::string Description = Info->m_strDescription;
+			std::string Description = PieceData->m_strDescription;
 			Description.erase(std::remove(Description.begin(), Description.end(), ','), Description.end());
 
-			snprintf(Line, sizeof(Line), "\"%s\",\"%s\",%d,%s,%d\n", Description.c_str(), gColorList[ColorIt.first].Name, ColorIt.second, Info->mFileName, gColorList[ColorIt.first].Code);
+			snprintf(Line, sizeof(Line), "\"%s\",\"%s\",%d,%s,%d\n", Description.c_str(), gColorList[ColorIt.first].Name, ColorIt.second, PieceData->mFileName, gColorList[ColorIt.first].Code);
 			CSVFile.WriteLine(Line);
 		}
 	}
@@ -3330,7 +3330,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	POVFile.WriteLine("global_settings { assumed_gamma 1.0 }\n\n");
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>> PieceTable;
+	std::map<const lcPieceData*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>> PieceTable;
 	size_t NumColors = gColorList.size();
 	std::vector<std::string> LgeoColorTable(NumColors);
 	std::vector<std::array<char, LC_MAX_COLOR_NAME + 3>> ColorTable(NumColors);
@@ -3379,7 +3379,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	{
 		lcVector3 Points[8];
 
-		const lcMesh* Mesh = ModelPart.Mesh ? ModelPart.Mesh : ModelPart.Info->GetMesh();
+		const lcMesh* Mesh = ModelPart.Mesh ? ModelPart.Mesh : ModelPart.PieceData->GetMesh();
 		lcGetBoxCorners(Mesh->mBoundingBox, Points);
 
 		for (int PointIdx = 0; PointIdx < 8; PointIdx++)
@@ -3749,29 +3749,29 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 			lcstrcat(Src, ".dat");
 
-			PieceInfo* Info = Library->FindPiece(Src, nullptr, false, false);
-			if (!Info)
+			lcPieceData* PieceData = Library->FindPieceData(Src, nullptr, false, false);
+			if (!PieceData)
 				continue;
 
 			bool LgeoPartFound = false;
 
 			if ((LgeoPartFound = strchr(Flags, 'L')))
 			{
-				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[PieceData];
 				Entry.second |= LGEO_PIECE_LGEO;
 				snprintf(Entry.first, sizeof(Entry.first), "lg_%s", Dst);
 			}
 
 			if (strchr(Flags, 'A') && !LgeoPartFound)
 			{
-				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[Info];
+				std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[PieceData];
 				Entry.second |= LGEO_PIECE_AR;
 				snprintf(Entry.first, sizeof(Entry.first), "ar_%s", Dst);
 			}
 
 			if (strchr(Flags, 'S'))
 			{
-				auto Entry = PieceTable.find(Info);
+				auto Entry = PieceTable.find(PieceData);
 
 				if (Entry != PieceTable.end() && Entry->second.first[0])
 				{
@@ -3864,11 +3864,11 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			if (ModelPart.Mesh)
 				continue;
 
-			auto Search = PieceTable.find(ModelPart.Info);
+			auto Search = PieceTable.find(ModelPart.PieceData);
 			if (Search == PieceTable.end())
 				continue;
 
-			lcMesh* Mesh = ModelPart.Info->GetMesh();
+			lcMesh* Mesh = ModelPart.PieceData->GetMesh();
 
 			if (!Mesh)
 				continue;
@@ -3876,7 +3876,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			const std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = Search->second;
 			if (Entry.first[0] && IncludedLgeoNames.insert(Entry.first).second)
 			{
-				snprintf(Line, sizeof(Line), "#include \"%s.inc\" // %s\n", Entry.first, ModelPart.Info->m_strDescription);
+				snprintf(Line, sizeof(Line), "#include \"%s.inc\" // %s\n", Entry.first, ModelPart.PieceData->m_strDescription);
 				POVFile.WriteLine(Line);
 			}
 		}
@@ -3897,14 +3897,14 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
 
 		if (!ModelPart.Mesh)
 		{
-			const std::map<const PieceInfo*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>>::const_iterator ExistingPiece = PieceTable.find(ModelPart.Info);
+			const std::map<const lcPieceData*, std::pair<char[LC_PIECE_NAME_LEN + 1], int>>::const_iterator ExistingPiece = PieceTable.find(ModelPart.PieceData);
 
 			if (ExistingPiece != PieceTable.end() && ExistingPiece->second.first[0] &&
 				(ExistingPiece->second.second & (LGEO_PIECE_LGEO | LGEO_PIECE_AR)))
@@ -3916,7 +3916,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 		if (Added)
 		{
-			const QString BaseName = QLatin1String("lc_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.Info->mFileName));
+			const QString BaseName = QLatin1String("lc_") + MakeExportNameFragment(QString::fromUtf8(ModelPart.PieceData->mFileName));
 			const QString Identifier = MakeUniqueExportIdentifier(BaseName, UsedPovNames, QLatin1String("_clear"));
 			MeshNameIt = MeshNames.emplace(Mesh, Identifier.mid(3).toStdString()).first;
 		}
@@ -3925,7 +3925,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.PieceData];
 			snprintf(Entry.first, sizeof(Entry.first), "lc_%s", MeshName.c_str());
 		}
 
@@ -3956,11 +3956,11 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			snprintf(Modifier, sizeof(Modifier), "texture");
 		if (!ModelPart.Mesh)
 		{
-			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.Info];
+			std::pair<char[LC_PIECE_NAME_LEN + 1], int>& Entry = PieceTable[ModelPart.PieceData];
 
 			if (!Entry.first[0] && !(Entry.second & LGEO_PIECE_SLOPE))
 			{
-				const std::map<const lcMesh*, std::string>::const_iterator MeshName = MeshNames.find(ModelPart.Info->GetMesh());
+				const std::map<const lcMesh*, std::string>::const_iterator MeshName = MeshNames.find(ModelPart.PieceData->GetMesh());
 
 				if (MeshName != MeshNames.end())
 					snprintf(Entry.first, sizeof(Entry.first), "lc_%s", MeshName->second.c_str());
@@ -3977,7 +3977,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			}
 			else
 			{
-				if (!ModelPart.Info || !ModelPart.Info->GetMesh())
+				if (!ModelPart.PieceData || !ModelPart.PieceData->GetMesh())
 					continue;
 
 				snprintf(Line, sizeof(Line), "  object {\n    %s%s\n    %s { %s }\n    matrix <%g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g, %g>\n  }\n",
@@ -4080,7 +4080,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
@@ -4098,7 +4098,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
@@ -4119,7 +4119,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
-		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.Info->GetMesh() : ModelPart.Mesh;
+		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
 
 		if (!Mesh)
 			continue;
@@ -4148,15 +4148,15 @@ lcResult<void> Project::SaveImage(const lcImageDialogOptions& Options)
 	return mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End);
 }
 
-void Project::UpdatePieceInfo(PieceInfo* Info) const
+void Project::UpdatePieceData(lcPieceData* PieceData) const
 {
 	if (!mModels.empty())
 	{
 		std::vector<lcModel*> UpdatedModels;
-		mModels[0]->UpdatePieceInfo(UpdatedModels);
+		mModels[0]->UpdatePieceData(UpdatedModels);
 
-		lcBoundingBox BoundingBox = mModels[0]->GetPieceInfo()->GetBoundingBox();
-		Info->SetBoundingBox(BoundingBox.Min, BoundingBox.Max);
+		lcBoundingBox BoundingBox = mModels[0]->GetPieceData()->GetBoundingBox();
+		PieceData->SetBoundingBox(BoundingBox.Min, BoundingBox.Max);
 	}
 }
 

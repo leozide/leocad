@@ -1,9 +1,9 @@
 #include "lc_global.h"
 #include "lc_partselectionpopup.h"
 #include "lc_partselectionwidget.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 
-lcPartSelectionPopup::lcPartSelectionPopup(PieceInfo* InitialPart, QWidget* Parent)
+lcPartSelectionPopup::lcPartSelectionPopup(lcPieceData* InitialPart, QWidget* Parent)
 	: QWidget(Parent), mInitialPart(InitialPart)
 {
 	QVBoxLayout* Layout = new QVBoxLayout(this);
@@ -153,7 +153,7 @@ void lcPartSelectionPopup::Close()
 		Menu->close();
 }
 
-std::optional<PieceInfo*> lcShowPartSelectionPopup(PieceInfo* InitialPart, const std::vector<std::pair<PieceInfo*, std::string>>& CustomParts, int ColorIndex, QWidget* Parent, QPoint Position)
+std::optional<lcPieceData*> lcShowPartSelectionPopup(lcPieceData* InitialPart, const std::vector<std::pair<lcPieceData*, std::string>>& CustomParts, int ColorIndex, QWidget* Parent, QPoint Position)
 {
 	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
 	QWidgetAction* Action = new QWidgetAction(Menu.get());

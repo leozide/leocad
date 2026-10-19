@@ -1674,7 +1674,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				if (mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
 					IncludeLoaded = false;
 
-				Library->GetPieceFile(FileName, FileCallback);
+				Library->GetPieceDataFile(FileName, FileCallback);
 			}
 
 			if (!IncludeLoaded)

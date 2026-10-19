@@ -3,7 +3,7 @@
 #include "project.h"
 #include "lc_model.h"
 #include "piece.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 
 const float lcInstructions::mDisplayDPI = 72.0f;
 
@@ -182,9 +182,9 @@ void lcInstructions::AddDefaultPages(lcModel* Model, std::vector<const lcModel*>
 
 		for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
 		{
-			if (!Piece->IsHidden() && Piece->GetStepShow() == Step && Piece->mPieceInfo->IsModel())
+			if (!Piece->IsHidden() && Piece->GetStepShow() == Step && Piece->mPieceData->IsModel())
 			{
-				lcModel* SubModel = Piece->mPieceInfo->GetModel();
+				lcModel* SubModel = Piece->mPieceData->GetModel();
 
 				if (std::find(AddedModels.begin(), AddedModels.end(), SubModel) == AddedModels.end())
 					StepSubModels.insert(SubModel);

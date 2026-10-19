@@ -305,7 +305,7 @@ void lcApplication::SetProject(Project* Project)
 		gMainWindow->ScheduleAssetUpdate();
 
 	Project->SetActiveModel(0, true);
-	lcGetPiecesLibrary()->RemoveTemporaryPieces();
+	lcGetPiecesLibrary()->RemoveTemporaryPieceData();
 
 	if (mProject && !mProject->GetFileName().isEmpty() && mPreferences.mRestoreTabLayout)
 	{
@@ -358,7 +358,7 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 		if (mLibrary->Load(LibraryPathEntry.first, ShowProgress))
 		{
 			if (LibraryPathEntry.second)
-				mLibrary->SetOfficialPieces();
+				mLibrary->SetOfficialPieceLibrary();
 
 			return true;
 		}
@@ -1003,7 +1003,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	{
 		QString Message;
 
-		if (mLibrary->LoadBuiltinPieces())
+		if (mLibrary->LoadBuiltinPieceLibrary())
 			Message = tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 		else
 			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");

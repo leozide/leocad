@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_traintrack.h"
 #include "lc_library.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "piece.h"
 #include "lc_model.h"
 #include "lc_application.h"
@@ -15,7 +15,7 @@
 // auto replace cross when going over a straight section
 // set focus connection after adding
 
-std::map<size_t, PieceInfo*> lcTrainTrackInfo::mSleepers;
+std::map<size_t, lcPieceData*> lcTrainTrackInfo::mSleepers;
 
 void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 {
@@ -76,20 +76,20 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 
 		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
 		{
-			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
+			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr, false, false);
 
-			if (Info)
-				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, true));
+			if (PieceData)
+				PieceData->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, true));
 		}
 
 		JsonIDs = JsonPiece["HiddenIDs"].toArray();
 
 		for (QJsonArray::const_iterator IDIt = JsonIDs.constBegin(); IDIt != JsonIDs.constEnd(); ++IDIt)
 		{
-			PieceInfo* Info = Library->FindPiece(IDIt->toString().toLatin1(), nullptr, false, false);
+			lcPieceData* PieceData = Library->FindPieceData(IDIt->toString().toLatin1(), nullptr, false, false);
 
-			if (Info)
-				Info->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, false));
+			if (PieceData)
+				PieceData->SetTrainTrackInfo(new lcTrainTrackInfo(Connections, Color, false));
 		}
 	}
 
@@ -102,17 +102,17 @@ void lcTrainTrackInfo::Initialize(lcPiecesLibrary* Library)
 		size_t Group = qHash(SleepersIt.key());
 		QString PartId = SleepersIt->toString();
 
-		PieceInfo* SleeperInfo = Library->FindPiece(PartId.toLatin1(), nullptr, false, false);
+		lcPieceData* SleeperPieceData = Library->FindPieceData(PartId.toLatin1(), nullptr, false, false);
 
-		if (SleeperInfo)
-			mSleepers[Group] = SleeperInfo;
+		if (SleeperPieceData)
+			mSleepers[Group] = SleeperPieceData;
 	}
 }
 
 int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2)
 {
-	const lcTrainTrackInfo* TrainTrackInfo1 = Piece1->mPieceInfo->GetTrainTrackInfo();
-	const lcTrainTrackInfo* TrainTrackInfo2 = Piece2->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo1 = Piece1->mPieceData->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo2 = Piece2->mPieceData->GetTrainTrackInfo();
 
 	const std::vector<lcTrainTrackConnection>& Connections2 = TrainTrackInfo2->GetConnections();
 	lcMatrix44 Transform1 = lcMul(TrainTrackInfo1->GetConnections()[ConnectionIndex1].Transform, Piece1->mModelWorld);
@@ -134,12 +134,12 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint)
+std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint)
 {
 	std::vector<lcInsertPieceInfo> Pieces;
-	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceData->GetTrainTrackInfo();
 
-	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty() || (MovingPiece && Info != MovingPiece->mPieceInfo))
+	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty() || (MovingPiece && PieceData != MovingPiece->mPieceData))
 		return Pieces;
 
 	quint32 ConnectionIndex = 0;
@@ -157,7 +157,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 
 			if (MovingPiece)
 			{
-				const std::vector<lcTrainTrackConnection>& MovingConnections = Info->GetTrainTrackInfo()->GetConnections();
+				const std::vector<lcTrainTrackConnection>& MovingConnections = PieceData->GetTrainTrackInfo()->GetConnections();
 				bool CanConnect = false;
 
 				for (quint32 MovingConnectionIndex = 0; MovingConnectionIndex < MovingConnections.size(); MovingConnectionIndex++)
@@ -174,7 +174,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 			}
 			else
 			{
-				if (!Info->GetTrainTrackInfo()->CanConnectTo(CurrentTrackInfo->GetConnections()[CheckIndex].Type, AllowNewPieces))
+				if (!PieceData->GetTrainTrackInfo()->CanConnectTo(CurrentTrackInfo->GetConnections()[CheckIndex].Type, AllowNewPieces))
 					continue;
 			}
 
@@ -208,7 +208,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 	}
 
 	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
-	const std::vector<lcTrainTrackConnection>& NewConnections = Info->GetTrainTrackInfo()->GetConnections();
+	const std::vector<lcTrainTrackConnection>& NewConnections = PieceData->GetTrainTrackInfo()->GetConnections();
 	quint32 NewConnectionIndex;// = ConnectionIndex ? 0 : 1;
 
 	for (NewConnectionIndex = 0; NewConnectionIndex < NewConnections.size(); NewConnectionIndex++)
@@ -218,7 +218,7 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 			if (MovingPiece->IsTrainTrackConnected(NewConnectionIndex))
 				continue;
 
-			const std::vector<lcTrainTrackConnection>& MovingConnections = Info->GetTrainTrackInfo()->GetConnections();
+			const std::vector<lcTrainTrackConnection>& MovingConnections = PieceData->GetTrainTrackInfo()->GetConnections();
 
 			if (AreConnectionsCompatible(CurrentTrackInfo->GetConnections()[ConnectionIndex].Type, MovingConnections[NewConnectionIndex].Type, AllowNewPieces))
 				break;
@@ -235,46 +235,46 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 
 	if (CurrentConnectionType.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper && NewConnections[NewConnectionIndex].Type.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper)
 	{
-		std::map<size_t, PieceInfo*>::const_iterator SleeperIt = mSleepers.find(CurrentConnectionType.Group);
+		std::map<size_t, lcPieceData*>::const_iterator SleeperIt = mSleepers.find(CurrentConnectionType.Group);
 
 		if (SleeperIt == mSleepers.end())
 			return Pieces;
 
-		PieceInfo* SleeperInfo = SleeperIt->second;
+		lcPieceData* SleeperPieceData = SleeperIt->second;
 
-		if (!SleeperInfo)
+		if (!SleeperPieceData)
 			return Pieces;
 
-		std::optional<lcMatrix44> SleeperTransform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, SleeperInfo, 0);
+		std::optional<lcMatrix44> SleeperTransform = GetConnectionTransform(CurrentPiece->mPieceData, CurrentPiece->mModelWorld, ConnectionIndex, SleeperPieceData, 0);
 
 		if (!SleeperTransform)
 			return Pieces;
 
-		std::optional<lcMatrix44> Transform = GetConnectionTransform(SleeperInfo, SleeperTransform.value(), 1, Info, NewConnectionIndex);
+		std::optional<lcMatrix44> Transform = GetConnectionTransform(SleeperPieceData, SleeperTransform.value(), 1, PieceData, NewConnectionIndex);
 
 		if (Transform)
 		{
-			Pieces.emplace_back(lcInsertPieceInfo{ SleeperInfo, SleeperTransform.value(), lcGetColorIndex(SleeperInfo->GetTrainTrackInfo()->GetColorCode()) });
-			Pieces.emplace_back(lcInsertPieceInfo{ Info, Transform.value(), ColorIndex });
+			Pieces.emplace_back(lcInsertPieceInfo{ SleeperPieceData, SleeperTransform.value(), lcGetColorIndex(SleeperPieceData->GetTrainTrackInfo()->GetColorCode()) });
+			Pieces.emplace_back(lcInsertPieceInfo{ PieceData, Transform.value(), ColorIndex });
 		}
 	}
 	else
 	{
-		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceInfo, CurrentPiece->mModelWorld, ConnectionIndex, Info, NewConnectionIndex);
+		std::optional<lcMatrix44> Transform = GetConnectionTransform(CurrentPiece->mPieceData, CurrentPiece->mModelWorld, ConnectionIndex, PieceData, NewConnectionIndex);
 
 		if (Transform)
-			Pieces.emplace_back(lcInsertPieceInfo{ Info, Transform.value(), ColorIndex });
+			Pieces.emplace_back(lcInsertPieceInfo{ PieceData, Transform.value(), ColorIndex });
 	}
 
 	return Pieces;
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex)
+std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(lcPieceData* CurrentPieceData, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, lcPieceData* PieceData, quint32 NewConnectionIndex)
 {
-	if (!CurrentInfo || !Info)
+	if (!CurrentPieceData || !PieceData)
 		return std::nullopt;
 
-	const lcTrainTrackInfo* CurrentTrackInfo = CurrentInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPieceData->GetTrainTrackInfo();
 
 	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
 		return std::nullopt;
@@ -282,7 +282,7 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(PieceInfo* Cu
 	if (CurrentConnectionIndex >= CurrentTrackInfo->GetConnections().size())
 		return std::nullopt;
 
-	lcTrainTrackInfo* NewTrackInfo = Info->GetTrainTrackInfo();
+	lcTrainTrackInfo* NewTrackInfo = PieceData->GetTrainTrackInfo();
 
 	if (!NewTrackInfo || NewConnectionIndex >= NewTrackInfo->mConnections.size())
 		return std::nullopt;
@@ -303,9 +303,9 @@ std::optional<lcMatrix44> lcTrainTrackInfo::GetConnectionTransform(PieceInfo* Cu
 	return Transform;
 }
 
-std::optional<lcMatrix44> lcTrainTrackInfo::CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex)
+std::optional<lcMatrix44> lcTrainTrackInfo::CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, lcPieceData* PieceData, quint32 ConnectionIndex)
 {
-	lcTrainTrackInfo* TrackInfo = Info->GetTrainTrackInfo();
+	lcTrainTrackInfo* TrackInfo = PieceData->GetTrainTrackInfo();
 
 	if (!TrackInfo || ConnectionIndex >= TrackInfo->mConnections.size())
 		return std::nullopt;

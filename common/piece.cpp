@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "piece.h"
 #include "group.h"
 #include "lc_file.h"
@@ -25,10 +25,10 @@ lcPiece::lcPiece()
 {
 }
 
-lcPiece::lcPiece(PieceInfo* Info)
+lcPiece::lcPiece(lcPieceData* PieceData)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Info, QString(), true, true);
+	SetPieceData(PieceData, QString(), true, true);
 	mColorIndex = gDefaultColor;
 	mColorCode = 16;
 	mPivotMatrix = lcMatrix44Identity();
@@ -37,7 +37,7 @@ lcPiece::lcPiece(PieceInfo* Info)
 lcPiece::lcPiece(const lcPiece& Other)
 	: lcObject(lcObjectType::Piece)
 {
-	SetPieceInfo(Other.mPieceInfo, Other.mID, true, false);
+	SetPieceData(Other.mPieceData, Other.mID, true, false);
 	mHidden = Other.mHidden;
 	mSelected = Other.mSelected;
 	mColorIndex = Other.mColorIndex;
@@ -60,38 +60,38 @@ lcPiece::~lcPiece()
 {
 	lcGetPiecesLibrary()->CancelSynthMesh(this);
 
-	if (mPieceInfo)
+	if (mPieceData)
 	{
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		Library->ReleasePieceInfo(mPieceInfo);
-		Library->NotifyConsumersChanged();
+		Library->ReleasePieceData(mPieceData);
+		Library->NotifyAssetStatusChanged();
 	}
 
 	delete mMesh;
 }
 
-void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo)
+void lcPiece::SetPieceData(lcPieceData* PieceData, const QString& ID, bool Wait, bool UpdateSynthInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	PieceInfo* PreviousInfo = mPieceInfo;
+	lcPieceData* PreviousPieceData = mPieceData;
 
-	if (PreviousInfo != Info || UpdateSynthInfo)
+	if (PreviousPieceData != PieceData || UpdateSynthInfo)
 		Library->CancelSynthMesh(this);
 
-	if (PreviousInfo != Info)
+	if (PreviousPieceData != PieceData)
 	{
 		delete mMesh;
 		mMesh = nullptr;
 	}
 
-	mPieceInfo = Info;
-	if (mPieceInfo)
-		Library->RequestPieceLoad(mPieceInfo, Wait ? lcLoadPriority::Blocking : lcLoadPriority::Normal);
+	mPieceData = PieceData;
+	if (mPieceData)
+		Library->RequestPieceDataLoad(mPieceData, Wait ? lcLoadPriority::Blocking : lcLoadPriority::Normal);
 
 	if (!ID.isEmpty())
 		mID = ID;
-	else if (mPieceInfo)
-		mID = mPieceInfo->mFileName;
+	else if (mPieceData)
+		mID = mPieceData->mFileName;
 	else
 		mID.clear();
 
@@ -99,34 +99,34 @@ void lcPiece::SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool U
 	{
 		mControlPoints.clear();
 
-		const lcSynthInfo* SynthInfo = mPieceInfo ? mPieceInfo->GetSynthInfo() : nullptr;
+		const lcSynthInfo* SynthInfo = mPieceData ? mPieceData->GetSynthInfo() : nullptr;
 
 		if (SynthInfo)
 			SynthInfo->GetDefaultControlPoints(mControlPoints);
 
 		UpdateMesh();
 	}
-	else if (PreviousInfo && PreviousInfo != Info)
+	else if (PreviousPieceData && PreviousPieceData != PieceData)
 		UpdateMesh();
 
-	Library->NotifyConsumersChanged();
+	Library->NotifyAssetStatusChanged();
 }
 
-bool lcPiece::SetPieceId(PieceInfo* Info)
+bool lcPiece::SetPieceId(lcPieceData* PieceData)
 {
-	if (mPieceInfo == Info)
+	if (mPieceData == PieceData)
 		return false;
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	Library->ReleasePieceInfo(mPieceInfo);
-	SetPieceInfo(Info, QString(), true, true);
+	Library->ReleasePieceData(mPieceData);
+	SetPieceData(PieceData, QString(), true, true);
 
 	return true;
 }
 
 void lcPiece::UpdateID()
 {
-	mID = mPieceInfo->mFileName;
+	mID = mPieceData->mFileName;
 }
 
 void lcPiece::SaveLDraw(QTextStream& Stream) const
@@ -333,8 +333,8 @@ bool lcPiece::FileLoad(lcFile& file, Project* Project)
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 	lcstrcat(name, ".dat");
 
-	PieceInfo* pInfo = lcGetPiecesLibrary()->FindPiece(name, Project, true, false);
-	SetPieceInfo(pInfo, QString(), true, true);
+	lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(name, Project, true, false);
+	SetPieceData(PieceData, QString(), true, true);
 
 	// 11 (0.77)
 	if (version < 11)
@@ -490,14 +490,14 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 	const lcVector3 Start = lcMul31(ObjectRayTest.Start, InverseWorldMatrix);
 	const lcVector3 End = lcMul31(ObjectRayTest.End, InverseWorldMatrix);
 
-	if (MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceInfoRayTest))
+	if (MinIntersectDist(Start, End, ObjectRayTest.Distance, ObjectRayTest.PieceRayTest))
 	{
 		ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_POSITION;
-		ObjectRayTest.PieceInfoRayTest.Transform = lcMul(ObjectRayTest.PieceInfoRayTest.Transform, mModelWorld);
+		ObjectRayTest.PieceRayTest.Transform = lcMul(ObjectRayTest.PieceRayTest.Transform, mModelWorld);
 	}
 
-	if (mPieceInfo->GetSynthInfo() && AreControlPointsVisible())
+	if (mPieceData->GetSynthInfo() && AreControlPointsVisible())
 	{
 		const lcVector3 Min(-LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE, -LC_PIECE_CONTROL_POINT_SIZE);
 		const lcVector3 Max(LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE, LC_PIECE_CONTROL_POINT_SIZE);
@@ -516,24 +516,24 @@ void lcPiece::RayTest(lcObjectRayTest& ObjectRayTest) const
 				ObjectRayTest.ObjectSection.Object = const_cast<lcPiece*>(this);
 				ObjectRayTest.ObjectSection.Section = LC_PIECE_SECTION_CONTROL_POINT_FIRST + ControlPointIndex;
 				ObjectRayTest.Distance = Distance;
-				ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+				ObjectRayTest.PieceRayTest.Plane = Plane;
 			}
 		}
 	}
 }
 
-bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
+bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceRayTest& PieceRayTest) const
 {
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
-		return mPieceInfo->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest);
+	if (!Mesh || mPieceData->IsLoading())
+		return mPieceData->MinIntersectDist(Start, End, MinDistance, PieceRayTest);
 
-	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest.Plane))
+	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane))
 		return false;
 
-	PieceInfoRayTest.Info = mPieceInfo;
-	PieceInfoRayTest.Transform = lcMatrix44Identity();
+	PieceRayTest.PieceData = mPieceData;
+	PieceRayTest.Transform = lcMatrix44Identity();
 
 	return true;
 }
@@ -548,8 +548,8 @@ bool lcPiece::IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Pl
 {
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
-		return mPieceInfo->BoxTest(WorldMatrix, Planes);
+	if (!Mesh || mPieceData->IsLoading())
+		return mPieceData->BoxTest(WorldMatrix, Planes);
 
 	const lcMatrix44 InverseWorldMatrix = lcMatrix44AffineInverse(WorldMatrix);
 	lcVector4 LocalPlanes[6];
@@ -680,7 +680,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		Context->DrawIndexedPrimitives(GL_LINES, 24, GL_UNSIGNED_SHORT, 0);
 	}
 
-	if (mPieceInfo->GetSynthInfo())
+	if (mPieceData->GetSynthInfo())
 		DrawSynthInterface(Context, WorldMatrix);
 }
 
@@ -742,7 +742,7 @@ QVariant lcPiece::GetPropertyValue(lcObjectPropertyId PropertyId) const
 	switch (PropertyId)
 	{
 	case lcObjectPropertyId::PieceId:
-		return QVariant::fromValue<void*>(mPieceInfo);
+		return QVariant::fromValue<void*>(mPieceData);
 
 	case lcObjectPropertyId::PieceColor:
 		return GetColorIndex();
@@ -802,7 +802,7 @@ bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	switch (PropertyId)
 	{
 	case lcObjectPropertyId::PieceId:
-		return SetPieceId(static_cast<PieceInfo*>(Value.value<void*>()));
+		return SetPieceId(static_cast<lcPieceData*>(Value.value<void*>()));
 
 	case lcObjectPropertyId::PieceColor:
 		return SetColorIndex(Value.toInt());
@@ -1033,16 +1033,16 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(mID.toLatin1(), Model->GetProject(), true, true);
+	lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(mID.toLatin1(), Model->GetProject(), true, true);
 
-	if (mPieceInfo != Info)
+	if (mPieceData != PieceData)
 	{
-		const bool NewPiece = !mPieceInfo;
+		const bool NewPiece = !mPieceData;
 
-		if (mPieceInfo)
-			lcGetPiecesLibrary()->ReleasePieceInfo(mPieceInfo);
+		if (mPieceData)
+			lcGetPiecesLibrary()->ReleasePieceData(mPieceData);
 
-		SetPieceInfo(Info, mID, true, false);
+		SetPieceData(PieceData, mID, true, false);
 
 		if (NewPiece)
 			UpdateMesh();
@@ -1076,7 +1076,7 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 			RenderMeshState = lcRenderMeshState::Faded;
 	}
 
-	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+	if (mPieceData->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
 	{
 		Scene->MarkMissingAssets();
 		return;
@@ -1084,10 +1084,10 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
-	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceInfo->IsLoading())
+	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceData->IsLoading())
 		Scene->AddMesh(Mesh, mModelWorld, mColorIndex, RenderMeshState);
 	else
-		mPieceInfo->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
+		mPieceData->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
 
 	if (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected)
 		Scene->AddInterfaceObject(this);
@@ -1107,7 +1107,7 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	else if (ParentActive)
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
 
-	if (mPieceInfo->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
+	if (mPieceData->GetSynthInfo() && !HasGeneratedMesh() && Scene->GetRequireGeneratedMeshes())
 	{
 		Scene->MarkMissingAssets();
 		return;
@@ -1115,10 +1115,10 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
-	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceInfo->IsLoading())
+	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceData->IsLoading())
 		Scene->AddMesh(Mesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
 	else
-		mPieceInfo->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
+		mPieceData->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
 
 	if (ParentActive && (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected))
 		Scene->AddInterfaceObject(this);
@@ -1129,9 +1129,9 @@ void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 	const lcMatrix44 ModelWorldMatrix = lcMul(mModelWorld, WorldMatrix);
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
+	if (!Mesh || mPieceData->IsLoading())
 	{
-		mPieceInfo->CompareBoundingBox(ModelWorldMatrix, Min, Max);
+		mPieceData->CompareBoundingBox(ModelWorldMatrix, Min, Max);
 		return;
 	}
 
@@ -1148,13 +1148,13 @@ void lcPiece::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcPiece::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
-	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo->GetSynthInfo() && !HasGeneratedMesh())
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceData->GetSynthInfo() && !HasGeneratedMesh())
 		return;
 
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
-		mPieceInfo->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points, Mode);
+	if (!Mesh || mPieceData->IsLoading())
+		mPieceData->AddSubModelBoundingBoxPoints(lcMul(mModelWorld, WorldMatrix), Points, Mode);
 	else
 	{
 		lcVector3 BoxPoints[8];
@@ -1266,7 +1266,7 @@ quint32 lcPiece::GetAllowedTransforms() const
 	if (Section == LC_PIECE_SECTION_POSITION || Section == LC_PIECE_SECTION_INVALID)
 		return LC_OBJECT_TRANSFORM_MOVE_XYZ | LC_OBJECT_TRANSFORM_ROTATE_XYZ;
 
-	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceData->GetSynthInfo();
 
 	if (SynthInfo)
 	{
@@ -1293,7 +1293,7 @@ lcVector3 lcPiece::GetSectionPosition(quint32 Section) const
 			return mModelWorld.GetTranslation();
 	}
 
-	if (mPieceInfo->GetSynthInfo())
+	if (mPieceData->GetSynthInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
@@ -1307,12 +1307,12 @@ lcVector3 lcPiece::GetSectionPosition(quint32 Section) const
 		}
 	}
 
-	if (mPieceInfo->GetTrainTrackInfo())
+	if (mPieceData->GetTrainTrackInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 		{
 			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceData->GetTrainTrackInfo()->GetConnections();
 
 			if (ConnectionIndex < Connections.size())
 			{
@@ -1334,7 +1334,7 @@ lcVector3 lcPiece::GetRotationCenter() const
 		if (mPivotPointValid)
 			return lcMul31(mPivotMatrix.GetTranslation(), mModelWorld);
 	}
-	else if (mPieceInfo->GetSynthInfo())
+	else if (mPieceData->GetSynthInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
@@ -1347,12 +1347,12 @@ lcVector3 lcPiece::GetRotationCenter() const
 			}
 		}
 	}
-	else if (mPieceInfo->GetTrainTrackInfo())
+	else if (mPieceData->GetTrainTrackInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 		{
 			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceData->GetTrainTrackInfo()->GetConnections();
 
 			if (ConnectionIndex < Connections.size())
 			{
@@ -1376,7 +1376,7 @@ lcMatrix33 lcPiece::GetRelativeRotation() const
 		else
 			return lcMatrix33(mModelWorld);
 	}
-	else if (mPieceInfo->GetSynthInfo())
+	else if (mPieceData->GetSynthInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST)
 		{
@@ -1389,12 +1389,12 @@ lcMatrix33 lcPiece::GetRelativeRotation() const
 			}
 		}
 	}
-	else if (mPieceInfo->GetTrainTrackInfo())
+	else if (mPieceData->GetTrainTrackInfo())
 	{
 		if (Section >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 		{
 			const quint32 ConnectionIndex = Section - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
-			const std::vector<lcTrainTrackConnection>& Connections = mPieceInfo->GetTrainTrackInfo()->GetConnections();
+			const std::vector<lcTrainTrackConnection>& Connections = mPieceData->GetTrainTrackInfo()->GetConnections();
 
 			if (ConnectionIndex < Connections.size())
 			{
@@ -1412,7 +1412,7 @@ bool lcPiece::CanAddControlPoint() const
 	if (mControlPoints.size() >= LC_MAX_CONTROL_POINTS)
 		return false;
 
-	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceData->GetSynthInfo();
 	return SynthInfo && SynthInfo->CanAddControlPoints();
 }
 
@@ -1431,7 +1431,7 @@ bool lcPiece::InsertControlPoint(const lcVector3& WorldStart, const lcVector3& W
 	const lcVector3 Start = lcMul31(WorldStart, InverseWorldMatrix);
 	const lcVector3 End = lcMul31(WorldEnd, InverseWorldMatrix);
 
-	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceData->GetSynthInfo();
 	const int ControlPointIndex = SynthInfo->InsertControlPoint(mControlPoints, Start, End);
 
 	if (ControlPointIndex)
@@ -1468,7 +1468,7 @@ bool lcPiece::RemoveFocusedControlPoint()
 
 void lcPiece::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoints) const
 {
-	const lcSynthInfo* SynthInfo = mPieceInfo->GetSynthInfo();
+	const lcSynthInfo* SynthInfo = mPieceData->GetSynthInfo();
 
 	if (!SynthInfo)
 	{
@@ -1485,7 +1485,7 @@ void lcPiece::VerifyControlPoints(std::vector<lcPieceControlPoint>& ControlPoint
 
 QString lcPiece::GetName() const
 {
-	return QString::fromLatin1(mPieceInfo->m_strDescription);
+	return QString::fromLatin1(mPieceData->m_strDescription);
 }
 
 bool lcPiece::IsVisible(lcStep Step) const
@@ -1508,18 +1508,18 @@ void lcPiece::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	if (!mMesh || mPieceInfo->mState != lcAssetState::Loaded)
-		mPieceInfo->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
+	if (!mMesh || mPieceData->mState != lcAssetState::Loaded)
+		mPieceData->GetModelParts(lcMul(mModelWorld, WorldMatrix), ColorIndex, ModelParts);
 	else
-		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceInfo, mMesh, ColorIndex });
+		ModelParts.emplace_back(lcModelPartsEntry{ lcMul(mModelWorld, WorldMatrix), mPieceData, mMesh, ColorIndex });
 }
 
 const lcBoundingBox& lcPiece::GetBoundingBox() const
 {
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
-		return mPieceInfo->GetBoundingBox();
+	if (!Mesh || mPieceData->IsLoading())
+		return mPieceData->GetBoundingBox();
 	else
 		return Mesh->mBoundingBox;
 }
@@ -1528,8 +1528,8 @@ void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 {
 	lcMesh* Mesh = GetDisplayMesh();
 
-	if (!Mesh || mPieceInfo->IsLoading())
-		mPieceInfo->CompareBoundingBox(mModelWorld, Min, Max);
+	if (!Mesh || mPieceData->IsLoading())
+		mPieceData->CompareBoundingBox(mModelWorld, Min, Max);
 	else
 	{
 		lcVector3 Points[8];
@@ -1561,7 +1561,7 @@ void lcPiece::UpdatePosition(lcStep Step)
 
 void lcPiece::UpdateMesh()
 {
-	mSynthPending = mPieceInfo && mPieceInfo->GetSynthInfo();
+	mSynthPending = mPieceData && mPieceData->GetSynthInfo();
 
 	if (mSynthPending)
 		lcGetPiecesLibrary()->RequestSynthMesh(this);
@@ -1575,13 +1575,13 @@ void lcPiece::UpdateMesh()
 
 lcMesh* lcPiece::GetDisplayMesh() const
 {
-	if (!mPieceInfo || mPieceInfo->mState != lcAssetState::Loaded)
+	if (!mPieceData || mPieceData->mState != lcAssetState::Loaded)
 		return nullptr;
 
 	if (mMesh)
 		return mMesh;
 
-	if (mSynthPending && mPieceInfo && mPieceInfo->GetSynthInfo())
+	if (mSynthPending && mPieceData && mPieceData->GetSynthInfo())
 		return lcGetPiecesLibrary()->GetLoadingMesh();
 
 	return nullptr;

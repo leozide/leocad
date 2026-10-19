@@ -6,7 +6,7 @@
 #include "piece.h"
 #include "camera.h"
 #include "light.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_mainwindow.h"
 #include "lc_collapsiblewidget.h"
 #include "lc_colorpicker.h"
@@ -1072,12 +1072,12 @@ void lcPropertiesWidget::UpdatePieceId(lcObjectPropertyId PropertyId)
 
 	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
-	PieceInfo* Info = static_cast<PieceInfo*>(Value.value<void*>());
+	lcPieceData* PieceData = static_cast<lcPieceData*>(Value.value<void*>());
 
 	if (Partial)
 		PieceIdButton->setText(tr("Multiple Pieces"));
-	else if (Info)
-		PieceIdButton->setText(Info->m_strDescription);
+	else if (PieceData)
+		PieceIdButton->setText(PieceData->m_strDescription);
 
 	UpdateKeyFrameWidget(PropertyId);
 }
@@ -1095,23 +1095,23 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 
 	std::tie(Value, Partial) = GetUpdateValue(PropertyId);
 
-	PieceInfo* Info = Partial ? nullptr : static_cast<PieceInfo*>(Value.value<void*>());
+	lcPieceData* PieceData = Partial ? nullptr : static_cast<lcPieceData*>(Value.value<void*>());
 
 	std::tie(Value, Partial) = GetUpdateValue(lcObjectPropertyId::PieceColor);
 
 	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
-	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Info, std::vector<std::pair<PieceInfo*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(PieceData, std::vector<std::pair<lcPieceData*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
 
 	if (Result.has_value())
 	{
 		lcModel* Model = gMainWindow->GetActiveModel();
-		Info = Result.value();
+		PieceData = Result.value();
 
-		if (!Model || !Info)
+		if (!Model || !PieceData)
 			return;
 
-		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(Info));
+		Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, QVariant::fromValue<void*>(PieceData));
 	}
 }
 

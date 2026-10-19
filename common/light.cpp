@@ -374,7 +374,7 @@ void lcLight::RayTest(lcObjectRayTest& ObjectRayTest) const
 			ObjectRayTest.ObjectSection.Object = const_cast<lcLight*>(this);
 			ObjectRayTest.ObjectSection.Section = LC_LIGHT_SECTION_POSITION;
 			ObjectRayTest.Distance = Distance;
-			ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+			ObjectRayTest.PieceRayTest.Plane = Plane;
 		}
 	}
 

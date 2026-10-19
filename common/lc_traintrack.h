@@ -4,7 +4,7 @@
 
 class lcPiece;
 class lcPiecesLibrary;
-class PieceInfo;
+class lcPieceData;
 struct lcInsertPieceInfo;
 
 enum class lcTrainTrackConnectionSleeper
@@ -45,9 +45,9 @@ public:
 	}
 
 	static void Initialize(lcPiecesLibrary* Library);
-	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, PieceInfo* Info, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint);
-	static std::optional<lcMatrix44> GetConnectionTransform(PieceInfo* CurrentInfo, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, PieceInfo* Info, quint32 NewConnectionIndex);
-	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, PieceInfo* Info, quint32 ConnectionIndex);
+	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint);
+	static std::optional<lcMatrix44> GetConnectionTransform(lcPieceData* CurrentPieceData, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, lcPieceData* PieceData, quint32 NewConnectionIndex);
+	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, lcPieceData* PieceData, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
 
 	const std::vector<lcTrainTrackConnection>& GetConnections() const
@@ -89,5 +89,5 @@ protected:
 	int mColorCode = 16;
 	bool mVisible = false;
 
-	static std::map<size_t, PieceInfo*> mSleepers;
+	static std::map<size_t, lcPieceData*> mSleepers;
 };

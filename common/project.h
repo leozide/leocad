@@ -81,11 +81,11 @@ public:
 
 	std::shared_ptr<const lcEmbeddedData> FindEmbeddedData(const QString& FileName) const;
 	lcModel* GetModel(const QString& FileName) const;
-	PieceInfo* FindPiece(const std::string& Name) const;
-	void RegisterPiece(const std::string& Name, PieceInfo* Info);
-	void UnregisterPiece(PieceInfo* Info);
-	void ClearPieceIndex();
-	void TransferPieceIndexTo(Project* Destination);
+	lcPieceData* FindPieceData(const std::string& Name) const;
+	void RegisterPieceData(const std::string& Name, lcPieceData* PieceData);
+	void UnregisterPieceData(lcPieceData* PieceData);
+	void ClearPieceDataIndex();
+	void TransferPieceDataIndexTo(Project* Destination);
 
 	lcModel* GetActiveModel() const
 	{
@@ -144,7 +144,7 @@ public:
 	bool ImportInventory(const std::vector<lcSetInventoryItem>& SetInventory, const QString& Name, const QString& Description);
 
 	lcResult<void> SaveImage(const lcImageDialogOptions& Options);
-	std::vector<PieceInfo*> GetRequiredPieces() const;
+	std::vector<lcPieceData*> GetRequiredPieceData() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
 	lcResult<void> ExportCurrentStep(const QString& FileName);
@@ -160,7 +160,7 @@ public:
 	lcResult<void> ExportPOVRay(const QString& FileName);
 	lcResult<void> ExportWavefront(const QString& FileName);
 
-	void UpdatePieceInfo(PieceInfo* Info) const;
+	void UpdatePieceData(lcPieceData* PieceData) const;
 
 private:
 	struct LoadWarning
@@ -201,7 +201,7 @@ private:
 	static QString MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix);
 
 protected:
-	static bool CanShareMergePiece(const PieceInfo* Existing, const PieceInfo* Incoming);
+	static bool CanShareMergePieceData(const lcPieceData* Existing, const lcPieceData* Incoming);
 	QString GetExportFileName(const QString& FileName, const QString& DefaultExtension, const QString& DialogTitle, const QString& DialogFilter) const;
 
 	std::vector<lcModelPartsEntry> GetModelParts();
@@ -226,9 +226,9 @@ protected:
 	// First definition wins; retain duplicate blocks in mEmbeddedData for saving.
 	std::map<QString, std::shared_ptr<const lcEmbeddedData>> mEmbeddedDataIndex;
 	std::vector<std::unique_ptr<lcModel>> mModels;
-	// Maps normalized local filenames to PieceInfo objects visible in this project.
+	// Maps normalized local filenames to lcPieceData objects visible in this project.
 	// This map does not own them; lcPiecesLibrary tracks and deletes them.
-	std::map<std::string, PieceInfo*> mPieceIndex;
+	std::map<std::string, lcPieceData*> mPieceIndex;
 	lcModel* mActiveModel;
 	std::unique_ptr<lcInstructions> mInstructions;
 

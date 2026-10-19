@@ -57,7 +57,7 @@ protected:
 
 struct lcPartSelectionListModelEntry
 {
-	PieceInfo* Info = nullptr;
+	lcPieceData* PieceData = nullptr;
 	std::string Description;
 	int ColorIndex = -1;
 	QPixmap Pixmap;
@@ -77,16 +77,16 @@ public:
 	QVariant headerData(int Section, Qt::Orientation Orientation, int Role = Qt::DisplayRole) const override;
 	Qt::ItemFlags flags(const QModelIndex& Index) const override;
 
-	QModelIndex GetPieceInfoIndex(PieceInfo* Info) const;
+	QModelIndex GetPieceDataIndex(lcPieceData* PieceData) const;
 
-	PieceInfo* GetPieceInfo(const QModelIndex& Index) const
+	lcPieceData* GetPieceData(const QModelIndex& Index) const
 	{
-		return Index.isValid() ? mParts[Index.row()].Info : nullptr;
+		return Index.isValid() ? mParts[Index.row()].PieceData : nullptr;
 	}
 
-	PieceInfo* GetPieceInfo(int Row) const
+	lcPieceData* GetPieceData(int Row) const
 	{
-		return mParts[Row].Info;
+		return mParts[Row].PieceData;
 	}
 
 	bool GetShowDecoratedParts() const
@@ -152,7 +152,7 @@ public:
 	void SetModelsCategory();
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
-	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
+	void SetCustomParts(const std::vector<std::pair<lcPieceData*, std::string>>& Parts, int ColorIndex);
 	void SetFilter(const QString& FilterString);
 	void RequestThumbnail(int PartIndex);
 	void SetShowDecoratedParts(bool Show);
@@ -206,12 +206,12 @@ public:
 	QSize GetPreferredSize(int MaximumWidth) const;
 
 	void SetCategory(lcPartCategoryType Type, int Index);
-	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
-	void SetCurrentPart(PieceInfo* Info);
+	void SetCustomParts(const std::vector<std::pair<lcPieceData*, std::string>>& Parts, int ColorIndex);
+	void SetCurrentPart(lcPieceData* PieceData);
 
-	PieceInfo* GetCurrentPart() const
+	lcPieceData* GetCurrentPart() const
 	{
-		return mListModel->GetPieceInfo(currentIndex());
+		return mListModel->GetPieceData(currentIndex());
 	}
 
 	lcPartSelectionListModel* GetListModel() const
@@ -224,16 +224,16 @@ public:
 		return mPartSelectionWidget;
 	}
 
-	PieceInfo* GetContextInfo() const
+	lcPieceData* GetContextInfo() const
 	{
-		return mContextInfo;
+		return mContextPieceData;
 	}
 
 	void UpdateInUseCategory();
 	void UpdateViewMode();
 
 signals:
-	void PartPicked(PieceInfo* Info);
+	void PartPicked(lcPieceData* PieceData);
 	void LayoutChanged();
 
 public slots:
@@ -265,7 +265,7 @@ protected:
 
 	lcPartSelectionListModel* mListModel = nullptr;
 	lcPartSelectionWidget* mPartSelectionWidget = nullptr;
-	PieceInfo* mContextInfo = nullptr;
+	lcPieceData* mContextPieceData = nullptr;
 	int mRequestedIconSize = NoIconSize;
 	lcPartCategoryType mCategoryType = lcPartCategoryType::AllParts;
 	int mCategoryIndex = 0;
@@ -287,9 +287,9 @@ public:
 	void LoadState(QSettings& Settings);
 	void SaveState(QSettings& Settings);
 	void SetOrientation(Qt::Orientation Orientation);
-	void SetCurrentPart(PieceInfo* Info);
+	void SetCurrentPart(lcPieceData* PieceData);
 	void SetCategory(lcPartCategoryType Type, int Index);
-	void SetCustomParts(const std::vector<std::pair<PieceInfo*, std::string>>& Parts, int ColorIndex);
+	void SetCustomParts(const std::vector<std::pair<lcPieceData*, std::string>>& Parts, int ColorIndex);
 
 	bool GetIsPopup() const
 	{
@@ -311,7 +311,7 @@ public:
 		return mPartPalettes;
 	}
 
-	PieceInfo* GetCurrentPart() const
+	lcPieceData* GetCurrentPart() const
 	{
 		return mPartsWidget->GetCurrentPart();
 	}
@@ -328,8 +328,8 @@ public:
 	}
 
 signals:
-	void PartPicked(PieceInfo* Info);
-	void CurrentPartChanged(PieceInfo* Info);
+	void PartPicked(lcPieceData* PieceData);
+	void CurrentPartChanged(lcPieceData* PieceData);
 	void LayoutChanged();
 
 public slots:
@@ -346,7 +346,7 @@ protected slots:
 	void FilterCategoriesTriggered();
 	void CategoryChanged(QTreeWidgetItem* Current, QTreeWidgetItem* Previous);
 	void PartViewSelectionChanged(const QModelIndex& Current, const QModelIndex& Previous);
-	void PartViewPartPicked(PieceInfo* Info);
+	void PartViewPartPicked(lcPieceData* PieceData);
 	void OptionsMenuAboutToShow();
 	void EditPartPalettes();
 

@@ -971,7 +971,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_POSITION;
 		ObjectRayTest.Distance = Distance;
-		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+		ObjectRayTest.PieceRayTest.Plane = Plane;
 	}
 
 	Min = lcVector3(-LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE, -LC_CAMERA_TARGET_EDGE);
@@ -988,7 +988,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_TARGET;
 		ObjectRayTest.Distance = Distance;
-		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+		ObjectRayTest.PieceRayTest.Plane = Plane;
 	}
 
 	const lcMatrix44 ViewWorld = lcMatrix44AffineInverse(mWorldView);
@@ -1005,7 +1005,7 @@ void lcCamera::RayTest(lcObjectRayTest& ObjectRayTest) const
 		ObjectRayTest.ObjectSection.Object = const_cast<lcCamera*>(this);
 		ObjectRayTest.ObjectSection.Section = LC_CAMERA_SECTION_UPVECTOR;
 		ObjectRayTest.Distance = Distance;
-		ObjectRayTest.PieceInfoRayTest.Plane = Plane;
+		ObjectRayTest.PieceRayTest.Plane = Plane;
 	}
 }
 

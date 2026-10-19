@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "lc_scene.h"
 #include "lc_context.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_texture.h"
 #include "lc_library.h"
 #include "lc_application.h"

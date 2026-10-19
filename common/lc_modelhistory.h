@@ -16,10 +16,10 @@ public:
 	virtual void LoadStartState(lcModel* Model) const = 0;
 	virtual void LoadEndState(lcModel* Model) const = 0;
 	virtual bool StateChanged() const = 0;
-	virtual void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo)
+	virtual void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData)
 	{
 		Q_UNUSED(Renames);
-		Q_UNUSED(ModelInfo);
+		Q_UNUSED(ModelPieceData);
 	}
 
 	virtual bool CanMergeWith(const lcModelHistory* Other) const
@@ -122,7 +122,7 @@ public:
 	void LoadStartState(lcModel* Model) const override;
 	void LoadEndState(lcModel* Model) const override;
 	bool StateChanged() const override;
-	void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo) override;
+	void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData) override;
 
 	bool CanMergeWith(const lcModelHistory* Other) const override;
 	void MergeWith(lcModelHistory* Other) override;
@@ -147,7 +147,7 @@ public:
 	void LoadStartState(lcModel* Model) const override;
 	void LoadEndState(lcModel* Model) const override;
 	bool StateChanged() const override;
-	void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo) override;
+	void RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData) override;
 
 protected:
 	static void SaveState(lcModelProperties& State, const lcModel* Model);

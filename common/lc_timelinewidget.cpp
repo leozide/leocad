@@ -2,7 +2,7 @@
 #include "lc_timelinewidget.h"
 #include "lc_model.h"
 #include "piece.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_mainwindow.h"
 
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
@@ -39,7 +39,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	{
 		lcPiece* Piece = (lcPiece*)FocusObject;
 
-		if (Piece->mPieceInfo->IsModel())
+		if (Piece->mPieceData->IsModel())
 		{
 			Menu->addAction(gMainWindow->mActions[LC_PIECE_EDIT_SELECTED_SUBMODEL]);
 			Menu->addAction(gMainWindow->mActions[LC_PIECE_VIEW_SELECTED_MODEL]);
@@ -192,7 +192,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 		if (UpdateItem)
 		{
-			PieceItem->setText(0, Piece->mPieceInfo->m_strDescription);
+			PieceItem->setText(0, Piece->mPieceData->m_strDescription);
 
 			int ColorIndex = Piece->GetColorIndex();
 			if (!mIcons.contains(ColorIndex))
@@ -214,7 +214,7 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 
 			QColor Color = palette().text().color();
 
-			if (Piece->mPieceInfo->mState == lcAssetState::Failed)
+			if (Piece->mPieceData->mState == lcAssetState::Failed)
 				Color = QColor(208, 0, 0);
 			else if (Piece->IsHidden())
 				Color.setAlpha(128);
@@ -594,12 +594,12 @@ void lcTimelineWidget::PreviewSelection(QTreeWidgetItem* CurrentItem)
 	if (!Piece)
 		return;
 
-	PieceInfo* Info = Piece->mPieceInfo;
+	lcPieceData* PieceData = Piece->mPieceData;
 
-	if (!Info)
+	if (!PieceData)
 		return;
 
-	gMainWindow->PreviewPiece(Info, Piece->GetColorCode(), false);
+	gMainWindow->PreviewPiece(PieceData, Piece->GetColorCode(), false);
 }
 
 void lcTimelineWidget::UpdateModel()

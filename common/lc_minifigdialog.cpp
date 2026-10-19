@@ -4,7 +4,7 @@
 #include "lc_viewwidget.h"
 #include "lc_colorpicker.h"
 #include "minifig.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_library.h"
 #include "lc_view.h"
 #include "lc_model.h"
@@ -206,13 +206,13 @@ void lcMinifigDialog::TemplateComboBoxCurrentTextChanged(const QString& Template
 	{
 		if (!Template.Parts[PartIdx].isEmpty())
 		{
-			PieceInfo* Info = mMinifigWizard->mMinifig.Parts[PartIdx];
+			lcPieceData* PieceData = mMinifigWizard->mMinifig.Parts[PartIdx];
 
-			if (Info)
+			if (PieceData)
 			{
 				for (const lcMinifigPieceInfo& MinifigPieceInfo : mMinifigWizard->mSettings[PartIdx])
 				{
-					if (Info == MinifigPieceInfo.Info)
+					if (PieceData == MinifigPieceInfo.PieceData)
 					{
 						mPieceButtons[PartIdx]->setText(MinifigPieceInfo.Description);
 						break;
@@ -274,7 +274,7 @@ void lcMinifigDialog::TemplateSaveButtonClicked()
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		Template.Parts[ItemIndex] = mMinifigWizard->mSettings[ItemIndex][mMinifigWizard->GetSelectionIndex(ItemIndex)].Info->mFileName;
+		Template.Parts[ItemIndex] = mMinifigWizard->mSettings[ItemIndex][mMinifigWizard->GetSelectionIndex(ItemIndex)].PieceData->mFileName;
 		Template.ColorCodes[ItemIndex] = mColorPickers[ItemIndex]->GetCurrentColorCode();
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[ItemIndex];
 		Template.Angles[ItemIndex] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;
@@ -368,32 +368,32 @@ void lcMinifigDialog::PieceButtonClicked()
 		return;
 
 	int ItemIndex = static_cast<int>(std::distance(mPieceButtons.begin(), Search));
-	PieceInfo* CurrentInfo = mMinifigWizard->mMinifig.Parts[ItemIndex];
+	lcPieceData* CurrentPieceData = mMinifigWizard->mMinifig.Parts[ItemIndex];
 
 	QPoint Position = PieceButton->mapToGlobal(PieceButton->rect().bottomLeft());
-	std::vector<std::pair<PieceInfo*, std::string>> Parts;
+	std::vector<std::pair<lcPieceData*, std::string>> Parts;
 
 	Parts.reserve(mMinifigWizard->mSettings[ItemIndex].size());
 	Parts.emplace_back(nullptr, tr("None").toStdString());
 
 	for (const lcMinifigPieceInfo& Setting : mMinifigWizard->mSettings[ItemIndex])
-		if (Setting.Info)
-			Parts.emplace_back(Setting.Info, Setting.Description);
+		if (Setting.PieceData)
+			Parts.emplace_back(Setting.PieceData, Setting.Description);
 
 	int ColorIndex = mMinifigWizard->mMinifig.ColorIndices[ItemIndex];
 
-	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(CurrentInfo, Parts, ColorIndex, PieceButton, Position);
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(CurrentPieceData, Parts, ColorIndex, PieceButton, Position);
 
 	if (!Result.has_value())
 		return;
 
-	PieceInfo* NewPiece = Result.value();
+	lcPieceData* NewPiece = Result.value();
 
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();
 
 	mView->MakeCurrent();
-	mMinifigWizard->SetPieceInfo(ItemIndex, NewPiece);
+	mMinifigWizard->SetPieceData(ItemIndex, NewPiece);
 	mView->Redraw();
 
 	if (NewPiece)

@@ -5,8 +5,8 @@ class lcPiecesLibrary;
 struct lcPartThumbnail
 {
 	QPixmap Pixmap;
-	PieceInfo* Info;
-	std::vector<PieceInfo*> Required;
+	lcPieceData* PieceData;
+	std::vector<lcPieceData*> Required;
 	int ColorIndex;
 	int Size;
 	float DeviceScale;
@@ -26,18 +26,18 @@ public:
 	lcThumbnailManager(lcPiecesLibrary* Library);
 	~lcThumbnailManager();
 
-	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(PieceInfo* Info, int ColorIndex, int Size, float DeviceScale);
+	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(lcPieceData* PieceData, int ColorIndex, int Size, float DeviceScale);
 	void ReleaseThumbnail(lcPartThumbnailId ThumbnailId);
 	void Clear();
-	void RefreshPieces(const std::vector<PieceInfo*>& ChangedPieces);
+	void RefreshPieces(const std::vector<lcPieceData*>& ChangedPieces);
 
 signals:
 	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);
 
 protected slots:
-	void PartLoaded(PieceInfo* Info);
-	void PartLoadFailed(PieceInfo* Info);
-	void GeneratedMeshSettled(PieceInfo* Info);
+	void PartLoaded(lcPieceData* PieceData);
+	void PartLoadFailed(lcPieceData* PieceData);
+	void GeneratedMeshSettled(lcPieceData* PieceData);
 
 protected:
 	void RefreshRequiredPieces(lcPartThumbnail& Thumbnail);

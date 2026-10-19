@@ -4,20 +4,13 @@
 #include "lc_assettypes.h"
 #include "lc_math.h"
 
-enum class lcPieceInfoType
-{
-	Part,
-	Model,
-	Project
-};
-
 #define LC_PIECE_NAME_LEN 256
 
 struct lcModelPartsEntry
 {
 	lcMatrix44 WorldMatrix;
-	const PieceInfo* Info;
-	// Borrowed explicit mesh for generated/direct geometry; null uses Info->GetMesh().
+	const lcPieceData* PieceData;
+	// Borrowed explicit mesh for generated/direct geometry; null uses PieceData->GetMesh().
 	lcMesh* Mesh;
 	int ColorIndex;
 };
@@ -26,16 +19,16 @@ class lcSynthInfo;
 class lcTrainTrackInfo;
 enum class lcZipFileType;
 
-class PieceInfo
+class lcPieceData
 {
 public:
-	explicit PieceInfo(bool IsLibraryPiece);
-	~PieceInfo();
+	explicit lcPieceData(bool IsLibraryPiece);
+	~lcPieceData();
 
-	PieceInfo(const PieceInfo&) = delete;
-	PieceInfo(PieceInfo&&) = delete;
-	PieceInfo& operator=(const PieceInfo&) = delete;
-	PieceInfo& operator=(PieceInfo&&) = delete;
+	lcPieceData(const lcPieceData&) = delete;
+	lcPieceData(lcPieceData&&) = delete;
+	lcPieceData& operator=(const lcPieceData&) = delete;
+	lcPieceData& operator=(lcPieceData&&) = delete;
 
 	const lcBoundingBox& GetBoundingBox() const
 	{
@@ -120,12 +113,12 @@ public:
 
 	bool IsModel() const
 	{
-		return mType == lcPieceInfoType::Model;
+		return mType == Type::Model;
 	}
 
 	bool IsProject() const
 	{
-		return mType == lcPieceInfoType::Project;
+		return mType == Type::Project;
 	}
 
 	void SetZipFile(lcZipFileType ZipFileType, int ZipFileIndex)
@@ -180,7 +173,7 @@ public:
 	void CreateProject(Project* Project, const char* PieceName);
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& WorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceRayTest& PieceRayTest) const;
 	bool BoxTest(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSubModels, lcPartsList& PartsList) const;
 	void GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const;
@@ -200,12 +193,19 @@ public:
 	int mFolderIndex;
 
 protected:
+	enum class Type
+	{
+		Part,
+		Model,
+		Project
+	};
+
 	void SetLoadingBoundingBox();
 
 	// Fixed at creation, independently of type and load state.
 	const bool mIsLibraryPiece;
 	int mRefCount = 0;
-	lcPieceInfoType mType = lcPieceInfoType::Part;
+	Type mType = Type::Part;
 	lcModel* mModel = nullptr;
 	Project* mProject = nullptr;
 	lcMesh* mMesh = nullptr;

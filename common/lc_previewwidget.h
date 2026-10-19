@@ -11,13 +11,13 @@ class lcPreviewDockWidget : public QMainWindow
 public:
 	explicit lcPreviewDockWidget(QMainWindow* Parent);
 
-	bool SetCurrentPiece(PieceInfo* Info, int ColorCode);
+	bool SetCurrentPiece(lcPieceData* PieceData, int ColorCode);
 	void ClearPreview();
 	void UpdatePreview();
 	void RefreshDescription();
 	void RefreshModel(const lcModel* Model);
-	void RefreshAfterAssetChange(const std::vector<PieceInfo*>& ChangedPieces);
-	void RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement);
+	void RefreshAfterAssetChange(const std::vector<lcPieceData*>& ChangedPieces);
+	void RebindPieceData(lcPieceData* Previous, lcPieceData* Replacement);
 
 protected slots:
 	void SetPreviewLock();
@@ -53,7 +53,7 @@ public:
 	void ClearPreview();
 	void UpdatePreview();
 	void RefreshDescription();
-	bool SetCurrentPiece(PieceInfo* Info, int ColorCode);
+	bool SetCurrentPiece(lcPieceData* PieceData, int ColorCode);
 
 protected:
 	std::unique_ptr<Project> mLoader;

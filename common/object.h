@@ -18,9 +18,9 @@ struct lcObjectSection
 	quint32 Section = 0;
 };
 
-struct lcPieceInfoRayTest
+struct lcPieceRayTest
 {
-	const PieceInfo* Info = nullptr;
+	const lcPieceData* PieceData = nullptr;
 	lcMatrix44 Transform;
 	lcVector3 Plane;
 };
@@ -34,7 +34,7 @@ struct lcObjectRayTest
 	lcVector3 End;
 	float Distance = FLT_MAX;
 	lcObjectSection ObjectSection;
-	lcPieceInfoRayTest PieceInfoRayTest;
+	lcPieceRayTest PieceRayTest;
 };
 
 struct lcObjectBoxTest

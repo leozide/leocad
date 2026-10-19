@@ -69,14 +69,14 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(lcModelTransformFlags)
 
 struct lcInsertPieceInfo
 {
-	PieceInfo* Info;
+	lcPieceData* PieceData;
 	lcMatrix44 Transform;
 	int ColorIndex;
 };
 
 struct lcModelPieceRename
 {
-	PieceInfo* Info;
+	lcPieceData* PieceData;
 	QString OldName;
 	QString NewName;
 };
@@ -181,20 +181,20 @@ public:
 
 	bool GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix) const;
 	bool IncludesModel(const lcModel* Model) const;
-	void CreatePieceInfo(Project* Project);
-	bool RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement);
-	void UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels);
+	void CreatePieceData(Project* Project);
+	bool RebindPieceData(lcPieceData* Previous, lcPieceData* Replacement);
+	void UpdatePieceData(std::vector<lcModel*>& UpdatedModels);
 	void QueueMeshBuild();
 	void UpdateAllViews() const;
 	void RefreshPreview() const;
-	std::vector<PieceInfo*> GetRequiredPieces() const;
+	std::vector<lcPieceData*> GetRequiredPieceData() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	void WaitForAssets() const;
 	lcResult<void> EnsureAssetsReady() const;
 
-	PieceInfo* GetPieceInfo() const
+	lcPieceData* GetPieceData() const
 	{
-		return mPieceInfo;
+		return mPieceData;
 	}
 
 	const std::vector<std::unique_ptr<lcPiece>>& GetPieces() const
@@ -282,7 +282,7 @@ public:
 	void LoadEditHistoryState(const lcModelHistoryEditState& HistoryState);
 	void LoadModelPropertiesState(const lcModelProperties& ModelProperties);
 
-	lcPiece* AddPiece(PieceInfo* Info, quint32 Section);
+	lcPiece* AddPiece(lcPieceData* PieceData, quint32 Section);
 	void AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex);
 	void DeleteSelectedObjects();
 	void ResetSelectedPiecesPivotPoint();
@@ -318,7 +318,7 @@ public:
 	void Merge(std::unique_ptr<lcModel> Other);
 
 	void SetMinifig(const lcMinifig& Minifig);
-	void SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex);
+	void SetPreviewPieceData(lcPieceData* PieceData, int ColorIndex);
 
 	lcResult<void> Cut();
 	lcResult<void> Copy();
@@ -343,7 +343,7 @@ public:
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
-	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
+	bool SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceRayTest& PieceRayTest) const;
 	bool SubModelBoxTest(const lcVector4 Planes[6]) const;
 	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
 	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const;
@@ -506,7 +506,7 @@ protected:
 	// Their order and the current-directory preference are saved with the model.
 	std::vector<QString> mAssetSourceDirectories;
 	bool mPreferCurrentAssetDirectory = true;
-	PieceInfo* mPieceInfo;
+	lcPieceData* mPieceData;
 
 	bool mIsPreview;
 	bool mActive;

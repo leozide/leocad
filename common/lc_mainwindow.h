@@ -140,9 +140,9 @@ public:
 		return mSelectionMode;
 	}
 
-	PieceInfo* GetCurrentPieceInfo() const
+	lcPieceData* GetInsertPieceData() const
 	{
-		return mCurrentPieceInfo;
+		return mInsertPieceData;
 	}
 
 	lcView* GetActiveView() const
@@ -267,9 +267,9 @@ public:
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
-	void PreviewPiece(PieceInfo* Info, int ColorCode, bool ShowPreview);
+	void PreviewPiece(lcPieceData* PieceData, int ColorCode, bool ShowPreview);
 	void TogglePreviewWidget(bool Visible);
-	void SetCurrentPieceInfo(PieceInfo* Info);
+	void SetInsertPieceData(lcPieceData* PieceData);
 
 protected slots:
 	void FileMenuAboutToShow();
@@ -285,7 +285,7 @@ protected slots:
 	void ClipboardChanged();
 	void ActionTriggered();
 	void ColorChanged(int ColorIndex);
-	void PartListPicked(PieceInfo* Info);
+	void PartListPicked(lcPieceData* PieceData);
 	void ColorButtonClicked();
 	void Print(QPrinter* Printer);
 	void EnableWindowFlags(bool);
@@ -347,7 +347,7 @@ protected:
 	int mAngleSnapIndex;
 	bool mRelativeTransform = true;
 	bool mLocalTransform = false;
-	PieceInfo* mCurrentPieceInfo = nullptr;
+	lcPieceData* mInsertPieceData = nullptr;
 	lcSelectionMode mSelectionMode;
 	int mMousePressTabIndex = -1;
 
@@ -380,7 +380,7 @@ protected:
 	lcSpinnerWidget* mStatusLoadSpinner = nullptr;
 	QLabel* mStatusLoadFailureLabel = nullptr;
 	const Project* mStatusProject = nullptr;
-	std::unordered_set<const PieceInfo*> mStatusRequiredAssets;
+	std::unordered_set<const lcPieceData*> mStatusRequiredAssets;
 	bool mAssetUpdateScheduled = false;
 
 	QMenu* mTransformMenu = nullptr;

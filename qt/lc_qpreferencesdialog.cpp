@@ -7,7 +7,7 @@
 #include "lc_application.h"
 #include "lc_qutils.h"
 #include "lc_glextensions.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_edgecolordialog.h"
 #include "lc_blenderpreferences.h"
 #include "lc_mainwindow.h"
@@ -807,14 +807,14 @@ void lcPreferencesDialog::UpdateParts()
 
 	if (CategoryIndex != -1)
 	{
-		std::vector<PieceInfo*> SingleParts, GroupedParts;
+		std::vector<lcPieceData*> SingleParts, GroupedParts;
 
 		Library->GetCategoryEntries(mOptions->Categories[CategoryIndex].Keywords.constData(), false, SingleParts, GroupedParts);
 
-		for (PieceInfo* Info : SingleParts)
+		for (lcPieceData* PieceData : SingleParts)
 		{
-			QStringList RowList(Info->m_strDescription);
-			RowList.append(Info->mFileName);
+			QStringList RowList(PieceData->m_strDescription);
+			RowList.append(PieceData->mFileName);
 
 			new QTreeWidgetItem(Tree, RowList);
 		}
@@ -823,18 +823,18 @@ void lcPreferencesDialog::UpdateParts()
 	{
 		for (const auto& PartIt : Library->mPieces)
 		{
-			PieceInfo* Info = PartIt.second;
+			lcPieceData* PieceData = PartIt.second;
 
 			for (CategoryIndex = 0; CategoryIndex < static_cast<int>(mOptions->Categories.size()); CategoryIndex++)
 			{
-				if (Library->PieceInCategory(Info, mOptions->Categories[CategoryIndex].Keywords.constData()))
+				if (Library->PieceDataInCategory(PieceData, mOptions->Categories[CategoryIndex].Keywords.constData()))
 					break;
 			}
 
 			if (CategoryIndex == static_cast<int>(mOptions->Categories.size()))
 			{
-				QStringList RowList(Info->m_strDescription);
-				RowList.append(Info->mFileName);
+				QStringList RowList(PieceData->m_strDescription);
+				RowList.append(PieceData->mFileName);
 
 				new QTreeWidgetItem(Tree, RowList);
 			}

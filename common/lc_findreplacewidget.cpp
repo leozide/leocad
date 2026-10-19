@@ -3,7 +3,7 @@
 #include "lc_colorpicker.h"
 #include "lc_mainwindow.h"
 #include "lc_partselectionpopup.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "piece.h"
 #include "lc_model.h"
 #include "lc_view.h"
@@ -111,11 +111,11 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	{
 		lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-		Params.FindInfo = Focus->mPieceInfo;
+		Params.FindPieceData = Focus->mPieceData;
 		Params.FindColorIndex = Focus->GetColorIndex();
 
 		FindColorPicker->SetCurrentColor(Params.FindColorIndex);
-		mFindPartComboBox->setCurrentIndex(mFindPartComboBox->findData(QVariant::fromValue((void*)Params.FindInfo)));
+		mFindPartComboBox->setCurrentIndex(mFindPartComboBox->findData(QVariant::fromValue((void*)Params.FindPieceData)));
 
 	}
 	else
@@ -142,7 +142,7 @@ void lcFindReplaceWidget::FindTextEdited(const QString& Text)
 	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
 	Params.FindString = Text;
-	Params.FindInfo = nullptr;
+	Params.FindPieceData = nullptr;
 }
 
 void lcFindReplaceWidget::FindActivated(int Index)
@@ -150,7 +150,7 @@ void lcFindReplaceWidget::FindActivated(int Index)
 	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
 	Params.FindString.clear();
-	Params.FindInfo = (PieceInfo*)mFindPartComboBox->itemData(Index).value<void*>();
+	Params.FindPieceData = (lcPieceData*)mFindPartComboBox->itemData(Index).value<void*>();
 }
 
 void lcFindReplaceWidget::ReplaceColorIndexChanged(int ColorIndex)
@@ -164,12 +164,12 @@ void lcFindReplaceWidget::ReplaceButtonClicked()
 {
 	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(Params.ReplacePieceInfo, std::vector<std::pair<PieceInfo*, std::string>>(),
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(Params.ReplacePieceData, std::vector<std::pair<lcPieceData*, std::string>>(),
                 gDefaultColor, mReplacePartButton, mReplacePartButton->mapToGlobal(mReplacePartButton->rect().bottomLeft()));
 
 	if (!Result.has_value())
 		return;
 
-	Params.ReplacePieceInfo = Result.value();
+	Params.ReplacePieceData = Result.value();
 	mReplacePartButton->setText(Result.value()->m_strDescription);
 }

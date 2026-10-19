@@ -14,7 +14,7 @@ enum class lcAssetState
 	Failed
 };
 
-// Scheduling urgency. The library's RequestPieceLoad() also waits when Blocking is requested.
+// Scheduling urgency. The library's RequestPieceDataLoad() also waits when Blocking is requested.
 // Queued requests only promote and keep their priority until completion or cancellation.
 enum class lcLoadPriority
 {

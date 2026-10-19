@@ -6,7 +6,7 @@
 #include "object.h"
 #include "piece.h"
 #include "camera.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
 #include "lc_mainwindow.h"
@@ -428,7 +428,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		lcPiece* Piece = (lcPiece*)Focus;
 		quint32 Section = Piece->GetFocusSection();
 
-		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && Piece->mPieceInfo->GetSynthInfo() && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
+		if (Section >= LC_PIECE_SECTION_CONTROL_POINT_FIRST && Section <= LC_PIECE_SECTION_CONTROL_POINT_LAST && Piece->mPieceData->GetSynthInfo() && Piece->mPieceData->GetSynthInfo()->IsCurve())
 		{
 			int ControlPointIndex = Section - LC_PIECE_SECTION_CONTROL_POINT_FIRST;
 			float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
@@ -482,7 +482,7 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 2, 18);
 			Context->DrawPrimitives(GL_TRIANGLE_STRIP, 20, 18);
 		}
-		else if (Piece->mPieceInfo->GetTrainTrackInfo() && TrackButton == lcTrackButton::None)
+		else if (Piece->mPieceData->GetTrainTrackInfo() && TrackButton == lcTrackButton::None)
 		{
 			DrawTrainTrack(Piece, Context, TrackTool, TrackToolSection);
 		}
@@ -557,7 +557,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 	}
 	else
 	{
-		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+		const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceData->GetTrainTrackInfo();
 		const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
 		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
@@ -588,7 +588,7 @@ void lcViewManipulator::DrawTrainTrack(lcPiece* Piece, lcContext* Context, lcTra
 	const lcVector4 ConnectionColor = lcVector4FromColor(Preferences.mControlPointColor);
 	const lcVector4 ConnectionFocusedColor = lcVector4FromColor(Preferences.mControlPointFocusedColor);
 
-	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceData->GetTrainTrackInfo();
 	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
@@ -1253,7 +1253,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButto
 	{
 		lcPiece* Piece = (lcPiece*)Focus;
 
-		if (Piece->mPieceInfo->GetSynthInfo())
+		if (Piece->mPieceData->GetSynthInfo())
 		{
 			quint32 Section = Piece->GetFocusSection();
 
@@ -1328,7 +1328,7 @@ std::pair<lcTrackTool, quint32> lcViewManipulator::UpdateSelectMove(lcTrackButto
 
 		lcPiece* Piece = (lcPiece*)Focus;
 
-		if (ControlPointIndex != -1 && Piece->mPieceInfo->GetSynthInfo()->IsCurve())
+		if (ControlPointIndex != -1 && Piece->mPieceData->GetSynthInfo()->IsCurve())
 		{
 			float Strength = Piece->GetControlPoints()[ControlPointIndex].Scale;
 			const float ScaleStart = (2.0f - OverlayScaleRadius) * OverlayScale + Strength;
@@ -1395,7 +1395,7 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 	quint32 NewTrackSection = ~0U;
 	float ClosestIntersectionDistance = FLT_MAX;
 
-	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return { NewTrackTool, NewTrackSection, ClosestIntersectionDistance };

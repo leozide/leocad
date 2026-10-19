@@ -12,7 +12,7 @@
 #include "lc_scene.h"
 #include "lc_traintrack.h"
 #include "lc_file.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_view.h"
 #include "minifig.h"
 #include "lc_arraydialog.h"
@@ -184,7 +184,7 @@ lcModel::lcModel(const QString& FileName, Project* Project, bool Preview)
 
 	mActive = false;
 	mCurrentStep = 1;
-	mPieceInfo = nullptr;
+	mPieceData = nullptr;
 }
 
 void lcModel::SetProject(Project* Project)
@@ -262,27 +262,27 @@ lcModel::~lcModel()
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 		for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
+			Library->ReleasePieceData(PreviewPieceInfoTransform.PieceData);
 
 		mPreviewInsertPieceInfo.clear();
 	}
 
-	if (mPieceInfo)
+	if (mPieceData)
 	{
-		if (mPieceInfo->GetModel() == this)
+		if (mPieceData->GetModel() == this)
 		{
-			if (!mIsPreview && gMainWindow && gMainWindow->GetCurrentPieceInfo() == mPieceInfo)
-				gMainWindow->SetCurrentPieceInfo(nullptr);
+			if (!mIsPreview && gMainWindow && gMainWindow->GetInsertPieceData() == mPieceData)
+				gMainWindow->SetInsertPieceData(nullptr);
 
 			// Keep the name indexed while placements still reference the deleted model.
-			lcGetPiecesLibrary()->InvalidatePieceLoad(mPieceInfo);
-			mPieceInfo->DetachContainer();
-			mPieceInfo->SetFailed(tr("Model '%1' was deleted.").arg(QString::fromLatin1(mPieceInfo->mFileName)));
-			lcGetPiecesLibrary()->NotifyConsumersChanged();
+			lcGetPiecesLibrary()->InvalidatePieceDataLoad(mPieceData);
+			mPieceData->DetachContainer();
+			mPieceData->SetFailed(tr("Model '%1' was deleted.").arg(QString::fromLatin1(mPieceData->mFileName)));
+			lcGetPiecesLibrary()->NotifyAssetStatusChanged();
 		}
 
 		lcPiecesLibrary* Library = lcGetPiecesLibrary();
-		Library->ReleasePieceInfo(mPieceInfo);
+		Library->ReleasePieceData(mPieceData);
 	}
 
 	DeleteModel();
@@ -298,13 +298,13 @@ bool lcModel::GetPieceWorldMatrix(lcPiece* Piece, lcMatrix44& ParentWorldMatrix)
 			return true;
 		}
 
-		const PieceInfo* Info = ModelPiece->mPieceInfo;
+		const lcPieceData* PieceData = ModelPiece->mPieceData;
 
-		if (Info->IsModel())
+		if (PieceData->IsModel())
 		{
 			lcMatrix44 WorldMatrix = lcMul(ModelPiece->mModelWorld, ParentWorldMatrix);
 
-			if (Info->GetPieceWorldMatrix(Piece, WorldMatrix))
+			if (PieceData->GetPieceWorldMatrix(Piece, WorldMatrix))
 			{
 				ParentWorldMatrix = WorldMatrix;
 				return true;
@@ -328,9 +328,9 @@ bool lcModel::IncludesModel(const lcModel* Model) const
 
 		for (const std::unique_ptr<lcPiece>& Piece : Current->mPieces)
 		{
-			const PieceInfo* Info = Piece->mPieceInfo;
+			const lcPieceData* PieceData = Piece->mPieceData;
 
-			if (Info && Info->IsModel() && Visit(Info->GetModel()))
+			if (PieceData && PieceData->IsModel() && Visit(PieceData->GetModel()))
 				return true;
 		}
 
@@ -373,28 +373,28 @@ void lcModel::DeleteModel()
 	mHasDirectGeometry = false;
 }
 
-void lcModel::CreatePieceInfo(Project* Project)
+void lcModel::CreatePieceData(Project* Project)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	bool Reused;
-	mPieceInfo = Library->CreateModelPiece(mProperties.mFileName.toLatin1().constData(), Project, Reused);
-	mPieceInfo->SetModel(this);
+	mPieceData = Library->AcquireModelPieceData(mProperties.mFileName.toLatin1().constData(), Project, Reused);
+	mPieceData->SetModel(this);
 
 	if (Reused)
 	{
 		// Reusing a referenced name can turn an existing placement into a cycle.
 		mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this](const std::unique_ptr<lcPiece>& Piece)
 		{
-			return Piece->mPieceInfo && Piece->mPieceInfo->IncludesModel(this);
+			return Piece->mPieceData && Piece->mPieceData->IncludesModel(this);
 		}), mPieces.end());
 	}
 
-	// A model with deferred mesh requests retains its initial CreateModelPiece reference
+	// A model with deferred mesh requests retains its initial AcquireModelPieceData reference
 	// until its source lines have been parsed and QueueMeshBuild() runs.
 	if (!Project->DefersModelMeshRequests())
 	{
-		Library->RequestPieceLoad(mPieceInfo, mIsPreview ? lcLoadPriority::Normal : lcLoadPriority::Blocking);
-		Library->ReleasePieceInfo(mPieceInfo);
+		Library->RequestPieceDataLoad(mPieceData, mIsPreview ? lcLoadPriority::Normal : lcLoadPriority::Blocking);
+		Library->ReleasePieceData(mPieceData);
 	}
 
 	if (Reused)
@@ -406,14 +406,14 @@ void lcModel::CreatePieceInfo(Project* Project)
 	}
 }
 
-bool lcModel::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
+bool lcModel::RebindPieceData(lcPieceData* Previous, lcPieceData* Replacement)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	bool Changed = false;
 
 	mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this, Previous, Replacement, Library, &Changed](const std::unique_ptr<lcPiece>& Piece)
 	{
-		if (Piece->mPieceInfo != Previous)
+		if (Piece->mPieceData != Previous)
 			return false;
 
 		Changed = true;
@@ -422,8 +422,8 @@ bool lcModel::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
 			return true;
 
 		const QString PieceId = Piece->GetID();
-		Piece->SetPieceInfo(Replacement, PieceId, false, false);
-		Library->ReleasePieceInfo(Previous);
+		Piece->SetPieceData(Replacement, PieceId, false, false);
+		Library->ReleasePieceData(Previous);
 
 		return false;
 	}), mPieces.end());
@@ -433,8 +433,8 @@ bool lcModel::RebindPieceInfo(PieceInfo* Previous, PieceInfo* Replacement)
 
 void lcModel::QueueMeshBuild()
 {
-	mPieceInfo->SetModel(this);
-	lcGetPiecesLibrary()->RebuildModelPiece(mPieceInfo);
+	mPieceData->SetModel(this);
+	lcGetPiecesLibrary()->RebuildModelPieceData(mPieceData);
 }
 
 void lcModel::UpdateAllViews() const
@@ -451,9 +451,9 @@ void lcModel::RefreshPreview() const
 		gMainWindow->GetPreviewWidget()->RefreshModel(this);
 }
 
-std::vector<PieceInfo*> lcModel::GetRequiredPieces() const
+std::vector<lcPieceData*> lcModel::GetRequiredPieceData() const
 {
-	std::vector<PieceInfo*> Required;
+	std::vector<lcPieceData*> Required;
 	std::unordered_set<const lcModel*> Visited;
 
 	const std::function<void(const lcModel*)> Collect = [&Required, &Visited, &Collect](const lcModel* Model)
@@ -461,19 +461,19 @@ std::vector<PieceInfo*> lcModel::GetRequiredPieces() const
 		if (!Model || !Visited.insert(Model).second)
 			return;
 
-		if (Model->mPieceInfo)
-			Required.push_back(Model->mPieceInfo);
+		if (Model->mPieceData)
+			Required.push_back(Model->mPieceData);
 
 		for (const std::unique_ptr<lcPiece>& Piece : Model->mPieces)
 		{
-			PieceInfo* Info = Piece->mPieceInfo;
+			lcPieceData* PieceData = Piece->mPieceData;
 
-			if (Info->IsModel())
-				Collect(Info->GetModel());
-			else if (Info->IsProject())
-				Collect(Info->GetProject()->GetMainModel());
+			if (PieceData->IsModel())
+				Collect(PieceData->GetModel());
+			else if (PieceData->IsProject())
+				Collect(PieceData->GetProject()->GetMainModel());
 			else
-				Required.push_back(Info);
+				Required.push_back(PieceData);
 		}
 	};
 
@@ -497,13 +497,13 @@ std::vector<lcPiece*> lcModel::GetRequiredSynthPieces() const
 
 		for (const std::unique_ptr<lcPiece>& Piece : Model->mPieces)
 		{
-			PieceInfo* Info = Piece->mPieceInfo;
+			lcPieceData* PieceData = Piece->mPieceData;
 
-			if (Info->IsModel())
-				Collect(Info->GetModel());
-			else if (Info->IsProject())
-				Collect(Info->GetProject()->GetMainModel());
-			else if (Info->GetSynthInfo())
+			if (PieceData->IsModel())
+				Collect(PieceData->GetModel());
+			else if (PieceData->IsProject())
+				Collect(PieceData->GetProject()->GetMainModel());
+			else if (PieceData->GetSynthInfo())
 				Required.push_back(Piece.get());
 		}
 	};
@@ -515,17 +515,17 @@ std::vector<lcPiece*> lcModel::GetRequiredSynthPieces() const
 
 void lcModel::WaitForAssets() const
 {
-	const std::vector<PieceInfo*> Required = GetRequiredPieces();
+	const std::vector<lcPieceData*> Required = GetRequiredPieceData();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	Library->WaitForPieces(Required);
+	Library->WaitForPieceData(Required);
 	Library->WaitForSynthMeshes(GetRequiredSynthPieces());
 
 	// Temporary minifigure and thumbnail models have no container piece to update.
-	if (mPieceInfo)
+	if (mPieceData)
 	{
 		std::vector<lcModel*> UpdatedModels;
-		const_cast<lcModel*>(this)->UpdatePieceInfo(UpdatedModels);
+		const_cast<lcModel*>(this)->UpdatePieceData(UpdatedModels);
 	}
 }
 
@@ -533,15 +533,15 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 {
 	WaitForAssets();
 
-	const std::vector<PieceInfo*> Required = GetRequiredPieces();
+	const std::vector<lcPieceData*> Required = GetRequiredPieceData();
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	for (const PieceInfo* Info : Required)
+	for (const lcPieceData* PieceData : Required)
 	{
-		if (Info->mState == lcAssetState::Loaded)
+		if (PieceData->mState == lcAssetState::Loaded)
 			continue;
 
-		const QString Error = Library->GetPieceLoadError(Info);
+		const QString Error = Library->GetPieceDataLoadError(PieceData);
 
 		if (!Error.isEmpty())
 			return lcUnexpected(Error);
@@ -557,7 +557,7 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 			QString Error = Library->GetSynthMeshError(Piece);
 
 			if (Error.isEmpty())
-				Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceInfo->mFileName));
+				Error = tr("Could not generate geometry for piece '%1'.").arg(QString::fromLatin1(Piece->mPieceData->mFileName));
 
 			return lcUnexpected(Error);
 		}
@@ -565,19 +565,19 @@ lcResult<void> lcModel::EnsureAssetsReady() const
 	return lcResult<void>();
 }
 
-void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
+void lcModel::UpdatePieceData(std::vector<lcModel*>& UpdatedModels)
 {
 	if (std::find(UpdatedModels.begin(), UpdatedModels.end(), this) != UpdatedModels.end())
 		return;
 
-	mPieceInfo->SetModel(this);
+	mPieceData->SetModel(this);
 	UpdatedModels.push_back(this);
 
-	const lcMesh* Mesh = mPieceInfo->GetDisplayMesh();
+	const lcMesh* Mesh = mPieceData->GetDisplayMesh();
 
 	if (mPieces.empty() && !Mesh)
 	{
-		mPieceInfo->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
+		mPieceData->SetBoundingBox(lcVector3(0.0f, 0.0f, 0.0f), lcVector3(0.0f, 0.0f, 0.0f));
 		return;
 	}
 
@@ -587,7 +587,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 	{
 		if (Piece->IsVisibleInSubModel())
 		{
-			Piece->mPieceInfo->UpdateBoundingBox(UpdatedModels);
+			Piece->mPieceData->UpdateBoundingBox(UpdatedModels);
 			Piece->CompareBoundingBox(Min, Max);
 		}
 	}
@@ -598,7 +598,7 @@ void lcModel::UpdatePieceInfo(std::vector<lcModel*>& UpdatedModels)
 		Max = lcMax(Max, Mesh->mBoundingBox.Max);
 	}
 
-	mPieceInfo->SetBoundingBox(Min, Max);
+	mPieceData->SetBoundingBox(Min, Max);
 }
 
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
@@ -720,7 +720,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 			}
 		}
 
-		if (Piece->mPieceInfo->GetSynthInfo())
+		if (Piece->mPieceData->GetSynthInfo())
 		{
 			Stream << QLatin1String("0 !LEOCAD SYNTH BEGIN\r\n");
 
@@ -741,7 +741,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 		Piece->SaveLDraw(Stream);
 
-		if (Piece->mPieceInfo->GetSynthInfo())
+		if (Piece->mPieceData->GetSynthInfo())
 			Stream << QLatin1String("0 !LEOCAD SYNTH END\r\n");
 	}
 
@@ -1022,21 +1022,21 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!CurrentGroups.empty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.size() - 1]);
 
-				PieceInfo* Info = Library->FindPiece(PartId.toLatin1().constData(), Project, true, true);
+				lcPieceData* PieceData = Library->FindPieceData(PartId.toLatin1().constData(), Project, true, true);
 
 				const float* Matrix = IncludeTransform.GetFloats();
 				const lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
 									       lcVector4(-Matrix[4], -Matrix[6], Matrix[5], 0.0f), lcVector4(Matrix[12], Matrix[14], -Matrix[13], 1.0f));
 
 				Piece->SetFileLine(mFileLines.size());
-				Piece->SetPieceInfo(Info, PartId, false, false);
+				Piece->SetPieceData(PieceData, PartId, false, false);
 				Piece->Initialize(Transform, CurrentStep);
 				Piece->SetColorCode(ColorCode);
 				Piece->VerifyControlPoints(ControlPoints);
 				Piece->SetControlPoints(ControlPoints);
 				ControlPoints.clear();
 
-				if (Piece->mPieceInfo->IsModel() && Piece->mPieceInfo->GetModel()->IncludesModel(this))
+				if (Piece->mPieceData->IsModel() && Piece->mPieceData->GetModel()->IncludesModel(this))
 				{
 					Project->AddLoadWarning(tr("Model '%1': reference to '%2' was ignored because it would create a circular reference.").arg(GetFileName(), PartId));
 					delete Piece;
@@ -1145,8 +1145,8 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			PieceInfo* pInfo = Library->FindPiece(name, mProject, true, false);
-			lcPiece* pPiece = new lcPiece(pInfo);
+			lcPieceData* PieceData = Library->FindPieceData(name, mProject, true, false);
+			lcPiece* pPiece = new lcPiece(PieceData);
 
 			pPiece->Initialize(WorldMatrix, step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
@@ -1346,13 +1346,13 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 
 	for (const lcSetInventoryItem& SetInventoryItem : SetInventory)
 	{
-		PieceInfo* Info = Library->FindPiece(SetInventoryItem.PartID + ".dat", mProject, true, false);
+		lcPieceData* PieceData = Library->FindPieceData(SetInventoryItem.PartID + ".dat", mProject, true, false);
 		int Quantity = SetInventoryItem.Quantity;
 
 		while (Quantity--)
 		{
 			lcPiece* Piece = new lcPiece(nullptr);
-			Piece->SetPieceInfo(Info, QString(), false, true);
+			Piece->SetPieceData(PieceData, QString(), false, true);
 			Piece->Initialize(lcMatrix44Identity(), 1);
 			Piece->SetColorCode(SetInventoryItem.ColorCode);
 			AddPiece(Piece);
@@ -1362,14 +1362,14 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 	if (mPieces.empty())
 		return false;
 
-	std::vector<PieceInfo*> Required;
+	std::vector<lcPieceData*> Required;
 
 	Required.reserve(mPieces.size());
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		Required.push_back(Piece->mPieceInfo);
+		Required.push_back(Piece->mPieceData);
 
-	if (!Library->WaitForPieces(Required))
+	if (!Library->WaitForPieceData(Required))
 		return false;
 
 	Library->mBuffersDirty = true;
@@ -1387,7 +1387,7 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		lcBoundingBox BoundingBox = Piece->mPieceInfo->GetBoundingBox();
+		lcBoundingBox BoundingBox = Piece->mPieceData->GetBoundingBox();
 		RoundBounds(BoundingBox.Min.x);
 		RoundBounds(BoundingBox.Min.y);
 		RoundBounds(BoundingBox.Max.x);
@@ -1638,8 +1638,8 @@ void lcModel::PaintSelectedPieces()
 
 void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHighlight, bool AllowFade) const
 {
-	if (mPieceInfo)
-		mPieceInfo->AddRenderMesh(*Scene);
+	if (mPieceData)
+		mPieceData->AddRenderMesh(*Scene);
 
 	lcPiece* FocusPiece = nullptr;
 
@@ -1672,7 +1672,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
+			PreviewPieceInfoTransform.PieceData->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
 	}
 }
 
@@ -1692,7 +1692,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	if (Scene->GetDrawInsertPreview())
 	{
 		for (const lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-			PreviewPieceInfoTransform.Info->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
+			PreviewPieceInfoTransform.PieceData->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
 	}
 }
 
@@ -1792,7 +1792,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 	struct lcPartsListImage
 	{
 		QImage Thumbnail;
-		const PieceInfo* Info;
+		const lcPieceData* PieceData;
 		int ColorIndex;
 		int Count;
 		QRect Bounds;
@@ -1803,16 +1803,16 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 
 	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.first;
+		const lcPieceData* PieceData = PartIt.first;
 
-		if (!KeepMissingParts && !Info->IsModel() && !Info->IsProject() && (Info->mState != lcAssetState::Loaded || !Info->GetMesh()))
+		if (!KeepMissingParts && !PieceData->IsModel() && !PieceData->IsProject() && (PieceData->mState != lcAssetState::Loaded || !PieceData->GetMesh()))
 			continue;
 
 		for (const auto& ColorIt : PartIt.second)
 		{
 			Images.push_back(lcPartsListImage());
 			lcPartsListImage& Image = Images.back();
-			Image.Info = PartIt.first;
+			Image.PieceData = PartIt.first;
 			Image.ColorIndex = ColorIt.first;
 			Image.Count = ColorIt.second;
 		}
@@ -1834,7 +1834,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 		if (Image1.ColorIndex != Image2.ColorIndex)
 			return Image1.ColorIndex < Image2.ColorIndex;
 
-		return strcmp(Image1.Info->m_strDescription, Image2.Info->m_strDescription) < 0;
+		return strcmp(Image1.PieceData->m_strDescription, Image2.PieceData->m_strDescription) < 0;
 	};
 
 	std::sort(Images.begin(), Images.end(), ImageCompare);
@@ -1860,8 +1860,8 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 
 	for (const lcPartsListImage& Image : Images)
 	{
-		const PieceInfo* Info = Image.Info;
-		const lcBoundingBox& BoundingBox = Info->GetBoundingBox();
+		const lcPieceData* PieceData = Image.PieceData;
+		const lcBoundingBox& BoundingBox = PieceData->GetBoundingBox();
 
 		lcVector3 Points[8];
 		lcGetBoxCorners(BoundingBox.Min, BoundingBox.Max, Points);
@@ -1906,7 +1906,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
 
-		Image.Info->AddRenderMeshes(&Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
+		Image.PieceData->AddRenderMeshes(&Scene, lcMatrix44Identity(), Image.ColorIndex, lcRenderMeshState::Default, true);
 
 		Scene.End();
 
@@ -2141,7 +2141,7 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 			Light->BoxTest(ObjectBoxTest);
 }
 
-bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const
+bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVector3& WorldEnd, float& MinDistance, lcPieceRayTest& PieceRayTest) const
 {
 	bool MinIntersect = false;
 
@@ -2153,10 +2153,10 @@ bool lcModel::SubModelMinIntersectDist(const lcVector3& WorldStart, const lcVect
 
 		if (Piece->IsVisibleInSubModel())
 		{
-			if (Piece->MinIntersectDist(Start, End, MinDistance, PieceInfoRayTest))
+			if (Piece->MinIntersectDist(Start, End, MinDistance, PieceRayTest))
 			{
 				MinIntersect = true;
-				PieceInfoRayTest.Transform = lcMul(PieceInfoRayTest.Transform, Piece->mModelWorld);
+				PieceRayTest.Transform = lcMul(PieceRayTest.Transform, Piece->mModelWorld);
 			}
 		}
 	}
@@ -2175,7 +2175,7 @@ bool lcModel::SubModelBoxTest(const lcVector4 Planes[6]) const
 
 void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const
 {
-	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+	const lcMesh* Mesh = mPieceData ? mPieceData->GetDisplayMesh() : nullptr;
 
 	if (Mesh)
 	{
@@ -2197,9 +2197,9 @@ void lcModel::SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector
 
 void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const
 {
-	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+	const lcMesh* Mesh = mPieceData ? mPieceData->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcAssetState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceData && mPieceData->mState != lcAssetState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)
@@ -2322,7 +2322,7 @@ void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 	// a submodel that was replaced. Do not restore references that now recurse.
 	mPieces.erase(std::remove_if(mPieces.begin(), mPieces.end(), [this](const std::unique_ptr<lcPiece>& Piece)
 	{
-		return Piece->mPieceInfo && Piece->mPieceInfo->IncludesModel(this);
+		return Piece->mPieceData && Piece->mPieceData->IncludesModel(this);
 	}), mPieces.end());
 
 	LoadObjectHistoryState(HistoryState.Cameras, mCameras);
@@ -3099,12 +3099,12 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 	return lcMatrix33Identity();
 }
 
-lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
+lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 {
-	if (!Info)
-		Info = gMainWindow->GetCurrentPieceInfo();
+	if (!PieceData)
+		PieceData = gMainWindow->GetInsertPieceData();
 
-	if (!Info)
+	if (!PieceData)
 		return nullptr;
 
 	lcPiece* Last = mPieces.empty() ? nullptr : mPieces.back().get();
@@ -3118,22 +3118,22 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 		}
 	}
 
-	lcGetPiecesLibrary()->EnsurePieceAssetsReady(Info);
+	lcGetPiecesLibrary()->EnsurePieceDataAssetsReady(PieceData);
 
 	if (Last)
 	{
-		lcGetPiecesLibrary()->EnsurePieceAssetsReady(Last->mPieceInfo);
+		lcGetPiecesLibrary()->EnsurePieceDataAssetsReady(Last->mPieceData);
 
-		if (Last->mPieceInfo->GetSynthInfo())
+		if (Last->mPieceData->GetSynthInfo())
 			lcGetPiecesLibrary()->WaitForSynthMeshes({ Last });
 	}
 
-	const lcBoundingBox& PieceInfoBoundingBox = Info->GetBoundingBox();
+	const lcBoundingBox& PieceDataBoundingBox = PieceData->GetBoundingBox();
 	lcPiece* Piece = nullptr;
 
-	auto CreatePiece=[this, &Piece](PieceInfo* Info, const lcMatrix44& WorldMatrix, int ColorIndex)
+	auto CreatePiece=[this, &Piece](lcPieceData* PieceData, const lcMatrix44& WorldMatrix, int ColorIndex)
 	{
-		Piece = new lcPiece(Info);
+		Piece = new lcPiece(PieceData);
 		Piece->Initialize(WorldMatrix, mCurrentStep);
 		Piece->SetColorIndex(ColorIndex);
 		AddPiece(Piece);
@@ -3146,7 +3146,7 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 	{
 		std::vector<lcInsertPieceInfo> TrainTracks;
 
-		if (Info->GetTrainTrackInfo() && Last->mPieceInfo->GetTrainTrackInfo())
+		if (PieceData->GetTrainTrackInfo() && Last->mPieceData->GetTrainTrackInfo())
 		{
 			quint32 FocusSection = Last->GetFocusSection();
 
@@ -3156,29 +3156,29 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 			if (!Last->IsFocused())
 				UpdateTrainTrackConnections(Last, false);
 
-			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, Info, nullptr, gMainWindow->mColorIndex, Section, true, std::nullopt);
+			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, PieceData, nullptr, gMainWindow->mColorIndex, Section, true, std::nullopt);
 
 			for (const lcInsertPieceInfo& TrainTrack : TrainTracks)
-				CreatePiece(TrainTrack.Info, TrainTrack.Transform, TrainTrack.ColorIndex);
+				CreatePiece(TrainTrack.PieceData, TrainTrack.Transform, TrainTrack.ColorIndex);
 		}
 
 		if (TrainTracks.empty())
 		{
 			const lcBoundingBox& LastBoundingBox = Last->GetBoundingBox();
-			lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceInfoBoundingBox.Min.z);
+			lcVector3 Dist(0, 0, LastBoundingBox.Max.z - PieceDataBoundingBox.Min.z);
 			Dist = SnapPosition(Dist);
 
 			lcMatrix44 WorldMatrix = Last->mModelWorld;
 			WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
 
-			CreatePiece(Info, WorldMatrix, gMainWindow->mColorIndex);
+			CreatePiece(PieceData, WorldMatrix, gMainWindow->mColorIndex);
 		}
 	}
 	else
 	{
-		lcMatrix44 WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceInfoBoundingBox.Min.z));
+		lcMatrix44 WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceDataBoundingBox.Min.z));
 
-		CreatePiece(Info, WorldMatrix, gMainWindow->mColorIndex);
+		CreatePiece(PieceData, WorldMatrix, gMainWindow->mColorIndex);
 	}
 
 	if (!Piece)
@@ -3201,11 +3201,11 @@ lcPiece* lcModel::AddPiece(PieceInfo* Info, quint32 Section)
 
 void lcModel::AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex)
 {
-	const PieceInfo* Info = Piece->mPieceInfo;
+	const lcPieceData* PieceData = Piece->mPieceData;
 
-	if (!Info->IsModel())
+	if (!PieceData->IsModel())
 	{
-		const lcMesh* Mesh = Info->GetMesh();
+		const lcMesh* Mesh = PieceData->GetMesh();
 
 		if (Mesh && Mesh->mVertexCacheOffset == -1)
 			lcGetPiecesLibrary()->mBuffersDirty = true;
@@ -3241,7 +3241,7 @@ void lcModel::FocusNextTrainTrack()
 		return;
 
 	lcPiece* FocusPiece = (lcPiece*)Focus;
-	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return;
@@ -3268,7 +3268,7 @@ void lcModel::FocusPreviousTrainTrack()
 		return;
 
 	lcPiece* FocusPiece = (lcPiece*)Focus;
-	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return;
@@ -3295,7 +3295,7 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 		return;
 
 	lcPiece* FocusPiece = (lcPiece*)Focus;
-	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = FocusPiece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return;
@@ -3332,7 +3332,7 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 	lcMatrix44 ConnectionTransform = lcMul(TrainTrackInfo->GetConnections()[RotateConnectionIndex].Transform, FocusPiece->mModelWorld);
 	int NewConnectionIndex = (RotateConnectionIndex + Direction + static_cast<int>(TrainTrackInfo->GetConnections().size())) % TrainTrackInfo->GetConnections().size();
 
-	Transform = lcTrainTrackInfo::CalculateTransformToConnection(ConnectionTransform, FocusPiece->mPieceInfo, NewConnectionIndex);
+	Transform = lcTrainTrackInfo::CalculateTransformToConnection(ConnectionTransform, FocusPiece->mPieceData, NewConnectionIndex);
 
 	if (!Transform)
 		return;
@@ -3360,7 +3360,7 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	if (!TrackPiece)
 		return;
 
-	const lcTrainTrackInfo* TrainTrackInfo = TrackPiece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = TrackPiece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return;
@@ -3370,7 +3370,7 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece.get() == TrackPiece || !Piece->mPieceInfo->GetTrainTrackInfo() || (IgnoreSelected && Piece->IsSelected()))
+		if (Piece.get() == TrackPiece || !Piece->mPieceData->GetTrainTrackInfo() || (IgnoreSelected && Piece->IsSelected()))
 			continue;
 
 		for (int ConnectionIndex = 0; ConnectionIndex < ConnectionCount; ConnectionIndex++)
@@ -3386,12 +3386,12 @@ void lcModel::UpdateSelectedPiecesTrainTrackConnections()
 	std::vector<lcPiece *> TrackPieces;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->mPieceInfo->GetTrainTrackInfo() && Piece->IsSelected())
+		if (Piece->mPieceData->GetTrainTrackInfo() && Piece->IsSelected())
 			TrackPieces.push_back(Piece.get());
 
 	for (lcPiece* TrackPiece : TrackPieces)
 	{
-		const lcTrainTrackInfo* TrainTrackInfo = TrackPiece->mPieceInfo->GetTrainTrackInfo();
+		const lcTrainTrackInfo* TrainTrackInfo = TrackPiece->mPieceData->GetTrainTrackInfo();
 		const int ConnectionCount = static_cast<int>(TrainTrackInfo->GetConnections().size());
 		std::vector<bool> Connections(ConnectionCount, false);
 
@@ -3412,20 +3412,20 @@ void lcModel::UpdateSelectedPiecesTrainTrackConnections()
 void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	std::vector<PieceInfo*> Required;
+	std::vector<lcPieceData*> Required;
 
 	Required.reserve(PreviewInsertPieceInfo.size());
 
 	for (lcInsertPieceInfo& InfoTransform : PreviewInsertPieceInfo)
 	{
-		Library->RequestPieceLoad(InfoTransform.Info, lcLoadPriority::Normal);
-		Required.push_back(InfoTransform.Info);
+		Library->RequestPieceDataLoad(InfoTransform.PieceData, lcLoadPriority::Normal);
+		Required.push_back(InfoTransform.PieceData);
 	}
 
-	Library->WaitForPieces(Required);
+	Library->WaitForPieceData(Required);
 
 	for (lcInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
-		Library->ReleasePieceInfo(PreviewPieceInfoTransform.Info);
+		Library->ReleasePieceData(PreviewPieceInfoTransform.PieceData);
 
 	mPreviewInsertPieceInfo = std::move(PreviewInsertPieceInfo);
 
@@ -3738,7 +3738,7 @@ void lcModel::RenamePieces(const std::vector<lcModelPieceRename>& Renames)
 	{
 		for (const lcModelPieceRename& Rename : Renames)
 		{
-			if (Piece->mPieceInfo != Rename.Info)
+			if (Piece->mPieceData != Rename.PieceData)
 				continue;
 
 			Piece->UpdateID();
@@ -3746,10 +3746,10 @@ void lcModel::RenamePieces(const std::vector<lcModelPieceRename>& Renames)
 		}
 	}
 
-	auto RenameHistorySequence = [&Renames, ModelInfo = mPieceInfo](std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence)
+	auto RenameHistorySequence = [&Renames, ModelPieceData = mPieceData](std::vector<std::unique_ptr<lcModelHistory>>& HistorySequence)
 	{
 		for (const std::unique_ptr<lcModelHistory>& ModelHistory : HistorySequence)
-			ModelHistory->RenamePieces(Renames, ModelInfo);
+			ModelHistory->RenamePieces(Renames, ModelPieceData);
 	};
 
 	RenameHistorySequence(mHistorySequence);
@@ -3789,7 +3789,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 
 			if (!ModelPiece)
 			{
-				ModelPiece = new lcPiece(Model->mPieceInfo);
+				ModelPiece = new lcPiece(Model->mPieceData);
 				ModelPiece->SetColorIndex(gDefaultColor);
 				AddPiece(std::unique_ptr<lcPiece>(ModelPiece), PieceIndex);
 				PieceIndex++;
@@ -3818,7 +3818,7 @@ void lcModel::MoveSelectionToModel(lcModel* Model)
 	}
 
 	std::vector<lcModel*> UpdatedModels;
-	Model->UpdatePieceInfo(UpdatedModels);
+	Model->UpdatePieceData(UpdatedModels);
 	if (ModelPiece)
 	{
 		ModelPiece->Initialize(lcMatrix44Translation(ModelCenter), FirstStep);
@@ -3846,7 +3846,7 @@ void lcModel::InlineSelectedModels()
 	{
 		lcPiece* Piece = mPieces[PieceIndex].get();
 
-		if (!Piece->IsSelected() || !Piece->mPieceInfo->IsModel())
+		if (!Piece->IsSelected() || !Piece->mPieceData->IsModel())
 		{
 			PieceIndex++;
 			continue;
@@ -3855,7 +3855,7 @@ void lcModel::InlineSelectedModels()
 		mPieces[PieceIndex].release();
 		mPieces.erase(mPieces.begin() + PieceIndex);
 
-		lcModel* Model = Piece->mPieceInfo->GetModel();
+		lcModel* Model = Piece->mPieceData->GetModel();
 
 		Modified = true;
 
@@ -3870,7 +3870,7 @@ void lcModel::InlineSelectedModels()
 			if (ColorIndex == gDefaultColor)
 				ColorIndex = Piece->GetColorIndex();
 
-			NewPiece->SetPieceInfo(ModelPiece->mPieceInfo, ModelPiece->GetID(), true, true);
+			NewPiece->SetPieceData(ModelPiece->mPieceData, ModelPiece->GetID(), true, true);
 			NewPiece->Initialize(lcMul(ModelPiece->mModelWorld, Piece->mModelWorld), Piece->GetStepShow());
 			NewPiece->SetColorIndex(ColorIndex);
 			NewPiece->UpdatePosition(mCurrentStep);
@@ -4606,8 +4606,8 @@ lcObject* lcModel::GetFocusObject() const
 lcModel* lcModel::GetFirstSelectedSubmodel() const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsSelected() && Piece->mPieceInfo->IsModel())
-			return Piece->mPieceInfo->GetModel();
+		if (Piece->IsSelected() && Piece->mPieceData->IsModel())
+			return Piece->mPieceData->GetModel();
 
 	return nullptr;
 }
@@ -4616,9 +4616,9 @@ void lcModel::GetSubModels(std::set<lcModel*>& SubModels) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->mPieceInfo->IsModel())
+		if (Piece->mPieceData->IsModel())
 		{
-			lcModel* SubModel = Piece->mPieceInfo->GetModel();
+			lcModel* SubModel = Piece->mPieceData->GetModel();
 
 			SubModels.insert(SubModel);
 		}
@@ -4877,9 +4877,9 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints(lcGeometryBoundsMode Mode) const
 {
 	std::vector<lcVector3> Points;
-	const lcMesh* Mesh = mPieceInfo ? mPieceInfo->GetDisplayMesh() : nullptr;
+	const lcMesh* Mesh = mPieceData ? mPieceData->GetDisplayMesh() : nullptr;
 
-	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceInfo && mPieceInfo->mState != lcAssetState::Loaded)
+	if (Mode == lcGeometryBoundsMode::AvailableOnly && mPieceData && mPieceData->mState != lcAssetState::Loaded)
 		Mesh = nullptr;
 
 	if (Mesh)
@@ -4910,7 +4910,7 @@ void lcModel::GetPartsList(int DefaultColorIndex, bool ScanSubModels, bool AddSu
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, ScanSubModels, AddSubModels, PartsList);
+		Piece->mPieceData->GetPartsList(ColorIndex, ScanSubModels, AddSubModels, PartsList);
 	}
 }
 
@@ -4926,14 +4926,14 @@ void lcModel::GetPartsListForStep(lcStep Step, int DefaultColorIndex, lcPartsLis
 		if (ColorIndex == gDefaultColor)
 			ColorIndex = DefaultColorIndex;
 
-		Piece->mPieceInfo->GetPartsList(ColorIndex, false, true, PartsList);
+		Piece->mPieceData->GetPartsList(ColorIndex, false, true, PartsList);
 	}
 }
 
 void lcModel::GetModelParts(const lcMatrix44& WorldMatrix, int DefaultColorIndex, std::vector<lcModelPartsEntry>& ModelParts) const
 {
-	if (mHasDirectGeometry && mPieceInfo->GetMesh())
-		ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, mPieceInfo, mPieceInfo->GetMesh(), DefaultColorIndex });
+	if (mHasDirectGeometry && mPieceData->GetMesh())
+		ModelParts.emplace_back(lcModelPartsEntry{ WorldMatrix, mPieceData, mPieceData->GetMesh(), DefaultColorIndex });
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		Piece->GetModelParts(WorldMatrix, DefaultColorIndex, ModelParts);
@@ -4960,7 +4960,7 @@ void lcModel::GetSelectionInformation(int* Flags, std::vector<lcObject*>& Select
 				if (Piece->IsFocused())
 					*Focus = Piece.get();
 
-				if (Piece->mPieceInfo->IsModel())
+				if (Piece->mPieceData->IsModel())
 					*Flags |= LC_SEL_MODEL_SELECTED;
 
 				if (Piece->IsHidden())
@@ -5098,7 +5098,7 @@ void lcModel::RemoveFromSelectionAction(const std::vector<lcObject*>& Objects)
 
 std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode SelectionMode, const lcPiece* SelectedPiece) const
 {
-	const PieceInfo* Info = SelectedPiece->mPieceInfo;
+	const lcPieceData* PieceData = SelectedPiece->mPieceData;
 	const int ColorIndex = SelectedPiece->GetColorIndex();
 	std::vector<lcObject*> Pieces;
 
@@ -5109,7 +5109,7 @@ std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode Selection
 
 	case lcSelectionMode::Piece:
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece.get() != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceData == PieceData && Piece.get() != SelectedPiece)
 				Pieces.emplace_back(Piece.get());
 		break;
 
@@ -5121,7 +5121,7 @@ std::vector<lcObject*> lcModel::GetSelectionModePieces(lcSelectionMode Selection
 
 	case lcSelectionMode::PieceColor:
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceInfo == Info && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
+			if (Piece->IsVisible(mCurrentStep) && Piece->mPieceData == PieceData && Piece->GetColorIndex() == ColorIndex && Piece.get() != SelectedPiece)
 				Pieces.emplace_back(Piece.get());
 		break;
 	}
@@ -5328,30 +5328,30 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
 
-	const bool ReplacePieceInfo = Replace && Params.ReplacePieceInfo;
+	const bool ReplacePieceData = Replace && Params.ReplacePieceData;
 	const bool ReplaceColor = Replace && lcGetColorCode(Params.ReplaceColorIndex) != LC_COLOR_NOCOLOR;
 
 	// Check if we are supposed to actually replace something
-	const bool Replacing = (ReplaceColor || ReplacePieceInfo);
+	const bool Replacing = (ReplaceColor || ReplacePieceData);
 
 	auto PieceMatches = [&Params](const lcPiece* Piece)
 	{
-		if (Params.FindInfo && Params.FindInfo != Piece->mPieceInfo)
+		if (Params.FindPieceData && Params.FindPieceData != Piece->mPieceData)
 			return false;
 
-		if (!Params.FindString.isEmpty() && !lcstrcasestr(Piece->mPieceInfo->m_strDescription, Params.FindString.toLatin1()))
+		if (!Params.FindString.isEmpty() && !lcstrcasestr(Piece->mPieceData->m_strDescription, Params.FindString.toLatin1()))
 			return false;
 
 		return (lcGetColorCode(Params.FindColorIndex) == LC_COLOR_NOCOLOR) || (Piece->GetColorIndex() == Params.FindColorIndex);
 	};
 
-	auto ReplacePiece = [&Params, ReplacePieceInfo, ReplaceColor](lcPiece* Piece)
+	auto ReplacePiece = [&Params, ReplacePieceData, ReplaceColor](lcPiece* Piece)
 	{
 		if (ReplaceColor)
 			Piece->SetColorIndex(Params.ReplaceColorIndex);
 
-		if (ReplacePieceInfo)
-			Piece->SetPieceInfo(Params.ReplacePieceInfo, QString(), true, true);
+		if (ReplacePieceData)
+			Piece->SetPieceData(Params.ReplacePieceData, QString(), true, true);
 	};
 
 	size_t StartIndex = mPieces.size() - 1;
@@ -5637,7 +5637,7 @@ bool lcModel::InsertPieceToolClicked()
 
 	for (const lcInsertPieceInfo& InsertPieceInfo : mPreviewInsertPieceInfo)
 	{
-		Piece = new lcPiece(InsertPieceInfo.Info);
+		Piece = new lcPiece(InsertPieceInfo.PieceData);
 
 		Piece->Initialize(InsertPieceInfo.Transform, mCurrentStep);
 		Piece->SetColorIndex(InsertPieceInfo.ColorIndex);
@@ -6190,7 +6190,7 @@ void lcModel::ShowArrayDialog()
 					ModelWorld.SetTranslation(Position + Offset);
 
 					lcPiece* NewPiece = new lcPiece(nullptr);
-					NewPiece->SetPieceInfo(Piece->mPieceInfo, Piece->GetID(), true, true);
+					NewPiece->SetPieceData(Piece->mPieceData, Piece->GetID(), true, true);
 					NewPiece->Initialize(ModelWorld, mCurrentStep);
 					NewPiece->SetColorIndex(Piece->GetColorIndex());
 
@@ -6282,11 +6282,11 @@ void lcModel::SetMinifig(const lcMinifig& Minifig)
 	}
 }
 
-void lcModel::SetPreviewPieceInfo(PieceInfo* Info, int ColorIndex)
+void lcModel::SetPreviewPieceData(lcPieceData* PieceData, int ColorIndex)
 {
 	DeleteModel();
 
-	lcPiece* Piece = new lcPiece(Info);
+	lcPiece* Piece = new lcPiece(PieceData);
 
 	Piece->Initialize(lcMatrix44Identity(), 1);
 	Piece->SetColorIndex(ColorIndex);

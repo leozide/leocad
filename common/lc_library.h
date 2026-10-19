@@ -6,7 +6,7 @@
 #include "lc_result.h"
 #include "lc_assettypes.h"
 
-class PieceInfo;
+class lcPieceData;
 class lcPiece;
 class lcMesh;
 class lcTrainTrackInfo;
@@ -163,33 +163,33 @@ public:
 	bool Load(const QString& LibraryPath, bool ShowProgress);
 	void LoadColors();
 	void Unload();
-	void RemoveTemporaryPieces();
-	void ReleaseProjectPieces(Project* OwnerProject);
-	void TransferProjectPieces(Project* Source, Project* Destination);
+	void RemoveTemporaryPieceData();
+	void ReleaseProjectPieceData(Project* OwnerProject);
+	void TransferProjectPieceData(Project* Source, Project* Destination);
 
-	void SetModelPieceName(PieceInfo* Info, const char* Name);
-	bool RenamePiece(PieceInfo* Info, const char* NewName);
-	static std::string NormalizePieceName(const char* PieceName);
-	// Returns one acquired model reference, paired with ReleasePieceInfo().
-	PieceInfo* CreateModelPiece(const char* PieceName, Project* Project, bool& Reused);
+	void SetModelPieceDataName(lcPieceData* PieceData, const char* Name);
+	bool RenamePieceData(lcPieceData* PieceData, const char* NewName);
+	static std::string NormalizePieceDataName(const char* PieceName);
+	// Returns one acquired model reference, paired with ReleasePieceData().
+	lcPieceData* AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused);
 	// Returns a borrowed identity; lookup does not acquire a reference or ensure readiness.
-	PieceInfo* FindPiece(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
-	bool RemapProjectPiece(PieceInfo* Info, const QString& ProjectDirectory, bool IsPreview);
+	lcPieceData* FindPieceData(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
+	bool RemapProjectPieceData(lcPieceData* PieceData, const QString& ProjectDirectory, bool IsPreview);
 
 	// Asset scheduling, waits, invalidation, and consumer releases below run on the UI thread.
-	// Acquires one reference even on failure; always pair with ReleasePieceInfo().
+	// Acquires one reference even on failure; always pair with ReleasePieceData().
 	// Blocking waits and reports success; Low and Normal return immediately. See docs/asset-loading.md.
-	bool RequestPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
-	void NotifyConsumersChanged();
+	bool RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
+	void NotifyAssetStatusChanged();
 	// Start or promote loading, then wait. Adds no consumer references.
 	// Returns false for failed or cancelled pieces.
 	// Does not traverse container children or wait for per-instance synth geometry.
-	bool WaitForPieces(const std::vector<PieceInfo*>& Pieces);
+	bool WaitForPieceData(const std::vector<lcPieceData*>& Pieces);
 	// Also settles container children/synths and updates bounds; caller retains the identity.
-	bool EnsurePieceAssetsReady(PieceInfo* Info);
+	bool EnsurePieceDataAssetsReady(lcPieceData* PieceData);
 
 	// Obsoletes pending work and resets readiness without acquiring a reference.
-	void InvalidatePieceLoad(PieceInfo* Info);
+	void InvalidatePieceDataLoad(lcPieceData* PieceData);
 
 	// Replaces any pending generation for this instance; snapshots control points for workers.
 	void RequestSynthMesh(lcPiece* Piece);
@@ -199,23 +199,23 @@ public:
 	bool WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces);
 	// Last generation error, or an empty string; an empty error does not imply readiness.
 	QString GetSynthMeshError(const lcPiece* Piece) const;
-	void RebuildModelPiece(PieceInfo* Info);
+	void RebuildModelPieceData(lcPieceData* PieceData);
 	// Releases one reference and lets the loader cancel unused queued work.
-	void ReleasePieceInfo(PieceInfo* Info);
+	void ReleasePieceData(lcPieceData* PieceData);
 	// Lifetime hold only: does not start loading or establish readiness.
-	void AddPieceReference(PieceInfo* Info);
+	void AddPieceDataReference(lcPieceData* PieceData);
 	// Loader helper: assumes a pending request/notification owns one in-flight hold.
-	bool HasPieceConsumers(const PieceInfo* Info);
+	bool HasPieceDataConsumers(const lcPieceData* PieceData);
 	// Releases that in-flight hold without triggering consumer-release cancellation.
-	void ReleasePieceLoadHold(PieceInfo* Info);
-	void SetPieceLoadError(const PieceInfo* Info, QString Error);
-	QString GetPieceLoadError(const PieceInfo* Info) const;
-	void ClearPieceLoadError(const PieceInfo* Info);
-	bool LoadBuiltinPieces();
-	lcPieceSourceSnapshot SnapshotPieceSource(const PieceInfo* Info) const;
+	void ReleasePieceDataLoadHold(lcPieceData* PieceData);
+	void SetPieceDataLoadError(const lcPieceData* PieceData, QString Error);
+	QString GetPieceDataLoadError(const lcPieceData* PieceData) const;
+	void ClearPieceDataLoadError(const lcPieceData* PieceData);
+	bool LoadBuiltinPieceLibrary();
+	lcPieceSourceSnapshot SnapshotPieceDataSource(const lcPieceData* PieceData) const;
 	// Worker build service: returns a converted private mesh or an error without publishing asset state.
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
-	void SaveBuiltPieceCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
+	void SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
 
 	// UI-thread lookup and upload wait; returns a ready reference or nullptr on failure.
 	// Release a returned reference with ReleaseTexture().
@@ -224,20 +224,20 @@ public:
 	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source);
 	void ReleaseTexture(lcTexture* Texture);
 
-	bool PieceInCategory(PieceInfo* Info, const char* CategoryKeywords) const;
-	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
-	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<PieceInfo*>& SinglePieces, std::vector<PieceInfo*>& GroupedPieces);
-	void GetParts(std::vector<PieceInfo*>& Parts) const;
-	std::vector<PieceInfo*> GetVisibleTrainTrackParts(const lcTrainTrackConnectionType& ConnectionType) const;
+	bool PieceDataInCategory(lcPieceData* PieceData, const char* CategoryKeywords) const;
+	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<lcPieceData*>& SinglePieces, std::vector<lcPieceData*>& GroupedPieces);
+	void GetCategoryEntries(const char* CategoryKeywords, bool GroupPieces, std::vector<lcPieceData*>& SinglePieces, std::vector<lcPieceData*>& GroupedPieces);
+	void GetParts(std::vector<lcPieceData*>& Parts) const;
+	std::vector<lcPieceData*> GetVisibleTrainTrackParts(const lcTrainTrackConnectionType& ConnectionType) const;
 
-	std::vector<PieceInfo*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
-	std::string GetPartId(const PieceInfo* Info) const;
+	std::vector<lcPieceData*> GetPartsFromSet(const std::vector<std::string>& PartIds) const;
+	std::string GetPartId(const lcPieceData* PieceData) const;
 
 	// Opens a resolved source on the reading thread, positioned at zero.
 	// Caller owns the file; archive replacement requires draining workers first.
 	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSource& Source);
 	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
-	void GetPieceFile(const char* FileName, std::function<void(lcFile& File)> Callback);
+	void GetPieceDataFile(const char* FileName, std::function<void(lcFile& File)> Callback);
 
 	bool IsPrimitive(const char* Name) const;
 	lcLibraryPrimitive* FindPrimitive(const char* Name) const;
@@ -253,7 +253,7 @@ public:
 		return mStudStyle;
 	}
 
-	void SetOfficialPieces()
+	void SetOfficialPieceLibrary()
 	{
 		if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 			mNumOfficialPieces = (int)mPieces.size();
@@ -269,7 +269,7 @@ public:
 	void UnloadUnusedParts();
 	lcMesh* GetLoadingMesh() const;
 
-	std::map<std::string, PieceInfo*> mPieces;
+	std::map<std::string, lcPieceData*> mPieces;
 	int mNumOfficialPieces;
 
 	QDir mLibraryDir;
@@ -279,23 +279,23 @@ public:
 	lcIndexBuffer mIndexBuffer;
 
 signals:
-	void AssetRequestsChanged();
-	void PartLoaded(PieceInfo* Info);
-	void PartLoadFailed(PieceInfo* Info, const QString& Error);
-	void GeneratedMeshSettled(PieceInfo* Info);
+	void AssetStatusChanged();
+	void PartLoaded(lcPieceData* PieceData);
+	void PartLoadFailed(lcPieceData* PieceData, const QString& Error);
+	void GeneratedMeshSettled(lcPieceData* PieceData);
 	void ColorsLoaded();
 
 protected:
 	friend class lcAssetLoader;
 
 	// Prepare asset readiness and request work without acquiring a consumer reference or waiting.
-	void StartPieceLoad(PieceInfo* Info, lcLoadPriority LoadPriority);
+	void StartPieceLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority);
 	// The loader calls this only when cancelling the current request, before releasing its hold.
-	void PieceLoadCancelled(PieceInfo* Info);
+	void PieceDataLoadCancelled(lcPieceData* PieceData);
 
 	// Publish current results on the UI thread; the loader rejects stale requests first.
 	// A successful piece result may have no mesh when its geometry is empty.
-	bool PublishPieceMesh(PieceInfo* Info, std::unique_ptr<lcMesh> Mesh, QString Error);
+	bool PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, QString Error);
 	bool PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error);
 	// Apply decoded pixels or a decode failure; upload scheduling and retries stay in the loader.
 	void PublishTexture(lcTexture* Texture, lcTextureBuildResult Result);
@@ -321,9 +321,9 @@ protected:
 	static qint32 MeshCacheSettingsKey(lcStudStyle StudStyle, bool StudCylinderColorEnabled);
 	void UpdateLoadingMeshColors();
 	void UpdateStudStyleSource();
-	void RemovePiece(PieceInfo* Info);
-	void UnloadPieceInfo(PieceInfo* Info);
-	void RegisterProjectPiece(Project* Project, const std::string& Name, PieceInfo* Info);
+	void RemovePieceData(lcPieceData* PieceData);
+	void UnloadPieceData(lcPieceData* PieceData);
+	void RegisterProjectPieceData(Project* Project, const std::string& Name, lcPieceData* PieceData);
 
 	// Worker decode service: returns private pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcFileSource& Source);
@@ -334,9 +334,9 @@ protected:
 	void ReleaseBuffers();
 
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
-	// Each project maps its local filenames to PieceInfo pointers. This map tracks the
-	// project for each local PieceInfo, or nullptr after that project is destroyed.
-	std::unordered_map<PieceInfo*, Project*> mProjectPieces;
+	// Each project maps its local filenames to lcPieceData pointers. This map tracks the
+	// project for each local lcPieceData, or nullptr after that project is destroyed.
+	std::unordered_map<lcPieceData*, Project*> mProjectPieces;
 
 	// UI-thread live synth instances and their last generation errors (empty on success or retry).
 	// Instances unregister before destruction; the library does not own them.
@@ -354,7 +354,7 @@ protected:
 
 	// Sparse errors avoid storing a QString in every catalog identity.
 	mutable QMutex mPieceErrorMutex;
-	std::unordered_map<const PieceInfo*, QString> mFailedPartErrors;
+	std::unordered_map<const lcPieceData*, QString> mFailedPartErrors;
 
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;

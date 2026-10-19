@@ -8,7 +8,7 @@
 #include "texfont.h"
 #include "lc_texture.h"
 #include "piece.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_traintrack.h"
 #include "lc_scene.h"
 #include "lc_context.h"
@@ -142,7 +142,7 @@ void lcView::SetMouseModifiers(Qt::KeyboardModifiers MouseModifiers)
 
 lcModel* lcView::GetActiveModel() const
 {
-	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceInfo->GetModel();
+	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceData->GetModel();
 }
 
 void lcView::SetTopSubmodelActive()
@@ -173,12 +173,12 @@ void lcView::SetSelectedSubmodelActive()
 	{
 		lcPiece* Piece = (lcPiece*)Object;
 
-		if (Piece->mPieceInfo->IsModel())
+		if (Piece->mPieceData->IsModel())
 		{
 			mActiveSubmodelTransform = lcMatrix44Identity();
 			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelTransform);
 			mActiveSubmodelInstance = Piece;
-			ActiveModel = mActiveSubmodelInstance->mPieceInfo->GetModel();
+			ActiveModel = mActiveSubmodelInstance->mPieceData->GetModel();
 			ActiveModel->SetActive(true);
 			RemoveCamera();
 		}
@@ -311,7 +311,7 @@ void lcView::ShowTrainTrackPopup()
 		return;
 
 	lcPiece* Piece = (lcPiece*)Focus;
-	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceData->GetTrainTrackInfo();
 
 	if (!TrainTrackInfo)
 		return;
@@ -321,9 +321,9 @@ void lcView::ShowTrainTrackPopup()
 
 	int ConnectionIndex = mTrackToolSection - LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST;
 	const lcTrainTrackConnectionType& ConnectionType = TrainTrackInfo->GetConnections()[ConnectionIndex].Type;
-	std::vector<PieceInfo*> TrainTrackParts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
+	std::vector<lcPieceData*> TrainTrackParts = lcGetPiecesLibrary()->GetVisibleTrainTrackParts(ConnectionType);
 
-	auto PartSortFunc = [](const PieceInfo* a, const PieceInfo* b)
+	auto PartSortFunc = [](const lcPieceData* a, const lcPieceData* b)
 	{
 		if (!a)
 			return true;
@@ -336,19 +336,19 @@ void lcView::ShowTrainTrackPopup()
 
 	std::sort(TrainTrackParts.begin(), TrainTrackParts.end(), PartSortFunc);
 
-	std::vector<std::pair<PieceInfo*, std::string>> Parts;
+	std::vector<std::pair<lcPieceData*, std::string>> Parts;
 
 	Parts.reserve(TrainTrackParts.size());
 
-	for (PieceInfo* Info : TrainTrackParts)
-		Parts.emplace_back(Info, std::string());
+	for (lcPieceData* PieceData : TrainTrackParts)
+		Parts.emplace_back(PieceData, std::string());
 
-	std::optional<PieceInfo*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
-	PieceInfo* Info = Result.has_value() ? Result.value() : nullptr;
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
+	lcPieceData* PieceData = Result.has_value() ? Result.value() : nullptr;
 
-	if (Info)
+	if (PieceData)
 	{
-		Piece = ActiveModel->AddPiece(Info, mTrackToolSection);
+		Piece = ActiveModel->AddPiece(PieceData, mTrackToolSection);
 
 		if (Piece)
 			ActiveModel->UpdateTrainTrackConnections(Piece, false);
@@ -474,25 +474,25 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 
 void lcView::UpdatePiecePreview()
 {
-	PieceInfo* PreviewInfo = gMainWindow->GetCurrentPieceInfo();
+	lcPieceData* PreviewPieceData = gMainWindow->GetInsertPieceData();
 	std::vector<lcInsertPieceInfo> InsertPieceInfo;
 	bool IsConnection;
 
-	if (PreviewInfo)
+	if (PreviewPieceData)
 	{
-		std::tie(InsertPieceInfo, IsConnection) = GetMouseInsertPieceInfo(false, true, PreviewInfo, nullptr);
+		std::tie(InsertPieceInfo, IsConnection) = GetMouseInsertPieceInfo(false, true, PreviewPieceData, nullptr);
 	}
 
 	GetActiveModel()->SetPreviewInsertPieceInfo(std::move(InsertPieceInfo));
 }
 
-std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, PieceInfo* Info, lcPiece* MovingPiece) const
+std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, lcPieceData* PieceData, lcPiece* MovingPiece) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
-	lcGetPiecesLibrary()->EnsurePieceAssetsReady(Info);
+	lcGetPiecesLibrary()->EnsurePieceDataAssetsReady(PieceData);
 
-	if (MovingPiece && Info->GetSynthInfo())
+	if (MovingPiece && PieceData->GetSynthInfo())
 		lcGetPiecesLibrary()->WaitForSynthMeshes({ MovingPiece });
 
 	lcObjectRayTest ObjectRayTest = RayTest(true, IgnoreSelected);
@@ -501,12 +501,12 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	while (ObjectRayTest.ObjectSection.Object)
 	{
 		lcPiece* MousePiece = reinterpret_cast<lcPiece*>(ObjectRayTest.ObjectSection.Object);
-		PieceInfo* MouseInfo = MousePiece->mPieceInfo;
-		const bool Retest = MouseInfo->mState != lcAssetState::Loaded || MouseInfo->IsModel() || MouseInfo->IsProject() || MousePiece->IsGeneratedMeshPending();
+		lcPieceData* MousePieceData = MousePiece->mPieceData;
+		const bool Retest = MousePieceData->mState != lcAssetState::Loaded || MousePieceData->IsModel() || MousePieceData->IsProject() || MousePiece->IsGeneratedMeshPending();
 
-		lcGetPiecesLibrary()->EnsurePieceAssetsReady(MouseInfo);
+		lcGetPiecesLibrary()->EnsurePieceDataAssetsReady(MousePieceData);
 
-		if (MouseInfo->GetSynthInfo())
+		if (MousePieceData->GetSynthInfo())
 			lcGetPiecesLibrary()->WaitForSynthMeshes({ MousePiece });
 
 		if (!Retest)
@@ -520,13 +520,13 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 			break;
 	}
 
-	const lcBoundingBox& BoundingBox = MovingPiece ? MovingPiece->GetBoundingBox() : Info->GetBoundingBox();
+	const lcBoundingBox& BoundingBox = MovingPiece ? MovingPiece->GetBoundingBox() : PieceData->GetBoundingBox();
 
 	if (ObjectRayTest.ObjectSection.Object)
 	{
 		lcPiece* MousePiece = reinterpret_cast<lcPiece*>(ObjectRayTest.ObjectSection.Object);
-		lcTrainTrackInfo* RayTrackInfo = MousePiece->mPieceInfo->GetTrainTrackInfo();
-		lcTrainTrackInfo* InfoTrackInfo = Info->GetTrainTrackInfo();
+		lcTrainTrackInfo* RayTrackInfo = MousePiece->mPieceData->GetTrainTrackInfo();
+		lcTrainTrackInfo* InfoTrackInfo = PieceData->GetTrainTrackInfo();
 
 		if (RayTrackInfo && InfoTrackInfo)
 		{
@@ -535,13 +535,13 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
-			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, Info, MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
+			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, PieceData, MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
 
 			if (!TrainTracks.empty())
 				return { TrainTracks, true };
 		}
 
-		lcVector3 Position = ObjectRayTest.PieceInfoRayTest.Plane;
+		lcVector3 Position = ObjectRayTest.PieceRayTest.Plane;
 
 		if (Position.x > 0.0f)
 			Position.x += fabsf(BoundingBox.Min.x);
@@ -557,14 +557,14 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 			Position.z -= fabsf(BoundingBox.Max.z);
 
 		if (gMainWindow->GetRelativeTransform())
-			Position = lcMul31(ActiveModel->SnapPosition(Position), ObjectRayTest.PieceInfoRayTest.Transform);
+			Position = lcMul31(ActiveModel->SnapPosition(Position), ObjectRayTest.PieceRayTest.Transform);
 		else
-			Position = ActiveModel->SnapPosition(lcMul31(Position, ObjectRayTest.PieceInfoRayTest.Transform));
+			Position = ActiveModel->SnapPosition(lcMul31(Position, ObjectRayTest.PieceRayTest.Transform));
 
-		lcMatrix44 WorldMatrix = ObjectRayTest.PieceInfoRayTest.Transform;
+		lcMatrix44 WorldMatrix = ObjectRayTest.PieceRayTest.Transform;
 		WorldMatrix.SetTranslation(Position);
 
-		return { { lcInsertPieceInfo{ Info, WorldMatrix, gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData, WorldMatrix, gMainWindow->mColorIndex } }, false };
 	}
 
 	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
@@ -583,7 +583,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
 	lcVector3 Position;
@@ -596,10 +596,10 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData, lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
-	return { { lcInsertPieceInfo{ Info, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } }, false };
+	return { { lcInsertPieceInfo{ PieceData, lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } }, false };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const
@@ -1622,7 +1622,7 @@ void lcView::DrawGrid()
 		for (const lcInsertPieceInfo& PreviewInsertPieceInfo : PreviewModel->GetPreviewInsertPieceInfo())
 		{
 			lcVector3 Points[8];
-			lcGetBoxCorners(PreviewInsertPieceInfo.Info->GetBoundingBox(), Points);
+			lcGetBoxCorners(PreviewInsertPieceInfo.PieceData->GetBoundingBox(), Points);
 			lcMatrix44 PreviewTransform = PreviewInsertPieceInfo.Transform;
 
 			if (PreviewModel != mModel)
@@ -2861,7 +2861,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 				break;
 
 			lcPiece* Piece = (lcPiece*)Focus;
-			const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceInfo->GetTrainTrackInfo();
+			const lcTrainTrackInfo* TrainTrackInfo = Piece->mPieceData->GetTrainTrackInfo();
 
 			if (!TrainTrackInfo)
 				break;
@@ -3188,10 +3188,10 @@ void lcView::OnMouseMove()
 			}
 			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
-				if (mMouseDownPiece->mPieceInfo->GetTrainTrackInfo())
+				if (mMouseDownPiece->mPieceData->GetTrainTrackInfo())
 					ActiveModel->UpdateSelectedPiecesTrainTrackConnections();
 
-				auto [PieceInfoTransforms, IsConnection] = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceInfo, mMouseDownPiece);
+				auto [PieceInfoTransforms, IsConnection] = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceData, mMouseDownPiece);
 
 				if (!PieceInfoTransforms.empty())
 				{

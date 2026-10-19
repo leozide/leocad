@@ -4,7 +4,7 @@
 #include "lc_qutils.h"
 #include "lc_colors.h"
 #include "lc_application.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 
 class lcFrozenPartsView : public QTableView
 {

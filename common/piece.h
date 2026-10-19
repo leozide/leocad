@@ -1,6 +1,6 @@
 #pragma once
 
-class PieceInfo;
+class lcPieceData;
 
 #include "object.h"
 #include "lc_colors.h"
@@ -59,7 +59,7 @@ class lcPiece : public lcObject
 {
 public:
 	lcPiece();
-	lcPiece(PieceInfo* Info);
+	lcPiece(lcPieceData* PieceData);
 	lcPiece(const lcPiece& Other);
 	virtual ~lcPiece();
 
@@ -85,7 +85,7 @@ public:
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const override;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const override;
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceInfoRayTest& PieceInfoRayTest) const;
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcPieceRayTest& PieceRayTest) const;
 	bool IntersectsPlanes(const lcMatrix44& WorldMatrix, const lcVector4 Planes[6]) const;
 	void DrawInterface(lcContext* Context, const lcScene& Scene) const override;
 	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;
@@ -161,8 +161,8 @@ public:
 	void Initialize(const lcMatrix44& WorldMatrix, lcStep Step);
 	const lcBoundingBox& GetBoundingBox() const;
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
-	void SetPieceInfo(PieceInfo* Info, const QString& ID, bool Wait, bool UpdateSynthInfo);
-	bool SetPieceId(PieceInfo* Info);
+	void SetPieceData(lcPieceData* PieceData, const QString& ID, bool Wait, bool UpdateSynthInfo);
+	bool SetPieceId(lcPieceData* PieceData);
 	bool FileLoad(lcFile& file, Project* Project);
 
 	void UpdatePosition(lcStep Step) override;
@@ -278,7 +278,7 @@ public:
 	}
 
 public:
-	PieceInfo* mPieceInfo = nullptr;
+	lcPieceData* mPieceData = nullptr;
 
 	lcMatrix44 mModelWorld;
 	lcMatrix44 mPivotMatrix = lcMatrix44Identity();

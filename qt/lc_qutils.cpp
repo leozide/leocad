@@ -3,7 +3,7 @@
 #include "lc_application.h"
 #include "lc_library.h"
 #include "lc_model.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_string.h"
 
 #ifdef Q_OS_WIN
@@ -205,25 +205,25 @@ lcPieceIdStringModel::lcPieceIdStringModel(lcModel* Model, QObject* Parent)
 
 	for (const auto& PartIt : Library->mPieces)
 	{
-		PieceInfo* Info = PartIt.second;
+		lcPieceData* PieceData = PartIt.second;
 
-		if (!Info->IsModel() || !Info->GetModel()->IncludesModel(Model))
+		if (!PieceData->IsModel() || !PieceData->GetModel()->IncludesModel(Model))
 			mSortedPieces.push_back(PartIt.second);
 	}
 
-	auto PieceCompare = [](PieceInfo* Info1, PieceInfo* Info2)
+	auto PieceCompare = [](lcPieceData* PieceData1, lcPieceData* PieceData2)
 	{
-		return strcmp(Info1->m_strDescription, Info2->m_strDescription) < 0;
+		return strcmp(PieceData1->m_strDescription, PieceData2->m_strDescription) < 0;
 	};
 
 	std::sort(mSortedPieces.begin(), mSortedPieces.end(), PieceCompare);
 }
 
-QModelIndex lcPieceIdStringModel::Index(PieceInfo* Info) const
+QModelIndex lcPieceIdStringModel::Index(lcPieceData* PieceData) const
 {
-	for (size_t PieceInfoIndex = 0; PieceInfoIndex < mSortedPieces.size(); PieceInfoIndex++)
-		if (mSortedPieces[PieceInfoIndex] == Info)
-			return index(static_cast<int>(PieceInfoIndex), 0);
+	for (size_t PieceDataIndex = 0; PieceDataIndex < mSortedPieces.size(); PieceDataIndex++)
+		if (mSortedPieces[PieceDataIndex] == PieceData)
+			return index(static_cast<int>(PieceDataIndex), 0);
 
 	return QModelIndex();
 }
@@ -233,11 +233,11 @@ std::vector<bool> lcPieceIdStringModel::GetFilteredRows(const QString& FilterTex
 	const std::string Text = FilterText.toStdString();
 	std::vector<bool> FilteredRows(mSortedPieces.size());
 
-	for (size_t PieceInfoIndex = 0; PieceInfoIndex < mSortedPieces.size(); PieceInfoIndex++)
+	for (size_t PieceDataIndex = 0; PieceDataIndex < mSortedPieces.size(); PieceDataIndex++)
 	{
-		const PieceInfo* Info = mSortedPieces[PieceInfoIndex];
+		const lcPieceData* PieceData = mSortedPieces[PieceDataIndex];
 
-		FilteredRows[PieceInfoIndex] = (lcstrcasestr(Info->m_strDescription, Text.c_str()) || lcstrcasestr(Info->mFileName, Text.c_str()));
+		FilteredRows[PieceDataIndex] = (lcstrcasestr(PieceData->m_strDescription, Text.c_str()) || lcstrcasestr(PieceData->mFileName, Text.c_str()));
 	}
 
 	return FilteredRows;

@@ -179,7 +179,6 @@ SOURCES += \
 	common/minifig.cpp \
 	common/object.cpp \
 	common/piece.cpp \
-	common/pieceinf.cpp \
 	common/project.cpp \
 	common/texfont.cpp \
 	common/lc_aboutdialog.cpp \
@@ -224,6 +223,7 @@ SOURCES += \
 	common/lc_partpalettedialog.cpp \
 	common/lc_partselectionpopup.cpp \
 	common/lc_partselectionwidget.cpp \
+	common/lc_piecedata.cpp \
 	common/lc_previewwidget.cpp \
 	common/lc_profile.cpp \
 	common/lc_propertieswidget.cpp \
@@ -260,7 +260,6 @@ HEADERS += \
 	common/minifig.h \
 	common/object.h \
 	common/piece.h \
-	common/pieceinf.h \
 	common/project.h \
 	common/texfont.h \
 	common/lc_aboutdialog.h \
@@ -308,6 +307,7 @@ HEADERS += \
 	common/lc_partpalettedialog.h \
 	common/lc_partselectionpopup.h \
 	common/lc_partselectionwidget.h \
+	common/lc_piecedata.h \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_propertieswidget.h \

@@ -1,7 +1,7 @@
 #include "lc_global.h"
 #include "minifig.h"
 #include "lc_colors.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_model.h"
 #include "lc_library.h"
 #include "lc_application.h"
@@ -61,7 +61,7 @@ MinifigWizard::~MinifigWizard()
 
 	for (int i = 0; i < LC_MFW_NUMITEMS; i++)
 		if (mMinifig.Parts[i])
-			Library->ReleasePieceInfo(mMinifig.Parts[i]); // todo: don't call ReleasePieceInfo here because it may release textures and they need a GL context current
+			Library->ReleasePieceData(mMinifig.Parts[i]); // todo: don't call ReleasePieceData here because it may release textures and they need a GL context current
 
 	SaveTemplates();
 }
@@ -121,7 +121,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			strncpy(MinifigInfo.Description, "None", sizeof(MinifigInfo.Description));
 			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
 			MinifigInfo.Offset = lcMatrix44Identity();
-			MinifigInfo.Info = nullptr;
+			MinifigInfo.PieceData = nullptr;
 
 			InfoArray.emplace_back(std::move(MinifigInfo));
 			continue;
@@ -152,8 +152,8 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			*NameEnd = 0;
 			NameEnd++;
 
-			PieceInfo* Info = lcGetPiecesLibrary()->FindPiece(NameStart, nullptr, false, false);
-			if (!Info && *NameStart)
+			lcPieceData* PieceData = lcGetPiecesLibrary()->FindPieceData(NameStart, nullptr, false, false);
+			if (!PieceData && *NameStart)
 				continue;
 
 			float Mat[12];
@@ -184,7 +184,7 @@ void MinifigWizard::ParseSettings(lcFile& Settings)
 			strncpy(MinifigInfo.Description, DescriptionStart, sizeof(MinifigInfo.Description));
 			MinifigInfo.Description[sizeof(MinifigInfo.Description)-1] = 0;
 			MinifigInfo.Offset = Offset;
-			MinifigInfo.Info = Info;
+			MinifigInfo.PieceData = PieceData;
 
 			InfoArray.emplace_back(std::move(MinifigInfo));
 		}
@@ -208,23 +208,23 @@ void MinifigWizard::LoadTemplate(const QString& TemplateName)
 		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
 
 		if (mMinifig.Parts[PartIndex])
-			Library->ReleasePieceInfo(mMinifig.Parts[PartIndex]);
+			Library->ReleasePieceData(mMinifig.Parts[PartIndex]);
 
-		PieceInfo* Info = Library->FindPiece(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
 
-		mMinifig.Parts[PartIndex] = Info;
+		mMinifig.Parts[PartIndex] = PieceData;
 
-		if (Info)
-			Library->RequestPieceLoad(Info, lcLoadPriority::Normal);
+		if (PieceData)
+			Library->RequestPieceDataLoad(PieceData, lcLoadPriority::Normal);
 	}
 
-	std::vector<PieceInfo*> Required;
+	std::vector<lcPieceData*> Required;
 
-	for (PieceInfo* Info : mMinifig.Parts)
-		if (Info)
-			Required.push_back(Info);
+	for (lcPieceData* PieceData : mMinifig.Parts)
+		if (PieceData)
+			Required.push_back(PieceData);
 
-	Library->WaitForPieces(Required);
+	Library->WaitForPieceData(Required);
 
 	Calculate();
 }
@@ -326,7 +326,7 @@ void MinifigWizard::Calculate()
 	float HeadOffset = 0.0f;
 	lcMatrix44 Root, Mat, Mat2;
 
-	PieceInfo** Parts = mMinifig.Parts;
+	lcPieceData** Parts = mMinifig.Parts;
 	const float* Angles = mMinifig.Angles;
 	lcMatrix44* Matrices = mMinifig.Matrices;
 
@@ -497,23 +497,23 @@ int MinifigWizard::GetSelectionIndex(int Type) const
 	const std::vector<lcMinifigPieceInfo>& InfoArray = mSettings[Type];
 
 	for (size_t Index = 0; Index < InfoArray.size(); Index++)
-		if (InfoArray[Index].Info == mMinifig.Parts[Type])
+		if (InfoArray[Index].PieceData == mMinifig.Parts[Type])
 			return (int)Index;
 
 	return 0;
 }
 
-void MinifigWizard::SetPieceInfo(int Type, PieceInfo* Info)
+void MinifigWizard::SetPieceData(int Type, lcPieceData* PieceData)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	if (mMinifig.Parts[Type])
-		Library->ReleasePieceInfo(mMinifig.Parts[Type]);
+		Library->ReleasePieceData(mMinifig.Parts[Type]);
 
-	mMinifig.Parts[Type] = Info;
+	mMinifig.Parts[Type] = PieceData;
 
 	if (mMinifig.Parts[Type])
-		Library->RequestPieceLoad(mMinifig.Parts[Type], lcLoadPriority::Blocking);
+		Library->RequestPieceDataLoad(mMinifig.Parts[Type], lcLoadPriority::Blocking);
 
 	Calculate();
 }

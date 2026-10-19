@@ -27,13 +27,13 @@ enum LC_MFW_TYPES
 struct lcMinifigPieceInfo
 {
 	char Description[128];
-	PieceInfo* Info;
+	lcPieceData* PieceData;
 	lcMatrix44 Offset;
 };
 
 struct lcMinifig
 {
-	PieceInfo* Parts[LC_MFW_NUMITEMS];
+	lcPieceData* Parts[LC_MFW_NUMITEMS];
 	int ColorIndices[LC_MFW_NUMITEMS];
 	float Angles[LC_MFW_NUMITEMS];
 	lcMatrix44 Matrices[LC_MFW_NUMITEMS];
@@ -77,7 +77,7 @@ public:
 
 	void Calculate();
 	int GetSelectionIndex(int Type) const;
-	void SetPieceInfo(int Type, PieceInfo* Info);
+	void SetPieceData(int Type, lcPieceData* PieceData);
 	void SetColorIndex(int Type, int ColorIndex);
 	void SetAngle(int Type, float Angle);
 

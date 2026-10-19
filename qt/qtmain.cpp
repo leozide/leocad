@@ -2,7 +2,7 @@
 #include "lc_application.h"
 #include "lc_updatedialog.h"
 #include "lc_profile.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include <QApplication>
 #include <locale.h>
 
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 	if (Translator.load("leocad_" + Locale.name(), ":/resources"))
 		Application.installTranslator(&Translator);
 
-	qRegisterMetaType<PieceInfo*>("PieceInfo*");
+	qRegisterMetaType<lcPieceData*>("lcPieceData*");
 	qRegisterMetaType<QList<int> >("QList<int>");
 	qRegisterMetaType<lcVector3>("lcVector3");
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))

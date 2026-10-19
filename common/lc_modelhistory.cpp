@@ -209,9 +209,9 @@ bool lcModelHistoryEdit::StateChanged() const
 	return mStartState != mEndState;
 }
 
-void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo)
+void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData)
 {
-	Q_UNUSED(ModelInfo);
+	Q_UNUSED(ModelPieceData);
 
 	auto RenamePieceIds = [&Renames](lcModelHistoryEditState& State)
 	{
@@ -272,13 +272,13 @@ bool lcModelHistoryProperties::StateChanged() const
 	return mStartState != mEndState;
 }
 
-void lcModelHistoryProperties::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const PieceInfo* ModelInfo)
+void lcModelHistoryProperties::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData)
 {
-	auto RenameModel = [&Renames, ModelInfo](lcModelProperties& Properties)
+	auto RenameModel = [&Renames, ModelPieceData](lcModelProperties& Properties)
 	{
 		for (const lcModelPieceRename& Rename : Renames)
 		{
-			if (Rename.Info != ModelInfo || Properties.mFileName.compare(Rename.OldName, Qt::CaseInsensitive) != 0)
+			if (Rename.PieceData != ModelPieceData || Properties.mFileName.compare(Rename.OldName, Qt::CaseInsensitive) != 0)
 				continue;
 
 			if (Properties.mModelName == Properties.mFileName)

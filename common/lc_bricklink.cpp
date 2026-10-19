@@ -4,7 +4,7 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_string.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_colors.h"
 
 static QJsonDocument lcLoadBrickLinkMapping()
@@ -79,12 +79,12 @@ lcResult<void> lcExportBrickLink(const QString& SaveFileName, const lcPartsList&
 
 	for (const auto& PartIt : PartsList)
 	{
-		const PieceInfo* Info = PartIt.first;
+		const lcPieceData* PieceData = PartIt.first;
 
 		for (const auto& ColorIt : PartIt.second)
 		{
 			char FileName[LC_PIECE_NAME_LEN];
-			lcstrcpy(FileName, Info->mFileName);
+			lcstrcpy(FileName, PieceData->mFileName);
 			char* Ext = strchr(FileName, '.');
 			if (Ext)
 				*Ext = 0;

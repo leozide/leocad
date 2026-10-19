@@ -22,7 +22,7 @@
 #include "piece.h"
 #include "camera.h"
 #include "group.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include "lc_library.h"
 #include "lc_colors.h"
 #include "lc_previewwidget.h"
@@ -64,10 +64,10 @@ lcMainWindow::~lcMainWindow()
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	disconnect(Library, nullptr, this, nullptr);
 
-	if (mCurrentPieceInfo)
+	if (mInsertPieceData)
 	{
-		Library->ReleasePieceInfo(mCurrentPieceInfo);
-		mCurrentPieceInfo = nullptr;
+		Library->ReleasePieceData(mInsertPieceData);
+		mInsertPieceData = nullptr;
 	}
 
 	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
@@ -691,7 +691,7 @@ void lcMainWindow::CreateToolBars()
 
 	connect(mPartsToolBar, &QDockWidget::dockLocationChanged, mPartSelectionWidget, &lcPartSelectionWidget::DockLocationChanged);
 	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartPicked, this, &lcMainWindow::PartListPicked);
-	connect(mPartSelectionWidget, &lcPartSelectionWidget::CurrentPartChanged, this, &lcMainWindow::SetCurrentPieceInfo);
+	connect(mPartSelectionWidget, &lcPartSelectionWidget::CurrentPartChanged, this, &lcMainWindow::SetInsertPieceData);
 
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
@@ -796,12 +796,12 @@ lcView* lcMainWindow::CreateView(lcModel* Model)
 	return NewView;
 }
 
-void lcMainWindow::PreviewPiece(PieceInfo* Info, int ColorCode, bool ShowPreview)
+void lcMainWindow::PreviewPiece(lcPieceData* PieceData, int ColorCode, bool ShowPreview)
 {
 	if (ShowPreview)
 		mPreviewToolBar->show();
 
-	mPreviewWidget->SetCurrentPiece(Info, ColorCode);
+	mPreviewWidget->SetCurrentPiece(PieceData, ColorCode);
 }
 
 void lcMainWindow::CreatePreviewWidget()
@@ -966,15 +966,15 @@ void lcMainWindow::CreateStatusBar()
 	StatusBar->addPermanentWidget(mStatusTimeLabel);
 
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	connect(Library, &lcPiecesLibrary::AssetRequestsChanged, this, &lcMainWindow::ScheduleAssetUpdate);
-	connect(Library, &lcPiecesLibrary::PartLoaded, this, [this](PieceInfo* Info)
+	connect(Library, &lcPiecesLibrary::AssetStatusChanged, this, &lcMainWindow::ScheduleAssetUpdate);
+	connect(Library, &lcPiecesLibrary::PartLoaded, this, [this](lcPieceData* PieceData)
 	{
-		if (mStatusRequiredAssets.find(Info) != mStatusRequiredAssets.end())
+		if (mStatusRequiredAssets.find(PieceData) != mStatusRequiredAssets.end())
 			ScheduleAssetUpdate();
 	});
-	connect(Library, &lcPiecesLibrary::PartLoadFailed, this, [this](PieceInfo* Info, const QString&)
+	connect(Library, &lcPiecesLibrary::PartLoadFailed, this, [this](lcPieceData* PieceData, const QString&)
 	{
-		if (mStatusRequiredAssets.find(Info) != mStatusRequiredAssets.end())
+		if (mStatusRequiredAssets.find(PieceData) != mStatusRequiredAssets.end())
 			ScheduleAssetUpdate();
 	});
 }
@@ -1017,13 +1017,13 @@ void lcMainWindow::UpdateAssets()
 	std::vector<lcModel*> UpdatedModels;
 
 	for (const std::unique_ptr<lcModel>& Model : Project->GetModels())
-		Model->UpdatePieceInfo(UpdatedModels);
+		Model->UpdatePieceData(UpdatedModels);
 
 	UpdateTimeline(false, true);
 
 	lcView::UpdateProjectViews(Project);
 
-	const std::vector<PieceInfo*> Required = Project->GetRequiredPieces();
+	const std::vector<lcPieceData*> Required = Project->GetRequiredPieceData();
 	const std::vector<lcPiece*> GeneratedPieces = Project->GetRequiredSynthPieces();
 
 	mStatusRequiredAssets.clear();
@@ -1042,13 +1042,13 @@ void lcMainWindow::UpdateAssets()
 		FailureDetails += Warning;
 	}
 
-	for (const PieceInfo* Info : Required)
+	for (const lcPieceData* PieceData : Required)
 	{
-		if (Info->mState == lcAssetState::Failed)
+		if (PieceData->mState == lcAssetState::Failed)
 		{
 			Failed++;
 
-			QString Error = lcGetPiecesLibrary()->GetPieceLoadError(Info);
+			QString Error = lcGetPiecesLibrary()->GetPieceDataLoadError(PieceData);
 
 			if (Error.isEmpty())
 				Error = tr("Could not load part.");
@@ -1056,9 +1056,9 @@ void lcMainWindow::UpdateAssets()
 			if (!FailureDetails.isEmpty())
 				FailureDetails += QLatin1Char('\n');
 
-			FailureDetails += QString::fromLatin1(Info->mFileName) + QStringLiteral(": ") + Error;
+			FailureDetails += QString::fromLatin1(PieceData->mFileName) + QStringLiteral(": ") + Error;
 		}
-		else if (Info->mState != lcAssetState::Loaded)
+		else if (PieceData->mState != lcAssetState::Loaded)
 			PendingParts++;
 	}
 
@@ -1078,7 +1078,7 @@ void lcMainWindow::UpdateAssets()
 			if (!FailureDetails.isEmpty())
 				FailureDetails += QLatin1Char('\n');
 
-			FailureDetails += QString::fromLatin1(Piece->mPieceInfo->mFileName) + QStringLiteral(": ") + Error;
+			FailureDetails += QString::fromLatin1(Piece->mPieceData->mFileName) + QStringLiteral(": ") + Error;
 		}
 	}
 
@@ -1279,14 +1279,14 @@ void lcMainWindow::ColorChanged(int ColorIndex)
 	SetColorIndex(ColorIndex);
 }
 
-void lcMainWindow::PartListPicked(PieceInfo* Info)
+void lcMainWindow::PartListPicked(lcPieceData* PieceData)
 {
-	if (!Info)
+	if (!PieceData)
 		return;
 
 	quint32 ColorCode = lcGetColorCode(mPartSelectionWidget->GetColorIndex());
 
-	PreviewPiece(Info, ColorCode, true);
+	PreviewPiece(PieceData, ColorCode, true);
 }
 
 void lcMainWindow::ColorButtonClicked()
@@ -2012,17 +2012,17 @@ void lcMainWindow::SetTransformType(lcTransformType TransformType)
 	mActions[LC_EDIT_TRANSFORM]->setIcon(QIcon(IconNames[TransformIndex]));
 }
 
-void lcMainWindow::SetCurrentPieceInfo(PieceInfo* Info)
+void lcMainWindow::SetInsertPieceData(lcPieceData* PieceData)
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
-	if (mCurrentPieceInfo)
-		Library->ReleasePieceInfo(mCurrentPieceInfo);
+	if (mInsertPieceData)
+		Library->ReleasePieceData(mInsertPieceData);
 
-	mCurrentPieceInfo = Info;
+	mInsertPieceData = PieceData;
 
-	if (mCurrentPieceInfo)
-		Library->RequestPieceLoad(mCurrentPieceInfo, lcLoadPriority::Normal);
+	if (mInsertPieceData)
+		Library->RequestPieceDataLoad(mInsertPieceData, lcLoadPriority::Normal);
 }
 
 lcVector3 lcMainWindow::GetTransformAmount()
@@ -2286,7 +2286,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		int ColorIndex = Piece->GetColorIndex();
 		quint32 ColorCode = lcGetColorCode(ColorIndex);
 
-		PreviewPiece(Piece->mPieceInfo, ColorCode, false);
+		PreviewPiece(Piece->mPieceData, ColorCode, false);
 	}
 
 	QString Message;
@@ -2563,9 +2563,9 @@ void lcMainWindow::UpdateModels()
 
 	mPartSelectionWidget->UpdateModels();
 
-	if (mCurrentPieceInfo && mCurrentPieceInfo->IsModel())
-		if (!HasModel(mCurrentPieceInfo->GetModel()))
-			SetCurrentPieceInfo(nullptr);
+	if (mInsertPieceData && mInsertPieceData->IsModel())
+		if (!HasModel(mInsertPieceData->GetModel()))
+			SetInsertPieceData(nullptr);
 }
 
 void lcMainWindow::UpdateInUseCategory()
@@ -2653,7 +2653,7 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	}
 
 	delete NewProject;
-	lcGetPiecesLibrary()->RemoveTemporaryPieces();
+	lcGetPiecesLibrary()->RemoveTemporaryPieceData();
 	return false;
 }
 
@@ -2728,7 +2728,7 @@ void lcMainWindow::ImportLDD()
 	else
 	{
 		delete NewProject;
-		lcGetPiecesLibrary()->RemoveTemporaryPieces();
+		lcGetPiecesLibrary()->RemoveTemporaryPieceData();
 	}
 }
 
@@ -2826,7 +2826,7 @@ bool lcMainWindow::SetModelFromFocus()
 	if (!FocusObject || !FocusObject->IsPiece())
 		return false;
 
-	lcModel* Model = ((lcPiece*)FocusObject)->mPieceInfo->GetModel();
+	lcModel* Model = ((lcPiece*)FocusObject)->mPieceData->GetModel();
 
 	if (Model)
 	{
@@ -3319,7 +3319,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 			if (ActiveModel)
 			{
 				std::vector<lcModel*> UpdatedModels;
-				ActiveModel->UpdatePieceInfo(UpdatedModels);
+				ActiveModel->UpdatePieceData(UpdatedModels);
 			}
 		}
 		break;

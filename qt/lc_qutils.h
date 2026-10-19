@@ -168,14 +168,14 @@ class lcPieceIdStringModel : public QAbstractListModel
 public:
 	lcPieceIdStringModel(lcModel* Model, QObject* Parent);
 
-	QModelIndex Index(PieceInfo* Info) const;
+	QModelIndex Index(lcPieceData* PieceData) const;
 	std::vector<bool> GetFilteredRows(const QString& FilterText) const;
 
 	int rowCount(const QModelIndex& Parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex& Index, int Role = Qt::DisplayRole) const override;
 
 protected:
-	std::vector<PieceInfo*> mSortedPieces;
+	std::vector<lcPieceData*> mSortedPieces;
 };
 
 class lcColorDialogPopup : public QWidget

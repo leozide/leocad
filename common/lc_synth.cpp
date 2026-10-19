@@ -5,7 +5,7 @@
 #include "lc_file.h"
 #include "lc_meshloader.h"
 #include "lc_mesh.h"
-#include "pieceinf.h"
+#include "lc_piecedata.h"
 #include <locale.h>
 
 class lcSynthInfoCurved : public lcSynthInfo
@@ -173,10 +173,10 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: FlexibleHoses)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexibleHose(HoseInfo.Length, HoseInfo.NumSections, HoseInfo.EdgePart2));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoFlexibleHose(HoseInfo.Length, HoseInfo.NumSections, HoseInfo.EdgePart2));
 	}
 
 	static const struct
@@ -224,10 +224,10 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: FlexSystemHoses)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoFlexSystemHose(HoseInfo.Length, HoseInfo.NumSections));
 	}
 
 	static const struct
@@ -272,19 +272,19 @@ void lcSynthInit()
 
 	for (const auto& TubeInfo: PneumaticTubes)
 	{
-		PieceInfo* Info = Library->FindPiece(TubeInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(TubeInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections, "71533k02.dat"));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoPneumaticTube(TubeInfo.Length, TubeInfo.NumSections, "71533k02.dat"));
 
 		auto RegularInfo = TubeInfo;
 		RegularInfo.PartID[7] = '2';
 		RegularInfo.Length -= 40.0f;
 
-		Info = Library->FindPiece(RegularInfo.PartID, nullptr, false, false);
+		PieceData = Library->FindPieceData(RegularInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoPneumaticTube(RegularInfo.Length, RegularInfo.NumSections, "71533k01.dat"));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoPneumaticTube(RegularInfo.Length, RegularInfo.NumSections, "71533k01.dat"));
 	}
 
 	static const struct
@@ -318,10 +318,10 @@ void lcSynthInit()
 
 	for (const auto& HoseInfo: RibbedHoses)
 	{
-		PieceInfo* Info = Library->FindPiece(HoseInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(HoseInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoRibbedHose(HoseInfo.Length, HoseInfo.NumSections));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoRibbedHose(HoseInfo.Length, HoseInfo.NumSections));
 	}
 
 	static const struct
@@ -343,10 +343,10 @@ void lcSynthInit()
 
 	for (const auto& AxleInfo: FlexibleAxles)
 	{
-		PieceInfo* Info = Library->FindPiece(AxleInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(AxleInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoFlexibleAxle(AxleInfo.Length, AxleInfo.NumSections));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoFlexibleAxle(AxleInfo.Length, AxleInfo.NumSections));
 	}
 
 	static const struct
@@ -364,10 +364,10 @@ void lcSynthInit()
 
 	for (const auto& StringInfo: BraidedStrings)
 	{
-		PieceInfo* Info = Library->FindPiece(StringInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(StringInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoBraidedString(StringInfo.Length, StringInfo.NumSections));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoBraidedString(StringInfo.Length, StringInfo.NumSections));
 	}
 
 	static const struct
@@ -385,10 +385,10 @@ void lcSynthInit()
 
 	for (const auto& AbsorberInfo: ShockAbsorbers)
 	{
-		PieceInfo* Info = Library->FindPiece(AbsorberInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(AbsorberInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoShockAbsorber(AbsorberInfo.SpringPart));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoShockAbsorber(AbsorberInfo.SpringPart));
 	}
 
 	static const struct
@@ -414,10 +414,10 @@ void lcSynthInit()
 
 	for (const auto& ActuatorInfo: Actuators)
 	{
-		PieceInfo* Info = Library->FindPiece(ActuatorInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(ActuatorInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.BodyPart, ActuatorInfo.PistonPart,
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoActuator(ActuatorInfo.BodyPart, ActuatorInfo.PistonPart,
 					ActuatorInfo.AxlePart, ActuatorInfo.Length, ActuatorInfo.AxleOffset));
 	}
 
@@ -439,10 +439,10 @@ void lcSynthInit()
 
 	for (const auto& JointInfo: UniversalJoints)
 	{
-		PieceInfo* Info = Library->FindPiece(JointInfo.PartID, nullptr, false, false);
+		lcPieceData* PieceData = Library->FindPieceData(JointInfo.PartID, nullptr, false, false);
 
-		if (Info)
-			Info->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndOffset, JointInfo.EndPart, JointInfo.CenterPart));
+		if (PieceData)
+			PieceData->SetSynthInfo(new lcSynthInfoUniversalJoint(JointInfo.Length, JointInfo.EndOffset, JointInfo.EndPart, JointInfo.CenterPart));
 	}
 
 //	"758C01" // Hose Flexible  12L

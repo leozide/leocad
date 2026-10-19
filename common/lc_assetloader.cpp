@@ -68,7 +68,7 @@ void lcAssetLoader::PromotePiecePriority(const std::shared_ptr<PieceRequest>& Re
 	{
 		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
 		{
-			const auto It = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
+			const auto It = mTextureRequests.find(Lod.Sections[SectionIdx].Texture.Get());
 
 			if (It != mTextureRequests.end())
 				It->second->LoadPriority = std::max(It->second->LoadPriority, RequestedPiece->LoadPriority);
@@ -119,12 +119,11 @@ void lcAssetLoader::RequestTextureLoad(lcTexture* Texture, lcFileSource Source, 
 		return;
 	}
 
-	mLibrary->AddTextureReference(Texture);
 	Texture->mState = lcAssetState::Loading;
 
 	std::shared_ptr<TextureRequest> RequestedTexture = std::make_shared<TextureRequest>();
 
-	RequestedTexture->Texture = Texture;
+	RequestedTexture->Texture = lcTextureRef(Texture);
 	RequestedTexture->Source = std::move(Source);
 	RequestedTexture->LoadPriority = LoadPriority;
 	RequestedTexture->QueuedAt = QDateTime::currentMSecsSinceEpoch();
@@ -412,7 +411,7 @@ void lcAssetLoader::ProcessTextureCompletion(Completion& Completed)
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	const std::shared_ptr<TextureRequest>& RequestedTexture = Completed.RequestedTexture;
-	lcTexture* Texture = RequestedTexture->Texture;
+	lcTexture* Texture = RequestedTexture->Texture.Get();
 	const auto It = mTextureRequests.find(Texture);
 	const bool Stale = mStopping || It == mTextureRequests.end() || It->second != RequestedTexture;
 	if (Stale && It != mTextureRequests.end() && It->second == RequestedTexture)
@@ -421,7 +420,7 @@ void lcAssetLoader::ProcessTextureCompletion(Completion& Completed)
 
 	if (Stale)
 	{
-		mLibrary->ReleaseTexture(Texture);
+		RequestedTexture->Texture.Reset();
 		return;
 	}
 
@@ -446,10 +445,10 @@ bool lcAssetLoader::ResolveAndQueueMeshTextures(lcMesh& Mesh, const lcPieceSourc
 				continue;
 
 			lcFileSource TextureSource;
-			Section.Texture = mLibrary->FindTextureDeferred(Section.TextureName.toLatin1().constData(), Source.TextureSearchDirectories, Source.EmbeddedData, TextureSource);
+			Section.Texture = mLibrary->AcquireTexture(Section.TextureName.toLatin1().constData(), Source.TextureSearchDirectories, Source.EmbeddedData, TextureSource);
 
 			if (Section.Texture && !Section.Texture->IsReady() && Section.Texture->mState != lcAssetState::Failed)
-				RequestTextureLoad(Section.Texture, std::move(TextureSource), LoadPriority);
+				RequestTextureLoad(Section.Texture.Get(), std::move(TextureSource), LoadPriority);
 		}
 
 	return MeshTexturesSettled(Mesh, Error);
@@ -463,7 +462,7 @@ bool lcAssetLoader::MeshTexturesSettled(const lcMesh& Mesh, QString& Error)
 		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
 		{
 			const lcMeshSection& Section = Lod.Sections[SectionIdx];
-			lcTexture* Texture = Section.Texture;
+			lcTexture* Texture = Section.Texture.Get();
 
 			if (!Texture)
 			{
@@ -483,7 +482,7 @@ void lcAssetLoader::UploadTextureRequest(const std::shared_ptr<TextureRequest>& 
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	lcTexture* Texture = RequestedTexture->Texture;
+	lcTexture* Texture = RequestedTexture->Texture.Get();
 
 	RequestedTexture->UploadAttempts++;
 
@@ -548,12 +547,12 @@ void lcAssetLoader::CompleteTextureRequest(const std::shared_ptr<TextureRequest>
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	const auto It = mTextureRequests.find(RequestedTexture->Texture);
+	const auto It = mTextureRequests.find(RequestedTexture->Texture.Get());
 	if (It != mTextureRequests.end() && It->second == RequestedTexture)
 		mTextureRequests.erase(It);
 	RequestedTexture->State = RequestedTexture->Texture->IsReady() ? RequestState::Succeeded : RequestState::Failed;
 
-	mLibrary->ReleaseTexture(RequestedTexture->Texture);
+	RequestedTexture->Texture.Reset();
 
 	FinishPiecesWithSettledTextures();
 	FinishSynthsWithSettledTextures();
@@ -718,8 +717,6 @@ void lcAssetLoader::DispatchNotifications()
 				return;
 			}
 		}
-
-		Notification.PieceData.Reset();
 	}
 
 	if (!mPieceNotifications.empty() || !mSynthNotifications.empty())
@@ -851,7 +848,7 @@ bool lcAssetLoader::WaitForSynthMeshes(const std::vector<lcPiece*>& Pieces)
 			for (const lcMeshLod& Lod : RequestedSynth->StagedMesh->mLods)
 				for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
 				{
-					const TextureRequestMap::iterator TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture);
+					const TextureRequestMap::iterator TextureIt = mTextureRequests.find(Lod.Sections[SectionIdx].Texture.Get());
 
 					if (TextureIt != mTextureRequests.end())
 						TextureIt->second->LoadPriority = lcLoadPriority::Blocking;
@@ -1041,11 +1038,11 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 
 	for (const std::shared_ptr<TextureRequest>& RequestedTexture : Cancelled)
 	{
-		lcTexture* Texture = RequestedTexture->Texture;
+		lcTexture* Texture = RequestedTexture->Texture.Get();
 
 		Texture->DiscardDecodedImage();
 
-		mLibrary->ReleaseTexture(Texture);
+		RequestedTexture->Texture.Reset();
 	}
 }
 
@@ -1163,7 +1160,7 @@ void lcAssetLoader::Shutdown()
 		RequestedPiece->PieceData.Reset();
 
 	for (const std::shared_ptr<TextureRequest>& RequestedTexture : CancelledTextures)
-		mLibrary->ReleaseTexture(RequestedTexture->Texture);
+		RequestedTexture->Texture.Reset();
 
 	WaitForAllWork();
 
@@ -1177,13 +1174,7 @@ void lcAssetLoader::Shutdown()
 	}
 
 	while (!mSynthNotifications.empty())
-	{
-		SynthNotification Notification = std::move(mSynthNotifications.front());
-
 		mSynthNotifications.pop_front();
-
-		Notification.PieceData.Reset();
-	}
 
 	mLibrary->mCancelLoading.store(WasCancelled);
 }

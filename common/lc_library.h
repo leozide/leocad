@@ -214,12 +214,14 @@ public:
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
 	void SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
 
-	// UI-thread lookup and upload wait; returns a ready reference or nullptr on failure.
-	// Release a returned reference with ReleaseTexture().
-	lcTexture* FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
-	// UI-thread lookup/acquisition only; also returns the resolved source for loading. Caller releases the reference.
-	lcTexture* FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source);
-	void ReleaseTexture(lcTexture* Texture);
+	// Borrowed registered lookup by resolved source. No I/O, creation, or acquisition.
+	lcTexture* FindTexture(const lcFileSource& Source);
+	// Resolve/create and return one scoped reference without decoding, uploading, or waiting.
+	lcTextureRef AcquireTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
+	lcTextureRef AcquireTexture(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source);
+	// Priority controls scheduling only. Both operations require the caller to retain the texture.
+	void RequestTextureLoad(lcTexture* Texture, lcLoadPriority LoadPriority);
+	bool WaitForTexture(const lcTextureRef& TextureRef);
 
 	bool PieceDataInCategory(lcPieceData* PieceData, const char* CategoryKeywords) const;
 	void GetCategoryEntries(int CategoryIndex, bool GroupPieces, std::vector<lcPieceData*>& SinglePieces, std::vector<lcPieceData*>& GroupedPieces);
@@ -330,6 +332,7 @@ protected:
 	// Worker decode service: returns private pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcFileSource& Source);
 	void AddTextureReference(lcTexture* Texture);
+	void ReleaseTexture(lcTexture* Texture);
 	static QString FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName);
 	lcFileSource ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath);
 

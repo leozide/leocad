@@ -20,13 +20,6 @@ lcMesh::~lcMesh()
 	free(mIndexData);
 	for (int LodIdx = 0; LodIdx < LC_NUM_MESH_LODS; LodIdx++)
 	{
-		for (int SectionIdx = 0; SectionIdx < mLods[LodIdx].NumSections; SectionIdx++)
-		{
-			lcTexture* Texture = mLods[LodIdx].Sections[SectionIdx].Texture;
-			if (Texture)
-				lcGetPiecesLibrary()->ReleaseTexture(Texture);
-		}
-
 		delete[] mLods[LodIdx].Sections;
 	}
 }
@@ -134,7 +127,6 @@ void lcMesh::CreateBox()
 	Section->DrawOffset = 0;
 	Section->DrawCount = 36;
 	Section->PrimitiveType = LC_MESH_TRIANGLES;
-	Section->Texture = nullptr;
 	Section->BoundingBox = mBoundingBox;
 	Section->Radius = mRadius;
 
@@ -161,7 +153,6 @@ void lcMesh::CreateBox()
 	Section->DrawOffset = 36 * 2;
 	Section->DrawCount = 24;
 	Section->PrimitiveType = LC_MESH_LINES;
-	Section->Texture = nullptr;
 	Section->BoundingBox = mBoundingBox;
 	Section->Radius = mRadius;
 
@@ -511,10 +502,7 @@ bool lcMesh::FileLoad(lcMemFile& File)
 				FileName[Length] = 0;
 
 				Section.TextureName = QString::fromLatin1(FileName);
-				Section.Texture = nullptr;
 			}
-			else
-				Section.Texture = nullptr;
 		}
 	}
 

@@ -51,6 +51,9 @@ public:
 	// Start or promote decoding as needed, then wait through upload and retries. The caller retains the texture.
 	bool WaitForTexture(lcTexture* Texture, lcFileSource Source);
 
+	// Queue or promote decoding without waiting or acquiring a consumer reference.
+	void RequestTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority);
+
 	// True while piece, texture, or generated-mesh requests or worker completions remain unsettled.
 	// Includes paused work and upload retries; deferred notifications alone do not count.
 	bool HasPendingWork();
@@ -100,10 +103,11 @@ private:
 		QString Error;
 	};
 
-	// Holds a texture reference through CPU decoding and UI-thread upload/retries.
+	// Owns a texture reference through CPU decoding and UI-thread upload/retries.
+	// Reset on the UI thread before worker-shared request storage can be destroyed.
 	struct TextureRequest : RequestBase
 	{
-		lcTexture* Texture;
+		lcTextureRef Texture;
 		lcFileSource Source;
 		int UploadAttempts = 0;
 		qint64 RetryAt = 0;
@@ -151,8 +155,7 @@ private:
 		lcPieceDataRef PieceData;
 	};
 
-	// Queue and promote requests on the UI thread.
-	void RequestTextureLoad(lcTexture* Texture, lcFileSource Source, lcLoadPriority LoadPriority);
+	// Promote requests on the UI thread.
 	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcLoadPriority LoadPriority);
 
 	// Fill available job slots using queued request priority and age.

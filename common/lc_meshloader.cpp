@@ -1019,8 +1019,6 @@ bool lcLibraryMeshData::WriteSections(lcMesh* Mesh, const std::vector<lcMeshLoad
 			DstSection.DrawCount = 0;
 			DstSection.TextureName = QString::fromLatin1(FinalSection.Name);
 
-			DstSection.Texture = nullptr;
-
 			DstSection.DrawOffset = NumIndices * sizeof(IndexType);
 
 			IndexType* Index = Mesh->mIndexDataSize ? (IndexType*)Mesh->mIndexData + NumIndices : nullptr;

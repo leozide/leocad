@@ -1447,24 +1447,19 @@ lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, con
 		for (const std::string& Name : References)
 		{
 			lcFileSource BeforeSource;
-			lcTexture* Before = Library->FindTextureDeferred(Name.c_str(), BeforeDirectories, Source.mEmbeddedDataIndex, BeforeSource);
+			lcTextureRef Before = Library->AcquireTexture(Name.c_str(), BeforeDirectories, Source.mEmbeddedDataIndex, BeforeSource);
 
 			if (!Before)
 				continue;
 
 			lcFileSource AfterSource;
-			lcTexture* After = Library->FindTextureDeferred(Name.c_str(), AfterDirectories, MergedData, AfterSource);
-			bool Same = After != nullptr;
+			lcTextureRef After = Library->AcquireTexture(Name.c_str(), AfterDirectories, MergedData, AfterSource);
+			bool Same = bool(After);
 
 			if (Same && BeforeSource.EmbeddedData && AfterSource.EmbeddedData)
 				Same = SameEmbeddedData(*BeforeSource.EmbeddedData, *AfterSource.EmbeddedData);
 			else if (Same)
 				Same = BeforeSource == AfterSource;
-
-			Library->ReleaseTexture(Before);
-
-			if (After)
-				Library->ReleaseTexture(After);
 
 			if (!Same)
 				return lcUnexpected(tr("Merging would change texture '%1' used by model '%2'. Rename the conflicting texture before merging.").arg(QString::fromLatin1(Name.c_str()), Model->GetFileName()));

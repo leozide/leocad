@@ -507,7 +507,7 @@ bool lcPiecesLibrary::RemapProjectPieceData(lcPieceData* PieceData, const QStrin
 	return true;
 }
 
-lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
+lcTextureRef lcPiecesLibrary::AcquireTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder)
 {
 	QString ProjectPath;
 
@@ -525,17 +525,7 @@ lcTexture* lcPiecesLibrary::FindTexture(const char* TextureName, Project* Curren
 		EmbeddedData = CurrentProject->GetEmbeddedDataLookup();
 
 	lcFileSource Source;
-	lcTexture* Texture = FindTextureDeferred(TextureName, std::vector<QString>{ ProjectPath }, EmbeddedData, Source);
-
-	if (!Texture)
-		return nullptr;
-
-	if (mAssetLoader->WaitForTexture(Texture, std::move(Source)))
-		return Texture;
-
-	ReleaseTexture(Texture);
-
-	return nullptr;
+	return AcquireTexture(TextureName, std::vector<QString>{ ProjectPath }, EmbeddedData, Source);
 }
 
 QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, const QString& TextureName)
@@ -683,12 +673,31 @@ lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, cons
 	return Source;
 }
 
-lcTexture* lcPiecesLibrary::FindTextureDeferred(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source)
+lcTexture* lcPiecesLibrary::FindTexture(const lcFileSource& Source)
+{
+	return mTextureManager->FindTexture(Source);
+}
+
+lcTextureRef lcPiecesLibrary::AcquireTexture(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source)
 {
 	QString ProjectPath;
 	Source = ResolveTextureSource(TextureName, SearchDirectories, EmbeddedData, ProjectPath);
 
-	return mTextureManager->AcquireTexture(TextureName, Source, ProjectPath);
+	return lcTextureRef::Adopt(mTextureManager->AcquireTexture(TextureName, Source, ProjectPath), this);
+}
+
+void lcPiecesLibrary::RequestTextureLoad(lcTexture* Texture, lcLoadPriority LoadPriority)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	mAssetLoader->RequestTextureLoad(Texture, Texture->mSource, LoadPriority);
+}
+
+bool lcPiecesLibrary::WaitForTexture(const lcTextureRef& TextureRef)
+{
+	Q_ASSERT(QThread::currentThread() == thread());
+
+	return mAssetLoader->WaitForTexture(TextureRef.Get(), TextureRef->mSource);
 }
 
 lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSource& Source)

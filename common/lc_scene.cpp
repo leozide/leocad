@@ -279,7 +279,7 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 			}
 			else
 			{
-				lcTexture* const Texture = Section->Texture;
+				lcTexture* const Texture = Section->Texture.Get();
 
 				if (Texture)
 				{
@@ -392,7 +392,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 			break;
 		}
 
-		lcTexture* const Texture = Section->Texture;
+		lcTexture* const Texture = Section->Texture.Get();
 		int VertexBufferOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;
 		const int IndexBufferOffset = Mesh->mIndexCacheOffset != -1 ? Mesh->mIndexCacheOffset : 0;
 

@@ -25,6 +25,17 @@ void lcTextureManager::AddTextureReference(lcTexture* Texture)
 	Texture->AddRef();
 }
 
+lcTexture* lcTextureManager::FindTexture(const lcFileSource& Source)
+{
+	QMutexLocker Lock(&mMutex);
+
+	for (lcTexture* Texture : mTextures)
+		if (Texture->mSource == Source)
+			return Texture;
+
+	return nullptr;
+}
+
 lcTexture* lcTextureManager::AcquireTexture(const char* TextureName, const lcFileSource& Source, const QString& ProjectPath)
 {
 	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)

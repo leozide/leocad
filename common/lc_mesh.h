@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_math.h"
+#include "lc_assettypes.h"
 
 enum lcMeshPrimitiveType
 {
@@ -38,7 +39,7 @@ struct lcMeshSection
 	int DrawOffset; // Index-buffer byte offset, or first conditional vertex.
 	int DrawCount;  // Index count, or conditional vertex count.
 	lcMeshPrimitiveType PrimitiveType;
-	lcTexture* Texture = nullptr;
+	lcTextureRef Texture;
 	QString TextureName;
 	lcBoundingBox BoundingBox;
 	float Radius;

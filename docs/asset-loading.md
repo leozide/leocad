@@ -88,27 +88,33 @@ source snapshots and the library's build services; they do not consult the
 active project or publish into live models.
 
 The texture manager is owned by the library and owns the only texture registry.
-`FindTextureDeferred()` resolves embedded data, project-directory files, and
+`AcquireTexture()` resolves embedded data, project-directory files, and
 indexed library files in the library, then asks the manager to acquire an identity
-for that resolved source. The lookup returns the source snapshot alongside the
-acquired identity so callers can pass it to loader requests without reading texture fields.
+for that resolved source. The explicit-search acquisition overload returns the
+source snapshot alongside the scoped `lcTextureRef`, so callers can pass it to
+loader requests without reading texture fields.
 Resolution preserves the prefixed search order and
 canonicalizes disk paths. The project directory is passed separately to acquisition
 so the manager preserves temporary-texture metadata without searching files itself.
 Library texture APIs forward reference changes and decoding to the manager.
-`FindTexture()` still gathers the explicit project's context and waits through
-the loader. Texture requests,
+The project overload of `AcquireTexture()` gathers the explicit project's context
+without starting decoding or waiting. `FindTexture(Source)` only borrows an already
+registered texture by its resolved source; it performs no source search or creation.
+`RequestTextureLoad()` starts or promotes work, and `WaitForTexture()` explicitly
+waits through decoding and upload. Texture requests,
 priority promotion, cancellation, upload/retries, and part dependency settlement
-remain in `lcAssetLoader`; its in-flight texture references are acquired through
-the manager. Shared readiness, priority, file-source and piece-source snapshots,
-build results, and `lcTextureLoadError` live in `lc_assettypes.h`. Stud-style and
+remain in `lcAssetLoader`; its requests retain `lcTextureRef` handles, explicitly
+reset on the UI thread before worker-shared request storage can be destroyed.
+Shared readiness, priority, file-source and piece-source snapshots, build results, and `lcTextureLoadError` live in `lc_assettypes.h`. Stud-style and
 archive-type enums remain in `lc_library.h` and are forward-declared by the shared
 header; the piece snapshot constructor supplies their defaults out of line.
 `lcTexture::mSource` stores the source identity; copies for workers do not snapshot
 file contents. Texture names, project directories, and temporary flags remain separate.
-Callers pass the resolved source into each texture request. The library's
-`BuildTextureData()` and `AddTextureReference()` are internal loader services,
-accessible through the existing `lcAssetLoader` friendship.
+Loader dependency requests receive the resolved source explicitly. Direct library
+request/wait wrappers copy the texture's source on the UI thread. The loader uses
+the library's internal `BuildTextureData()` service through friendship; scoped
+references use its internal `AddTextureReference()` and `ReleaseTexture()`
+primitives.
 
 The library calls `OpenFile()` on the reading thread and passes the opened
 `lcFile&` to the texture manager for decoding. `BuildTextureData()` continues to
@@ -397,6 +403,15 @@ are safe. `==` and `!=` compare pointer identity between handles or with a
 borrowed pointer in either order, including null, without changing reference counts.
 Use `Get()` when passing a borrowed pointer to an API.
 
+Textures use the same lookup/acquisition convention: `FindTexture(Source)` borrows
+a registered identity and `AcquireTexture()` returns a scoped reference without
+loading. `RequestTextureLoad()` only schedules work; `WaitForTexture()` explicitly
+waits through decoding and upload and accepts `const lcTextureRef&`, matching
+the piece wait API. Both require the caller to retain the texture.
+Mesh texture sections own `lcTextureRef` handles, so section copies retain and
+moves transfer ownership. The library's add/release primitives are internal to
+scoped reference management.
+
 `lcPiece::SetPieceData()` accepts an `lcPieceDataRef` by value, adopts that
 reference, and releases the previous identity. Passing an lvalue copies and retains;
 passing a moved handle transfers the reference. Its raw-pointer constructor is a
@@ -516,16 +531,16 @@ adds strict failure reporting. During shutdown, the loader's private
 
 | Need | API and lifetime contract |
 | --- | --- |
-| Find a registered identity | `FindPieceData(Name, Project)` returns a borrowed identity without I/O or creation; retain it before keeping it beyond its owner's lifetime. |
+| Find a registered identity | `FindPieceData(Name, Project)` or `FindTexture(Source)`. Borrowed lookup only, with no I/O or creation. |
 | Resolve or create a piece identity | `AcquirePieceData(Name, Project, CreateMissing, SearchProjectFolder)` returns a scoped reference without ensuring mesh readiness. |
 | Start ordinary asynchronous work | Retain the identity, then call `RequestPieceDataLoad()` with `lcLoadPriority::Low` for background work or `Normal` for model/view work. Existing owners need no extra reference for another request. |
 | Retain and synchronously load one identity | Keep an `lcPieceDataRef` from `AcquirePieceData()`, then call `WaitForPieceData(PieceDataRef)` and check its return value. |
-| Retain without starting work | `lcPieceDataRef(Piece)` returns a scoped reference. This does not make geometry ready. |
+| Retain without starting work | `lcPieceDataRef(Piece)` or `lcTextureRef(Texture)` returns a scoped reference to an existing identity. This does not make the asset ready. |
 | Wait for an explicit part set | `WaitForPieceData(PieceDataRefs)` (use `WaitForPieceData(PieceDataRef)` for one identity), check the boolean for strict consumers. Retain every identity and its owner throughout the wait; this call acquires no consumer references. |
 | Wait for one identity and its container geometry | `EnsurePieceDataAssetsReady()` settles the identity, then delegates recursive children, synths, and bounds to the model/project API. Retain the identity and its owner throughout. |
 | Wait for a model, including nested synths | `WaitForAssets()` for permissive output; `EnsureAssetsReady()` for strict preview-style failure reporting. Keep the model and its pieces alive throughout. |
 | Replace/wait for generated geometry | `RequestSynthMesh()` / `WaitForSynthMeshes()`. Supply live `lcPiece` instances; a shared part mesh or a retained previous generated mesh is not readiness for the replacement. |
-| Acquire a texture directly | `FindTexture()` waits for readiness and returns an acquired texture or null. `FindTextureDeferred()` acquires without waiting. The loader handles GPU upload readiness internally. Retain the texture during a direct wait and pair acquisition with `ReleaseTexture()`. |
+| Acquire a texture directly | Keep an `lcTextureRef` from `AcquireTexture()`. Use `RequestTextureLoad()` to start asynchronous work or `WaitForTexture()` to ensure readiness. Acquisition alone does not decode or upload. |
 
 Scoped waits may process unrelated completions while pumping publication, but
 their completion condition depends only on the requested assets. They cannot

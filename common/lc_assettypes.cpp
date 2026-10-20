@@ -3,6 +3,8 @@
 #include "lc_library.h"
 #include "lc_application.h"
 #include "lc_mesh.h"
+#include "lc_piecedata.h"
+#include "lc_texture.h"
 
 template<>
 void lcAssetRef<lcPieceData>::Retain(lcPieceData* Asset, lcPiecesLibrary* Library)
@@ -89,6 +91,14 @@ lcAssetRef<T>& lcAssetRef<T>::operator=(lcAssetRef&& OtherRef) noexcept
 	}
 
 	return *this;
+}
+
+template<typename T>
+bool lcAssetRef<T>::HasOtherReferences() const
+{
+	Q_ASSERT(!mAsset || (mLibrary && QThread::currentThread() == mLibrary->thread()));
+
+	return mAsset && mAsset->GetRefCount() > 1;
 }
 
 template<typename T>

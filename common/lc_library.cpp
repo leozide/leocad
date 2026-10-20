@@ -69,6 +69,8 @@ lcPiecesLibrary::~lcPiecesLibrary()
 
 void lcPiecesLibrary::Unload()
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
 	const bool HadLoader = static_cast<bool>(mAssetLoader);
 
 	if (HadLoader && mThumbnailManager)
@@ -76,10 +78,6 @@ void lcPiecesLibrary::Unload()
 
 	mAssetLoader.reset();
 	mSynthPieces.clear();
-
-	mPieceErrorMutex.lock();
-	mFailedPartErrors.clear();
-	mPieceErrorMutex.unlock();
 
 	mPieceManager->Clear();
 
@@ -102,40 +100,29 @@ void lcPiecesLibrary::Unload()
 
 void lcPiecesLibrary::RemoveTemporaryPieceData()
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	mPieceManager->RemoveTemporaryPieceData();
 }
 
 void lcPiecesLibrary::ReleaseProjectPieceData(Project* OwnerProject)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	mPieceManager->ReleaseProjectPieceData(OwnerProject);
 }
 
 void lcPiecesLibrary::TransferProjectPieceData(Project* Source, Project* Destination)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	mPieceManager->TransferProjectPieceData(Source, Destination);
 }
 
 void lcPiecesLibrary::SetModelPieceDataName(lcPieceData* PieceData, const char* Name)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	mPieceManager->SetModelPieceDataName(PieceData, Name);
 }
 
 bool lcPiecesLibrary::RenameModelPieceData(lcPieceData* PieceData, const char* NewName)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	if (!mPieceManager->RenameModelPieceData(PieceData, NewName))
 		return false;
 
-	LoadLock.unlock();
 	if (PieceData->mState != lcAssetState::Failed)
 		ClearPieceDataLoadError(PieceData);
 
@@ -149,11 +136,7 @@ std::string lcPiecesLibrary::NormalizePieceDataName(const char* PieceName)
 
 lcPieceDataRef lcPiecesLibrary::AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused)
 {
-	lcPieceData* PieceData;
-
-	mLoadMutex.lock();
-	PieceData = mPieceManager->AcquireModelPieceData(PieceName, Project, Reused);
-	mLoadMutex.unlock();
+	lcPieceData* PieceData = mPieceManager->AcquireModelPieceData(PieceName, Project, Reused);
 
 	lcPieceDataRef PieceDataRef = lcPieceDataRef::Adopt(PieceData, this);
 
@@ -191,25 +174,22 @@ lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInf
 lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* CurrentProject)
 {
 	const std::string Name = NormalizePieceDataName(PieceName);
-	QMutexLocker LoadLock(&mLoadMutex);
 
 	return mPieceManager->FindPieceData(Name, CurrentProject);
 }
 
 lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
 	QString ProjectPath;
 	QString LoadError;
 
-	{
-		QMutexLocker LoadLock(&mLoadMutex);
+	if (lcPieceData* PieceData = FindPieceData(PieceName, CurrentProject))
+		return lcPieceDataRef(PieceData, this);
 
-		if (lcPieceData* PieceData = FindPieceData(PieceName, CurrentProject))
-			return lcPieceDataRef(PieceData, this);
-
-		if (CurrentProject && SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
-			ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
-	}
+	if (CurrentProject && SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
+		ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
 
 	if (!ProjectPath.isEmpty())
 	{
@@ -221,7 +201,6 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 
 			if (ExternalProject)
 			{
-				QMutexLocker LoadLock(&mLoadMutex);
 				lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
 
 				PieceData->CreateProject(ExternalProject.value(), PieceName);
@@ -235,7 +214,6 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 
 	if (CreateMissing)
 	{
-		QMutexLocker LoadLock(&mLoadMutex);
 		lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
 
 		PieceData->SetFailed(LoadError.isEmpty() ? tr("Could not find piece '%1'.").arg(QString::fromLatin1(PieceName)) : LoadError);
@@ -357,12 +335,12 @@ QString lcPiecesLibrary::FindProjectTextureFile(const QString& ProjectPath, cons
 
 lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, QString& ProjectPath)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
 	ProjectPath.clear();
 
 	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)
 		return {};
-
-	QMutexLocker LoadLock(&mLoadMutex);
 
 	const bool ArchiveLibrary = static_cast<bool>(mZipFiles[static_cast<int>(lcZipFileType::Official)]);
 	lcFileSource Source;
@@ -1644,11 +1622,7 @@ void lcPiecesLibrary::InvalidatePieceDataLoad(lcPieceData* PieceData)
 
 void lcPiecesLibrary::ReleasePieceData(lcPieceData* PieceData)
 {
-	int Remaining;
-
-	mLoadMutex.lock();
-	Remaining = mPieceManager->ReleasePieceData(PieceData);
-	mLoadMutex.unlock();
+	const int Remaining = mPieceManager->ReleasePieceData(PieceData);
 
 	if (Remaining == 1 && mAssetLoader)
 		mAssetLoader->CancelPieceLoad(PieceData);
@@ -1656,42 +1630,22 @@ void lcPiecesLibrary::ReleasePieceData(lcPieceData* PieceData)
 
 void lcPiecesLibrary::AddPieceDataReference(lcPieceData* PieceData)
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	mPieceManager->AddPieceDataReference(PieceData);
-}
-
-bool lcPiecesLibrary::HasPieceDataConsumers(const lcPieceData* PieceData)
-{
-	QMutexLocker LoadLock(&mLoadMutex);
-
-	return mPieceManager->HasPieceDataConsumers(PieceData);
 }
 
 void lcPiecesLibrary::SetPieceDataLoadError(const lcPieceData* PieceData, QString Error)
 {
-	QMutexLocker ErrorLock(&mPieceErrorMutex);
-
-	if (Error.isEmpty())
-		mFailedPartErrors.erase(PieceData);
-	else
-		mFailedPartErrors.insert_or_assign(PieceData, std::move(Error));
+	mPieceManager->SetPieceDataLoadError(PieceData, std::move(Error));
 }
 
 QString lcPiecesLibrary::GetPieceDataLoadError(const lcPieceData* PieceData) const
 {
-	QMutexLocker ErrorLock(&mPieceErrorMutex);
-
-	const auto It = mFailedPartErrors.find(PieceData);
-
-	return It == mFailedPartErrors.end() ? QString() : It->second;
+	return mPieceManager->GetPieceDataLoadError(PieceData);
 }
 
 void lcPiecesLibrary::ClearPieceDataLoadError(const lcPieceData* PieceData)
 {
-	QMutexLocker ErrorLock(&mPieceErrorMutex);
-
-	mFailedPartErrors.erase(PieceData);
+	mPieceManager->ClearPieceDataLoadError(PieceData);
 }
 
 lcPieceSourceSnapshot lcPiecesLibrary::SnapshotPieceDataSource(const lcPieceData* PieceData) const
@@ -1875,11 +1829,7 @@ void lcPiecesLibrary::GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::funct
 
 void lcPiecesLibrary::GetPieceDataFile(const char* PieceName, std::function<void(lcFile& File)> Callback)
 {
-	std::optional<lcPieceManager::FileInfo> FileInfo;
-
-	mLoadMutex.lock();
-	FileInfo = mPieceManager->GetPieceDataFileInfo(PieceName);
-	mLoadMutex.unlock();
+	const std::optional<lcPieceManager::FileInfo> FileInfo = mPieceManager->GetPieceDataFileInfo(PieceName);
 
 	if (FileInfo)
 	{
@@ -2130,8 +2080,6 @@ lcMesh* lcPiecesLibrary::GetLoadingMesh() const
 
 void lcPiecesLibrary::UnloadUnusedParts()
 {
-	QMutexLocker LoadLock(&mLoadMutex);
-
 	for (lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
 	{
 		if (PieceData->GetRefCount() == 0 && PieceData->mState != lcAssetState::Unloaded)
@@ -2162,6 +2110,8 @@ bool lcPiecesLibrary::SupportsStudStyle() const
 
 void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
 	if (mStudStyle == StudStyle && mStudCylinderColorEnabled == StudCylinderColorEnabled)
 		return;
 
@@ -2174,8 +2124,6 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	LoadColors();
 	UpdateStudStyleSource();
-
-	mLoadMutex.lock();
 
 	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
 	{
@@ -2211,8 +2159,6 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 
 	for (lcPieceData* PieceData : mPieceManager->GetAllPieceData())
 		ReloadPiece(PieceData);
-
-	mLoadMutex.unlock();
 
 	std::vector<lcPiece*> SynthPieces;
 	SynthPieces.reserve(mSynthPieces.size());

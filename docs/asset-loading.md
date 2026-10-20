@@ -77,7 +77,7 @@ new evidence and update this record with any agreed change.
 | Owner | Responsibility | Source |
 | --- | --- | --- |
 | `lcPiecesLibrary` | Acquisition/lifetime facade, source discovery, texture file indexes, archives, primitive and mesh caches, settings, shared mesh buffers, and loader coordination. Owns the piece and texture managers and supplies archive readers. | [lc_library.h](../common/lc_library.h), [lc_library.cpp](../common/lc_library.cpp) |
-| `lcPieceManager` | Piece creation/reuse, library/local registrations and project indexes, normalization/renaming, references, zero-reference unload/deletion, temporary cleanup, ordered teardown, borrowed snapshots and copied include-source metadata. No source discovery or scheduling. | [lc_piecemanager.h](../common/lc_piecemanager.h), [lc_piecemanager.cpp](../common/lc_piecemanager.cpp) |
+| `lcPieceManager` | Piece creation/reuse, library/local registrations and project indexes, normalization/renaming, references, zero-reference unload/deletion, temporary cleanup, sparse errors, synchronized registry access, ordered teardown, borrowed snapshots and copied include-source metadata. No source discovery or scheduling. | [lc_piecemanager.h](../common/lc_piecemanager.h), [lc_piecemanager.cpp](../common/lc_piecemanager.cpp) |
 | `lcTextureManager` | Texture identities and references, snapshots, and private CPU decoding of resolved sources. | [lc_texturemanager.h](../common/lc_texturemanager.h), [lc_texturemanager.cpp](../common/lc_texturemanager.cpp) |
 | `lcAssetLoader` | Pending requests, worker scheduling, private results, texture upload, publication, cancellation, readiness waits, and deferred settlement notifications. | [lc_assetloader.h](../common/lc_assetloader.h), [lc_assetloader.cpp](../common/lc_assetloader.cpp) |
 | `lcPieceData` / `lcTexture` | Published geometry or texture data, readiness state, and asset metadata. | [lc_piecedata.h](../common/lc_piecedata.h), [lc_texture.h](../common/lc_texture.h) |
@@ -95,10 +95,17 @@ Library discovery supplies source metadata; the library still resolves external
 files, adopts model references, invalidates reused data and schedules loading.
 Scoped references remain bound to the library facade. After a manager release,
 the library invokes loader cancellation only for a live identity with one remaining
-reference, after releasing its existing recursive load mutex.
+reference, after the manager has released its registry lock.
 
-That mutex still serializes compound registry/lifetime operations and worker
-metadata reads; moving synchronization and sparse errors is a separate step.
+The manager's recursive mutex protects registry operations, reference bookkeeping
+and copied worker include metadata. Its separate error mutex protects sparse
+failure text. Both locks are released before resource destruction; registry locks
+also end before file I/O, worker waits, publication or enumeration consumers.
+Acquisition and reference changes stay on the UI thread, so a borrowed lookup can
+be retained without another thread deleting it between calls. Source discovery
+initializes metadata before workers use it; source/settings changes and archive
+closure require draining workers. Texture source resolution runs on the UI thread,
+and stud-style changes pause queued work and drain running workers before mutation.
 Startup discovery and UI enumeration keep their existing thread/lifetime
 guarantees. Borrowed snapshots do not retain identities, and ordered library
 snapshots preserve description-cache compatibility. Manager `Clear()` destroys
@@ -320,7 +327,7 @@ requirements, including nested and external models, with cycle protection.
 
 ### Diagnostics and retries
 
-Part error text lives in the library's sparse `mFailedPartErrors` map, queried
+Part error text lives in the piece manager's sparse `mPieceDataLoadErrors` map, queried
 through `GetPieceDataLoadError()`, rather than an empty string in every library part.
 `lcPieceData::Unload()` clears its sparse error through the existing library facade
 before releasing resources, so manager deletion and direct unload cannot leave a
@@ -455,7 +462,11 @@ owning handle vectors, deduplicated by identity; releasing a result releases its
 snapshot references.
 
 A part request owns an additional in-flight `lcPieceDataRef`; synth notifications also
-own a scoped definition reference. Request handles are explicitly reset at the
+own a scoped definition reference.
+`HasOtherReferences()` reports whether a nonempty handle shares its asset with
+another reference. Piece/synth notification and texture request checks interpret
+those other references as consumers because the request or notification owns one
+hold. The query runs on the UI thread and acquires no reference. Request handles are explicitly reset at the
 UI-thread completion, cancellation, and notification boundaries, before shared
 request storage can be destroyed on a worker thread. Moves preserve the single
 loader hold without introducing additional consumer counts. Removing one instance

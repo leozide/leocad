@@ -1,10 +1,25 @@
 #pragma once
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+using lcPieceManagerMutex = QRecursiveMutex;
+#else
+// Use recursive QMutex for Qt 5 compatibility.
+class lcPieceManagerMutex : public QMutex
+{
+public:
+	lcPieceManagerMutex()
+		: QMutex(QMutex::Recursive)
+	{
+	}
+};
+#endif
+
 enum class lcZipFileType;
 
 // Creates and indexes piece identities and manages their references and lifetime.
-// The library handles source resolution, loading, errors and cancellation.
-// Calls follow the library's existing thread/lock contracts.
+// The library handles source resolution, loading and cancellation.
+// Mutations and borrowed identities belong to the UI thread. Workers may copy
+// file metadata and access sparse errors; registry locking ends before teardown.
 class lcPieceManager
 {
 public:
@@ -52,8 +67,10 @@ public:
 	// Returns the remaining count; zero may mean the pointer was deleted. Already-zero is a no-op.
 	int ReleasePieceData(lcPieceData* PieceData);
 
-	// Checks for references beyond a documented loader or notification hold.
-	bool HasPieceDataConsumers(const lcPieceData* PieceData) const;
+	// Sparse errors are independently synchronized and cleared before resource teardown.
+	void SetPieceDataLoadError(const lcPieceData* PieceData, QString Error);
+	QString GetPieceDataLoadError(const lcPieceData* PieceData) const;
+	void ClearPieceDataLoadError(const lcPieceData* PieceData);
 
 	// Removes unreferenced non-library identities without changing library-part eviction policy.
 	void RemoveTemporaryPieceData();
@@ -84,7 +101,7 @@ public:
 		int ZipFileIndex;
 	};
 
-	// Copies library file metadata under the library lock, or returns no value if missing.
+	// Copies library file metadata under the registry lock, or returns no value if missing.
 	// Workers use the copy after unlocking instead of accessing the registered identity.
 	std::optional<FileInfo> GetPieceDataFileInfo(const std::string& Name) const;
 
@@ -104,8 +121,14 @@ private:
 	// Keeps library identities registered; deletes non-library identities.
 	void UnloadPieceData(lcPieceData* PieceData);
 
+	// Recursive for compound operations that reuse registry helpers. Never held during deletion.
+	mutable lcPieceManagerMutex mMutex;
 	std::map<std::string, lcPieceData*> mPieces;
 
 	// An owner may be null after its project is destroyed while references remain.
 	std::unordered_map<lcPieceData*, Project*> mProjectPieces;
+
+	// No error lock is held while unloading or deleting identities.
+	mutable QMutex mErrorMutex;
+	std::unordered_map<const lcPieceData*, QString> mPieceDataLoadErrors;
 };

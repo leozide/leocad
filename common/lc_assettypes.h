@@ -79,6 +79,9 @@ public:
 		return !(Left == RightRef);
 	}
 
+	// True when nonempty and another reference exists. Query on the UI thread.
+	bool HasOtherReferences() const;
+
 	void Reset();
 	T* Release();
 	void Swap(lcAssetRef& OtherRef) noexcept;

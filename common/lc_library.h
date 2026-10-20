@@ -16,20 +16,6 @@ class lcZipFile;
 class lcLibraryMeshData;
 struct lcEmbeddedData;
 
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-using lcLibraryLoadMutex = QRecursiveMutex;
-#else
-// Qt 5 has no QRecursiveMutex; library release paths can reenter this lock.
-class lcLibraryLoadMutex : public QMutex
-{
-public:
-	lcLibraryLoadMutex()
-		: QMutex(QMutex::Recursive)
-	{
-	}
-};
-#endif
-
 enum class lcStudStyle
 {
 	Plain,
@@ -201,8 +187,6 @@ public:
 	// Last generation error, or an empty string; an empty error does not imply readiness.
 	QString GetSynthMeshError(const lcPiece* Piece) const;
 	void RebuildModelPieceData(lcPieceData* PieceData);
-	// Loader helper: assumes a pending request/notification owns one in-flight hold.
-	bool HasPieceDataConsumers(const lcPieceData* PieceData);
 	void SetPieceDataLoadError(const lcPieceData* PieceData, QString Error);
 	QString GetPieceDataLoadError(const lcPieceData* PieceData) const;
 	void ClearPieceDataLoadError(const lcPieceData* PieceData);
@@ -335,19 +319,11 @@ protected:
 	// Instances unregister before destruction; the library does not own them.
 	std::unordered_map<lcPiece*, QString> mSynthPieces;
 
-	// Protects identity/reference bookkeeping.
-	// Recursive because library release and lookup paths can reenter this lock.
-	lcLibraryLoadMutex mLoadMutex;
-
 	// Active dependency edges include both nested loads and waits on other workers.
 	QMutex mPrimitiveMutex;
 	QWaitCondition mPrimitiveLoaded;
 	std::unordered_map<QThread*, std::vector<lcLibraryPrimitive*>> mPrimitiveLoadStacks;
 	std::unordered_map<lcLibraryPrimitive*, lcLibraryPrimitive*> mPrimitiveDependencies;
-
-	// Sparse errors avoid storing a QString in every library identity.
-	mutable QMutex mPieceErrorMutex;
-	std::unordered_map<const lcPieceData*, QString> mFailedPartErrors;
 
 	lcStudStyle mStudStyle;
 	bool mStudCylinderColorEnabled;

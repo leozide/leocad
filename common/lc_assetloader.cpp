@@ -333,7 +333,7 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 	const bool Stale = mStopping || !Current;
 	RequestedPiece->State = Stale ? RequestState::Cancelled : RequestState::AwaitingPublication;
 
-	const bool HasConsumer = mLibrary->HasPieceDataConsumers(PieceData);
+	const bool HasConsumer = RequestedPiece->PieceData.HasOtherReferences();
 
 	if (Stale || !HasConsumer)
 	{
@@ -668,7 +668,7 @@ void lcAssetLoader::DispatchNotifications()
 
 		lcPieceData* PieceData = Notification.RequestedPiece->PieceData.Get();
 
-		if (Notification.RequestedPiece->State == RequestState::Cancelled || !mLibrary->HasPieceDataConsumers(PieceData))
+		if (Notification.RequestedPiece->State == RequestState::Cancelled || !Notification.RequestedPiece->PieceData.HasOtherReferences())
 		{
 			Notification.RequestedPiece->PieceData.Reset();
 
@@ -703,7 +703,7 @@ void lcAssetLoader::DispatchNotifications()
 
 		lcPieceData* PieceData = Notification.PieceData.Get();
 
-		if (!Notification.RequestedSynth->Cancelled.load(std::memory_order_relaxed) && mLibrary->HasPieceDataConsumers(PieceData) && SettledSynths.insert(PieceData).second)
+		if (!Notification.RequestedSynth->Cancelled.load(std::memory_order_relaxed) && Notification.PieceData.HasOtherReferences() && SettledSynths.insert(PieceData).second)
 		{
 			QPointer<lcAssetLoader> LoaderGuard(this);
 			QPointer<lcPiecesLibrary> LibraryGuard(mLibrary);
@@ -1023,7 +1023,7 @@ void lcAssetLoader::CancelUnusedTextureRequests()
 		const std::shared_ptr<TextureRequest>& RequestedTexture = It->second;
 
 		// The request owns one reference; all others belong to consumers.
-		if (RequestedTexture->State == RequestState::AwaitingCompletion || RequestedTexture->Texture->GetRefCount() > 1)
+		if (RequestedTexture->State == RequestState::AwaitingCompletion || RequestedTexture->Texture.HasOtherReferences())
 		{
 			++It;
 			continue;

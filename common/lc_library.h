@@ -181,9 +181,6 @@ public:
 	// Reused data is invalidated before returning.
 	lcPieceDataRef AcquireModelPieceData(const char* PieceName, Project* Project, bool& Reused);
 
-	// Updates the model filename and description without changing its index key.
-	void SetModelPieceDataName(lcPieceData* PieceData, const char* Name);
-
 	// Renames the model identity and its index key, rejecting collisions in the same scope.
 	bool RenameModelPieceData(lcPieceData* PieceData, const char* NewName);
 

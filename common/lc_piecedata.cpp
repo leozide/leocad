@@ -115,7 +115,9 @@ void lcPieceData::SetModel(lcModel* Model)
 		lcGetPiecesLibrary()->ClearPieceDataLoadError(this);
 	}
 
-	lcGetPiecesLibrary()->SetModelPieceDataName(this, Model->GetProperties().mFileName.toLatin1().data());
+	const QByteArray Name = Model->GetProperties().mFileName.toLatin1();
+	lcstrcpy(mFileName, Name.constData());
+	lcstrcpy(m_strDescription, Name.constData());
 }
 
 void lcPieceData::CreateProject(Project* NewProject, const char* PieceName)

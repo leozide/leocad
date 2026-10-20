@@ -129,14 +129,6 @@ lcPieceData* lcPieceManager::AcquireModelPieceData(const char* PieceName, Projec
 	return PieceData;
 }
 
-void lcPieceManager::SetModelPieceDataName(lcPieceData* PieceData, const char* Name)
-{
-	QMutexLocker Lock(&mMutex);
-
-	lcstrcpy(PieceData->mFileName, Name);
-	lcstrcpy(PieceData->m_strDescription, Name);
-}
-
 void lcPieceManager::AddPieceDataReference(lcPieceData* PieceData)
 {
 	QMutexLocker Lock(&mMutex);

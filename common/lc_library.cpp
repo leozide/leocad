@@ -113,11 +113,6 @@ void lcPiecesLibrary::TransferProjectPieceData(Project* Source, Project* Destina
 	mPieceManager->TransferProjectPieceData(Source, Destination);
 }
 
-void lcPiecesLibrary::SetModelPieceDataName(lcPieceData* PieceData, const char* Name)
-{
-	mPieceManager->SetModelPieceDataName(PieceData, Name);
-}
-
 bool lcPiecesLibrary::RenameModelPieceData(lcPieceData* PieceData, const char* NewName)
 {
 	if (!mPieceManager->RenameModelPieceData(PieceData, NewName))
@@ -690,33 +685,17 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 	for (quint32 FileIdx = 0; FileIdx < ZipFile->mFiles.size(); FileIdx++)
 	{
 		lcZipFileInfo& FileInfo = ZipFile->mFiles[FileIdx];
-		char NameBuffer[LC_PIECE_NAME_LEN];
-		char* Name = NameBuffer;
+		const std::string NormalizedName = NormalizePieceDataName(FileInfo.file_name);
+		const char* Name = NormalizedName.c_str();
 
-		const char* Src = FileInfo.file_name;
-		char* Dst = Name;
-
-		while (*Src && Dst - Name < LC_PIECE_NAME_LEN)
-		{
-			if (*Src >= 'a' && *Src <= 'z')
-				*Dst = *Src + 'A' - 'a';
-			else if (*Src == '\\')
-				*Dst = '/';
-			else
-				*Dst = *Src;
-
-			Src++;
-			Dst++;
-		}
-
-		if (Dst - Name <= 4)
+		if (NormalizedName.size() <= 4)
 			continue;
 
-		*Dst = 0;
-		Dst -= 4;
-		if (memcmp(Dst, ".DAT", 4))
+		const char* Extension = Name + NormalizedName.size() - 4;
+
+		if (memcmp(Extension, ".DAT", 4))
 		{
-			if (!memcmp(Dst, ".PNG", 4))
+			if (!memcmp(Extension, ".PNG", 4))
 			{
 				if (ZipFileType == lcZipFileType::Official || ZipFileType == lcZipFileType::Unofficial)
 					mTextureArchiveEntries[static_cast<int>(ZipFileType)].emplace(QDir::cleanPath(QString::fromLatin1(Name)).toUpper(), FileIdx);
@@ -727,17 +706,17 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 		if (ZipFileType == lcZipFileType::Official)
 		{
-			if (memcmp(Name, "LDRAW/", 6))
+			if (strncmp(Name, "LDRAW/", 6))
 				continue;
 
 			Name += 6;
 		}
 
-		if (!memcmp(Name, "PARTS/", 6))
+		if (!strncmp(Name, "PARTS/", 6))
 		{
 			Name += 6;
 
-			if (memcmp(Name, "S/", 2))
+			if (strncmp(Name, "S/", 2))
 			{
 				lcPieceData* PieceData = FindPieceData(Name, nullptr);
 
@@ -747,19 +726,19 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 
 				if (!PieceData)
 				{
-					PieceData = mPieceManager->CreateLibraryPieceData(Name, FileInfo.file_name + (Name - NameBuffer));
+					PieceData = mPieceManager->CreateLibraryPieceData(Name, FileInfo.file_name + (Name - NormalizedName.c_str()));
 				}
 
 				PieceData->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
-				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, false, false, true);
+				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, false, false, true);
 		}
-		else if (!memcmp(Name, "P/", 2))
+		else if (!strncmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NameBuffer), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
+			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
 		}
 	}
 
@@ -862,41 +841,22 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 
 			while (DirIterator.hasNext())
 			{
-				char Name[LC_PIECE_NAME_LEN];
 				QString FileName = DirIterator.next();
 				QByteArray FileString = BaseDir.relativeFilePath(FileName).toLatin1();
-				const char* Src = strchr(FileString, '/') + 1;
-				char* Dst = Name;
+				const char* RelativeName = strchr(FileString.constData(), '/') + 1;
+				const std::string Name = NormalizePieceDataName(RelativeName);
 
-				while (*Src && Dst - Name < (int)sizeof(Name))
-				{
-					if (*Src >= 'a' && *Src <= 'z')
-						*Dst = *Src + 'A' - 'a';
-					else if (*Src == '\\')
-						*Dst = '/';
-					else
-						*Dst = *Src;
-
-					Src++;
-					Dst++;
-				}
-				*Dst = 0;
-
-				if (Dst - Name <= 4)
+				if (Name.size() <= 4 || Name.compare(Name.size() - 4, 4, ".DAT"))
 					continue;
 
-				Dst -= 4;
-				if (memcmp(Dst, ".DAT", 4))
-					continue;
-
-				if (BaseFolderIdx > 0 && IsPrimitive(Name))
+				if (BaseFolderIdx > 0 && IsPrimitive(Name.c_str()))
 					continue;
 
 				if (BaseFolderIdx == static_cast<int>(lcLibraryFolderType::Unofficial))
 					mHasUnofficial = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
-				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), strchr(FileString, '/') + 1, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name), IsStudStylePrimitive(Name), SubFile);
+				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), RelativeName, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
 			}
 		}
 
@@ -956,24 +916,8 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 		for (int FileIdx = 0; FileIdx < FileList.size(); FileIdx++)
 		{
-			char Name[LC_PIECE_NAME_LEN];
 			QByteArray FileString = FileList[FileIdx].fileName().toLatin1();
-			const char* Src = FileString;
-			char* Dst = Name;
-
-			while (*Src && Dst - Name < (int)sizeof(Name))
-			{
-				if (*Src >= 'a' && *Src <= 'z')
-					*Dst = *Src + 'A' - 'a';
-				else if (*Src == '\\')
-					*Dst = '/';
-				else
-					*Dst = *Src;
-
-				Src++;
-				Dst++;
-			}
-			*Dst = 0;
+			const std::string Name = NormalizePieceDataName(FileString.constData());
 
 			if (FolderIdx > 0 && mPieceManager->FindPieceData(Name, nullptr))
 				continue;
@@ -2163,7 +2107,7 @@ lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
 			return PrimitiveIt->second;
 	}
 
-	return	nullptr;
+	return nullptr;
 }
 
 lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)

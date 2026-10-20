@@ -54,9 +54,6 @@ public:
 	// The library adopts the reference and invalidates reused data after this returns.
 	lcPieceData* AcquireModelPieceData(const char* PieceName, Project* OwnerProject, bool& Reused);
 
-	// Updates the model filename and description without changing its index key.
-	void SetModelPieceDataName(lcPieceData* PieceData, const char* Name);
-
 	// Renames the identity and its index key, rejecting collisions in the same scope.
 	bool RenameModelPieceData(lcPieceData* PieceData, const char* NewName);
 

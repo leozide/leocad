@@ -1809,20 +1809,17 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 				{
 					const QByteArray FileName = (Prefix + Folder + QString::fromLatin1(PieceName)).toLatin1();
 
-					for (quint32 Index = 0; Index < Archive->mFiles.size(); Index++)
-					{
-						if (qstricmp(Archive->mFiles[Index].file_name, FileName.constData()))
-							continue;
+					const std::optional<quint32> FileIndex = Archive->FindFileIndex(FileName.constData());
 
-						lcFileSource Source;
-						Source.ArchiveType = static_cast<int>(Type);
-						Source.ArchiveIndex = Index;
+					if (!FileIndex)
+						continue;
 
-						if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
-							return File;
+					lcFileSource Source;
+					Source.ArchiveType = static_cast<int>(Type);
+					Source.ArchiveIndex = *FileIndex;
 
-						break;
-					}
+					if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
+						return File;
 				}
 			}
 

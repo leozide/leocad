@@ -59,6 +59,9 @@ public:
 	bool OpenRead(std::unique_ptr<lcFile> File);
 	bool OpenWrite(const QString& FileName);
 
+	// Returns the first case-insensitive filename match in archive order.
+	std::optional<quint32> FindFileIndex(const char* FileName) const;
+
 	bool ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLength = 0xffffffff);
 	bool ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength = 0xffffffff);
 

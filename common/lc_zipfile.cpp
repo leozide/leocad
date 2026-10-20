@@ -567,17 +567,24 @@ bool lcZipFile::ReadCentralDir()
 	return true;
 }
 
-bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength)
+std::optional<quint32> lcZipFile::FindFileIndex(const char* FileName) const
 {
 	for (quint32 FileIdx = 0; FileIdx < mFiles.size(); FileIdx++)
 	{
-		lcZipFileInfo& FileInfo = mFiles[FileIdx];
+		const lcZipFileInfo& FileInfo = mFiles[FileIdx];
 
 		if (!qstricmp(FileInfo.file_name, FileName))
-			return ExtractFile(FileIdx, File, MaxLength);
+			return FileIdx;
 	}
 
-	return false;
+	return std::nullopt;
+}
+
+bool lcZipFile::ExtractFile(const char* FileName, lcMemFile& File, quint32 MaxLength)
+{
+	const std::optional<quint32> FileIndex = FindFileIndex(FileName);
+
+	return FileIndex && ExtractFile(*FileIndex, File, MaxLength);
 }
 
 bool lcZipFile::ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLength)

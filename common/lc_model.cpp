@@ -1361,7 +1361,6 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 	if (!Library->WaitForPieceData(RequiredPieceData))
 		return false;
 
-	Library->mBuffersDirty = true;
 	Library->UnloadUnusedParts();
 
 	auto RoundBounds = [](float& Value)
@@ -3192,16 +3191,6 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 
 void lcModel::AddPiece(std::unique_ptr<lcPiece> Piece, size_t PieceIndex)
 {
-	const lcPieceData* PieceData = Piece->mPieceData.Get();
-
-	if (!PieceData->IsModel())
-	{
-		const lcMesh* Mesh = PieceData->GetMesh();
-
-		if (Mesh && Mesh->mVertexCacheOffset == -1)
-			lcGetPiecesLibrary()->mBuffersDirty = true;
-	}
-
 	mPieces.insert(mPieces.begin() + PieceIndex, std::move(Piece));
 }
 

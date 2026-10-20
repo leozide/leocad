@@ -93,6 +93,12 @@ It creates/reuses identities, maintains name and project indexes, normalizes and
 renames names, changes reference counts, and unloads or deletes identities at zero.
 Library discovery supplies source metadata; the library still resolves external
 files, adopts model references, invalidates reused data and schedules loading.
+
+Official library parts take precedence over same-name unofficial parts for archive
+and directory sources. Unofficial-only parts remain available. Cached descriptions
+and geometry from the older archive override policy are invalidated by the library
+cache version change.
+
 Scoped references remain bound to the library facade. After a manager release,
 the library invokes loader cancellation only for a live identity with one remaining
 reference, after the manager has released its registry lock.

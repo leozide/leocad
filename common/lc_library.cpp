@@ -29,7 +29,8 @@
 #  define DEF_MEM_LEVEL	 MAX_MEM_LEVEL
 #endif
 
-constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0110;
+// Source precedence affects both cached descriptions and geometry.
+constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0111;
 constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
 
 enum class lcLibraryCacheFlag : quint32
@@ -739,6 +740,10 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 			if (memcmp(Name, "S/", 2))
 			{
 				lcPieceData* PieceData = FindPieceData(Name, nullptr);
+
+				// Unofficial additions must not replace registered official parts.
+				if (PieceData && ZipFileType == lcZipFileType::Unofficial && PieceData->mZipFileType == lcZipFileType::Official)
+					continue;
 
 				if (!PieceData)
 				{

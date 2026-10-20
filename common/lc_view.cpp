@@ -1640,12 +1640,16 @@ void lcView::DrawGrid()
 		}
 	}
 
-	if (GridSizeValid)
+	if (GridSizeValid && std::isfinite(Min[0]) && std::isfinite(Min[1]) && std::isfinite(Max[0]) && std::isfinite(Max[1]))
 	{
-		MinX = (int)(floorf(Min[0] / (20.0f * Spacing))) - 1;
-		MinY = (int)(floorf(Min[1] / (20.0f * Spacing))) - 1;
-		MaxX = (int)(ceilf(Max[0] / (20.0f * Spacing))) + 1;
-		MaxY = (int)(ceilf(Max[1] / (20.0f * Spacing))) + 1;
+		// Bound grid coordinates before converting to integers, keeping the vertex buffer below 1 MB.
+		constexpr float MaxGridExtent = 10000.0f;
+		const float GridSpacing = 20.0f * Spacing;
+
+		MinX = static_cast<int>(floorf(lcClamp(Min[0] / GridSpacing, -MaxGridExtent + 1.0f, MaxGridExtent - 1.0f))) - 1;
+		MinY = static_cast<int>(floorf(lcClamp(Min[1] / GridSpacing, -MaxGridExtent + 1.0f, MaxGridExtent - 1.0f))) - 1;
+		MaxX = static_cast<int>(ceilf(lcClamp(Max[0] / GridSpacing, -MaxGridExtent + 1.0f, MaxGridExtent - 1.0f))) + 1;
+		MaxY = static_cast<int>(ceilf(lcClamp(Max[1] / GridSpacing, -MaxGridExtent + 1.0f, MaxGridExtent - 1.0f))) + 1;
 
 		MinX = lcMin(MinX, -2);
 		MinY = lcMin(MinY, -2);
@@ -1689,8 +1693,8 @@ void lcView::DrawGrid()
                 float Top = MinY * 20.0f * Spacing;
                 float Bottom = MaxY * 20.0f * Spacing;
                 float Z = 0;
-                float U = (MaxX - MinX) * Spacing;
-                float V = (MaxY - MinY) * Spacing;
+                float U = (MaxX - MinX) * static_cast<float>(Spacing);
+                float V = (MaxY - MinY) * static_cast<float>(Spacing);
 
                 *CurVert++ = Left;
                 *CurVert++ = Top;

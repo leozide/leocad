@@ -1519,12 +1519,11 @@ void lcContext::SetIndexBufferPointer(const void* IndexBuffer)
 
 void lcContext::BindMesh(const lcMesh* Mesh)
 {
-	const lcPiecesLibrary* const Library = lcGetPiecesLibrary();
-
 	if (Mesh->mVertexCacheOffset != -1)
 	{
-		const GLuint VertexBufferObject = Library->mVertexBuffer.Object;
-		const GLuint IndexBufferObject = Library->mIndexBuffer.Object;
+		const auto [VertexBuffer, IndexBuffer] = lcGetPiecesLibrary()->GetBuffers();
+		const GLuint VertexBufferObject = VertexBuffer.Object;
+		const GLuint IndexBufferObject = IndexBuffer.Object;
 
 		if (VertexBufferObject != mVertexBufferObject)
 		{

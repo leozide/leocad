@@ -11,7 +11,7 @@ static QJsonDocument lcLoadBrickLinkMapping()
 {
 	std::map<std::string, std::string> Remapping;
 
-	QFile File(lcGetPiecesLibrary()->mLibraryDir.absoluteFilePath(QLatin1String("ldraw2bl.txt")));
+	QFile File(lcGetPiecesLibrary()->GetLibraryFilePath(QLatin1String("ldraw2bl.txt")));
 	QByteArray Data;
 
 	if (File.open(QIODevice::ReadOnly))

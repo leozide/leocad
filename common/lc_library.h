@@ -145,6 +145,12 @@ public:
 	// Loads the bundled fallback library and its default settings.
 	bool LoadBuiltinPieceLibrary();
 
+	// Resolves a file path relative to the library directory without opening it.
+	QString GetLibraryFilePath(const QString& FileName) const
+	{
+		return mLibraryDir.absoluteFilePath(FileName);
+	}
+
 	// Returns the official archive count for update checks, or zero for custom/directory libraries.
 	int GetOfficialPieceCount() const
 	{
@@ -292,16 +298,17 @@ public:
 	// Rebuilds shared mesh buffers when dirty, using the supplied render context.
 	void UpdateBuffers(lcContext* Context);
 
+	// Returns borrowed read-only references to the shared vertex and index buffers.
+	std::pair<const lcVertexBuffer&, const lcIndexBuffer&> GetBuffers() const
+	{
+		return { mVertexBuffer, mIndexBuffer };
+	}
+
 	// Checks unused library parts under the existing zero-reference release policy.
 	void UnloadUnusedParts();
 
 	// Returns the borrowed placeholder mesh for pending or failed piece geometry.
 	lcMesh* GetLoadingMesh() const;
-
-	QDir mLibraryDir;
-
-	lcVertexBuffer mVertexBuffer;
-	lcIndexBuffer mIndexBuffer;
 
 signals:
 	void AssetStatusChanged();
@@ -396,7 +403,8 @@ protected:
 
 	void ReleaseBuffers();
 
-	// Archive readers and discovered primitive sources; workers drain before replacement or teardown.
+	// Library directory, archive readers and primitive sources; workers drain before replacement or teardown.
+	QDir mLibraryDir;
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 	bool mHasUnofficial;
@@ -432,7 +440,9 @@ protected:
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
 
-	// Placeholder geometry and deferred shared-buffer repacking state.
+	// Shared GPU buffers, placeholder geometry and deferred repacking state.
+	lcVertexBuffer mVertexBuffer;
+	lcIndexBuffer mIndexBuffer;
 	bool mBuffersDirty;
 	std::unique_ptr<lcMesh> mLoadingMesh;
 	bool mStreamingBuffersPending = false;

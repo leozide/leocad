@@ -9,7 +9,7 @@
 
 static bool lcLoadLDrawXML(std::map<int, int>& MaterialTable, std::map<int, std::string>& BrickTable, std::map<std::string, std::pair<lcVector3, lcVector4>>& TransformTable)
 {
-	QFile File(lcGetPiecesLibrary()->mLibraryDir.absoluteFilePath(QLatin1String("ldraw.xml")));
+	QFile File(lcGetPiecesLibrary()->GetLibraryFilePath(QLatin1String("ldraw.xml")));
 	QByteArray Data;
 
 	if (File.open(QIODevice::ReadOnly))

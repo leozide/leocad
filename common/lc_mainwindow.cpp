@@ -2867,6 +2867,38 @@ lcModelTabWidget* lcMainWindow::GetTabForView(lcView* View) const
 	return nullptr;
 }
 
+// Commands that can't delete or replace the pieces being dragged with the mouse.
+static bool lcIsCommandAllowedWhileDragging(lcCommandId CommandId)
+{
+	switch (CommandId)
+	{
+	case LC_EDIT_CANCEL:
+	case LC_PIECE_MOVE_PLUSX:
+	case LC_PIECE_MOVE_MINUSX:
+	case LC_PIECE_MOVE_PLUSY:
+	case LC_PIECE_MOVE_MINUSY:
+	case LC_PIECE_MOVE_PLUSZ:
+	case LC_PIECE_MOVE_MINUSZ:
+	case LC_PIECE_ROTATE_PLUSX:
+	case LC_PIECE_ROTATE_MINUSX:
+	case LC_PIECE_ROTATE_PLUSY:
+	case LC_PIECE_ROTATE_MINUSY:
+	case LC_PIECE_ROTATE_PLUSZ:
+	case LC_PIECE_ROTATE_MINUSZ:
+	case LC_VIEW_VIEWPOINT_FRONT:
+	case LC_VIEW_VIEWPOINT_BACK:
+	case LC_VIEW_VIEWPOINT_TOP:
+	case LC_VIEW_VIEWPOINT_BOTTOM:
+	case LC_VIEW_VIEWPOINT_LEFT:
+	case LC_VIEW_VIEWPOINT_RIGHT:
+	case LC_VIEW_VIEWPOINT_HOME:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
 void lcMainWindow::HandleCommand(lcCommandId CommandId)
 {
 	lcView* ActiveView = GetActiveView();
@@ -2874,6 +2906,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	if (ActiveModel)
 		ActiveModel->CheckHistoryInvariant();
+
+	// Ignore commands that could delete or replace the pieces being dragged.
+	if (ActiveModel && lcView::IsMovingWithMouse(ActiveModel) && !lcIsCommandAllowedWhileDragging(CommandId))
+		return;
 
 	switch (CommandId)
 	{

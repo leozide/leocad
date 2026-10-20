@@ -91,6 +91,22 @@ void lcView::UpdateProjectViews(const Project* Project)
 	}
 }
 
+bool lcView::IsMovingWithMouse(const lcModel* Model)
+{
+	for (lcView* View : mViews)
+	{
+		if (View->mTrackButton == lcTrackButton::None || View->GetActiveModel() != Model)
+			continue;
+
+		const lcTool Tool = View->GetCurrentTool();
+
+		if (Tool == lcTool::Move || Tool == lcTool::Rotate)
+			return true;
+	}
+
+	return false;
+}
+
 void lcView::UpdateAllViews()
 {
 	for (lcView* View : mViews)

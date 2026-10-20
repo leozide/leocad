@@ -220,6 +220,8 @@ public:
 	static std::vector<lcView*> GetModelViews(const lcModel* Model);
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();
+	// Some view is moving or rotating pieces of Model with the mouse.
+	static bool IsMovingWithMouse(const lcModel* Model);
 
 	static void CreateResources(lcContext* Context);
 	static void DestroyResources(lcContext* Context);

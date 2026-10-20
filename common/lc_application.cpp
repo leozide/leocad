@@ -345,24 +345,17 @@ bool lcApplication::LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryP
 		char* EnvPath = getenv("LEOCAD_LIB");
 
 		if (EnvPath && EnvPath[0])
-			return mLibrary->Load(EnvPath, ShowProgress);
+			return mLibrary->Load(EnvPath, ShowProgress, false);
 
 		QString CustomPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
 
 		if (!CustomPath.isEmpty())
-			return mLibrary->Load(CustomPath, ShowProgress);
+			return mLibrary->Load(CustomPath, ShowProgress, false);
 	}
 
 	for (const QPair<QString, bool>& LibraryPathEntry : LibraryPaths)
-	{
-		if (mLibrary->Load(LibraryPathEntry.first, ShowProgress))
-		{
-			if (LibraryPathEntry.second)
-				mLibrary->SetOfficialPieceLibrary();
-
+		if (mLibrary->Load(LibraryPathEntry.first, ShowProgress, LibraryPathEntry.second))
 			return true;
-		}
-	}
 
 	return false;
 }

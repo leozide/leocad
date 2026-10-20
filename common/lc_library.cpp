@@ -53,7 +53,6 @@ lcPiecesLibrary::lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEn
 	QDir Dir;
 	Dir.mkpath(mCachePath);
 
-	mNumOfficialPieces = 0;
 	mBuffersDirty = false;
 	mHasUnofficial = false;
 }
@@ -89,7 +88,7 @@ void lcPiecesLibrary::Unload()
 	for (std::map<QString, int>& Entries : mTextureArchiveEntries)
 		Entries.clear();
 
-	mNumOfficialPieces = 0;
+	mOfficialPieceCount = 0;
 
 	for (std::unique_ptr<lcZipFile>& ZipFile : mZipFiles)
 		ZipFile.reset();
@@ -525,12 +524,15 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenFile(const lcFileSource& 
 	return std::unique_ptr<lcFile>(std::move(File));
 }
 
-bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress)
+bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool OfficialLibrary)
 {
 	Unload();
 
 	if (OpenArchive(LibraryPath, lcZipFileType::Official))
 	{
+		if (OfficialLibrary)
+			mOfficialPieceCount = static_cast<int>(mPieceManager->GetLibraryPieceDataCount());
+
 		LoadColors();
 
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
@@ -2095,12 +2097,6 @@ void lcPiecesLibrary::AddTextureReference(lcTexture* Texture)
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 {
 	mTextureManager->ReleaseTexture(Texture);
-}
-
-void lcPiecesLibrary::SetOfficialPieceLibrary()
-{
-	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-		mNumOfficialPieces = static_cast<int>(mPieceManager->GetLibraryPieceDataCount());
 }
 
 bool lcPiecesLibrary::SupportsStudStyle() const

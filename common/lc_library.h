@@ -139,13 +139,17 @@ public:
 	lcPiecesLibrary& operator=(lcPiecesLibrary&&) = delete;
 
 	// Replaces the current library with an archive or directory and initializes its metadata.
-	bool Load(const QString& LibraryPath, bool ShowProgress);
+	// OfficialLibrary enables archive update checks; directories remain excluded.
+	bool Load(const QString& LibraryPath, bool ShowProgress, bool OfficialLibrary);
 
 	// Loads the bundled fallback library and its default settings.
 	bool LoadBuiltinPieceLibrary();
 
-	// Records the loaded piece count for official-library update checks.
-	void SetOfficialPieceLibrary();
+	// Returns the official archive count for update checks, or zero for custom/directory libraries.
+	int GetOfficialPieceCount() const
+	{
+		return mOfficialPieceCount;
+	}
 
 	// Reloads the configured colors and updates the loading mesh.
 	void LoadColors();
@@ -294,8 +298,6 @@ public:
 	// Returns the borrowed placeholder mesh for pending or failed piece geometry.
 	lcMesh* GetLoadingMesh() const;
 
-	int mNumOfficialPieces;
-
 	QDir mLibraryDir;
 
 	lcVertexBuffer mVertexBuffer;
@@ -398,6 +400,9 @@ protected:
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 	bool mHasUnofficial;
+
+	// Captured before unofficial additions/overrides; custom libraries skip update checks.
+	int mOfficialPieceCount = 0;
 
 	// Settings captured by worker source snapshots and mesh cache keys.
 	lcStudStyle mStudStyle;

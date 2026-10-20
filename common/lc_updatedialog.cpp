@@ -104,11 +104,11 @@ void lcUpdateDialog::DownloadFinished(lcHttpReply* Reply)
 			else
 				Status = tr("<p>You are using the latest LeoCAD version.</p>");
 
-			lcPiecesLibrary* Library = lcGetPiecesLibrary();
+			const int OfficialPieceCount = lcGetPiecesLibrary()->GetOfficialPieceCount();
 
-			if (Library->mNumOfficialPieces)
+			if (OfficialPieceCount)
 			{
-				if (Parts > Library->mNumOfficialPieces)
+				if (Parts > OfficialPieceCount)
 				{
 					Status += tr("<p>There are new parts available.</p>");
 					UpdateAvailable = true;

@@ -2872,6 +2872,9 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	lcView* ActiveView = GetActiveView();
 	lcModel* ActiveModel = ActiveView ? ActiveView->GetActiveModel() : nullptr;
 
+	if (ActiveModel)
+		ActiveModel->CheckHistoryInvariant();
+
 	switch (CommandId)
 	{
 	case LC_FILE_NEW:

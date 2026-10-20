@@ -402,6 +402,7 @@ public:
 	void FindReplacePiece(bool SearchForward, bool FindAll, bool Replace);
 
 	void UndoAction();
+	void CheckHistoryInvariant();
 	void RedoAction();
 
 	lcVector3 SnapPosition(const lcVector3& Delta) const;
@@ -531,6 +532,8 @@ protected:
 	bool mMouseToolMovePositionValid = false;
 	bool mMouseToolMoveUsesFocus = false;
 	bool mMouseToolFirstMove;
+	bool mMouseToolOwnsHistory = false; // A mouse tool keeps its pending sequence open until the button is released.
+	int mHistoryDepth = 0; // Nesting of pending history sequences; only the outermost level commits or reverts.
 	std::vector<lcPreviewInsertPieceInfo> mPreviewInsertPieceInfo;
 
 	std::vector<std::unique_ptr<lcPiece>> mPieces;

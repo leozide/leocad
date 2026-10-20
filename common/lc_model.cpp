@@ -2200,6 +2200,12 @@ void lcModel::SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::v
 
 void lcModel::AddSelectionHistory(std::function<void()> Callback)
 {
+	if (mHistoryDepth > 1)
+	{
+		Callback();
+		return;
+	}
+
 	std::unique_ptr<lcModelHistorySelect> ModelHistorySelect = std::make_unique<lcModelHistorySelect>();
 
 	ModelHistorySelect->SaveStartState(this);
@@ -2318,6 +2324,9 @@ void lcModel::BeginEditHistory()
 
 void lcModel::BeginMergeableEditHistory(lcModelHistoryEditMerge ModelHistoryEditMerge, lcObjectPropertyId PropertyId)
 {
+	if (mHistoryDepth > 1)
+		return;
+
 	const lcModelHistoryEditMergeKey MergeKey = { ModelHistoryEditMerge, PropertyId, mCurrentStep, gMainWindow ? gMainWindow->GetAddKeys() : false };
 	std::unique_ptr<lcModelHistoryEdit> ModelHistoryEdit = std::make_unique<lcModelHistoryEdit>(MergeKey);
 
@@ -2328,6 +2337,9 @@ void lcModel::BeginMergeableEditHistory(lcModelHistoryEditMerge ModelHistoryEdit
 
 void lcModel::EndEditHistory()
 {
+	if (mHistoryDepth > 1)
+		return;
+
 	if (mHistorySequence.empty())
 		return;
 
@@ -2417,13 +2429,39 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 		RefreshPreview();
 }
 
+// History sequences nest: a nested begin joins the open sequence, and only the outermost
+// level adds history items and commits, discards or reverts.
 void lcModel::BeginHistorySequence()
 {
+	if (mHistoryDepth++ > 0)
+		return;
+
 	mHistorySequence.clear();
+}
+
+// Reset a sequence left open without an active owner (a mouse tool or a property edit).
+void lcModel::CheckHistoryInvariant()
+{
+	const bool Owned = mMouseToolOwnsHistory || mActivePropertyEdit != lcObjectPropertyId::Count;
+
+	if (mHistoryDepth > 0 && !Owned)
+	{
+		qWarning("lcModel: %d history sequence(s) were left open, resetting", mHistoryDepth);
+		mHistoryDepth = 0;
+		mHistorySequence.clear();
+	}
 }
 
 void lcModel::EndHistorySequence(const QString& Description)
 {
+	if (mHistoryDepth > 1)
+	{
+		mHistoryDepth--;
+		return;
+	}
+
+	mHistoryDepth = 0;
+
 	if (mHistorySequence.empty())
 		return;
 
@@ -2493,11 +2531,28 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 void lcModel::DiscardHistorySequence()
 {
+	if (mHistoryDepth > 1)
+	{
+		mHistoryDepth--;
+		return;
+	}
+
+	mHistoryDepth = 0;
 	mHistorySequence.clear();
 }
 
 void lcModel::RevertHistorySequence()
 {
+	if (mHistoryDepth > 1)
+	{
+		// Nested changes have no snapshot of their own; the outermost level decides about them.
+		qWarning("lcModel: a nested history sequence can't be reverted, its changes are kept");
+		mHistoryDepth--;
+		return;
+	}
+
+	mHistoryDepth = 0;
+
 	RunHistorySequence(mHistorySequence, false);
 
 	mHistorySequence.clear();
@@ -2515,6 +2570,9 @@ void lcModel::SetSaved()
 
 void lcModel::RemoveFirstUndoIfUnchanged()
 {
+	if (mHistoryDepth > 0)
+		return;
+
 	if (mUndoHistory.empty())
 		return;
 
@@ -5422,6 +5480,9 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 void lcModel::UndoAction()
 {
+	if (mHistoryDepth > 0)
+		return;
+
 	if (mUndoHistory.empty())
 		return;
 
@@ -5438,6 +5499,9 @@ void lcModel::UndoAction()
 
 void lcModel::RedoAction()
 {
+	if (mHistoryDepth > 0)
+		return;
+
 	if (mRedoHistory.empty())
 		return;
 
@@ -5454,6 +5518,10 @@ void lcModel::RedoAction()
 
 void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 {
+	// An earlier mouse tool that still owns a sequence was never ended.
+	mMouseToolOwnsHistory = false;
+	CheckHistoryInvariant();
+
 	switch (Tool)
 	{
 		case lcTool::Insert:
@@ -5469,6 +5537,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 		case lcTool::Rotate:
 			BeginHistorySequence();
 			BeginEditHistory();
+			mMouseToolOwnsHistory = true;
 			break;
 
 		case lcTool::Eraser:
@@ -5484,6 +5553,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 			{
 				BeginHistorySequence();
 				BeginEditHistory();
+				mMouseToolOwnsHistory = true;
 			}
 			break;
 
@@ -5524,6 +5594,8 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 
 void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 {
+	mMouseToolOwnsHistory = false;
+
 	if (!Accept)
 	{
 		RevertHistorySequence();

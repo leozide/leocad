@@ -236,9 +236,6 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	else
 		ui->PreviewViewSphereSizeCombo->setCurrentIndex(0);
 
-	if (!lcGetPiecesLibrary()->SupportsStudStyle())
-		ui->studStyleCombo->setEnabled(false);
-
 	ui->studStyleCombo->setCurrentIndex(static_cast<int>(mOptions->StudStyle));
 
 	ui->ShadingMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mShadingMode));

@@ -160,8 +160,6 @@ public:
 	// Reloads the configured colors and updates the loading mesh.
 	void LoadColors();
 
-	bool SupportsStudStyle() const;
-
 	lcStudStyle GetStudStyle() const
 	{
 		return mStudStyle;
@@ -303,9 +301,6 @@ public:
 	{
 		return { mVertexBuffer, mIndexBuffer };
 	}
-
-	// Checks unused library parts under the existing zero-reference release policy.
-	void UnloadUnusedParts();
 
 	// Returns the borrowed placeholder mesh for pending or failed piece geometry.
 	lcMesh* GetLoadingMesh() const;

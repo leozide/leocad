@@ -1052,7 +1052,6 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 	mCurrentStep = CurrentStep;
 	CalculateStep(mCurrentStep);
-	Library->UnloadUnusedParts();
 
 	delete Piece;
 	delete Camera;
@@ -1299,7 +1298,6 @@ bool lcModel::LoadBinary(lcFile* file)
 	}
 
 	CalculateStep(mCurrentStep);
-	lcGetPiecesLibrary()->UnloadUnusedParts();
 
 	return true;
 }
@@ -1322,9 +1320,7 @@ bool lcModel::LoadLDD(const QString& FileData)
 			Piece->SetGroup(NewGroup);
 	}
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	CalculateStep(mCurrentStep);
-	Library->UnloadUnusedParts();
 
 	return true;
 }
@@ -1360,8 +1356,6 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 
 	if (!Library->WaitForPieceData(RequiredPieceData))
 		return false;
-
-	Library->UnloadUnusedParts();
 
 	auto RoundBounds = [](float& Value)
 	{

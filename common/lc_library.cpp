@@ -2080,15 +2080,6 @@ lcMesh* lcPiecesLibrary::GetLoadingMesh() const
 	return mLoadingMesh.get();
 }
 
-void lcPiecesLibrary::UnloadUnusedParts()
-{
-	for (lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
-	{
-		if (PieceData->GetRefCount() == 0 && PieceData->mState != lcAssetState::Unloaded)
-			ReleasePieceData(PieceData);
-	}
-}
-
 void lcPiecesLibrary::AddTextureReference(lcTexture* Texture)
 {
 	mTextureManager->AddTextureReference(Texture);
@@ -2097,11 +2088,6 @@ void lcPiecesLibrary::AddTextureReference(lcTexture* Texture)
 void lcPiecesLibrary::ReleaseTexture(lcTexture* Texture)
 {
 	mTextureManager->ReleaseTexture(Texture);
-}
-
-bool lcPiecesLibrary::SupportsStudStyle() const
-{
-	return true;
 }
 
 void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudCylinderColorEnabled)

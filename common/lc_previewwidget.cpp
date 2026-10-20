@@ -336,7 +336,6 @@ void lcPreview::ClearPreview()
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	Library->RemoveTemporaryPieceData();
-	Library->UnloadUnusedParts();
 	Redraw();
 }
 

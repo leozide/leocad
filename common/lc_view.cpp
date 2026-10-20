@@ -1642,6 +1642,15 @@ void lcView::DrawGrid()
 
 	if (GridSizeValid)
 	{
+		// Limit the grid size so the cell counts below can't overflow.
+		constexpr float GridLimit = 100000.0f;
+
+		for (int Axis = 0; Axis < 3; Axis++)
+		{
+			Min[Axis] = std::isfinite(Min[Axis]) ? lcClamp(Min[Axis], -GridLimit, GridLimit) : 0.0f;
+			Max[Axis] = std::isfinite(Max[Axis]) ? lcClamp(Max[Axis], -GridLimit, GridLimit) : 0.0f;
+		}
+
 		MinX = (int)(floorf(Min[0] / (20.0f * Spacing))) - 1;
 		MinY = (int)(floorf(Min[1] / (20.0f * Spacing))) - 1;
 		MaxX = (int)(ceilf(Max[0] / (20.0f * Spacing))) + 1;

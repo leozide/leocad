@@ -6693,6 +6693,12 @@ Anisotropic: %5
         <translation type="unfinished">  -html, --export-html &lt;folder&gt;：为模型创建 HTML 页面.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -6803,6 +6809,12 @@ Anisotropic: %5
         <source>Initialize Renderer</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">初始化渲染器</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1447"/>

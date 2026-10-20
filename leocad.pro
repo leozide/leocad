@@ -189,6 +189,7 @@ SOURCES += \
 	common/lc_colorpicker.cpp \
 	common/lc_colors.cpp \
 	common/lc_commands.cpp \
+	common/lc_connectivity.cpp \
 	common/lc_context.cpp \
 	common/lc_doublespinbox.cpp \
 	common/lc_edgecolordialog.cpp \
@@ -227,6 +228,8 @@ SOURCES += \
 	common/lc_scene.cpp \
 	common/lc_selectdialog.cpp \
 	common/lc_setsdatabasedialog.cpp \
+	common/lc_shadowlibrary.cpp \
+	common/lc_shadowparser.cpp \
 	common/lc_shortcuts.cpp \
 	common/lc_spinnerwidget.cpp \
 	common/lc_string.cpp \
@@ -271,6 +274,7 @@ HEADERS += \
 	common/lc_colorpicker.h \
 	common/lc_colors.h \
 	common/lc_commands.h \
+	common/lc_connectivity.h \
 	common/lc_context.h \
 	common/lc_doublespinbox.h \
 	common/lc_edgecolordialog.h \
@@ -313,6 +317,8 @@ HEADERS += \
 	common/lc_scene.h \
 	common/lc_selectdialog.h \
 	common/lc_setsdatabasedialog.h \
+	common/lc_shadowlibrary.h \
+	common/lc_shadowparser.h \
 	common/lc_shortcuts.h \
 	common/lc_spinnerwidget.h \
 	common/lc_string.h \

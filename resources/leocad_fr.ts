@@ -7154,6 +7154,12 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished">  -html, --export-html &lt;folder&gt; : Créez une page HTML pour le modèle.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -7265,6 +7271,12 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <source>Load Pieces Library</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Charger la bibliothèque de pièces</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>

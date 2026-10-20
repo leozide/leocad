@@ -6664,6 +6664,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -6746,6 +6752,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </source>
         <translation>Не указано имя файла.
 </translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1447"/>

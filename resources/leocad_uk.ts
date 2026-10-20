@@ -7240,6 +7240,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
         <translation type="unfinished">  -html, --export-html &lt;folder&gt;: створити сторінку HTML для моделі.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -7347,6 +7353,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>LeoCAD не може завантажити бібліотеку блоків.
 
 Відвідайте https://www.leocad.org для дізнатися як завантажити і встановити бібліотеки блоків.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1447"/>

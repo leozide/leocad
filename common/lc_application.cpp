@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include <stdio.h>
 #include "lc_application.h"
+#include "lc_shadowlibrary.h"
 #include "lc_library.h"
 #include "lc_profile.h"
 #include "project.h"
@@ -760,6 +761,10 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.SaveCSV = true;
 			ParseString(Options.SaveCSVName, false);
 		}
+		else if (Option == QLatin1String("--shadow-library"))
+		{
+			ParseString(Options.ShadowLibraryPath, true);
+		}
 		else if (Option == QLatin1String("-html") || Option == QLatin1String("--export-html"))
 		{
 			Options.SaveHTML = true;
@@ -820,6 +825,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
 			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of pieces used in CSV format.\n");
 			Options.StdOut += tr("  -html, --export-html <folder>: Create an HTML page for the model.\n");
+			Options.StdOut += tr("  --shadow-library <path>: Set the LDCad Shadow Library location to path.\n");
 			Options.StdOut += tr("  -v, --version: Output version information and exit.\n");
 			Options.StdOut += tr("  -?, --help: Display this help message and exit.\n");
 			Options.StdOut += QLatin1String("\n");
@@ -1010,6 +1016,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			StdErr.flush();
 		}
 	}
+
+	if (!Options.ShadowLibraryPath.isEmpty() && !lcShadowLibrary::SetPath(Options.ShadowLibraryPath))
+		StdErr << tr("Could not find a shadow library in '%1'.\n").arg(Options.ShadowLibraryPath);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();

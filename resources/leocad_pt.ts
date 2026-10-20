@@ -6798,6 +6798,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Valores de parâmetro inválidos especificados para a opção '%1': os requisitos são: 1 &lt;= &lt;near&gt; &lt; &lt;far&gt;.</translation>
     </message>
     <message>
+        <location filename="../common/lc_commandline.cpp" line="633"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="788"/>
         <source>  -c, --camera &lt;camera name&gt;: Set the active camera.
 </source>
@@ -7268,6 +7274,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <source>Load Pieces Library</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Carregar biblioteca de peças</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="495"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>

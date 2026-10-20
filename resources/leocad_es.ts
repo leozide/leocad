@@ -6399,6 +6399,12 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
 </translation>
     </message>
     <message>
+        <location filename="../common/lc_commandline.cpp" line="633"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="788"/>
         <source>  -c, --camera &lt;camera name&gt;: Set the active camera.
 </source>
@@ -6931,6 +6937,12 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <source>Load Pieces Library</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Cargar biblioteca de piezas</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="495"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>

@@ -155,6 +155,8 @@ void lcCommandLineOptions::ParseOption(const QString& Option, QStringList& Argum
 		if (ParseString(Option, Arguments, LibPath, true))
 			mLibraryPaths += QPair<QString, bool>(LibPath, false);
 	}
+	else if (Option == QLatin1String("--shadow-library"))
+		ParseString(Option, Arguments, mShadowLibraryPath, true);
 	else if (Option == QLatin1String("-v") || Option == QLatin1String("--version"))
 	{
 		AppendVersion();
@@ -628,6 +630,7 @@ void lcCommandLineOptions::AppendHelp()
 	mStdOut += tr("  [options] can be:\n");
 	mStdOut += tr("  Colors use RRGGBB or RRGGBBAA (alpha last), with an optional # prefix, or transparent.\n");
 	mStdOut += tr("  -l, --libpath <path>: Set the Pieces Library location to path.\n");
+	mStdOut += tr("  --shadow-library <path>: Set the LDCad Shadow Library location to path.\n");
 	mStdOut += tr("  -i, --image [outfile.ext]: Save a picture in the format specified by ext and exit.\n");
 	mStdOut += tr("    Omitted image filename: use the input name and saved image extension. Explicit extensionless filename: PNG.\n");
 	mStdOut += tr("  --background <transparent|RRGGBB|RRGGBBAA>: Set the image background; alpha is last.\n");

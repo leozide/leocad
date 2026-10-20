@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "lc_application.h"
 #include "lc_commandline.h"
+#include "lc_shadowlibrary.h"
 #include "lc_library.h"
 #include "lc_profile.h"
 #include "project.h"
@@ -489,6 +490,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			StdErr.flush();
 		}
 	}
+
+	if (!Options.mShadowLibraryPath.isEmpty() && !lcShadowLibrary::SetPath(Options.mShadowLibraryPath))
+		StdErr << tr("Could not find a shadow library in '%1'.\n").arg(Options.mShadowLibraryPath);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();

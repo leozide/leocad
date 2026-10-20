@@ -5741,7 +5741,8 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 		lcMatrix33 RelativeRotation = MousePiece->GetRelativeRotation();
 
 		lcMatrix33 WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
-		RotationMatrix = lcMul(RotationMatrix, RelativeRotation);
+		// Rotate() expects the rotation in the focus frame.
+		RotationMatrix = lcMul(RelativeRotation, RotationMatrix);
 
 		int Flags;
 		std::vector<lcObject*> Selection;

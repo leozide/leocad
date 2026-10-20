@@ -154,7 +154,13 @@ run on a worker, so file opening and archive extraction stay on that worker. The
 manager stores no file-reader callback or library instance.
 Success returns an owned `lcFile` positioned at zero: disk sources retain
 an open `lcDiskFile`, archive entries and decoded embedded data use `lcMemFile`.
-Opening never searches for another source or parses its contents. Failures carry
+Opening never searches for another source or parses its contents.
+`OpenPieceDataFile()` and `OpenPrimitiveFile()` return the same owning result for
+includes and use `OpenFile()` for disk/archive access. Piece include lookup keeps
+its registered-source precedence and official-first fallback search; each result
+has a separate cursor. The mesh loader consumes the file directly and decides
+whether a missing include is fatal from `RequireAllIncludes`. Directory piece
+building still retries unofficial geometry after an official open or parse failure. Failures carry
 an error; the caller retains the result while consuming the file. Archive access
 is unlocked before image decoding, and returned memory files are independent of
 their archive or embedded source. Each `lcZipFile` serializes its own extraction;

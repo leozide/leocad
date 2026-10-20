@@ -1632,11 +1632,6 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			bool Mirror = IncludeTransform.Determinant() < 0.0f;
 			bool IncludeLoaded = true;
 
-			const auto FileCallback = [this, &IncludeTransform, &ColorCode, &Mirror, &InvertNext, &MeshDataType, &IncludeLoaded](lcFile& File)
-			{
-				IncludeLoaded = ReadMeshData(File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
-			};
-
 			if (Primitive)
 			{
 				// Read shared loading state under the library's primitive lock.
@@ -1659,20 +1654,24 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				}
 				else
 				{
-					if (mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
-						IncludeLoaded = false;
+					const lcResult<std::unique_ptr<lcFile>> IncludeFile = Library->OpenPrimitiveFile(Primitive);
 
-					Library->GetPrimitiveFile(Primitive, FileCallback);
+					if (IncludeFile)
+						IncludeLoaded = ReadMeshData(*IncludeFile.value(), IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
+					else
+						IncludeLoaded = !mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes);
 				}
 
 				mMeshData.mHasStyleStud |= Primitive->mStudStyle | Primitive->mMeshData.mHasStyleStud;
 			}
 			else
 			{
-				if (mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
-					IncludeLoaded = false;
+				const lcResult<std::unique_ptr<lcFile>> IncludeFile = Library->OpenPieceDataFile(FileName);
 
-				Library->GetPieceDataFile(FileName, FileCallback);
+				if (IncludeFile)
+					IncludeLoaded = ReadMeshData(*IncludeFile.value(), IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
+				else
+					IncludeLoaded = !mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes);
 			}
 
 			if (!IncludeLoaded)

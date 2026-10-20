@@ -274,9 +274,10 @@ public:
 	// Loads shared primitive data, waiting for another worker when necessary.
 	lcResult<void> LoadPrimitive(lcLibraryPrimitive* Primitive);
 
-	// Opens an include for the synchronous callback on the reading thread.
-	void GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback);
-	void GetPieceDataFile(const char* FileName, std::function<void(lcFile& File)> Callback);
+	// Opens an owned include on the reading thread, positioned at zero, or returns an error.
+	// Piece lookup preserves official-first search order; callers decide whether missing includes are fatal.
+	lcResult<std::unique_ptr<lcFile>> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive);
+	lcResult<std::unique_ptr<lcFile>> OpenPieceDataFile(const char* PieceName);
 
 	// Worker builds poll this shutdown flag without consulting live UI state.
 	bool ShouldCancelLoading() const

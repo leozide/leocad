@@ -1754,28 +1754,33 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 
 		if (Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
 		{
-			lcMemFile PieceFile;
+			lcFileSource FileSource;
+			FileSource.ArchiveType = static_cast<int>(Source.ZipFileType);
+			FileSource.ArchiveIndex = Source.ZipFileIndex;
+			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(FileSource);
 
-			if (mZipFiles[static_cast<int>(Source.ZipFileType)]->ExtractFile(Source.ZipFileIndex, PieceFile))
-				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
+			if (File)
+				Loaded = MeshLoader.LoadMesh(*File.value(), LC_MESHDATA_SHARED);
 		}
 		else
 		{
-			lcDiskFile PieceFile;
+			lcFileSource FileSource;
+			FileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("parts/") + Source.FileName);
+			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(FileSource);
 
-			PieceFile.SetFileName(QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("parts/") + Source.FileName));
+			if (File)
+				Loaded = MeshLoader.LoadMesh(*File.value(), LC_MESHDATA_SHARED);
 
-			if (PieceFile.Open(QIODevice::ReadOnly))
-				Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
-
+			// Directory loading retries unofficial geometry after an open or parse failure.
 			if (mHasUnofficial && !Loaded)
 			{
 				MeshData.Clear();
 
-				PieceFile.SetFileName(QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("unofficial/parts/") + Source.FileName));
+				FileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("unofficial/parts/") + Source.FileName);
+				const lcResult<std::unique_ptr<lcFile>> UnofficialFile = OpenFile(FileSource);
 
-				if (PieceFile.Open(QIODevice::ReadOnly))
-					Loaded = MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED);
+				if (UnofficialFile)
+					Loaded = MeshLoader.LoadMesh(*UnofficialFile.value(), LC_MESHDATA_SHARED);
 			}
 		}
 
@@ -1816,126 +1821,106 @@ void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Sourc
 	WriteArchiveCacheFile(Source.CachePath, MeshData);
 }
 
-void lcPiecesLibrary::GetPrimitiveFile(lcLibraryPrimitive* Primitive, std::function<void(lcFile& File)> Callback)
+lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)
 {
-	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-	{
-		lcMemFile IncludeFile;
+	lcFileSource Source;
 
-		if (mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, IncludeFile))
-			Callback(IncludeFile);
+	if (Primitive->mZipFileType != lcZipFileType::Count)
+	{
+		Source.ArchiveType = static_cast<int>(Primitive->mZipFileType);
+		Source.ArchiveIndex = Primitive->mZipFileIndex;
 	}
 	else
-	{
-		lcDiskFile IncludeFile(Primitive->mFileName);
+		Source.FilePath = Primitive->mFileName;
 
-		if (IncludeFile.Open(QIODevice::ReadOnly))
-			Callback(IncludeFile);
-	}
+	return OpenFile(Source);
 }
 
-void lcPiecesLibrary::GetPieceDataFile(const char* PieceName, std::function<void(lcFile& File)> Callback)
+lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char* PieceName)
 {
 	const std::optional<lcPieceManager::FileInfo> FileInfo = mPieceManager->GetPieceDataFileInfo(PieceName);
 
-	if (FileInfo)
+	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
 	{
-		if (mZipFiles[static_cast<int>(lcZipFileType::Official)] && FileInfo->ZipFileType != lcZipFileType::Count)
+		if (FileInfo && FileInfo->ZipFileType != lcZipFileType::Count)
 		{
-			lcMemFile IncludeFile;
-
-			if (mZipFiles[static_cast<int>(FileInfo->ZipFileType)]->ExtractFile(FileInfo->ZipFileIndex, IncludeFile))
-				Callback(IncludeFile);
+			lcFileSource Source;
+			Source.ArchiveType = static_cast<int>(FileInfo->ZipFileType);
+			Source.ArchiveIndex = FileInfo->ZipFileIndex;
+			return OpenFile(Source);
 		}
-		else
+
+		if (!FileInfo)
 		{
-			lcDiskFile IncludeFile;
-			char FileName[LC_MAXPATH];
-			bool Found = false;
-
-			snprintf(FileName, sizeof(FileName), "parts/%s", FileInfo->FileName.c_str());
-			IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-			Found = IncludeFile.Open(QIODevice::ReadOnly);
-
-			if (mHasUnofficial && !Found)
+			for (const lcZipFileType Type : { lcZipFileType::Official, lcZipFileType::Unofficial })
 			{
-				snprintf(FileName, sizeof(FileName), "unofficial/parts/%s", FileInfo->FileName.c_str());
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(QLatin1String(FileName)));
-				Found = IncludeFile.Open(QIODevice::ReadOnly);
+				const std::unique_ptr<lcZipFile>& Archive = mZipFiles[static_cast<int>(Type)];
+
+				if (!Archive)
+					continue;
+
+				const QString Prefix = Type == lcZipFileType::Official ? QStringLiteral("ldraw/") : QString();
+
+				for (const QString& Folder : { QStringLiteral("parts/"), QStringLiteral("p/") })
+				{
+					const QByteArray FileName = (Prefix + Folder + QString::fromLatin1(PieceName)).toLatin1();
+
+					for (quint32 Index = 0; Index < Archive->mFiles.size(); Index++)
+					{
+						if (qstricmp(Archive->mFiles[Index].file_name, FileName.constData()))
+							continue;
+
+						lcFileSource Source;
+						Source.ArchiveType = static_cast<int>(Type);
+						Source.ArchiveIndex = Index;
+
+						if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
+							return File;
+
+						break;
+					}
+				}
 			}
 
-			if (Found)
-				Callback(IncludeFile);
+			return lcUnexpected(tr("Could not open included file %1.").arg(QString::fromLatin1(PieceName)));
 		}
 	}
-	else
+
+	const QString Name = QString::fromLatin1(FileInfo ? FileInfo->FileName.c_str() : PieceName);
+	std::vector<QString> Folders(1, QStringLiteral("parts/"));
+
+	if (!FileInfo)
+		Folders.emplace_back(QStringLiteral("p/"));
+
+	if (mHasUnofficial)
 	{
-		bool Found = false;
+		Folders.emplace_back(QStringLiteral("unofficial/parts/"));
 
-		if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
-		{
-			lcMemFile IncludeFile;
+		if (!FileInfo)
+			Folders.emplace_back(QStringLiteral("unofficial/p/"));
+	}
 
-			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const char* Folder, lcZipFileType ZipFileType)
-			{
-				char IncludeFileName[LC_MAXPATH];
-				snprintf(IncludeFileName, sizeof(IncludeFileName), Folder, PieceName);
-				return mZipFiles[static_cast<int>(ZipFileType)]->ExtractFile(IncludeFileName, IncludeFile);
-			};
+	for (const QString& Folder : Folders)
+	{
+		const QString FileName = Folder + Name;
+		lcFileSource Source;
+		Source.FilePath = mLibraryDir.absoluteFilePath(FileName);
 
-			Found = LoadIncludeFile("ldraw/parts/%s", lcZipFileType::Official);
-
-			if (!Found)
-				Found = LoadIncludeFile("ldraw/p/%s", lcZipFileType::Official);
-
-			if (mZipFiles[static_cast<int>(lcZipFileType::Unofficial)] && !Found)
-			{
-				Found = LoadIncludeFile("parts/%s", lcZipFileType::Unofficial);
-
-				if (!Found)
-					Found = LoadIncludeFile("p/%s", lcZipFileType::Unofficial);
-			}
-
-			if (Found)
-				Callback(IncludeFile);
-		}
-		else
-		{
-			lcDiskFile IncludeFile;
-
-			auto LoadIncludeFile = [&IncludeFile, PieceName, this](const QLatin1String& Folder)
-			{
-				const QString IncludeFileName = Folder + PieceName;
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(IncludeFileName));
-				if (IncludeFile.Open(QIODevice::ReadOnly))
-					return true;
+		if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
+			return File;
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-				// todo: search the parts/primitive lists and get the file name from there instead of using toLower
-				IncludeFile.SetFileName(mLibraryDir.absoluteFilePath(IncludeFileName.toLower()));
-				return IncludeFile.Open(QIODevice::ReadOnly);
-#else
-				return false;
-#endif
-			};
+		if (!FileInfo)
+		{
+			Source.FilePath = mLibraryDir.absoluteFilePath(FileName.toLower());
 
-			Found = LoadIncludeFile(QLatin1String("parts/"));
-
-			if (!Found)
-				Found = LoadIncludeFile(QLatin1String("p/"));
-
-			if (mHasUnofficial && !Found)
-			{
-				Found = LoadIncludeFile(QLatin1String("unofficial/parts/"));
-
-				if (!Found)
-					Found = LoadIncludeFile(QLatin1String("unofficial/p/"));
-			}
-
-			if (Found)
-				Callback(IncludeFile);
+			if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
+				return File;
 		}
+#endif
 	}
+
+	return lcUnexpected(tr("Could not open included file %1.").arg(QString::fromLatin1(PieceName)));
 }
 
 void lcPiecesLibrary::ReleaseBuffers()
@@ -2281,10 +2266,9 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 
 	lcMeshLoader MeshLoader(Primitive->mMeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
-	const auto LoadFailed = [this, Primitive, &MeshLoader]() -> lcResult<void>
+	const auto LoadFailed = [this, Primitive](QString Error) -> lcResult<void>
 	{
 		Primitive->mMeshData.Clear();
-		QString Error = MeshLoader.GetError();
 
 		if (Error.isEmpty())
 			Error = tr("Could not load included file %1.").arg(QString::fromLatin1(Primitive->mName));
@@ -2296,64 +2280,38 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 		return lcUnexpected(std::move(Error));
 	};
 
-	if (mZipFiles[static_cast<int>(lcZipFileType::Official)])
+	lcLibraryPrimitive* LowPrimitive = nullptr;
+
+	if (mZipFiles[static_cast<int>(lcZipFileType::Official)] && Primitive->mStud && !Primitive->mStudStyle)
 	{
-		lcLibraryPrimitive* LowPrimitive = nullptr;
-
-		lcMemFile PrimFile;
-
-		if (Primitive->mStud && !Primitive->mStudStyle)
+		if (strncmp(Primitive->mName, "8/", 2)) // todo: low LOD for loose file libraries
 		{
-			if (strncmp(Primitive->mName, "8/", 2)) // todo: this is currently the only place that uses mName so use mFileName instead. this should also be done for the loose file libraries.
-			{
-				char Name[LC_PIECE_NAME_LEN];
-				lcstrcpy(Name, "8/");
-				lcstrcat(Name, Primitive->mName);
-				lcstrupr(Name);
+			char Name[LC_PIECE_NAME_LEN];
+			lcstrcpy(Name, "8/");
+			lcstrcat(Name, Primitive->mName);
+			lcstrupr(Name);
 
-				LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo, because the low stud gets added as shared
-			}
-		}
-
-		if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
-			return LoadFailed();
-
-		if (!LowPrimitive)
-		{
-			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
-				return LoadFailed();
-		}
-		else
-		{
-			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_HIGH))
-				return LoadFailed();
-
-			if (!mZipFiles[static_cast<int>(LowPrimitive->mZipFileType)]->ExtractFile(LowPrimitive->mZipFileIndex, PrimFile))
-				return LoadFailed();
-
-			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_LOW))
-				return LoadFailed();
+			LowPrimitive = FindPrimitive(Name); // todo: low primitives don't work with studlogo
 		}
 	}
-	else
+
+	const lcResult<std::unique_ptr<lcFile>> File = OpenPrimitiveFile(Primitive);
+
+	if (!File)
+		return LoadFailed(File.error());
+
+	if (!MeshLoader.LoadMesh(*File.value(), LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
+		return LoadFailed(MeshLoader.GetError());
+
+	if (LowPrimitive)
 	{
-		if (Primitive->mZipFileType == lcZipFileType::Count)
-		{
-			lcDiskFile PrimFile(Primitive->mFileName);
+		const lcResult<std::unique_ptr<lcFile>> LowFile = OpenPrimitiveFile(LowPrimitive);
 
-			if (!PrimFile.Open(QIODevice::ReadOnly) || !MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED)) // todo: LOD like the zip files
-				return LoadFailed();
-		}
-		else
-		{
-			lcMemFile PrimFile;
+		if (!LowFile)
+			return LoadFailed(LowFile.error());
 
-			if (!mZipFiles[static_cast<int>(Primitive->mZipFileType)]->ExtractFile(Primitive->mZipFileIndex, PrimFile))
-				return LoadFailed();
-
-			if (!MeshLoader.LoadMesh(PrimFile, LC_MESHDATA_SHARED))
-				return LoadFailed();
-		}
+		if (!MeshLoader.LoadMesh(*LowFile.value(), LC_MESHDATA_LOW))
+			return LoadFailed(MeshLoader.GetError());
 	}
 
 	mPrimitiveMutex.lock();

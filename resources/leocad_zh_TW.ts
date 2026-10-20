@@ -6367,6 +6367,12 @@ Anisotropic: %5
         <translation type="unfinished">  -l, --libpath &lt;path&gt;：將片段庫位置設置為路徑.</translation>
     </message>
     <message>
+        <location filename="../common/lc_commandline.cpp" line="633"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="782"/>
         <source>  -i, --image &lt;outfile.ext&gt;: Save a picture in the format specified by ext and exit.
 </source>
@@ -6795,6 +6801,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <source>Load Pieces Library</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">載入零件庫</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="495"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>

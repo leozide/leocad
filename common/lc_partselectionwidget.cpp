@@ -319,9 +319,9 @@ void lcPartSelectionListModel::SetFilter(const QString& FilterString)
 
 		if (!PieceData)
 			Visible = true;
-		else if (!mShowDecoratedParts && PieceData->IsPatterned() && !PieceData->IsProjectPiece())
+		else if (!mShowDecoratedParts && PieceData->IsDecorated() && !PieceData->IsProjectPiece())
 			Visible = false;
-		else if (!mShowPartAliases && PieceData->m_strDescription[0] == '=')
+		else if (!mShowPartAliases && PieceData->IsAlias())
 			Visible = false;
 		else if (mPartFilterType == lcPartFilterType::Default)
 		{

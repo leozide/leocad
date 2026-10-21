@@ -29,8 +29,8 @@
 #  define DEF_MEM_LEVEL	 MAX_MEM_LEVEL
 #endif
 
-// Source precedence affects both cached descriptions and geometry.
-constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0111;
+// Description indices include classification flags and resolved patterned parent IDs.
+constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0113;
 constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
 
 enum class lcLibraryCacheFlag : quint32
@@ -335,7 +335,7 @@ lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, cons
 	ProjectPath.clear();
 
 	if (!TextureName[0] || strlen(TextureName) >= LC_TEXTURE_NAME_LEN)
-		return {};
+		return lcFileSource();
 
 	const bool ArchiveLibrary = static_cast<bool>(mZipFiles[static_cast<int>(lcZipFileType::Official)]);
 	lcFileSource Source;
@@ -799,6 +799,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 			}
 		}
 
+		ClassifyPieces();
 		SaveArchiveCacheIndex(IndexFileName);
 	}
 }
@@ -887,25 +888,37 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 {
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 	lcMemFile IndexFile;
-	std::vector<const char*> CachedDescriptions;
 
-	if (ReadDirectoryCacheFile(IndexFileName, IndexFile))
+	struct CachedDescription
 	{
-		QString LibraryPath = IndexFile.ReadQString();
+		lcPieceData::CacheData CacheData;
+		quint8 FolderType;
+		quint64 FileTime;
+	};
 
-		if (LibraryPath == mLibraryDir.absolutePath())
+	std::map<std::string, CachedDescription> CachedDescriptions;
+
+	if (ReadDirectoryCacheFile(IndexFileName, IndexFile) && IndexFile.ReadQString() == mLibraryDir.absolutePath())
+	{
+		quint32 Count;
+
+		if (IndexFile.ReadU32(&Count, 1) == 1)
 		{
-			int NumDescriptions = IndexFile.ReadU32();
-			CachedDescriptions.reserve(NumDescriptions);
-
-			while (NumDescriptions--)
+			for (quint32 Index = 0; Index < Count; Index++)
 			{
-				const char* FileName = (const char*)IndexFile.mBuffer + IndexFile.GetPosition();
-				CachedDescriptions.push_back(FileName);
-				IndexFile.Seek(strlen(FileName) + 1, SEEK_CUR);
-				const char* Description = (const char*)IndexFile.mBuffer + IndexFile.GetPosition();
-				IndexFile.Seek(strlen(Description) + 1, SEEK_CUR);
-				IndexFile.Seek(4 + 1 + 8, SEEK_CUR);
+				std::string FileName;
+				CachedDescription Entry;
+
+				if (!ReadIndexString(IndexFile, FileName) || FileName.empty() ||
+					!ReadIndexString(IndexFile, Entry.CacheData.Description) || !ReadIndexString(IndexFile, Entry.CacheData.PatternParentId) ||
+					IndexFile.ReadU8(&Entry.CacheData.Flags, 1) != 1 ||
+					IndexFile.ReadU8(&Entry.FolderType, 1) != 1 || IndexFile.ReadU64(&Entry.FileTime, 1) != 1 ||
+					Entry.FolderType >= static_cast<quint8>(lcLibraryFolderType::Count) ||
+					!CachedDescriptions.emplace(std::move(FileName), std::move(Entry)).second)
+				{
+					CachedDescriptions.clear();
+					break;
+				}
 			}
 		}
 	}
@@ -923,13 +936,14 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 				continue;
 
 			lcPieceData* PieceData = mPieceManager->CreateLibraryPieceData(Name, FileString.constData());
+
 			PieceData->mFolderType = FolderIdx;
 			PieceData->mFolderIndex = FileIdx;
 		}
 	}
 
 	QAtomicInt FilesLoaded;
-	bool Modified = false;
+	std::atomic_bool Modified(false);
 
 	auto ReadDescriptions = [&FileLists, &CachedDescriptions, &FilesLoaded, &Modified](lcPieceData* PieceData)
 	{
@@ -938,30 +952,14 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 		lcDiskFile PieceFile(FileLists[PieceData->mFolderType][PieceData->mFolderIndex].absoluteFilePath());
 		char Line[1024];
 
-		if (!CachedDescriptions.empty())
-		{
-			auto DescriptionCompare = [](const void* Key, const void* Element)
-			{
-				return strcmp((const char*)Key, *(const char**)Element);
-			};
+		const auto CachedIt = CachedDescriptions.find(PieceData->mFileName);
+		const quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
 
-			void* CachedDescription = bsearch(PieceData->mFileName, &CachedDescriptions.front(), CachedDescriptions.size(), sizeof(char*), DescriptionCompare);
+		if (CachedIt != CachedDescriptions.end() && CachedIt->second.FileTime == FileTime && CachedIt->second.FolderType == PieceData->mFolderType &&
+			PieceData->InitializeFromCache(CachedIt->second.CacheData))
+			return;
 
-			if (CachedDescription)
-			{
-				const char* FileName = *(const char**)CachedDescription;
-				const char* Description = FileName + strlen(FileName) + 1;
-				const uint64_t CachedFileTime = *(uint64_t*)(Description + strlen(Description) + 1 + 4 + 1);
-
-				quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
-
-				if (FileTime == CachedFileTime)
-				{
-					lcstrcpy(PieceData->m_strDescription, Description);
-					return;
-				}
-			}
-		}
+		Modified.store(true);
 
 		if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -983,8 +981,6 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			*Dst = 0;
 			break;
 		}
-
-		Modified = true;
 	};
 
 	QProgressDialog* ProgressDialog = new QProgressDialog(nullptr);
@@ -1013,35 +1009,27 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 	ProgressDialog->deleteLater();
 
-	if (Modified)
+	// A target's change, addition or removal can invalidate otherwise unchanged aliases.
+	if (Modified.load() || CachedDescriptions.size() != LibraryPieceData.size())
 	{
+		ClassifyPieces();
+
 		lcMemFile NewIndexFile;
 
 		NewIndexFile.WriteQString(mLibraryDir.absolutePath());
+		NewIndexFile.WriteU32(static_cast<quint32>(LibraryPieceData.size()));
 
-		NewIndexFile.WriteU32((quint32)mPieceManager->GetLibraryPieceDataCount());
-
-		std::vector<lcPieceData*> SortedPieces = mPieceManager->GetLibraryPieceData();
-
-		auto PieceDataCompare = [](lcPieceData* PieceData1, lcPieceData* PieceData2)
+		for (const lcPieceData* PieceData : LibraryPieceData)
 		{
-			return strcmp(PieceData1->mFileName, PieceData2->mFileName) < 0;
-		};
+			const lcPieceData::CacheData CacheData = PieceData->GetCacheData();
 
-		std::sort(SortedPieces.begin(), SortedPieces.end(), PieceDataCompare);
-
-		for (const lcPieceData* PieceData : SortedPieces)
-		{
-			if (NewIndexFile.WriteBuffer(PieceData->mFileName, strlen(PieceData->mFileName) + 1) == 0)
+			if (!WriteIndexString(NewIndexFile, PieceData->mFileName) ||
+				!WriteIndexString(NewIndexFile, CacheData.Description) || !WriteIndexString(NewIndexFile, CacheData.PatternParentId))
 				return;
 
-			if (NewIndexFile.WriteBuffer(PieceData->m_strDescription, strlen(PieceData->m_strDescription) + 1) == 0)
-				return;
-
+			NewIndexFile.WriteU8(CacheData.Flags);
 			NewIndexFile.WriteU8(static_cast<quint8>(PieceData->mFolderType));
-
-			quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
-
+			const quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
 			NewIndexFile.WriteU64(FileTime);
 		}
 
@@ -1298,6 +1286,169 @@ bool lcPiecesLibrary::WriteDirectoryCacheFile(const QString& FileName, lcMemFile
 	return true;
 }
 
+bool lcPiecesLibrary::ReadIndexString(lcMemFile& File, std::string& String)
+{
+	quint8 Length;
+
+	if (File.ReadU8(&Length, 1) != 1)
+		return false;
+
+	String.resize(Length);
+
+	return File.ReadBuffer(String.data(), Length) == Length;
+}
+
+bool lcPiecesLibrary::WriteIndexString(lcMemFile& File, const std::string& String)
+{
+	if (String.size() > 255)
+		return false;
+
+	const quint8 Length = static_cast<quint8>(String.size());
+
+	return File.WriteU8(&Length, 1) == 1 && File.WriteBuffer(String.data(), Length) == Length;
+}
+
+std::string lcPiecesLibrary::ReadAliasTarget(lcFile& File)
+{
+	std::string Target;
+	char Buffer[1024];
+
+	while (File.ReadLine(Buffer, sizeof(Buffer)))
+	{
+		QString Line = QString::fromLatin1(Buffer).trimmed();
+
+		if (Line.isEmpty())
+			continue;
+
+		QTextStream Stream(&Line, QIODevice::ReadOnly);
+		int LineType;
+
+		Stream >> LineType;
+
+		if (Stream.status() != QTextStream::Ok)
+			return std::string();
+
+		if (LineType == 0)
+			continue;
+
+		// Aliases contain exactly one reference and no direct geometry.
+		if (LineType != 1 || !Target.empty())
+			return std::string();
+
+		int Color;
+		Stream >> Color;
+
+		for (int ValueIndex = 0; ValueIndex < 12; ValueIndex++)
+		{
+			float Value;
+			Stream >> Value;
+		}
+
+		if (Stream.status() != QTextStream::Ok)
+			return std::string();
+
+		const QByteArray Name = Stream.readAll().trimmed().toLatin1();
+
+		if (Name.isEmpty() || Name.size() >= LC_PIECE_NAME_LEN)
+			return std::string();
+
+		Target = NormalizePieceDataName(Name.constData());
+	}
+
+	return Target;
+}
+
+void lcPiecesLibrary::ClassifyPieces()
+{
+	const std::vector<lcPieceData*> Parts = mPieceManager->GetLibraryPieceData();
+	std::unordered_map<lcPieceData*, lcPieceData*> AliasTargets;
+
+	for (lcPieceData* PieceData : Parts)
+	{
+		const std::string Name = NormalizePieceDataName(PieceData->mFileName);
+		const std::vector<std::string> ParentIds = PieceData->Classify(Name);
+
+		if (PieceData->IsAlias())
+		{
+			lcFileSource Source;
+
+			if (PieceData->mZipFileType != lcZipFileType::Count)
+			{
+				Source.ArchiveType = static_cast<int>(PieceData->mZipFileType);
+				Source.ArchiveIndex = PieceData->mZipFileIndex;
+			}
+			else
+			{
+				const QString Folder = PieceData->mFolderType == static_cast<int>(lcLibraryFolderType::Unofficial) ? QStringLiteral("unofficial/parts/") : QStringLiteral("parts/");
+				Source.FilePath = mLibraryDir.absoluteFilePath(Folder + QString::fromLatin1(PieceData->mFileName));
+			}
+
+			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source);
+			lcPieceData* Target = nullptr;
+
+			if (File)
+			{
+				const std::string TargetId = ReadAliasTarget(*File.value());
+
+				if (!TargetId.empty())
+					Target = FindPieceData(TargetId.c_str(), nullptr);
+			}
+
+			AliasTargets.emplace(PieceData, Target);
+			continue;
+		}
+
+		for (const std::string& ParentId : ParentIds)
+		{
+			const lcPieceData* Parent = FindPieceData(ParentId.c_str(), nullptr);
+
+			if (Parent && Parent->IsLibraryPiece())
+			{
+				PieceData->SetPatternParentId(ParentId);
+				break;
+			}
+		}
+	}
+
+	std::unordered_set<lcPieceData*> ResolvedAliases;
+
+	for (const auto& [Alias, Target] : AliasTargets)
+	{
+		if (ResolvedAliases.find(Alias) != ResolvedAliases.end())
+			continue;
+
+		std::vector<lcPieceData*> Chain;
+		lcPieceData* Current = Alias;
+		bool Cycle = false;
+
+		while (Current)
+		{
+			const auto TargetIt = AliasTargets.find(Current);
+
+			if (TargetIt == AliasTargets.end() || ResolvedAliases.find(Current) != ResolvedAliases.end())
+				break;
+
+			if (std::find(Chain.begin(), Chain.end(), Current) != Chain.end())
+			{
+				Cycle = true;
+				break;
+			}
+
+			Chain.push_back(Current);
+			Current = TargetIt->second;
+		}
+
+		// Only the referencing alias inherits decoration from its target.
+		for (auto PieceIt = Chain.rbegin(); PieceIt != Chain.rend(); PieceIt++)
+		{
+			lcPieceData* PieceData = *PieceIt;
+			PieceData->SetAliasTarget(Cycle ? nullptr : Current);
+			Current = PieceData;
+			ResolvedAliases.insert(PieceData);
+		}
+	}
+}
+
 bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
@@ -1307,22 +1458,16 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 
 	quint32 NumFiles;
 
-	if (IndexFile.ReadBuffer((char*)&NumFiles, sizeof(NumFiles)) == 0 || NumFiles != mPieceManager->GetLibraryPieceDataCount())
+	if (IndexFile.ReadU32(&NumFiles, 1) != 1 || NumFiles != mPieceManager->GetLibraryPieceDataCount())
 		return false;
 
 	for (lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
 	{
-		quint8 Length;
+		lcPieceData::CacheData CacheData;
 
-		static_assert(sizeof(PieceData->m_strDescription) == 256);
-
-		if (IndexFile.ReadBuffer((char*)&Length, sizeof(Length)) == 0)
+		if (!ReadIndexString(IndexFile, CacheData.Description) || !ReadIndexString(IndexFile, CacheData.PatternParentId) ||
+			IndexFile.ReadU8(&CacheData.Flags, 1) != 1 || !PieceData->InitializeFromCache(CacheData))
 			return false;
-
-		if (IndexFile.ReadBuffer((char*)PieceData->m_strDescription, Length) == 0)
-			return false;
-
-		PieceData->m_strDescription[Length] = 0;
 	}
 
 	return true;
@@ -1339,13 +1484,12 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 
 	for (const lcPieceData* PieceData : mPieceManager->GetLibraryPieceData())
 	{
-		const quint8 Length = (quint8)strlen(PieceData->m_strDescription);
+		const lcPieceData::CacheData CacheData = PieceData->GetCacheData();
 
-		if (IndexFile.WriteBuffer((char*)&Length, sizeof(Length)) == 0)
+		if (!WriteIndexString(IndexFile, CacheData.Description) || !WriteIndexString(IndexFile, CacheData.PatternParentId))
 			return false;
 
-		if (IndexFile.WriteBuffer((char*)PieceData->m_strDescription, Length) == 0)
-			return false;
+		IndexFile.WriteU8(CacheData.Flags);
 	}
 
 	return WriteArchiveCacheFile(FileName, IndexFile);
@@ -2301,17 +2445,9 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 		}
 
 		// Check if it's a patterned piece.
-		if (PieceData->IsPatterned())
+		if (PieceData->IsDecorated())
 		{
-			lcPieceData* Parent;
-
-			// Find the parent of this patterned piece.
-			char ParentName[LC_PIECE_NAME_LEN];
-			lcstrcpy(ParentName, PieceData->mFileName);
-			*strchr(ParentName, 'P') = '\0';
-			lcstrcat(ParentName, ".dat");
-
-			Parent = FindPieceData(ParentName, nullptr);
+			lcPieceData* Parent = FindPieceData(PieceData->GetPatternParentId().c_str(), nullptr);
 
 			if (Parent)
 			{
@@ -2326,7 +2462,7 @@ void lcPiecesLibrary::GetCategoryEntries(const char* CategoryKeywords, bool Grou
 			}
 			else
 			{
-				// Patterned pieces should have a parent but in case they don't just add them anyway.
+				// Decorations without a plain parent remain individual entries.
 				SinglePieces.emplace_back(PieceData);
 			}
 		}
@@ -2408,6 +2544,8 @@ bool lcPiecesLibrary::LoadBuiltinPieceLibrary()
 			break;
 		}
 	}
+
+	ClassifyPieces();
 
 	lcLoadDefaultColors(mStudStyle);
 	UpdateLoadingMeshColors();

@@ -368,7 +368,7 @@ protected:
 	bool ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
 	bool WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
-	// Restores/saves descriptions in library index order.
+	// Restores/saves descriptions and patterned parent IDs in library index order.
 	bool LoadCacheIndex(const QString& FileName);
 	bool SaveArchiveCacheIndex(const QString& FileName);
 
@@ -395,6 +395,17 @@ protected:
 	void ScheduleBufferRepack();
 
 	void ReleaseBuffers();
+
+private:
+	// Classifies descriptions, decorations and alias parents after all parts are registered.
+	void ClassifyPieces();
+	static std::string ReadAliasTarget(lcFile& File);
+
+	// Description cache strings are bounded to the piece name/description length limit.
+	static bool ReadIndexString(lcMemFile& File, std::string& String);
+	static bool WriteIndexString(lcMemFile& File, const std::string& String);
+
+protected:
 
 	// Library directory, archive readers and primitive sources; workers drain before replacement or teardown.
 	QDir mLibraryDir;
@@ -442,5 +453,5 @@ protected:
 	bool mBufferRepackScheduled = false;
 
 	// Shutdown flag polled by workers while the UI thread drains outstanding builds.
-	std::atomic_bool mCancelLoading{ false };
+	std::atomic_bool mCancelLoading = false;
 };

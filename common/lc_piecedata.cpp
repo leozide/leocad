@@ -2,7 +2,6 @@
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
-#include "lc_texture.h"
 #include "lc_piecedata.h"
 #include "lc_string.h"
 #include "lc_library.h"
@@ -12,7 +11,6 @@
 #include "lc_scene.h"
 #include "lc_synth.h"
 #include "lc_traintrack.h"
-#include <locale.h>
 
 lcPieceData::lcPieceData(bool IsLibraryPiece)
 	: mIsLibraryPiece(IsLibraryPiece)
@@ -25,6 +23,124 @@ lcPieceData::lcPieceData(bool IsLibraryPiece)
 	SetLoadingBoundingBox();
 	mFileName[0] = 0;
 	m_strDescription[0] = 0;
+}
+
+bool lcPieceData::HasDecorationDescription(const char* Description)
+{
+	// Assemblies and intrinsically printed parts may have no pattern suffix.
+	std::string PreviousWord;
+	bool With = false;
+
+	for (const char* Position = Description; *Position;)
+	{
+		std::string Word;
+
+		while ((*Position >= 'A' && *Position <= 'Z') || (*Position >= 'a' && *Position <= 'z'))
+		{
+			char Character = *Position++;
+
+			if (Character >= 'a' && Character <= 'z')
+				Character += 'A' - 'a';
+
+			Word.push_back(Character);
+		}
+
+		if (Word.empty())
+		{
+			Position++;
+			continue;
+		}
+
+		if (PreviousWord != "WITHOUT" && (Word == "PATTERN" || Word == "PATTERNS" || Word == "PATTERNED" || (With && (Word == "STICKER" || Word == "STICKERS"))))
+			return true;
+
+		if (Word == "WITH")
+			With = true;
+		else if (Word == "WITHOUT")
+			With = false;
+
+		PreviousWord = std::move(Word);
+	}
+
+	return false;
+}
+
+std::vector<std::string> lcPieceData::Classify(std::string_view Name)
+{
+	mPatternParentId.clear();
+	mFlags = Flags();
+
+	if (!IsLibraryPiece())
+		return std::vector<std::string>();
+
+	if (m_strDescription[0] == '=')
+		mFlags |= Flag::Alias;
+	else if (m_strDescription[0] == '~')
+		mFlags |= Flag::SubPiece;
+
+	if (HasDecorationDescription(m_strDescription))
+		mFlags |= Flag::Decorated;
+
+	if (IsAlias())
+		return std::vector<std::string>();
+
+	if (Name.size() <= 4 || Name.compare(Name.size() - 4, 4, ".DAT") != 0)
+		return std::vector<std::string>();
+
+	const std::string_view Stem = Name.substr(0, Name.size() - 4);
+
+	const size_t NumberStart = Stem[0] == 'U' || Stem[0] == 'T' || Stem[0] == 'S' ? 1 : 0;
+	const size_t NumberEnd = Stem.find_first_not_of("0123456789", NumberStart);
+
+	if (NumberStart == NumberEnd)
+		return std::vector<std::string>();
+
+	std::vector<std::string> ParentIds;
+
+	// P denotes a printed pattern; D denotes a sticker shortcut. Preserve base variants.
+	for (size_t Position = Stem.find_last_of("PD"); Position != std::string_view::npos; Position = Position ? Stem.find_last_of("PD", Position - 1) : std::string_view::npos)
+	{
+		if (Position == 0 || Position + 1 == Stem.size())
+			continue;
+
+		if (Stem.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", Position + 1) != std::string_view::npos)
+			continue;
+
+		mFlags |= Flag::Decorated;
+
+		ParentIds.emplace_back(Stem.substr(0, Position));
+		ParentIds.back() += ".DAT";
+	}
+
+	return ParentIds;
+}
+
+bool lcPieceData::InitializeFromCache(const CacheData& CacheData)
+{
+	const int KnownFlags = static_cast<int>(Flag::Decorated) | static_cast<int>(Flag::Alias) | static_cast<int>(Flag::SubPiece);
+
+	if (CacheData.Description.size() >= sizeof(m_strDescription) || CacheData.PatternParentId.size() >= LC_PIECE_NAME_LEN || (CacheData.Flags & ~KnownFlags) != 0)
+		return false;
+
+	lcstrcpy(m_strDescription, CacheData.Description.c_str());
+	mPatternParentId = CacheData.PatternParentId;
+	mFlags = Flags(static_cast<Flag>(CacheData.Flags));
+
+	return true;
+}
+
+lcPieceData::CacheData lcPieceData::GetCacheData() const
+{
+	return { m_strDescription, mPatternParentId, static_cast<quint8>(static_cast<int>(mFlags)) };
+}
+
+void lcPieceData::SetAliasTarget(const lcPieceData* Target)
+{
+	if (!IsAlias())
+		return;
+
+	mPatternParentId = Target ? Target->GetPatternParentId() : std::string();
+	mFlags.setFlag(Flag::Decorated, HasDecorationDescription(m_strDescription) || (Target && Target->IsDecorated()));
 }
 
 void lcPieceData::SetLoadingBoundingBox()

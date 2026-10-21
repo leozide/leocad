@@ -127,38 +127,48 @@ public:
 		mZipFileIndex = ZipFileIndex;
 	}
 
-	bool IsPatterned() const
+	struct CacheData
 	{
-		if (!IsLibraryPiece())
-			return false;
+		std::string Description;
+		std::string PatternParentId;
+		quint8 Flags;
+	};
 
-		const char* Name = mFileName;
+	// Restores or snapshots the description and classification as one cache record.
+	bool InitializeFromCache(const CacheData& CacheData);
+	CacheData GetCacheData() const;
 
-		// Heuristic: Names matching '^[Uu]?[0-9]*[A-Za-z][^.][^.]' are patterned.
+	// Inherits the resolved target's decoration and parent without retaining the target.
+	void SetAliasTarget(const lcPieceData* Target);
 
-		if (*Name == 'U' || *Name == 'u')
-			Name++;
+	// Updates local flags from the normalized name and description, returning candidate parent IDs.
+	// Resolving those IDs and alias targets belongs to the library.
+	std::vector<std::string> Classify(std::string_view Name);
 
-		while (*Name)
-		{
-			if (*Name < '0' || *Name > '9')
-				break;
+	bool IsDecorated() const
+	{
+		return IsLibraryPiece() && mFlags.testFlag(Flag::Decorated);
+	}
 
-			Name++;
-		}
+	bool IsAlias() const
+	{
+		return mFlags.testFlag(Flag::Alias);
+	}
 
-		if (!*Name || !((*Name >= 'A' && *Name <= 'Z') || (*Name >= 'a' && *Name <= 'z')))
-			return false;
+	// Normalized undecorated library part ID; empty when no parent could be resolved.
+	const std::string& GetPatternParentId() const
+	{
+		return mPatternParentId;
+	}
 
-		if (Name[1] && Name[1] != '.' && Name[2] && Name[2] != '.')
-			return true;
-
-		return false;
+	void SetPatternParentId(std::string ParentId)
+	{
+		mPatternParentId = std::move(ParentId);
 	}
 
 	bool IsSubPiece() const
 	{
-		return (m_strDescription[0] == '~');
+		return mFlags.testFlag(Flag::SubPiece);
 	}
 
 	bool IsProjectPiece() const;
@@ -193,6 +203,14 @@ public:
 	int mFolderIndex;
 
 protected:
+	enum class Flag
+	{
+		Decorated = 0x01,
+		Alias = 0x02,
+		SubPiece = 0x04
+	};
+	Q_DECLARE_FLAGS(Flags, Flag)
+
 	enum class Type
 	{
 		Part,
@@ -210,6 +228,12 @@ protected:
 	Project* mProject = nullptr;
 	lcMesh* mMesh = nullptr;
 	lcBoundingBox mBoundingBox;
+	Flags mFlags;
+	std::string mPatternParentId;
 	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
+
+private:
+	static bool HasDecorationDescription(const char* Description);
+
 };

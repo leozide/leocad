@@ -26,6 +26,7 @@ INCLUDEPATH += qt common
 CONFIG += precompile_header incremental c++17 force_debug_info
 
 win32 {
+	DEFINES += NOMINMAX
 	RC_ICONS = resources/leocad.ico
 	VERSION = 26.9.0.0
 	QMAKE_TARGET_COMPANY = LeoCAD Software

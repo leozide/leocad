@@ -6878,6 +6878,16 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">已保存 '%1'.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="836"/>
+        <source>Load Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="836"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available. Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation type="vanished">LeoCAD 找不到兼容的零件库，因此只有少量零件可用。请访问 https://www.leocad.org 了解如何下载和安装零件库。</translation>
     </message>
@@ -12484,6 +12494,27 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>LGEO 库:</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="406"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <source>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>S&amp;hadow Library:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
+        <source>Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="431"/>
+        <source>Choose the LDCad shadow library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="412"/>
         <source>Restore tab layout</source>
         <translation>恢复标签页布局</translation>
@@ -14026,6 +14057,11 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>打开 LGEO 文件夹</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="536"/>
+        <source>Select Shadow Library Folder</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>

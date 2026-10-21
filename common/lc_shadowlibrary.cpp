@@ -16,6 +16,9 @@ bool lcShadowLibrary::SetPath(const QString& Path)
 	mShadowLines.clear();
 	mCylinders.clear();
 
+	if (Path.isEmpty())
+		return false;
+
 	const QDir Root(Path);
 
 	for (const char* Folder : { "parts", "p" })

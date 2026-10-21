@@ -262,6 +262,7 @@ public:
 	void UpdatePanGesture(int dx, int dy);
 	void EndPanGesture(bool Accept);
 	void StartOrbitTracking();
+	void StopTracking(bool Accept);
 	void CancelTrackingOrClearSelectionAction();
 
 	void SetViewpoint(lcViewpoint Viewpoint);
@@ -335,7 +336,6 @@ protected:
 	void UpdateTrackTool();
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	void StartTracking(lcTrackButton TrackButton);
-	void StopTracking(bool Accept);
 	void OnButtonDown(lcTrackButton TrackButton);
 	void StartPan(int x, int y);
 	void UpdatePan(int x, int y);

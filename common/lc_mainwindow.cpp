@@ -2870,6 +2870,10 @@ lcModelTabWidget* lcMainWindow::GetTabForView(lcView* View) const
 void lcMainWindow::HandleCommand(lcCommandId CommandId)
 {
 	lcView* ActiveView = GetActiveView();
+
+	if (ActiveView && CommandId != LC_EDIT_CANCEL)
+		ActiveView->StopTracking(true);
+
 	lcModel* ActiveModel = ActiveView ? ActiveView->GetActiveModel() : nullptr;
 
 	switch (CommandId)

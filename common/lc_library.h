@@ -107,19 +107,13 @@ struct lcLibrarySource
 {
 	lcLibrarySource() = default;
 
-	~lcLibrarySource()
-	{
-		for (const auto& PrimitiveIt : Primitives)
-			delete PrimitiveIt.second;
-	}
-
 	lcLibrarySource(const lcLibrarySource&) = delete;
 	lcLibrarySource(lcLibrarySource&&) = delete;
 	lcLibrarySource& operator=(const lcLibrarySource&) = delete;
 	lcLibrarySource& operator=(lcLibrarySource&&) = delete;
 
 	lcLibrarySourceType Type;
-	std::map<std::string, lcLibraryPrimitive*> Primitives;
+	std::map<std::string, std::unique_ptr<lcLibraryPrimitive>> Primitives;
 };
 
 // Coordinates asset sources, loading, settings and shared render buffers.
@@ -265,7 +259,6 @@ public:
 	std::string GetPartId(const lcPieceData* PieceData) const;
 
 	// Queries primitive sources; FindPrimitive() returns a borrowed entry.
-	bool IsPrimitive(const char* Name) const;
 	lcLibraryPrimitive* FindPrimitive(const char* Name) const;
 
 	// Loads shared primitive data, waiting for another worker when necessary.

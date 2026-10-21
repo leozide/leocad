@@ -999,7 +999,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 
 			QByteArray CleanId = PartId.toLatin1().toUpper().replace('\\', '/');
 
-			if (Library->IsPrimitive(CleanId.constData()))
+			if (Library->FindPrimitive(CleanId.constData()))
 			{
 				mFileLines.append(OriginalLine);
 				mHasDirectGeometry = true;

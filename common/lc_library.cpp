@@ -732,13 +732,13 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				PieceData->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
-				Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, false, false, true);
+				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, false, false, true);
 		}
 		else if (!strncmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			Source->Primitives[Name] = new lcLibraryPrimitive(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
+			Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
 		}
 	}
 
@@ -850,14 +850,14 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (Name.size() <= 4 || Name.compare(Name.size() - 4, 4, ".DAT"))
 					continue;
 
-				if (BaseFolderIdx > 0 && IsPrimitive(Name.c_str()))
+				if (BaseFolderIdx > 0 && FindPrimitive(Name.c_str()))
 					continue;
 
 				if (BaseFolderIdx == static_cast<int>(lcLibraryFolderType::Unofficial))
 					mHasUnofficial = true;
 
 				const bool SubFile = SubFileDirectories[DirectoryIdx];
-				Source->Primitives[Name] = new lcLibraryPrimitive(std::move(FileName), RelativeName, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
+				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(FileName), RelativeName, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
 			}
 		}
 
@@ -2186,7 +2186,7 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 	{
 		for (const auto& PrimitiveIt : Source->Primitives)
 		{
-			lcLibraryPrimitive* Primitive = PrimitiveIt.second;
+			lcLibraryPrimitive* Primitive = PrimitiveIt.second.get();
 
 			if (Primitive->mStudStyle || Primitive->mMeshData.mHasStyleStud)
 				Primitive->Unload();
@@ -2229,15 +2229,6 @@ void lcPiecesLibrary::UpdateStudStyleAndColors(lcStudStyle StudStyle, bool StudC
 	mAssetLoader->ResumeQueuedWork();
 }
 
-bool lcPiecesLibrary::IsPrimitive(const char* Name) const
-{
-	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
-		if (Source->Primitives.find(Name) != Source->Primitives.end())
-			return true;
-
-	return false;
-}
-
 lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
 {
 	for (const std::unique_ptr<lcLibrarySource>& Source : mSources)
@@ -2245,7 +2236,7 @@ lcLibraryPrimitive* lcPiecesLibrary::FindPrimitive(const char* Name) const
 		const auto PrimitiveIt = Source->Primitives.find(Name);
 
 		if (PrimitiveIt != Source->Primitives.end())
-			return PrimitiveIt->second;
+			return PrimitiveIt->second.get();
 	}
 
 	return nullptr;

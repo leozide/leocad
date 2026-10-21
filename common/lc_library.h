@@ -390,8 +390,11 @@ protected:
 	void ReleaseBuffers();
 
 private:
+	using DirectoryFilePaths = std::unordered_map<const lcPieceData*, QString>;
+
 	// Classifies descriptions, decorations and alias parents after all parts are registered.
-	void ClassifyPieces();
+	// Directory paths are temporary discovery metadata; archive entries use their stored indices.
+	void ClassifyPieces(const DirectoryFilePaths& FilePaths);
 	static std::string ReadAliasTarget(lcFile& File);
 
 	// Description cache strings are bounded to the piece name/description length limit.

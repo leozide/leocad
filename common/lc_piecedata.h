@@ -194,13 +194,11 @@ public:
 	void Unload();
 
 public:
-	char mFileName[LC_PIECE_NAME_LEN];
-	char m_strDescription[256];
+	char mFileName[LC_PIECE_NAME_LEN] = {};
+	char m_strDescription[256] = {};
 	lcZipFileType mZipFileType;
-	int mZipFileIndex;
-	lcAssetState mState;
-	int mFolderType;
-	int mFolderIndex;
+	int mZipFileIndex = -1;
+	lcAssetState mState = lcAssetState::Unloaded;
 
 protected:
 	enum class Flag

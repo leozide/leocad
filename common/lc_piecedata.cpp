@@ -16,13 +16,7 @@ lcPieceData::lcPieceData(bool IsLibraryPiece)
 	: mIsLibraryPiece(IsLibraryPiece)
 {
 	mZipFileType = lcZipFileType::Count;
-	mZipFileIndex = -1;
-	mFolderType = -1;
-	mFolderIndex = -1;
-	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();
-	mFileName[0] = 0;
-	m_strDescription[0] = 0;
 }
 
 bool lcPieceData::HasDecorationDescription(const char* Description)

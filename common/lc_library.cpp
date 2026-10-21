@@ -799,7 +799,7 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 			}
 		}
 
-		ClassifyPieces();
+		ClassifyPieces(DirectoryFilePaths());
 		SaveArchiveCacheIndex(IndexFileName);
 	}
 }
@@ -923,6 +923,16 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 		}
 	}
 
+	struct DescriptionJob
+	{
+		lcPieceData* PieceData;
+		QFileInfo FileInfo;
+		lcLibraryFolderType FolderType;
+		bool Modified = false;
+	};
+
+	std::vector<DescriptionJob> Jobs;
+
 	for (int FolderIdx = 0; FolderIdx < static_cast<int>(lcLibraryFolderType::Count); FolderIdx++)
 	{
 		const QFileInfoList& FileList = FileLists[FolderIdx];
@@ -937,29 +947,34 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 			lcPieceData* PieceData = mPieceManager->CreateLibraryPieceData(Name, FileString.constData());
 
-			PieceData->mFolderType = FolderIdx;
-			PieceData->mFolderIndex = FileIdx;
+			Jobs.push_back({ PieceData, FileList[FileIdx], static_cast<lcLibraryFolderType>(FolderIdx) });
 		}
 	}
 
-	QAtomicInt FilesLoaded;
-	std::atomic_bool Modified(false);
+	// Only process entries retained by the normalized registry after discovery.
+	Jobs.erase(std::remove_if(Jobs.begin(), Jobs.end(), [this](const DescriptionJob& Job)
+	{
+		return FindPieceData(Job.FileInfo.fileName().toLatin1().constData(), nullptr) != Job.PieceData;
+	}), Jobs.end());
 
-	auto ReadDescriptions = [&FileLists, &CachedDescriptions, &FilesLoaded, &Modified](lcPieceData* PieceData)
+	QAtomicInt FilesLoaded;
+
+	auto ReadDescriptions = [&CachedDescriptions, &FilesLoaded](DescriptionJob& Job)
 	{
 		FilesLoaded.ref();
 
-		lcDiskFile PieceFile(FileLists[PieceData->mFolderType][PieceData->mFolderIndex].absoluteFilePath());
+		lcPieceData* PieceData = Job.PieceData;
+		lcDiskFile PieceFile(Job.FileInfo.absoluteFilePath());
 		char Line[1024];
 
 		const auto CachedIt = CachedDescriptions.find(PieceData->mFileName);
-		const quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
+		const quint64 FileTime = Job.FileInfo.lastModified().toMSecsSinceEpoch();
 
-		if (CachedIt != CachedDescriptions.end() && CachedIt->second.FileTime == FileTime && CachedIt->second.FolderType == PieceData->mFolderType &&
+		if (CachedIt != CachedDescriptions.end() && CachedIt->second.FileTime == FileTime && CachedIt->second.FolderType == static_cast<quint8>(Job.FolderType) &&
 			PieceData->InitializeFromCache(CachedIt->second.CacheData))
 			return;
 
-		Modified.store(true);
+		Job.Modified = true;
 
 		if (!PieceFile.Open(QIODevice::ReadOnly) || !PieceFile.ReadLine(Line, sizeof(Line)))
 		{
@@ -987,7 +1002,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 	ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
 	ProgressDialog->setWindowTitle(tr("Initializing"));
 	ProgressDialog->setLabelText(tr("Loading Parts Library"));
-	ProgressDialog->setMaximum((int)mPieceManager->GetLibraryPieceDataCount());
+	ProgressDialog->setMaximum(static_cast<int>(Jobs.size()));
 	ProgressDialog->setMinimum(0);
 	ProgressDialog->setValue(0);
 	ProgressDialog->setCancelButton(nullptr);
@@ -995,8 +1010,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 	if (ShowProgress)
 		ProgressDialog->show();
 
-	std::vector<lcPieceData*> LibraryPieceData = mPieceManager->GetLibraryPieceData();
-	QFuture<void> LoadFuture = QtConcurrent::map(LibraryPieceData, ReadDescriptions);
+	QFuture<void> LoadFuture = QtConcurrent::map(Jobs, ReadDescriptions);
 
 	while (!LoadFuture.isFinished())
 	{
@@ -1010,17 +1024,28 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 	ProgressDialog->deleteLater();
 
 	// A target's change, addition or removal can invalidate otherwise unchanged aliases.
-	if (Modified.load() || CachedDescriptions.size() != LibraryPieceData.size())
+	const bool Modified = std::any_of(Jobs.begin(), Jobs.end(), [](const DescriptionJob& Job)
 	{
-		ClassifyPieces();
+		return Job.Modified;
+	});
+
+	if (Modified || CachedDescriptions.size() != Jobs.size())
+	{
+		DirectoryFilePaths FilePaths;
+
+		for (const DescriptionJob& Job : Jobs)
+			FilePaths.emplace(Job.PieceData, Job.FileInfo.absoluteFilePath());
+
+		ClassifyPieces(FilePaths);
 
 		lcMemFile NewIndexFile;
 
 		NewIndexFile.WriteQString(mLibraryDir.absolutePath());
-		NewIndexFile.WriteU32(static_cast<quint32>(LibraryPieceData.size()));
+		NewIndexFile.WriteU32(static_cast<quint32>(Jobs.size()));
 
-		for (const lcPieceData* PieceData : LibraryPieceData)
+		for (const DescriptionJob& Job : Jobs)
 		{
+			const lcPieceData* PieceData = Job.PieceData;
 			const lcPieceData::CacheData CacheData = PieceData->GetCacheData();
 
 			if (!WriteIndexString(NewIndexFile, PieceData->mFileName) ||
@@ -1028,8 +1053,8 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 				return;
 
 			NewIndexFile.WriteU8(CacheData.Flags);
-			NewIndexFile.WriteU8(static_cast<quint8>(PieceData->mFolderType));
-			const quint64 FileTime = FileLists[PieceData->mFolderType][PieceData->mFolderIndex].lastModified().toMSecsSinceEpoch();
+			NewIndexFile.WriteU8(static_cast<quint8>(Job.FolderType));
+			const quint64 FileTime = Job.FileInfo.lastModified().toMSecsSinceEpoch();
 			NewIndexFile.WriteU64(FileTime);
 		}
 
@@ -1358,7 +1383,7 @@ std::string lcPiecesLibrary::ReadAliasTarget(lcFile& File)
 	return Target;
 }
 
-void lcPiecesLibrary::ClassifyPieces()
+void lcPiecesLibrary::ClassifyPieces(const DirectoryFilePaths& FilePaths)
 {
 	const std::vector<lcPieceData*> Parts = mPieceManager->GetLibraryPieceData();
 	std::unordered_map<lcPieceData*, lcPieceData*> AliasTargets;
@@ -1379,8 +1404,15 @@ void lcPiecesLibrary::ClassifyPieces()
 			}
 			else
 			{
-				const QString Folder = PieceData->mFolderType == static_cast<int>(lcLibraryFolderType::Unofficial) ? QStringLiteral("unofficial/parts/") : QStringLiteral("parts/");
-				Source.FilePath = mLibraryDir.absoluteFilePath(Folder + QString::fromLatin1(PieceData->mFileName));
+				const auto FileIt = FilePaths.find(PieceData);
+
+				if (FileIt == FilePaths.end())
+				{
+					AliasTargets.emplace(PieceData, nullptr);
+					continue;
+				}
+
+				Source.FilePath = FileIt->second;
 			}
 
 			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source);
@@ -2536,7 +2568,7 @@ bool lcPiecesLibrary::LoadBuiltinPieceLibrary()
 		}
 	}
 
-	ClassifyPieces();
+	ClassifyPieces(DirectoryFilePaths());
 
 	lcLoadDefaultColors(mStudStyle);
 	UpdateLoadingMeshColors();

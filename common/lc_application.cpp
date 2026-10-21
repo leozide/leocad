@@ -1017,8 +1017,10 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		}
 	}
 
-	if (!Options.ShadowLibraryPath.isEmpty() && !lcShadowLibrary::SetPath(Options.ShadowLibraryPath))
-		StdErr << tr("Could not find a shadow library in '%1'.\n").arg(Options.ShadowLibraryPath);
+	const QString ShadowLibraryPath = Options.ShadowLibraryPath.isEmpty() ? lcGetProfileString(LC_PROFILE_SHADOW_LIBRARY) : Options.ShadowLibraryPath;
+
+	if (!ShadowLibraryPath.isEmpty() && !lcShadowLibrary::SetPath(ShadowLibraryPath))
+		StdErr << tr("Could not find a shadow library in '%1'.\n").arg(ShadowLibraryPath);
 
 	if (!SaveAndExit)
 		gMainWindow->CreateWidgets();
@@ -1393,6 +1395,7 @@ void lcApplication::ShowPreferencesDialog()
 	Options.Preferences = mPreferences;
 
 	Options.LibraryPath = lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+	Options.ShadowLibraryPath = lcGetProfileString(LC_PROFILE_SHADOW_LIBRARY);
 	Options.MinifigSettingsPath = lcGetProfileString(LC_PROFILE_MINIFIG_SETTINGS);
 	Options.ColorConfigPath = lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	Options.POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
@@ -1421,6 +1424,7 @@ void lcApplication::ShowPreferencesDialog()
 
 	bool LanguageChanged = Options.Language != lcGetProfileString(LC_PROFILE_LANGUAGE);
 	bool LibraryChanged = Options.LibraryPath != lcGetProfileString(LC_PROFILE_PARTS_LIBRARY);
+	bool ShadowLibraryChanged = Options.ShadowLibraryPath != lcGetProfileString(LC_PROFILE_SHADOW_LIBRARY);
 	bool ColorConfigChanged = Options.ColorConfigPath != lcGetProfileString(LC_PROFILE_COLOR_CONFIG);
 	bool AAChanged = CurrentAASamples != Options.AASamples;
 	bool StudStyleChanged = CurrentStudStyle != Options.StudStyle;
@@ -1445,6 +1449,7 @@ void lcApplication::ShowPreferencesDialog()
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);
+	lcSetProfileString(LC_PROFILE_SHADOW_LIBRARY, Options.ShadowLibraryPath);
 	lcSetProfileString(LC_PROFILE_MINIFIG_SETTINGS, Options.MinifigSettingsPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_PATH, Options.POVRayPath);
 	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Options.LGEOPath);
@@ -1455,6 +1460,15 @@ void lcApplication::ShowPreferencesDialog()
 
 	if (LanguageChanged || LibraryChanged || AAChanged)
 		QMessageBox::information(gMainWindow, tr("Preferences"), tr("Some changes will only take effect the next time you start LeoCAD."));
+
+	// Unlike the parts library, the shadow library can be switched while running.
+	if (ShadowLibraryChanged)
+	{
+		if (!lcShadowLibrary::SetPath(Options.ShadowLibraryPath) && !Options.ShadowLibraryPath.isEmpty())
+			QMessageBox::warning(gMainWindow, tr("Load Shadow Library"), tr("Could not find a shadow library in '%1'.").arg(Options.ShadowLibraryPath));
+
+		gMainWindow->UpdateSelectedObjects(false);
+	}
 
 	if (Options.CategoriesModified)
 	{

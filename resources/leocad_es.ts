@@ -6924,6 +6924,16 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <translation type="unfinished">Preferencias</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Load Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Error creating OpenGL context.
 </source>
         <translation type="vanished">Error creando contexto OpenGL.
@@ -13314,6 +13324,27 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <translation>Rutas personalizadas</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="406"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <source>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>S&amp;hadow Library:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
+        <source>Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="431"/>
+        <source>Choose the LDCad shadow library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
         <source>Set the distance in LDraw units at which simpler piece meshes are used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -13882,6 +13913,11 @@ Las tarjetas de video no compatibles usan tinte frontal y bordes coloreados.</tr
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>Abrir la carpeta de LGEO</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="533"/>
+        <source>Select Shadow Library Folder</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>

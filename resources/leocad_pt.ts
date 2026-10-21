@@ -7313,6 +7313,16 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Preferências</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Load Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
         <translation type="vanished">As mudanças de Biblioteca e de Antisserrilhamento só tomam efeito após o próximo arranque do LeoCAD.</translation>
     </message>
@@ -12659,6 +12669,27 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">&amp;LGEO Biblioteca:</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="406"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <source>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>S&amp;hadow Library:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
+        <source>Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="431"/>
+        <source>Choose the LDCad shadow library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="412"/>
         <source>Restore tab layout</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -14264,6 +14295,11 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>Escolher a Pasta LGEO</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="533"/>
+        <source>Select Shadow Library Folder</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>

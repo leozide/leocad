@@ -48,6 +48,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	connect(ui->MinifigSettingsBrowseButton, &QPushButton::clicked, this, &lcPreferencesDialog::MinifigSettingsBrowseButtonClicked);
 	connect(ui->povrayExecutableBrowse, &QPushButton::clicked, this, &lcPreferencesDialog::PovrayExecutableBrowseClicked);
 	connect(ui->lgeoPathBrowse, &QPushButton::clicked, this, &lcPreferencesDialog::LgeoPathBrowseClicked);
+	connect(ui->ShadowLibraryBrowseButton, &QPushButton::clicked, this, &lcPreferencesDialog::ShadowLibraryBrowseButtonClicked);
 	connect(ui->ColorTheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &lcPreferencesDialog::ColorThemeCurrentIndexChanged);
 	connect(ui->AutomateEdgeColor, &QCheckBox::toggled, this, &lcPreferencesDialog::AutomateEdgeColorToggled);
 	connect(ui->BlenderAddonSettingsButton, &QPushButton::clicked, this, &lcPreferencesDialog::BlenderAddonSettingsButtonClicked);
@@ -117,6 +118,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->MinifigSettingsEdit->setText(mOptions->MinifigSettingsPath);
 	ui->povrayExecutable->setText(mOptions->POVRayPath);
 	ui->lgeoPath->setText(mOptions->LGEOPath);
+	ui->ShadowLibraryEdit->setText(mOptions->ShadowLibraryPath);
 	ui->authorName->setText(mOptions->DefaultAuthor);
 	ui->mouseSensitivity->setValue(mOptions->Preferences.mMouseSensitivity);
 	const bool ColorThemeBlocked = ui->ColorTheme->blockSignals(true);
@@ -373,6 +375,7 @@ void lcPreferencesDialog::accept()
 	mOptions->ColorConfigPath = ui->ColorConfigEdit->text();
 	mOptions->POVRayPath = ui->povrayExecutable->text();
 	mOptions->LGEOPath = ui->lgeoPath->text();
+	mOptions->ShadowLibraryPath = ui->ShadowLibraryEdit->text();
 	mOptions->DefaultAuthor = ui->authorName->text();
 	mOptions->Preferences.mMouseSensitivity = ui->mouseSensitivity->value();
 	mOptions->Preferences.mColorTheme = static_cast<lcColorTheme>(ui->ColorTheme->currentIndex());
@@ -523,6 +526,14 @@ void lcPreferencesDialog::LgeoPathBrowseClicked()
 
 	if (!Result.isEmpty())
 		ui->lgeoPath->setText(QDir::toNativeSeparators(Result));
+}
+
+void lcPreferencesDialog::ShadowLibraryBrowseButtonClicked()
+{
+	QString Result = QFileDialog::getExistingDirectory(this, tr("Select Shadow Library Folder"), ui->ShadowLibraryEdit->text());
+
+	if (!Result.isEmpty())
+		ui->ShadowLibraryEdit->setText(QDir::toNativeSeparators(Result));
 }
 
 void lcPreferencesDialog::ColorThemeCurrentIndexChanged(int Index)

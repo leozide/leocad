@@ -9,6 +9,7 @@ struct lcPreferencesDialogOptions
 	lcPreferences Preferences;
 
 	QString LibraryPath;
+	QString ShadowLibraryPath;
 	QString ColorConfigPath;
 	QString MinifigSettingsPath;
 	QString POVRayPath;
@@ -65,6 +66,7 @@ private slots:
 	void MinifigSettingsBrowseButtonClicked();
 	void PovrayExecutableBrowseClicked();
 	void LgeoPathBrowseClicked();
+	void ShadowLibraryBrowseButtonClicked();
 	void ColorThemeCurrentIndexChanged(int Index);
 	void ColorButtonClicked();
 	void AutomateEdgeColor();

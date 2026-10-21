@@ -2,8 +2,6 @@
 
 #include "lc_assettypes.h"
 
-class lcPiecesLibrary;
-
 struct lcPartThumbnail
 {
 	QPixmap Pixmap;

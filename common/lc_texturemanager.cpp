@@ -2,6 +2,7 @@
 #include "lc_texturemanager.h"
 #include "lc_file.h"
 #include "lc_string.h"
+#include "lc_texture.h"
 
 lcTextureManager::~lcTextureManager()
 {

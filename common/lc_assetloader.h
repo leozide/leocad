@@ -2,13 +2,7 @@
 
 #include "lc_assettypes.h"
 
-class lcPieceData;
-class lcPiecesLibrary;
-class lcPiece;
 struct lcPieceControlPoint;
-class lcMesh;
-class lcSynthInfo;
-class lcTexture;
 
 // Owned by lcPiecesLibrary. Instance methods run on the UI thread and schedule private worker builds;
 // UI-thread completion processing resolves colors, uploads textures, and publishes meshes.

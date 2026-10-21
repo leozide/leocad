@@ -39,6 +39,38 @@ enum class lcLibraryCacheFlag : quint32
 	Directory = 0x0002
 };
 
+enum class lcLibrarySourceType
+{
+	Library,
+	StudStyle
+};
+
+struct lcLibrarySource
+{
+	lcLibrarySource() = default;
+
+	lcLibrarySource(const lcLibrarySource&) = delete;
+	lcLibrarySource(lcLibrarySource&&) = delete;
+	lcLibrarySource& operator=(const lcLibrarySource&) = delete;
+	lcLibrarySource& operator=(lcLibrarySource&&) = delete;
+
+	lcLibrarySourceType Type;
+	std::map<std::string, std::unique_ptr<lcLibraryPrimitive>> Primitives;
+};
+
+lcLibraryPrimitive::lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile)
+	: mFileName(std::move(FileName))
+{
+	lcstrcpy(mName, Name);
+
+	mZipFileType = ZipFileType;
+	mZipFileIndex = ZipFileIndex;
+	mState = lcPrimitiveState::NotLoaded;
+	mStud = Stud;
+	mStudStyle = StudStyle;
+	mSubFile = SubFile;
+}
+
 lcPiecesLibrary::lcPiecesLibrary(lcStudStyle StudStyle, bool StudCylinderColorEnabled)
 	: mStudStyle(StudStyle), mStudCylinderColorEnabled(StudCylinderColorEnabled)
 {

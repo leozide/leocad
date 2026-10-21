@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lc_texture.h"
+#include "lc_assettypes.h"
 
 // Creates and reuses textures, tracks their references, and prepares image data.
 // The asset loader handles scheduling, OpenGL uploads, and retries.

@@ -1,20 +1,13 @@
 #pragma once
 
 #include "lc_context.h"
-#include "lc_math.h"
 #include "lc_meshloader.h"
 #include "lc_result.h"
 #include "lc_assettypes.h"
-#include "lc_string.h"
 
-class lcPieceData;
-class lcPiece;
-class lcMesh;
-class lcTrainTrackInfo;
 struct lcTrainTrackConnectionType;
 class lcZipFile;
-class lcLibraryMeshData;
-struct lcEmbeddedData;
+struct lcLibrarySource;
 
 enum class lcStudStyle
 {
@@ -59,18 +52,7 @@ enum class lcPrimitiveState
 class lcLibraryPrimitive
 {
 public:
-	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile)
-		: mFileName(std::move(FileName))
-	{
-		lcstrcpy(mName, Name);
-
-		mZipFileType = ZipFileType;
-		mZipFileIndex = ZipFileIndex;
-		mState = lcPrimitiveState::NotLoaded;
-		mStud = Stud;
-		mStudStyle = StudStyle;
-		mSubFile = SubFile;
-	}
+	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile);
 
 	void SetZipFile(lcZipFileType ZipFileType, quint32 ZipFileIndex)
 	{
@@ -95,25 +77,6 @@ public:
 	bool mSubFile;
 	lcLibraryMeshData mMeshData;
 	QString mLoadError;
-};
-
-enum class lcLibrarySourceType
-{
-	Library,
-	StudStyle
-};
-
-struct lcLibrarySource
-{
-	lcLibrarySource() = default;
-
-	lcLibrarySource(const lcLibrarySource&) = delete;
-	lcLibrarySource(lcLibrarySource&&) = delete;
-	lcLibrarySource& operator=(const lcLibrarySource&) = delete;
-	lcLibrarySource& operator=(lcLibrarySource&&) = delete;
-
-	lcLibrarySourceType Type;
-	std::map<std::string, std::unique_ptr<lcLibraryPrimitive>> Primitives;
 };
 
 // Coordinates asset sources, loading, settings and shared render buffers.

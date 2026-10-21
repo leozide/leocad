@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdio.h>
 #include "lc_assettypes.h"
 #include "lc_math.h"
 
@@ -14,10 +13,6 @@ struct lcModelPartsEntry
 	lcMesh* Mesh;
 	int ColorIndex;
 };
-
-class lcSynthInfo;
-class lcTrainTrackInfo;
-enum class lcZipFileType;
 
 class lcPieceData
 {

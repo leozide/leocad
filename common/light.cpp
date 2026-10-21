@@ -1511,7 +1511,7 @@ void lcLight::RemoveKeyFrames()
 	mPOVRayFadePower.RemoveAllKeys();
 }
 
-lcLightHistoryState lcLight::GetHistoryState([[maybe_unused]] const lcModel* Model) const
+lcLightHistoryState lcLight::GetHistoryState() const
 {
 	lcLightHistoryState State;
 
@@ -1541,7 +1541,7 @@ lcLightHistoryState lcLight::GetHistoryState([[maybe_unused]] const lcModel* Mod
 	return State;
 }
 
-void lcLight::SetHistoryState(const lcLightHistoryState& State, [[maybe_unused]] const lcModel* Model)
+void lcLight::SetHistoryState(const lcLightHistoryState& State)
 {
 	mId = State.Id;
 	mHidden = State.Hidden;

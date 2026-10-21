@@ -304,6 +304,7 @@ HEADERS += \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
 	common/lc_modellistdialog.h \
+	common/lc_objecthistory.h \
 	common/lc_objectproperty.h \
 	common/lc_pagesetupdialog.h \
 	common/lc_partpalettedialog.h \

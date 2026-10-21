@@ -15,6 +15,11 @@ enum class lcGeometryBoundsMode
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
 struct lcModelHistoryEditState;
+struct lcGroupHistoryState;
+struct lcPieceHistoryState;
+struct lcCameraHistoryState;
+struct lcLightHistoryState;
+template<typename StateType> struct lcObjectHistory;
 class lcModelHistory;
 class lcModelHistorySelect;
 class lcModelHistoryEdit;
@@ -291,8 +296,6 @@ public:
 	void InsertStepAction(lcStep Step);
 	void RemoveStepAction(lcStep Step);
 
-	template<typename StateType, typename ObjectType>
-	void LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects);
 	void LoadEditHistoryState(const lcModelHistoryEditState& HistoryState);
 	void LoadModelPropertiesState(const lcModelProperties& ModelProperties);
 
@@ -477,6 +480,11 @@ protected:
 	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera);
 
 	void DeleteModel();
+
+	std::unordered_map<uint32_t, lcGroup*> RestoreGroups(const lcObjectHistory<lcGroupHistoryState>& History);
+	void RestorePieces(const lcObjectHistory<lcPieceHistoryState>& History, const std::unordered_map<uint32_t, lcGroup*>& GroupsById);
+	void RestoreCameras(const lcObjectHistory<lcCameraHistoryState>& History);
+	void RestoreLights(const lcObjectHistory<lcLightHistoryState>& History);
 
 	void AddSelectionHistory(std::function<void()> Callback);
 	void ClearSelection();

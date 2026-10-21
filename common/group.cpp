@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
-#include "lc_model.h"
 #include "lc_file.h"
 
 lcGroupId lcGroup::mNextId;
@@ -63,36 +62,20 @@ void lcGroup::CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups)
 	mName = Prefix + QString::number(Max + 1);
 }
 
-lcGroupHistoryState lcGroup::GetHistoryState(const lcModel* Model) const
+lcGroupHistoryState lcGroup::GetHistoryState() const
 {
 	lcGroupHistoryState State;
 
 	State.Id = mId;
-	State.ParentIndex = ~0U;
+	State.ParentId = mGroup ? static_cast<uint32_t>(mGroup->GetId()) : LC_GROUP_ID_INVALID;
 	State.Name = mName;
-
-	if (mGroup)
-	{
-		const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-
-		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
-		{
-			if (Groups[GroupIndex].get() == mGroup)
-			{
-				State.ParentIndex = static_cast<uint32_t>(GroupIndex);
-				break;
-			}
-		}
-	}
 
 	return State;
 }
 
-void lcGroup::SetHistoryState(const lcGroupHistoryState& State, const lcModel* Model)
+void lcGroup::SetHistoryState(const lcGroupHistoryState& State, lcGroup* Parent)
 {
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-
 	mId = State.Id;
 	mName = State.Name;
-	mGroup = (State.ParentIndex < Groups.size()) ? Groups[State.ParentIndex].get() : nullptr;
+	mGroup = Parent;
 }

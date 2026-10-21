@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_model.h"
+#include "lc_objecthistory.h"
 
 enum class lcObjectType;
 enum class lcSelectionMode;
@@ -78,13 +79,16 @@ struct lcLightHistoryState;
 
 struct lcModelHistoryEditState
 {
-	std::vector<lcGroupHistoryState> Groups;
-	std::vector<lcPieceHistoryState> Pieces;
-	std::vector<lcCameraHistoryState> Cameras;
-	std::vector<lcLightHistoryState> Lights;
-};
+	lcObjectHistory<lcGroupHistoryState> Groups;
+	lcObjectHistory<lcPieceHistoryState> Pieces;
+	lcObjectHistory<lcCameraHistoryState> Cameras;
+	lcObjectHistory<lcLightHistoryState> Lights;
 
-bool operator!=(const lcModelHistoryEditState& a, const lcModelHistoryEditState& b);
+	bool IsEmpty() const
+	{
+		return Groups.IsEmpty() && Pieces.IsEmpty() && Cameras.IsEmpty() && Lights.IsEmpty();
+	}
+};
 
 enum class lcModelHistoryEditMerge
 {

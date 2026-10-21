@@ -35,7 +35,7 @@ struct lcPieceHistoryState
 	bool Hidden;
 	int FileLine;
 	QString PieceId;
-	uint32_t GroupIndex;
+	uint32_t GroupId;
 	int ColorIndex;
 	quint32 ColorCode;
 	lcStep StepShow;
@@ -49,7 +49,7 @@ struct lcPieceHistoryState
 	bool operator==(const lcPieceHistoryState& Other) const
 	{
 		return Id == Other.Id && Hidden == Other.Hidden && FileLine == Other.FileLine && PieceId == Other.PieceId &&
-            GroupIndex == Other.GroupIndex && ColorIndex == Other.ColorIndex && ColorCode == Other.ColorCode &&
+            GroupId == Other.GroupId && ColorIndex == Other.ColorIndex && ColorCode == Other.ColorCode &&
             StepShow == Other.StepShow && StepHide == Other.StepHide && PivotMatrix == Other.PivotMatrix &&
             PivotPointValid == Other.PivotPointValid && ControlPoints == Other.ControlPoints &&
             Position == Other.Position && Rotation == Other.Rotation;
@@ -95,8 +95,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	lcPieceHistoryState GetHistoryState(const lcModel* Model) const;
-	void SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model);
+	lcPieceHistoryState GetHistoryState() const;
+	void SetHistoryState(const lcPieceHistoryState& State, Project* Project, lcGroup* Group);
 
 	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
 	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;

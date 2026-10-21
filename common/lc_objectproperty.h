@@ -61,6 +61,11 @@ struct lcObjectPropertyKey
 {
 	lcStep Step;
 	T Value;
+
+	bool operator==(const lcObjectPropertyKey& Other) const
+	{
+		return Step == Other.Step && Value == Other.Value;
+	}
 };
 
 template<typename T>
@@ -77,6 +82,11 @@ public:
 	operator const T& () const
 	{
 		return mValue;
+	}
+
+	bool operator==(const lcObjectProperty& Other) const
+	{
+		return mValue == Other.mValue && mKeys == Other.mKeys;
 	}
 
 	void SetValue(const T& Value)

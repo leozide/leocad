@@ -142,11 +142,6 @@ void lcModelHistorySelect::LoadState(const lcModelHistorySelectState& State, lcM
 	}
 }
 
-bool operator!=(const lcModelHistoryEditState& a, const lcModelHistoryEditState& b)
-{
-	return a.Groups != b.Groups || a.Pieces != b.Pieces || a.Cameras != b.Cameras || a.Lights != b.Lights;
-}
-
 lcModelHistoryEdit::lcModelHistoryEdit(lcModelHistoryEditMergeKey MergeKey)
 	: mMergeKey(MergeKey)
 {
@@ -158,25 +153,10 @@ lcModelHistoryEdit::~lcModelHistoryEdit()
 
 void lcModelHistoryEdit::SaveState(lcModelHistoryEditState& State, const lcModel* Model)
 {
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-
-	for (const std::unique_ptr<lcGroup>& Group : Groups)
-		State.Groups.emplace_back(Group->GetHistoryState(Model));
-
-	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
-
-	for (const std::unique_ptr<lcPiece>& Piece : Pieces)
-		State.Pieces.emplace_back(Piece->GetHistoryState(Model));
-
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
-
-	for (const std::unique_ptr<lcCamera>& Camera : Cameras)
-		State.Cameras.emplace_back(Camera->GetHistoryState(Model));
-
-	const std::vector<std::unique_ptr<lcLight>>& Lights = Model->GetLights();
-
-	for (const std::unique_ptr<lcLight>& Light : Lights)
-		State.Lights.emplace_back(Light->GetHistoryState(Model));
+	State.Groups.Save(Model->GetGroups());
+	State.Pieces.Save(Model->GetPieces());
+	State.Cameras.Save(Model->GetCameras());
+	State.Lights.Save(Model->GetLights());
 }
 
 void lcModelHistoryEdit::LoadState(const lcModelHistoryEditState& State, lcModel* Model)
@@ -192,6 +172,11 @@ void lcModelHistoryEdit::SaveStartState(const lcModel* Model)
 void lcModelHistoryEdit::SaveEndState(const lcModel* Model)
 {
 	SaveState(mEndState, Model);
+
+	lcObjectHistory<lcGroupHistoryState>::Compact(mStartState.Groups, mEndState.Groups);
+	lcObjectHistory<lcPieceHistoryState>::Compact(mStartState.Pieces, mEndState.Pieces);
+	lcObjectHistory<lcCameraHistoryState>::Compact(mStartState.Cameras, mEndState.Cameras);
+	lcObjectHistory<lcLightHistoryState>::Compact(mStartState.Lights, mEndState.Lights);
 }
 
 void lcModelHistoryEdit::LoadStartState(lcModel* Model) const
@@ -206,7 +191,7 @@ void lcModelHistoryEdit::LoadEndState(lcModel* Model) const
 
 bool lcModelHistoryEdit::StateChanged() const
 {
-	return mStartState != mEndState;
+	return !mStartState.IsEmpty() || !mEndState.IsEmpty();
 }
 
 void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Renames, const lcPieceData* ModelPieceData)
@@ -215,7 +200,7 @@ void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Ren
 
 	auto RenamePieceIds = [&Renames](lcModelHistoryEditState& State)
 	{
-		for (lcPieceHistoryState& Piece : State.Pieces)
+		for (lcPieceHistoryState& Piece : State.Pieces.States)
 		{
 			for (const lcModelPieceRename& Rename : Renames)
 			{
@@ -243,8 +228,13 @@ void lcModelHistoryEdit::MergeWith(lcModelHistory* Other)
 {
 	lcModelHistoryEdit* OtherModelHistoryEdit = dynamic_cast<lcModelHistoryEdit*>(Other);
 
-	if (OtherModelHistoryEdit)
-		mEndState = std::move(OtherModelHistoryEdit->mEndState);
+	if (!OtherModelHistoryEdit)
+		return;
+
+	lcObjectHistory<lcGroupHistoryState>::Merge(mStartState.Groups, mEndState.Groups, OtherModelHistoryEdit->mStartState.Groups, OtherModelHistoryEdit->mEndState.Groups);
+	lcObjectHistory<lcPieceHistoryState>::Merge(mStartState.Pieces, mEndState.Pieces, OtherModelHistoryEdit->mStartState.Pieces, OtherModelHistoryEdit->mEndState.Pieces);
+	lcObjectHistory<lcCameraHistoryState>::Merge(mStartState.Cameras, mEndState.Cameras, OtherModelHistoryEdit->mStartState.Cameras, OtherModelHistoryEdit->mEndState.Cameras);
+	lcObjectHistory<lcLightHistoryState>::Merge(mStartState.Lights, mEndState.Lights, OtherModelHistoryEdit->mStartState.Lights, OtherModelHistoryEdit->mEndState.Lights);
 }
 
 void lcModelHistoryProperties::SaveStartState(const lcModel* Model)

@@ -2262,43 +2262,43 @@ void lcModel::RemoveFromSelection(const std::vector<lcObject*>& Objects)
 	AddSelectionHistory([this, &Objects](){ SetObjectsSelected(Objects, false); });
 }
 
-template<typename StateType, typename ObjectType>
-void lcModel::LoadObjectHistoryState(const std::vector<StateType>& ObjectStates, std::vector<std::unique_ptr<ObjectType>>& Objects)
-{
-	std::vector<std::unique_ptr<ObjectType>> NewObjects;
-	std::unordered_map<uint32_t, size_t> ObjectIndices;
-
-	NewObjects.reserve(ObjectStates.size());
-	ObjectIndices.reserve(Objects.size());
-
-	for (size_t ObjectIndex = 0; ObjectIndex < Objects.size(); ObjectIndex++)
-		ObjectIndices.emplace(static_cast<uint32_t>(Objects[ObjectIndex]->GetId()), ObjectIndex);
-
-	for (const StateType& ObjectState : ObjectStates)
-	{
-		const auto ObjectIt = ObjectIndices.find(static_cast<uint32_t>(ObjectState.Id));
-
-		if (ObjectIt != ObjectIndices.end())
-			NewObjects.emplace_back(std::move(Objects[ObjectIt->second]));
-		else
-			NewObjects.emplace_back(new ObjectType());
-	}
-
-	if constexpr(std::is_same_v<ObjectType, lcCamera>)
-		for (const std::unique_ptr<lcCamera>& Camera : Objects)
-			if (Camera)
-				RemoveCameraFromViews(Camera.get());
-
-	Objects = std::move(NewObjects);
-
-	for (size_t ObjectIndex = 0; ObjectIndex < Objects.size(); ObjectIndex++)
-		Objects[ObjectIndex]->SetHistoryState(ObjectStates[ObjectIndex], this);
-}
-
 void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 {
-	LoadObjectHistoryState(HistoryState.Groups, mGroups);
-	LoadObjectHistoryState(HistoryState.Pieces, mPieces);
+	const std::unordered_map<uint32_t, lcGroup*> GroupsById = RestoreGroups(HistoryState.Groups);
+	RestorePieces(HistoryState.Pieces, GroupsById);
+	RestoreCameras(HistoryState.Cameras);
+	RestoreLights(HistoryState.Lights);
+}
+
+std::unordered_map<uint32_t, lcGroup*> lcModel::RestoreGroups(const lcObjectHistory<lcGroupHistoryState>& History)
+{
+	const std::unordered_map<uint32_t, lcGroup*> GroupsById = History.RestoreObjects(mGroups);
+
+	// The lookup uses saved IDs, so a parent can be linked before its state is restored.
+	for (const lcGroupHistoryState& State : History.States)
+	{
+		const auto Group = GroupsById.find(static_cast<uint32_t>(State.Id));
+		const auto Parent = GroupsById.find(State.ParentId);
+
+		if (Group != GroupsById.end())
+			Group->second->SetHistoryState(State, Parent != GroupsById.end() ? Parent->second : nullptr);
+	}
+
+	return GroupsById;
+}
+
+void lcModel::RestorePieces(const lcObjectHistory<lcPieceHistoryState>& History, const std::unordered_map<uint32_t, lcGroup*>& GroupsById)
+{
+	const std::unordered_map<uint32_t, lcPiece*> PiecesById = History.RestoreObjects(mPieces);
+
+	for (const lcPieceHistoryState& State : History.States)
+	{
+		const auto Piece = PiecesById.find(static_cast<uint32_t>(State.Id));
+		const auto Group = GroupsById.find(State.GroupId);
+
+		if (Piece != PiecesById.end())
+			Piece->second->SetHistoryState(State, mProject, Group != GroupsById.end() ? Group->second : nullptr);
+	}
 
 	// Model-list changes are not undoable, but older edit states can still name
 	// a submodel that was replaced. Do not restore references that now recurse.
@@ -2306,9 +2306,47 @@ void lcModel::LoadEditHistoryState(const lcModelHistoryEditState& HistoryState)
 	{
 		return Piece->mPieceData && Piece->mPieceData->IncludesModel(this);
 	}), mPieces.end());
+}
 
-	LoadObjectHistoryState(HistoryState.Cameras, mCameras);
-	LoadObjectHistoryState(HistoryState.Lights, mLights);
+void lcModel::RestoreCameras(const lcObjectHistory<lcCameraHistoryState>& History)
+{
+	if (History.IsEmpty())
+		return;
+
+	if (History.Order)
+	{
+		const std::unordered_set<uint32_t> CameraIds(History.Order->begin(), History.Order->end());
+
+		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+			if (CameraIds.find(static_cast<uint32_t>(Camera->GetId())) == CameraIds.end())
+				RemoveCameraFromViews(Camera.get());
+	}
+
+	const std::unordered_map<uint32_t, lcCamera*> CamerasById = History.RestoreObjects(mCameras);
+
+	for (const lcCameraHistoryState& State : History.States)
+	{
+		const auto Camera = CamerasById.find(static_cast<uint32_t>(State.Id));
+
+		if (Camera != CamerasById.end())
+			Camera->second->SetHistoryState(State);
+	}
+}
+
+void lcModel::RestoreLights(const lcObjectHistory<lcLightHistoryState>& History)
+{
+	if (History.IsEmpty())
+		return;
+
+	const std::unordered_map<uint32_t, lcLight*> LightsById = History.RestoreObjects(mLights);
+
+	for (const lcLightHistoryState& State : History.States)
+	{
+		const auto Light = LightsById.find(static_cast<uint32_t>(State.Id));
+
+		if (Light != LightsById.end())
+			Light->second->SetHistoryState(State);
+	}
 }
 
 void lcModel::BeginEditHistory()

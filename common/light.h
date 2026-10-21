@@ -197,8 +197,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	lcLightHistoryState GetHistoryState(const lcModel* Model) const;
-	void SetHistoryState(const lcLightHistoryState& State, const lcModel* Model);
+	lcLightHistoryState GetHistoryState() const;
+	void SetHistoryState(const lcLightHistoryState& State);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

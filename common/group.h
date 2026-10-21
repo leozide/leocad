@@ -4,15 +4,17 @@
 
 enum class lcGroupId : uint32_t;
 
+constexpr uint32_t LC_GROUP_ID_INVALID = std::numeric_limits<uint32_t>::max();
+
 struct lcGroupHistoryState
 {
 	lcGroupId Id;
-	uint32_t ParentIndex;
+	uint32_t ParentId;
 	QString Name;
 
 	bool operator==(const lcGroupHistoryState& Other) const
 	{
-		return Id == Other.Id && ParentIndex == Other.ParentIndex && Name == Other.Name;
+		return Id == Other.Id && ParentId == Other.ParentId && Name == Other.Name;
 	}
 };
 
@@ -34,8 +36,8 @@ public:
 	void FileLoad(lcFile* File);
 	void CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups);
 
-	lcGroupHistoryState GetHistoryState(const lcModel* Model) const;
-	void SetHistoryState(const lcGroupHistoryState& State, const lcModel* Model);
+	lcGroupHistoryState GetHistoryState() const;
+	void SetHistoryState(const lcGroupHistoryState& State, lcGroup* Parent);
 
 	lcGroup* mGroup = nullptr;
 	QString mName;

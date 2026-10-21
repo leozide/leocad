@@ -988,7 +988,7 @@ void lcPiece::RemoveKeyFrames()
 	mRotation.RemoveAllKeys();
 }
 
-lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
+lcPieceHistoryState lcPiece::GetHistoryState() const
 {
 	lcPieceHistoryState State;
 
@@ -996,7 +996,7 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 	State.Hidden = mHidden;
 	State.FileLine = mFileLine;
 	State.PieceId = mID;
-	State.GroupIndex = ~0U;
+	State.GroupId = mGroup ? static_cast<uint32_t>(mGroup->GetId()) : LC_GROUP_ID_INVALID;
 	State.ColorIndex = mColorIndex;
 	State.ColorCode = mColorCode;
 	State.StepShow = mStepShow;
@@ -1007,32 +1007,16 @@ lcPieceHistoryState lcPiece::GetHistoryState(const lcModel* Model) const
 	State.Position = mPosition;
 	State.Rotation = mRotation;
 
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-
-	if (mGroup)
-	{
-		for (size_t GroupIndex = 0; GroupIndex < Groups.size(); GroupIndex++)
-		{
-			if (mGroup == Groups[GroupIndex].get())
-			{
-				State.GroupIndex = static_cast<uint32_t>(GroupIndex);
-				break;
-			}
-		}
-	}
-
 	return State;
 }
 
-void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* Model)
+void lcPiece::SetHistoryState(const lcPieceHistoryState& State, Project* Project, lcGroup* Group)
 {
-	const std::vector<std::unique_ptr<lcGroup>>& Groups = Model->GetGroups();
-
 	mId = State.Id;
 	mHidden = State.Hidden;
 	mFileLine = State.FileLine;
 	mID = State.PieceId;
-	mGroup = (State.GroupIndex < Groups.size()) ? Groups[State.GroupIndex].get() : nullptr;
+	mGroup = Group;
 	mColorIndex = State.ColorIndex;
 	mColorCode = State.ColorCode;
 	mStepShow = State.StepShow;
@@ -1043,7 +1027,7 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, const lcModel* M
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	lcPieceDataRef RestoredData = lcGetPiecesLibrary()->AcquirePieceData(mID.toLatin1(), Model->GetProject(), true, true);
+	lcPieceDataRef RestoredData = lcGetPiecesLibrary()->AcquirePieceData(mID.toLatin1(), Project, true, true);
 
 	if (mPieceData != RestoredData)
 	{

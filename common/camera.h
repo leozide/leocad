@@ -191,8 +191,8 @@ public:
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
-	lcCameraHistoryState GetHistoryState(const lcModel* Model) const;
-	void SetHistoryState(const lcCameraHistoryState& State, const lcModel* Model);
+	lcCameraHistoryState GetHistoryState() const;
+	void SetHistoryState(const lcCameraHistoryState& State);
 
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);

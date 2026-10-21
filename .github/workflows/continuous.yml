@@ -14,14 +14,14 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install Qt
       uses: jurplel/install-qt-action@v4  
       with:
         version: '5.15.*'
         cache: 'true'
     - name: Get number of CPU cores
-      uses: SimenB/github-actions-cpu-cores@v1
+      uses: SimenB/github-actions-cpu-cores@v3
       id: cpu-cores
     - name: Generate Makefile
       run: qmake PREFIX=/usr
@@ -40,7 +40,7 @@ jobs:
       run: make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
         path: build/tests/test-results.xml
@@ -49,14 +49,14 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.11.*'
         cache: 'true'
     - name: Cache Library
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       id: cache-library
       with:
         path: library.bin
@@ -67,7 +67,7 @@ jobs:
         wget https://github.com/leozide/leocad/releases/download/v26.09/Library-26.08.zip -O library.zip
         unzip library.zip
     - name: Cache POV-Ray
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       id: cache-povray
       with:
         path: povray
@@ -81,7 +81,7 @@ jobs:
         REMOTE=$(cat remote.txt)
         echo "REMOTE=$REMOTE"        
     - name: Get number of CPU cores
-      uses: SimenB/github-actions-cpu-cores@v1
+      uses: SimenB/github-actions-cpu-cores@v3
       id: cpu-cores
     - name: Generate Makefile
       run: qmake -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib PREFIX=/usr
@@ -100,7 +100,7 @@ jobs:
       run: make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
         path: build/tests/test-results.xml
@@ -112,7 +112,7 @@ jobs:
       run:
         shell: cmd
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -120,7 +120,8 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: '6.11.*'
+        # aqtinstall 3.3 cannot read Qt 6.11's Windows repository layout.
+        version: '6.10.3'
         arch: 'win64_msvc2022_64'
         cache: 'true'
     - name: Generate Makefile
@@ -140,7 +141,7 @@ jobs:
       run: nmake /NOLOGO check "TESTARGS=-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
         path: build/tests/test-results.xml

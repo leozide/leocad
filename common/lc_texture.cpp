@@ -196,7 +196,7 @@ QString lcTexture::GetLoadError() const
 	switch (mLoadFailure)
 	{
 	case lcTextureLoadError::DecodeFailed:
-		return tr("Could not load texture %1.").arg(QString::fromLatin1(mName));
+		return tr("Could not load texture '%1'.").arg(QString::fromLatin1(mName));
 
 	case lcTextureLoadError::ContextActivationFailed:
 		return tr("Could not make the shared GL context current for texture upload.");
@@ -208,10 +208,10 @@ QString lcTexture::GetLoadError() const
 		return tr("Texture upload failed.");
 
 	case lcTextureLoadError::None:
-		return tr("Texture %1 failed to load.").arg(QString::fromLatin1(mName));
+		return tr("Texture '%1' failed to load.").arg(QString::fromLatin1(mName));
 	}
 
-	return tr("Texture %1 failed to load.").arg(QString::fromLatin1(mName));
+	return tr("Texture '%1' failed to load.").arg(QString::fromLatin1(mName));
 }
 
 void lcTexture::SetImages(std::vector<QImage>&& Images, int Flags)

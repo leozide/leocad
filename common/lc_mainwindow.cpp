@@ -1049,12 +1049,12 @@ void lcMainWindow::UpdateAssets()
 			QString Error = lcGetPiecesLibrary()->GetPieceDataLoadError(PieceData);
 
 			if (Error.isEmpty())
-				Error = tr("Could not load part.");
+				Error = tr("Could not load piece.");
 
 			if (!FailureDetails.isEmpty())
 				FailureDetails += QLatin1Char('\n');
 
-			FailureDetails += QString::fromLatin1(PieceData->mFileName) + QStringLiteral(": ") + Error;
+			FailureDetails += QStringLiteral("'%1': %2").arg(QString::fromLatin1(PieceData->mFileName), Error);
 		}
 		else if (PieceData->mState != lcAssetState::Loaded)
 			PendingParts++;
@@ -1076,7 +1076,7 @@ void lcMainWindow::UpdateAssets()
 			if (!FailureDetails.isEmpty())
 				FailureDetails += QLatin1Char('\n');
 
-			FailureDetails += QString::fromLatin1(Piece->mPieceData->mFileName) + QStringLiteral(": ") + Error;
+			FailureDetails += QStringLiteral("'%1': %2").arg(QString::fromLatin1(Piece->mPieceData->mFileName), Error);
 		}
 	}
 
@@ -2706,7 +2706,7 @@ void lcMainWindow::ImportLDD()
 	if (!SaveProjectIfModified())
 		return;
 
-	QString LoadFileName = QFileDialog::getOpenFileName(this, tr("Import"), QString(), tr("LEGO Diginal Designer Files (*.lxf);;All Files (*.*)"));
+	QString LoadFileName = QFileDialog::getOpenFileName(this, tr("Import"), QString(), tr("LEGO Digital Designer Files (*.lxf);;All Files (*.*)"));
 	if (LoadFileName.isEmpty())
 		return;
 

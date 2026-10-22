@@ -56,7 +56,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	PartColorValueLDIndexSlider->setValue(mPartColorValueLDIndex * 100);
 	PartColorValueLDIndexSlider->setToolTip(ShowHighContrastDialog ?
 		tr("Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39.") :
-		tr("Set to specify amount of edge color tint or shade from the saturation adjusted part color"));
+		tr("Set to specify amount of edge color tint or shade from the saturation adjusted piece color"));
 	connect(PartColorValueLDIndexSlider, &QSlider::valueChanged, this, &lcAutomateEdgeColorDialog::SliderValueChanged);
 	emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
 
@@ -102,7 +102,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	HighContrastColorLayout->addWidget(StudCylinderColorButton,0,1);
 	HighContrastColorLayout->addWidget(ResetStudCylinderColorButton,0,2);
 
-	PartEdgeColorEnabledBox = new QCheckBox(tr("Parts Edge Color:"), this);
+	PartEdgeColorEnabledBox = new QCheckBox(tr("Pieces Edge Color:"), this);
 	PartEdgeColorEnabledBox->setChecked(mPartEdgeColorEnabled);
 	connect(PartEdgeColorEnabledBox, &QCheckBox::clicked, this, &lcAutomateEdgeColorDialog::ColorCheckBoxClicked);
 
@@ -120,7 +120,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	HighContrastColorLayout->addWidget(PartEdgeColorButton,1,1);
 	HighContrastColorLayout->addWidget(ResetPartEdgeColorButton,1,2);
 
-	BlackEdgeColorEnabledBox = new QCheckBox(tr("Black Parts Edge Color:"), this);
+	BlackEdgeColorEnabledBox = new QCheckBox(tr("Black Pieces Edge Color:"), this);
 	BlackEdgeColorEnabledBox->setChecked(mBlackEdgeColorEnabled);
 	connect(BlackEdgeColorEnabledBox, &QCheckBox::clicked, this, &lcAutomateEdgeColorDialog::ColorCheckBoxClicked);
 
@@ -138,7 +138,7 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	HighContrastColorLayout->addWidget(BlackEdgeColorButton,2,1);
 	HighContrastColorLayout->addWidget(ResetBlackEdgeColorButton,2,2);
 
-	DarkEdgeColorEnabledBox = new QCheckBox(tr("Dark Parts Edge Color:"), this);
+	DarkEdgeColorEnabledBox = new QCheckBox(tr("Dark Pieces Edge Color:"), this);
 	DarkEdgeColorEnabledBox->setChecked(mDarkEdgeColorEnabled);
 	connect(DarkEdgeColorEnabledBox, &QCheckBox::clicked, this, &lcAutomateEdgeColorDialog::ColorCheckBoxClicked);
 
@@ -221,7 +221,7 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 	}
 	else if (Button == PartEdgeColorButton)
 	{
-		Title = tr("Select Part Edge Color");
+		Title = tr("Select Piece Edge Color");
 		Color = &mPartEdgeColor;
 	}
 	else if (Button == BlackEdgeColorButton)
@@ -229,7 +229,7 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 		if (lcGetPreferences().mAutomateEdgeColor)
 		{
 			QMessageBox msgBox;
-			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Black parts edge color will not be accessible.<br>Do you want to continue?"));
+			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Black pieces edge color will not be accessible.<br>Do you want to continue?"));
 			if (msgBox.exec() != QMessageBox::Accepted)
 				return;
 		}
@@ -241,7 +241,7 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 		if (lcGetPreferences().mAutomateEdgeColor)
 		{
 			QMessageBox msgBox;
-			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Dark parts edge color will not be accessible.<br>Do you want to continue?"));
+			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Dark pieces edge color will not be accessible.<br>Do you want to continue?"));
 			if (msgBox.exec() != QMessageBox::Accepted)
 				return;
 		}

@@ -785,7 +785,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.ZoomExtents"),
 		QT_TRANSLATE_NOOP("Menu", "Zoom E&xtents"),
-		QT_TRANSLATE_NOOP("Status", "Fit all pieces in current the view (hold the CTRL key down to zoom all views)"),
+		QT_TRANSLATE_NOOP("Status", "Fit all pieces in the current view (hold the CTRL key down to zoom all views)"),
 		""
 	},
 	// LC_VIEW_LOOK_AT
@@ -1828,7 +1828,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Help.Updates"),
 		QT_TRANSLATE_NOOP("Menu", "Check for &Updates..."),
-		QT_TRANSLATE_NOOP("Status", "Check if a newer LeoCAD version or parts library has been released"),
+		QT_TRANSLATE_NOOP("Status", "Check if a newer LeoCAD version or pieces library has been released"),
 		""
 	},
 	// LC_HELP_ABOUT

@@ -46,45 +46,45 @@ const QLatin1String LineEnding("\r\n");
 #define LC_RENDER_IMAGE_MAX_SIZE           32768 // pixels
 
 static QString WhatsThisDescription = QObject::tr(
-	"  Blender LDraw Addon Settings\n\n"
-	"  You can configure the Blender LDraw addon settings.\n"
+	"  Blender LDraw Add-on Settings\n\n"
+	"  You can configure the Blender LDraw add-on settings.\n"
 	"  - Blender Executable: set Blender path. On entry,\n"
 	"    %1 will automatically apply the setting and\n"
-	"    attempt the configure the LDraw addon.\n"
-	"  - %1 Blender LDraw Addon: you can update the LDraw\n"
-	"    addon which will download the latest addon or apply\n"
-	"    the current addon if the version is the same or newer\n"
+	"    attempt to configure the LDraw add-on.\n"
+	"  - %1 Blender LDraw Add-on: you can update the LDraw\n"
+	"    add-on which will download the latest add-on or apply\n"
+	"    the current add-on if the version is the same or newer\n"
 	"    than the online version.\n"
 	"    You can view the standard output log for the update.\n\n"
-	"  - Enabled Addon Modules: check the desired import module.\n"
+	"  - Enabled Add-on Modules: check the desired import module.\n"
 	"    The LDraw Import TN import module is the long-standing\n"
-	"    Blender LDraw import addon, while the LDraw Import MM\n"
-	"    addon was recently introduced. The latter addon also\n"
-	"    offer LDraw export functionality.\n"
-	"    The %1 3D Image Render addon is mandatory but if\n"
+	"    Blender LDraw import add-on, while the LDraw Import MM\n"
+	"    add-on was recently introduced. The latter add-on also\n"
+	"    offers LDraw export functionality.\n"
+	"    The %1 3D Image Render add-on is mandatory but if\n"
 	"    no import module is enabled, none of the modules\n"
 	"    will be enabled in Blender so it will not be possible\n"
 	"    to perform an LDraw model import or render.\n\n"
-	"  - LDraw Import Addon Paths: addon paths are specific\n"
-	"    to the enabled addon import module.\n"
-	"  - LDraw Import Addon Settings: addon settings are\n"
-	"    specific to the enabled addon import module.\n"
-	"  - Apply: apply the addon path and setting preferences.\n"
-	"  - Show/Hide Paths: show or hide the addon paths\n"
+	"  - LDraw Import Add-on Paths: add-on paths are specific\n"
+	"    to the enabled add-on import module.\n"
+	"  - LDraw Import Add-on Settings: add-on settings are\n"
+	"    specific to the enabled add-on import module.\n"
+	"  - Apply: apply the add-on path and setting preferences.\n"
+	"  - Show/Hide Paths: show or hide the add-on paths\n"
 	"    display box.\n"
-	"  - Reset: reset the addon path and setting preferences.\n"
-	"    You can select how to reset addon settings.\n"
+	"  - Reset: reset the add-on path and setting preferences.\n"
+	"    You can select how to reset add-on settings.\n"
 	"    The choice is since last apply or system default.\n\n"
 	"  You can see the specific description of each setting\n"
 	"  if you hover over the setting to display its tooltip.\n\n"
 	"  Image Width, Image Height and Render Percentage are\n"
-	"  always updated from the current step model when the\n"
-	"  this dialog is opened. These settngs can be manually\n"
-	"  overridden, Also, when Crop Image is checked the\n"
-	"  current step cropped image width and height is\n"
-	"  calculated and and used\n\n"
-	"  Use the dialogue window scroll bar to access the\n"
-	"  complete selection of addon settings.\n")
+	"  always updated from the current step model when\n"
+	"  this dialog is opened. These settings can be manually\n"
+	"  overridden. Also, when Crop Image is checked the\n"
+	"  cropped image width and height for the current step are\n"
+	"  calculated and used.\n\n"
+	"  Use the dialog window scroll bar to access the\n"
+	"  complete selection of add-on settings.\n")
 .arg(QLatin1String(LC_PRODUCTNAME_STR));
 
 lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mBlenderPaths [NUM_PATHS];
@@ -93,13 +93,13 @@ lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mDefaultPaths [NUM_PAT
 	/*                             Key:                  MM Key:               Value:             Label:                                   Tooltip (Description):*/
 	/* 0   PATH_BLENDER        */ {"blenderpath",        "blenderpath",        "",    QObject::tr("Blender Path"),             QObject::tr("Full file path to Blender application executable")},
 	/* 1   PATH_BLENDFILE      */ {"blendfile",          "blendfile",          "",    QObject::tr("Blendfile Path"),           QObject::tr("Full file path to a supplement .blend file - specify to append additional settings")},
-	/* 2   PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QObject::tr("Environment Texture Path"), QObject::tr("Full file path to .exr environment texture file - specify if not using default bundled in addon")},
+	/* 2   PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QObject::tr("Environment Texture Path"), QObject::tr("Full file path to .exr environment texture file - specify if not using default bundled in add-on")},
 	/* 3   PATH_LDCONFIG       */ {"customldconfigfile", "customldconfigfile", "",    QObject::tr("Custom LDConfig Path"),     QObject::tr("Full file path to custom LDConfig file - specify if not %1 alternate LDConfig file").arg(LC_PRODUCTNAME_STR)},
-	/* 4   PATH_LDRAW          */ {"ldrawdirectory",     "ldrawpath",          "",    QObject::tr("LDraw Directory"),          QObject::tr("Full directory path to the LDraw parts library (download from https://library.ldraw.org)")},
-	/* 5   PATH_LSYNTH         */ {"lsynthdirectory",    "",                   "",    QObject::tr("LSynth Directory"),         QObject::tr("Full directory path to LSynth primitives - specify if not using default bundled in addon")},
-	/* 6   PATH_STUD_LOGO      */ {"studlogodirectory",  "",                   "",    QObject::tr("Stud Logo Directory"),      QObject::tr("Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial parts not used or not using default bundled in addon")},
-	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QObject::tr("Stud.io LDraw Path"),       QObject::tr("Full filepath to the Stud.io LDraw Parts Library (download from https://www.bricklink.com/v3/studio/download.page)")},
-	/* 8   PATH_STUDIO_CUSTOM_PARTS */ {"",              "studiocustompartspath", "", QObject::tr("Stud.io Custom Parts Path"),QObject::tr("Full filepath to the Stud.io LDraw Custom Parts")}
+	/* 4   PATH_LDRAW          */ {"ldrawdirectory",     "ldrawpath",          "",    QObject::tr("LDraw Directory"),          QObject::tr("Full directory path to the LDraw pieces library (download from https://library.ldraw.org)")},
+	/* 5   PATH_LSYNTH         */ {"lsynthdirectory",    "",                   "",    QObject::tr("LSynth Directory"),         QObject::tr("Full directory path to LSynth primitives - specify if not using default bundled in add-on")},
+	/* 6   PATH_STUD_LOGO      */ {"studlogodirectory",  "",                   "",    QObject::tr("Stud Logo Directory"),      QObject::tr("Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial pieces not used or not using default bundled in add-on")},
+	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QObject::tr("Stud.io LDraw Path"),       QObject::tr("Full file path to the Stud.io LDraw Pieces Library (download from https://www.bricklink.com/v3/studio/download.page)")},
+	/* 8   PATH_STUDIO_CUSTOM_PARTS */ {"",              "studiocustompartspath", "", QObject::tr("Stud.io Custom Pieces Path"),QObject::tr("Full file path to the Stud.io LDraw Custom Pieces")}
 };
 
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mBlenderSettings [NUM_SETTINGS];
@@ -107,18 +107,18 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettings [N
 {
 	/*                                   Key:                              Value:                  Label                                  Tooltip (Description)*/
 	/* 0   LBL_ADD_ENVIRONMENT       */ {"addenvironment",                 "1",        QObject::tr("Add Environment"),        QObject::tr("Adds a ground plane and environment texture (affects 'Photo-realistic' look only)")},
-	/* 1   LBL_ADD_GAPS              */ {"gaps",                           "0",        QObject::tr("Add Part Gap"),           QObject::tr("Add a small space between each part")},
+	/* 1   LBL_ADD_GAPS              */ {"gaps",                           "0",        QObject::tr("Add Piece Gap"),           QObject::tr("Add a small space between each piece")},
 	/* 2   LBL_BEVEL_EDGES           */ {"beveledges",                     "1",        QObject::tr("Bevel Edges"),            QObject::tr("Adds a Bevel modifier for rounding off sharp edges")},
 	/* 3   LBL_BLENDFILE_TRUSTED     */ {"blendfiletrusted",               "0",        QObject::tr("Trusted Blend File"),     QObject::tr("Specify whether to treat the .blend file as being loaded from a trusted source")},
 	/* 4   LBL_CROP_IMAGE            */ {"cropimage",                      "0",        QObject::tr("Crop Image"),             QObject::tr("Crop the image border at opaque content. Requires transparent background set to True")},
 	/* 5   LBL_CURVED_WALLS          */ {"curvedwalls",                    "1",        QObject::tr("Curved Walls"),           QObject::tr("Makes surfaces look slightly concave, for interesting reflections")},
-	/* 6   LBL_FLATTEN_HIERARCHY     */ {"flattenhierarchy",               "0",        QObject::tr("Flatten Hierarchy"),      QObject::tr("In Scene Outline, all parts are placed directly below the root - there's no tree of submodels")},
+	/* 6   LBL_FLATTEN_HIERARCHY     */ {"flattenhierarchy",               "0",        QObject::tr("Flatten Hierarchy"),      QObject::tr("In Scene Outline, all pieces are placed directly below the root - there's no tree of submodels")},
 	/* 7   LBL_IMPORT_CAMERAS        */ {"importcameras",                  "1",        QObject::tr("Import Cameras"),         QObject::tr("%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
 	/* 8   LBL_IMPORT_LIGHTS         */ {"importlights",                   "1",        QObject::tr("Import Lights"),          QObject::tr("%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
 	/* 9   LBL_INSTANCE_STUDS        */ {"instancestuds",                  "0",        QObject::tr("Instance Studs"),         QObject::tr("Creates a Blender Object for each and every stud (WARNING: can be slow to import and edit in Blender if there are lots of studs)")},
 	/*10   LBL_KEEP_ASPECT_RATIO     */ {"keepaspectratio",                "1",        QObject::tr("Keep Aspect Ratio"),      QObject::tr("Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
-	/*11   LBL_LINK_PARTS            */ {"linkparts",                      "1",        QObject::tr("Link Like Parts"),        QObject::tr("Identical parts (of the same type and colour) share the same mesh")},
-	/*12   LBL_MINIFIG_HIERARCHY     */ {"minifighierarchy",               "1",        QObject::tr("Parent Minifigs"),        QObject::tr("Parts of minifigs are automatically parented to each other in a hierarchy")},
+	/*11   LBL_LINK_PARTS            */ {"linkparts",                      "1",        QObject::tr("Link Like Pieces"),        QObject::tr("Identical pieces (of the same type and color) share the same mesh")},
+	/*12   LBL_MINIFIG_HIERARCHY     */ {"minifighierarchy",               "1",        QObject::tr("Parent Minifigs"),        QObject::tr("Pieces of minifigs are automatically parented to each other in a hierarchy")},
 	/*13   LBL_NUMBER_NODES          */ {"numbernodes",                    "1",        QObject::tr("Number Objects"),         QObject::tr("Each object has a five digit prefix eg. 00001_car. This keeps the list in it's proper order")},
 	/*14   LBL_OVERWRITE_IMAGE       */ {"overwriteimage",                 "1",        QObject::tr("Overwrite Image"),        QObject::tr("Specify whether to overwrite an existing rendered image file")},
 	/*15   LBL_OVERWRITE_MATERIALS   */ {"overwriteexistingmaterials",     "0",        QObject::tr("Use Existing Material"),  QObject::tr("Overwrite existing material with the same name")},
@@ -130,32 +130,32 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettings [N
 	/*21   LBL_SEARCH_ADDL_PATHS     */ {"searchadditionalpaths",          "0",        QObject::tr("Search Additional Paths"),QObject::tr("Specify whether to search additional LDraw paths")},
 	/*22   LBL_SMOOTH_SHADING        */ {"smoothshading",                  "1",        QObject::tr("Smooth Shading"),         QObject::tr("Smooth faces and add an edge-split modifier (recommended)")},
 	/*23   LBL_TRANSPARENT_BACKGROUND*/ {"transparentbackground",          "0",        QObject::tr("Transparent Background"), QObject::tr("Specify whether to render a background (affects 'Photo-realistic look only)")},
-	/*24   LBL_UNOFFICIAL_PARTS      */ {"useunofficialparts",             "1",        QObject::tr("Use Unofficial Parts"),   QObject::tr("Specify whether to use parts from the LDraw unofficial parts library path")},
+	/*24   LBL_UNOFFICIAL_PARTS      */ {"useunofficialparts",             "1",        QObject::tr("Use Unofficial Pieces"),   QObject::tr("Specify whether to use pieces from the LDraw unofficial pieces library path")},
 	/*25   LBL_USE_LOGO_STUDS        */ {"uselogostuds",                   "1",        QObject::tr("Use Logo Studs"),         QObject::tr("Shows the LEGO logo on each stud (at the expense of some extra geometry and import time)")},
 	/*26   LBL_VERBOSE               */ {"verbose",                        "1",        QObject::tr("Verbose output"),         QObject::tr("Output all messages while working, else only show warnings and errors")},
 
-	/*27/0 LBL_BEVEL_WIDTH           */ {"bevelwidth",                     "0.5",      QObject::tr("Bevel Width"),            QObject::tr("Width of the bevelled edges")},
+	/*27/0 LBL_BEVEL_WIDTH           */ {"bevelwidth",                     "0.5",      QObject::tr("Bevel Width"),            QObject::tr("Width of the beveled edges")},
 	/*28/1 LBL_CAMERA_BORDER_PERCENT */ {"cameraborderpercentage",         "5.0",      QObject::tr("Camera Border Percent"),  QObject::tr("When positioning the camera, include a (percentage) border leeway around the model in the rendered image")},
-	/*29/2 LBL_DEFAULT_COLOUR        */ {"defaultcolour",                  "16",       QObject::tr("Default Colour"),         QObject::tr("Sets the default part colour using LDraw colour code")},
-	/*20/3 LBL_GAPS_SIZE             */ {"realgapwidth",                   "0.0002",   QObject::tr("Gap Width"),              QObject::tr("Amount of space between each part (default 0.2mm)")},
+	/*29/2 LBL_DEFAULT_COLOUR        */ {"defaultcolour",                  "16",       QObject::tr("Default Color"),         QObject::tr("Sets the default piece color using LDraw color code")},
+	/*20/3 LBL_GAPS_SIZE             */ {"realgapwidth",                   "0.0002",   QObject::tr("Gap Width"),              QObject::tr("Amount of space between each piece (default 0.2mm)")},
 	/*31/4 LBL_IMAGE_WIDTH           */ {"resolutionwidth",                "800",      QObject::tr("Image Width"),            QObject::tr("Sets the rendered image width in pixels - from current step image, label shows config setting.")},
 	/*32/5 LBL_IMAGE_HEIGHT          */ {"resolutionheight",               "600",      QObject::tr("Image Height"),           QObject::tr("Sets the rendered image height in pixels - from current step image, label shows config setting.")},
 	/*33/6 LBL_IMAGE_SCALE           */ {"realscale",                      "1.0",      QObject::tr("Image Scale"),            QObject::tr("Sets a scale for the model (1.0 = real life scale)")},
 	/*34/6 LBL_RENDER_PERCENTAGE     */ {"renderpercentage",               "100",      QObject::tr("Render Percentage"),      QObject::tr("Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
 
-	/*35/0 LBL_COLOUR_SCHEME         */ {"usecolourscheme",                "lgeo",     QObject::tr("Colour Scheme"),          QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
-	/*36/1 LBL_FLEX_PARTS_SOURCE     */ {"uselsynthparts",                 "1",        QObject::tr("Flex Parts Source"),      QObject::tr("Source used to create flexible parts - string, hoses etc. (LDCad, LSynth or both")},
+	/*35/0 LBL_COLOUR_SCHEME         */ {"usecolourscheme",                "lgeo",     QObject::tr("Color Scheme"),          QObject::tr("Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/*36/1 LBL_FLEX_PARTS_SOURCE     */ {"uselsynthparts",                 "1",        QObject::tr("Flex Pieces Source"),      QObject::tr("Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both")},
 	/*27/2 LBL_LOGO_STUD_VERSION     */ {"logostudversion",                "4",        QObject::tr("Logo Version"),           QObject::tr("Which version of the logo to use ('3' (flat), '4' (rounded) or '5' (subtle rounded))")},
 	/*38/3 LBL_LOOK                  */ {"uselook",                        "normal",   QObject::tr("Look"),                   QObject::tr("Photo-realistic or Schematic 'Instruction' look")},
-	/*39/4 LBL_POSITION_OBJECT       */ {"positionobjectongroundatorigin", "1",        QObject::tr("Position Object"),        QObject::tr("The object is centred at the origin, and on the ground plane")},
-	/*40/5 LBL_RESOLUTION            */ {"resolution",                     "Standard", QObject::tr("Resolution"),             QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
-	/*41/6 LBL_RESOLVE_NORMALS       */ {"resolvenormals",                 "guess",    QObject::tr("Resolve Normals"),        QObject::tr("Some older LDraw parts have faces with ambiguous normals, this specifies what do do with them")}
+	/*39/4 LBL_POSITION_OBJECT       */ {"positionobjectongroundatorigin", "1",        QObject::tr("Position Object"),        QObject::tr("The object is centered at the origin, and on the ground plane")},
+	/*40/5 LBL_RESOLUTION            */ {"resolution",                     "Standard", QObject::tr("Resolution"),             QObject::tr("Resolution of piece primitives, i.e., how much geometry they have")},
+	/*41/6 LBL_RESOLVE_NORMALS       */ {"resolvenormals",                 "guess",    QObject::tr("Resolve Normals"),        QObject::tr("Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItems [NUM_COMBO_ITEMS] =
 {
 	/*    FIRST item set as default        Data                                  Item:   */
-	/* 00 LBL_COLOUR_SCHEME            */ {"lgeo|ldraw|alt|custom",  QObject::tr("Realistic Colours|Original LDraw Colours|Alternate LDraw Colours|Custom Colours")},
+	/* 00 LBL_COLOUR_SCHEME            */ {"lgeo|ldraw|alt|custom",  QObject::tr("Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
 	/* 01 LBL_FLEX_PARTS_SOURCE (t/f)  */ {"1|0|1",                  QObject::tr("LSynth|LDCad|LDCad and LSynth")},
 	/* 02 LBL_LOGO_STUD_VERSION        */ {"4|3|5",                  QObject::tr("Rounded(4)|Flattened(3)|Subtle Rounded(5)")},
 	/* 03 LBL_LOOK                     */ {"normal|instructions",    QObject::tr("Photo Realistic|Lego Instructions")},
@@ -169,7 +169,7 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 {
 	/*                                                Key:                             Value:                    Label                                    Tooltip (Description)*/
 	/* 00 LBL_ADD_ENVIRONMENT_MM                  */ {"addenvironment",                "1",          QObject::tr("Add Environment"),          QObject::tr("Adds a ground plane and environment texture")},
-	/* 01 LBL_BEVEL_EDGES_MM                      */ {"beveledges",                    "0",          QObject::tr("Bevel Edgest"),             QObject::tr("Bevel edges. Can cause some parts to render incorrectly")},
+	/* 01 LBL_BEVEL_EDGES_MM                      */ {"beveledges",                    "0",          QObject::tr("Bevel Edges"),             QObject::tr("Bevel edges. Can cause some pieces to render incorrectly")},
 	/* 02 LBL_BLEND_FILE_TRUSTED_MM               */ {"blendfiletrusted",              "0",          QObject::tr("Trusted Blend File"),       QObject::tr("Specify whether to treat the .blend file as being loaded from a trusted source")},
 #ifdef Q_OS_LINUX
 	/* 03 LBL_CASE_SENSITIVE_FILESYSTEM           */ {"casesensitivefilesystem",       "1",          QObject::tr("Case-sensitive Filesystem"),QObject::tr("Filesystem is case sensitive. Defaults to true on Linux.")},
@@ -184,20 +184,20 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 09 LBL_KEEP_ASPECT_RATIO_MM                */ {"keepaspectratio",               "1",          QObject::tr("Keep Aspect Ratio"),        QObject::tr("Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
 	/* 10 LBL_MAKE_GAPS                           */ {"makegaps",                      "1",          QObject::tr("Make Gaps"),                QObject::tr("Make small gaps between bricks. A small gap is more realistic")},
 	/* 11 LBL_META_BFC                            */ {"metabfc",                       "1",          QObject::tr("BFC"),                      QObject::tr("Process LDraw Back Face Culling meta commands")},
-	/* 12 LBL_META_CLEAR                          */ {"metaclear",                     "0",          QObject::tr("CLEAR Command"),            QObject::tr("Hides all parts in the timeline up to where this command is encountered")},
+	/* 12 LBL_META_CLEAR                          */ {"metaclear",                     "0",          QObject::tr("CLEAR Command"),            QObject::tr("Hides all pieces in the timeline up to where this command is encountered")},
 	/* 13 LBL_META_GROUP                          */ {"metagroup",                     "1",          QObject::tr("GROUP Command"),            QObject::tr("Process GROUP meta commands")},
 	/* 14 LBL_META_PAUSE                          */ {"metapause",                     "0",          QObject::tr("PAUSE Command"),            QObject::tr("Not implemented")},
 	/* 15 LBL_META_PRINT_WRITE                    */ {"metaprintwrite",                "0",          QObject::tr("PRINT/WRITE Command"),      QObject::tr("Prints PRINT/WRITE META commands to the system console.")},
 	/* 16 LBL_META_SAVE                           */ {"metasave",                      "0",          QObject::tr("SAVE Command"),             QObject::tr("Not implemented")},
-	/* 17 LBL_META_STEP                           */ {"metastep",                      "0",          QObject::tr("STEP Command"),             QObject::tr("Adds a keyframe that shows the part at the moment in the timeline")},
+	/* 17 LBL_META_STEP                           */ {"metastep",                      "0",          QObject::tr("STEP Command"),             QObject::tr("Adds a keyframe that shows the piece at the moment in the timeline")},
 	/* 18 LBL_META_STEP_GROUPS                    */ {"metastepgroups",                "0",          QObject::tr("STEP Groups"),              QObject::tr("Create collection for individual steps")},
 	/* 19 LBL_META_TEXMAP                         */ {"metatexmap",                    "1",          QObject::tr("TEXMAP and DATA Command"),  QObject::tr("Process TEXMAP and DATA meta commands")},
 	/* 20 LBL_NO_STUDS                            */ {"nostuds",                       "0",          QObject::tr("No Studs"),                 QObject::tr("Don't import studs")},
 	/* 21 LBL_OVERWRITE_IMAGE_MM                  */ {"overwriteimage",                "1",          QObject::tr("Overwrite Image"),          QObject::tr("Specify whether to overwrite an existing rendered image file")},
 	/* 22 LBL_POSITION_CAMERA_MM                  */ {"positioncamera",                "1",          QObject::tr("Position Camera"),          QObject::tr("Position the camera to show the whole model")},
 	/* 23 LBL_PARENT_TO_EMPTY                     */ {"parenttoempty",                 "1",          QObject::tr("Parent To Empty"),          QObject::tr("Parent the model to an empty")},
-	/* 24 LBL_PREFER_STUDIO                       */ {"preferstudio",                  "0",          QObject::tr("Prefer Stud.io Library"),   QObject::tr("Search for parts in Stud.io library first")},
-	/* 25 LBL_PREFER_UNOFFICIAL                   */ {"preferunofficial",              "0",          QObject::tr("Prefer Unofficial Parts"),  QObject::tr("Search for unofficial parts first")},
+	/* 24 LBL_PREFER_STUDIO                       */ {"preferstudio",                  "0",          QObject::tr("Prefer Stud.io Library"),   QObject::tr("Search for pieces in Stud.io library first")},
+	/* 25 LBL_PREFER_UNOFFICIAL                   */ {"preferunofficial",              "0",          QObject::tr("Prefer Unofficial Pieces"),  QObject::tr("Search for unofficial pieces first")},
 	/* 26 LBL_PROFILE                             */ {"profile",                       "0",          QObject::tr("Profile"),                  QObject::tr("Profile import performance")},
 	/* 27 LBL_RECALCULATE_NORMALS                 */ {"recalculatenormals",            "0",          QObject::tr("Recalculate Normals"),      QObject::tr("Recalculate normals. Not recommended if BFC processing is active")},
 	/* 28 LBL_REMOVE_DOUBLES_MM                   */ {"removedoubles",                 "1",          QObject::tr("No Duplicate Vertices"),    QObject::tr("Merge vertices that are within a certain distance.")},
@@ -205,9 +205,9 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 30 LBL_SEARCH_ADDL_PATHS_MM                */ {"searchadditionalpaths",         "0",          QObject::tr("Search Additional Paths"),  QObject::tr("Specify whether to search additional LDraw paths")},
 	/* 31 LBL_SETEND_FRAME                        */ {"setendframe",                   "1",          QObject::tr("Set Step End Frame"),       QObject::tr("Set the end frame to the last step")},
 	/* 32 LBL_SET_TIMELINE_MARKERS                */ {"settimelinemarkers",            "0",          QObject::tr("Set Timeline Markers"),     QObject::tr("Set timeline markers for meta commands")},
-	/* 33 LBL_SHADE_SMOOTH                        */ {"shadesmooth",                   "1",          QObject::tr("Shade Smooth"),             QObject::tr("Use flat or smooth shading for part faces")},
+	/* 33 LBL_SHADE_SMOOTH                        */ {"shadesmooth",                   "1",          QObject::tr("Shade Smooth"),             QObject::tr("Use flat or smooth shading for piece faces")},
 	/* 34 LBL_TRANSPARENT_BACKGROUND_MM           */ {"transparentbackground",         "0",          QObject::tr("Transparent Background"),   QObject::tr("Specify whether to render a background")},
-	/* 35 LBL_TREAT_SHORTCUT_AS_MODEL             */ {"treatshortcutasmodel",          "0",          QObject::tr("Treat Shortcuts As Models"),QObject::tr("Split shortcut parts into their constituent pieces as if they were models")},
+	/* 35 LBL_TREAT_SHORTCUT_AS_MODEL             */ {"treatshortcutasmodel",          "0",          QObject::tr("Treat Shortcuts As Models"),QObject::tr("Split shortcut pieces into their constituent pieces as if they were models")},
 	/* 36 LBL_TRIANGULATE                         */ {"triangulate",                   "0",          QObject::tr("Triangulate Faces"),        QObject::tr("Triangulate all faces")},
 	/* 37 LBL_USE_ARCHIVE_LIBRARY_MM              */ {"usearchivelibrary",             "0",          QObject::tr("Use Archive Libraries"),    QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
 	/* 38 LBL_USE_FREESTYLE_EDGES                 */ {"usefreestyleedges",             "0",          QObject::tr("Use Freestyle Edges"),      QObject::tr("Render LDraw edges using freestyle")},
@@ -215,10 +215,10 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 
 	/* 40/00 LBL_BEVEL_SEGMENTS                   */ {"bevelsegments",                 "4",          QObject::tr("Bevel Segments"),           QObject::tr("Bevel segments")},
 	/* 41/01 LBL_BEVEL_WEIGHT                     */ {"bevelweight",                   "0.03",       QObject::tr("Bevel Weight"),             QObject::tr("Bevel weight")},
-	/* 42/02 LBL_BEVEL_WIDTH_MM                   */ {"bevelwidth",                    "0.3",        QObject::tr("Bevel Width"),              QObject::tr("Width of the bevelled edges")},
+	/* 42/02 LBL_BEVEL_WIDTH_MM                   */ {"bevelwidth",                    "0.3",        QObject::tr("Bevel Width"),              QObject::tr("Width of the beveled edges")},
 	/* 43/03 LBL_CAMERA_BORDER_PERCENT_MM         */ {"cameraborderpercent",           "5",          QObject::tr("Camera Border Percent"),    QObject::tr("When positioning the camera, include a (percentage) border around the model in the render")},
 	/* 44/04 LBL_FRAMES_PER_STEP                  */ {"framesperstep",                 "3",          QObject::tr("Frames Per Step"),          QObject::tr("Frames per step")},
-	/* 45/05 LBL_GAP_SCALE                        */ {"gapscale",                      "0.997",      QObject::tr("Gap Scale"),                QObject::tr("Scale individual parts by this much to create the gap")},
+	/* 45/05 LBL_GAP_SCALE                        */ {"gapscale",                      "0.997",      QObject::tr("Gap Scale"),                QObject::tr("Scale individual pieces by this much to create the gap")},
 	/* 46/06 LBL_IMPORT_SCALE                     */ {"importscale",                   "0.02",       QObject::tr("Import Scale"),             QObject::tr("What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport")},
 	/* 47/07 LBL_MERGE_DISTANCE                   */ {"mergedistance",                 "0.05",       QObject::tr("Merge Distance"),           QObject::tr("Maximum distance between elements to merge")},
 	/* 48/08 LBL_RENDER_PERCENTAGE_MM             */ {"renderpercentage",              "100",        QObject::tr("Render Percentage"),        QObject::tr("Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
@@ -227,20 +227,20 @@ lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM 
 	/* 51/11 LBL_STARTING_STEP_FRAME              */ {"startingstepframe",             "1",          QObject::tr("Starting Step Frame"),      QObject::tr("Frame to add the first STEP meta command")},
 
 	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QObject::tr("Chosen Logo"),              QObject::tr("Which logo to display. logo and logo2 aren't used and are only included for completeness")},
-	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QObject::tr("Colour Scheme"),            QObject::tr("Colour scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
-	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of part primitives, ie. how much geometry they have")},
-	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QObject::tr("How To Scale Parts"),       QObject::tr("Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for part editing")},
-	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth part faces")}
+	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QObject::tr("Color Scheme"),            QObject::tr("Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of piece primitives, i.e., how much geometry they have")},
+	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QObject::tr("How To Scale Pieces"),       QObject::tr("Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for piece editing")},
+	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth piece faces")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO_ITEMS_MM] =
 {
 	/*    FIRST item set as default        Data                                  Item: */
 	/* 00 LBL_CHOSEN_LOGO              */ {"logo3|logo4|logo5",                  QObject::tr("Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)")},
-	/* 01 LBL_COLOUR_SCHEME_MM         */ {"lgeo|ldraw|alt|custom",              QObject::tr("Realistic Colours|Original LDraw Colours|Alternate LDraw Colours|Custom Colours")},
+	/* 01 LBL_COLOUR_SCHEME_MM         */ {"lgeo|ldraw|alt|custom",              QObject::tr("Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
 	/* 02 LBL_RESOLUTION_MM            */ {"Low|Standard|High",                  QObject::tr("Low Resolution Primitives|Standard Primitives|High Resolution Primitives")},
 	/* 03 LBL_SCALE_STRATEGY           */ {"mesh|object",                        QObject::tr("Scale Mesh|Scale Object")},
-	/* 04 LBL_SMOOTH_TYPE              */ {"edge_split|auto_smooth|bmesh_split", QObject::tr("Smooth part faces with edge split modifier|Auto-smooth part faces|Split during initial mesh processing")}
+	/* 04 LBL_SMOOTH_TYPE              */ {"edge_split|auto_smooth|bmesh_split", QObject::tr("Smooth piece faces with edge split modifier|Auto-smooth piece faces|Split during initial mesh processing")}
 };
 
 lcBlenderPreferences* gAddonPreferences;
@@ -257,7 +257,7 @@ enum AddonEnc
 lcBlenderPreferencesDialog::lcBlenderPreferencesDialog(int Width, int Height, double Scale, QWidget* Parent)
 	: QDialog(Parent)
 {
-	setWindowTitle(tr("Blender LDraw Addon Settings"));
+	setWindowTitle(tr("Blender LDraw Add-on Settings"));
 
 	QVBoxLayout* Layout = new QVBoxLayout(this);
 	setLayout(Layout);
@@ -270,19 +270,19 @@ lcBlenderPreferencesDialog::lcBlenderPreferencesDialog(int Width, int Height, do
 	QDialogButtonBox* ButtonBox;
 	ButtonBox = new QDialogButtonBox(this);
 	mApplyButton = new QPushButton(tr("Apply"), ButtonBox);
-	mApplyButton->setToolTip(tr("Apply addon paths and settings preferences"));
+	mApplyButton->setToolTip(tr("Apply add-on paths and settings preferences"));
 	mApplyButton->setEnabled(false);
 	ButtonBox->addButton(mApplyButton, QDialogButtonBox::ActionRole);
 	connect(mApplyButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::accept);
 
 	mPathsButton = new QPushButton(tr("Hide Paths"), ButtonBox);
-	mPathsButton->setToolTip(tr("Hide addon path preferences dialog"));
+	mPathsButton->setToolTip(tr("Hide add-on path preferences dialog"));
 	ButtonBox->addButton(mPathsButton,QDialogButtonBox::ActionRole);
 	connect(mPathsButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ShowPathsGroup);
 
 	mResetButton = new QPushButton(tr("Reset"), ButtonBox);
 	mResetButton->setEnabled(false);
-	mResetButton->setToolTip(tr("Reset addon paths and settings preferences"));
+	mResetButton->setToolTip(tr("Reset add-on paths and settings preferences"));
 	ButtonBox->addButton(mResetButton,QDialogButtonBox::ActionRole);
 	connect(mResetButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ResetSettings);
 
@@ -328,7 +328,7 @@ void lcBlenderPreferencesDialog::ShowPathsGroup()
 {
 	const QString Display = mPathsButton->text().startsWith("Hide") ? tr("Show") : tr("Hide");
 	mPathsButton->setText(tr("%1 Paths").arg(Display));
-	mPathsButton->setToolTip(tr("%1 addon path preferences dialog").arg(Display));
+	mPathsButton->setToolTip(tr("%1 add-on path preferences dialog").arg(Display));
 	mPreferences->ShowPathsGroup();
 }
 
@@ -340,7 +340,7 @@ void lcBlenderPreferencesDialog::EnableButton(bool Change)
 		mResetButton->setEnabled(true);
 	}
 	mPathsButton->setText(tr("Hide Paths"));
-	mPathsButton->setToolTip(tr("Hide addon path preferences dialog"));
+	mPathsButton->setToolTip(tr("Hide add-on path preferences dialog"));
 }
 
 void lcBlenderPreferencesDialog::ResetSettings()
@@ -386,7 +386,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	}
 	else
 	{
-		setWindowTitle(tr("Blender LDraw Addon Settings"));
+		setWindowTitle(tr("Blender LDraw Add-on Settings"));
 		setLayout(Layout);
 		setWhatsThis(WhatsThisDescription);
 	}
@@ -432,13 +432,13 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mPathBrowseButtonList << PathBrowseButton;
 	connect(PathBrowseButton, &QPushButton::clicked, this, &lcBlenderPreferences::BrowseBlender);
 
-	QGroupBox* BlenderAddonVersionBox = new QGroupBox(tr("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR),mContent);
+	QGroupBox* BlenderAddonVersionBox = new QGroupBox(tr("%1 Blender LDraw Add-on").arg(LC_PRODUCTNAME_STR),mContent);
 	mForm->addRow(BlenderAddonVersionBox);
 
 	mAddonGridLayout = new QGridLayout(BlenderAddonVersionBox);
 	BlenderAddonVersionBox->setLayout(mAddonGridLayout);
 
-	QCheckBox* AddonVersionCheck = new QCheckBox(tr("Prompt to download new addon version when available"), BlenderAddonVersionBox);
+	QCheckBox* AddonVersionCheck = new QCheckBox(tr("Prompt to download new add-on version when available"), BlenderAddonVersionBox);
 	AddonVersionCheck->setChecked(lcGetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK));
 	QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
 	{
@@ -451,40 +451,40 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mAddonGridLayout->addWidget(mAddonVersionLabel,1,0);
 
 	mAddonVersionEdit = new QLineEdit(BlenderAddonVersionBox);
-	mAddonVersionEdit->setToolTip(tr("%1 Blender LDraw import and image renderer addon").arg(LC_PRODUCTNAME_STR));
+	mAddonVersionEdit->setToolTip(tr("%1 Blender LDraw import and image renderer add-on").arg(LC_PRODUCTNAME_STR));
 	mAddonVersionEdit->setPalette(ReadOnlyPalette);
 	mAddonVersionEdit->setReadOnly(true);
 	mAddonGridLayout->addWidget(mAddonVersionEdit,1,1);
 	mAddonGridLayout->setColumnStretch(1,1/*1 is greater than 0 (default)*/);
 
 	mAddonUpdateButton = new QPushButton(tr("Update"), BlenderAddonVersionBox);
-	mAddonUpdateButton->setToolTip(tr("Update %1 Blender LDraw addon").arg(LC_PRODUCTNAME_STR));
+	mAddonUpdateButton->setToolTip(tr("Update %1 Blender LDraw add-on").arg(LC_PRODUCTNAME_STR));
 	mAddonGridLayout->addWidget(mAddonUpdateButton,1,2);
 	connect(mAddonUpdateButton, &QPushButton::clicked, this, &lcBlenderPreferences::UpdateBlenderAddon);
 
 	mAddonStdOutButton = new QPushButton(tr("Output..."), BlenderAddonVersionBox);
-	mAddonStdOutButton->setToolTip(tr("Open the standrd output log"));
+	mAddonStdOutButton->setToolTip(tr("Open the standard output log"));
 	mAddonStdOutButton->setEnabled(false);
 	mAddonGridLayout->addWidget(mAddonStdOutButton,1,3);
 	connect(mAddonStdOutButton, &QPushButton::clicked, this, &lcBlenderPreferences::GetStandardOutput);
 
-	mModulesBox = new QGroupBox(tr("Enabled Addon Modules"),mContent);
+	mModulesBox = new QGroupBox(tr("Enabled Add-on Modules"),mContent);
 	QHBoxLayout* ModulesLayout = new QHBoxLayout(mModulesBox);
 	mModulesBox->setLayout(ModulesLayout);
 	mAddonGridLayout->addWidget(mModulesBox,2,0,1,4);
 
 	mImportActBox = new QCheckBox(tr("LDraw Import TN"),mModulesBox);
-	mImportActBox->setToolTip(tr("Enable addon import module (adapted from LDraw Import by Toby Nelson) in Blender"));
+	mImportActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender"));
 	ModulesLayout->addWidget(mImportActBox);
 	connect(mImportActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mImportMMActBox = new QCheckBox(tr("LDraw Import MM"),mModulesBox);
-	mImportMMActBox->setToolTip(tr("Enable addon import module (adapted from LDraw Import by Matthew Morrison) in Blender"));
+	mImportMMActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender"));
 	ModulesLayout->addWidget(mImportMMActBox);
 	connect(mImportMMActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mRenderActBox = new QCheckBox(tr("%1 Image Render").arg(LC_PRODUCTNAME_STR), mModulesBox);
-	mRenderActBox->setToolTip(tr("Addon image render module in Blender"));
+	mRenderActBox->setToolTip(tr("Add-on image render module in Blender"));
 	mRenderActBox->setEnabled(false);
 	ModulesLayout->addWidget(mRenderActBox);
 
@@ -514,7 +514,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	}
 
 	QString VersionTextColour = QApplication::palette().text().color().name(),AddonTextColour;
-	QString VersionText = tr("Blender"), AddonText = tr("Blender Addon");
+	QString VersionText = tr("Blender"), AddonText = tr("Blender Add-on");
 	if (mConfigured)
 	{
 		AddonTextColour = VersionTextColour;
@@ -540,9 +540,9 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 			mImportActBox->setChecked(true);
 			mAddonUpdateButton->setEnabled(true);
 			if (BlenderConfigured)
-				AddonText = tr("Addon not configured - Update.");
+				AddonText = tr("Add-on not configured - Update.");
 			else
-				AddonText = tr("Addon not configured.");
+				AddonText = tr("Add-on not configured.");
 			AddonTextColour = TextColour;
 		}
 	}
@@ -608,7 +608,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 	// Paths
 	ClearGroupBox(mPathsBox);
 	mPathsBox = new QGroupBox(mContent);
-	mPathsBox->setTitle(tr("LDraw Import TN Addon Paths"));
+	mPathsBox->setTitle(tr("LDraw Import TN Add-on Paths"));
 	mPathsGridLayout = new QGridLayout(mPathsBox);
 	mPathsBox->setLayout(mPathsGridLayout);
 	mForm->addRow(mPathsBox);
@@ -657,7 +657,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 	mSettingsBox->setLayout(mSettingsSubform);
 	mForm->addRow(mSettingsBox);
 
-	mSettingsBox->setTitle(tr("LDraw Import TN Addon Settings"));
+	mSettingsBox->setTitle(tr("LDraw Import TN Add-on Settings"));
 	mSettingLabelList.clear();
 	mCheckBoxList.clear();
 	mLineEditList.clear();
@@ -757,7 +757,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 	// Paths
 	ClearGroupBox(mPathsBox);
 	mPathsBox = new QGroupBox(mContent);
-	mPathsBox->setTitle(tr("LDraw Import MM Addon Paths"));
+	mPathsBox->setTitle(tr("LDraw Import MM Add-on Paths"));
 	mPathsGridLayout = new QGridLayout(mPathsBox);
 	mPathsBox->setLayout(mPathsGridLayout);
 	mForm->addRow(mPathsBox);
@@ -806,7 +806,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 	mSettingsBox->setLayout(mSettingsSubform);
 	mForm->addRow(mSettingsBox);
 
-	mSettingsBox->setTitle(tr("LDraw Import MM Addon Settings"));
+	mSettingsBox->setTitle(tr("LDraw Import MM Add-on Settings"));
 	mSettingLabelList.clear();
 	mCheckBoxList.clear();
 	mLineEditList.clear();
@@ -967,7 +967,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			mProcess = new QProcess();
 
-			QString ProcessAction = tr("addon install");
+			QString ProcessAction = tr("add-on install");
 			if (Action == PR_INSTALL)
 			{
 				connect(mProcess, &QProcess::readyReadStandardOutput, this, [this]() { ReadStdOut(); });
@@ -1002,7 +1002,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!mProcess->waitForStarted())
 			{
-				Message = tr("Cannot start Blender %1 mProcess.\n%2").arg(ProcessAction, QString(mProcess->readAllStandardError()));
+				Message = tr("Cannot start Blender %1 process.\n%2").arg(ProcessAction, QString(mProcess->readAllStandardError()));
 				delete mProcess;
 				mProcess = nullptr;
 				return PR_WAIT;
@@ -1029,7 +1029,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				if (!StdOut.contains(BlenderTestString))
 				{
 					Message =  tr("A simple check to test if the selected file is Blender failed."
-								 "Please create an %1 GitHub ticket if you are sure the file is Blender 2.8 or newer."
+								 "Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer."
 								 "The ticket should contain the full path to the Blender executable.").arg(LC_PRODUCTNAME_STR);
 					return PR_FAIL;
 				}
@@ -1050,7 +1050,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 							// set default LDraw import module if not configured
 							if (!mImportActBox->isChecked() && !mImportMMActBox->isChecked())
 								mImportActBox->setChecked(true);
-							Message = tr("Blender %1 mProcess completed. Version: %2 validated.").arg(ProcessAction, mBlenderVersion);
+							Message = tr("Blender %1 process completed. Version: %2 validated.").arg(ProcessAction, mBlenderVersion);
 						}
 					}
 				}
@@ -1130,7 +1130,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 				}
 				else
 				{
-					const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
+					const QString& Title = tr ("%1 Blender LDraw Add-on").arg(LC_PRODUCTNAME_STR);
 					const QString& Header = tr ("Blender test failed.");
 					ShowMessage(this, Header, Title, Message);
 					return;
@@ -1139,8 +1139,8 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!mBlenderVersion.isEmpty() && !mImportMMActBox->isChecked() && !mImportActBox->isChecked())
 			{
-				const QString& Title = tr ("%1 Blender LDraw Addon Modules").arg(LC_PRODUCTNAME_STR);
-				const QString& Header = tr ("No import module enabled. If you continue, the default import module (Import TN) will be used.<br>If you select No, all addon modules will be disabled.");
+				const QString& Title = tr ("%1 Blender LDraw Add-on Modules").arg(LC_PRODUCTNAME_STR);
+				const QString& Header = tr ("No import module enabled. If you continue, the default import module (Import TN) will be used.<br>If you select No, all add-on modules will be disabled.");
 				const QString& Body = tr ("Continue with the default import module ?");
 				int Exec = ShowMessage(this, Header, Title, Body, QString(), MBB_YES_NO, QMessageBox::NoIcon);
 				if (Exec != QMessageBox::Yes)
@@ -1179,7 +1179,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 					mBlenderVersionLabel->setText(tr("Blender"));
 					mBlenderVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(QApplication::palette().text().color().name()));
 					mBlenderVersionEdit->setText(mBlenderVersion);
-					mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render addon version").arg(LC_PRODUCTNAME_STR));
+					mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render add-on version").arg(LC_PRODUCTNAME_STR));
 					mBlenderVersionEdit->setVisible(mConfigured);
 					if (!mAddonVersion.isEmpty())
 					{
@@ -1190,7 +1190,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 					if (mProgressBar)
 					{
 						mAddonGridLayout->replaceWidget(mProgressBar, mAddonVersionEdit);
-						mAddonVersionLabel->setText(tr("Blender Addon"));
+						mAddonVersionLabel->setText(tr("Blender Add-on"));
 						mProgressBar->close();
 					}
 				}
@@ -1199,7 +1199,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 
 			if (!QFileInfo::exists(BlenderInstallFile))
 			{
-				ShowMessage(this, tr("Could not find addon install file: %1").arg(BlenderInstallFile));
+				ShowMessage(this, tr("Could not find add-on install file: '%1'").arg(BlenderInstallFile));
 				StatusUpdate(true, true, tr("Not found."));
 				return;
 			}
@@ -1226,7 +1226,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			Arguments << QString("--disable_ldraw_render");
 		Arguments << QString("--leocad");
 
-		Message = tr("Blender Addon Install Arguments: %1 %2").arg(BlenderExe, Arguments.join(" "));
+		Message = tr("Blender Add-on Install Arguments: '%1' %2").arg(BlenderExe, Arguments.join(" "));
 
 		if (!TestBlender)
 			mBlenderVersionFound = false;
@@ -1247,7 +1247,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 						QFile File(QFileInfo(List.at(LblIdx)).absoluteFilePath());
 						if (!File.open(QFile::ReadOnly | QFile::Text))
 						{
-							ShowMessage(this, tr("Cannot read addon file %1<br>%2").arg(List.at(LblIdx).fileName(), File.errorString()));
+							ShowMessage(this, tr("Cannot read add-on file '%1'<br>%2").arg(List.at(LblIdx).fileName(), File.errorString()));
 							break;
 						}
 						else
@@ -1319,7 +1319,7 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 			StatusUpdate(true, true, tr("Install failed."));
 	}
 	else
-		ShowMessage(this, tr("Blender executable not found at [%1]").arg(BlenderExe), tr("Addon install failed."));
+		ShowMessage(this, tr("Blender executable not found at '%1'").arg(BlenderExe), tr("Add-on install failed."));
 }
 
 bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
@@ -1341,11 +1341,11 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 
 		if (!Extracted)
 		{
-			QString Message = tr("Failed to extract %1 to %2").arg(LC_BLENDER_ADDON_FILE, BlenderDir);
+			QString Message = tr("Failed to extract '%1' to '%2'").arg(LC_BLENDER_ADDON_FILE, BlenderDir);
 			if (Result.size())
 				Message.append(" "+Result);
 
-			ShowMessage(this, Message, tr("Extract addon"));
+			ShowMessage(this, Message, tr("Extract add-on"));
 		}
 	}
 	else if (AddonAction == ADDON_NO_ACTION)
@@ -1407,7 +1407,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		}
 		else
 		{
-			ShowMessage(this, tr("Check latest addon version failed."), tr("Latest Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(this, tr("Check latest add-on version failed."), tr("Latest Add-on"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 			return true; // Reload existing archive
 		}
 
@@ -1420,7 +1420,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			if (!ZipFile.OpenRead(BlenderAddonFile))
 			{
-				ShowMessage(this, tr("Cannot open addon archive file: %1.").arg(BlenderAddonFile));
+				ShowMessage(this, tr("Cannot open add-on archive file: '%1'.").arg(BlenderAddonFile));
 				return false;
 			}
 
@@ -1428,14 +1428,14 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			if (!ZipFile.ExtractFile(VersionFile, File))
 			{
-				ShowMessage(this, tr("Cannot extract addon archive version file: %1.").arg(VersionFile));
+				ShowMessage(this, tr("Cannot extract add-on archive version file: '%1'.").arg(VersionFile));
 				return false;
 			}
 
 			Ba = QByteArray::fromRawData((const char*)File.mBuffer, (int)File.GetLength());
 			if (Ba.isEmpty())
 			{
-				ShowMessage(this, tr("Cannot read addon archive version file: %1.").arg(VersionFile));
+				ShowMessage(this, tr("Cannot read add-on archive version file: '%1'.").arg(VersionFile));
 				return false; // Download new archive
 			}
 		}
@@ -1444,7 +1444,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			QFile File(AddonVersionFile);
 			if (!File.open(QIODevice::ReadOnly))
 			{
-				ShowMessage(this, tr("Cannot read addon version file: [%1]<br>%2.").arg(AddonVersionFile, File.errorString()));
+				ShowMessage(this, tr("Cannot read add-on version file: '%1'<br>%2.").arg(AddonVersionFile, File.errorString()));
 				return false; // Download new archive
 			}
 			Ba = File.readAll();
@@ -1488,8 +1488,8 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 			{
 				if (LocalVersion.isEmpty())
 					LocalVersion = gAddonPreferences->mAddonVersion;
-				const QString& Title = tr ("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR);
-				const QString& Header = tr ("Detected %1 Blender LDraw addon %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR, LocalVersion, OnlineVersion);
+				const QString& Title = tr ("%1 Blender LDraw Add-on").arg(LC_PRODUCTNAME_STR);
+				const QString& Header = tr ("Detected %1 Blender LDraw add-on %2. A newer version %3 exists.").arg(LC_PRODUCTNAME_STR, LocalVersion, OnlineVersion);
 				const QString& Body = tr ("Do you want to download version %1 ?").arg(OnlineVersion);
 				int Exec = ShowMessage(this, Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 				if (Exec == QMessageBox::Cancel)
@@ -1527,7 +1527,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 
 			Result &= Dir.rmdir(BlenderAddonDir);
 			if (!Result)
-				ShowMessage(this, tr("Failed to properly remove Blender addon: %1").arg(BlenderAddonDir), tr("Remove Existing Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+				ShowMessage(this, tr("Failed to properly remove Blender add-on: '%1'").arg(BlenderAddonDir), tr("Remove Existing Add-on"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 		}
 	};
 
@@ -1543,7 +1543,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 		if (QFileInfo::exists(BlenderAddonFile))
 		{
 			if (!QFile::rename(BlenderAddonFile, OldBlenderAddonFile))
-				ShowMessage(this, tr("Failed to rename existing Blender addon archive %1.").arg(BlenderAddonFile));
+				ShowMessage(this, tr("Failed to rename existing Blender add-on archive '%1'.").arg(BlenderAddonFile));
 		}
 
 		QDir Dir(BlenderDir);
@@ -1589,35 +1589,35 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 							BlenderAddonValidated = true;
 						}
 						else
-							ShowMessage(this, tr("Failed to validate Blender addon file name<br>Downloaded:%1<br>Received:%2").arg(ArchiveFileName, ShaReceived.last()));
+							ShowMessage(this, tr("Failed to validate Blender add-on file name<br>Downloaded:'%1'<br>Received:'%2'").arg(ArchiveFileName, ShaReceived.last()));
 					}
 					else
-						ShowMessage(this, tr("Failed to validate Blender addon SHA hash <br>Calculated:%1<br>Received:%2").arg(ShaCalculated, ShaReceived.first()));
+						ShowMessage(this, tr("Failed to validate Blender add-on SHA hash <br>Calculated:%1<br>Received:%2").arg(ShaCalculated, ShaReceived.first()));
 					gAddonPreferences->mData.clear();
 				}
 				else
-					ShowMessage(this, tr("Failed to receive SHA hash for Blender addon %1.sha256").arg(LC_BLENDER_ADDON_FILE));
+					ShowMessage(this, tr("Failed to receive SHA hash for Blender add-on '%1.sha256'").arg(LC_BLENDER_ADDON_FILE));
 			}
 			else
-				ShowMessage(this, tr("Failed to read Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile, File.errorString()));
+				ShowMessage(this, tr("Failed to read Blender add-on archive:<br>'%1':<br>%2").arg(BlenderAddonFile, File.errorString()));
 		}
 		else
-			ShowMessage(this, tr("Failed to write Blender addon archive:<br>%1:<br>%2").arg(BlenderAddonFile, File.errorString()));
+			ShowMessage(this, tr("Failed to write Blender add-on archive:<br>'%1':<br>%2").arg(BlenderAddonFile, File.errorString()));
 
 		if (!BlenderAddonValidated)
 		{
 			if (QFileInfo::exists(BlenderAddonFile))
 				if (!QFile::remove(BlenderAddonFile))
-					ShowMessage(this, tr("Failed to remove invalid Blender addon archive:<br>%1").arg(BlenderAddonFile));
+					ShowMessage(this, tr("Failed to remove invalid Blender add-on archive:<br>'%1'").arg(BlenderAddonFile));
 			if (QFileInfo::exists(OldBlenderAddonFile))
 				if (!QFile::rename(OldBlenderAddonFile, BlenderAddonFile))
-					ShowMessage(this, tr("Failed to restore Blender addon archive:<br>%1 from %2").arg(ArchiveFileName, OldArchiveFileName));
+					ShowMessage(this, tr("Failed to restore Blender add-on archive:<br>'%1' from '%2'").arg(ArchiveFileName, OldArchiveFileName));
 			AddonAction = ADDON_FAIL;
 		}
 	}
 	else
 	{
-		ShowMessage(this, tr("Failed to download Blender addon archive:<br>%1").arg(BlenderAddonFile));
+		ShowMessage(this, tr("Failed to download Blender add-on archive:<br>'%1'").arg(BlenderAddonFile));
 		AddonAction = ADDON_FAIL;
 	}
 
@@ -1633,7 +1633,7 @@ int lcBlenderPreferences::GetBlenderAddon(const QString& BlenderDir)
 void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& Message)
 {
 	QString Label, Colour;
-	const QString Which = Addon ? tr("Blender addon") : tr("Blender");
+	const QString Which = Addon ? tr("Blender add-on") : tr("Blender");
 	if (mProgressBar)
 	{
 		if (Addon)
@@ -1699,13 +1699,13 @@ void lcBlenderPreferences::ShowResult()
 	if (mProcess->exitStatus() != QProcess::NormalExit || mProcess->exitCode() != 0 || Error)
 	{
 		const QString BlenderDir = QString("%1/Blender").arg(mDataDir);
-		Message = tr("Addon install failed. See %1/stderr-blender-addon-install for details.").arg(BlenderDir);
+		Message = tr("Add-on install failed. See '%1/stderr-blender-add-on-install' for details.").arg(BlenderDir);
 		StatusUpdate(true, true,tr("Error: Install failed."));
 		mConfigured = false;
 
-		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
-		const QString& Header = "<b>" + tr ("Addon install failed.") + "</b>";
-		const QString& Body = tr ("LDraw addon install encountered one or more errors. See Show Details...");
+		const QString& Title = tr ("%1 Blender Add-on Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr ("Add-on install failed.") + "</b>";
+		const QString& Body = tr ("LDraw add-on install encountered one or more errors. See Show Details...");
 		ShowMessage(this, Header, Title, Body, StdErrLog, MBB_OK, QMessageBox::Warning);
 	}
 	else
@@ -1716,14 +1716,14 @@ void lcBlenderPreferences::ShowResult()
 		mBlenderVersionLabel->setText(tr("Blender"));
 		mBlenderVersionLabel->setStyleSheet(TextColour);
 		mBlenderVersionEdit->setText(mBlenderVersion);
-		mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render addon version").arg(LC_PRODUCTNAME_STR));
+		mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render add-on version").arg(LC_PRODUCTNAME_STR));
 		mBlenderVersionEdit->setVisible(mConfigured);
 		mPathsBox->setEnabled(mConfigured);
 		mSettingsBox->setEnabled(mConfigured);
 
 		if (!mAddonVersion.isEmpty())
 		{
-			mAddonVersionLabel->setText(tr("Blender Addon"));
+			mAddonVersionLabel->setText(tr("Blender Add-on"));
 			mAddonVersionLabel->setStyleSheet(TextColour);
 			mAddonVersionEdit->setText(mAddonVersion);
 			mAddonVersionEdit->setVisible(true);
@@ -1833,7 +1833,7 @@ void lcBlenderPreferences::GetStandardOutput()
 	QFileInfo FileInfo(LogFile);
 	if (!FileInfo.exists())
 	{
-		ShowMessage(this, tr("Blender addon standard output file not found: %1.").arg(FileInfo.absoluteFilePath()));
+		ShowMessage(this, tr("Blender add-on standard output file not found: '%1'.").arg(FileInfo.absoluteFilePath()));
 		return;
 	}
 
@@ -1981,15 +1981,15 @@ void lcBlenderPreferences::ReadStdOut()
 
 	if (!ErrorsAndWarnings.isEmpty())
 	{
-		const QString StdOutLog = QDir::toNativeSeparators(QString("<br>- See %1/Blender/stdout-blender-addon-install")
+		const QString StdOutLog = QDir::toNativeSeparators(QString("<br>- See '%1/Blender/stdout-blender-addon-install'")
 																.arg(mDataDir));
 
 		QMessageBox::Icon Icon = QMessageBox::Warning;
 		const QString& Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
 
-		const QString& Title = tr ("%1 Blender Addon Install").arg(LC_PRODUCTNAME_STR);
-		const QString& Header = "<b>" + tr ("Addon install standard output.") + "</b>";
-		const QString& Body = tr ("LDraw addon install encountered %1. See Show Details...").arg(Items);
+		const QString& Title = tr ("%1 Blender Add-on Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr ("Add-on install standard output.") + "</b>";
+		const QString& Body = tr ("LDraw add-on install encountered %1. See Show Details...").arg(Items);
 		ShowMessage(this, Header, Title, Body, ErrorsAndWarnings.append(StdOutLog), MBB_OK, Icon);
 	}
 }
@@ -2008,7 +2008,7 @@ QString lcBlenderPreferences::ReadStdErr(bool& Error) const
 	QFile File(QString("%1/stderr-blender-addon-install").arg(BlenderDir));
 	if (!File.open(QFile::ReadOnly | QFile::Text))
 	{
-		const QString Message = tr("Failed to open log file: %1:\n%2").arg(File.fileName(), File.errorString());
+		const QString Message = tr("Failed to open log file: '%1':\n%2").arg(File.fileName(), File.errorString());
 		return Message;
 	}
 	QTextStream In(&File);
@@ -2043,8 +2043,8 @@ bool lcBlenderPreferences::PromptCancel()
 #ifndef QT_NO_PROCESS
 	if (mProcess)
 	{
-		const QString& Title = tr ("Cancel %1 Addon Install").arg(LC_PRODUCTNAME_STR);
-		const QString& Header = "<b>" + tr("Are you sure you want to cancel the add on install ?") + "</b>";
+		const QString& Title = tr ("Cancel %1 Add-on Install").arg(LC_PRODUCTNAME_STR);
+		const QString& Header = "<b>" + tr("Are you sure you want to cancel the add-on installation?") + "</b>";
 		int Exec = ShowMessage(this, Header, Title, QString(), QString(), MBB_YES_NO, QMessageBox::Question);
 		if (Exec == QMessageBox::Yes)
 		{
@@ -2337,7 +2337,7 @@ void lcBlenderPreferences::ResetSettings()
 	BlenderSettings const* SettingsMM = mBlenderSettingsMM;
 
 	QDialog* Dialog = new QDialog(this);
-	Dialog->setWindowTitle(tr("Addon Reset"));
+	Dialog->setWindowTitle(tr("Add-on Reset"));
 	Dialog->setWhatsThis(tr("Select how to reset settings. Choice is since last apply or system default."));
 	QVBoxLayout* Layout = new QVBoxLayout(Dialog);
 	QGroupBox* DlgGroup = new QGroupBox(Dialog);
@@ -2930,7 +2930,7 @@ void lcBlenderPreferences::SetDefaultColor(int ColorIndex)
 	mLineEditList[CTL_DEFAULT_COLOUR_EDIT]->setText(QString("%1 (%2)").arg(Colour->Name).arg(ColourCode));
 	mLineEditList[CTL_DEFAULT_COLOUR_EDIT]->setProperty("ColorIndex", QVariant::fromValue(ColorIndex));
 	mDefaultColourEditAction->setIcon(QPixmap::fromImage(Image));
-	mDefaultColourEditAction->setToolTip(tr("Select Colour"));
+	mDefaultColourEditAction->setToolTip(tr("Select Color"));
 
 	bool Change = mBlenderSettings[LBL_DEFAULT_COLOUR].value != QString::number(ColourCode);
 	Change |= SettingsModified(false);
@@ -3149,9 +3149,9 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 		BlenderSettings const* defaultSettings = ImportMM ? mDefaultSettingsMM : mDefaultSettings;
 		Settings[Color_Scheme].value = defaultSettings[Color_Scheme].value;
 
-		const QString& Title = tr ("Custom LDraw Colours");
-		const QString& Header = "<b>" + tr ("Colour scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
-		const QString& Body = tr ("Colour scheme 'custom' selected but no LDConfig file was specified.<br>The default colour scheme '%1' will be used.<br>").arg(Settings[Color_Scheme].value);
+		const QString& Title = tr ("Custom LDraw Colors");
+		const QString& Header = "<b>" + tr ("Color scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
+		const QString& Body = tr ("Color scheme 'custom' selected but no LDConfig file was specified.<br>The default color scheme '%1' will be used.<br>").arg(Settings[Color_Scheme].value);
 		ShowMessage(this, Header, Title, Body, QString(), MBB_OK, QMessageBox::Warning);
 	}
 	else
@@ -3529,13 +3529,13 @@ bool lcBlenderPreferences::ExportParameterFile()
 		Stream << "# end of parameters" << LineEnding;
 
 		File.close();
-		Message = tr("Finished writing Blender parameter entries. Processed %1 lines in file [%2].")
+		Message = tr("Finished writing Blender parameter entries. Processed %1 lines in file '%2'.")
 					  .arg(Counter)
 					  .arg(File.fileName());
 	}
 	else
 	{
-		Message = tr("Failed to open Blender parameter file: %1:<br>%2")
+		Message = tr("Failed to open Blender parameter file: '%1':<br>%2")
 					  .arg(File.fileName(), File.errorString());
 		ShowMessage(nullptr, Message);
 		return false;
@@ -3551,8 +3551,8 @@ bool lcBlenderPreferences::OverwriteFile(const QString& File)
 		return true;
 
 	const QString& Title = tr ("Replace Existing File");
-	const QString Header = "<b>" + QMessageBox::tr ("Existing file %1 detected.").arg(fileInfo.fileName()) + "</b>";
-	const QString Body = QMessageBox::tr ("\"%1\"<br>This file already exists.<br>Replace existing file?").arg(fileInfo.fileName());
+	const QString Header = "<b>" + QMessageBox::tr ("Existing file '%1' detected.").arg(fileInfo.fileName()) + "</b>";
+	const QString Body = QMessageBox::tr ("'%1'<br>This file already exists.<br>Replace existing file?").arg(fileInfo.fileName());
 	int Exec = ShowMessage(nullptr, Header, Title, Body, QString(), MBB_YES, QMessageBox::NoIcon);
 
 	return (Exec == QMessageBox::Yes);
@@ -3578,7 +3578,7 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 	if (!Title.isEmpty())
 		Box.setWindowTitle(Title);
 	else
-		Box.setWindowTitle(tr("%1 Blender LDraw Addon").arg(LC_PRODUCTNAME_STR));
+		Box.setWindowTitle(tr("%1 Blender LDraw Add-on").arg(LC_PRODUCTNAME_STR));
 
 	Box.setText (Header);
 	if (!Body.isEmpty())
@@ -3629,7 +3629,7 @@ int lcBlenderPreferences::ShowMessage(QWidget* Parent, const QString& Header,  c
 
 	if (DownloadRequest)
 	{
-		QCheckBox* AddonVersionCheck = new QCheckBox(tr("Do not show download new addon version message again."));
+		QCheckBox* AddonVersionCheck = new QCheckBox(tr("Do not show download new add-on version message again."));
 		Box.setCheckBox(AddonVersionCheck);
 		QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
 		{
@@ -3648,7 +3648,7 @@ void lcBlenderPreferences::DownloadFinished(lcHttpReply* Reply)
 	if (!Reply->error())
 		mData = Reply->readAll();
 	else
-		ShowMessage(this, tr("Addon download failed."));
+		ShowMessage(this, tr("Add-on download failed."));
 
 	mHttpReply = nullptr;
 
@@ -3796,7 +3796,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 				FileInfo.permissions |= QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther;
 			break;
 		default:
-			ShowMessage(this, tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx), tr("Extract Addon"), QString(), QString(), MBB_OK, QMessageBox::Warning);
+			ShowMessage(this, tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx), tr("Extract Add-on"), QString(), QString(), MBB_OK, QMessageBox::Warning);
 			Ok = false;
 		}
 

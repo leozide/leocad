@@ -371,9 +371,9 @@ QVariant lcPartSelectionListModel::data(const QModelIndex& Index, int Role) cons
 					return QVariant(Error);
 
 				if (PieceData->mState == lcAssetState::Failed)
-					return QVariant(tr("Could not load part %1.").arg(QString::fromLatin1(PieceData->mFileName)));
+					return QVariant(tr("Could not load piece '%1'.").arg(QString::fromLatin1(PieceData->mFileName)));
 
-				return QVariant(QString("%1 (%2)").arg(QString::fromLatin1(PieceData->m_strDescription), QString::fromLatin1(PieceData->mFileName)));
+				return QVariant(QString("'%1' ('%2')").arg(QString::fromLatin1(PieceData->m_strDescription), QString::fromLatin1(PieceData->mFileName)));
 			}
 			break;
 
@@ -1283,7 +1283,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	if (ListModel->GetIconSize() != lcPartSelectionListView::NoIconSize && !ListModel->IsListMode())
 	{
-		QAction* PartNames = Menu->addAction(tr("Show Part Names"), mPartsWidget, &lcPartSelectionListView::TogglePartNames);
+		QAction* PartNames = Menu->addAction(tr("Show Piece Names"), mPartsWidget, &lcPartSelectionListView::TogglePartNames);
 		PartNames->setCheckable(true);
 		PartNames->setChecked(ListModel->GetShowPartNames());
 	}
@@ -1292,7 +1292,7 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	DecoratedParts->setCheckable(true);
 	DecoratedParts->setChecked(ListModel->GetShowDecoratedParts());
 
-	QAction* PartAliases = Menu->addAction(tr("Show Part Aliases"), mPartsWidget, &lcPartSelectionListView::TogglePartAliases);
+	QAction* PartAliases = Menu->addAction(tr("Show Piece Aliases"), mPartsWidget, &lcPartSelectionListView::TogglePartAliases);
 	PartAliases->setCheckable(true);
 	PartAliases->setChecked(ListModel->GetShowPartAliases());
 
@@ -1358,12 +1358,12 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	FilterMenu->addSeparator();
 
-	QAction* FileNameFilter = FilterMenu->addAction(tr("Part ID"), mPartsWidget, &lcPartSelectionListView::ToggleFileNameFilter);
+	QAction* FileNameFilter = FilterMenu->addAction(tr("Piece ID"), mPartsWidget, &lcPartSelectionListView::ToggleFileNameFilter);
 	FileNameFilter->setCheckable(true);
 	FileNameFilter->setChecked(ListModel->GetFileNameFilter());
 	FileNameFilter->setEnabled(ListModel->GetPartDescriptionFilter());
 
-	QAction* PartDescriptionFilter = FilterMenu->addAction(tr("Part Description"), mPartsWidget, &lcPartSelectionListView::TogglePartDescriptionFilter);
+	QAction* PartDescriptionFilter = FilterMenu->addAction(tr("Piece Description"), mPartsWidget, &lcPartSelectionListView::TogglePartDescriptionFilter);
 	PartDescriptionFilter->setCheckable(true);
 	PartDescriptionFilter->setChecked(ListModel->GetPartDescriptionFilter());
 	PartDescriptionFilter->setEnabled(ListModel->GetFileNameFilter());

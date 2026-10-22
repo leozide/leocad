@@ -263,7 +263,7 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 	std::vector<int> ColorColumns(gColorList.size());
 	int ColorCount = 0;
 
-	HorizontalLabels.append(tr("Part"));
+	HorizontalLabels.append(tr("Piece"));
 
 	for (size_t ColorIndex = 0; ColorIndex < gColorList.size(); ColorIndex++)
 	{

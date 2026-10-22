@@ -157,7 +157,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Parts Library:</string>
+             <string>Pieces Library:</string>
             </property>
             <property name="buddy">
              <cstring>partsLibrary</cstring>
@@ -373,7 +373,7 @@
           <item row="18" column="1">
            <widget class="QToolButton" name="BlenderAddonSettingsButton">
             <property name="text">
-             <string>Addon Settings...</string>
+             <string>Add-on Settings...</string>
             </property>
            </widget>
           </item>
@@ -816,7 +816,7 @@ Unsupported video cards use face tint and colored edges.</string>
        <item>
         <widget class="QGroupBox" name="PreviewGroup">
          <property name="title">
-          <string>Part Preview</string>
+          <string>Piece Preview</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="2" column="0" colspan="2">
@@ -1475,7 +1475,7 @@ Unsupported video cards use face tint and colored edges.</string>
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Parts Library Categories</string>
+          <string>Pieces Library Categories</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>

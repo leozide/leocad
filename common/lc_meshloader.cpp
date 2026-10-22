@@ -1677,7 +1677,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			if (!IncludeLoaded)
 			{
 				if (mError.isEmpty())
-					mError = tr("Could not load included file %1.").arg(QString::fromLatin1(OriginalFileName));
+					mError = tr("Could not load included file '%1'.").arg(QString::fromLatin1(OriginalFileName));
 
 				return false;
 			}

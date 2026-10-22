@@ -1018,7 +1018,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 	QProgressDialog* ProgressDialog = new QProgressDialog(nullptr);
 	ProgressDialog->setWindowFlags(ProgressDialog->windowFlags() & ~Qt::WindowCloseButtonHint);
 	ProgressDialog->setWindowTitle(tr("Initializing"));
-	ProgressDialog->setLabelText(tr("Loading Parts Library"));
+	ProgressDialog->setLabelText(tr("Loading Pieces Library"));
 	ProgressDialog->setMaximum(static_cast<int>(Jobs.size()));
 	ProgressDialog->setMinimum(0);
 	ProgressDialog->setValue(0);
@@ -1652,7 +1652,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 
 	if (mCancelLoading.load())
 	{
-		Result.Error = tr("Library loading was cancelled.");
+		Result.Error = tr("Library loading was canceled.");
 		return Result;
 	}
 
@@ -1698,7 +1698,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 
 		if (!MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED))
 		{
-			Result.Error = tr("Could not load model geometry %1.").arg(Source.FileName);
+			Result.Error = tr("Could not load model geometry '%1'.").arg(Source.FileName);
 
 			if (!MeshLoader.GetError().isEmpty())
 				Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
@@ -1749,10 +1749,10 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		}
 
 		if (mCancelLoading.load())
-			Result.Error = tr("Library loading was cancelled.");
+			Result.Error = tr("Library loading was canceled.");
 		else if (!Loaded)
 		{
-			Result.Error = tr("Could not load part %1.").arg(Source.FileName);
+			Result.Error = tr("Could not load piece '%1'.").arg(Source.FileName);
 
 			if (!MeshLoader.GetError().isEmpty())
 				Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
@@ -1765,7 +1765,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 	Result.Mesh.reset(MeshData.CreateMesh(nullptr));
 
 	if (!Result.Mesh)
-		Result.Error = tr("Could not prepare piece %1 for rendering.").arg(Source.FileName);
+		Result.Error = tr("Could not prepare piece '%1' for rendering.").arg(Source.FileName);
 
 	return Result;
 }
@@ -1843,7 +1843,7 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 				}
 			}
 
-			return lcUnexpected(tr("Could not open included file %1.").arg(QString::fromLatin1(PieceName)));
+			return lcUnexpected(tr("Could not open included file '%1'.").arg(QString::fromLatin1(PieceName)));
 		}
 	}
 
@@ -1881,7 +1881,7 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 #endif
 	}
 
-	return lcUnexpected(tr("Could not open included file %1.").arg(QString::fromLatin1(PieceName)));
+	return lcUnexpected(tr("Could not open included file '%1'.").arg(QString::fromLatin1(PieceName)));
 }
 
 void lcPiecesLibrary::ReleaseBuffers()
@@ -2128,7 +2128,7 @@ lcResult<void> lcPiecesLibrary::LoadPrimitive(lcLibraryPrimitive* Primitive)
 	if (ShouldCancelLoading())
 	{
 		mPrimitiveMutex.unlock();
-		return lcUnexpected(tr("Library loading was cancelled."));
+		return lcUnexpected(tr("Library loading was canceled."));
 	}
 
 	if (Primitive->mState == lcPrimitiveState::Loaded)
@@ -2186,7 +2186,7 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 	if (ShouldCancelLoading())
 	{
 		mPrimitiveMutex.unlock();
-		return lcUnexpected(tr("Library loading was cancelled."));
+		return lcUnexpected(tr("Library loading was canceled."));
 	}
 
 	if (Primitive->mState == lcPrimitiveState::NotLoaded)
@@ -2198,7 +2198,7 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 			if (ShouldCancelLoading())
 			{
 				mPrimitiveMutex.unlock();
-				return lcUnexpected(tr("Library loading was cancelled."));
+				return lcUnexpected(tr("Library loading was canceled."));
 			}
 
 			mPrimitiveLoaded.wait(&mPrimitiveMutex, 10);
@@ -2223,7 +2223,7 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 		Primitive->mMeshData.Clear();
 
 		if (Error.isEmpty())
-			Error = tr("Could not load included file %1.").arg(QString::fromLatin1(Primitive->mName));
+			Error = tr("Could not load included file '%1'.").arg(QString::fromLatin1(Primitive->mName));
 
 		QMutexLocker LoadLock(&mPrimitiveMutex);
 		Primitive->mLoadError = Error;

@@ -778,7 +778,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			Options.StdOut += tr("Usage: leocad [options] [file]\n");
 			Options.StdOut += tr("  [options] can be:\n");
-			Options.StdOut += tr("  -l, --libpath <path>: Set the Parts Library location to path.\n");
+			Options.StdOut += tr("  -l, --libpath <path>: Set the Pieces Library location to path.\n");
 			Options.StdOut += tr("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
 			Options.StdOut += tr("  -w, --width <width>: Set the picture width.\n");
 			Options.StdOut += tr("  -h, --height <height>: Set the picture height.\n");
@@ -793,31 +793,31 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  --orthographic: Render images using an orthographic projection.\n");
 			Options.StdOut += tr("  --fov <degrees>: Set the vertical field of view used to render images (< 180).\n");
 			Options.StdOut += tr("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
-			Options.StdOut += tr("  --fade-steps: Render parts from prior steps faded.\n");
-			Options.StdOut += tr("  --no-fade-steps: Do not render parts from prior steps faded.\n");
-			Options.StdOut += tr("  --fade-steps-color <#AARRGGBB>: Renderinng color for prior step parts.\n");
-			Options.StdOut += tr("  --highlight: Highlight parts in the steps they appear.\n");
-			Options.StdOut += tr("  --no-highlight: Do not highlight parts in the steps they appear.\n");
-			Options.StdOut += tr("  --highlight-color <#AARRGGBB>: Rendering color for highlighted parts.\n");
+			Options.StdOut += tr("  --fade-steps: Render pieces from prior steps faded.\n");
+			Options.StdOut += tr("  --no-fade-steps: Do not render pieces from prior steps faded.\n");
+			Options.StdOut += tr("  --fade-steps-color <#AARRGGBB>: Rendering color for prior step pieces.\n");
+			Options.StdOut += tr("  --highlight: Highlight pieces in the steps they appear.\n");
+			Options.StdOut += tr("  --no-highlight: Do not highlight pieces in the steps they appear.\n");
+			Options.StdOut += tr("  --highlight-color <#AARRGGBB>: Rendering color for highlighted pieces.\n");
 			Options.StdOut += tr("  --shading <mode>: Select shading mode for rendering (wireframe, flat, default, full).\n");
 			Options.StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
-			Options.StdOut += tr("  --aa-samples <samples>: AntiAliasing sample size (1, 2, 4, or 8).\n");
+			Options.StdOut += tr("  --aa-samples <samples>: Anti-aliasing sample size (1, 2, 4, or 8).\n");
 			Options.StdOut += tr("  -ss, --stud-style <style>: Set the stud style (0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire).\n");
 			Options.StdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
 			Options.StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
 			Options.StdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
 			Options.StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
-			Options.StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black parts.\n");
-			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black parts.\n");
-			Options.StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color parts.\n");
-			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color parts.\n");
+			Options.StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black pieces.\n");
+			Options.StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black pieces.\n");
+			Options.StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color pieces.\n");
+			Options.StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color pieces.\n");
 			Options.StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
 			Options.StdOut += tr("  -cc, --color-contrast <contrast>: Color contrast value between 0.0 and 1.0.\n");
 			Options.StdOut += tr("  -ldv, --light-dark-value <value>: Light/Dark color value between 0.0 and 1.0.\n");
 			Options.StdOut += tr("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			Options.StdOut += tr("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
-			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of parts used in csv format.\n");
+			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of pieces used in csv format.\n");
 			Options.StdOut += tr("  -html, --export-html <folder>: Create an HTML page for the model.\n");
 			Options.StdOut += tr("  -v, --version: Output version information and exit.\n");
 			Options.StdOut += tr("  -?, --help: Display this help message and exit.\n");
@@ -997,9 +997,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		QString Message;
 
 		if (mLibrary->LoadBuiltinPieceLibrary())
-			Message = tr("LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
+			Message = tr("LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 		else
-			Message = tr("LeoCAD could not load Parts Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
+			Message = tr("LeoCAD could not load Pieces Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
 		if (gMainWindow)
 			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);

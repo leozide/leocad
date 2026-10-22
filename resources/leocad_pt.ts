@@ -3415,7 +3415,7 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="759"/>
-        <source>Fit all pieces in current the view (hold the CTRL key down to zoom all views)</source>
+        <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
         <translation>Faz caber todas as peças na vista actual (carregue na tecla CTRL para aplicar a todas as vistas)</translation>
     </message>
     <message>
@@ -3986,7 +3986,7 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1781"/>
-        <source>Check if a newer LeoCAD version or parts library has been released</source>
+        <source>Check if a newer LeoCAD version or pieces library has been released</source>
         <translation>Verifica se uma nova versão do LeoCAD ou da Biblioteca de peças estão disponiveis</translation>
     </message>
     <message>
@@ -4038,7 +4038,7 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="949"/>
-        <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available.
+        <source>LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.
 
 Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation>LeoCAD não achou uma Biblioteca de Peças.compatível portanto só vai haver uma pequena quantia de peças disponível.
@@ -4139,7 +4139,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="765"/>
-        <source>  -l, --libpath &lt;path&gt;: Set the Parts Library location to path.
+        <source>  -l, --libpath &lt;path&gt;: Set the Pieces Library location to path.
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4235,13 +4235,13 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="781"/>
-        <source>  --fade-steps: Render parts from prior steps faded.
+        <source>  --fade-steps: Render pieces from prior steps faded.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="782"/>
-        <source>  --no-fade-steps: Do not render parts from prior steps faded.
+        <source>  --no-fade-steps: Do not render pieces from prior steps faded.
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4253,13 +4253,13 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="784"/>
-        <source>  --highlight: Highlight parts in the steps they appear.
+        <source>  --highlight: Highlight pieces in the steps they appear.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="785"/>
-        <source>  --no-highlight: Do not highlight parts in the steps they appear.
+        <source>  --no-highlight: Do not highlight pieces in the steps they appear.
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4313,25 +4313,25 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="794"/>
-        <source>  -nbec, --disable-black-edge-color: Disable high contrast edge color for black parts.
+        <source>  -nbec, --disable-black-edge-color: Disable high contrast edge color for black pieces.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="795"/>
-        <source>  -bec, --black-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for black parts.
+        <source>  -bec, --black-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for black pieces.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="796"/>
-        <source>  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color parts.
+        <source>  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color pieces.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="797"/>
-        <source>  -dec, --dark-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for dark color parts.
+        <source>  -dec, --dark-edge-color &lt;#AARRGGBB&gt;: High contrast edge color for dark color pieces.
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4373,7 +4373,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="804"/>
-        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of parts used in csv format.
+        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
 </source>
         <translation type="unfinished"></translation>
     </message>
@@ -4463,7 +4463,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="951"/>
-        <source>LeoCAD could not load Parts Library.
+        <source>LeoCAD could not load Pieces Library.
 
 Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation>LeoCAD não conseguiu carregar a Biblioteca de Peças.
@@ -4553,7 +4553,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="59"/>
-        <source>Set to specify amount of edge color tint or shade from the saturation adjusted part color</source>
+        <source>Set to specify amount of edge color tint or shade from the saturation adjusted piece color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4568,17 +4568,17 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="105"/>
-        <source>Parts Edge Color:</source>
+        <source>Pieces Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="123"/>
-        <source>Black Parts Edge Color:</source>
+        <source>Black Pieces Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="141"/>
-        <source>Dark Parts Edge Color:</source>
+        <source>Dark Pieces Edge Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4588,12 +4588,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="224"/>
-        <source>Select Part Edge Color</source>
+        <source>Select Piece Edge Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
-        <source>Automate edge color appears to be enabled.&lt;br&gt;Black parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
+        <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4603,7 +4603,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
-        <source>Automate edge color appears to be enabled.&lt;br&gt;Dark parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
+        <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5086,7 +5086,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2388"/>
-        <source>LEGO Diginal Designer Files (*.lxf);;All Files (*.*)</source>
+        <source>LEGO Digital Designer Files (*.lxf);;All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5683,7 +5683,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     <name>lcPartPaletteDialog</name>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="14"/>
-        <source>Part Palettes</source>
+        <source>Piece Palettes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5718,7 +5718,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="68"/>
-        <source>New Part Palette</source>
+        <source>New Piece Palette</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5734,12 +5734,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="88"/>
-        <source>Delete Part Palette</source>
+        <source>Delete Piece Palette</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="107"/>
-        <source>Rename Part Palette</source>
+        <source>Rename Piece Palette</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5815,7 +5815,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1007"/>
-        <source>Show Part Names</source>
+        <source>Show Piece Names</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5825,7 +5825,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1016"/>
-        <source>Show Part Aliases</source>
+        <source>Show Piece Aliases</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5868,7 +5868,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_library.cpp" line="784"/>
-        <source>Loading Parts Library</source>
+        <source>Loading Pieces Library</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6123,7 +6123,7 @@ Anisotropic: %5
         <translation type="vanished">Nome</translation>
     </message>
     <message>
-        <source>Part ID</source>
+        <source>Piece ID</source>
         <translation type="vanished">ID de Peça</translation>
     </message>
     <message>
@@ -6786,7 +6786,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="190"/>
-        <source>Parts Library:</source>
+        <source>Pieces Library:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6930,7 +6930,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="805"/>
-        <source>Part Preview</source>
+        <source>Piece Preview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7096,7 +7096,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1464"/>
-        <source>Parts Library Categories</source>
+        <source>Pieces Library Categories</source>
         <translation>Categorias de Peças na Biblioteca</translation>
     </message>
     <message>
@@ -7271,7 +7271,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="354"/>
-        <source>Select Parts Library Folder</source>
+        <source>Select Pieces Library Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7281,7 +7281,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="362"/>
-        <source>Select Parts Library Archive</source>
+        <source>Select Pieces Library Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7653,7 +7653,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="70"/>
-        <source>Part</source>
+        <source>Piece</source>
         <translation>Peça</translation>
     </message>
     <message>
@@ -7764,7 +7764,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="911"/>
-        <source>Part</source>
+        <source>Piece</source>
         <translation>Peça</translation>
     </message>
     <message>
@@ -7856,12 +7856,12 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="118"/>
-        <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
+        <source>&lt;p&gt;There are new pieces available.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Existem novas peças disponiveis.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="122"/>
-        <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
+        <source>&lt;p&gt;There are no new pieces available at this time.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Não há novas peças disponiveis.&lt;/p&gt;</translation>
     </message>
     <message>

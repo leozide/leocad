@@ -463,7 +463,7 @@ bool lcAssetLoader::MeshTexturesSettled(const lcMesh& Mesh, QString& Error)
 			if (!Texture)
 			{
 				if (!Section.TextureName.isEmpty())
-					Error = tr("Missing texture %1.").arg(Section.TextureName);
+					Error = tr("Missing texture '%1'.").arg(Section.TextureName);
 			}
 			else if (Texture->mState == lcAssetState::Failed)
 				Error = Texture->GetLoadError();
@@ -606,7 +606,7 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 	QString& LoadError = RequestedPiece->Error;
 
 	if (LoadError.isEmpty() && !RequestedPiece->StagedMesh && !RequestedPiece->EmptyGeometry)
-		LoadError = tr("Could not load part %1.").arg(RequestedPiece->Source.FileName);
+		LoadError = tr("Could not load piece '%1'.").arg(RequestedPiece->Source.FileName);
 
 	if (LoadError.isEmpty() && RequestedPiece->SaveCache && RequestedPiece->StagedMesh)
 		mLibrary->SaveBuiltPieceDataCache(RequestedPiece->Source, *RequestedPiece->StagedMesh);

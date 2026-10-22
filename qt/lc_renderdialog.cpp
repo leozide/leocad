@@ -607,7 +607,7 @@ QString lcRenderDialog::ReadStdErr(bool& HasError) const
 
 	if (!File.open(QFile::ReadOnly | QFile::Text))
 	{
-		const QString Message = tr("Failed to open log file: %1:\n%2").arg(File.fileName(), File.errorString());
+		const QString Message = tr("Failed to open log file: '%1':\n%2").arg(File.fileName(), File.errorString());
 		return Message;
 	}
 
@@ -883,12 +883,12 @@ void lcRenderDialog::LogButtonClicked()
 	if (mDialogMode == lcRenderDialogMode::RenderPOVRay)
 	{
 		FileInfo.setFile(GetStdErrFileName());
-		Message = tr("POV-Ray standard error file not found: %1.").arg(FileInfo.absoluteFilePath());
+		Message = tr("POV-Ray standard error file not found: '%1'.").arg(FileInfo.absoluteFilePath());
 	}
 	else
 	{
 		FileInfo.setFile(GetStdOutFileName());
-		Message = tr("Blender standard output file not found: %1.").arg(FileInfo.absoluteFilePath());
+		Message = tr("Blender standard output file not found: '%1'.").arg(FileInfo.absoluteFilePath());
 	}
 
 	if (!FileInfo.exists())

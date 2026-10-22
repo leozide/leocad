@@ -1149,7 +1149,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddCategory(CategoryIndex::Piece, tr("Piece"));
 
-	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Part"), tr("Part Id"), false);
+	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Piece"), tr("Piece Id"), false);
 	AddPieceColorProperty(lcObjectPropertyId::PieceColor, tr("Color"), tr("Piece color"), false);
 
 	AddSpacing();

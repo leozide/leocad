@@ -449,7 +449,7 @@ void lcPreferencesDialog::accept()
 
 void lcPreferencesDialog::PartsLibraryBrowseClicked()
 {
-	QString Result = QFileDialog::getExistingDirectory(this, tr("Select Parts Library Folder"), ui->partsLibrary->text());
+	QString Result = QFileDialog::getExistingDirectory(this, tr("Select Pieces Library Folder"), ui->partsLibrary->text());
 
 	if (!Result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(Result));
@@ -457,7 +457,7 @@ void lcPreferencesDialog::PartsLibraryBrowseClicked()
 
 void lcPreferencesDialog::PartsArchiveBrowseClicked()
 {
-	QString Result = QFileDialog::getOpenFileName(this, tr("Select Parts Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
+	QString Result = QFileDialog::getOpenFileName(this, tr("Select Pieces Library Archive"), ui->partsLibrary->text(), tr("Supported Archives (*.zip *.bin);;All Files (*.*)"));
 
 	if (!Result.isEmpty())
 		ui->partsLibrary->setText(QDir::toNativeSeparators(Result));

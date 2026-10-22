@@ -1034,7 +1034,7 @@ std::vector<QString> Project::GetLoadWarningDetails() const
 
 		for (const LoadWarning& Warning : Current->mLoadWarnings)
 		{
-			const QString Detail = QDir::toNativeSeparators(Warning.FileName) + QStringLiteral(": ") + Warning.Message;
+			const QString Detail = QStringLiteral("'%1': %2").arg(QDir::toNativeSeparators(Warning.FileName), Warning.Message);
 
 			if (SeenWarnings.insert(Detail).second)
 				Details.push_back(Detail);

@@ -110,11 +110,11 @@ void lcUpdateDialog::DownloadFinished(lcHttpReply* Reply)
 			{
 				if (Parts > OfficialPieceCount)
 				{
-					Status += tr("<p>There are new parts available.</p>");
+					Status += tr("<p>There are new pieces available.</p>");
 					UpdateAvailable = true;
 				}
 				else
-					Status += tr("<p>There are no new parts available at this time.</p>");
+					Status += tr("<p>There are no new pieces available at this time.</p>");
 			}
 
 			if (UpdateAvailable)

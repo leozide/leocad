@@ -3413,7 +3413,7 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="759"/>
-        <source>Fit all pieces in current the view (hold the CTRL key down to zoom all views)</source>
+        <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
         <translation>使所有零件适应当前视图（按住 CTRL 键可缩放所有视图）</translation>
     </message>
     <message>
@@ -3984,7 +3984,7 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1781"/>
-        <source>Check if a newer LeoCAD version or parts library has been released</source>
+        <source>Check if a newer LeoCAD version or pieces library has been released</source>
         <translation>检查是否有更新的 LeoCAD 版本或零件库发布</translation>
     </message>
     <message>
@@ -4473,7 +4473,7 @@
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="59"/>
-        <source>Set to specify amount of edge color tint or shade from the saturation adjusted part color</source>
+        <source>Set to specify amount of edge color tint or shade from the saturation adjusted piece color</source>
         <translation>设置边缘色从饱和度调整后的零件颜色中获取的色调或阴影量</translation>
     </message>
     <message>
@@ -4488,17 +4488,17 @@
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="105"/>
-        <source>Parts Edge Color:</source>
+        <source>Pieces Edge Color:</source>
         <translation>零件边缘颜色:</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="123"/>
-        <source>Black Parts Edge Color:</source>
+        <source>Black Pieces Edge Color:</source>
         <translation>黑色零件边缘颜色:</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="141"/>
-        <source>Dark Parts Edge Color:</source>
+        <source>Dark Pieces Edge Color:</source>
         <translation>深色零件边缘颜色:</translation>
     </message>
     <message>
@@ -4508,12 +4508,12 @@
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="224"/>
-        <source>Select Part Edge Color</source>
+        <source>Select Piece Edge Color</source>
         <translation>选择零件边缘颜色</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
-        <source>Automate edge color appears to be enabled.&lt;br&gt;Black parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
+        <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>自动边缘色似乎已启用。&lt;br&gt;黑色零件边缘颜色将不可用。&lt;br&gt;是否继续？</translation>
     </message>
     <message>
@@ -4523,7 +4523,7 @@
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
-        <source>Automate edge color appears to be enabled.&lt;br&gt;Dark parts edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
+        <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>自动边缘色似乎已启用。&lt;br&gt;深色零件边缘颜色将不可用。&lt;br&gt;是否继续？</translation>
     </message>
     <message>
@@ -5005,7 +5005,7 @@
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2388"/>
-        <source>LEGO Diginal Designer Files (*.lxf);;All Files (*.*)</source>
+        <source>LEGO Digital Designer Files (*.lxf);;All Files (*.*)</source>
         <translation>LEGO Digital Designer 文件 (*.lxf);;所有文件 (*.*)</translation>
     </message>
     <message>
@@ -5600,7 +5600,7 @@
     <name>lcPartPaletteDialog</name>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="14"/>
-        <source>Part Palettes</source>
+        <source>Piece Palettes</source>
         <translation>零件库</translation>
     </message>
     <message>
@@ -5635,7 +5635,7 @@
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="68"/>
-        <source>New Part Palette</source>
+        <source>New Piece Palette</source>
         <translation>新建零件库</translation>
     </message>
     <message>
@@ -5651,12 +5651,12 @@
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="88"/>
-        <source>Delete Part Palette</source>
+        <source>Delete Piece Palette</source>
         <translation>删除零件库</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.cpp" line="107"/>
-        <source>Rename Part Palette</source>
+        <source>Rename Piece Palette</source>
         <translation>重命名零件库</translation>
     </message>
 </context>
@@ -5732,7 +5732,7 @@
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1007"/>
-        <source>Show Part Names</source>
+        <source>Show Piece Names</source>
         <translation>显示零件名称</translation>
     </message>
     <message>
@@ -5742,7 +5742,7 @@
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1016"/>
-        <source>Show Part Aliases</source>
+        <source>Show Piece Aliases</source>
         <translation>显示零件别名</translation>
     </message>
     <message>
@@ -5785,7 +5785,7 @@
     </message>
     <message>
         <location filename="../common/lc_library.cpp" line="784"/>
-        <source>Loading Parts Library</source>
+        <source>Loading Pieces Library</source>
         <translation>正在加载零件库</translation>
     </message>
 </context>
@@ -6049,7 +6049,7 @@ Anisotropic: %5
         <translation type="vanished">名称</translation>
     </message>
     <message>
-        <source>Part ID</source>
+        <source>Piece ID</source>
         <translation type="vanished">零件ID</translation>
     </message>
     <message>
@@ -6712,7 +6712,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="190"/>
-        <source>Parts Library:</source>
+        <source>Pieces Library:</source>
         <translation>零件库:</translation>
     </message>
     <message>
@@ -6856,7 +6856,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="805"/>
-        <source>Part Preview</source>
+        <source>Piece Preview</source>
         <translation>零件预览</translation>
     </message>
     <message>
@@ -7022,7 +7022,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1464"/>
-        <source>Parts Library Categories</source>
+        <source>Pieces Library Categories</source>
         <translation>零件库类别</translation>
     </message>
     <message>
@@ -7197,7 +7197,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="354"/>
-        <source>Select Parts Library Folder</source>
+        <source>Select Pieces Library Folder</source>
         <translation>选择零件库文件夹</translation>
     </message>
     <message>
@@ -7207,7 +7207,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="362"/>
-        <source>Select Parts Library Archive</source>
+        <source>Select Pieces Library Archive</source>
         <translation>选择零件库压缩包</translation>
     </message>
     <message>
@@ -7581,7 +7581,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.cpp" line="70"/>
-        <source>Part</source>
+        <source>Piece</source>
         <translation>零件</translation>
     </message>
     <message>
@@ -7692,7 +7692,7 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qpropertiestree.cpp" line="911"/>
-        <source>Part</source>
+        <source>Piece</source>
         <translation>零件</translation>
     </message>
     <message>
@@ -7784,12 +7784,12 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="118"/>
-        <source>&lt;p&gt;There are new parts available.&lt;/p&gt;</source>
+        <source>&lt;p&gt;There are new pieces available.&lt;/p&gt;</source>
         <translation>&lt;p&gt;有新的零件可用。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qupdatedialog.cpp" line="122"/>
-        <source>&lt;p&gt;There are no new parts available at this time.&lt;/p&gt;</source>
+        <source>&lt;p&gt;There are no new pieces available at this time.&lt;/p&gt;</source>
         <translation>&lt;p&gt;当前没有新的零件可用。&lt;/p&gt;</translation>
     </message>
     <message>

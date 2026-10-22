@@ -27,7 +27,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	Layout->addWidget(FindColorPicker, 0, 1);
 
 	mFindPartComboBox = new QComboBox(this);
-	mFindPartComboBox->setToolTip(tr("Search Part"));
+	mFindPartComboBox->setToolTip(tr("Search Piece"));
 	mFindPartComboBox->setEditable(true);
 	mFindPartComboBox->setInsertPolicy(QComboBox::NoInsert);
 	Layout->addWidget(mFindPartComboBox, 0, 2);
@@ -61,7 +61,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 		Pixmap.fill(QColor::fromRgba64(0, 0, 0, 0));
 
 		mReplacePartButton = new lcElidableToolButton(this);
-		mReplacePartButton->setToolTip(tr("Replacement Part"));
+		mReplacePartButton->setToolTip(tr("Replacement Piece"));
 
 		QSizePolicy PieceButtonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		PieceButtonSizePolicy.setHorizontalStretch(2);

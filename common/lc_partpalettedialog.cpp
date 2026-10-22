@@ -74,7 +74,7 @@ void lcPartPaletteDialog::NewButtonClicked()
 {
 	bool Ok = false;
 
-	QString Name = QInputDialog::getText(this, tr("New Part Palette"), tr("Palette Name:"), QLineEdit::Normal, QString(), &Ok);
+	QString Name = QInputDialog::getText(this, tr("New Piece Palette"), tr("Palette Name:"), QLineEdit::Normal, QString(), &Ok);
 
 	if (!Ok || Name.isEmpty())
 		return;
@@ -94,7 +94,7 @@ void lcPartPaletteDialog::DeleteButtonClicked()
 		return;
 
 	QString Prompt = tr("Are you sure you want to delete the palette '%1'?").arg(SelectedItems[0]->text());
-	if (QMessageBox::question(this, tr("Delete Part Palette"), Prompt, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+	if (QMessageBox::question(this, tr("Delete Piece Palette"), Prompt, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;
 
 	QListWidgetItem* SelectedItem = SelectedItems.first();
@@ -113,7 +113,7 @@ void lcPartPaletteDialog::RenameButtonClicked()
 	bool Ok = false;
 
 	QString Name = SelectedItems[0]->text();
-	Name = QInputDialog::getText(this, tr("Rename Part Palette"), tr("Palette Name:"), QLineEdit::Normal, Name, &Ok);
+	Name = QInputDialog::getText(this, tr("Rename Piece Palette"), tr("Palette Name:"), QLineEdit::Normal, Name, &Ok);
 
 	if (!Ok || Name.isEmpty())
 		return;

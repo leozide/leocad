@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcArrayDialog</class>
  <widget class="QDialog" name="lcArrayDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Array&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create repeated copies of the selected pieces using up to three array dimensions. Each row defines a count, an offset, and a rotation increment.&lt;/p&gt;&lt;p&gt;Counts include the original selection. For example, counts of 3, 2, and 1 create five new copies of each selected piece. Set an offset or rotation to keep copies from overlapping.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -18,6 +21,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QGroupBox" name="groupBox_4">
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row controls one array dimension, with a count from 1 to 1000. The product of the three counts includes the original selection. A count of 1 adds no copies along that dimension.&lt;/p&gt;</string>
+       </property>
        <property name="title">
         <string>Dimensions</string>
        </property>
@@ -26,6 +32,12 @@
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="2" column="0">
            <widget class="QSpinBox" name="count3">
+            <property name="toolTip">
+             <string>Number of positions in dimension 3, including the original.</string>
+            </property>
+            <property name="accessibleName">
+             <string>Dimension 3 count</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -36,6 +48,12 @@
           </item>
           <item row="0" column="0">
            <widget class="QSpinBox" name="count1">
+            <property name="toolTip">
+             <string>Number of positions in dimension 1, including the original.</string>
+            </property>
+            <property name="accessibleName">
+             <string>Dimension 1 count</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -46,6 +64,12 @@
           </item>
           <item row="1" column="0">
            <widget class="QSpinBox" name="count2">
+            <property name="toolTip">
+             <string>Number of positions in dimension 2, including the original.</string>
+            </property>
+            <property name="accessibleName">
+             <string>Dimension 2 count</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -61,72 +85,204 @@
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox_5">
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Offsets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the X, Y, and Z displacement per step in the corresponding array dimension. Values use the model axes and LDraw units; 20 units equal one stud width. Negative values reverse the direction.&lt;/p&gt;&lt;p&gt;For a straight row spaced one stud apart along X, use a count greater than 1 and an X offset of 20 in the same row.&lt;/p&gt;</string>
+       </property>
        <property name="title">
         <string>Offsets</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_10">
         <item row="0" column="1">
-         <widget class="QLineEdit" name="offset1y"/>
+         <widget class="QLineEdit" name="offset1y">
+          <property name="toolTip">
+           <string>Y offset per step in dimension 1, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 Y offset</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLineEdit" name="offset2x"/>
+         <widget class="QLineEdit" name="offset2x">
+          <property name="toolTip">
+           <string>X offset per step in dimension 2, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 X offset</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLineEdit" name="offset1x"/>
+         <widget class="QLineEdit" name="offset1x">
+          <property name="toolTip">
+           <string>X offset per step in dimension 1, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 X offset</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLineEdit" name="offset3x"/>
+         <widget class="QLineEdit" name="offset3x">
+          <property name="toolTip">
+           <string>X offset per step in dimension 3, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 X offset</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLineEdit" name="offset1z"/>
+         <widget class="QLineEdit" name="offset1z">
+          <property name="toolTip">
+           <string>Z offset per step in dimension 1, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 Z offset</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="offset2y"/>
+         <widget class="QLineEdit" name="offset2y">
+          <property name="toolTip">
+           <string>Y offset per step in dimension 2, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 Y offset</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="offset3y"/>
+         <widget class="QLineEdit" name="offset3y">
+          <property name="toolTip">
+           <string>Y offset per step in dimension 3, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 Y offset</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLineEdit" name="offset2z"/>
+         <widget class="QLineEdit" name="offset2z">
+          <property name="toolTip">
+           <string>Z offset per step in dimension 2, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 Z offset</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="2">
-         <widget class="QLineEdit" name="offset3z"/>
+         <widget class="QLineEdit" name="offset3z">
+          <property name="toolTip">
+           <string>Z offset per step in dimension 3, in LDraw units.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 Z offset</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox_6">
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Rotations&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the rotation increment around the X, Y, and Z model axes, in degrees, for its array dimension. Rotations from all three dimensions are added, then applied in X, Y, Z order before the offset.&lt;/p&gt;&lt;p&gt;Copies rotate around the focused piece origin, or the selection center when no piece has focus. Negative values reverse the rotation.&lt;/p&gt;</string>
+       </property>
        <property name="title">
         <string>Rotations</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_11">
         <item row="2" column="2">
-         <widget class="QLineEdit" name="rotation3z"/>
+         <widget class="QLineEdit" name="rotation3z">
+          <property name="toolTip">
+           <string>Z rotation per step in dimension 3, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 Z rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLineEdit" name="rotation3x"/>
+         <widget class="QLineEdit" name="rotation3x">
+          <property name="toolTip">
+           <string>X rotation per step in dimension 3, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 X rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLineEdit" name="rotation1x"/>
+         <widget class="QLineEdit" name="rotation1x">
+          <property name="toolTip">
+           <string>X rotation per step in dimension 1, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 X rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLineEdit" name="rotation2z"/>
+         <widget class="QLineEdit" name="rotation2z">
+          <property name="toolTip">
+           <string>Z rotation per step in dimension 2, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 Z rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLineEdit" name="rotation1z"/>
+         <widget class="QLineEdit" name="rotation1z">
+          <property name="toolTip">
+           <string>Z rotation per step in dimension 1, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 Z rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLineEdit" name="rotation2x"/>
+         <widget class="QLineEdit" name="rotation2x">
+          <property name="toolTip">
+           <string>X rotation per step in dimension 2, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 X rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="rotation1y"/>
+         <widget class="QLineEdit" name="rotation1y">
+          <property name="toolTip">
+           <string>Y rotation per step in dimension 1, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 1 Y rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="rotation2y"/>
+         <widget class="QLineEdit" name="rotation2y">
+          <property name="toolTip">
+           <string>Y rotation per step in dimension 2, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 2 Y rotation</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="rotation3y"/>
+         <widget class="QLineEdit" name="rotation3y">
+          <property name="toolTip">
+           <string>Y rotation per step in dimension 3, in degrees.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Dimension 3 Y rotation</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -139,7 +295,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

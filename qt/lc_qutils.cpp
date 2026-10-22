@@ -11,6 +11,31 @@
 #include <TlHelp32.h>
 #endif
 
+void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox)
+{
+	const auto ShowHelp = [Dialog](QWidget* Widget)
+	{
+		while (Widget && Widget->whatsThis().isEmpty() && Widget != Dialog)
+			Widget = Widget->parentWidget();
+
+		if (Widget && !Widget->whatsThis().isEmpty())
+			QWhatsThis::showText(Widget->mapToGlobal(QPoint(0, Widget->height())), Widget->whatsThis(), Widget);
+	};
+
+	QObject::connect(ButtonBox, &QDialogButtonBox::helpRequested, Dialog, [Dialog, ShowHelp]()
+	{
+		ShowHelp(Dialog);
+	});
+
+	QShortcut* HelpShortcut = new QShortcut(QKeySequence(Qt::Key_F1), Dialog);
+	HelpShortcut->setContext(Qt::WidgetWithChildrenShortcut);
+	QObject::connect(HelpShortcut, &QShortcut::activated, Dialog, [Dialog, ShowHelp]()
+	{
+		QWidget* Focus = QApplication::focusWidget();
+		ShowHelp(Focus && Dialog->isAncestorOf(Focus) ? Focus : Dialog);
+	});
+}
+
 QString lcFormatValue(float Value, int Precision)
 {
 	QString String = QString::number(Value, 'f', Precision);

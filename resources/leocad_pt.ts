@@ -5047,15 +5047,15 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="obsolete">Erro</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qutils.cpp" line="66"/>
-        <location filename="../qt/lc_qutils.cpp" line="72"/>
-        <location filename="../qt/lc_qutils.cpp" line="90"/>
+        <location filename="../qt/lc_qutils.cpp" line="91"/>
+        <location filename="../qt/lc_qutils.cpp" line="97"/>
+        <location filename="../qt/lc_qutils.cpp" line="115"/>
         <source>Stop Blender Process</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Parar o processo do Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qutils.cpp" line="90"/>
+        <location filename="../qt/lc_qutils.cpp" line="115"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 falhou: %2</translation>
@@ -7012,27 +7012,257 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 <context>
     <name>lcArrayDialog</name>
     <message>
-        <location filename="../common/lc_arraydialog.ui" line="14"/>
+        <location filename="../common/lc_arraydialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Array&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create repeated copies of the selected pieces using up to three array dimensions. Each row defines a count, an offset, and a rotation increment.&lt;/p&gt;&lt;p&gt;Counts include the original selection. For example, counts of 3, 2, and 1 create five new copies of each selected piece. Set an offset or rotation to keep copies from overlapping.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="17"/>
         <source>Array</source>
         <translation>Quadro</translation>
     </message>
     <message>
-        <location filename="../common/lc_arraydialog.ui" line="22"/>
+        <location filename="../common/lc_arraydialog.ui" line="25"/>
+        <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row controls one array dimension, with a count from 1 to 1000. The product of the three counts includes the original selection. A count of 1 adds no copies along that dimension.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="28"/>
         <source>Dimensions</source>
         <translation>Dimensões</translation>
     </message>
     <message>
-        <location filename="../common/lc_arraydialog.ui" line="65"/>
+        <location filename="../common/lc_arraydialog.ui" line="36"/>
+        <source>Number of positions in dimension 3, including the original.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="39"/>
+        <source>Dimension 3 count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="52"/>
+        <source>Number of positions in dimension 1, including the original.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="55"/>
+        <source>Dimension 1 count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="68"/>
+        <source>Number of positions in dimension 2, including the original.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="71"/>
+        <source>Dimension 2 count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="89"/>
+        <source>&lt;p&gt;&lt;b&gt;Offsets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the X, Y, and Z displacement per step in the corresponding array dimension. Values use the model axes and LDraw units; 20 units equal one stud width. Negative values reverse the direction.&lt;/p&gt;&lt;p&gt;For a straight row spaced one stud apart along X, use a count greater than 1 and an X offset of 20 in the same row.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="92"/>
         <source>Offsets</source>
         <translation>Espaços</translation>
     </message>
     <message>
+        <location filename="../common/lc_arraydialog.ui" line="98"/>
+        <source>Y offset per step in dimension 1, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_arraydialog.ui" line="101"/>
+        <source>Dimension 1 Y offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="108"/>
+        <source>X offset per step in dimension 2, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="111"/>
+        <source>Dimension 2 X offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="118"/>
+        <source>X offset per step in dimension 1, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="121"/>
+        <source>Dimension 1 X offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="128"/>
+        <source>X offset per step in dimension 3, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="131"/>
+        <source>Dimension 3 X offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="138"/>
+        <source>Z offset per step in dimension 1, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="141"/>
+        <source>Dimension 1 Z offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="148"/>
+        <source>Y offset per step in dimension 2, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="151"/>
+        <source>Dimension 2 Y offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="158"/>
+        <source>Y offset per step in dimension 3, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="161"/>
+        <source>Dimension 3 Y offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="168"/>
+        <source>Z offset per step in dimension 2, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="171"/>
+        <source>Dimension 2 Z offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="178"/>
+        <source>Z offset per step in dimension 3, in LDraw units.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="181"/>
+        <source>Dimension 3 Z offset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="191"/>
+        <source>&lt;p&gt;&lt;b&gt;Rotations&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the rotation increment around the X, Y, and Z model axes, in degrees, for its array dimension. Rotations from all three dimensions are added, then applied in X, Y, Z order before the offset.&lt;/p&gt;&lt;p&gt;Copies rotate around the focused piece origin, or the selection center when no piece has focus. Negative values reverse the rotation.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="194"/>
         <source>Rotations</source>
         <translation>Rotações</translation>
     </message>
     <message>
-        <location filename="../common/lc_arraydialog.cpp" line="74"/>
+        <location filename="../common/lc_arraydialog.ui" line="200"/>
+        <source>Z rotation per step in dimension 3, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="203"/>
+        <source>Dimension 3 Z rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="210"/>
+        <source>X rotation per step in dimension 3, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="213"/>
+        <source>Dimension 3 X rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="220"/>
+        <source>X rotation per step in dimension 1, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="223"/>
+        <source>Dimension 1 X rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="230"/>
+        <source>Z rotation per step in dimension 2, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="233"/>
+        <source>Dimension 2 Z rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="240"/>
+        <source>Z rotation per step in dimension 1, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="243"/>
+        <source>Dimension 1 Z rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="250"/>
+        <source>X rotation per step in dimension 2, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="253"/>
+        <source>Dimension 2 X rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="260"/>
+        <source>Y rotation per step in dimension 1, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="263"/>
+        <source>Dimension 1 Y rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="270"/>
+        <source>Y rotation per step in dimension 2, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="273"/>
+        <source>Dimension 2 Y rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="280"/>
+        <source>Y rotation per step in dimension 3, in degrees.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.ui" line="283"/>
+        <source>Dimension 3 Y rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_arraydialog.cpp" line="75"/>
         <source>Array is empty.</source>
         <translation>O quadro está vazio.</translation>
     </message>
@@ -8406,68 +8636,155 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 <context>
     <name>lcImageDialog</name>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="14"/>
+        <location filename="../common/lc_imagedialog.ui" line="17"/>
         <source>Save Image</source>
         <translation>Gravar Imagem</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="24"/>
+        <location filename="../common/lc_imagedialog.ui" line="33"/>
         <source>File Name:</source>
         <oldsource>File name:</oldsource>
         <translation type="unfinished">Nome do ficheiro:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="48"/>
+        <location filename="../common/lc_imagedialog.ui" line="27"/>
+        <location filename="../common/lc_imagedialog.ui" line="43"/>
+        <source>Path and file name for the exported image.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="30"/>
+        <location filename="../common/lc_imagedialog.ui" line="46"/>
+        <location filename="../common/lc_imagedialog.ui" line="56"/>
+        <source>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, &apos;model.png&apos; becomes &apos;model01.png&apos;, &apos;model02.png&apos;, and so on.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="53"/>
+        <source>Choose the image file and format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="59"/>
+        <source>Choose Image File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="73"/>
+        <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the exported image width and height in pixels. Each value must be between 1 and 32768. Larger images use more memory and may exceed the graphics hardware limits.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="76"/>
         <source>Dimensions</source>
         <translation>Dimensões</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="109"/>
+        <location filename="../common/lc_imagedialog.ui" line="82"/>
+        <location filename="../common/lc_imagedialog.ui" line="95"/>
+        <source>Width of the saved image, in pixels (1 to 32768).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="114"/>
+        <location filename="../common/lc_imagedialog.ui" line="127"/>
+        <source>Height of the saved image, in pixels (1 to 32768).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="149"/>
+        <source>&lt;p&gt;&lt;b&gt;Step Range&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose All Steps, Current Step, or Custom Range. The From and To fields are used only for Custom Range. Both endpoints are included, and To may equal From to save just one step.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="152"/>
         <source>Step Range</source>
         <translation>Intervalo de Passos</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="115"/>
+        <location filename="../common/lc_imagedialog.ui" line="158"/>
+        <source>Save an image for every step in the active model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="161"/>
         <source>All Steps</source>
         <translation>Todos os Passos</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="122"/>
+        <location filename="../common/lc_imagedialog.ui" line="168"/>
+        <source>Save only the current step.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="171"/>
         <source>Current Step</source>
         <translation>Passo Actual</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="131"/>
+        <location filename="../common/lc_imagedialog.ui" line="180"/>
+        <source>Save the steps between From and To, including both endpoints.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="183"/>
         <source>Custom Range</source>
         <translation>Intervalo Personalizado</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="138"/>
+        <location filename="../common/lc_imagedialog.ui" line="196"/>
         <source>From:</source>
         <translation>De:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="161"/>
+        <location filename="../common/lc_imagedialog.ui" line="190"/>
+        <location filename="../common/lc_imagedialog.ui" line="203"/>
+        <source>First step to save when Custom Range is selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="206"/>
+        <source>First Step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="231"/>
         <source>To:</source>
         <translation>Até:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="54"/>
+        <location filename="../common/lc_imagedialog.ui" line="225"/>
+        <location filename="../common/lc_imagedialog.ui" line="238"/>
+        <source>Last step to save when Custom Range is selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="241"/>
+        <source>Last Step</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="85"/>
         <source>Width:</source>
         <translation>Largura:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="80"/>
+        <location filename="../common/lc_imagedialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Save Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Save images of the active model using the current view. Choose a destination file, image dimensions, and the steps to include.&lt;/p&gt;&lt;p&gt;Saving one step produces one image. Saving several steps produces a separate numbered image for each step.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_imagedialog.ui" line="117"/>
         <source>Height:</source>
         <translation>Altura:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.ui" line="37"/>
+        <location filename="../common/lc_imagedialog.ui" line="62"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="37"/>
+        <location filename="../common/lc_imagedialog.cpp" line="39"/>
         <source>Output file cannot be empty.</source>
         <oldsource>Output File cannot be empty.</oldsource>
         <translation type="unfinished">Tem de indicar o ficheiro de saída.</translation>
@@ -8477,37 +8794,37 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="vanished">Erro</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="75"/>
+        <location filename="../common/lc_imagedialog.cpp" line="77"/>
         <source>First step must be between 1 and %1.</source>
         <translation>O primeiro passo tem de ser entre 1 e %1.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="83"/>
+        <location filename="../common/lc_imagedialog.cpp" line="85"/>
         <source>Last step must be between 1 and %1.</source>
         <translation>O último passo tem de ser entre %1 e 1.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="105"/>
+        <location filename="../common/lc_imagedialog.cpp" line="107"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Formatos de Imagem Suportados (*.bmp *.png *.jpg);;Ficheiros BMP (*.bmp);;Ficheiros PNG (*.png);;Ficheiros JPEG (*.jpg);;Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="89"/>
+        <location filename="../common/lc_imagedialog.cpp" line="91"/>
         <source>Last step must be greater than first step.</source>
         <translation>O último passo tem de ser superior au primeiro.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="45"/>
+        <location filename="../common/lc_imagedialog.cpp" line="47"/>
         <source>Please enter a width between 1 and 32768.</source>
         <translation>É favor escolher uma largura entre 1 e 32768.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="53"/>
+        <location filename="../common/lc_imagedialog.cpp" line="55"/>
         <source>Please enter a height between 1 and 32768.</source>
         <translation>É favor escolher uma altura entre 1 e 32768.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="105"/>
+        <location filename="../common/lc_imagedialog.cpp" line="107"/>
         <source>Save Image File</source>
         <translation>Exportar Imagem</translation>
     </message>

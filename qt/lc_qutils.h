@@ -10,6 +10,8 @@ QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
 float lcParseValueLocalized(const QString& Value);
 
+void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
+
 #ifdef Q_OS_WIN
 
 #include <windows.h>

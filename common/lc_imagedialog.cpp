@@ -2,11 +2,13 @@
 #include "lc_imagedialog.h"
 #include "ui_lc_imagedialog.h"
 #include "project.h"
+#include "lc_qutils.h"
 
 lcImageDialog::lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options)
     : QDialog(Parent), mOptions(Options), ui(new Ui::lcImageDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(ui->fileNameBrowse, &QPushButton::clicked, this, &lcImageDialog::FileNameBrowseClicked);
 

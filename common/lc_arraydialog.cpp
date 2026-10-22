@@ -7,6 +7,7 @@ lcArrayDialog::lcArrayDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcArrayDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	ui->offset1x->setValidator(new QDoubleValidator(ui->offset1x));
 	ui->offset1y->setValidator(new QDoubleValidator(ui->offset1y));

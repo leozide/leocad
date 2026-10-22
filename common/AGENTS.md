@@ -17,3 +17,8 @@
 - Explain the problem or trigger, why the change is needed, and how the resulting behavior addresses it.
 - Write for a future maintainer without access to the chat. Do not merely restate the diff or include conversational history.
 - Subject-only messages are acceptable for purely mechanical changes.
+
+# Dialog help and translations
+
+- Follow `docs/dialog-help.md` when adding or changing dialog controls, including help text, label buddies, and Help/F1 behavior.
+- Keep UI strings translatable and refresh affected catalogs. Preserve existing translations and review status; leave new untranslated or generated translations unfinished.

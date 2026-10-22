@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcImageDialog</class>
  <widget class="QDialog" name="lcImageDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Save Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Save images of the active model using the current view. Choose a destination file, image dimensions, and the steps to include.&lt;/p&gt;&lt;p&gt;Saving one step produces one image. Saving several steps produces a separate numbered image for each step.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,6 +23,12 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QLabel" name="label">
+         <property name="toolTip">
+          <string>Path and file name for the exported image.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, 'model.png' becomes 'model01.png', 'model02.png', and so on.&lt;/p&gt;</string>
+         </property>
          <property name="text">
           <string>File Name:</string>
          </property>
@@ -29,10 +38,26 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="fileName"/>
+        <widget class="QLineEdit" name="fileName">
+         <property name="toolTip">
+          <string>Path and file name for the exported image.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, 'model.png' becomes 'model01.png', 'model02.png', and so on.&lt;/p&gt;</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QToolButton" name="fileNameBrowse">
+         <property name="toolTip">
+          <string>Choose the image file and format.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, 'model.png' becomes 'model01.png', 'model02.png', and so on.&lt;/p&gt;</string>
+         </property>
+         <property name="accessibleName">
+          <string>Choose Image File</string>
+         </property>
          <property name="text">
           <string>...</string>
          </property>
@@ -44,12 +69,18 @@
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
         <widget class="QGroupBox" name="groupBox">
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the exported image width and height in pixels. Each value must be between 1 and 32768. Larger images use more memory and may exceed the graphics hardware limits.&lt;/p&gt;</string>
+         </property>
          <property name="title">
           <string>Dimensions</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
            <widget class="QLabel" name="label_3">
+            <property name="toolTip">
+             <string>Width of the saved image, in pixels (1 to 32768).</string>
+            </property>
             <property name="text">
              <string>Width:</string>
             </property>
@@ -60,6 +91,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="width">
+            <property name="toolTip">
+             <string>Width of the saved image, in pixels (1 to 32768).</string>
+            </property>
             <property name="minimumSize">
              <size>
               <width>75</width>
@@ -76,6 +110,9 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
+            <property name="toolTip">
+             <string>Height of the saved image, in pixels (1 to 32768).</string>
+            </property>
             <property name="text">
              <string>Height:</string>
             </property>
@@ -86,6 +123,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="height">
+            <property name="toolTip">
+             <string>Height of the saved image, in pixels (1 to 32768).</string>
+            </property>
             <property name="minimumSize">
              <size>
               <width>75</width>
@@ -105,12 +145,18 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Step Range&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose All Steps, Current Step, or Custom Range. The From and To fields are used only for Custom Range. Both endpoints are included, and To may equal From to save just one step.&lt;/p&gt;</string>
+         </property>
          <property name="title">
           <string>Step Range</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QRadioButton" name="rangeAll">
+            <property name="toolTip">
+             <string>Save an image for every step in the active model.</string>
+            </property>
             <property name="text">
              <string>All Steps</string>
             </property>
@@ -118,6 +164,9 @@
           </item>
           <item>
            <widget class="QRadioButton" name="rangeCurrent">
+            <property name="toolTip">
+             <string>Save only the current step.</string>
+            </property>
             <property name="text">
              <string>Current Step</string>
             </property>
@@ -127,6 +176,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QRadioButton" name="rangeCustom">
+              <property name="toolTip">
+               <string>Save the steps between From and To, including both endpoints.</string>
+              </property>
               <property name="text">
                <string>Custom Range</string>
               </property>
@@ -134,6 +186,12 @@
             </item>
             <item>
              <widget class="QLabel" name="label_2">
+              <property name="toolTip">
+               <string>First step to save when Custom Range is selected.</string>
+              </property>
+              <property name="buddy">
+               <cstring>firstStep</cstring>
+              </property>
               <property name="text">
                <string>From:</string>
               </property>
@@ -141,6 +199,12 @@
             </item>
             <item>
              <widget class="QLineEdit" name="firstStep">
+              <property name="toolTip">
+               <string>First step to save when Custom Range is selected.</string>
+              </property>
+              <property name="accessibleName">
+               <string>First Step</string>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>75</width>
@@ -157,6 +221,12 @@
             </item>
             <item>
              <widget class="QLabel" name="label_7">
+              <property name="toolTip">
+               <string>Last step to save when Custom Range is selected.</string>
+              </property>
+              <property name="buddy">
+               <cstring>lastStep</cstring>
+              </property>
               <property name="text">
                <string>To:</string>
               </property>
@@ -164,6 +234,12 @@
             </item>
             <item>
              <widget class="QLineEdit" name="lastStep">
+              <property name="toolTip">
+               <string>Last step to save when Custom Range is selected.</string>
+              </property>
+              <property name="accessibleName">
+               <string>Last Step</string>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>75</width>
@@ -193,7 +269,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

@@ -3331,13 +3331,13 @@ File format is not recognized.</source>
         <translation type="obsolete">Помилка</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3563"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3564"/>
         <source>Existing file &apos;%1&apos; detected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Обнаружен существующий файл '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3564"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3565"/>
         <source>&apos;%1&apos;&lt;br&gt;This file already exists.&lt;br&gt;Replace existing file?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">'%1'&lt;br&gt;Этот файл уже существует.&lt;br&gt;Заменить существующий файл?</translation>
@@ -6860,7 +6860,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <location filename="../common/lc_blenderpreferences.cpp" line="516"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1178"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1635"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1715"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1712"/>
         <source>Blender</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">Blender</translation>
@@ -6868,7 +6868,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="516"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1192"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1725"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1722"/>
         <source>Blender Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Дополнение</translation>
@@ -6980,26 +6980,26 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Тест Blender не пройден.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2030"/>
         <source>Save Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Сохранить вывод дополнения Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2041"/>
         <source>Cancel Blender Add-on Installation</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Отменить установку дополнения Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3121"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
         <source>Apply Render Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Применить настройки рендеринга</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3159"/>
         <source>Set LDraw Color Scheme</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Задать цветовую схему LDraw</translation>
@@ -7030,7 +7030,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1181"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1718"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1715"/>
         <source>Display the Blender and %1 Render add-on version</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Отображение версии надстройки Blender и %1 Render.</translation>
@@ -7046,9 +7046,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1744"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1702"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1982"/>
         <source>Install Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Установить дополнение Blender</translation>
@@ -7086,7 +7085,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3806"/>
         <source>Extract Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Распаковать дополнение Blender</translation>
@@ -7098,7 +7097,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Проверить обновления дополнения Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1703"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Установка дополнения не удалась.</translation>
@@ -7295,13 +7294,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">%1 настройка...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1701"/>
         <source>Add-on install failed. See &apos;%1/stderr-blender-add-on-install&apos; for details.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Установка дополнения не удалась. Подробности см. в '%1/stderr-blender-add-on-install'.</translation>
+        <translation type="obsolete">Установка дополнения не удалась. Подробности см. в '%1/stderr-blender-add-on-install'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1702"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1699"/>
         <source>Error: Install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ошибка: установка не удалась.</translation>
@@ -7312,67 +7310,66 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">%1 Blender Установка дополнения</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1707"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1704"/>
         <source>LDraw add-on install encountered one or more errors. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">При установке дополнения LDraw возникла одна или несколько ошибок. См. Показать детали...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1737"/>
         <source>Blender version %1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Blender версия %1</translation>
+        <translation type="obsolete">Blender версия %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1828"/>
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Стандартный выходной файл дополнения Blender не найден: '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1828"/>
         <source>View Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Показать вывод дополнения Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1930"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1923"/>
         <source>v%1</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">v%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1987"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
         <source>errors%1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">ошибки%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1987"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
         <source> and warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished"> и предупреждения</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1987"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
         <source>warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">предупреждения</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1990"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1983"/>
         <source>Add-on install standard output.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Дополнение устанавливает стандартный вывод.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1991"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1984"/>
         <source>LDraw add-on install encountered %1. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">При установке дополнения LDraw обнаружен %1. См. Показать детали...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2010"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2003"/>
         <source>Failed to open log file: &apos;%1&apos;:
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7380,7 +7377,7 @@ Please visit https://www.leocad.org for information on how to download and insta
 %2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2030"/>
         <source>Error writing to %1 file &apos;%2&apos;:
 %3</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7393,63 +7390,63 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">Отменить установку дополнения %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2042"/>
         <source>Are you sure you want to cancel the add-on installation?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Вы уверены, что хотите отменить установку дополнения?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2339"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2335"/>
         <source>Add-on Reset</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Сброс дополнения</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2340"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2336"/>
         <source>Select how to reset settings. Choice is since last apply or system default.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Выберите способ сброса настроек. Выбор: с момента последнего применения или по умолчанию в системе.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2344"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2340"/>
         <source>Last Apply</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Последняя подача заявки</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2342"/>
         <source>System Default</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Системные настройки по умолчанию</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2632"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2650"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2628"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2646"/>
         <source>%1 - Setting (%2)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 — Настройка (%2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2669"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2675"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2665"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2670"/>
         <source>Load Blender Add-on Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Загрузить настройки дополнения Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2670"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Конфигурационный файл Blender не найден. Ошибка проверки журнала установки:&lt;br&gt;%1:&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2943"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2940"/>
         <source>Select Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Выберите цвет</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2958"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2955"/>
         <source>Locate %1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Найдите %1</translation>
@@ -7460,25 +7457,25 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">LDraw Конфликт настроек рендеринга</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3125"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3122"/>
         <source>Crop image configuration settings conflict were resolved.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Конфликт настроек конфигурации изображения обрезки устранен.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3126"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
         <source>Keep aspect ratio set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Оставьте для соотношения сторон значение false.&lt;br&gt;.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3126"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
         <source>Add environment (backdrop and base plane) set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Добавьте среду (фон и базовую плоскость), для которой установлено значение false.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3126"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
         <source>Transparent background set to true.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Для прозрачного фона установлено значение true.&lt;br&gt;.</translation>
@@ -7489,13 +7486,13 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">Пользовательские LDraw цвета</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3163"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3160"/>
         <source>Color scheme &apos;custom&apos; cannot be enabled. Custom LDConfig file not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Цветовую схему «Пользовательская» включить невозможно. Пользовательский файл LDConfig не найден.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3164"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3161"/>
         <source>Color scheme &apos;custom&apos; selected but no LDConfig file was specified.&lt;br&gt;The default color scheme &apos;%1&apos; will be used.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Выбрана цветовая схема «Пользовательская», но файл LDConfig не указан.&lt;br&gt;Будет использоваться цветовая схема по умолчанию '%1'.&lt;br&gt;</translation>
@@ -7519,43 +7516,43 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Не удалось открыть файл параметров Blender: '%1':&lt;br&gt;%2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3549"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3550"/>
         <source>Export Blender Parameters</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Экспортировать параметры Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3562"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3563"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Заменить существующий файл</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3634"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3635"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Хотите скачать версию </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3638"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3639"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Больше не показывать сообщение о загрузке новой версии дополнения.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3658"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Загрузка дополнения не удалась.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3658"/>
         <source>Download Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Скачать дополнение Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3806"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Формат записи ZipFile (HostOS %1) с индексом %2 не поддерживается. Извлечение прекращено.</translation>
@@ -7566,7 +7563,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">Извлечь дополнение</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3870"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3871"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">

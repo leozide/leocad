@@ -214,7 +214,7 @@ void lcModelListDialog::ExportModelClicked()
 		lcResult<void> ExportResult = lcGetActiveProject()->ExportModel(SaveFileName, Model);
 
 		if (!ExportResult && !ExportResult.error().isEmpty())
-			QMessageBox::information(this, tr("Export Submodel"), ExportResult.error());
+			QMessageBox::warning(this, tr("Export Submodel"), ExportResult.error());
 
 		lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(SaveFileName).absolutePath());
 	}
@@ -236,7 +236,7 @@ void lcModelListDialog::ExportModelClicked()
 
 				if (!ExportResult && !ExportResult.error().isEmpty())
 				{
-					QMessageBox::information(this, tr("Export Submodel"), ExportResult.error());
+					QMessageBox::warning(this, tr("Export Submodel"), ExportResult.error());
 					break;
 				}
 			}

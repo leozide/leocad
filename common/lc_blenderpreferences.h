@@ -48,7 +48,7 @@ public:
 	static void SaveSettings();
 	static bool ExportParameterFile();
 	static bool SettingsModified(bool Update = true, QString const& Module = QString());
-	static int ShowMessage(QWidget* Parent, QString const& Header, QString const& Title, QString const& Body = QString(), QString const& Detail = QString(), const int Buttons = MBB_OK, const int Icon = 3 /*QMessageBox::Critical*/);
+	static int ShowMessage(QWidget* Parent, QString const& Header, QString const& Title, QString const& Body = QString(), QString const& Detail = QString(), const int Buttons = MBB_OK, const int Icon = QMessageBox::Warning);
 
 	void Apply(const int Response = QDialog::Accepted);
 

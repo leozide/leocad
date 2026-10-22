@@ -211,7 +211,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 
 		if (mKeys.isEmpty())
 		{
-			QMessageBox::information(this, tr("Connect to Sets Database"), tr("Error connecting to server."));
+			QMessageBox::warning(this, tr("Connect to Sets Database"), tr("Error connecting to server."));
 			close();
 		}
 
@@ -258,7 +258,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 		if (!Reply->error())
 			mInventory = Reply->readAll();
 		else
-			QMessageBox::information(this, tr("Download Set Inventory"), tr("Error downloading set inventory."));
+			QMessageBox::warning(this, tr("Download Set Inventory"), tr("Error downloading set inventory."));
 
 		mInventoryReply = nullptr;
 	}

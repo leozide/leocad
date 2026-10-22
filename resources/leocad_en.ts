@@ -4,7 +4,7 @@
 <context>
     <name>lcBlenderPreferences</name>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3873"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3871"/>
         <source>%1 of %n files extracted.</source>
         <translation>
             <numerusform>%1 of %n file extracted.</numerusform>

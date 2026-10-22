@@ -1491,7 +1491,7 @@ void lcMainWindow::ShowHTMLDialog()
 		return;
 
 	Options.SaveDefaults();
-	ShowResultMessageBox(lcGetActiveProject()->ExportHTML(Options), tr("Export HTML"));
+	ShowResultError(lcGetActiveProject()->ExportHTML(Options), tr("Export HTML"));
 }
 
 void lcMainWindow::ShowExportPOVRayDialog()
@@ -1584,10 +1584,10 @@ void lcMainWindow::ShowSelectDialog()
 	ActiveModel->SetSelectionAndFocusAction(Dialog.mObjects, nullptr, 0, lcSelectionMode::Single);
 }
 
-void lcMainWindow::ShowResultMessageBox(const lcResult<void>& Result, const QString& Title)
+void lcMainWindow::ShowResultError(const lcResult<void>& Result, const QString& Title)
 {
 	if (!Result && !Result.error().isEmpty())
-		QMessageBox::information(this, Title, Result.error());
+		QMessageBox::warning(this, Title, Result.error());
 }
 
 void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
@@ -2908,11 +2908,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_3DS:
-		ShowResultMessageBox(lcGetActiveProject()->Export3DStudio(QString()), tr("Export 3DS"));
+		ShowResultError(lcGetActiveProject()->Export3DStudio(QString()), tr("Export 3DS"));
 		break;
 
 	case LC_FILE_EXPORT_COLLADA:
-		ShowResultMessageBox(lcGetActiveProject()->ExportCOLLADA(QString()), tr("Export COLLADA"));
+		ShowResultError(lcGetActiveProject()->ExportCOLLADA(QString()), tr("Export COLLADA"));
 		break;
 
 	case LC_FILE_EXPORT_HTML:
@@ -2920,11 +2920,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_BRICKLINK:
-		ShowResultMessageBox(lcGetActiveProject()->ExportBrickLink(), tr("Export BrickLink"));
+		ShowResultError(lcGetActiveProject()->ExportBrickLink(), tr("Export BrickLink"));
 		break;
 
 	case LC_FILE_EXPORT_CSV:
-		ShowResultMessageBox(lcGetActiveProject()->ExportCSV(QString()), tr("Export CSV"));
+		ShowResultError(lcGetActiveProject()->ExportCSV(QString()), tr("Export CSV"));
 		break;
 
 	case LC_FILE_EXPORT_POVRAY:
@@ -2932,7 +2932,7 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_FILE_EXPORT_WAVEFRONT:
-		ShowResultMessageBox(lcGetActiveProject()->ExportWavefront(QString()), tr("Export Wavefront"));
+		ShowResultError(lcGetActiveProject()->ExportWavefront(QString()), tr("Export Wavefront"));
 		break;
 
 	case LC_FILE_RENDER_POVRAY:
@@ -2982,22 +2982,22 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_CUT:
 		if (ActiveModel)
-			ShowResultMessageBox(ActiveModel->Cut(), tr("Cannot Cut Model"));
+			ShowResultError(ActiveModel->Cut(), tr("Cannot Cut Model"));
 		break;
 
 	case LC_EDIT_COPY:
 		if (ActiveModel)
-			ShowResultMessageBox(ActiveModel->Copy(), tr("Cannot Copy Model"));
+			ShowResultError(ActiveModel->Copy(), tr("Cannot Copy Model"));
 		break;
 
 	case LC_EDIT_PASTE:
 		if (ActiveModel)
-			ShowResultMessageBox(ActiveModel->Paste(true), tr("Cannot Paste Model"));
+			ShowResultError(ActiveModel->Paste(true), tr("Cannot Paste Model"));
 		break;
 
 	case LC_EDIT_PASTE_STEPS:
 		if (ActiveModel)
-			ShowResultMessageBox(ActiveModel->Paste(false), tr("Cannot Paste Model"));
+			ShowResultError(ActiveModel->Paste(false), tr("Cannot Paste Model"));
 		break;
 
 	case LC_EDIT_FIND:

@@ -1002,7 +1002,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			Message = tr("LeoCAD could not load Pieces Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
 		if (gMainWindow)
-			QMessageBox::information(gMainWindow, tr("Load Pieces Library"), Message);
+			QMessageBox::warning(gMainWindow, tr("Load Pieces Library"), Message);
 		else
 		{
 			StdErr << Message << "\n";

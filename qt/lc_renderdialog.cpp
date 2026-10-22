@@ -245,7 +245,7 @@ void lcRenderDialog::RenderPOVRay()
 	if (!ExportResult)
 	{
 		if (!ExportResult.error().isEmpty())
-			QMessageBox::information(this, windowTitle(), ExportResult.error());
+			QMessageBox::warning(this, windowTitle(), ExportResult.error());
 
 		return;
 	}
@@ -348,7 +348,7 @@ void lcRenderDialog::RenderPOVRay()
 	else
 	{
 		delete Process;
-		QMessageBox::information(this, windowTitle(), tr("Error starting POV-Ray."));
+		QMessageBox::warning(this, windowTitle(), tr("Error starting POV-Ray."));
 		CloseProcess();
 	}
 }
@@ -453,7 +453,7 @@ void lcRenderDialog::RenderBlender()
 	}
 	else
 	{
-		QMessageBox::information(this, windowTitle(), tr("Cannot write Blender render script file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString()));
+		QMessageBox::warning(this, windowTitle(), tr("Cannot write Blender render script file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString()));
 
 		return;
 	}
@@ -515,7 +515,7 @@ void lcRenderDialog::RenderBlender()
 #endif
 						if (Error || Warning)
 						{
-							QMessageBox::Icon Icon = QMessageBox::Information;
+							QMessageBox::Icon Icon = QMessageBox::Warning;
 							const QString Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
 							const QString Title = tr("Open in Blender Output");
 							const QString Body = tr("Open in Blender encountered %1. See Show Details...").arg(Items);
@@ -548,7 +548,7 @@ void lcRenderDialog::RenderBlender()
 	else
 	{
 		Message = tr("Error starting Blender render process.");
-		QMessageBox::information(this, windowTitle(), Message);
+		QMessageBox::warning(this, windowTitle(), Message);
 		CloseProcess();
 	}
 }
@@ -762,7 +762,7 @@ void lcRenderDialog::ShowResult()
 		ui->RenderProgress->setValue(0);
 
 		const QString Body  = tr("An error occurred while rendering.");
-		lcBlenderPreferences::ShowMessage(this, Body, windowTitle(), QString(), StdErrLog, 0, QMessageBox::Information);
+		lcBlenderPreferences::ShowMessage(this, Body, windowTitle(), QString(), StdErrLog, 0, QMessageBox::Warning);
 		return;
 	}
 	else
@@ -784,7 +784,7 @@ void lcRenderDialog::ShowResult()
 			Success = Writer.write(mImage);
 
 			if (!Success)
-				QMessageBox::information(this, windowTitle(), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+				QMessageBox::warning(this, windowTitle(), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 		}
 
 	}
@@ -806,7 +806,7 @@ void lcRenderDialog::ShowResult()
 	}
 
 	if (!Success)
-		QMessageBox::information(this, windowTitle(), tr("Render failed."));
+		QMessageBox::warning(this, windowTitle(), tr("Render failed."));
 
 	WriteStdOut();
 }
@@ -893,7 +893,7 @@ void lcRenderDialog::LogButtonClicked()
 
 	if (!FileInfo.exists())
 	{
-		QMessageBox::information(this, tr("Render Log"), Message);
+		QMessageBox::warning(this, tr("Render Log"), Message);
 		return;
 	}
 
@@ -901,7 +901,7 @@ void lcRenderDialog::LogButtonClicked()
 
 	if (!File.open(QFile::ReadOnly | QFile::Text))
 	{
-		QMessageBox::information(this, tr("Render Log"), tr("Error opening log file '%1':\n%2.").arg(FileInfo.absoluteFilePath(), File.errorString()));
+		QMessageBox::warning(this, tr("Render Log"), tr("Error opening log file '%1':\n%2.").arg(FileInfo.absoluteFilePath(), File.errorString()));
 		return;
 	}
 

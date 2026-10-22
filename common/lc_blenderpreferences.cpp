@@ -46,45 +46,13 @@ const QLatin1String LineEnding("\r\n");
 #define LC_RENDER_IMAGE_MAX_SIZE           32768 // pixels
 
 static constexpr char WhatsThisDescription[] = QT_TRANSLATE_NOOP("QObject",
-	"  Blender LDraw Add-on Settings\n\n"
-	"  You can configure the Blender LDraw add-on settings.\n"
-	"  - Blender Executable: set Blender path. On entry,\n"
-	"    %1 will automatically apply the setting and\n"
-	"    attempt to configure the LDraw add-on.\n"
-	"  - %1 Blender LDraw Add-on: you can update the LDraw\n"
-	"    add-on which will download the latest add-on or apply\n"
-	"    the current add-on if the version is the same or newer\n"
-	"    than the online version.\n"
-	"    You can view the standard output log for the update.\n\n"
-	"  - Enabled Add-on Modules: check the desired import module.\n"
-	"    The LDraw Import TN import module is the long-standing\n"
-	"    Blender LDraw import add-on, while the LDraw Import MM\n"
-	"    add-on was recently introduced. The latter add-on also\n"
-	"    offers LDraw export functionality.\n"
-	"    The %1 3D Image Render add-on is mandatory but if\n"
-	"    no import module is enabled, none of the modules\n"
-	"    will be enabled in Blender so it will not be possible\n"
-	"    to perform an LDraw model import or render.\n\n"
-	"  - LDraw Import Add-on Paths: add-on paths are specific\n"
-	"    to the enabled add-on import module.\n"
-	"  - LDraw Import Add-on Settings: add-on settings are\n"
-	"    specific to the enabled add-on import module.\n"
-	"  - Apply: apply the add-on path and setting preferences.\n"
-	"  - Show/Hide Paths: show or hide the add-on paths\n"
-	"    display box.\n"
-	"  - Reset: reset the add-on path and setting preferences.\n"
-	"    You can select how to reset add-on settings.\n"
-	"    The choice is since last apply or system default.\n\n"
-	"  You can see the specific description of each setting\n"
-	"  if you hover over the setting to display its tooltip.\n\n"
-	"  Image Width, Image Height and Render Percentage are\n"
-	"  always updated from the current step model when\n"
-	"  this dialog is opened. These settings can be manually\n"
-	"  overridden. Also, when Crop Image is checked the\n"
-	"  cropped image width and height for the current step are\n"
-	"  calculated and used.\n\n"
-	"  Use the dialog window scroll bar to access the\n"
-	"  complete selection of add-on settings.\n");
+	"<p><b>Blender LDraw Add-on Settings</b></p><p>Configure Blender and its LDraw import and render add-ons. "
+	"Choose the Blender executable first. Editing its path or changing an import module can configure the add-on immediately.</p>"
+	"<p>Choose an import module, then adjust its library paths and rendering options. TN and MM have separate settings. "
+	"Use the scroll bar to reach all options; Show Paths and Hide Paths control the paths section.</p>"
+	"<p>Image dimensions and render percentage start with the values from the Render dialog. Crop Image calculates dimensions for the current model. "
+	"Choose Apply to save the paths and settings and close this dialog. Reset restores the last applied values or system defaults.</p>"
+	"<p>Cancel closes without applying pending path and setting edits. Add-on installation, module configuration, and the update-check preference can take effect before Apply.</p>");
 
 lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mBlenderPaths [NUM_PATHS];
 lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mDefaultPaths [NUM_PATHS] =
@@ -265,26 +233,29 @@ lcBlenderPreferencesDialog::lcBlenderPreferencesDialog(int Width, int Height, do
 	Layout->addWidget(Box);
 
 	mPreferences = new lcBlenderPreferences(Width,Height,Scale,Box);
+	setWhatsThis(Box->whatsThis());
 
 	QDialogButtonBox* ButtonBox;
 	ButtonBox = new QDialogButtonBox(this);
 	mApplyButton = new QPushButton(tr("Apply"), ButtonBox);
-	mApplyButton->setToolTip(tr("Apply add-on paths and settings preferences"));
+	mApplyButton->setToolTip(tr("Save the add-on paths and settings and close this dialog."));
 	mApplyButton->setEnabled(false);
 	ButtonBox->addButton(mApplyButton, QDialogButtonBox::ActionRole);
 	connect(mApplyButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::accept);
 
 	mPathsButton = new QPushButton(tr("Hide Paths"), ButtonBox);
-	mPathsButton->setToolTip(tr("Hide add-on path preferences dialog"));
+	mPathsButton->setToolTip(tr("Hide the add-on paths section."));
 	ButtonBox->addButton(mPathsButton,QDialogButtonBox::ActionRole);
 	connect(mPathsButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ShowPathsGroup);
 
 	mResetButton = new QPushButton(tr("Reset"), ButtonBox);
 	mResetButton->setEnabled(false);
-	mResetButton->setToolTip(tr("Reset add-on paths and settings preferences"));
+	mResetButton->setToolTip(tr("Restore the last applied paths and settings or the system defaults."));
 	ButtonBox->addButton(mResetButton,QDialogButtonBox::ActionRole);
 	connect(mResetButton, &QPushButton::clicked, this, &lcBlenderPreferencesDialog::ResetSettings);
 
+	ButtonBox->addButton(QDialogButtonBox::Help);
+	lcSetupDialogHelp(this, ButtonBox);
 	ButtonBox->addButton(QDialogButtonBox::Cancel);
 	connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcBlenderPreferencesDialog::reject);
 
@@ -325,9 +296,9 @@ bool lcBlenderPreferencesDialog::GetBlenderPreferences(int& Width, int& Height, 
 
 void lcBlenderPreferencesDialog::ShowPathsGroup()
 {
-	const QString Display = mPathsButton->text().startsWith("Hide") ? tr("Show") : tr("Hide");
-	mPathsButton->setText(tr("%1 Paths").arg(Display));
-	mPathsButton->setToolTip(tr("%1 add-on path preferences dialog").arg(Display));
+	const bool HidePaths = mPathsButton->text() == tr("Hide Paths");
+	mPathsButton->setText(HidePaths ? tr("Show Paths") : tr("Hide Paths"));
+	mPathsButton->setToolTip(HidePaths ? tr("Show the add-on paths section.") : tr("Hide the add-on paths section."));
 	mPreferences->ShowPathsGroup();
 }
 
@@ -339,7 +310,7 @@ void lcBlenderPreferencesDialog::EnableButton(bool Change)
 		mResetButton->setEnabled(true);
 	}
 	mPathsButton->setText(tr("Hide Paths"));
-	mPathsButton->setToolTip(tr("Hide add-on path preferences dialog"));
+	mPathsButton->setToolTip(tr("Hide the add-on paths section."));
 }
 
 void lcBlenderPreferencesDialog::ResetSettings()
@@ -381,13 +352,13 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	if (Parent)
 	{
 		Parent->setLayout(Layout);
-		Parent->setWhatsThis(QObject::tr(WhatsThisDescription).arg(QLatin1String(LC_PRODUCTNAME_STR)));
+		Parent->setWhatsThis(QObject::tr(WhatsThisDescription));
 	}
 	else
 	{
 		setWindowTitle(tr("Blender LDraw Add-on Settings"));
 		setLayout(Layout);
-		setWhatsThis(QObject::tr(WhatsThisDescription).arg(QLatin1String(LC_PRODUCTNAME_STR)));
+		setWhatsThis(QObject::tr(WhatsThisDescription));
 	}
 
 	mContent = new QWidget();
@@ -406,6 +377,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 
 	QGroupBox* BlenderExeBox = new QGroupBox(tr("Blender Executable"),mContent);
 	mForm->addRow(BlenderExeBox);
+	BlenderExeBox->setWhatsThis(tr("<p><b>Blender Executable</b></p><p>Choose the Blender executable. Finishing an edit to this path starts Blender configuration and may install or update the LDraw add-on. Configuration must complete before add-on paths and settings become available.</p>"));
 
 	mExeGridLayout = new QGridLayout(BlenderExeBox);
 	BlenderExeBox->setLayout(mExeGridLayout);
@@ -416,6 +388,10 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mBlenderVersionEdit = new QLineEdit(BlenderExeBox);
 	mBlenderVersionEdit->setPalette(ReadOnlyPalette);
 	mBlenderVersionEdit->setReadOnly(true);
+	mBlenderVersionEdit->setToolTip(tr("Installed Blender version reported during configuration."));
+	mBlenderVersionEdit->setAccessibleName(tr("Blender Version"));
+	mBlenderVersionLabel->setBuddy(mBlenderVersionEdit);
+	mBlenderVersionLabel->setToolTip(mBlenderVersionEdit->toolTip());
 	mExeGridLayout->addWidget(mBlenderVersionEdit,0,1,1,2);
 
 	QLabel* PathLabel = new QLabel(BlenderExeBox);
@@ -429,15 +405,18 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	QPushButton* PathBrowseButton = new QPushButton(tr("Browse..."), BlenderExeBox);
 	mExeGridLayout->addWidget(PathBrowseButton,1,2);
 	mPathBrowseButtonList << PathBrowseButton;
+	PathBrowseButton->setToolTip(tr("Locate the Blender executable."));
 	connect(PathBrowseButton, &QPushButton::clicked, this, &lcBlenderPreferences::BrowseBlender);
 
 	QGroupBox* BlenderAddonVersionBox = new QGroupBox(tr("%1 Blender LDraw Add-on").arg(LC_PRODUCTNAME_STR),mContent);
 	mForm->addRow(BlenderAddonVersionBox);
+	BlenderAddonVersionBox->setWhatsThis(tr("<p><b>Blender LDraw Add-on</b></p><p>Update downloads or reconfigures the LDraw add-on. Output opens the configuration log when available. The update-check preference takes effect as soon as you change it.</p>"));
 
 	mAddonGridLayout = new QGridLayout(BlenderAddonVersionBox);
 	BlenderAddonVersionBox->setLayout(mAddonGridLayout);
 
 	QCheckBox* AddonVersionCheck = new QCheckBox(tr("Prompt to download new add-on version when available"), BlenderAddonVersionBox);
+	AddonVersionCheck->setToolTip(tr("Check for add-on updates; this preference is saved immediately."));
 	AddonVersionCheck->setChecked(lcGetProfileInt(LC_PROFILE_BLENDER_ADDON_VERSION_CHECK));
 	QObject::connect(AddonVersionCheck, &QCheckBox::stateChanged, [](int State)
 	{
@@ -450,19 +429,22 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mAddonGridLayout->addWidget(mAddonVersionLabel,1,0);
 
 	mAddonVersionEdit = new QLineEdit(BlenderAddonVersionBox);
-	mAddonVersionEdit->setToolTip(tr("%1 Blender LDraw import and image renderer add-on").arg(LC_PRODUCTNAME_STR));
+	mAddonVersionEdit->setToolTip(tr("Installed %1 Blender LDraw import and render add-on version.").arg(LC_PRODUCTNAME_STR));
 	mAddonVersionEdit->setPalette(ReadOnlyPalette);
 	mAddonVersionEdit->setReadOnly(true);
+	mAddonVersionEdit->setAccessibleName(tr("Blender LDraw Add-on Version"));
+	mAddonVersionLabel->setBuddy(mAddonVersionEdit);
+	mAddonVersionLabel->setToolTip(mAddonVersionEdit->toolTip());
 	mAddonGridLayout->addWidget(mAddonVersionEdit,1,1);
 	mAddonGridLayout->setColumnStretch(1,1/*1 is greater than 0 (default)*/);
 
 	mAddonUpdateButton = new QPushButton(tr("Update"), BlenderAddonVersionBox);
-	mAddonUpdateButton->setToolTip(tr("Update %1 Blender LDraw add-on").arg(LC_PRODUCTNAME_STR));
+	mAddonUpdateButton->setToolTip(tr("Download or reconfigure the %1 Blender LDraw add-on.").arg(LC_PRODUCTNAME_STR));
 	mAddonGridLayout->addWidget(mAddonUpdateButton,1,2);
 	connect(mAddonUpdateButton, &QPushButton::clicked, this, &lcBlenderPreferences::UpdateBlenderAddon);
 
 	mAddonStdOutButton = new QPushButton(tr("Output..."), BlenderAddonVersionBox);
-	mAddonStdOutButton->setToolTip(tr("Open the standard output log"));
+	mAddonStdOutButton->setToolTip(tr("Open the standard output log."));
 	mAddonStdOutButton->setEnabled(false);
 	mAddonGridLayout->addWidget(mAddonStdOutButton,1,3);
 	connect(mAddonStdOutButton, &QPushButton::clicked, this, &lcBlenderPreferences::GetStandardOutput);
@@ -470,20 +452,21 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mModulesBox = new QGroupBox(tr("Enabled Add-on Modules"),mContent);
 	QHBoxLayout* ModulesLayout = new QHBoxLayout(mModulesBox);
 	mModulesBox->setLayout(ModulesLayout);
+	mModulesBox->setWhatsThis(tr("<p><b>Import and Render Modules</b></p><p>Choose TN or MM to select the LDraw importer and its options. Changing the importer configures Blender immediately. The image render module is managed automatically; an import module is required to import or render a model.</p>"));
 	mAddonGridLayout->addWidget(mModulesBox,2,0,1,4);
 
 	mImportActBox = new QCheckBox(tr("LDraw Import TN"),mModulesBox);
-	mImportActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender"));
+	mImportActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender."));
 	ModulesLayout->addWidget(mImportActBox);
 	connect(mImportActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mImportMMActBox = new QCheckBox(tr("LDraw Import MM"),mModulesBox);
-	mImportMMActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender"));
+	mImportMMActBox->setToolTip(tr("Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender."));
 	ModulesLayout->addWidget(mImportMMActBox);
 	connect(mImportMMActBox, &QCheckBox::clicked, this, &lcBlenderPreferences::EnableImportModule);
 
 	mRenderActBox = new QCheckBox(tr("%1 Image Render").arg(LC_PRODUCTNAME_STR), mModulesBox);
-	mRenderActBox->setToolTip(tr("Add-on image render module in Blender"));
+	mRenderActBox->setToolTip(tr("Add-on image render module in Blender."));
 	mRenderActBox->setEnabled(false);
 	ModulesLayout->addWidget(mRenderActBox);
 
@@ -497,6 +480,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 
 	PathLineEdit->setText(mBlenderPaths[CtlIdx].value);
 	PathLineEdit->setToolTip(mBlenderPaths[CtlIdx].tooltip);
+	SetupControlHelp(PathLabel, PathLineEdit);
 
 	if (mAddonVersion.isEmpty())
 	{
@@ -599,6 +583,14 @@ void lcBlenderPreferences::ClearGroupBox(QGroupBox* GroupBox)
 	delete GroupBoxIitem;
 }
 
+void lcBlenderPreferences::SetupControlHelp(QLabel* Label, QWidget* Control)
+{
+	Label->setBuddy(Control);
+	Control->setAccessibleName(Label->text());
+	Control->setWhatsThis(QString("<p><b>%1</b></p><p>%2</p>").arg(Label->text().toHtmlEscaped(), Control->toolTip().toHtmlEscaped()));
+	Label->setWhatsThis(Control->whatsThis());
+}
+
 void lcBlenderPreferences::InitPathsAndSettings()
 {
 	if (!NumSettings())
@@ -610,6 +602,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 	mPathsBox->setTitle(tr("LDraw Import TN Add-on Paths"));
 	mPathsGridLayout = new QGridLayout(mPathsBox);
 	mPathsBox->setLayout(mPathsGridLayout);
+	mPathsBox->setWhatsThis(tr("<p><b>Add-on Paths</b></p><p>Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.</p>"));
 	mForm->addRow(mPathsBox);
 
 	for (int CtlIdx = 1/*skip blender executable*/; CtlIdx < NumPaths(); ++CtlIdx)
@@ -625,6 +618,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 		PathLineEdit->setProperty("ControlID",QVariant(CtlIdx));
 		PathLineEdit->setText(mBlenderPaths[CtlIdx].value);
 		PathLineEdit->setToolTip(mBlenderPaths[CtlIdx].tooltip);
+		SetupControlHelp(PathLabel, PathLineEdit);
 		if (mPathLineEditList.size() > CtlIdx)
 			mPathLineEditList.replace(CtlIdx, PathLineEdit);
 		else
@@ -633,6 +627,8 @@ void lcBlenderPreferences::InitPathsAndSettings()
 		PathLineEdit->setVisible(IsVisible);
 
 		QPushButton* PathBrowseButton = new QPushButton(tr("Browse..."), mPathsBox);
+		PathBrowseButton->setToolTip(tr("Choose a file or folder for %1.").arg(PathLabel->text()));
+		PathBrowseButton->setWhatsThis(PathLineEdit->whatsThis());
 		if (mPathBrowseButtonList.size() > CtlIdx)
 			mPathBrowseButtonList.replace(CtlIdx, PathBrowseButton);
 		else
@@ -654,6 +650,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 	mSettingsBox = new QGroupBox(mContent);
 	mSettingsSubform = new QFormLayout(mSettingsBox);
 	mSettingsBox->setLayout(mSettingsSubform);
+	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.</p>"));
 	mForm->addRow(mSettingsBox);
 
 	mSettingsBox->setTitle(tr("LDraw Import TN Add-on Settings"));
@@ -677,6 +674,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			CheckBox->setProperty("ControlID",QVariant(LblIdx));
 			CheckBox->setChecked(mBlenderSettings[LblIdx].value.toInt());
 			CheckBox->setToolTip(mBlenderSettings[LblIdx].tooltip);
+			SetupControlHelp(Label, CheckBox);
 			if (LblIdx == LBL_CROP_IMAGE)
 				connect(CheckBox, &QCheckBox::toggled, this, &lcBlenderPreferences::SetModelSize);
 			else
@@ -712,6 +710,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettings[LblIdx].tooltip);
+			SetupControlHelp(Label, LineEdit);
 			mLineEditList << LineEdit;
 			if (LblIdx == LBL_DEFAULT_COLOUR)
 				SetDefaultColor(lcGetColorIndex(mBlenderSettings[LBL_DEFAULT_COLOUR].value.toInt()));
@@ -728,6 +727,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			for (int CtlIdx = 0; CtlIdx < ComboBox->count(); CtlIdx++)
 				ComboBox->setItemData(CtlIdx, DataList.at(CtlIdx));
 			ComboBox->setToolTip(mBlenderSettings[LblIdx].tooltip);
+			SetupControlHelp(Label, ComboBox);
 			int CurrentIndex = int(ComboBox->findData(QVariant::fromValue(Value)));
 			ComboBox->setCurrentIndex(CurrentIndex);
 			if (LblIdx == LBL_COLOUR_SCHEME)
@@ -759,6 +759,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 	mPathsBox->setTitle(tr("LDraw Import MM Add-on Paths"));
 	mPathsGridLayout = new QGridLayout(mPathsBox);
 	mPathsBox->setLayout(mPathsGridLayout);
+	mPathsBox->setWhatsThis(tr("<p><b>Add-on Paths</b></p><p>Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.</p>"));
 	mForm->addRow(mPathsBox);
 
 	for (int CtlIdx = 1/*skip blender executable*/; CtlIdx < NumPaths(); ++CtlIdx)
@@ -774,6 +775,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 		PathLineEdit->setProperty("ControlID",QVariant(CtlIdx));
 		PathLineEdit->setText(mBlenderPaths[CtlIdx].value);
 		PathLineEdit->setToolTip(mBlenderPaths[CtlIdx].tooltip);
+		SetupControlHelp(PathLabel, PathLineEdit);
 		if (mPathLineEditList.size() > CtlIdx)
 			mPathLineEditList.replace(CtlIdx, PathLineEdit);
 		else
@@ -782,6 +784,8 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 		PathLineEdit->setVisible(IsVisible);
 
 		QPushButton* PathBrowseButton = new QPushButton(tr("Browse..."), mPathsBox);
+		PathBrowseButton->setToolTip(tr("Choose a file or folder for %1.").arg(PathLabel->text()));
+		PathBrowseButton->setWhatsThis(PathLineEdit->whatsThis());
 		if (mPathBrowseButtonList.size() > CtlIdx)
 			mPathBrowseButtonList.replace(CtlIdx, PathBrowseButton);
 		else
@@ -803,6 +807,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 	mSettingsBox = new QGroupBox(mContent);
 	mSettingsSubform = new QFormLayout(mSettingsBox);
 	mSettingsBox->setLayout(mSettingsSubform);
+	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.</p>"));
 	mForm->addRow(mSettingsBox);
 
 	mSettingsBox->setTitle(tr("LDraw Import MM Add-on Settings"));
@@ -826,6 +831,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			CheckBox->setProperty("ControlID",QVariant(LblIdx));
 			CheckBox->setChecked(mBlenderSettingsMM[LblIdx].value.toInt());
 			CheckBox->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
+			SetupControlHelp(Label, CheckBox);
 			if (LblIdx == LBL_CROP_IMAGE_MM)
 				connect(CheckBox, &QCheckBox::toggled, this, &lcBlenderPreferences::SetModelSize);
 			else
@@ -858,6 +864,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
+			SetupControlHelp(Label, LineEdit);
 			mLineEditList << LineEdit;
 			mSettingsSubform->addRow(Label,LineEdit);
 		}
@@ -872,6 +879,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			for (int CtlIdx = 0; CtlIdx < ComboBox->count(); CtlIdx++)
 				ComboBox->setItemData(CtlIdx, DataList.at(CtlIdx));
 			ComboBox->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
+			SetupControlHelp(Label, ComboBox);
 			int CurrentIndex = int(ComboBox->findData(QVariant::fromValue(Value)));
 			ComboBox->setCurrentIndex(CurrentIndex);
 			if (LblIdx == LBL_COLOUR_SCHEME_MM)
@@ -1178,7 +1186,6 @@ void lcBlenderPreferences::ConfigureBlenderAddon(bool TestBlender, bool AddonUpd
 					mBlenderVersionLabel->setText(tr("Blender"));
 					mBlenderVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(QApplication::palette().text().color().name()));
 					mBlenderVersionEdit->setText(mBlenderVersion);
-					mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render add-on version").arg(LC_PRODUCTNAME_STR));
 					mBlenderVersionEdit->setVisible(mConfigured);
 					if (!mAddonVersion.isEmpty())
 					{
@@ -1712,7 +1719,6 @@ void lcBlenderPreferences::ShowResult()
 		mBlenderVersionLabel->setText(tr("Blender"));
 		mBlenderVersionLabel->setStyleSheet(TextColour);
 		mBlenderVersionEdit->setText(mBlenderVersion);
-		mBlenderVersionEdit->setToolTip(tr("Display the Blender and %1 Render add-on version").arg(LC_PRODUCTNAME_STR));
 		mBlenderVersionEdit->setVisible(mConfigured);
 		mPathsBox->setEnabled(mConfigured);
 		mSettingsBox->setEnabled(mConfigured);

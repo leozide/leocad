@@ -3449,13 +3449,13 @@ Formát souboru není rozpoznán.</translation>
         <translation type="obsolete">Chyba</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3564"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3570"/>
         <source>Existing file &apos;%1&apos; detected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Byl zjištěn existující soubor '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3565"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3571"/>
         <source>&apos;%1&apos;&lt;br&gt;This file already exists.&lt;br&gt;Replace existing file?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">'%1'&lt;br&gt;Tento soubor již existuje.&lt;br&gt;Nahradit stávající soubor?</translation>
@@ -3473,7 +3473,6 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Nelze otevřít soubor &apos;%1&apos; pro zápis.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="48"/>
         <source>  Blender LDraw Add-on Settings
 
   You can configure the Blender LDraw add-on settings.
@@ -3521,7 +3520,7 @@ Formát souboru není rozpoznán.</translation>
   complete selection of add-on settings.
 </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">  Blender LDraw Nastavení doplňků
+        <translation type="obsolete">  Blender LDraw Nastavení doplňků
 
   Můžete nakonfigurovat nastavení doplňku Blender LDraw.
   - Blender Spustitelný soubor: nastavte cestu Blender. při vstupu,
@@ -3569,1195 +3568,1200 @@ Formát souboru není rozpoznán.</translation>
 </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="83"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
         <source>%1 can specify camera definitions within the LDraw data. Choose to load them or ignore them.</source>
         <oldsource>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 může specifikovat definice kamer v datech ldraw. Zvolte je načíst nebo ignorovat.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="182"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="84"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="150"/>
         <source>%1 can specify point and sunlight definitions within the LDraw data. Choose to load them or ignore them.</source>
         <oldsource>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 může specifikovat definice bodu a slunečního světla v datech ldraw. Zvolte je načíst nebo ignorovat.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="108"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="170"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="76"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="138"/>
         <source>Add Environment</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidat prostředí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="109"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="77"/>
         <source>Add Piece Gap</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidejte mezeru mezi dílky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="109"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="77"/>
         <source>Add a small space between each piece</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mezi každý dílek přidejte malou mezeru</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="128"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="211"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="96"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="179"/>
         <source>Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidejte libovolné archivní (zip) knihovny v cestě k souboru LDraw do seznamu vyhledávání knihoven – ovlivňuje výkon</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="110"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="78"/>
         <source>Adds a Bevel modifier for rounding off sharp edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidá modifikátor zkosení pro zaoblení ostrých hran</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="170"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="138"/>
         <source>Adds a ground plane and environment texture</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidá základní rovinu a texturu prostředí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="108"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="76"/>
         <source>Adds a ground plane and environment texture (affects &apos;Photo-realistic&apos; look only)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidá základní rovinu a texturu prostředí (ovlivňuje pouze „fotorealistický“ vzhled)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="191"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
         <source>Adds a keyframe that shows the piece at the moment in the timeline</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidá klíčový snímek, který na časové ose zobrazuje daný moment</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="139"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="107"/>
         <source>Amount of space between each piece (default 0.2mm)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Velikost mezery mezi každým dílkem (výchozí 0,2 mm)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="231"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="199"/>
         <source>Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for piece editing</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použít měřítko importu na síť – doporučeno pro vykreslování, Použít měřítko importu na objekt – doporučeno pro úpravy dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="185"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="153"/>
         <source>BFC</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">BFC</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="110"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="78"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="139"/>
         <source>Bevel Edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zkosené hrany</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="215"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="183"/>
         <source>Bevel Segments</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úkosové segmenty</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="216"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
         <source>Bevel Weight</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zkosená hmotnost</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="136"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="217"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="104"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="185"/>
         <source>Bevel Width</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Šířka zkosení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="139"/>
         <source>Bevel edges. Can cause some pieces to render incorrectly.</source>
         <oldsource>Bevel edges. Can cause some pieces to render incorrectly</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zkosené hrany. Může způsobit nesprávné vykreslení některých dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="215"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="183"/>
         <source>Bevel segments</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úkosové segmenty</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="216"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
         <source>Bevel weight</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zkosená hmotnost</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="93"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="61"/>
         <source>Blender Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Cesta</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="94"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="62"/>
         <source>Blendfile Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cesta k Blendfile</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="186"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="154"/>
         <source>CLEAR Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz CLEAR</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="137"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="218"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="105"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="186"/>
         <source>Camera Border Percent</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Procento ohraničení fotoaparátu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="174"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="142"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="144"/>
         <source>Case-sensitive Filesystem</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Souborový systém rozlišující malá a velká písmena</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="129"/>
         <source>Centered at Origin on Ground|Centered at Origin</source>
         <oldsource>Centered At Origin On Ground|Centered At Origin</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Centered At Origin On Ground|Centered At Origin</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="228"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="196"/>
         <source>Chosen Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zvolené logo</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="145"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="229"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="113"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
         <source>Color Scheme</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Barevné schéma</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="145"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="229"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="113"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
         <source>Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Možnosti barevného schématu – realistické (lgeo), původní (LDConfig), alternativní (LDCfgalt), vlastní (definované uživatelem)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="192"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
         <source>Create collection for individual steps</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vytvořte kolekci pro jednotlivé kroky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="117"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="85"/>
         <source>Creates a Blender Object for each and every stud (WARNING: can be slow to import and edit in Blender if there are lots of studs)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vytvoří objekt Blender pro každý čep (VAROVÁNÍ: import a úprava v Blender může být pomalá, pokud je tam hodně čepů)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="112"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="80"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
         <source>Crop Image</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Oříznout obrázek</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="112"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="80"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
         <source>Crop the image border at opaque content. Requires transparent background set to True.</source>
         <oldsource>Crop the image border at opaque content. Requires transparent background set to True</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ořízněte ohraničení obrázku u neprůhledného obsahu. Vyžaduje průhledné pozadí nastavené na hodnotu True</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="113"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="81"/>
         <source>Curved Walls</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zakřivené stěny</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="96"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="64"/>
         <source>Custom LDConfig Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vlastní cesta LDConfig</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="138"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="106"/>
         <source>Default Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výchozí barva</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="179"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="147"/>
         <source>Display Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zobrazit logo</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="127"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="203"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="95"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
         <source>Display Render Window</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zobrazit okno vykreslení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="179"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="147"/>
         <source>Display the logo on the stud</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zobrazte logo na čepu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="194"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="162"/>
         <source>Don&apos;t import studs</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Neimportujte hřebíky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="121"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="89"/>
         <source>Each object has a five-digit prefix, e.g., 00001_car. This keeps the list in its proper order.</source>
         <oldsource>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Každý objekt má pětimístnou předponu, např. 00001_auto. To udržuje seznam ve správném pořadí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="95"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="63"/>
         <source>Environment Texture Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cesta textury prostředí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="144"/>
         <source>Filesystem case sensitivity defaults to false on Windows and macOS. Set to true if the LDraw path is case-sensitive on a case-insensitive filesystem.</source>
         <oldsource>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výchozí nastavení souborového systému rozlišuje malá a velká písmena na falešné Windows a MacOS. Nastavte true, pokud je cesta LDraw nastavena na malá a velká písmena v souborovém systému bez ohledu na velikost písmen.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="174"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="142"/>
         <source>Filesystem is case sensitive. Defaults to true on Linux.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Souborový systém rozlišuje velká a malá písmena. V systému Linux je výchozí hodnota true.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="114"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="82"/>
         <source>Flatten Hierarchy</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zploštění hierarchie</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="114"/>
         <source>Flex Pieces Source</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zdroj Flex Pieces</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="226"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="194"/>
         <source>Frame to add the first STEP meta command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rámeček pro přidání prvního meta příkazu STEP</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="219"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="187"/>
         <source>Frames per Step</source>
         <oldsource>Frames Per Step</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Počet snímků za krok</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="219"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="187"/>
         <source>Frames per step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Snímky na krok</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="98"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="66"/>
         <source>Full directory path to LSynth primitives - specify if not using default bundled in add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k adresáři k primitivům LSynth – určete, zda nepoužíváte výchozí balíček v doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="99"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="67"/>
         <source>Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial pieces not used or not using default bundled in add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k adresáři k primitivům loga hřebíků – pokud je povoleno logo hřebu, určete, zda se neoficiální dílky nepoužívají nebo nepoužívají výchozí přibalené v doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="97"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="65"/>
         <source>Full directory path to the LDraw pieces library (download from https://library.ldraw.org)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k adresáři ke knihovně dílků LDraw (stáhnout z https://library.ldraw.org)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="95"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="63"/>
         <source>Full file path to .exr environment texture file - specify if not using default bundled in add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k souboru textury prostředí .exr – určete, zda nepoužíváte výchozí přibalený doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="93"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="61"/>
         <source>Full file path to Blender application executable</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta ke spustitelnému souboru aplikace Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="94"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="62"/>
         <source>Full file path to a supplement .blend file - specify to append additional settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta souboru k doplňkovému souboru .blend – zadejte, chcete-li přidat další nastavení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="96"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="64"/>
         <source>Full file path to custom LDConfig file - specify if not %1 alternate LDConfig file</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k vlastnímu souboru LDConfig – uveďte, pokud ne, %1 alternativní soubor LDConfig</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="101"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="69"/>
         <source>Full file path to the Stud.io LDraw Custom Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k souboru Stud.io LDraw Custom Pieces</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="100"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="68"/>
         <source>Full file path to the Stud.io LDraw Pieces Library (download from https://www.bricklink.com/v3/studio/download.page)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Úplná cesta k souboru do Stud.io LDraw Pieces Library (stáhnout z https://www.bricklink.com/v3/studio/download.page)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="187"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="155"/>
         <source>GROUP Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz GROUP</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="220"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="188"/>
         <source>Gap Scale</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Měřítko mezery</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="139"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="107"/>
         <source>Gap Width</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Šířka mezery</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="186"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="154"/>
         <source>Hides all pieces in the timeline up to where this command is encountered</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Skryje všechny části na časové ose až do místa, kde se setkáte s tímto příkazem</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="231"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="199"/>
         <source>How to Scale Pieces</source>
         <oldsource>How To Scale Pieces</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jak škálovat dílky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="119"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="87"/>
         <source>Identical pieces (of the same type and color) share the same mesh</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Identické dílky (stejného typu a barvy) sdílejí stejnou síť</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="141"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="225"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="109"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="193"/>
         <source>Image Height</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výška obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="142"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="110"/>
         <source>Image Scale</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Měřítko obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="140"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="224"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="108"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="192"/>
         <source>Image Width</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Šířka obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="83"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
         <source>Import Cameras</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Importovat kamery</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="181"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="149"/>
         <source>Import Edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Importovat hrany</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="181"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="149"/>
         <source>Import LDraw edges as edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Importujte hrany LDraw jako hrany</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="182"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="84"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="150"/>
         <source>Import Lights</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Import světel</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="221"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="189"/>
         <source>Import Scale</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Měřítko importu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="114"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="82"/>
         <source>In Scene Outline, all pieces are placed directly below the root - there&apos;s no tree of submodels</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ve Scene Outline jsou všechny díly umístěny přímo pod kořenem – není zde žádný strom podmodelů</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="117"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="85"/>
         <source>Instance Studs</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Instance Studs</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="183"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="86"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
         <source>Keep Aspect Ratio</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zachovat poměr stran</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="97"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="65"/>
         <source>LDraw Directory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Adresář LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="98"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="66"/>
         <source>LSynth Directory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Adresář LSynth</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="158"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="126"/>
         <source>LSynth|LDCad|LDCad and LSynth</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LSynth|LDCad|LDCad a LSynth</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="119"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="87"/>
         <source>Link Like Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Link Like Pieces</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="147"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
         <source>Logo Version</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Verze loga</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
         <source>Look</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Podívejte</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="240"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="208"/>
         <source>Low Resolution Primitives|Standard Primitives|High Resolution Primitives</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Primitives s nízkým rozlišením|Standard Primitives|Primitives s vysokým rozlišením</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="183"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="86"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
         <source>Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Při změně velikosti výstupního obrázku zachovejte poměr stran – tento atribut se nepředává do Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="152"/>
         <source>Make Gaps</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Dělejte mezery</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="152"/>
         <source>Make small gaps between bricks. A small gap is more realistic.</source>
         <oldsource>Make small gaps between bricks. A small gap is more realistic</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mezi cihlami vytvořte malé mezery. Malá mezera je realističtější</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="113"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="81"/>
         <source>Makes surfaces look slightly concave, for interesting reflections</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Dodává povrchům mírně konkávní vzhled pro zajímavé odrazy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="222"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="190"/>
         <source>Maximum distance between elements to merge</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Maximální vzdálenost mezi prvky ke sloučení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="222"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="190"/>
         <source>Merge Distance</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sloučit vzdálenost</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="202"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="170"/>
         <source>Merge vertices that are within a certain distance.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sloučit vrcholy, které jsou v určité vzdálenosti.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="126"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="202"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="94"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="170"/>
         <source>No Duplicate Vertices</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Žádné duplicitní vrcholy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="194"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="162"/>
         <source>No Studs</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Žádné hřeby</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="188"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="190"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="156"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="158"/>
         <source>Not implemented</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Neimplementováno</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="121"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="89"/>
         <source>Number Objects</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Počet objektů</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="134"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="213"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="102"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="181"/>
         <source>Output all messages while working, else only show warnings and errors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Při práci vypisujte všechny zprávy, jinak zobrazujte pouze varování a chyby</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="122"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="195"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="90"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
         <source>Overwrite Image</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepsat obrázek</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="123"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="91"/>
         <source>Overwrite existing material with the same name</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepište existující materiál stejným názvem</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="92"/>
         <source>Overwrite existing mesh with the same name</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepsat existující síť stejným názvem</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="188"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="156"/>
         <source>PAUSE Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz PAUSE</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="189"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="157"/>
         <source>PRINT/WRITE Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz PRINT/WRITE</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="120"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="88"/>
         <source>Parent Minifigs</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rodičovské minifigy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="165"/>
         <source>Parent to Empty</source>
         <oldsource>Parent To Empty</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rodič do prázdné</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="165"/>
         <source>Parent the model to an empty</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nadřazený model jako prázdný</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="128"/>
         <source>Photorealistic|LEGO Instructions</source>
         <oldsource>Photo Realistic|Lego Instructions</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Photo Realistic|Lego Návod</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
         <source>Photorealistic or schematic instruction look</source>
         <oldsource>Photo-realistic or Schematic &apos;Instruction&apos; look</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fotorealistický nebo schematický vzhled „Instrukce“.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="120"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="88"/>
         <source>Pieces of minifigs are automatically parented to each other in a hierarchy</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Kusy minifigů jsou automaticky přiřazeny k sobě v hierarchii</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="125"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="196"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="93"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="164"/>
         <source>Position Camera</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Umístění kamery</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="149"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="117"/>
         <source>Position Object</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Umístění objektu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="125"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="196"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="93"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="164"/>
         <source>Position the camera to show the whole model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Umístěte kameru tak, aby se zobrazil celý model</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="198"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="166"/>
         <source>Prefer Stud.io Library</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Preferujte knihovnu Stud.io</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="199"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="167"/>
         <source>Prefer Unofficial Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Preferujte neoficiální kousky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="189"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="157"/>
         <source>Prints PRINT/WRITE META commands to the system console.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vytiskne příkazy PRINT/WRITE META do systémové konzoly.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="187"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="155"/>
         <source>Process GROUP meta commands</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zpracujte meta příkazy GROUP</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="185"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="153"/>
         <source>Process LDraw Back Face Culling meta commands</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zpracujte meta příkazy LDraw Back Face Culling</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="193"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
         <source>Process TEXMAP and DATA meta commands</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zpracujte TEXMAP a meta příkazy DATA</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="200"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="168"/>
         <source>Profile</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Profil</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="200"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="168"/>
         <source>Profile import performance</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výkon importu profilu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="238"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="206"/>
         <source>Raised flattened logo geometry (3)|Raised rounded logo geometry (4)|Subtle rounded logo geometry (5)</source>
         <oldsource>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyvýšená zploštělá geometrie loga(3)|Vyvýšená zaoblená geometrie loga(4)|Jemná zaoblená geometrie loga(5)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="157"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="239"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="125"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="207"/>
         <source>Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Realistické barvy|Originální LDraw Barvy|Alternativní LDraw Barvy|Vlastní barvy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="169"/>
         <source>Recalculate Normals</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepočítat normály</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
         <source>Recalculate Normals|Two Faces Back to Back</source>
         <oldsource>Recalculate Normals|Two Faces Back To Back</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepočítat Normals|Two Faces Back To Back</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="169"/>
         <source>Recalculate normals. Not recommended if BFC processing is active.</source>
         <oldsource>Recalculate normals. Not recommended if BFC processing is active</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přepočítejte normály. Nedoporučuje se, pokud je aktivní zpracování BFC</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="126"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="94"/>
         <source>Remove duplicate vertices (recommended)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Odstranit duplicitní vrcholy (doporučeno)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="212"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
         <source>Render LDraw edges using freestyle</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vykreslete hrany LDraw pomocí volného stylu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="143"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="223"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="111"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="191"/>
         <source>Render Percentage</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Procento vykreslení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="150"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="230"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="48"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure Blender and its LDraw import and render add-ons. Choose the Blender executable first. Editing its path or changing an import module can configure the add-on immediately.&lt;/p&gt;&lt;p&gt;Choose an import module, then adjust its library paths and rendering options. TN and MM have separate settings. Use the scroll bar to reach all options; Show Paths and Hide Paths control the paths section.&lt;/p&gt;&lt;p&gt;Image dimensions and render percentage start with the values from the Render dialog. Crop Image calculates dimensions for the current model. Choose Apply to save the paths and settings and close this dialog. Reset restores the last applied values or system defaults.&lt;/p&gt;&lt;p&gt;Cancel closes without applying pending path and setting edits. Add-on installation, module configuration, and the update-check preference can take effect before Apply.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="198"/>
         <source>Resolution</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rezoluce</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="150"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="230"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="198"/>
         <source>Resolution of piece primitives, i.e., how much geometry they have</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rozlišení kusových primitiv, tj. jak velkou geometrii mají</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="119"/>
         <source>Resolve Normals</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyřešit normály</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="127"/>
         <source>Rounded (4)|Flattened (3)|Subtle Rounded (5)</source>
         <oldsource>Rounded(4)|Flattened(3)|Subtle Rounded(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zaoblený(4)|Zploštělý(3)|Subtle Zaoblený(5)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="190"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="158"/>
         <source>SAVE Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz SAVE</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="191"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
         <source>STEP Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Příkaz STEP</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="192"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
         <source>STEP Groups</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Skupiny STEP</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="241"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
         <source>Scale Mesh|Scale Object</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Měřítko Mesh|Scale Object</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="220"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="188"/>
         <source>Scale individual pieces by this much to create the gap</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Změřte jednotlivé dílky o tolik, abyste vytvořili mezeru</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="129"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="204"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="97"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="172"/>
         <source>Search Additional Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Hledat další cesty</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="198"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="166"/>
         <source>Search for pieces in Stud.io library first</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nejprve vyhledejte dílky v knihovně Stud.io</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="199"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="167"/>
         <source>Search for unofficial pieces first</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nejprve hledejte neoficiální kousky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="205"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="173"/>
         <source>Set Step End Frame</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastavte krokový koncový rám</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="206"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="174"/>
         <source>Set Timeline Markers</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastavte značky časové osy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="205"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="173"/>
         <source>Set the end frame to the last step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastavte koncový rám na poslední krok</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="206"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="174"/>
         <source>Set timeline markers for meta commands</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastavte značky časové osy pro meta příkazy</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="142"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="110"/>
         <source>Sets a scale for the model (1.0 = real life scale)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastaví měřítko modelu (1,0 = skutečné měřítko)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="138"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="106"/>
         <source>Sets the default piece color using LDraw color code</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastaví výchozí barvu dílku pomocí kódu barvy LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="141"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="225"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="109"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="193"/>
         <source>Sets the rendered image height in pixels - from current step image, label shows config setting.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastaví výšku vykresleného obrázku v pixelech - z aktuálního kroku obrázku, popisek ukazuje nastavení konfigurace.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="143"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="223"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="111"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="191"/>
         <source>Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastaví procentuální měřítko vykresleného obrázku pro jeho pixelové rozlišení – aktualizováno z aktuálního kroku, popisek zobrazuje nastavení konfigurace.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="140"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="224"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="108"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="192"/>
         <source>Sets the rendered image width in pixels - from current step image, label shows config setting.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastaví šířku vykresleného obrázku v pixelech - z aktuálního kroku obrázku, popisek ukazuje nastavení konfigurace.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="207"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="175"/>
         <source>Shade Smooth</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Odstín hladký</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="133"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="101"/>
         <source>Shows the LEGO logo on each stud (at the expense of some extra geometry and import time)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zobrazuje logo LEGO na každém čepu (na úkor určité geometrie navíc a času importu)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="130"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="98"/>
         <source>Smooth Shading</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Hladké stínování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="232"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="200"/>
         <source>Smooth Type</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Hladký typ</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="130"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="98"/>
         <source>Smooth faces and add an edge-split modifier (recommended)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyhladit plochy a přidat modifikátor dělení hran (doporučeno)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="242"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="210"/>
         <source>Smooth piece faces with edge split modifier|Auto-smooth piece faces|Split during initial mesh processing</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Hladké plochy dílků s modifikátorem rozdělení hran|Automaticky hladké plochy dílků|Rozdělení během počátečního zpracování sítě</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="119"/>
         <source>Some older LDraw pieces have faces with ambiguous normals. This specifies what to do with them.</source>
         <oldsource>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Některé starší dílky LDraw mají obličeje s nejednoznačnými normálami, což určuje, co s nimi dělat</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="114"/>
         <source>Source used to create flexible pieces - string, hoses, etc. (LDCad, LSynth, or both)</source>
         <oldsource>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zdroj používaný k vytvoření pružných dílků - provázek, hadic atd. (LDCad, LSynth nebo obojí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="127"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="203"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="95"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
         <source>Specify whether to display the render window during Blender user interface image file render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se má zobrazit okno vykreslení během vykreslování souboru obrázku uživatelského rozhraní Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="122"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="195"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="90"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
         <source>Specify whether to overwrite an existing rendered image file</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se má přepsat existující soubor rendrovaného obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="208"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
         <source>Specify whether to render a background</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se má vykreslit pozadí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="99"/>
         <source>Specify whether to render a background (affects the photorealistic look only)</source>
         <oldsource>Specify whether to render a background (affects &apos;Photo-realistic look only)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se má vykreslit pozadí (ovlivňuje pouze „fotorealistický vzhled“)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="129"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="204"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="97"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="172"/>
         <source>Specify whether to search additional LDraw paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se mají hledat další cesty LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="111"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="172"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="79"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="140"/>
         <source>Specify whether to treat the .blend file as being loaded from a trusted source</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda má být soubor .blend považován za načtený z důvěryhodného zdroje</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="132"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="100"/>
         <source>Specify whether to use pieces from the LDraw unofficial pieces library path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Určete, zda se mají použít dílky z neoficiální cesty knihovny dílků LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="177"/>
         <source>Split shortcut pieces into their constituent pieces as if they were models</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rozdělte zkratky na jednotlivé části, jako by to byly modely</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="162"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="130"/>
         <source>Standard Primitives|High Resolution Primitives|Low Resolution Primitives</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Standardní primitiva|Primitiva s vysokým rozlišením|Primitiva s nízkým rozlišením</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="226"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="194"/>
         <source>Starting Step Frame</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Počáteční krokový rám</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="99"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="67"/>
         <source>Stud Logo Directory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Adresář loga hřebíků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="101"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="69"/>
         <source>Stud.io Custom Pieces Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cesta vlastních dílků Stud.io</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="100"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="68"/>
         <source>Stud.io LDraw Path</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cesta Stud.io LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="193"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
         <source>TEXMAP and DATA Command</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">TEXMAP a příkaz DATA</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="149"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="117"/>
         <source>The object is centered at the origin, and on the ground plane</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Objekt je vystředěn v počátku a na základní rovině</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="208"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="99"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
         <source>Transparent Background</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Průhledné Pozadí</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="177"/>
         <source>Treat Shortcuts as Models</source>
         <oldsource>Treat Shortcuts As Models</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Považujte zástupce za modely</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="210"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
         <source>Triangulate Faces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Triangulovat tváře</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="210"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
         <source>Triangulate all faces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Triangulujte všechny tváře</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="111"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="172"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="79"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="140"/>
         <source>Trusted Blend File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Trusted Blend File</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="128"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="211"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="96"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="179"/>
         <source>Use Archive Libraries</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použijte archivní knihovny</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="123"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="91"/>
         <source>Use Existing Material</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použít existující materiál</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="92"/>
         <source>Use Existing Mesh</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použít existující síť</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="212"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
         <source>Use Freestyle Edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použijte Freestyle Edge</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="133"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="101"/>
         <source>Use Logo Studs</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použijte Log Studs</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="132"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="100"/>
         <source>Use Unofficial Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použijte neoficiální kousky</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="232"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="200"/>
         <source>Use either autosmooth or an edge split modifier to smooth piece faces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">K vyhlazení ploch dílu použijte buď automatické vyhlazení nebo modifikátor rozdělení hran</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="207"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="175"/>
         <source>Use flat or smooth shading for piece faces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pro tváře dílků použijte ploché nebo hladké stínování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="134"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="213"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="102"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="181"/>
         <source>Verbose Output</source>
         <oldsource>Verbose output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Podrobný výstup</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="221"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="189"/>
         <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport.</source>
         <oldsource>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">V jakém měřítku importovat. Plné měřítko je 1,0 a je tak velké, že je ve výřezu nepraktické</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="218"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="186"/>
         <source>When positioning the camera, include a (percentage) border around the model in the render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Při umisťování kamery zahrňte do vykreslení (procentuální) ohraničení kolem modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="137"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="105"/>
         <source>When positioning the camera, include a (percentage) border leeway around the model in the rendered image</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Při umisťování kamery zahrňte (procentuální) okraj kolem modelu ve vykresleném obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="228"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="196"/>
         <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness.</source>
         <oldsource>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jaké logo zobrazit. logo a logo2 nejsou použity a jsou uvedeny pouze pro úplnost</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="147"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
         <source>Which version of the logo to use (&apos;3&apos; (flat), &apos;4&apos; (rounded) or &apos;5&apos; (subtle rounded))</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jakou verzi loga použít („3“ (ploché), „4“ (zaoblené) nebo „5“ (jemně zaoblené))</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="136"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="217"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="104"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="185"/>
         <source>Width of the beveled edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Šířka zkosených hran</translation>
@@ -7086,152 +7090,189 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 <context>
     <name>lcBlenderPreferences</name>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="388"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="359"/>
         <source>Blender LDraw Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender LDraw Nastavení doplňků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="407"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="378"/>
         <source>Blender Executable</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Spustitelný soubor</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="429"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="635"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="784"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="380"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender Executable&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the Blender executable. Finishing an edit to this path starts Blender configuration and may install or update the LDraw add-on. Configuration must complete before add-on paths and settings become available.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="391"/>
+        <source>Installed Blender version reported during configuration.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="392"/>
+        <source>Blender Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="405"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="629"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="786"/>
         <source>Browse...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Prohlížet...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="408"/>
+        <source>Locate the Blender executable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="411"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="440"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="413"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Update downloads or reconfigures the LDraw add-on. Output opens the configuration log when available. The update-check preference takes effect as soon as you change it.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="418"/>
         <source>Prompt to download new add-on version when available</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyzvat ke stažení nové verze doplňku, je-li k dispozici</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="453"/>
         <source>%1 Blender LDraw import and image renderer add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender LDraw doplněk pro import a vykreslování obrázků</translation>
+        <translation type="obsolete">%1 Blender LDraw doplněk pro import a vykreslování obrázků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="459"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="441"/>
         <source>Update</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Aktualizovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="460"/>
         <source>Update %1 Blender LDraw add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Aktualizovat doplněk %1 Blender LDraw</translation>
+        <translation type="obsolete">Aktualizovat doplněk %1 Blender LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="464"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="446"/>
         <source>Output...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výstup...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="465"/>
         <source>Open the standard output log</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Otevřete protokol standardního výstupu</translation>
+        <translation type="obsolete">Otevřete protokol standardního výstupu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="470"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="452"/>
         <source>Enabled Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Povolené přídavné moduly</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="475"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="458"/>
         <source>LDraw Import TN</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Import TN</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="476"/>
         <source>Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Povolit doplňkový modul importu (upraveno z LDraw Import od Toby Nelsona) v Blender</translation>
+        <translation type="obsolete">Povolit doplňkový modul importu (upraveno z LDraw Import od Toby Nelsona) v Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="480"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="463"/>
         <source>LDraw Import MM</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Import MM</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="481"/>
         <source>Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Povolit doplňkový modul importu (upraveno z LDraw Import od Matthew Morrisona) v Blender</translation>
+        <translation type="obsolete">Povolit doplňkový modul importu (upraveno z LDraw Import od Matthew Morrisona) v Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="485"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="468"/>
         <source>%1 Image Render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Vykreslení obrázku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="486"/>
         <source>Add-on image render module in Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Přídavný modul vykreslování obrázků v Blender</translation>
+        <translation type="obsolete">Přídavný modul vykreslování obrázků v Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="516"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1178"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1635"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1712"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="500"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1186"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1642"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1719"/>
         <source>Blender</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="516"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1192"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1722"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="500"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1199"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1728"/>
         <source>Blender Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="530"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="514"/>
         <source>Blender not configured.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender není nakonfigurováno.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="542"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="526"/>
         <source>Add-on not configured - Update.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Doplněk není nakonfigurován - Aktualizace.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="544"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="528"/>
         <source>Add-on not configured.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Doplněk není nakonfigurován.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="602"/>
         <source>LDraw Import TN Add-on Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importujte cesty doplňku TN</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="659"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="605"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="762"/>
+        <source>&lt;p&gt;&lt;b&gt;Add-on Paths&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="630"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="787"/>
+        <source>Choose a file or folder for %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="653"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="810"/>
+        <source>&lt;p&gt;&lt;b&gt;Import and Render Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the selected importer&apos;s geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="656"/>
         <source>LDraw Import TN Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Import nastavení doplňku TN</translation>
@@ -7243,25 +7284,25 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">LDraw Importujte cesty doplňku MM</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="808"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="813"/>
         <source>LDraw Import MM Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Import nastavení doplňku MM</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="969"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="977"/>
         <source>add-on install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">instalace doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="981"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="989"/>
         <source>test</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">test</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1004"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1012"/>
         <source>Cannot start Blender %1 process.
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7269,7 +7310,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1013"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1021"/>
         <source>Failed to execute Blender %1.
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7277,28 +7318,28 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1030"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1038"/>
         <source>A simple check to test if the selected file is Blender failed. Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer. The ticket should contain the full path to the Blender executable.</source>
         <oldsource>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jednoduchá kontrola pro otestování, zda je vybraný soubor Blender se nezdařila. Pokud jste si jisti, že se jedná o soubor Blender 2.8 nebo novější, vytvořte prosím %1 lístek GitHub. Lístek by měl obsahovat úplnou cestu ke spustitelnému souboru Blenderu.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1052"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1060"/>
         <source>Blender %1 process completed. Version: %2 validated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender %1 proces dokončen. Verze: %2 ověřena.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1073"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1206"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1081"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1213"/>
         <source>Installing...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Instalace...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1109"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1304"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1117"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1311"/>
         <source>Error writing to file &apos;%1&apos;:
 %2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7306,33 +7347,33 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 %2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1123"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1133"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1131"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
         <source>Blender test failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Test Blender se nezdařil.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2030"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2036"/>
         <source>Save Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Uložit výstup doplňku Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2041"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2047"/>
         <source>Cancel Blender Add-on Installation</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Zrušit instalaci doplňku Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3121"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3127"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3183"/>
         <source>Apply Render Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Použít nastavení vykreslování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3159"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3165"/>
         <source>Set LDraw Color Scheme</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Nastavit barevné schéma LDraw</translation>
@@ -7343,118 +7384,161 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">%1 Blender LDraw přídavné moduly</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1142"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1150"/>
         <source>No import module enabled. If you continue, the default import module (Import TN) will be used.&lt;br&gt;If you select No, all add-on modules will be disabled.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Není povolen žádný modul importu. Pokud budete pokračovat, použije se výchozí modul importu (Import TN).&lt;br&gt;Pokud zvolíte Ne, všechny přídavné moduly budou zakázány.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1143"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1151"/>
         <source>Continue with the default import module?</source>
         <oldsource>Continue with the default import module ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pokračovat s výchozím importním modulem?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1169"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1177"/>
         <source>Downloading...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Stahování...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1181"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1715"/>
         <source>Display the Blender and %1 Render add-on version</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Zobrazit verzi doplňku Blender a %1 Render</translation>
+        <translation type="obsolete">Zobrazit verzi doplňku Blender a %1 Render</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1208"/>
         <source>Could not find add-on install file: &apos;%1&apos;.</source>
         <oldsource>Could not find add-on install file: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze najít instalační soubor doplňku: '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1702"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1982"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1208"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1256"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1328"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1709"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1988"/>
         <source>Install Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Nainstalovat doplněk Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1202"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1209"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nenalezeno.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1228"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1235"/>
         <source>Blender Add-on Install Arguments: &apos;%1&apos; %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Argumenty instalace doplňku: '%1' %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1256"/>
         <source>Cannot read add-on file &apos;%1&apos;&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze přečíst soubor doplňku '%1'&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1318"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1325"/>
         <source>Install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Instalace se nezdařila.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1328"/>
         <source>Blender executable not found at &apos;%1&apos;.</source>
         <oldsource>Blender executable not found at &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Spustitelný soubor Blender nebyl nalezen na '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3806"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1354"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3812"/>
         <source>Extract Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Rozbalit doplněk Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1416"/>
         <source>Check for Blender Add-on Updates</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Vyhledat aktualizace doplňku Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1703"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1710"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Instalace doplňku se nezdařila.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1335"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1342"/>
         <source>Extracting...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Extrakce...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="419"/>
+        <source>Check for add-on updates; this preference is saved immediately.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="432"/>
+        <source>Installed %1 Blender LDraw import and render add-on version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="435"/>
+        <source>Blender LDraw Add-on Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="442"/>
+        <source>Download or reconfigure the %1 Blender LDraw add-on.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="447"/>
+        <source>Open the standard output log.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="455"/>
+        <source>&lt;p&gt;&lt;b&gt;Import and Render Modules&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose TN or MM to select the LDraw importer and its options. Changing the importer configures Blender immediately. The image render module is managed automatically; an import module is required to import or render a model.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="459"/>
+        <source>Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="464"/>
+        <source>Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="469"/>
+        <source>Add-on image render module in Blender.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1140"/>
         <source>Test Blender</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Otestovat Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1149"/>
         <source>Configure Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Nastavit doplněk Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1350"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7466,7 +7550,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Extrahovat doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1416"/>
         <source>Check latest add-on version failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Kontrola nejnovější verze doplňku se nezdařila.</translation>
@@ -7477,151 +7561,151 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Nejnovější doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1429"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze otevřít soubor archivu doplňku: '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1429"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1444"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1453"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1497"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1552"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1605"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1608"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1611"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1617"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1620"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1626"/>
         <source>Update Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Aktualizovat doplněk Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
         <source>Cannot extract add-on archive version file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze extrahovat soubor verze archivu doplňku: '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1444"/>
         <source>Cannot read add-on archive version file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze přečíst soubor verze archivu doplňku: '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1453"/>
         <source>Cannot read add-on version file: &apos;%1&apos;&lt;br&gt;%2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze přečíst soubor verze doplňku: '%1'&lt;br&gt;%2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1491"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1498"/>
         <source>Detected %1 Blender LDraw add-on %2. A newer version %3 exists.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zjištěn doplněk %1 Blender LDraw %2. Existuje novější verze %3.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1492"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1499"/>
         <source>Do you want to download version %1?</source>
         <oldsource>Do you want to download version %1 ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chcete si stáhnout verzi %1?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1529"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1536"/>
         <source>Failed to properly remove Blender add-on: &apos;%1&apos;.</source>
         <oldsource>Failed to properly remove Blender add-on: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se správně odebrat doplněk Blender: '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1529"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1536"/>
         <source>Remove Existing Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Odebrat existující doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1552"/>
         <source>Failed to rename existing Blender add-on archive &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se přejmenovat existující archiv Blender doplňků '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
         <source>Failed to validate Blender add-on file name.&lt;br&gt;Downloaded: &apos;%1&apos;&lt;br&gt;Received: &apos;%2&apos;</source>
         <oldsource>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se ověřit název souboru doplňku Blender&lt;br&gt;Staženo:'%1'&lt;br&gt;Přijato:'%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
         <source>Failed to validate Blender add-on SHA hash.&lt;br&gt;Calculated: %1&lt;br&gt;Received: %2</source>
         <oldsource>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se ověřit hash Blender doplňku SHA &lt;br&gt;Vypočteno:%1&lt;br&gt;Přijato:%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1605"/>
         <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;.</source>
         <oldsource>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se získat hodnotu hash SHA pro doplněk Blender '%1.sha256'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1608"/>
         <source>Failed to read Blender add-on archive:&lt;br&gt;&apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se přečíst archiv Blender doplňků:&lt;br&gt;'%1':&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1611"/>
         <source>Failed to write Blender add-on archive:&lt;br&gt;&apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se zapsat archiv doplňku Blender:&lt;br&gt;'%1':&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1617"/>
         <source>Failed to remove invalid Blender add-on archive:&lt;br&gt;&apos;%1&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se odstranit neplatný archiv doplňku Blender:&lt;br&gt;'%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1620"/>
         <source>Failed to restore Blender add-on archive:&lt;br&gt;&apos;%1&apos; from &apos;%2&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Obnovení archivu doplňků Blender se nezdařilo:&lt;br&gt;'%1' z '%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1626"/>
         <source>Failed to download Blender add-on archive:&lt;br&gt;&apos;%1&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se stáhnout archiv doplňků Blender:&lt;br&gt;'%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1624"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1631"/>
         <source>Download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Stahování se nezdařilo.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1635"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1642"/>
         <source>Blender add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender doplněk</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1658"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1665"/>
         <source>%1 not configured</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 není nakonfigurováno</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1669"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1676"/>
         <source>%1 setup...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nastavení %1...</translation>
@@ -7632,7 +7716,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Instalace doplňku se nezdařila. Podrobnosti viz '%1/stderr-blender-add-on-install'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1699"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
         <source>Error: Install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chyba: Instalace se nezdařila.</translation>
@@ -7643,7 +7727,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">%1 Blender Instalace doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1704"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1711"/>
         <source>LDraw add-on install encountered one or more errors. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Při instalaci doplňku LDraw došlo k jedné nebo více chybám. Viz Zobrazit podrobnosti...</translation>
@@ -7654,55 +7738,55 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Blender verze %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1828"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1834"/>
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Standardní výstupní soubor Blender doplňku nebyl nalezen: '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1828"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1834"/>
         <source>View Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Zobrazit výstup doplňku Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1923"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1929"/>
         <source>v%1</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">v%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
         <source>errors%1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">chyby%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
         <source> and warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished"> a varování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1980"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
         <source>warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">varování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1983"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>Add-on install standard output.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Standardní výstup pro instalaci doplňku.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1984"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1990"/>
         <source>LDraw add-on install encountered %1. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Došlo k instalaci doplňku LDraw %1. Viz Zobrazit podrobnosti...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2003"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2009"/>
         <source>Failed to open log file: &apos;%1&apos;:
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7710,7 +7794,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2030"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2036"/>
         <source>Error writing to %1 file &apos;%2&apos;:
 %3</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7723,63 +7807,63 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Zrušit instalaci doplňku %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2042"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2048"/>
         <source>Are you sure you want to cancel the add-on installation?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Opravdu chcete zrušit instalaci doplňku?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2335"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2341"/>
         <source>Add-on Reset</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Reset doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2336"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2342"/>
         <source>Select how to reset settings. Choice is since last apply or system default.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyberte způsob resetování nastavení. Volba je od posledního použití nebo výchozí nastavení systému.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2340"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
         <source>Last Apply</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Poslední použít</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2342"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2348"/>
         <source>System Default</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Výchozí nastavení systému</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2628"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2646"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2634"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2652"/>
         <source>%1 - Setting (%2)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 – Nastavení (%2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2665"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2670"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2671"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2676"/>
         <source>Load Blender Add-on Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Načíst nastavení doplňku Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2670"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2676"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Konfigurační soubor Blender nebyl nalezen. Kontrola protokolu instalace se nezdařila:&lt;br&gt;%1:&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2940"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2946"/>
         <source>Select Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyberte Barva</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2955"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2961"/>
         <source>Locate %1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Najděte %1</translation>
@@ -7790,25 +7874,25 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">LDraw Konflikt nastavení vykreslování</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3122"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3128"/>
         <source>Crop image configuration settings conflict were resolved.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Konflikt nastavení konfigurace oříznutí obrázku byl vyřešen.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
         <source>Keep aspect ratio set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ponechte poměr stran nastavený na hodnotu false.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
         <source>Add environment (backdrop and base plane) set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidat prostředí (pozadí a základní rovina) nastavené na hodnotu false.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3123"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
         <source>Transparent background set to true.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Transparentní pozadí nastaveno na true.&lt;br&gt;</translation>
@@ -7819,13 +7903,13 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Vlastní barvy LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3160"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3166"/>
         <source>Color scheme &apos;custom&apos; cannot be enabled. Custom LDConfig file not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">„Vlastní“ barevné schéma nelze povolit. Vlastní soubor LDConfig nebyl nalezen.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3161"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3167"/>
         <source>Color scheme &apos;custom&apos; selected but no LDConfig file was specified.&lt;br&gt;The default color scheme &apos;%1&apos; will be used.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Bylo vybráno „vlastní“ barevné schéma, ale nebyl zadán žádný soubor LDConfig.&lt;br&gt;Použije se výchozí barevné schéma '%1'.&lt;br&gt;</translation>
@@ -7836,56 +7920,56 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Nastavení vykreslování změněno</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3184"/>
         <source>Do you want to accept the modified settings before quitting?</source>
         <oldsource>Do you want to accept the modified settings before quitting ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chcete přijmout upravená nastavení před ukončením?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3547"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3553"/>
         <source>Failed to open Blender parameter file: &apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nepodařilo se otevřít soubor parametrů Blender: '%1':&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3550"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3556"/>
         <source>Export Blender Parameters</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Exportovat parametry Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3563"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3569"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nahradit existující soubor</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3635"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chcete si stáhnout verzi </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3639"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3645"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Znovu nezobrazovat zprávu o stažení nové verze doplňku.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3658"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3664"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Stažení doplňku se nezdařilo.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3658"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3664"/>
         <source>Download Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Stáhnout doplněk Blenderu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3806"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3812"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Formát záznamu ZipFile (HostOS %1) na indexu %2 není podporován. Extrakt ukončen.</translation>
@@ -7896,7 +7980,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="obsolete">Extrahovat doplněk</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3871"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3877"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -7906,7 +7990,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3542"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3548"/>
         <source>Finished writing Blender parameter entries. Processed %n lines in file &apos;%1&apos;.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -7919,72 +8003,93 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 <context>
     <name>lcBlenderPreferencesDialog</name>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="259"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="227"/>
         <source>Blender LDraw Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender LDraw Nastavení doplňků</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="271"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="240"/>
         <source>Apply</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Použít</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="272"/>
-        <source>Apply add-on paths and settings preferences</source>
-        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Použijte cesty doplňku a předvolby nastavení</translation>
+        <location filename="../common/lc_blenderpreferences.cpp" line="241"/>
+        <source>Save the add-on paths and settings and close this dialog.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="277"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="341"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="247"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="313"/>
+        <source>Hide the add-on paths section.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="253"/>
+        <source>Restore the last applied paths and settings or the system defaults.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="300"/>
+        <source>Show Paths</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
+        <source>Show the add-on paths section.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Apply add-on paths and settings preferences</source>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="obsolete">Použijte cesty doplňku a předvolby nastavení</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="246"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="299"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="300"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="312"/>
         <source>Hide Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Skrýt cesty</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="278"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="342"/>
         <source>Hide add-on path preferences dialog</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Skrýt dialogové okno předvoleb cesty doplňku</translation>
+        <translation type="obsolete">Skrýt dialogové okno předvoleb cesty doplňku</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="282"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="251"/>
         <source>Reset</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Resetovat</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="284"/>
         <source>Reset add-on paths and settings preferences</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Obnovte cesty doplňku a předvolby nastavení</translation>
+        <translation type="obsolete">Obnovte cesty doplňku a předvolby nastavení</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="328"/>
         <source>Show</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Show</translation>
+        <translation type="obsolete">Show</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="328"/>
         <source>Hide</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Skrýt</translation>
+        <translation type="obsolete">Skrýt</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="329"/>
         <source>%1 Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Cesty</translation>
+        <translation type="obsolete">%1 Cesty</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="330"/>
         <source>%1 add-on path preferences dialog</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 dialogové okno předvoleb cesty doplňku</translation>
+        <translation type="obsolete">%1 dialogové okno předvoleb cesty doplňku</translation>
     </message>
 </context>
 <context>
@@ -8089,22 +8194,52 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 <context>
     <name>lcEditGroupsDialog</name>
     <message>
-        <location filename="../common/lc_editgroupsdialog.ui" line="14"/>
+        <location filename="../common/lc_editgroupsdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Edit Groups&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reorganize the model&apos;s pieces and groups in the tree. Drag pieces or groups into a group, or to the top level to remove them from a parent group. Double-click a group name to rename it.&lt;/p&gt;&lt;p&gt;New Group creates a group inside the selected group, or beside an ungrouped piece. Choose OK to apply the hierarchy, or Cancel to discard the changes. Empty groups are removed when changes are applied.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.ui" line="17"/>
         <source>Edit Groups</source>
         <translation>Upravit skupiny</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.ui" line="23"/>
+        <source>Drag pieces and groups to reorganize them; double-click a group name to rename it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.ui" line="26"/>
+        <source>&lt;p&gt;&lt;b&gt;Group Hierarchy&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drop an item onto a group to make it a member of that group. Move it to the top level to remove its parent group. Only group names can be edited; names must be unique and nonempty.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.ui" line="29"/>
+        <source>Piece and Group Hierarchy</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>New Group</source>
         <translation type="vanished">Nová skupina</translation>
     </message>
     <message>
-        <location filename="../common/lc_editgroupsdialog.cpp" line="43"/>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="45"/>
         <source>&amp;New Group</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&amp;Nová skupina</translation>
     </message>
     <message>
-        <location filename="../common/lc_editgroupsdialog.cpp" line="92"/>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="46"/>
+        <source>Create a group under the selected group or at the top level.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="47"/>
+        <source>&lt;p&gt;&lt;b&gt;New Group&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a group to create a subgroup inside it. If a piece is selected, the new group is created beside that piece. With no selection, the new group is created at the top level. Rename the new group by editing its name, then drag pieces into it.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_editgroupsdialog.cpp" line="96"/>
         <source>Group #</source>
         <translation>Skupina #</translation>
     </message>
@@ -8163,22 +8298,39 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 <context>
     <name>lcGroupDialog</name>
     <message>
-        <location filename="../common/lc_groupdialog.ui" line="14"/>
+        <location filename="../common/lc_groupdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Group Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a new group for the selected pieces so you can select and move them together. Choose OK to create it, or Cancel to leave the groups unchanged.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_groupdialog.ui" line="17"/>
         <source>Group</source>
         <translation>Skupina</translation>
     </message>
     <message>
-        <location filename="../common/lc_groupdialog.ui" line="22"/>
+        <location filename="../common/lc_groupdialog.ui" line="25"/>
+        <location filename="../common/lc_groupdialog.ui" line="41"/>
+        <source>Enter a unique, nonempty name for the new group.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_groupdialog.ui" line="28"/>
+        <location filename="../common/lc_groupdialog.ui" line="44"/>
+        <source>&lt;p&gt;&lt;b&gt;Group Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a name that is not already used by another group in this model. The new group contains the selected pieces and their existing groups.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_groupdialog.ui" line="31"/>
         <source>Name</source>
         <translation>Název</translation>
     </message>
     <message>
-        <location filename="../common/lc_groupdialog.cpp" line="25"/>
+        <location filename="../common/lc_groupdialog.cpp" line="27"/>
         <source>Name cannot be empty.</source>
         <translation>Název nesmí být prázdný.</translation>
     </message>
     <message>
-        <location filename="../common/lc_groupdialog.cpp" line="33"/>
+        <location filename="../common/lc_groupdialog.cpp" line="35"/>
         <source>A group with this name already exists.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Skupina s tímto názvem již existuje.</translation>
@@ -13218,7 +13370,7 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="101"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="883"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="899"/>
         <source>Blender not configured. Use Settings to configure.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender není nakonfigurováno. Ke konfiguraci použijte Nastavení.</translation>
@@ -13394,57 +13546,82 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation type="unfinished">Nastavení POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="844"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="840"/>
+        <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the output image dimensions and rendering quality. Width and height are in pixels, with a minimum of 16. Larger images and higher quality can take longer to render.&lt;/p&gt;&lt;p&gt;Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="845"/>
         <source>Width:</source>
         <translation>Šířka:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="850"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="849"/>
+        <source>Set the rendered image width in pixels (minimum 16).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="852"/>
         <source>Height:</source>
         <translation>Výška:</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="856"/>
+        <source>Set the rendered image height in pixels (minimum 16).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="859"/>
         <source>Quality:</source>
         <translation>Kvalita:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="861"/>
         <source>High</source>
         <translation>Nejvyšší</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="861"/>
         <source>Medium</source>
         <translation>Střední</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="861"/>
         <source>Low</source>
         <translation>Nízká</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="897"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="863"/>
+        <source>Choose the rendering quality; higher quality can take longer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="864"/>
+        <source>&lt;p&gt;&lt;b&gt;Rendering Quality&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Low uses POV-Ray&apos;s default quality without additional antialiasing options. Medium uses quality level 5 with antialiasing. High uses quality level 11 with additional antialiasing settings.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="913"/>
         <source>POV-Ray standard error file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">POV-Ray standardní chybový soubor nenalezen: '%1'.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="902"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="918"/>
         <source>Blender standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Standardní výstupní soubor Blender nebyl nalezen: '%1'.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="907"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="915"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="924"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="923"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="931"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="940"/>
         <source>Render Log</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Protokol vykreslení</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="915"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="931"/>
         <source>Error opening log file &apos;%1&apos;:
 %2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -13575,22 +13752,57 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
 <context>
     <name>lcSelectDialog</name>
     <message>
-        <location filename="../common/lc_selectdialog.ui" line="14"/>
+        <location filename="../common/lc_selectdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Objects&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the checkboxes to choose visible pieces, cameras, and lights in the current model. Choose OK to replace the current selection with the checked objects, or Cancel to keep the current selection.&lt;/p&gt;&lt;p&gt;Pieces in the same top-level group are selected together. All, None, and Invert change the checkboxes in this dialog.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="17"/>
         <source>Select Objects</source>
         <translation>Vybrat objekty</translation>
     </message>
     <message>
-        <location filename="../common/lc_selectdialog.ui" line="34"/>
+        <location filename="../common/lc_selectdialog.ui" line="23"/>
+        <source>Check the objects to include in the selection.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="26"/>
+        <source>&lt;p&gt;&lt;b&gt;Object List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The list includes pieces visible in the current step and visible cameras and lights. Expand groups to see their pieces. Checking or clearing a grouped piece applies the same state to all pieces in its top-level group.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="29"/>
+        <source>Objects to Select</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="46"/>
+        <source>Check every object in the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="49"/>
         <source>All</source>
         <translation>Vše</translation>
     </message>
     <message>
-        <location filename="../common/lc_selectdialog.ui" line="41"/>
+        <location filename="../common/lc_selectdialog.ui" line="56"/>
+        <source>Clear every object checkbox in the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="59"/>
         <source>None</source>
         <translation>Žádné</translation>
     </message>
     <message>
-        <location filename="../common/lc_selectdialog.ui" line="48"/>
+        <location filename="../common/lc_selectdialog.ui" line="66"/>
+        <source>Check unchecked objects and clear checked objects.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_selectdialog.ui" line="69"/>
         <source>Invert</source>
         <translation>Invertovat</translation>
     </message>

@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_selectdialog.h"
 #include "ui_lc_selectdialog.h"
 #include "lc_model.h"
@@ -11,6 +12,7 @@ lcSelectDialog::lcSelectDialog(QWidget* Parent, lcModel* Model)
 	: QDialog(Parent), ui(new Ui::lcSelectDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(ui->selectAll, &QPushButton::clicked, this, &lcSelectDialog::SelectAllClicked);
 	connect(ui->selectNone, &QPushButton::clicked, this, &lcSelectDialog::SelectNoneClicked);

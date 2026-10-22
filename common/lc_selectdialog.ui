@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcSelectDialog</class>
  <widget class="QDialog" name="lcSelectDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Select Objects&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the checkboxes to choose visible pieces, cameras, and lights in the current model. Choose OK to replace the current selection with the checked objects, or Cancel to keep the current selection.&lt;/p&gt;&lt;p&gt;Pieces in the same top-level group are selected together. All, None, and Invert change the checkboxes in this dialog.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,6 +19,15 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="toolTip">
+      <string>Check the objects to include in the selection.</string>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Object List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The list includes pieces visible in the current step and visible cameras and lights. Expand groups to see their pieces. Checking or clearing a grouped piece applies the same state to all pieces in its top-level group.&lt;/p&gt;</string>
+     </property>
+     <property name="accessibleName">
+      <string>Objects to Select</string>
+     </property>
      <attribute name="headerVisible">
       <bool>false</bool>
      </attribute>
@@ -30,6 +42,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="selectAll">
+       <property name="toolTip">
+        <string>Check every object in the list.</string>
+       </property>
        <property name="text">
         <string>All</string>
        </property>
@@ -37,6 +52,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="selectNone">
+       <property name="toolTip">
+        <string>Clear every object checkbox in the list.</string>
+       </property>
        <property name="text">
         <string>None</string>
        </property>
@@ -44,6 +62,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="selectInvert">
+       <property name="toolTip">
+        <string>Check unchecked objects and clear checked objects.</string>
+       </property>
        <property name="text">
         <string>Invert</string>
        </property>
@@ -57,7 +78,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

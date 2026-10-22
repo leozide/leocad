@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_editgroupsdialog.h"
 #include "ui_lc_editgroupsdialog.h"
 #include "lc_model.h"
@@ -39,8 +40,11 @@ lcEditGroupsDialog::lcEditGroupsDialog(QWidget* Parent, const lcModel* Model)
 	ui = new Ui::lcEditGroupsDialog;
 
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	QPushButton* NewGroup = ui->buttonBox->addButton(tr("&New Group"), QDialogButtonBox::ActionRole);
+	NewGroup->setToolTip(tr("Create a group under the selected group or at the top level."));
+	NewGroup->setWhatsThis(tr("<p><b>New Group</b></p><p>Select a group to create a subgroup inside it. If a piece is selected, the new group is created beside that piece. With no selection, the new group is created at the top level. Rename the new group by editing its name, then drag pieces into it.</p>"));
 
 	connect(NewGroup, &QPushButton::clicked, this, &lcEditGroupsDialog::NewGroupClicked);
 

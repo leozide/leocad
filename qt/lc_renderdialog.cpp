@@ -837,6 +837,7 @@ void lcRenderDialog::SettingsButtonClicked()
 		QDialog Dialog(this);
 
 		Dialog.setWindowTitle(tr("POV-Ray Settings"));
+		Dialog.setWhatsThis(tr("<p><b>POV-Ray Settings</b></p><p>Set the output image dimensions and rendering quality. Width and height are in pixels, with a minimum of 16. Larger images and higher quality can take longer to render.</p><p>Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.</p>"));
 
 		QFormLayout* Layout = new QFormLayout(&Dialog);
 
@@ -845,21 +846,36 @@ void lcRenderDialog::SettingsButtonClicked()
 
 		WidthEdit->setText(QString::number(mWidth));
 		WidthEdit->setValidator(new QIntValidator(16, INT_MAX, this));
+		WidthEdit->setToolTip(tr("Set the rendered image width in pixels (minimum 16)."));
 
 		QLineEdit* HeightEdit = new QLineEdit(&Dialog);
 		Layout->addRow(tr("Height:"), HeightEdit);
 
 		HeightEdit->setText(QString::number(mHeight));
 		HeightEdit->setValidator(new QIntValidator(16, INT_MAX, this));
+		HeightEdit->setToolTip(tr("Set the rendered image height in pixels (minimum 16)."));
 
 		QComboBox* QualityComboBox = new QComboBox(&Dialog);
 		Layout->addRow(tr("Quality:"), QualityComboBox);
 
 		QualityComboBox->addItems({ tr("Low"), tr("Medium"), tr("High") });
 		QualityComboBox->setCurrentIndex(static_cast<int>(mQuality));
+		QualityComboBox->setToolTip(tr("Choose the rendering quality; higher quality can take longer."));
+		QualityComboBox->setWhatsThis(tr("<p><b>Rendering Quality</b></p><p>Low uses POV-Ray's default quality without additional antialiasing options. Medium uses quality level 5 with antialiasing. High uses quality level 11 with additional antialiasing settings.</p>"));
 
-		QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &Dialog);
-		Layout->addWidget(ButtonBox);
+		for (QWidget* Control : { static_cast<QWidget*>(WidthEdit), static_cast<QWidget*>(HeightEdit), static_cast<QWidget*>(QualityComboBox) })
+		{
+			QLabel* Label = qobject_cast<QLabel*>(Layout->labelForField(Control));
+			Label->setBuddy(Control);
+			Label->setToolTip(Control->toolTip());
+			if (Control->whatsThis().isEmpty())
+				Control->setWhatsThis(Control->toolTip());
+			Label->setWhatsThis(Control->whatsThis());
+		}
+
+		QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Help, Qt::Horizontal, &Dialog);
+		Layout->addRow(ButtonBox);
+		lcSetupDialogHelp(&Dialog, ButtonBox);
 
 		QObject::connect(ButtonBox, &QDialogButtonBox::rejected, &Dialog, &QDialog::reject);
 		QObject::connect(ButtonBox, &QDialogButtonBox::accepted, &Dialog, &QDialog::accept);

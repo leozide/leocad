@@ -57,6 +57,7 @@ public:
 	qreal mScale;
 
 protected:
+	static void SetupControlHelp(QLabel* Label, QWidget* Control);
 	static int NumPaths(bool DefaultSettings = false);
 	static int NumSettings(bool DefaultSettings = false);
 	static int NumSettingsMM(bool DefaultSettings = false);

@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_groupdialog.h"
 #include "ui_lc_groupdialog.h"
 #include "group.h"
@@ -7,6 +8,7 @@ lcGroupDialog::lcGroupDialog(QWidget* Parent, const QString& Name, const std::ve
     : QDialog(Parent), mGroups(Groups), ui(new Ui::lcGroupDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	ui->name->setText(Name);
 }

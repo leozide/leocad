@@ -2,6 +2,8 @@
 
 class lcSpinnerWidget : public QWidget
 {
+	Q_OBJECT
+
 public:
 	lcSpinnerWidget(QWidget* Parent = nullptr);
 

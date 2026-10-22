@@ -172,6 +172,11 @@ int main(int argc, char *argv[])
 		Application.installTranslator(&QtBaseTranslator);
 #endif
 
+	// Supply English plural forms when a locale has no translation for a numerus message.
+	QTranslator EnglishTranslator;
+	if (EnglishTranslator.load("leocad_en", ":/resources"))
+		Application.installTranslator(&EnglishTranslator);
+
 	QTranslator Translator;
 	if (Translator.load("leocad_" + Locale.name(), ":/resources"))
 		Application.installTranslator(&Translator);

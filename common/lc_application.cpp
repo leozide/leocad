@@ -609,7 +609,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if ((Options.SetCameraAngles = ParseFloatArray(2, Options.CameraLatLon.GetFloats(), true)) && (fabsf(Options.CameraLatLon[0]) > 360.0f || fabsf(Options.CameraLatLon[1]) > 360.0f))
 			{
-				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: limits are +/- 360.\n").arg(Option);
+				Options.StdErr += tr("Invalid parameter values specified for the '%1' option: limits are +/- 360.\n").arg(Option);
 				Options.ParseOK = false;
 			}
 		}
@@ -651,7 +651,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 		{
 			if ((Options.SetZPlanes = ParseFloatArray(2, Options.ZPlanes.GetFloats(), false)) && (Options.ZPlanes[0] < 1.0 || Options.ZPlanes[0] >= Options.ZPlanes[1]))
 			{
-				Options.StdErr += tr("Invalid parameter value(s) specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
+				Options.StdErr += tr("Invalid parameter values specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
 				Options.ParseOK = false;
 			}
 		}

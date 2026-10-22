@@ -382,6 +382,8 @@ private:
 		QString itemList;
 	};
 
+	static QString TranslateDefaultText(const QString& Source);
+
 	static BlenderPaths mBlenderPaths[];
 	static BlenderPaths mDefaultPaths[];
 	static BlenderSettings mBlenderSettings[];

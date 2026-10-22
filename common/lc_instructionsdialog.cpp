@@ -710,7 +710,7 @@ void lcInstructionsDialog::UpdatePageSettings()
 
 	mPageListWidget->mThumbnailsWidget->clear();
 	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
-		mPageListWidget->mThumbnailsWidget->addItem(QString("Page %1").arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(tr("Page %1").arg(PageNumber + 1));
 
 //	mThumbnailsWidget->setCurrentRow(0);
 

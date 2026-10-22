@@ -2293,7 +2293,7 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	}
 	else if (Selection.size() > 0)
 	{
-		Message = tr("%n Object(s) selected", "", static_cast<int>(Selection.size()));
+		Message = tr("%n objects selected", nullptr, static_cast<int>(Selection.size()));
 
 		if (Focus && Focus->IsPiece())
 		{
@@ -2693,10 +2693,7 @@ void lcMainWindow::ShowMergeDialog()
 		return;
 	}
 
-	if (ModelCount == 1)
-		QMessageBox::information(this, tr("LeoCAD"), tr("Merged 1 submodel."));
-	else
-		QMessageBox::information(this, tr("LeoCAD"), tr("Merged %1 submodels.").arg(ModelCount));
+	QMessageBox::information(this, tr("LeoCAD"), tr("Merged %n submodels.", nullptr, static_cast<int>(ModelCount)));
 
 	UpdateModels();
 }

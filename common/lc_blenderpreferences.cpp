@@ -45,7 +45,7 @@ const QLatin1String LineEnding("\r\n");
 
 #define LC_RENDER_IMAGE_MAX_SIZE           32768 // pixels
 
-static QString WhatsThisDescription = QObject::tr(
+static constexpr char WhatsThisDescription[] = QT_TRANSLATE_NOOP("QObject",
 	"  Blender LDraw Add-on Settings\n\n"
 	"  You can configure the Blender LDraw add-on settings.\n"
 	"  - Blender Executable: set Blender path. On entry,\n"
@@ -84,163 +84,162 @@ static QString WhatsThisDescription = QObject::tr(
 	"  cropped image width and height for the current step are\n"
 	"  calculated and used.\n\n"
 	"  Use the dialog window scroll bar to access the\n"
-	"  complete selection of add-on settings.\n")
-.arg(QLatin1String(LC_PRODUCTNAME_STR));
+	"  complete selection of add-on settings.\n");
 
 lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mBlenderPaths [NUM_PATHS];
 lcBlenderPreferences::BlenderPaths  lcBlenderPreferences::mDefaultPaths [NUM_PATHS] =
 {
 	/*                             Key:                  MM Key:               Value:             Label:                                   Tooltip (Description):*/
-	/* 0   PATH_BLENDER        */ {"blenderpath",        "blenderpath",        "",    QObject::tr("Blender Path"),             QObject::tr("Full file path to Blender application executable")},
-	/* 1   PATH_BLENDFILE      */ {"blendfile",          "blendfile",          "",    QObject::tr("Blendfile Path"),           QObject::tr("Full file path to a supplement .blend file - specify to append additional settings")},
-	/* 2   PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QObject::tr("Environment Texture Path"), QObject::tr("Full file path to .exr environment texture file - specify if not using default bundled in add-on")},
-	/* 3   PATH_LDCONFIG       */ {"customldconfigfile", "customldconfigfile", "",    QObject::tr("Custom LDConfig Path"),     QObject::tr("Full file path to custom LDConfig file - specify if not %1 alternate LDConfig file").arg(LC_PRODUCTNAME_STR)},
-	/* 4   PATH_LDRAW          */ {"ldrawdirectory",     "ldrawpath",          "",    QObject::tr("LDraw Directory"),          QObject::tr("Full directory path to the LDraw pieces library (download from https://library.ldraw.org)")},
-	/* 5   PATH_LSYNTH         */ {"lsynthdirectory",    "",                   "",    QObject::tr("LSynth Directory"),         QObject::tr("Full directory path to LSynth primitives - specify if not using default bundled in add-on")},
-	/* 6   PATH_STUD_LOGO      */ {"studlogodirectory",  "",                   "",    QObject::tr("Stud Logo Directory"),      QObject::tr("Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial pieces not used or not using default bundled in add-on")},
-	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QObject::tr("Stud.io LDraw Path"),       QObject::tr("Full file path to the Stud.io LDraw Pieces Library (download from https://www.bricklink.com/v3/studio/download.page)")},
-	/* 8   PATH_STUDIO_CUSTOM_PARTS */ {"",              "studiocustompartspath", "", QObject::tr("Stud.io Custom Pieces Path"),QObject::tr("Full file path to the Stud.io LDraw Custom Pieces")}
+	/* 0   PATH_BLENDER        */ {"blenderpath",        "blenderpath",        "",    QT_TRANSLATE_NOOP("QObject", "Blender Path"),             QT_TRANSLATE_NOOP("QObject", "Full file path to Blender application executable")},
+	/* 1   PATH_BLENDFILE      */ {"blendfile",          "blendfile",          "",    QT_TRANSLATE_NOOP("QObject", "Blendfile Path"),           QT_TRANSLATE_NOOP("QObject", "Full file path to a supplement .blend file - specify to append additional settings")},
+	/* 2   PATH_ENVIRONMENT    */ {"environmentfile",    "environmentfile",    "",    QT_TRANSLATE_NOOP("QObject", "Environment Texture Path"), QT_TRANSLATE_NOOP("QObject", "Full file path to .exr environment texture file - specify if not using default bundled in add-on")},
+	/* 3   PATH_LDCONFIG       */ {"customldconfigfile", "customldconfigfile", "",    QT_TRANSLATE_NOOP("QObject", "Custom LDConfig Path"),     QT_TRANSLATE_NOOP("QObject", "Full file path to custom LDConfig file - specify if not %1 alternate LDConfig file")},
+	/* 4   PATH_LDRAW          */ {"ldrawdirectory",     "ldrawpath",          "",    QT_TRANSLATE_NOOP("QObject", "LDraw Directory"),          QT_TRANSLATE_NOOP("QObject", "Full directory path to the LDraw pieces library (download from https://library.ldraw.org)")},
+	/* 5   PATH_LSYNTH         */ {"lsynthdirectory",    "",                   "",    QT_TRANSLATE_NOOP("QObject", "LSynth Directory"),         QT_TRANSLATE_NOOP("QObject", "Full directory path to LSynth primitives - specify if not using default bundled in add-on")},
+	/* 6   PATH_STUD_LOGO      */ {"studlogodirectory",  "",                   "",    QT_TRANSLATE_NOOP("QObject", "Stud Logo Directory"),      QT_TRANSLATE_NOOP("QObject", "Full directory path to stud logo primitives - if stud logo enabled, specify if unofficial pieces not used or not using default bundled in add-on")},
+	/* 7   PATH_STUDIO_LDRAW   */ {"",                   "studioldrawpath",    "",    QT_TRANSLATE_NOOP("QObject", "Stud.io LDraw Path"),       QT_TRANSLATE_NOOP("QObject", "Full file path to the Stud.io LDraw Pieces Library (download from https://www.bricklink.com/v3/studio/download.page)")},
+	/* 8   PATH_STUDIO_CUSTOM_PARTS */ {"",              "studiocustompartspath", "", QT_TRANSLATE_NOOP("QObject", "Stud.io Custom Pieces Path"),QT_TRANSLATE_NOOP("QObject", "Full file path to the Stud.io LDraw Custom Pieces")}
 };
 
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mBlenderSettings [NUM_SETTINGS];
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettings [NUM_SETTINGS] =
 {
 	/*                                   Key:                              Value:                  Label                                  Tooltip (Description)*/
-	/* 0   LBL_ADD_ENVIRONMENT       */ {"addenvironment",                 "1",        QObject::tr("Add Environment"),        QObject::tr("Adds a ground plane and environment texture (affects 'Photo-realistic' look only)")},
-	/* 1   LBL_ADD_GAPS              */ {"gaps",                           "0",        QObject::tr("Add Piece Gap"),           QObject::tr("Add a small space between each piece")},
-	/* 2   LBL_BEVEL_EDGES           */ {"beveledges",                     "1",        QObject::tr("Bevel Edges"),            QObject::tr("Adds a Bevel modifier for rounding off sharp edges")},
-	/* 3   LBL_BLENDFILE_TRUSTED     */ {"blendfiletrusted",               "0",        QObject::tr("Trusted Blend File"),     QObject::tr("Specify whether to treat the .blend file as being loaded from a trusted source")},
-	/* 4   LBL_CROP_IMAGE            */ {"cropimage",                      "0",        QObject::tr("Crop Image"),             QObject::tr("Crop the image border at opaque content. Requires transparent background set to True")},
-	/* 5   LBL_CURVED_WALLS          */ {"curvedwalls",                    "1",        QObject::tr("Curved Walls"),           QObject::tr("Makes surfaces look slightly concave, for interesting reflections")},
-	/* 6   LBL_FLATTEN_HIERARCHY     */ {"flattenhierarchy",               "0",        QObject::tr("Flatten Hierarchy"),      QObject::tr("In Scene Outline, all pieces are placed directly below the root - there's no tree of submodels")},
-	/* 7   LBL_IMPORT_CAMERAS        */ {"importcameras",                  "1",        QObject::tr("Import Cameras"),         QObject::tr("%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
-	/* 8   LBL_IMPORT_LIGHTS         */ {"importlights",                   "1",        QObject::tr("Import Lights"),          QObject::tr("%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
-	/* 9   LBL_INSTANCE_STUDS        */ {"instancestuds",                  "0",        QObject::tr("Instance Studs"),         QObject::tr("Creates a Blender Object for each and every stud (WARNING: can be slow to import and edit in Blender if there are lots of studs)")},
-	/*10   LBL_KEEP_ASPECT_RATIO     */ {"keepaspectratio",                "1",        QObject::tr("Keep Aspect Ratio"),      QObject::tr("Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
-	/*11   LBL_LINK_PARTS            */ {"linkparts",                      "1",        QObject::tr("Link Like Pieces"),        QObject::tr("Identical pieces (of the same type and color) share the same mesh")},
-	/*12   LBL_MINIFIG_HIERARCHY     */ {"minifighierarchy",               "1",        QObject::tr("Parent Minifigs"),        QObject::tr("Pieces of minifigs are automatically parented to each other in a hierarchy")},
-	/*13   LBL_NUMBER_NODES          */ {"numbernodes",                    "1",        QObject::tr("Number Objects"),         QObject::tr("Each object has a five digit prefix eg. 00001_car. This keeps the list in it's proper order")},
-	/*14   LBL_OVERWRITE_IMAGE       */ {"overwriteimage",                 "1",        QObject::tr("Overwrite Image"),        QObject::tr("Specify whether to overwrite an existing rendered image file")},
-	/*15   LBL_OVERWRITE_MATERIALS   */ {"overwriteexistingmaterials",     "0",        QObject::tr("Use Existing Material"),  QObject::tr("Overwrite existing material with the same name")},
-	/*16   LBL_OVERWRITE_MESHES      */ {"overwriteexistingmeshes",        "0",        QObject::tr("Use Existing Mesh"),      QObject::tr("Overwrite existing mesh with the same name")},
-	/*17   LBL_POSITION_CAMERA       */ {"positioncamera",                 "1",        QObject::tr("Position Camera"),        QObject::tr("Position the camera to show the whole model")},
-	/*18   LBL_REMOVE_DOUBLES        */ {"removedoubles",                  "1",        QObject::tr("No Duplicate Vertices"),  QObject::tr("Remove duplicate vertices (recommended)")},
-	/*19   LBL_RENDER_WINDOW         */ {"renderwindow",                   "1",        QObject::tr("Display Render Window"),  QObject::tr("Specify whether to display the render window during Blender user interface image file render")},
-	/*10   LBL_USE_ARCHIVE_LIBRARY   */ {"usearchivelibrary",              "0",        QObject::tr("Use Archive Libraries"),  QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
-	/*21   LBL_SEARCH_ADDL_PATHS     */ {"searchadditionalpaths",          "0",        QObject::tr("Search Additional Paths"),QObject::tr("Specify whether to search additional LDraw paths")},
-	/*22   LBL_SMOOTH_SHADING        */ {"smoothshading",                  "1",        QObject::tr("Smooth Shading"),         QObject::tr("Smooth faces and add an edge-split modifier (recommended)")},
-	/*23   LBL_TRANSPARENT_BACKGROUND*/ {"transparentbackground",          "0",        QObject::tr("Transparent Background"), QObject::tr("Specify whether to render a background (affects 'Photo-realistic look only)")},
-	/*24   LBL_UNOFFICIAL_PARTS      */ {"useunofficialparts",             "1",        QObject::tr("Use Unofficial Pieces"),   QObject::tr("Specify whether to use pieces from the LDraw unofficial pieces library path")},
-	/*25   LBL_USE_LOGO_STUDS        */ {"uselogostuds",                   "1",        QObject::tr("Use Logo Studs"),         QObject::tr("Shows the LEGO logo on each stud (at the expense of some extra geometry and import time)")},
-	/*26   LBL_VERBOSE               */ {"verbose",                        "1",        QObject::tr("Verbose output"),         QObject::tr("Output all messages while working, else only show warnings and errors")},
+	/* 0   LBL_ADD_ENVIRONMENT       */ {"addenvironment",                 "1",        QT_TRANSLATE_NOOP("QObject", "Add Environment"),        QT_TRANSLATE_NOOP("QObject", "Adds a ground plane and environment texture (affects 'Photo-realistic' look only)")},
+	/* 1   LBL_ADD_GAPS              */ {"gaps",                           "0",        QT_TRANSLATE_NOOP("QObject", "Add Piece Gap"),           QT_TRANSLATE_NOOP("QObject", "Add a small space between each piece")},
+	/* 2   LBL_BEVEL_EDGES           */ {"beveledges",                     "1",        QT_TRANSLATE_NOOP("QObject", "Bevel Edges"),            QT_TRANSLATE_NOOP("QObject", "Adds a Bevel modifier for rounding off sharp edges")},
+	/* 3   LBL_BLENDFILE_TRUSTED     */ {"blendfiletrusted",               "0",        QT_TRANSLATE_NOOP("QObject", "Trusted Blend File"),     QT_TRANSLATE_NOOP("QObject", "Specify whether to treat the .blend file as being loaded from a trusted source")},
+	/* 4   LBL_CROP_IMAGE            */ {"cropimage",                      "0",        QT_TRANSLATE_NOOP("QObject", "Crop Image"),             QT_TRANSLATE_NOOP("QObject", "Crop the image border at opaque content. Requires transparent background set to True")},
+	/* 5   LBL_CURVED_WALLS          */ {"curvedwalls",                    "1",        QT_TRANSLATE_NOOP("QObject", "Curved Walls"),           QT_TRANSLATE_NOOP("QObject", "Makes surfaces look slightly concave, for interesting reflections")},
+	/* 6   LBL_FLATTEN_HIERARCHY     */ {"flattenhierarchy",               "0",        QT_TRANSLATE_NOOP("QObject", "Flatten Hierarchy"),      QT_TRANSLATE_NOOP("QObject", "In Scene Outline, all pieces are placed directly below the root - there's no tree of submodels")},
+	/* 7   LBL_IMPORT_CAMERAS        */ {"importcameras",                  "1",        QT_TRANSLATE_NOOP("QObject", "Import Cameras"),         QT_TRANSLATE_NOOP("QObject", "%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.")},
+	/* 8   LBL_IMPORT_LIGHTS         */ {"importlights",                   "1",        QT_TRANSLATE_NOOP("QObject", "Import Lights"),          QT_TRANSLATE_NOOP("QObject", "%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.")},
+	/* 9   LBL_INSTANCE_STUDS        */ {"instancestuds",                  "0",        QT_TRANSLATE_NOOP("QObject", "Instance Studs"),         QT_TRANSLATE_NOOP("QObject", "Creates a Blender Object for each and every stud (WARNING: can be slow to import and edit in Blender if there are lots of studs)")},
+	/*10   LBL_KEEP_ASPECT_RATIO     */ {"keepaspectratio",                "1",        QT_TRANSLATE_NOOP("QObject", "Keep Aspect Ratio"),      QT_TRANSLATE_NOOP("QObject", "Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
+	/*11   LBL_LINK_PARTS            */ {"linkparts",                      "1",        QT_TRANSLATE_NOOP("QObject", "Link Like Pieces"),        QT_TRANSLATE_NOOP("QObject", "Identical pieces (of the same type and color) share the same mesh")},
+	/*12   LBL_MINIFIG_HIERARCHY     */ {"minifighierarchy",               "1",        QT_TRANSLATE_NOOP("QObject", "Parent Minifigs"),        QT_TRANSLATE_NOOP("QObject", "Pieces of minifigs are automatically parented to each other in a hierarchy")},
+	/*13   LBL_NUMBER_NODES          */ {"numbernodes",                    "1",        QT_TRANSLATE_NOOP("QObject", "Number Objects"),         QT_TRANSLATE_NOOP("QObject", "Each object has a five digit prefix eg. 00001_car. This keeps the list in it's proper order")},
+	/*14   LBL_OVERWRITE_IMAGE       */ {"overwriteimage",                 "1",        QT_TRANSLATE_NOOP("QObject", "Overwrite Image"),        QT_TRANSLATE_NOOP("QObject", "Specify whether to overwrite an existing rendered image file")},
+	/*15   LBL_OVERWRITE_MATERIALS   */ {"overwriteexistingmaterials",     "0",        QT_TRANSLATE_NOOP("QObject", "Use Existing Material"),  QT_TRANSLATE_NOOP("QObject", "Overwrite existing material with the same name")},
+	/*16   LBL_OVERWRITE_MESHES      */ {"overwriteexistingmeshes",        "0",        QT_TRANSLATE_NOOP("QObject", "Use Existing Mesh"),      QT_TRANSLATE_NOOP("QObject", "Overwrite existing mesh with the same name")},
+	/*17   LBL_POSITION_CAMERA       */ {"positioncamera",                 "1",        QT_TRANSLATE_NOOP("QObject", "Position Camera"),        QT_TRANSLATE_NOOP("QObject", "Position the camera to show the whole model")},
+	/*18   LBL_REMOVE_DOUBLES        */ {"removedoubles",                  "1",        QT_TRANSLATE_NOOP("QObject", "No Duplicate Vertices"),  QT_TRANSLATE_NOOP("QObject", "Remove duplicate vertices (recommended)")},
+	/*19   LBL_RENDER_WINDOW         */ {"renderwindow",                   "1",        QT_TRANSLATE_NOOP("QObject", "Display Render Window"),  QT_TRANSLATE_NOOP("QObject", "Specify whether to display the render window during Blender user interface image file render")},
+	/*10   LBL_USE_ARCHIVE_LIBRARY   */ {"usearchivelibrary",              "0",        QT_TRANSLATE_NOOP("QObject", "Use Archive Libraries"),  QT_TRANSLATE_NOOP("QObject", "Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
+	/*21   LBL_SEARCH_ADDL_PATHS     */ {"searchadditionalpaths",          "0",        QT_TRANSLATE_NOOP("QObject", "Search Additional Paths"),QT_TRANSLATE_NOOP("QObject", "Specify whether to search additional LDraw paths")},
+	/*22   LBL_SMOOTH_SHADING        */ {"smoothshading",                  "1",        QT_TRANSLATE_NOOP("QObject", "Smooth Shading"),         QT_TRANSLATE_NOOP("QObject", "Smooth faces and add an edge-split modifier (recommended)")},
+	/*23   LBL_TRANSPARENT_BACKGROUND*/ {"transparentbackground",          "0",        QT_TRANSLATE_NOOP("QObject", "Transparent Background"), QT_TRANSLATE_NOOP("QObject", "Specify whether to render a background (affects 'Photo-realistic look only)")},
+	/*24   LBL_UNOFFICIAL_PARTS      */ {"useunofficialparts",             "1",        QT_TRANSLATE_NOOP("QObject", "Use Unofficial Pieces"),   QT_TRANSLATE_NOOP("QObject", "Specify whether to use pieces from the LDraw unofficial pieces library path")},
+	/*25   LBL_USE_LOGO_STUDS        */ {"uselogostuds",                   "1",        QT_TRANSLATE_NOOP("QObject", "Use Logo Studs"),         QT_TRANSLATE_NOOP("QObject", "Shows the LEGO logo on each stud (at the expense of some extra geometry and import time)")},
+	/*26   LBL_VERBOSE               */ {"verbose",                        "1",        QT_TRANSLATE_NOOP("QObject", "Verbose output"),         QT_TRANSLATE_NOOP("QObject", "Output all messages while working, else only show warnings and errors")},
 
-	/*27/0 LBL_BEVEL_WIDTH           */ {"bevelwidth",                     "0.5",      QObject::tr("Bevel Width"),            QObject::tr("Width of the beveled edges")},
-	/*28/1 LBL_CAMERA_BORDER_PERCENT */ {"cameraborderpercentage",         "5.0",      QObject::tr("Camera Border Percent"),  QObject::tr("When positioning the camera, include a (percentage) border leeway around the model in the rendered image")},
-	/*29/2 LBL_DEFAULT_COLOUR        */ {"defaultcolour",                  "16",       QObject::tr("Default Color"),         QObject::tr("Sets the default piece color using LDraw color code")},
-	/*20/3 LBL_GAPS_SIZE             */ {"realgapwidth",                   "0.0002",   QObject::tr("Gap Width"),              QObject::tr("Amount of space between each piece (default 0.2mm)")},
-	/*31/4 LBL_IMAGE_WIDTH           */ {"resolutionwidth",                "800",      QObject::tr("Image Width"),            QObject::tr("Sets the rendered image width in pixels - from current step image, label shows config setting.")},
-	/*32/5 LBL_IMAGE_HEIGHT          */ {"resolutionheight",               "600",      QObject::tr("Image Height"),           QObject::tr("Sets the rendered image height in pixels - from current step image, label shows config setting.")},
-	/*33/6 LBL_IMAGE_SCALE           */ {"realscale",                      "1.0",      QObject::tr("Image Scale"),            QObject::tr("Sets a scale for the model (1.0 = real life scale)")},
-	/*34/6 LBL_RENDER_PERCENTAGE     */ {"renderpercentage",               "100",      QObject::tr("Render Percentage"),      QObject::tr("Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
+	/*27/0 LBL_BEVEL_WIDTH           */ {"bevelwidth",                     "0.5",      QT_TRANSLATE_NOOP("QObject", "Bevel Width"),            QT_TRANSLATE_NOOP("QObject", "Width of the beveled edges")},
+	/*28/1 LBL_CAMERA_BORDER_PERCENT */ {"cameraborderpercentage",         "5.0",      QT_TRANSLATE_NOOP("QObject", "Camera Border Percent"),  QT_TRANSLATE_NOOP("QObject", "When positioning the camera, include a (percentage) border leeway around the model in the rendered image")},
+	/*29/2 LBL_DEFAULT_COLOUR        */ {"defaultcolour",                  "16",       QT_TRANSLATE_NOOP("QObject", "Default Color"),         QT_TRANSLATE_NOOP("QObject", "Sets the default piece color using LDraw color code")},
+	/*20/3 LBL_GAPS_SIZE             */ {"realgapwidth",                   "0.0002",   QT_TRANSLATE_NOOP("QObject", "Gap Width"),              QT_TRANSLATE_NOOP("QObject", "Amount of space between each piece (default 0.2mm)")},
+	/*31/4 LBL_IMAGE_WIDTH           */ {"resolutionwidth",                "800",      QT_TRANSLATE_NOOP("QObject", "Image Width"),            QT_TRANSLATE_NOOP("QObject", "Sets the rendered image width in pixels - from current step image, label shows config setting.")},
+	/*32/5 LBL_IMAGE_HEIGHT          */ {"resolutionheight",               "600",      QT_TRANSLATE_NOOP("QObject", "Image Height"),           QT_TRANSLATE_NOOP("QObject", "Sets the rendered image height in pixels - from current step image, label shows config setting.")},
+	/*33/6 LBL_IMAGE_SCALE           */ {"realscale",                      "1.0",      QT_TRANSLATE_NOOP("QObject", "Image Scale"),            QT_TRANSLATE_NOOP("QObject", "Sets a scale for the model (1.0 = real life scale)")},
+	/*34/6 LBL_RENDER_PERCENTAGE     */ {"renderpercentage",               "100",      QT_TRANSLATE_NOOP("QObject", "Render Percentage"),      QT_TRANSLATE_NOOP("QObject", "Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
 
-	/*35/0 LBL_COLOUR_SCHEME         */ {"usecolourscheme",                "lgeo",     QObject::tr("Color Scheme"),          QObject::tr("Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
-	/*36/1 LBL_FLEX_PARTS_SOURCE     */ {"uselsynthparts",                 "1",        QObject::tr("Flex Pieces Source"),      QObject::tr("Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both")},
-	/*27/2 LBL_LOGO_STUD_VERSION     */ {"logostudversion",                "4",        QObject::tr("Logo Version"),           QObject::tr("Which version of the logo to use ('3' (flat), '4' (rounded) or '5' (subtle rounded))")},
-	/*38/3 LBL_LOOK                  */ {"uselook",                        "normal",   QObject::tr("Look"),                   QObject::tr("Photo-realistic or Schematic 'Instruction' look")},
-	/*39/4 LBL_POSITION_OBJECT       */ {"positionobjectongroundatorigin", "1",        QObject::tr("Position Object"),        QObject::tr("The object is centered at the origin, and on the ground plane")},
-	/*40/5 LBL_RESOLUTION            */ {"resolution",                     "Standard", QObject::tr("Resolution"),             QObject::tr("Resolution of piece primitives, i.e., how much geometry they have")},
-	/*41/6 LBL_RESOLVE_NORMALS       */ {"resolvenormals",                 "guess",    QObject::tr("Resolve Normals"),        QObject::tr("Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them")}
+	/*35/0 LBL_COLOUR_SCHEME         */ {"usecolourscheme",                "lgeo",     QT_TRANSLATE_NOOP("QObject", "Color Scheme"),          QT_TRANSLATE_NOOP("QObject", "Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/*36/1 LBL_FLEX_PARTS_SOURCE     */ {"uselsynthparts",                 "1",        QT_TRANSLATE_NOOP("QObject", "Flex Pieces Source"),      QT_TRANSLATE_NOOP("QObject", "Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both")},
+	/*27/2 LBL_LOGO_STUD_VERSION     */ {"logostudversion",                "4",        QT_TRANSLATE_NOOP("QObject", "Logo Version"),           QT_TRANSLATE_NOOP("QObject", "Which version of the logo to use ('3' (flat), '4' (rounded) or '5' (subtle rounded))")},
+	/*38/3 LBL_LOOK                  */ {"uselook",                        "normal",   QT_TRANSLATE_NOOP("QObject", "Look"),                   QT_TRANSLATE_NOOP("QObject", "Photo-realistic or Schematic 'Instruction' look")},
+	/*39/4 LBL_POSITION_OBJECT       */ {"positionobjectongroundatorigin", "1",        QT_TRANSLATE_NOOP("QObject", "Position Object"),        QT_TRANSLATE_NOOP("QObject", "The object is centered at the origin, and on the ground plane")},
+	/*40/5 LBL_RESOLUTION            */ {"resolution",                     "Standard", QT_TRANSLATE_NOOP("QObject", "Resolution"),             QT_TRANSLATE_NOOP("QObject", "Resolution of piece primitives, i.e., how much geometry they have")},
+	/*41/6 LBL_RESOLVE_NORMALS       */ {"resolvenormals",                 "guess",    QT_TRANSLATE_NOOP("QObject", "Resolve Normals"),        QT_TRANSLATE_NOOP("QObject", "Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItems [NUM_COMBO_ITEMS] =
 {
 	/*    FIRST item set as default        Data                                  Item:   */
-	/* 00 LBL_COLOUR_SCHEME            */ {"lgeo|ldraw|alt|custom",  QObject::tr("Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
-	/* 01 LBL_FLEX_PARTS_SOURCE (t/f)  */ {"1|0|1",                  QObject::tr("LSynth|LDCad|LDCad and LSynth")},
-	/* 02 LBL_LOGO_STUD_VERSION        */ {"4|3|5",                  QObject::tr("Rounded(4)|Flattened(3)|Subtle Rounded(5)")},
-	/* 03 LBL_LOOK                     */ {"normal|instructions",    QObject::tr("Photo Realistic|Lego Instructions")},
-	/* 04 LBL_POSITION_OBJECT (t/f)    */ {"1|0",                    QObject::tr("Centered At Origin On Ground|Centered At Origin")},
-	/* 05 LBL_RESOLUTION               */ {"Standard|High|Low",      QObject::tr("Standard Primitives|High Resolution Primitives|Low Resolution Primitives")},
-	/* 06 LBL_RESOLVE_NORMALS          */ {"guess|double",           QObject::tr("Recalculate Normals|Two Faces Back To Back")}
+	/* 00 LBL_COLOUR_SCHEME            */ {"lgeo|ldraw|alt|custom",  QT_TRANSLATE_NOOP("QObject", "Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
+	/* 01 LBL_FLEX_PARTS_SOURCE (t/f)  */ {"1|0|1",                  QT_TRANSLATE_NOOP("QObject", "LSynth|LDCad|LDCad and LSynth")},
+	/* 02 LBL_LOGO_STUD_VERSION        */ {"4|3|5",                  QT_TRANSLATE_NOOP("QObject", "Rounded(4)|Flattened(3)|Subtle Rounded(5)")},
+	/* 03 LBL_LOOK                     */ {"normal|instructions",    QT_TRANSLATE_NOOP("QObject", "Photo Realistic|Lego Instructions")},
+	/* 04 LBL_POSITION_OBJECT (t/f)    */ {"1|0",                    QT_TRANSLATE_NOOP("QObject", "Centered At Origin On Ground|Centered At Origin")},
+	/* 05 LBL_RESOLUTION               */ {"Standard|High|Low",      QT_TRANSLATE_NOOP("QObject", "Standard Primitives|High Resolution Primitives|Low Resolution Primitives")},
+	/* 06 LBL_RESOLVE_NORMALS          */ {"guess|double",           QT_TRANSLATE_NOOP("QObject", "Recalculate Normals|Two Faces Back To Back")}
 };
 
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mBlenderSettingsMM [NUM_SETTINGS_MM];
 lcBlenderPreferences::BlenderSettings  lcBlenderPreferences::mDefaultSettingsMM [NUM_SETTINGS_MM] =
 {
 	/*                                                Key:                             Value:                    Label                                    Tooltip (Description)*/
-	/* 00 LBL_ADD_ENVIRONMENT_MM                  */ {"addenvironment",                "1",          QObject::tr("Add Environment"),          QObject::tr("Adds a ground plane and environment texture")},
-	/* 01 LBL_BEVEL_EDGES_MM                      */ {"beveledges",                    "0",          QObject::tr("Bevel Edges"),             QObject::tr("Bevel edges. Can cause some pieces to render incorrectly")},
-	/* 02 LBL_BLEND_FILE_TRUSTED_MM               */ {"blendfiletrusted",              "0",          QObject::tr("Trusted Blend File"),       QObject::tr("Specify whether to treat the .blend file as being loaded from a trusted source")},
+	/* 00 LBL_ADD_ENVIRONMENT_MM                  */ {"addenvironment",                "1",          QT_TRANSLATE_NOOP("QObject", "Add Environment"),          QT_TRANSLATE_NOOP("QObject", "Adds a ground plane and environment texture")},
+	/* 01 LBL_BEVEL_EDGES_MM                      */ {"beveledges",                    "0",          QT_TRANSLATE_NOOP("QObject", "Bevel Edges"),             QT_TRANSLATE_NOOP("QObject", "Bevel edges. Can cause some pieces to render incorrectly")},
+	/* 02 LBL_BLEND_FILE_TRUSTED_MM               */ {"blendfiletrusted",              "0",          QT_TRANSLATE_NOOP("QObject", "Trusted Blend File"),       QT_TRANSLATE_NOOP("QObject", "Specify whether to treat the .blend file as being loaded from a trusted source")},
 #ifdef Q_OS_LINUX
-	/* 03 LBL_CASE_SENSITIVE_FILESYSTEM           */ {"casesensitivefilesystem",       "1",          QObject::tr("Case-sensitive Filesystem"),QObject::tr("Filesystem is case sensitive. Defaults to true on Linux.")},
+	/* 03 LBL_CASE_SENSITIVE_FILESYSTEM           */ {"casesensitivefilesystem",       "1",          QT_TRANSLATE_NOOP("QObject", "Case-sensitive Filesystem"),QT_TRANSLATE_NOOP("QObject", "Filesystem is case sensitive. Defaults to true on Linux.")},
 #else
-	/* 03 LBL_CASE_SENSITIVE_FILESYSTEM           */ {"casesensitivefilesystem",       "0",          QObject::tr("Case-sensitive Filesystem"),QObject::tr("Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.")},
+	/* 03 LBL_CASE_SENSITIVE_FILESYSTEM           */ {"casesensitivefilesystem",       "0",          QT_TRANSLATE_NOOP("QObject", "Case-sensitive Filesystem"),QT_TRANSLATE_NOOP("QObject", "Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.")},
 #endif
-	/* 04 LBL_CROP_IMAGE_MM                       */ {"cropimage",                     "0",          QObject::tr("Crop Image"),               QObject::tr("Crop the image border at opaque content. Requires transparent background set to True")},
-	/* 05 LBL_DISPLAY_LOGO                        */ {"displaylogo",                   "1",          QObject::tr("Display Logo"),             QObject::tr("Display the logo on the stud")},
-	/* 06 LBL_IMPORT_CAMERAS_MM                   */ {"importcameras",                 "1",          QObject::tr("Import Cameras"),           QObject::tr("%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
-	/* 07 LBL_IMPORT_EDGES                        */ {"importedges",                   "0",          QObject::tr("Import Edges"),             QObject::tr("Import LDraw edges as edges")},
-	/* 08 LBL_IMPORT_LIGHTS_MM                    */ {"importlights",                  "1",          QObject::tr("Import Lights"),            QObject::tr("%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.").arg(LC_PRODUCTNAME_STR)},
-	/* 09 LBL_KEEP_ASPECT_RATIO_MM                */ {"keepaspectratio",               "1",          QObject::tr("Keep Aspect Ratio"),        QObject::tr("Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
-	/* 10 LBL_MAKE_GAPS                           */ {"makegaps",                      "1",          QObject::tr("Make Gaps"),                QObject::tr("Make small gaps between bricks. A small gap is more realistic")},
-	/* 11 LBL_META_BFC                            */ {"metabfc",                       "1",          QObject::tr("BFC"),                      QObject::tr("Process LDraw Back Face Culling meta commands")},
-	/* 12 LBL_META_CLEAR                          */ {"metaclear",                     "0",          QObject::tr("CLEAR Command"),            QObject::tr("Hides all pieces in the timeline up to where this command is encountered")},
-	/* 13 LBL_META_GROUP                          */ {"metagroup",                     "1",          QObject::tr("GROUP Command"),            QObject::tr("Process GROUP meta commands")},
-	/* 14 LBL_META_PAUSE                          */ {"metapause",                     "0",          QObject::tr("PAUSE Command"),            QObject::tr("Not implemented")},
-	/* 15 LBL_META_PRINT_WRITE                    */ {"metaprintwrite",                "0",          QObject::tr("PRINT/WRITE Command"),      QObject::tr("Prints PRINT/WRITE META commands to the system console.")},
-	/* 16 LBL_META_SAVE                           */ {"metasave",                      "0",          QObject::tr("SAVE Command"),             QObject::tr("Not implemented")},
-	/* 17 LBL_META_STEP                           */ {"metastep",                      "0",          QObject::tr("STEP Command"),             QObject::tr("Adds a keyframe that shows the piece at the moment in the timeline")},
-	/* 18 LBL_META_STEP_GROUPS                    */ {"metastepgroups",                "0",          QObject::tr("STEP Groups"),              QObject::tr("Create collection for individual steps")},
-	/* 19 LBL_META_TEXMAP                         */ {"metatexmap",                    "1",          QObject::tr("TEXMAP and DATA Command"),  QObject::tr("Process TEXMAP and DATA meta commands")},
-	/* 20 LBL_NO_STUDS                            */ {"nostuds",                       "0",          QObject::tr("No Studs"),                 QObject::tr("Don't import studs")},
-	/* 21 LBL_OVERWRITE_IMAGE_MM                  */ {"overwriteimage",                "1",          QObject::tr("Overwrite Image"),          QObject::tr("Specify whether to overwrite an existing rendered image file")},
-	/* 22 LBL_POSITION_CAMERA_MM                  */ {"positioncamera",                "1",          QObject::tr("Position Camera"),          QObject::tr("Position the camera to show the whole model")},
-	/* 23 LBL_PARENT_TO_EMPTY                     */ {"parenttoempty",                 "1",          QObject::tr("Parent To Empty"),          QObject::tr("Parent the model to an empty")},
-	/* 24 LBL_PREFER_STUDIO                       */ {"preferstudio",                  "0",          QObject::tr("Prefer Stud.io Library"),   QObject::tr("Search for pieces in Stud.io library first")},
-	/* 25 LBL_PREFER_UNOFFICIAL                   */ {"preferunofficial",              "0",          QObject::tr("Prefer Unofficial Pieces"),  QObject::tr("Search for unofficial pieces first")},
-	/* 26 LBL_PROFILE                             */ {"profile",                       "0",          QObject::tr("Profile"),                  QObject::tr("Profile import performance")},
-	/* 27 LBL_RECALCULATE_NORMALS                 */ {"recalculatenormals",            "0",          QObject::tr("Recalculate Normals"),      QObject::tr("Recalculate normals. Not recommended if BFC processing is active")},
-	/* 28 LBL_REMOVE_DOUBLES_MM                   */ {"removedoubles",                 "1",          QObject::tr("No Duplicate Vertices"),    QObject::tr("Merge vertices that are within a certain distance.")},
-	/* 29 LBL_RENDER_WINDOW_MM                    */ {"renderwindow",                  "1",          QObject::tr("Display Render Window"),    QObject::tr("Specify whether to display the render window during Blender user interface image file render")},
-	/* 30 LBL_SEARCH_ADDL_PATHS_MM                */ {"searchadditionalpaths",         "0",          QObject::tr("Search Additional Paths"),  QObject::tr("Specify whether to search additional LDraw paths")},
-	/* 31 LBL_SETEND_FRAME                        */ {"setendframe",                   "1",          QObject::tr("Set Step End Frame"),       QObject::tr("Set the end frame to the last step")},
-	/* 32 LBL_SET_TIMELINE_MARKERS                */ {"settimelinemarkers",            "0",          QObject::tr("Set Timeline Markers"),     QObject::tr("Set timeline markers for meta commands")},
-	/* 33 LBL_SHADE_SMOOTH                        */ {"shadesmooth",                   "1",          QObject::tr("Shade Smooth"),             QObject::tr("Use flat or smooth shading for piece faces")},
-	/* 34 LBL_TRANSPARENT_BACKGROUND_MM           */ {"transparentbackground",         "0",          QObject::tr("Transparent Background"),   QObject::tr("Specify whether to render a background")},
-	/* 35 LBL_TREAT_SHORTCUT_AS_MODEL             */ {"treatshortcutasmodel",          "0",          QObject::tr("Treat Shortcuts As Models"),QObject::tr("Split shortcut pieces into their constituent pieces as if they were models")},
-	/* 36 LBL_TRIANGULATE                         */ {"triangulate",                   "0",          QObject::tr("Triangulate Faces"),        QObject::tr("Triangulate all faces")},
-	/* 37 LBL_USE_ARCHIVE_LIBRARY_MM              */ {"usearchivelibrary",             "0",          QObject::tr("Use Archive Libraries"),    QObject::tr("Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
-	/* 38 LBL_USE_FREESTYLE_EDGES                 */ {"usefreestyleedges",             "0",          QObject::tr("Use Freestyle Edges"),      QObject::tr("Render LDraw edges using freestyle")},
-	/* 39 LBL_VERBOSE_MM                          */ {"verbose",                       "1",          QObject::tr("Verbose output"),           QObject::tr("Output all messages while working, else only show warnings and errors")},
+	/* 04 LBL_CROP_IMAGE_MM                       */ {"cropimage",                     "0",          QT_TRANSLATE_NOOP("QObject", "Crop Image"),               QT_TRANSLATE_NOOP("QObject", "Crop the image border at opaque content. Requires transparent background set to True")},
+	/* 05 LBL_DISPLAY_LOGO                        */ {"displaylogo",                   "1",          QT_TRANSLATE_NOOP("QObject", "Display Logo"),             QT_TRANSLATE_NOOP("QObject", "Display the logo on the stud")},
+	/* 06 LBL_IMPORT_CAMERAS_MM                   */ {"importcameras",                 "1",          QT_TRANSLATE_NOOP("QObject", "Import Cameras"),           QT_TRANSLATE_NOOP("QObject", "%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.")},
+	/* 07 LBL_IMPORT_EDGES                        */ {"importedges",                   "0",          QT_TRANSLATE_NOOP("QObject", "Import Edges"),             QT_TRANSLATE_NOOP("QObject", "Import LDraw edges as edges")},
+	/* 08 LBL_IMPORT_LIGHTS_MM                    */ {"importlights",                  "1",          QT_TRANSLATE_NOOP("QObject", "Import Lights"),            QT_TRANSLATE_NOOP("QObject", "%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.")},
+	/* 09 LBL_KEEP_ASPECT_RATIO_MM                */ {"keepaspectratio",               "1",          QT_TRANSLATE_NOOP("QObject", "Keep Aspect Ratio"),        QT_TRANSLATE_NOOP("QObject", "Maintain the aspect ratio when resizing the output image - this attribute is not passed to Blender")},
+	/* 10 LBL_MAKE_GAPS                           */ {"makegaps",                      "1",          QT_TRANSLATE_NOOP("QObject", "Make Gaps"),                QT_TRANSLATE_NOOP("QObject", "Make small gaps between bricks. A small gap is more realistic")},
+	/* 11 LBL_META_BFC                            */ {"metabfc",                       "1",          QT_TRANSLATE_NOOP("QObject", "BFC"),                      QT_TRANSLATE_NOOP("QObject", "Process LDraw Back Face Culling meta commands")},
+	/* 12 LBL_META_CLEAR                          */ {"metaclear",                     "0",          QT_TRANSLATE_NOOP("QObject", "CLEAR Command"),            QT_TRANSLATE_NOOP("QObject", "Hides all pieces in the timeline up to where this command is encountered")},
+	/* 13 LBL_META_GROUP                          */ {"metagroup",                     "1",          QT_TRANSLATE_NOOP("QObject", "GROUP Command"),            QT_TRANSLATE_NOOP("QObject", "Process GROUP meta commands")},
+	/* 14 LBL_META_PAUSE                          */ {"metapause",                     "0",          QT_TRANSLATE_NOOP("QObject", "PAUSE Command"),            QT_TRANSLATE_NOOP("QObject", "Not implemented")},
+	/* 15 LBL_META_PRINT_WRITE                    */ {"metaprintwrite",                "0",          QT_TRANSLATE_NOOP("QObject", "PRINT/WRITE Command"),      QT_TRANSLATE_NOOP("QObject", "Prints PRINT/WRITE META commands to the system console.")},
+	/* 16 LBL_META_SAVE                           */ {"metasave",                      "0",          QT_TRANSLATE_NOOP("QObject", "SAVE Command"),             QT_TRANSLATE_NOOP("QObject", "Not implemented")},
+	/* 17 LBL_META_STEP                           */ {"metastep",                      "0",          QT_TRANSLATE_NOOP("QObject", "STEP Command"),             QT_TRANSLATE_NOOP("QObject", "Adds a keyframe that shows the piece at the moment in the timeline")},
+	/* 18 LBL_META_STEP_GROUPS                    */ {"metastepgroups",                "0",          QT_TRANSLATE_NOOP("QObject", "STEP Groups"),              QT_TRANSLATE_NOOP("QObject", "Create collection for individual steps")},
+	/* 19 LBL_META_TEXMAP                         */ {"metatexmap",                    "1",          QT_TRANSLATE_NOOP("QObject", "TEXMAP and DATA Command"),  QT_TRANSLATE_NOOP("QObject", "Process TEXMAP and DATA meta commands")},
+	/* 20 LBL_NO_STUDS                            */ {"nostuds",                       "0",          QT_TRANSLATE_NOOP("QObject", "No Studs"),                 QT_TRANSLATE_NOOP("QObject", "Don't import studs")},
+	/* 21 LBL_OVERWRITE_IMAGE_MM                  */ {"overwriteimage",                "1",          QT_TRANSLATE_NOOP("QObject", "Overwrite Image"),          QT_TRANSLATE_NOOP("QObject", "Specify whether to overwrite an existing rendered image file")},
+	/* 22 LBL_POSITION_CAMERA_MM                  */ {"positioncamera",                "1",          QT_TRANSLATE_NOOP("QObject", "Position Camera"),          QT_TRANSLATE_NOOP("QObject", "Position the camera to show the whole model")},
+	/* 23 LBL_PARENT_TO_EMPTY                     */ {"parenttoempty",                 "1",          QT_TRANSLATE_NOOP("QObject", "Parent To Empty"),          QT_TRANSLATE_NOOP("QObject", "Parent the model to an empty")},
+	/* 24 LBL_PREFER_STUDIO                       */ {"preferstudio",                  "0",          QT_TRANSLATE_NOOP("QObject", "Prefer Stud.io Library"),   QT_TRANSLATE_NOOP("QObject", "Search for pieces in Stud.io library first")},
+	/* 25 LBL_PREFER_UNOFFICIAL                   */ {"preferunofficial",              "0",          QT_TRANSLATE_NOOP("QObject", "Prefer Unofficial Pieces"),  QT_TRANSLATE_NOOP("QObject", "Search for unofficial pieces first")},
+	/* 26 LBL_PROFILE                             */ {"profile",                       "0",          QT_TRANSLATE_NOOP("QObject", "Profile"),                  QT_TRANSLATE_NOOP("QObject", "Profile import performance")},
+	/* 27 LBL_RECALCULATE_NORMALS                 */ {"recalculatenormals",            "0",          QT_TRANSLATE_NOOP("QObject", "Recalculate Normals"),      QT_TRANSLATE_NOOP("QObject", "Recalculate normals. Not recommended if BFC processing is active")},
+	/* 28 LBL_REMOVE_DOUBLES_MM                   */ {"removedoubles",                 "1",          QT_TRANSLATE_NOOP("QObject", "No Duplicate Vertices"),    QT_TRANSLATE_NOOP("QObject", "Merge vertices that are within a certain distance.")},
+	/* 29 LBL_RENDER_WINDOW_MM                    */ {"renderwindow",                  "1",          QT_TRANSLATE_NOOP("QObject", "Display Render Window"),    QT_TRANSLATE_NOOP("QObject", "Specify whether to display the render window during Blender user interface image file render")},
+	/* 30 LBL_SEARCH_ADDL_PATHS_MM                */ {"searchadditionalpaths",         "0",          QT_TRANSLATE_NOOP("QObject", "Search Additional Paths"),  QT_TRANSLATE_NOOP("QObject", "Specify whether to search additional LDraw paths")},
+	/* 31 LBL_SETEND_FRAME                        */ {"setendframe",                   "1",          QT_TRANSLATE_NOOP("QObject", "Set Step End Frame"),       QT_TRANSLATE_NOOP("QObject", "Set the end frame to the last step")},
+	/* 32 LBL_SET_TIMELINE_MARKERS                */ {"settimelinemarkers",            "0",          QT_TRANSLATE_NOOP("QObject", "Set Timeline Markers"),     QT_TRANSLATE_NOOP("QObject", "Set timeline markers for meta commands")},
+	/* 33 LBL_SHADE_SMOOTH                        */ {"shadesmooth",                   "1",          QT_TRANSLATE_NOOP("QObject", "Shade Smooth"),             QT_TRANSLATE_NOOP("QObject", "Use flat or smooth shading for piece faces")},
+	/* 34 LBL_TRANSPARENT_BACKGROUND_MM           */ {"transparentbackground",         "0",          QT_TRANSLATE_NOOP("QObject", "Transparent Background"),   QT_TRANSLATE_NOOP("QObject", "Specify whether to render a background")},
+	/* 35 LBL_TREAT_SHORTCUT_AS_MODEL             */ {"treatshortcutasmodel",          "0",          QT_TRANSLATE_NOOP("QObject", "Treat Shortcuts As Models"),QT_TRANSLATE_NOOP("QObject", "Split shortcut pieces into their constituent pieces as if they were models")},
+	/* 36 LBL_TRIANGULATE                         */ {"triangulate",                   "0",          QT_TRANSLATE_NOOP("QObject", "Triangulate Faces"),        QT_TRANSLATE_NOOP("QObject", "Triangulate all faces")},
+	/* 37 LBL_USE_ARCHIVE_LIBRARY_MM              */ {"usearchivelibrary",             "0",          QT_TRANSLATE_NOOP("QObject", "Use Archive Libraries"),    QT_TRANSLATE_NOOP("QObject", "Add any archive (zip) libraries in the LDraw file path to the library search list - impacts performance")},
+	/* 38 LBL_USE_FREESTYLE_EDGES                 */ {"usefreestyleedges",             "0",          QT_TRANSLATE_NOOP("QObject", "Use Freestyle Edges"),      QT_TRANSLATE_NOOP("QObject", "Render LDraw edges using freestyle")},
+	/* 39 LBL_VERBOSE_MM                          */ {"verbose",                       "1",          QT_TRANSLATE_NOOP("QObject", "Verbose output"),           QT_TRANSLATE_NOOP("QObject", "Output all messages while working, else only show warnings and errors")},
 
-	/* 40/00 LBL_BEVEL_SEGMENTS                   */ {"bevelsegments",                 "4",          QObject::tr("Bevel Segments"),           QObject::tr("Bevel segments")},
-	/* 41/01 LBL_BEVEL_WEIGHT                     */ {"bevelweight",                   "0.03",       QObject::tr("Bevel Weight"),             QObject::tr("Bevel weight")},
-	/* 42/02 LBL_BEVEL_WIDTH_MM                   */ {"bevelwidth",                    "0.3",        QObject::tr("Bevel Width"),              QObject::tr("Width of the beveled edges")},
-	/* 43/03 LBL_CAMERA_BORDER_PERCENT_MM         */ {"cameraborderpercent",           "5",          QObject::tr("Camera Border Percent"),    QObject::tr("When positioning the camera, include a (percentage) border around the model in the render")},
-	/* 44/04 LBL_FRAMES_PER_STEP                  */ {"framesperstep",                 "3",          QObject::tr("Frames Per Step"),          QObject::tr("Frames per step")},
-	/* 45/05 LBL_GAP_SCALE                        */ {"gapscale",                      "0.997",      QObject::tr("Gap Scale"),                QObject::tr("Scale individual pieces by this much to create the gap")},
-	/* 46/06 LBL_IMPORT_SCALE                     */ {"importscale",                   "0.02",       QObject::tr("Import Scale"),             QObject::tr("What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport")},
-	/* 47/07 LBL_MERGE_DISTANCE                   */ {"mergedistance",                 "0.05",       QObject::tr("Merge Distance"),           QObject::tr("Maximum distance between elements to merge")},
-	/* 48/08 LBL_RENDER_PERCENTAGE_MM             */ {"renderpercentage",              "100",        QObject::tr("Render Percentage"),        QObject::tr("Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
-	/* 49/09 LBL_RESOLUTION_WIDTH                 */ {"resolutionwidth",               "800",        QObject::tr("Image Width"),              QObject::tr("Sets the rendered image width in pixels - from current step image, label shows config setting.")},
-	/* 50/10 LBL_RESOLUTION_HEIGHT                */ {"resolutionheight",              "600",        QObject::tr("Image Height"),             QObject::tr("Sets the rendered image height in pixels - from current step image, label shows config setting.")},
-	/* 51/11 LBL_STARTING_STEP_FRAME              */ {"startingstepframe",             "1",          QObject::tr("Starting Step Frame"),      QObject::tr("Frame to add the first STEP meta command")},
+	/* 40/00 LBL_BEVEL_SEGMENTS                   */ {"bevelsegments",                 "4",          QT_TRANSLATE_NOOP("QObject", "Bevel Segments"),           QT_TRANSLATE_NOOP("QObject", "Bevel segments")},
+	/* 41/01 LBL_BEVEL_WEIGHT                     */ {"bevelweight",                   "0.03",       QT_TRANSLATE_NOOP("QObject", "Bevel Weight"),             QT_TRANSLATE_NOOP("QObject", "Bevel weight")},
+	/* 42/02 LBL_BEVEL_WIDTH_MM                   */ {"bevelwidth",                    "0.3",        QT_TRANSLATE_NOOP("QObject", "Bevel Width"),              QT_TRANSLATE_NOOP("QObject", "Width of the beveled edges")},
+	/* 43/03 LBL_CAMERA_BORDER_PERCENT_MM         */ {"cameraborderpercent",           "5",          QT_TRANSLATE_NOOP("QObject", "Camera Border Percent"),    QT_TRANSLATE_NOOP("QObject", "When positioning the camera, include a (percentage) border around the model in the render")},
+	/* 44/04 LBL_FRAMES_PER_STEP                  */ {"framesperstep",                 "3",          QT_TRANSLATE_NOOP("QObject", "Frames Per Step"),          QT_TRANSLATE_NOOP("QObject", "Frames per step")},
+	/* 45/05 LBL_GAP_SCALE                        */ {"gapscale",                      "0.997",      QT_TRANSLATE_NOOP("QObject", "Gap Scale"),                QT_TRANSLATE_NOOP("QObject", "Scale individual pieces by this much to create the gap")},
+	/* 46/06 LBL_IMPORT_SCALE                     */ {"importscale",                   "0.02",       QT_TRANSLATE_NOOP("QObject", "Import Scale"),             QT_TRANSLATE_NOOP("QObject", "What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport")},
+	/* 47/07 LBL_MERGE_DISTANCE                   */ {"mergedistance",                 "0.05",       QT_TRANSLATE_NOOP("QObject", "Merge Distance"),           QT_TRANSLATE_NOOP("QObject", "Maximum distance between elements to merge")},
+	/* 48/08 LBL_RENDER_PERCENTAGE_MM             */ {"renderpercentage",              "100",        QT_TRANSLATE_NOOP("QObject", "Render Percentage"),        QT_TRANSLATE_NOOP("QObject", "Sets the rendered image percentage scale for its pixel resolution - updated from current step, label shows config setting.")},
+	/* 49/09 LBL_RESOLUTION_WIDTH                 */ {"resolutionwidth",               "800",        QT_TRANSLATE_NOOP("QObject", "Image Width"),              QT_TRANSLATE_NOOP("QObject", "Sets the rendered image width in pixels - from current step image, label shows config setting.")},
+	/* 50/10 LBL_RESOLUTION_HEIGHT                */ {"resolutionheight",              "600",        QT_TRANSLATE_NOOP("QObject", "Image Height"),             QT_TRANSLATE_NOOP("QObject", "Sets the rendered image height in pixels - from current step image, label shows config setting.")},
+	/* 51/11 LBL_STARTING_STEP_FRAME              */ {"startingstepframe",             "1",          QT_TRANSLATE_NOOP("QObject", "Starting Step Frame"),      QT_TRANSLATE_NOOP("QObject", "Frame to add the first STEP meta command")},
 
-	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QObject::tr("Chosen Logo"),              QObject::tr("Which logo to display. logo and logo2 aren't used and are only included for completeness")},
-	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QObject::tr("Color Scheme"),            QObject::tr("Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
-	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QObject::tr("Resolution"),               QObject::tr("Resolution of piece primitives, i.e., how much geometry they have")},
-	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QObject::tr("How To Scale Pieces"),       QObject::tr("Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for piece editing")},
-	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QObject::tr("Smooth Type"),              QObject::tr("Use either autosmooth or an edge split modifier to smooth piece faces")}
+	/* 52/00 LBL_CHOSEN_LOGO                      */ {"chosenlogo",                    "logo3",      QT_TRANSLATE_NOOP("QObject", "Chosen Logo"),              QT_TRANSLATE_NOOP("QObject", "Which logo to display. logo and logo2 aren't used and are only included for completeness")},
+	/* 53/01 LBL_COLOUR_SCHEME_MM                 */ {"usecolourscheme",               "alt",        QT_TRANSLATE_NOOP("QObject", "Color Scheme"),            QT_TRANSLATE_NOOP("QObject", "Color scheme options - Realistic (lgeo), Original (LDConfig), Alternate (LDCfgalt), Custom (User Defined)")},
+	/* 54/02 LBL_RESOLUTION_MM                    */ {"resolution",                    "Standard",   QT_TRANSLATE_NOOP("QObject", "Resolution"),               QT_TRANSLATE_NOOP("QObject", "Resolution of piece primitives, i.e., how much geometry they have")},
+	/* 55/03 LBL_SCALE_STRATEGY                   */ {"scalestrategy",                 "mesh",       QT_TRANSLATE_NOOP("QObject", "How To Scale Pieces"),       QT_TRANSLATE_NOOP("QObject", "Apply import scaling to mesh - Recommended for rendering, Apply import scaling to object - Recommended for piece editing")},
+	/* 56/04 LBL_SMOOTH_TYPE                      */ {"smoothtype",                    "edge_split", QT_TRANSLATE_NOOP("QObject", "Smooth Type"),              QT_TRANSLATE_NOOP("QObject", "Use either autosmooth or an edge split modifier to smooth piece faces")}
 };
 
 lcBlenderPreferences::ComboItems  lcBlenderPreferences::mComboItemsMM [NUM_COMBO_ITEMS_MM] =
 {
 	/*    FIRST item set as default        Data                                  Item: */
-	/* 00 LBL_CHOSEN_LOGO              */ {"logo3|logo4|logo5",                  QObject::tr("Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)")},
-	/* 01 LBL_COLOUR_SCHEME_MM         */ {"lgeo|ldraw|alt|custom",              QObject::tr("Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
-	/* 02 LBL_RESOLUTION_MM            */ {"Low|Standard|High",                  QObject::tr("Low Resolution Primitives|Standard Primitives|High Resolution Primitives")},
-	/* 03 LBL_SCALE_STRATEGY           */ {"mesh|object",                        QObject::tr("Scale Mesh|Scale Object")},
-	/* 04 LBL_SMOOTH_TYPE              */ {"edge_split|auto_smooth|bmesh_split", QObject::tr("Smooth piece faces with edge split modifier|Auto-smooth piece faces|Split during initial mesh processing")}
+	/* 00 LBL_CHOSEN_LOGO              */ {"logo3|logo4|logo5",                  QT_TRANSLATE_NOOP("QObject", "Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)")},
+	/* 01 LBL_COLOUR_SCHEME_MM         */ {"lgeo|ldraw|alt|custom",              QT_TRANSLATE_NOOP("QObject", "Realistic Colors|Original LDraw Colors|Alternate LDraw Colors|Custom Colors")},
+	/* 02 LBL_RESOLUTION_MM            */ {"Low|Standard|High",                  QT_TRANSLATE_NOOP("QObject", "Low Resolution Primitives|Standard Primitives|High Resolution Primitives")},
+	/* 03 LBL_SCALE_STRATEGY           */ {"mesh|object",                        QT_TRANSLATE_NOOP("QObject", "Scale Mesh|Scale Object")},
+	/* 04 LBL_SMOOTH_TYPE              */ {"edge_split|auto_smooth|bmesh_split", QT_TRANSLATE_NOOP("QObject", "Smooth piece faces with edge split modifier|Auto-smooth piece faces|Split during initial mesh processing")}
 };
 
 lcBlenderPreferences* gAddonPreferences;
@@ -382,13 +381,13 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	if (Parent)
 	{
 		Parent->setLayout(Layout);
-		Parent->setWhatsThis(WhatsThisDescription);
+		Parent->setWhatsThis(QObject::tr(WhatsThisDescription).arg(QLatin1String(LC_PRODUCTNAME_STR)));
 	}
 	else
 	{
 		setWindowTitle(tr("Blender LDraw Add-on Settings"));
 		setLayout(Layout);
-		setWhatsThis(WhatsThisDescription);
+		setWhatsThis(QObject::tr(WhatsThisDescription).arg(QLatin1String(LC_PRODUCTNAME_STR)));
 	}
 
 	mContent = new QWidget();
@@ -724,7 +723,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			ComboBox->setProperty("ControlID",QVariant(LblIdx));
 			const QString Value = mBlenderSettings[LblIdx].value;
 			QStringList const DataList = mComboItems[ComboBoxItemsIndex].dataList.split("|");
-			QStringList const ItemList = mComboItems[ComboBoxItemsIndex].itemList.split("|");
+			QStringList const ItemList = TranslateDefaultText(mComboItems[ComboBoxItemsIndex].itemList).split("|");
 			ComboBox->addItems(ItemList);
 			for (int CtlIdx = 0; CtlIdx < ComboBox->count(); CtlIdx++)
 				ComboBox->setItemData(CtlIdx, DataList.at(CtlIdx));
@@ -868,7 +867,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			ComboBox->setProperty("ControlID",QVariant(LblIdx));
 			const QString Value = mBlenderSettingsMM[LblIdx].value;
 			QStringList const DataList = mComboItemsMM[ComboBoxItemsIndex].dataList.split("|");
-			QStringList const ItemList = mComboItemsMM[ComboBoxItemsIndex].itemList.split("|");
+			QStringList const ItemList = TranslateDefaultText(mComboItemsMM[ComboBoxItemsIndex].itemList).split("|");
 			ComboBox->addItems(ItemList);
 			for (int CtlIdx = 0; CtlIdx < ComboBox->count(); CtlIdx++)
 				ComboBox->setItemData(CtlIdx, DataList.at(CtlIdx));
@@ -2483,6 +2482,17 @@ void lcBlenderPreferences::ResetSettings()
 	emit SettingChangedSig(true);
 }
 
+QString lcBlenderPreferences::TranslateDefaultText(const QString& Source)
+{
+	QString Text = QCoreApplication::translate("QObject", Source.toUtf8().constData());
+
+	// Default text uses %1 only for the product name; substitute after translation.
+	if (Source.contains(QLatin1String("%1")))
+		Text = Text.arg(QLatin1String(LC_PRODUCTNAME_STR));
+
+	return Text;
+}
+
 void lcBlenderPreferences::LoadSettings()
 {
 	QStringList const& DataPathList = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation);
@@ -2541,8 +2551,8 @@ void lcBlenderPreferences::LoadSettings()
 					mDefaultPaths[LblIdx].key,
 					mDefaultPaths[LblIdx].key_mm,
 					QDir::toNativeSeparators(AddonPaths.at(LblIdx)),
-					mDefaultPaths[LblIdx].label,
-					mDefaultPaths[LblIdx].tooltip
+					TranslateDefaultText(mDefaultPaths[LblIdx].label),
+					TranslateDefaultText(mDefaultPaths[LblIdx].tooltip)
 				};
 		}
 	}
@@ -2555,8 +2565,8 @@ void lcBlenderPreferences::LoadSettings()
 				{
 					mDefaultSettings[LblIdx].key,
 					mDefaultSettings[LblIdx].value,
-					mDefaultSettings[LblIdx].label,
-					mDefaultSettings[LblIdx].tooltip
+					TranslateDefaultText(mDefaultSettings[LblIdx].label),
+					TranslateDefaultText(mDefaultSettings[LblIdx].tooltip)
 				};
 			if (LblIdx == LBL_USE_ARCHIVE_LIBRARY)
 				mBlenderSettings[LblIdx].value = QString::number(UseArchiveLibrary);
@@ -2571,8 +2581,8 @@ void lcBlenderPreferences::LoadSettings()
 				{
 					mDefaultSettingsMM[LblIdx].key,
 					mDefaultSettingsMM[LblIdx].value,
-					mDefaultSettingsMM[LblIdx].label,
-					mDefaultSettingsMM[LblIdx].tooltip
+					TranslateDefaultText(mDefaultSettingsMM[LblIdx].label),
+					TranslateDefaultText(mDefaultSettingsMM[LblIdx].tooltip)
 				};
 			if (LblIdx == LBL_USE_ARCHIVE_LIBRARY_MM)
 				mBlenderSettingsMM[LblIdx].value = QString::number(UseArchiveLibrary);
@@ -2618,8 +2628,8 @@ void lcBlenderPreferences::LoadSettings()
 			}
 			if (LblIdx == LBL_IMAGE_WIDTH || LblIdx == LBL_IMAGE_HEIGHT || LblIdx == LBL_RENDER_PERCENTAGE)
 			{
-				const QString& Label = mDefaultSettings[LblIdx].label;
-				mBlenderSettings[LblIdx].label = QString("%1 - Setting (%2)").arg(Label, Value);
+				const QString Label = TranslateDefaultText(mDefaultSettings[LblIdx].label);
+				mBlenderSettings[LblIdx].label = tr("%1 - Setting (%2)").arg(Label, Value);
 			}
 		}
 
@@ -2636,8 +2646,8 @@ void lcBlenderPreferences::LoadSettings()
 			}
 			if (LblIdx == LBL_RENDER_PERCENTAGE_MM || LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{
-				const QString& Label = mDefaultSettingsMM[LblIdx].label;
-				mBlenderSettingsMM[LblIdx].label = QString("%1 - Setting (%2)").arg(Label, Value);
+				const QString Label = TranslateDefaultText(mDefaultSettingsMM[LblIdx].label);
+				mBlenderSettingsMM[LblIdx].label = tr("%1 - Setting (%2)").arg(Label, Value);
 			}
 		}
 	}
@@ -3529,8 +3539,7 @@ bool lcBlenderPreferences::ExportParameterFile()
 		Stream << "# end of parameters" << LineEnding;
 
 		File.close();
-		Message = tr("Finished writing Blender parameter entries. Processed %1 lines in file '%2'.")
-					  .arg(Counter)
+		Message = tr("Finished writing Blender parameter entries. Processed %n lines in file '%1'.", nullptr, Counter)
 					  .arg(File.fileName());
 	}
 	else
@@ -3861,7 +3870,7 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 	}
 
 	if (!Ok)
-		Result = tr("%1 of %2 files extracted.").arg(Extracted).arg(ZipFile.mFiles.size());
+		Result = tr("%1 of %n files extracted.", nullptr, static_cast<int>(ZipFile.mFiles.size())).arg(Extracted);
 
 	return Ok;
 }

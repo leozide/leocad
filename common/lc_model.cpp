@@ -5449,7 +5449,7 @@ void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
 
 	if (ReplacedCount)
 	{
-		EndHistorySequence(tr("Replace Piece(s)", "", ReplacedCount));
+		EndHistorySequence(tr("Replace Pieces", nullptr, ReplacedCount));
 
 		gMainWindow->UpdateSelectedObjects(false);
 		gMainWindow->UpdateTimeline(false, true);

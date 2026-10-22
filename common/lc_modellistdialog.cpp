@@ -138,7 +138,7 @@ void lcModelListDialog::DeleteModelClicked()
 	if (SelectedItems.size() == 1)
 		Prompt = tr("Are you sure you want to delete the submodel '%1'?").arg(SelectedItems[0]->text());
 	else
-		Prompt = tr("Are you sure you want to delete %1 submodels?").arg(QString::number(SelectedItems.size()));
+		Prompt = tr("Are you sure you want to delete %n submodels?", nullptr, static_cast<int>(SelectedItems.size()));
 
 	if (QMessageBox::question(this, tr("Delete Submodel"), Prompt, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 		return;

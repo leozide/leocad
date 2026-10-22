@@ -17,6 +17,7 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcMinifigDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	QGridLayout* MinifigLayout = ui->MinifigLayout;
 
@@ -46,11 +47,19 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		PieceButton->setSizePolicy(PieceButtonSizePolicy);
 		PieceButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		PieceButton->setIcon(Pixmap);
+		PieceButton->setObjectName(QString("MinifigPiece%1").arg(ItemIndex));
+		PieceButton->setAccessibleName(tr("%1 piece").arg(Labels[ItemIndex]));
+		PieceButton->setToolTip(tr("Choose the piece for %1, or None to omit it.").arg(Labels[ItemIndex]));
+		PieceButton->setWhatsThis(tr("<p><b>Choose Piece</b></p><p>Choose a piece for this section of the minifigure. Select None to omit it. The preview updates when you select a different piece.</p>"));
 
 		connect(PieceButton, &QToolButton::clicked, this, &lcMinifigDialog::PieceButtonClicked);
 
 		lcColorPicker* ColorPicker = new lcColorPicker(this);
 		mColorPickers[ItemIndex] = ColorPicker;
+		ColorPicker->setObjectName(QString("MinifigColor%1").arg(ItemIndex));
+		ColorPicker->setAccessibleName(tr("%1 color").arg(Labels[ItemIndex]));
+		ColorPicker->setToolTip(tr("Choose the color for %1.").arg(Labels[ItemIndex]));
+		ColorPicker->setWhatsThis(tr("<p><b>Choose Color</b></p><p>Change the color of this minifigure piece. The preview updates immediately, and saving a template includes the chosen color.</p>"));
 
 		connect(ColorPicker, &lcColorPicker::ColorChanged, this, &lcMinifigDialog::ColorChanged);
 
@@ -62,11 +71,18 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 			SpinBox->setRange(-360.0, 360.0);
 			SpinBox->SetSnap(lcFloatPropertySnap::Rotation);
 			SpinBox->setSingleStep(5.0);
+			SpinBox->setObjectName(QString("MinifigRotation%1").arg(ItemIndex));
+			SpinBox->setAccessibleName(tr("%1 rotation").arg(Labels[ItemIndex]));
+			SpinBox->setToolTip(tr("Rotate %1, in degrees (-360 to 360).").arg(Labels[ItemIndex]));
+			SpinBox->setWhatsThis(tr("<p><b>Rotation</b></p><p>Adjust this piece's angle to pose the minifigure. Values range from -360 to 360 degrees. The available rotation depends on the selected minifigure section.</p>"));
 
 			connect(SpinBox, QOverload<double>::of(&lcDoubleSpinBox::valueChanged), this, &lcMinifigDialog::AngleChanged);
 		}
 
-		QWidget* Label = new QLabel(Labels[ItemIndex], this);
+		QLabel* Label = new QLabel(Labels[ItemIndex], this);
+		Label->setBuddy(PieceButton);
+		Label->setToolTip(PieceButton->toolTip());
+		Label->setWhatsThis(PieceButton->whatsThis());
 
 		auto AddRow=[MinifigLayout, Label, PieceButton, ColorPicker, SpinBox](int& Row, int Column)
 		{
@@ -108,6 +124,9 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 	mView = new lcView(lcViewType::Minifig, mMinifigWizard->GetModel());
 
 	lcViewWidget* ViewWidget = new lcViewWidget(nullptr, mView);
+	ViewWidget->setAccessibleName(tr("Minifigure Preview"));
+	ViewWidget->setToolTip(tr("Preview of the chosen pieces, colors, and pose."));
+	ViewWidget->setWhatsThis(tr("<p><b>Minifigure Preview</b></p><p>Check the assembled minifigure as you change pieces, colors, or angles. Choose OK to add this configuration to the current model.</p>"));
 	ViewWidget->setMinimumWidth(100);
 	PreviewLayout->addWidget(ViewWidget);
 
@@ -122,7 +141,10 @@ lcMinifigDialog::lcMinifigDialog(QWidget* Parent)
 		int PieceIndex = mMinifigWizard->GetSelectionIndex(ItemIndex);
 		QToolButton* PieceButton = mPieceButtons[ItemIndex];
 
-		PieceButton->setText(PieceList[PieceIndex].Description);
+		if (mMinifigWizard->mMinifig.PieceData[ItemIndex])
+			PieceButton->setText(PieceList[PieceIndex].Description);
+		else
+			PieceButton->setText(tr("None"));
 
 		lcColorPicker* ColorPicker = mColorPickers[ItemIndex];
 		QSignalBlocker ColorPickerBlocker(ColorPicker);

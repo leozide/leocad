@@ -9743,199 +9743,324 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 <context>
     <name>lcMinifigDialog</name>
     <message>
-        <location filename="../common/lc_minifigdialog.ui" line="14"/>
+        <location filename="../common/lc_minifigdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Minifig Wizard&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Build a minifigure by choosing its pieces, colors, and pose. The preview updates as you make changes. Choose OK to insert the minifigure into the current model, or Cancel to close without inserting it.&lt;/p&gt;&lt;p&gt;Templates let you reuse a configuration. Saved, deleted, and imported templates are retained even if you cancel the wizard.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="17"/>
         <source>Minifig Wizard</source>
         <translation type="unfinished">Assistente Minifig</translation>
     </message>
     <message>
+        <location filename="../common/lc_minifigdialog.ui" line="23"/>
+        <source>&lt;p&gt;&lt;b&gt;Minifigure Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each section has a piece selector and a color button. Some sections also have a rotation control in degrees. Choose None in a piece selector to omit that piece.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_minifigdialog.ui" line="31"/>
+        <source>&lt;p&gt;&lt;b&gt;Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Load a saved configuration of pieces, colors, and angles, or save the current configuration under a name. Choosing another template replaces the current preview configuration.&lt;/p&gt;&lt;p&gt;Changes to the preview are not saved as a template until you use Save. Template operations are retained when the wizard closes, including after Cancel.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="40"/>
         <source>Templates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Modelos</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.ui" line="47"/>
+        <location filename="../common/lc_minifigdialog.ui" line="46"/>
+        <source>Load a saved configuration of pieces, colors, and angles.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="49"/>
+        <source>Minifigure Template</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="62"/>
+        <source>Save the current minifigure configuration as a named template.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="65"/>
+        <source>&lt;p&gt;&lt;b&gt;Save Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a name for the current pieces, colors, and pose. Reusing an existing name asks before replacing that template. The Default template cannot be overwritten.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="68"/>
         <source>Save...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Guardar...</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.ui" line="54"/>
+        <location filename="../common/lc_minifigdialog.ui" line="75"/>
+        <source>Delete the selected saved template.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="78"/>
+        <source>&lt;p&gt;&lt;b&gt;Delete Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected named template after confirmation. This does not remove pieces from the preview or an existing model. The Default template cannot be deleted.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="81"/>
         <source>Delete...</source>
         <translation type="unfinished">Apagar...</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.ui" line="61"/>
+        <location filename="../common/lc_minifigdialog.ui" line="88"/>
+        <source>Add templates from a .minifig file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="91"/>
+        <source>&lt;p&gt;&lt;b&gt;Import Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add saved configurations from a .minifig file to the template collection. Existing template names are kept when the imported file contains the same names.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="94"/>
         <source>Import...</source>
         <translation type="unfinished">Importar....</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.ui" line="68"/>
+        <location filename="../common/lc_minifigdialog.ui" line="101"/>
+        <source>Save the entire template collection to a .minifig file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="104"/>
+        <source>&lt;p&gt;&lt;b&gt;Export Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write all templates to a .minifig file for backup or sharing. Export includes the entire collection, not just the selected template.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.ui" line="107"/>
         <source>Export...</source>
         <translation type="unfinished">Exportar...</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Hat</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chapéu</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Hat Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório para chapéu</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Head</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cabeça</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Neck</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pescoço</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Torso</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Torso</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Hip</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Anca</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Hip Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório de quadril</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Left Arm</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Braço Esquerdo</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Right Arm</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Braço Direito</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Left Hand</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mão Esquerda</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="29"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
         <source>Right Hand</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mão Direita</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Left Hand Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório para mão esquerda</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Right Hand Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório para mão direita</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Left Leg</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Perna Esquerda</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Right Leg</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Perna Direita</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Left Leg Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório para perna esquerda</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="30"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="31"/>
         <source>Right Leg Accessory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Acessório para perna direita</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="249"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="256"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="262"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="51"/>
+        <source>%1 piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="52"/>
+        <source>Choose the piece for %1, or None to omit it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="53"/>
+        <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece for this section of the minifigure. Select None to omit it. The preview updates when you select a different piece.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="60"/>
+        <source>%1 color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="61"/>
+        <source>Choose the color for %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="62"/>
+        <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Change the color of this minifigure piece. The preview updates immediately, and saving a template includes the chosen color.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="75"/>
+        <source>%1 rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="76"/>
+        <source>Rotate %1, in degrees (-360 to 360).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="77"/>
+        <source>&lt;p&gt;&lt;b&gt;Rotation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust this piece&apos;s angle to pose the minifigure. Values range from -360 to 360 degrees. The available rotation depends on the selected minifigure section.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="127"/>
+        <source>Minifigure Preview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="128"/>
+        <source>Preview of the chosen pieces, colors, and pose.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="129"/>
+        <source>&lt;p&gt;&lt;b&gt;Minifigure Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check the assembled minifigure as you change pieces, colors, or angles. Choose OK to add this configuration to the current model.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_minifigdialog.cpp" line="271"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="278"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="284"/>
         <source>Save Template</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Guardar modelo</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="249"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="271"/>
         <source>Template Name:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nome do modelo:</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="256"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="278"/>
         <source>Template name cannot be empty.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">O nome do modelo não pode estar vazio.</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="262"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="284"/>
         <source>Cannot overwrite the default template.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Não é possível substituir o modelo padrão.</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="268"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="290"/>
         <source>Are you sure you want to overwrite the template &apos;%1&apos;?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Tem a certeza que pretende substituir o modelo '%1'?</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="269"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="291"/>
         <source>Overwrite Template</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Modelo de substituição</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="297"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="319"/>
         <source>Are you sure you want to delete the template &apos;%1&apos;?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Tem a certeza que pretende eliminar o modelo '%1'?</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="299"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
         <source>Delete Template</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Excluir modelo</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="312"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="334"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="343"/>
         <source>Import Templates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Importar modelos</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="312"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="333"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="334"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="355"/>
         <source>Minifig Template Files (*.minifig);;All Files (*.*)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ficheiros de modelo Minifig (*.minifig);;Todos os ficheiros (*.*)</translation>
@@ -9945,7 +10070,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="obsolete">Erro</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="343"/>
         <source>Error reading file &apos;%1&apos;:
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -9953,23 +10078,24 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="333"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="355"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="364"/>
         <source>Export Templates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Exportar modelos</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="364"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation type="unfinished">Erro ao escrever no ficheiro &apos;%1&apos;:
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="225"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="377"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="408"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="147"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="247"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="399"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="430"/>
         <source>None</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Nenhum</translation>
@@ -9988,7 +10114,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1741"/>
-        <location filename="../common/lc_model.cpp" line="1756"/>
+        <location filename="../common/lc_model.cpp" line="1759"/>
         <source>Error creating images.</source>
         <translation>Erro ao criar as imagens.</translation>
     </message>
@@ -10785,71 +10911,127 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 <context>
     <name>lcPartPaletteDialog</name>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="14"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Piece Palettes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Organize reusable collections of pieces in the piece browser. Create, rename, delete, import, or reorder palettes, then choose OK to apply the changes. Cancel discards these palette changes.&lt;/p&gt;&lt;p&gt;Palettes organize piece choices; they do not change pieces already placed in a model.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="17"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="28"/>
         <source>Piece Palettes</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Paletas de peças</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="27"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="25"/>
+        <source>Select the palette to rename, delete, or move.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="31"/>
+        <source>&lt;p&gt;&lt;b&gt;Palette List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a palette before using Rename, Delete, Move Up, or Move Down. The list order determines the palette order in the piece browser.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="40"/>
+        <source>Create a new empty piece palette.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="43"/>
         <source>New...</source>
         <translation type="unfinished">Novo...</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="34"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="50"/>
+        <source>Remove the selected palette after confirmation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="53"/>
+        <source>&lt;p&gt;&lt;b&gt;Delete Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected palette and its list of piece choices. Library pieces and pieces already used in models are not deleted. At least one palette must remain.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="56"/>
         <source>Delete...</source>
         <translation type="unfinished">Apagar...</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="41"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="63"/>
+        <source>Change the name of the selected palette.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="66"/>
         <source>Rename...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Renomear...</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="48"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="73"/>
+        <source>Create a palette from an online set inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="76"/>
+        <source>&lt;p&gt;&lt;b&gt;Import Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open Import Set Inventory to search for a set and download its inventory. The new palette uses the set description as its name.&lt;/p&gt;&lt;p&gt;The palette stores piece IDs; inventory colors and quantities are not stored. An internet connection is required.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="79"/>
         <source>Import...</source>
         <translation type="unfinished">Importar....</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="55"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="86"/>
+        <source>Move the selected palette one position earlier in the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="89"/>
         <source>Move Up</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Subir</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.ui" line="62"/>
+        <location filename="../common/lc_partpalettedialog.ui" line="96"/>
+        <source>Move the selected palette one position later in the list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partpalettedialog.ui" line="99"/>
         <source>Move Down</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mover para baixo</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.cpp" line="77"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="79"/>
         <source>New Piece Palette</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nova paleta de peças</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.cpp" line="77"/>
-        <location filename="../common/lc_partpalettedialog.cpp" line="116"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="79"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="118"/>
         <source>Palette Name:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nome da paleta:</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.cpp" line="96"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="98"/>
         <source>Are you sure you want to delete the palette &apos;%1&apos;?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Tem a certeza de que pretende eliminar a paleta '%1'?</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.cpp" line="97"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="99"/>
         <source>Delete Piece Palette</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Apagar paleta de peças</translation>
     </message>
     <message>
-        <location filename="../common/lc_partpalettedialog.cpp" line="116"/>
+        <location filename="../common/lc_partpalettedialog.cpp" line="118"/>
         <source>Rename Piece Palette</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Renomear paleta de peças</translation>
@@ -13617,116 +13799,160 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
 <context>
     <name>lcSetsDatabaseDialog</name>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="14"/>
         <source>Sets Database</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Conjuntos de bases de dados</translation>
+        <translation type="obsolete">Conjuntos de bases de dados</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="22"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Import Set Inventory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Search the online Rebrickable database by set name or number. Select a result and choose OK, or double-click it, to download the set inventory for the operation that opened this dialog.&lt;/p&gt;&lt;p&gt;An internet connection is required for searching and downloading inventories.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="17"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="100"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="216"/>
+        <source>Import Set Inventory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="25"/>
+        <source>Enter a set name or number, then press Enter or choose Search.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="28"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="34"/>
         <source>Set Name or Number</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Definir nome ou número</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="29"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="31"/>
+        <source>&lt;p&gt;&lt;b&gt;Search Sets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a set number or words from its name. Press Enter or choose Search to retrieve matching sets. Refine the search if the set you want is not listed.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="41"/>
+        <source>Search the online database using the entered name or number.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="44"/>
         <source>Search</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pesquisa</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="51"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="53"/>
+        <source>Select a set to download its piece inventory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
+        <source>Set Search Results</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="59"/>
+        <source>&lt;p&gt;&lt;b&gt;Search Results&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Results show the set number, name, release year, and piece count. Select the desired set and choose OK, or double-click its row, to download its inventory.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="75"/>
         <source>Number</source>
         <translation>Número</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="80"/>
         <source>Name</source>
         <translation>Nome</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="61"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="85"/>
         <source>Year</source>
         <translation>Ano</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="66"/>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="90"/>
         <source>Pieces</source>
         <translation>Peças</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.ui" line="74"/>
-        <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Base de dados de conjuntos fornecida por &lt;a href="https://www.rebrickable.com"&gt;Rebrickable&lt;/a&gt;</translation>
+        <location filename="../common/lc_setsdatabasedialog.ui" line="98"/>
+        <source>Set data provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
+        <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="obsolete">Base de dados de conjuntos fornecida por &lt;a href="https://www.rebrickable.com"&gt;Rebrickable&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="100"/>
         <source>Please select a set from the list.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Selecione um conjunto da lista.</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
         <source>Set Inventory</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
-        <translation type="unfinished">Definir inventário</translation>
+        <translation type="obsolete">Definir inventário</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="105"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="107"/>
         <source>Downloading</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Baixando</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="106"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="108"/>
         <source>Downloading set inventory</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fazendo download do inventário definido</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="152"/>
         <source>Keyword cannot be empty.</source>
         <translation>A palavra chave não podem ser vazia.</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="152"/>
         <source>Search Sets</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Pesquisar conjuntos</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="155"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="157"/>
         <source>Searching</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Procurando</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="156"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="158"/>
         <source>Connecting to server</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ligar ao servidor</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="216"/>
         <source>Error connecting to server.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erro ao ligar ao servidor.</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
         <source>Connect to Sets Database</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
-        <translation type="unfinished">Conectar ao banco de dados de conjuntos</translation>
+        <translation type="obsolete">Conectar ao banco de dados de conjuntos</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="263"/>
         <source>Error downloading set inventory.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erro ao descarregar o inventário do conjunto.</translation>
     </message>
     <message>
-        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="263"/>
         <source>Download Set Inventory</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Baixar inventário do conjunto</translation>

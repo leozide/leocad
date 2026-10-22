@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcSetsDatabaseDialog</class>
  <widget class="QDialog" name="lcSetsDatabaseDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Import Set Inventory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Search the online Rebrickable database by set name or number. Select a result and choose OK, or double-click it, to download the set inventory for the operation that opened this dialog.&lt;/p&gt;&lt;p&gt;An internet connection is required for searching and downloading inventories.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +14,22 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Sets Database</string>
+   <string>Import Set Inventory</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLineEdit" name="SearchEdit">
+       <property name="toolTip">
+        <string>Enter a set name or number, then press Enter or choose Search.</string>
+       </property>
+       <property name="accessibleName">
+        <string>Set Name or Number</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Search Sets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a set number or words from its name. Press Enter or choose Search to retrieve matching sets. Refine the search if the set you want is not listed.&lt;/p&gt;</string>
+       </property>
        <property name="placeholderText">
         <string>Set Name or Number</string>
        </property>
@@ -25,6 +37,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="SearchButton">
+       <property name="toolTip">
+        <string>Search the online database using the entered name or number.</string>
+       </property>
        <property name="text">
         <string>Search</string>
        </property>
@@ -34,6 +49,15 @@
    </item>
    <item>
     <widget class="QTreeWidget" name="SetsTree">
+     <property name="toolTip">
+      <string>Select a set to download its piece inventory.</string>
+     </property>
+     <property name="accessibleName">
+      <string>Set Search Results</string>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Search Results&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Results show the set number, name, release year, and piece count. Select the desired set and choose OK, or double-click its row, to download its inventory.&lt;/p&gt;</string>
+     </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
@@ -71,7 +95,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</string>
+      <string>Set data provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</string>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>
@@ -84,7 +108,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

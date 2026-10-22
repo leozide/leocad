@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcMinifigDialog</class>
  <widget class="QDialog" name="lcMinifigDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Minifig Wizard&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Build a minifigure by choosing its pieces, colors, and pose. The preview updates as you make changes. Choose OK to insert the minifigure into the current model, or Cancel to close without inserting it.&lt;/p&gt;&lt;p&gt;Templates let you reuse a configuration. Saved, deleted, and imported templates are retained even if you cancel the wizard.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,11 +19,17 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QWidget" name="widget" native="true">
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Minifigure Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each section has a piece selector and a color button. Some sections also have a rotation control in degrees. Choose None in a piece selector to omit that piece.&lt;/p&gt;</string>
+     </property>
      <layout class="QGridLayout" name="MinifigLayout"/>
     </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="TemplateGroup">
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Load a saved configuration of pieces, colors, and angles, or save the current configuration under a name. Choosing another template replaces the current preview configuration.&lt;/p&gt;&lt;p&gt;Changes to the preview are not saved as a template until you use Save. Template operations are retained when the wizard closes, including after Cancel.&lt;/p&gt;</string>
+     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -33,6 +42,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QComboBox" name="TemplateComboBox">
+        <property name="toolTip">
+         <string>Load a saved configuration of pieces, colors, and angles.</string>
+        </property>
+        <property name="accessibleName">
+         <string>Minifigure Template</string>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -43,6 +58,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="TemplateSaveButton">
+        <property name="toolTip">
+         <string>Save the current minifigure configuration as a named template.</string>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;p&gt;&lt;b&gt;Save Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a name for the current pieces, colors, and pose. Reusing an existing name asks before replacing that template. The Default template cannot be overwritten.&lt;/p&gt;</string>
+        </property>
         <property name="text">
          <string>Save...</string>
         </property>
@@ -50,6 +71,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="TemplateDeleteButton">
+        <property name="toolTip">
+         <string>Delete the selected saved template.</string>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;p&gt;&lt;b&gt;Delete Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected named template after confirmation. This does not remove pieces from the preview or an existing model. The Default template cannot be deleted.&lt;/p&gt;</string>
+        </property>
         <property name="text">
          <string>Delete...</string>
         </property>
@@ -57,6 +84,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="TemplateImportButton">
+        <property name="toolTip">
+         <string>Add templates from a .minifig file.</string>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;p&gt;&lt;b&gt;Import Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add saved configurations from a .minifig file to the template collection. Existing template names are kept when the imported file contains the same names.&lt;/p&gt;</string>
+        </property>
         <property name="text">
          <string>Import...</string>
         </property>
@@ -64,6 +97,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="TemplateExportButton">
+        <property name="toolTip">
+         <string>Save the entire template collection to a .minifig file.</string>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;p&gt;&lt;b&gt;Export Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write all templates to a .minifig file for backup or sharing. Export includes the entire collection, not just the selected template.&lt;/p&gt;</string>
+        </property>
         <property name="text">
          <string>Export...</string>
         </property>
@@ -78,7 +117,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

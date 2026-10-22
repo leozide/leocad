@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_setsdatabasedialog.h"
 #include "ui_lc_setsdatabasedialog.h"
 #include "lc_http.h"
@@ -9,6 +10,7 @@ lcSetsDatabaseDialog::lcSetsDatabaseDialog(QWidget* Parent)
     ui(new Ui::lcSetsDatabaseDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 	ui->SearchEdit->installEventFilter(this);
 
 	mHttpManager = new lcHttpManager(this);
@@ -95,7 +97,7 @@ void lcSetsDatabaseDialog::accept()
 	QTreeWidgetItem* Current = ui->SetsTree->currentItem();
 	if (!Current)
 	{
-		QMessageBox::information(this, tr("Set Inventory"), tr("Please select a set from the list."));
+		QMessageBox::information(this, tr("Import Set Inventory"), tr("Please select a set from the list."));
 		return;
 	}
 
@@ -211,7 +213,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 
 		if (mKeys.isEmpty())
 		{
-			QMessageBox::warning(this, tr("Connect to Sets Database"), tr("Error connecting to server."));
+			QMessageBox::warning(this, tr("Import Set Inventory"), tr("Error connecting to server."));
 			close();
 		}
 

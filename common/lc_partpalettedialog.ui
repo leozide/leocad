@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcPartPaletteDialog</class>
  <widget class="QDialog" name="lcPartPaletteDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Piece Palettes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Organize reusable collections of pieces in the piece browser. Create, rename, delete, import, or reorder palettes, then choose OK to apply the changes. Cancel discards these palette changes.&lt;/p&gt;&lt;p&gt;Palettes organize piece choices; they do not change pieces already placed in a model.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,12 +20,25 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListWidget" name="PaletteList"/>
+      <widget class="QListWidget" name="PaletteList">
+       <property name="toolTip">
+        <string>Select the palette to rename, delete, or move.</string>
+       </property>
+       <property name="accessibleName">
+        <string>Piece Palettes</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Palette List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a palette before using Rename, Delete, Move Up, or Move Down. The list order determines the palette order in the piece browser.&lt;/p&gt;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QPushButton" name="NewButton">
+         <property name="toolTip">
+          <string>Create a new empty piece palette.</string>
+         </property>
          <property name="text">
           <string>New...</string>
          </property>
@@ -30,6 +46,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="DeleteButton">
+         <property name="toolTip">
+          <string>Remove the selected palette after confirmation.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Delete Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected palette and its list of piece choices. Library pieces and pieces already used in models are not deleted. At least one palette must remain.&lt;/p&gt;</string>
+         </property>
          <property name="text">
           <string>Delete...</string>
          </property>
@@ -37,6 +59,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="RenameButton">
+         <property name="toolTip">
+          <string>Change the name of the selected palette.</string>
+         </property>
          <property name="text">
           <string>Rename...</string>
          </property>
@@ -44,6 +69,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="ImportButton">
+         <property name="toolTip">
+          <string>Create a palette from an online set inventory.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Import Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open Import Set Inventory to search for a set and download its inventory. The new palette uses the set description as its name.&lt;/p&gt;&lt;p&gt;The palette stores piece IDs; inventory colors and quantities are not stored. An internet connection is required.&lt;/p&gt;</string>
+         </property>
          <property name="text">
           <string>Import...</string>
          </property>
@@ -51,6 +82,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="MoveUpButton">
+         <property name="toolTip">
+          <string>Move the selected palette one position earlier in the list.</string>
+         </property>
          <property name="text">
           <string>Move Up</string>
          </property>
@@ -58,6 +92,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="MoveDownButton">
+         <property name="toolTip">
+          <string>Move the selected palette one position later in the list.</string>
+         </property>
          <property name="text">
           <string>Move Down</string>
          </property>
@@ -86,7 +123,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_partpalettedialog.h"
 #include "ui_lc_partpalettedialog.h"
 #include "lc_partselectionwidget.h"
@@ -9,6 +10,7 @@ lcPartPaletteDialog::lcPartPaletteDialog(QWidget* Parent, std::vector<lcPartPale
 	: QDialog(Parent), ui(new Ui::lcPartPaletteDialog), mPartPalettes(PartPalettes)
 {
     ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(ui->NewButton, &QPushButton::clicked, this, &lcPartPaletteDialog::NewButtonClicked);
 	connect(ui->DeleteButton, &QPushButton::clicked, this, &lcPartPaletteDialog::DeleteButtonClicked);

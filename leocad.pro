@@ -175,13 +175,6 @@ ios {
 SOURCES += \
 	common/camera.cpp \
 	common/group.cpp \
-	common/lc_modelhistory.cpp \
-	common/light.cpp \
-	common/minifig.cpp \
-	common/object.cpp \
-	common/piece.cpp \
-	common/project.cpp \
-	common/texfont.cpp \
 	common/lc_aboutdialog.cpp \
 	common/lc_application.cpp \
 	common/lc_arraydialog.cpp \
@@ -219,6 +212,7 @@ SOURCES += \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \
 	common/lc_model.cpp \
+	common/lc_modelhistory.cpp \
 	common/lc_modellistdialog.cpp \
 	common/lc_objectproperty.cpp \
 	common/lc_pagesetupdialog.cpp \
@@ -249,22 +243,20 @@ SOURCES += \
 	common/lc_viewsphere.cpp \
 	common/lc_viewwidget.cpp \
 	common/lc_zipfile.cpp \
-	qt/qtmain.cpp \
-	qt/lc_qpropertiesdialog.cpp \
+	common/light.cpp \
+	common/minifig.cpp \
+	common/object.cpp \
+	common/piece.cpp \
+	common/project.cpp \
+	common/texfont.cpp \
 	qt/lc_qpreferencesdialog.cpp \
+	qt/lc_qpropertiesdialog.cpp \
 	qt/lc_qutils.cpp \
-	qt/lc_renderdialog.cpp
+	qt/lc_renderdialog.cpp \
+	qt/qtmain.cpp
 HEADERS += \
 	common/camera.h \
 	common/group.h \
-	common/lc_modelhistory.h \
-	common/lc_result.h \
-	common/light.h \
-	common/minifig.h \
-	common/object.h \
-	common/piece.h \
-	common/project.h \
-	common/texfont.h \
 	common/lc_aboutdialog.h \
 	common/lc_application.h \
 	common/lc_arraydialog.h \
@@ -304,6 +296,7 @@ HEADERS += \
 	common/lc_meshloader.h \
 	common/lc_minifigdialog.h \
 	common/lc_model.h \
+	common/lc_modelhistory.h \
 	common/lc_modellistdialog.h \
 	common/lc_objecthistory.h \
 	common/lc_objectproperty.h \
@@ -316,6 +309,7 @@ HEADERS += \
 	common/lc_previewwidget.h \
 	common/lc_profile.h \
 	common/lc_propertieswidget.h \
+	common/lc_result.h \
 	common/lc_scene.h \
 	common/lc_selectdialog.h \
 	common/lc_setsdatabasedialog.h \
@@ -335,8 +329,14 @@ HEADERS += \
 	common/lc_viewsphere.h \
 	common/lc_viewwidget.h \
 	common/lc_zipfile.h \
-	qt/lc_qpropertiesdialog.h \
+	common/light.h \
+	common/minifig.h \
+	common/object.h \
+	common/piece.h \
+	common/project.h \
+	common/texfont.h \
 	qt/lc_qpreferencesdialog.h \
+	qt/lc_qpropertiesdialog.h \
 	qt/lc_qutils.h \
 	qt/lc_renderdialog.h
 FORMS += \

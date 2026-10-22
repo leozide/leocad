@@ -176,9 +176,6 @@ public:
 	QString GetPieceDataLoadError(const lcPieceData* PieceData) const;
 	void ClearPieceDataLoadError(const lcPieceData* PieceData);
 
-	// Returns a borrowed registered texture for a resolved source. No I/O or acquisition.
-	lcTexture* FindTexture(const lcFileSource& Source);
-
 	// Resolves or creates a texture and returns one scoped reference without decoding or uploading.
 	lcTextureRef AcquireTexture(const char* TextureName, Project* CurrentProject, bool SearchProjectFolder);
 	lcTextureRef AcquireTexture(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source);
@@ -320,17 +317,20 @@ protected:
 	void ReadArchiveDescriptions(const QString& OfficialFileName, const QString& UnofficialFileName);
 	void ReadDirectoryDescriptions(const QFileInfoList (&FileLists)[static_cast<int>(lcLibraryFolderType::Count)], bool ShowProgress);
 
-	// Reads/writes compressed archive caches validated against archive checksums.
-	bool ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
-	bool WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile);
+	enum class CacheType : quint32
+	{
+		Archive = 0x0001,
+		Directory = 0x0002
+	};
+
+	// Reads/writes Qt-compressed caches with version, size and payload checksum validation.
+	// Archive caches also validate source archive sizes and modification times.
+	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile, CacheType Type);
+	bool WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type);
 
 	// Restores/saves descriptions and patterned parent IDs in library index order.
 	bool LoadCacheIndex(const QString& FileName);
 	bool SaveArchiveCacheIndex(const QString& FileName);
-
-	// Reads/writes compressed directory caches with version and size checks.
-	bool ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
-	bool WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile);
 
 	// Builds primitive data after dependency tracking selects this worker as its loader.
 	lcResult<void> LoadPrimitiveData(lcLibraryPrimitive* Primitive);
@@ -352,7 +352,6 @@ protected:
 
 	void ReleaseBuffers();
 
-private:
 	using DirectoryFilePaths = std::unordered_map<const lcPieceData*, QString>;
 
 	// Classifies descriptions, decorations and alias parents after all parts are registered.
@@ -363,8 +362,6 @@ private:
 	// Description cache strings are bounded to the piece name/description length limit.
 	static bool ReadIndexString(lcMemFile& File, std::string& String);
 	static bool WriteIndexString(lcMemFile& File, const std::string& String);
-
-protected:
 
 	// Library directory, archive readers and primitive sources; workers drain before replacement or teardown.
 	QDir mLibraryDir;

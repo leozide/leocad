@@ -19,9 +19,6 @@ public:
 	// Stop workers and release mesh references before calling.
 	void Clear();
 
-	// Returns a borrowed registered texture for this source, or nullptr. No creation or acquisition.
-	lcTexture* FindTexture(const lcFileSource& Source);
-
 	// Returns an existing texture for this source or creates one.
 	// Call on the UI thread and release the returned reference when done.
 	// Returns nullptr for an invalid name or missing source.

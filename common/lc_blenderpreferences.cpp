@@ -11,7 +11,6 @@
 #include "lc_file.h"
 #include "lc_qutils.h"
 #include "project.h"
-#include <zlib.h>
 
 #ifndef LC_DISABLE_BLENDER
 

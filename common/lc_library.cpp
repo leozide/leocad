@@ -21,23 +21,10 @@
 #include "lc_model.h"
 #include "lc_view.h"
 #include "lc_string.h"
-#include <zlib.h>
 
-#if MAX_MEM_LEVEL >= 8
-#  define DEF_MEM_LEVEL 8
-#else
-#  define DEF_MEM_LEVEL	 MAX_MEM_LEVEL
-#endif
-
-// Description indices include classification flags and resolved patterned parent IDs.
-constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0113;
+// Cache payloads use Qt compression with checksum validation.
+constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0114;
 constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
-
-enum class lcLibraryCacheFlag : quint32
-{
-	Archive = 0x0001,
-	Directory = 0x0002
-};
 
 enum class lcLibrarySourceType
 {
@@ -452,11 +439,6 @@ lcFileSource lcPiecesLibrary::ResolveTextureSource(const char* TextureName, cons
 	}
 
 	return Source;
-}
-
-lcTexture* lcPiecesLibrary::FindTexture(const lcFileSource& Source)
-{
-	return mTextureManager->FindTexture(Source);
 }
 
 lcTextureRef lcPiecesLibrary::AcquireTexture(const char* TextureName, const std::vector<QString>& SearchDirectories, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& EmbeddedData, lcFileSource& Source)
@@ -930,7 +912,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 
 	std::map<std::string, CachedDescription> CachedDescriptions;
 
-	if (ReadDirectoryCacheFile(IndexFileName, IndexFile) && IndexFile.ReadQString() == mLibraryDir.absolutePath())
+	if (ReadCacheFile(IndexFileName, IndexFile, CacheType::Directory) && IndexFile.ReadQString() == mLibraryDir.absolutePath())
 	{
 		quint32 Count;
 
@@ -1090,11 +1072,11 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			NewIndexFile.WriteU64(FileTime);
 		}
 
-		WriteDirectoryCacheFile(IndexFileName, NewIndexFile);
+		WriteCacheFile(IndexFileName, NewIndexFile, CacheType::Directory);
 	}
 }
 
-bool lcPiecesLibrary::ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile)
+bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFile, CacheType Type)
 {
 	QFile File(FileName);
 
@@ -1103,204 +1085,28 @@ bool lcPiecesLibrary::ReadArchiveCacheFile(const QString& FileName, lcMemFile& C
 
 	quint32 CacheVersion, CacheFlags;
 
-	if (File.read((char*)&CacheVersion, sizeof(CacheVersion)) != sizeof(CacheVersion) || CacheVersion != LC_LIBRARY_CACHE_VERSION)
+	if (File.read(reinterpret_cast<char*>(&CacheVersion), sizeof(CacheVersion)) != sizeof(CacheVersion) || CacheVersion != LC_LIBRARY_CACHE_VERSION)
 		return false;
 
-	if (File.read((char*)&CacheFlags, sizeof(CacheFlags)) != sizeof(CacheFlags) ||
-		CacheFlags != static_cast<quint32>(lcLibraryCacheFlag::Archive))
+	if (File.read(reinterpret_cast<char*>(&CacheFlags), sizeof(CacheFlags)) != sizeof(CacheFlags) || CacheFlags != static_cast<quint32>(Type))
 		return false;
 
-	qint64 CacheCheckSum[4];
+	if (Type == CacheType::Archive)
+	{
+		qint64 CacheCheckSum[4];
 
-	if (File.read((char*)&CacheCheckSum, sizeof(CacheCheckSum)) != sizeof(CacheCheckSum) || memcmp(CacheCheckSum, mArchiveCheckSum, sizeof(CacheCheckSum)))
-		return false;
+		if (File.read(reinterpret_cast<char*>(CacheCheckSum), sizeof(CacheCheckSum)) != sizeof(CacheCheckSum) ||
+			memcmp(CacheCheckSum, mArchiveCheckSum, sizeof(CacheCheckSum)))
+			return false;
+	}
 
 	quint32 UncompressedSize;
 
-	if (File.read((char*)&UncompressedSize, sizeof(UncompressedSize)) != sizeof(UncompressedSize))
+	if (File.read(reinterpret_cast<char*>(&UncompressedSize), sizeof(UncompressedSize)) != sizeof(UncompressedSize))
 		return false;
 
-	QByteArray CompressedData = File.readAll();
+	const QByteArray Data = qUncompress(File.readAll());
 
-	CacheFile.SetLength(UncompressedSize);
-	CacheFile.Seek(0, SEEK_SET);
-
-	if (UncompressedSize && !CacheFile.mBuffer)
-		return false;
-
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	constexpr qsizetype CHUNK = 16384;
-#else
-	constexpr int CHUNK = 16384;
-#endif
-	int ret;
-	unsigned have;
-	z_stream strm;
-	unsigned char in[CHUNK];
-	unsigned char out[CHUNK];
-	int pos;
-
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.avail_in = 0;
-	strm.next_in = Z_NULL;
-	pos = 0;
-
-	ret = inflateInit2(&strm, -MAX_WBITS);
-	if (ret != Z_OK)
-		return false;
-
-	do
-	{
-		strm.avail_in = lcMin(CompressedData.size() - pos, CHUNK);
-		strm.next_in = in;
-
-		if (strm.avail_in == 0)
-			break;
-
-		memcpy(in, CompressedData.constData() + pos, strm.avail_in);
-		pos += strm.avail_in;
-
-		do
-		{
-			strm.avail_out = CHUNK;
-			strm.next_out = out;
-			ret = inflate(&strm, Z_NO_FLUSH);
-
-			switch (ret)
-			{
-			case Z_NEED_DICT:
-				Q_FALLTHROUGH();
-			case Z_DATA_ERROR:
-				Q_FALLTHROUGH();
-			case Z_MEM_ERROR:
-				Q_FALLTHROUGH();
-			case Z_STREAM_ERROR:
-				(void)inflateEnd(&strm);
-				return false;
-			}
-
-			have = CHUNK - strm.avail_out;
-
-			if (strm.total_out > UncompressedSize)
-			{
-				inflateEnd(&strm);
-				return false;
-			}
-
-			CacheFile.WriteBuffer(out, have);
-		} while (strm.avail_out == 0);
-	} while (ret != Z_STREAM_END);
-
-	(void)inflateEnd(&strm);
-
-	CacheFile.Seek(0, SEEK_SET);
-
-	return ret == Z_STREAM_END && strm.total_out == UncompressedSize;
-}
-
-bool lcPiecesLibrary::WriteArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile)
-{
-	QFile File(FileName);
-
-	if (!File.open(QIODevice::WriteOnly))
-		return false;
-
-	constexpr quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
-	constexpr quint32 CacheFlags = static_cast<quint32>(lcLibraryCacheFlag::Archive);
-
-	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) != sizeof(CacheVersion))
-		return false;
-
-	if (File.write((char*)&CacheFlags, sizeof(CacheFlags)) != sizeof(CacheFlags))
-		return false;
-
-	if (File.write((char*)&mArchiveCheckSum, sizeof(mArchiveCheckSum)) != sizeof(mArchiveCheckSum))
-		return false;
-
-	const quint32 UncompressedSize = (quint32)CacheFile.GetLength();
-
-	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) != sizeof(UncompressedSize))
-		return false;
-
-	constexpr size_t BufferSize = 16384;
-	char WriteBuffer[BufferSize];
-	z_stream Stream;
-	quint32 Crc32 = 0;
-
-	CacheFile.Seek(0, SEEK_SET);
-
-	Stream.zalloc = nullptr;
-	Stream.zfree = nullptr;
-	Stream.opaque = nullptr;
-
-	if (deflateInit2(&Stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY) != Z_OK)
-		return false;
-
-	Bytef* BufferIn = CacheFile.mBuffer;
-	int FlushMode;
-	int DeflateResult = Z_OK;
-
-	do
-	{
-		uInt Read = (uInt)lcMin(CacheFile.GetLength() - (BufferIn - CacheFile.mBuffer), BufferSize);
-		Stream.avail_in = Read;
-		Stream.next_in = BufferIn;
-		Crc32 = crc32(Crc32, BufferIn, Read);
-		BufferIn += Read;
-
-		FlushMode = (BufferIn >= CacheFile.mBuffer + CacheFile.GetLength()) ? Z_FINISH : Z_NO_FLUSH;
-
-		do
-		{
-			Stream.avail_out = BufferSize;
-			Stream.next_out = (Bytef*)WriteBuffer;
-			DeflateResult = deflate(&Stream, FlushMode);
-
-			if (DeflateResult != Z_OK && DeflateResult != Z_STREAM_END && DeflateResult != Z_BUF_ERROR)
-			{
-				deflateEnd(&Stream);
-				return false;
-			}
-
-			const qint64 BytesToWrite = static_cast<qint64>(BufferSize - Stream.avail_out);
-
-			if (File.write(WriteBuffer, BytesToWrite) != BytesToWrite)
-			{
-				deflateEnd(&Stream);
-				return false;
-			}
-		} while (Stream.avail_out == 0);
-	} while (FlushMode != Z_FINISH);
-
-	deflateEnd(&Stream);
-
-	return DeflateResult == Z_STREAM_END;
-}
-
-bool lcPiecesLibrary::ReadDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile)
-{
-	QFile File(FileName);
-
-	if (!File.open(QIODevice::ReadOnly))
-		return false;
-
-	quint32 CacheVersion, CacheFlags;
-
-	if (File.read((char*)&CacheVersion, sizeof(CacheVersion)) != sizeof(CacheVersion) || CacheVersion != LC_LIBRARY_CACHE_VERSION)
-		return false;
-
-	if (File.read((char*)&CacheFlags, sizeof(CacheFlags)) != sizeof(CacheFlags) ||
-		CacheFlags != static_cast<quint32>(lcLibraryCacheFlag::Directory))
-		return false;
-
-	quint32 UncompressedSize;
-
-	if (File.read((char*)&UncompressedSize, sizeof(UncompressedSize)) != sizeof(UncompressedSize))
-		return false;
-
-	QByteArray Data = qUncompress(File.readAll());
 	if (Data.isEmpty() || static_cast<quint64>(Data.size()) != UncompressedSize)
 		return false;
 
@@ -1316,31 +1122,34 @@ bool lcPiecesLibrary::ReadDirectoryCacheFile(const QString& FileName, lcMemFile&
 	return true;
 }
 
-bool lcPiecesLibrary::WriteDirectoryCacheFile(const QString& FileName, lcMemFile& CacheFile)
+bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type)
 {
+	if (CacheFile.GetLength() > static_cast<size_t>(std::numeric_limits<int>::max()))
+		return false;
+
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 		return false;
 
 	constexpr quint32 CacheVersion = LC_LIBRARY_CACHE_VERSION;
-	if (File.write((char*)&CacheVersion, sizeof(CacheVersion)) != sizeof(CacheVersion))
+	const quint32 CacheFlags = static_cast<quint32>(Type);
+
+	if (File.write(reinterpret_cast<const char*>(&CacheVersion), sizeof(CacheVersion)) != sizeof(CacheVersion) ||
+		File.write(reinterpret_cast<const char*>(&CacheFlags), sizeof(CacheFlags)) != sizeof(CacheFlags))
 		return false;
 
-	constexpr quint32 CacheFlags = static_cast<quint32>(lcLibraryCacheFlag::Directory);
-	if (File.write((char*)&CacheFlags, sizeof(CacheFlags)) != sizeof(CacheFlags))
+	if (Type == CacheType::Archive && File.write(reinterpret_cast<const char*>(mArchiveCheckSum), sizeof(mArchiveCheckSum)) != sizeof(mArchiveCheckSum))
 		return false;
 
-	const quint32 UncompressedSize = (quint32)CacheFile.GetLength();
-	if (File.write((char*)&UncompressedSize, sizeof(UncompressedSize)) != sizeof(UncompressedSize))
+	const quint32 UncompressedSize = static_cast<quint32>(CacheFile.GetLength());
+
+	if (File.write(reinterpret_cast<const char*>(&UncompressedSize), sizeof(UncompressedSize)) != sizeof(UncompressedSize))
 		return false;
 
-	const QByteArray CompressedData = qCompress(CacheFile.mBuffer, (int)CacheFile.GetLength());
+	const QByteArray CompressedData = qCompress(CacheFile.mBuffer, static_cast<int>(CacheFile.GetLength()));
 
-	if (File.write(CompressedData) != CompressedData.size())
-		return false;
-
-	return true;
+	return !CompressedData.isEmpty() && File.write(CompressedData) == CompressedData.size();
 }
 
 bool lcPiecesLibrary::ReadIndexString(lcMemFile& File, std::string& String)
@@ -1517,7 +1326,7 @@ bool lcPiecesLibrary::LoadCacheIndex(const QString& FileName)
 {
 	lcMemFile IndexFile;
 
-	if (!ReadArchiveCacheFile(FileName, IndexFile))
+	if (!ReadCacheFile(FileName, IndexFile, CacheType::Archive))
 		return false;
 
 	quint32 NumFiles;
@@ -1556,7 +1365,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 		IndexFile.WriteU8(CacheData.Flags);
 	}
 
-	return WriteArchiveCacheFile(FileName, IndexFile);
+	return WriteCacheFile(FileName, IndexFile, CacheType::Archive);
 }
 
 void lcPiecesLibrary::RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority)
@@ -1848,7 +1657,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 	{
 		lcMemFile CacheData;
 
-		if (ReadArchiveCacheFile(Source.CachePath, CacheData))
+		if (ReadCacheFile(Source.CachePath, CacheData, CacheType::Archive))
 		{
 			qint32 Flags;
 
@@ -1970,7 +1779,7 @@ void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Sourc
 	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(MeshData))
 		return;
 
-	WriteArchiveCacheFile(Source.CachePath, MeshData);
+	WriteCacheFile(Source.CachePath, MeshData, CacheType::Archive);
 }
 
 lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)

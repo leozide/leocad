@@ -135,13 +135,6 @@ private:
 		std::unique_ptr<lcMesh> SynthMesh;
 	};
 
-	// UI-thread delivery retains the load hold after publication, until callbacks finish.
-	struct PieceNotification
-	{
-		std::shared_ptr<PieceRequest> RequestedPiece;
-		QString Error;
-	};
-
 	// Retains the base identity; cancellation makes delivery safe after instance deletion.
 	struct SynthNotification
 	{
@@ -156,8 +149,8 @@ private:
 	void DispatchJobs();
 
 	// Process a bounded batch of results and upload retries, then start more jobs.
-	// Returns whether any result or retry was processed; consumer signals remain deferred.
-	bool ProcessCompletions();
+	// Consumer signals remain deferred.
+	void ProcessCompletions();
 
 	// Handle worker results on the UI thread.
 	void ProcessPieceCompletion(Completion& Completed);
@@ -177,9 +170,6 @@ private:
 	void FinishSynthsWithSettledTextures();
 	void CompletePieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
 	void CompleteSynthRequest(const std::shared_ptr<SynthRequest>& RequestedSynth);
-
-	// Wait for a captured request to settle without delivering consumer signals.
-	bool WaitForPieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
 
 	// Sleep until a worker completion arrives or the next texture upload retry is due.
 	void WaitForCompletionOrRetry();
@@ -224,7 +214,8 @@ private:
 	std::deque<Completion> mCompletions;
 
 	// UI-thread only; public signals are deferred until outside synchronous waits.
-	std::deque<PieceNotification> mPieceNotifications;
+	// Retains each request and its definition reference through notification delivery.
+	std::deque<std::shared_ptr<PieceRequest>> mPieceNotifications;
 	std::deque<SynthNotification> mSynthNotifications;
 
 	Q_DECLARE_TR_FUNCTIONS(lcAssetLoader)

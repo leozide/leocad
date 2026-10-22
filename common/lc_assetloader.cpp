@@ -231,12 +231,11 @@ void lcAssetLoader::DispatchJobs()
 	}
 }
 
-bool lcAssetLoader::ProcessCompletions()
+void lcAssetLoader::ProcessCompletions()
 {
 	// Bounded UI-thread publication also runs during scoped waits, without public callbacks.
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	bool Progress = false;
 	constexpr int MaxCompletionsPerPump = 16;
 
 	for (int Processed = 0; Processed < MaxCompletionsPerPump; Processed++)
@@ -285,8 +284,6 @@ bool lcAssetLoader::ProcessCompletions()
 			}
 		}
 
-		Progress = true;
-
 		if (Retry)
 		{
 			UploadTextureRequest(Retry);
@@ -312,14 +309,13 @@ bool lcAssetLoader::ProcessCompletions()
 	{
 		return Entry.second->RetryAt && Entry.second->RetryAt <= Now;
 	});
+
 	mCompletionMutex.lock();
 	const bool NeedsPump = !mCompletions.empty() || RetryDue;
 	mCompletionMutex.unlock();
 
 	if (NeedsPump)
 		QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
-
-	return Progress;
 }
 
 void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
@@ -607,7 +603,7 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	lcPieceData* PieceData = RequestedPiece->PieceData.Get();
-	QString LoadError = RequestedPiece->Error;
+	QString& LoadError = RequestedPiece->Error;
 
 	if (LoadError.isEmpty() && !RequestedPiece->StagedMesh && !RequestedPiece->EmptyGeometry)
 		LoadError = tr("Could not load part %1.").arg(RequestedPiece->Source.FileName);
@@ -625,7 +621,7 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 		mPieceRequests.erase(It);
 	RequestedPiece->State = Loaded ? RequestState::Succeeded : RequestState::Failed;
 
-	mPieceNotifications.push_back({ RequestedPiece, std::move(LoadError) });
+	mPieceNotifications.push_back(RequestedPiece);
 
 	QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 }
@@ -662,15 +658,15 @@ void lcAssetLoader::DispatchNotifications()
 
 	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mPieceNotifications.empty(); Delivered++)
 	{
-		PieceNotification Notification = std::move(mPieceNotifications.front());
+		const std::shared_ptr<PieceRequest> RequestedPiece = std::move(mPieceNotifications.front());
 
 		mPieceNotifications.pop_front();
 
-		lcPieceData* PieceData = Notification.RequestedPiece->PieceData.Get();
+		lcPieceData* PieceData = RequestedPiece->PieceData.Get();
 
-		if (Notification.RequestedPiece->State == RequestState::Cancelled || !Notification.RequestedPiece->PieceData.HasOtherReferences())
+		if (RequestedPiece->State == RequestState::Cancelled || !RequestedPiece->PieceData.HasOtherReferences())
 		{
-			Notification.RequestedPiece->PieceData.Reset();
+			RequestedPiece->PieceData.Reset();
 
 			continue;
 		}
@@ -678,19 +674,19 @@ void lcAssetLoader::DispatchNotifications()
 		QPointer<lcAssetLoader> LoaderGuard(this);
 		QPointer<lcPiecesLibrary> LibraryGuard(mLibrary);
 
-		if (Notification.RequestedPiece->State == RequestState::Succeeded)
+		if (RequestedPiece->State == RequestState::Succeeded)
 			emit mLibrary->PartLoaded(PieceData);
 		else
-			emit mLibrary->PartLoadFailed(PieceData, Notification.Error);
+			emit mLibrary->PartLoadFailed(PieceData, RequestedPiece->Error);
 
 		if (!LoaderGuard || !LibraryGuard)
 		{
 			// Library teardown can delete the definition while delivering this callback.
-			Notification.RequestedPiece->PieceData.Release();
+			RequestedPiece->PieceData.Release();
 			return;
 		}
 
-		Notification.RequestedPiece->PieceData.Reset();
+		RequestedPiece->PieceData.Reset();
 	}
 
 	std::unordered_set<lcPieceData*> SettledSynths;
@@ -772,29 +768,6 @@ void lcAssetLoader::WaitForCompletionOrRetry()
 	}
 }
 
-bool lcAssetLoader::WaitForPieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece)
-{
-	Q_ASSERT(QThread::currentThread() == thread());
-
-	QOpenGLContext* const PreviousContext = QOpenGLContext::currentContext();
-	QSurface* const PreviousSurface = PreviousContext ? PreviousContext->surface() : nullptr;
-
-	for (;;)
-	{
-		ProcessCompletions();
-
-		if (mStopping || RequestedPiece->IsFinished())
-			break;
-
-		WaitForCompletionOrRetry();
-	}
-
-	if (PreviousContext && PreviousSurface && (QOpenGLContext::currentContext() != PreviousContext || PreviousContext->surface() != PreviousSurface))
-		PreviousContext->makeCurrent(PreviousSurface);
-
-	return RequestedPiece->State == RequestState::Succeeded;
-}
-
 bool lcAssetLoader::WaitForPieces(const std::vector<lcPieceData*>& Pieces)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
@@ -819,10 +792,28 @@ bool lcAssetLoader::WaitForPieces(const std::vector<lcPieceData*>& Pieces)
 
 	DispatchJobs();
 
+	QOpenGLContext* const PreviousContext = QOpenGLContext::currentContext();
+	QSurface* const PreviousSurface = PreviousContext ? PreviousContext->surface() : nullptr;
+
 	bool Ready = true;
 
 	for (const std::shared_ptr<PieceRequest>& RequestedPiece : Requests)
-		Ready = WaitForPieceRequest(RequestedPiece) && Ready;
+	{
+		for (;;)
+		{
+			ProcessCompletions();
+
+			if (mStopping || RequestedPiece->IsFinished())
+				break;
+
+			WaitForCompletionOrRetry();
+		}
+
+		Ready = RequestedPiece->State == RequestState::Succeeded && Ready;
+	}
+
+	if (PreviousContext && PreviousSurface && (QOpenGLContext::currentContext() != PreviousContext || PreviousContext->surface() != PreviousSurface))
+		PreviousContext->makeCurrent(PreviousSurface);
 
 	return Ready;
 }
@@ -939,9 +930,9 @@ void lcAssetLoader::InvalidatePieceLoad(lcPieceData* PieceData)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	for (PieceNotification& Pending : mPieceNotifications)
-		if (Pending.RequestedPiece->PieceData == PieceData)
-			Pending.RequestedPiece->State = RequestState::Cancelled;
+	for (const std::shared_ptr<PieceRequest>& Pending : mPieceNotifications)
+		if (Pending->PieceData == PieceData)
+			Pending->State = RequestState::Cancelled;
 
 	const auto It = mPieceRequests.find(PieceData);
 
@@ -1166,11 +1157,11 @@ void lcAssetLoader::Shutdown()
 
 	while (!mPieceNotifications.empty())
 	{
-		PieceNotification Notification = std::move(mPieceNotifications.front());
+		const std::shared_ptr<PieceRequest> RequestedPiece = std::move(mPieceNotifications.front());
 
 		mPieceNotifications.pop_front();
 
-		Notification.RequestedPiece->PieceData.Reset();
+		RequestedPiece->PieceData.Reset();
 	}
 
 	while (!mSynthNotifications.empty())

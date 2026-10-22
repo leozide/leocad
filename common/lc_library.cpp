@@ -840,18 +840,22 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 	mHasUnofficial = !FileLists[static_cast<int>(lcLibraryFolderType::Unofficial)].isEmpty();
 	ReadDirectoryDescriptions(FileLists, ShowProgress);
 
+	constexpr std::pair<const char*, bool> PrimitiveDirectories[] =
+	{
+		{ "p/", false },
+		{ "parts/s/", true }
+	};
+
 	for (unsigned int BaseFolderIdx = 0; BaseFolderIdx < LC_ARRAY_COUNT(BaseFolders); BaseFolderIdx++)
 	{
 		std::unique_ptr<lcLibrarySource> Source(new lcLibrarySource);
 		Source->Type = lcLibrarySourceType::Library;
 
-		const char* PrimitiveDirectories[] = { "p/", "parts/s/" };
-		bool SubFileDirectories[] = { false, false, true };
 		QDir BaseDir(LibraryDir.absoluteFilePath(QLatin1String(BaseFolders[BaseFolderIdx])));
 
-		for (int DirectoryIdx = 0; DirectoryIdx < (int)(LC_ARRAY_COUNT(PrimitiveDirectories)); DirectoryIdx++)
+		for (const auto& [Path, SubFile] : PrimitiveDirectories)
 		{
-			QString ChildPath = BaseDir.absoluteFilePath(QLatin1String(PrimitiveDirectories[DirectoryIdx]));
+			QString ChildPath = BaseDir.absoluteFilePath(QLatin1String(Path));
 			QDirIterator DirIterator(ChildPath, QStringList() << QLatin1String("*.dat"), QDir::Files | QDir::Hidden | QDir::Readable, QDirIterator::Subdirectories);
 
 			while (DirIterator.hasNext())
@@ -870,7 +874,6 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (BaseFolderIdx == static_cast<int>(lcLibraryFolderType::Unofficial))
 					mHasUnofficial = true;
 
-				const bool SubFile = SubFileDirectories[DirectoryIdx];
 				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(FileName), RelativeName, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
 			}
 		}

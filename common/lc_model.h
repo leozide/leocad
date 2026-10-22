@@ -12,6 +12,13 @@ enum class lcGeometryBoundsMode
 	AvailableOnly
 };
 
+enum class lcImageBackground
+{
+	Default,
+	Transparent,
+	Opaque
+};
+
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
 struct lcModelHistoryEditState;
@@ -356,7 +363,7 @@ public:
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
 	// Empty inventory succeeds with a null image; rendering failures return an error.
 	lcResult<QImage> GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const;
-	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End);
+	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, lcImageBackground Background);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -477,7 +484,7 @@ public:
 	void UpdateInterface();
 
 protected:
-	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera);
+	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, lcImageBackground Background);
 
 	void DeleteModel();
 

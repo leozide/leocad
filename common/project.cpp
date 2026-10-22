@@ -3224,7 +3224,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		}
 
 		QString StepImageBaseName = QFileInfo(Dir, BaseName + QLatin1String("-%1.png")).absoluteFilePath();
-		const lcResult<void> ImagesSaved = Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep);
+		const lcResult<void> ImagesSaved = Model->SaveStepImages(StepImageBaseName, true, false, Options.StepImagesWidth, Options.StepImagesHeight, 1, LastStep, Options.TransparentImages ? lcImageBackground::Transparent : lcImageBackground::Opaque);
 
 		if (!ImagesSaved)
 			return ImagesSaved;
@@ -4136,7 +4136,7 @@ lcResult<void> Project::SaveImage(const lcImageDialogOptions& Options)
 	if (Options.Start != Options.End)
 		FilePath = FilePath.insert(FilePath.length() - Extension.length() - 1, QLatin1String("%1"));
 
-	return mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End);
+	return mActiveModel->SaveStepImages(FilePath, Options.Start != Options.End, false, Options.Width, Options.Height, Options.Start, Options.End, lcImageBackground::Default);
 }
 
 void Project::UpdatePieceData(lcPieceData* PieceData) const

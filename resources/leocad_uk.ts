@@ -8675,87 +8675,191 @@ Please visit https://www.leocad.org for information on how to download and insta
 <context>
     <name>lcHTMLDialog</name>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="20"/>
+        <location filename="../common/lc_htmldialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Export HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create browser-viewable building instructions and PNG images in the output folder. Choose which models to include, how to organize the step pages, and where to show pieces lists.&lt;/p&gt;&lt;p&gt;Keep the generated HTML and image files together when copying or sharing the instructions.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="23"/>
         <source>HTML Options</source>
         <translation>Налаштування HTML</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="32"/>
+        <location filename="../common/lc_htmldialog.ui" line="35"/>
         <source>General</source>
         <translation>Основне</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="40"/>
+        <location filename="../common/lc_htmldialog.ui" line="43"/>
+        <location filename="../common/lc_htmldialog.ui" line="59"/>
+        <source>Folder for the generated HTML pages and images.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="46"/>
+        <location filename="../common/lc_htmldialog.ui" line="62"/>
+        <source>&lt;p&gt;&lt;b&gt;Output Folder&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The exporter creates this folder if needed and writes the instruction pages and their images into it. Use a separate folder for each export to keep the generated files together.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="49"/>
         <source>Output Folder:</source>
         <oldsource>Output folder:</oldsource>
         <translation type="unfinished">Вихідна тека:</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="53"/>
+        <location filename="../common/lc_htmldialog.ui" line="69"/>
+        <source>Choose the folder for the exported instructions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="72"/>
+        <source>Choose Output Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="75"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="62"/>
+        <location filename="../common/lc_htmldialog.ui" line="84"/>
+        <source>Save step images with a transparent background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="87"/>
+        <source>&lt;p&gt;&lt;b&gt;Transparent Image Background&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, the PNG step images have a transparent background so the page background can show through. When unchecked, they include the configured solid or gradient background with no transparency.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="90"/>
         <source>Transparent image background</source>
         <translation>Прозорий фон для зображень</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="72"/>
+        <location filename="../common/lc_htmldialog.ui" line="100"/>
+        <source>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export all models in the project, only the current model, or the current model with the submodels it references. When several models are exported, an overall index links to their instructions.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="103"/>
         <source>Models</source>
         <translation>Моделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="78"/>
+        <location filename="../common/lc_htmldialog.ui" line="109"/>
+        <source>Export instructions for every model in the project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="112"/>
         <source>All Models</source>
         <translation>Усі моделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="85"/>
+        <location filename="../common/lc_htmldialog.ui" line="119"/>
+        <source>Export the current model and the submodels it references.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="122"/>
         <source>Current Model and Submodels</source>
         <translation>Поточна модель і підмоделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="92"/>
+        <location filename="../common/lc_htmldialog.ui" line="129"/>
+        <source>Export instructions only for the current model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="132"/>
         <source>Current Model Only</source>
         <translation>Лише поточна модель</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="102"/>
+        <location filename="../common/lc_htmldialog.ui" line="142"/>
+        <source>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use positive dimensions up to 2048 pixels.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="145"/>
         <source>Steps</source>
         <translation>Кроки</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="108"/>
+        <location filename="../common/lc_htmldialog.ui" line="151"/>
+        <source>Put all steps for each model on one HTML page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="154"/>
         <source>Single Page</source>
         <translation>Єдина сторінка</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="115"/>
+        <location filename="../common/lc_htmldialog.ui" line="161"/>
+        <source>Create a separate HTML page for each step.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="164"/>
         <source>One Step per Page</source>
         <translation>Один крок на сторінку</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="122"/>
+        <location filename="../common/lc_htmldialog.ui" line="171"/>
+        <source>Add a step index when using One Step per Page.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="174"/>
         <source>Index page</source>
         <translation>Індексна сторінка</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="129"/>
+        <location filename="../common/lc_htmldialog.ui" line="181"/>
+        <location filename="../common/lc_htmldialog.ui" line="194"/>
+        <source>Width of each step image, in pixels.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="184"/>
         <source>Width:</source>
         <translation>Ширина:</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="149"/>
+        <location filename="../common/lc_htmldialog.ui" line="207"/>
+        <location filename="../common/lc_htmldialog.ui" line="220"/>
+        <source>Height of each step image, in pixels.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="210"/>
         <source>Height:</source>
         <translation>Висота:</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="236"/>
+        <source>&lt;p&gt;&lt;b&gt;Pieces List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;After each step shows the pieces added in that step. At the end shows the complete model inventory after the instructions. You can enable either option, both, or neither.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="245"/>
+        <source>Include a complete pieces list after each model&apos;s instructions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_htmldialog.ui" line="255"/>
+        <source>Include a list of the pieces added in each step.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Highlight new parts</source>
         <translation type="vanished">Підсвічувати нові блоки</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="172"/>
+        <location filename="../common/lc_htmldialog.ui" line="239"/>
         <source>Pieces List</source>
         <translation>Список блоків</translation>
     </message>
@@ -8764,7 +8868,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Колір:</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="185"/>
+        <location filename="../common/lc_htmldialog.ui" line="258"/>
         <source>After each step</source>
         <translation>Після кожного кроку</translation>
     </message>
@@ -8773,23 +8877,23 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Створювати зображення</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.ui" line="178"/>
+        <location filename="../common/lc_htmldialog.ui" line="248"/>
         <source>At the end</source>
         <translation>У кінці</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <location filename="../common/lc_htmldialog.cpp" line="50"/>
         <source>Output folder cannot be empty.</source>
         <translation>Вихідна теки не може бути порожньою.</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <location filename="../common/lc_htmldialog.cpp" line="50"/>
         <source>Export HTML</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Експорт HTML</translation>
     </message>
     <message>
-        <location filename="../common/lc_htmldialog.cpp" line="68"/>
+        <location filename="../common/lc_htmldialog.cpp" line="70"/>
         <source>Select Output Folder</source>
         <translation>Обрати вихідну теку</translation>
     </message>
@@ -10029,7 +10133,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     <name>lcModel</name>
     <message>
         <location filename="../common/lc_model.cpp" line="1318"/>
-        <location filename="../common/lc_model.cpp" line="2745"/>
+        <location filename="../common/lc_model.cpp" line="2751"/>
         <source>Group #</source>
         <translation>Група #</translation>
     </message>
@@ -10038,8 +10142,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1738"/>
-        <location filename="../common/lc_model.cpp" line="1753"/>
+        <location filename="../common/lc_model.cpp" line="1741"/>
+        <location filename="../common/lc_model.cpp" line="1756"/>
         <source>Error creating images.</source>
         <translation>Помилка створення зображення.</translation>
     </message>
@@ -10048,7 +10152,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Помилка</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2087"/>
+        <location filename="../common/lc_model.cpp" line="2093"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Помилка запису у файл &apos;%1&apos;:
@@ -10056,9 +10160,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1545"/>
-        <location filename="../common/lc_model.cpp" line="2741"/>
-        <location filename="../common/lc_model.cpp" line="2778"/>
-        <location filename="../common/lc_model.cpp" line="6156"/>
+        <location filename="../common/lc_model.cpp" line="2747"/>
+        <location filename="../common/lc_model.cpp" line="2784"/>
+        <location filename="../common/lc_model.cpp" line="6162"/>
         <source>No pieces selected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вибрано жодної частини.</translation>
@@ -10068,7 +10172,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">Нова модель</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3899"/>
+        <location filename="../common/lc_model.cpp" line="3905"/>
         <source>No models selected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вибрано жодної моделі.</translation>
@@ -10078,18 +10182,18 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="obsolete">Приховати</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4062"/>
-        <location filename="../common/lc_model.cpp" line="4557"/>
-        <location filename="../common/lc_model.cpp" line="5586"/>
-        <location filename="../common/lc_model.cpp" line="6064"/>
+        <location filename="../common/lc_model.cpp" line="4068"/>
+        <location filename="../common/lc_model.cpp" line="4563"/>
+        <location filename="../common/lc_model.cpp" line="5592"/>
+        <location filename="../common/lc_model.cpp" line="6070"/>
         <source>Move</source>
         <translation type="unfinished">Перемістити</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3365"/>
-        <location filename="../common/lc_model.cpp" line="4257"/>
-        <location filename="../common/lc_model.cpp" line="4563"/>
-        <location filename="../common/lc_model.cpp" line="5591"/>
+        <location filename="../common/lc_model.cpp" line="3371"/>
+        <location filename="../common/lc_model.cpp" line="4263"/>
+        <location filename="../common/lc_model.cpp" line="4569"/>
+        <location filename="../common/lc_model.cpp" line="5597"/>
         <source>Rotate</source>
         <translation type="unfinished">Покрутити</translation>
     </message>
@@ -10148,305 +10252,305 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Створити зображення кроку</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1808"/>
-        <location filename="../common/lc_model.cpp" line="1962"/>
-        <location filename="../common/lc_model.cpp" line="1971"/>
-        <location filename="../common/lc_model.cpp" line="2024"/>
+        <location filename="../common/lc_model.cpp" line="1814"/>
+        <location filename="../common/lc_model.cpp" line="1968"/>
+        <location filename="../common/lc_model.cpp" line="1977"/>
+        <location filename="../common/lc_model.cpp" line="2030"/>
         <source>Could not allocate the pieces list image.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося розмістити зображення списку частин.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1833"/>
+        <location filename="../common/lc_model.cpp" line="1839"/>
         <source>Could not create the pieces list framebuffer.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося створити кадровий буфер списку частин.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1911"/>
+        <location filename="../common/lc_model.cpp" line="1917"/>
         <source>Could not read the pieces list image.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося прочитати зображення списку частин.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2671"/>
+        <location filename="../common/lc_model.cpp" line="2677"/>
         <source>Insert Step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Вставити крок</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2691"/>
+        <location filename="../common/lc_model.cpp" line="2697"/>
         <source>Remove Step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Видалити крок</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2741"/>
+        <location filename="../common/lc_model.cpp" line="2747"/>
         <source>Group Selection</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Вибір групи</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2769"/>
-        <location filename="../common/lc_model.cpp" line="2872"/>
+        <location filename="../common/lc_model.cpp" line="2775"/>
+        <location filename="../common/lc_model.cpp" line="2878"/>
         <source>Group</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Група</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2778"/>
-        <location filename="../common/lc_model.cpp" line="2812"/>
+        <location filename="../common/lc_model.cpp" line="2784"/>
+        <location filename="../common/lc_model.cpp" line="2818"/>
         <source>Ungroup Selection</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Розгрупувати вибір</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2812"/>
+        <location filename="../common/lc_model.cpp" line="2818"/>
         <source>No groups selected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Групи не вибрано.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2835"/>
-        <location filename="../common/lc_model.cpp" line="2906"/>
+        <location filename="../common/lc_model.cpp" line="2841"/>
+        <location filename="../common/lc_model.cpp" line="2912"/>
         <source>Ungroup</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Розгрупувати</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="2959"/>
+        <location filename="../common/lc_model.cpp" line="2965"/>
         <source>Edit Groups</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Редагувати групи</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3217"/>
-        <location filename="../common/lc_model.cpp" line="5666"/>
+        <location filename="../common/lc_model.cpp" line="3223"/>
+        <location filename="../common/lc_model.cpp" line="5672"/>
         <source>Add Piece</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додати фрагмент</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3272"/>
-        <location filename="../common/lc_model.cpp" line="3299"/>
-        <location filename="../common/lc_model.cpp" line="5053"/>
-        <location filename="../common/lc_model.cpp" line="5060"/>
-        <location filename="../common/lc_model.cpp" line="5079"/>
-        <location filename="../common/lc_model.cpp" line="5086"/>
-        <location filename="../common/lc_model.cpp" line="5093"/>
-        <location filename="../common/lc_model.cpp" line="5100"/>
-        <location filename="../common/lc_model.cpp" line="5107"/>
-        <location filename="../common/lc_model.cpp" line="5458"/>
+        <location filename="../common/lc_model.cpp" line="3278"/>
+        <location filename="../common/lc_model.cpp" line="3305"/>
+        <location filename="../common/lc_model.cpp" line="5059"/>
+        <location filename="../common/lc_model.cpp" line="5066"/>
+        <location filename="../common/lc_model.cpp" line="5085"/>
+        <location filename="../common/lc_model.cpp" line="5092"/>
+        <location filename="../common/lc_model.cpp" line="5099"/>
+        <location filename="../common/lc_model.cpp" line="5106"/>
+        <location filename="../common/lc_model.cpp" line="5113"/>
+        <location filename="../common/lc_model.cpp" line="5464"/>
         <source>Selection</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Вибір</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3468"/>
-        <location filename="../common/lc_model.cpp" line="5921"/>
+        <location filename="../common/lc_model.cpp" line="3474"/>
+        <location filename="../common/lc_model.cpp" line="5927"/>
         <source>Delete</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Видалити</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3485"/>
+        <location filename="../common/lc_model.cpp" line="3491"/>
         <source>Reset Pivot Point</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Скинути опорну точку</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3506"/>
+        <location filename="../common/lc_model.cpp" line="3512"/>
         <source>Remove Key Frames</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Видалити ключові кадри</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3533"/>
+        <location filename="../common/lc_model.cpp" line="3539"/>
         <source>Add Control Point</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додати контрольну точку</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3558"/>
+        <location filename="../common/lc_model.cpp" line="3564"/>
         <source>Remove Control Point</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Видалити контрольну точку</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3606"/>
+        <location filename="../common/lc_model.cpp" line="3612"/>
         <source>Show Earlier</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Показати Раніше</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3656"/>
+        <location filename="../common/lc_model.cpp" line="3662"/>
         <source>Show Later</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Показати пізніше</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3695"/>
+        <location filename="../common/lc_model.cpp" line="3701"/>
         <source>Show Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Show Pieces</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3732"/>
+        <location filename="../common/lc_model.cpp" line="3738"/>
         <source>Change Step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Змінити крок</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3845"/>
+        <location filename="../common/lc_model.cpp" line="3851"/>
         <source>Move to Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Перейти до моделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3899"/>
+        <location filename="../common/lc_model.cpp" line="3905"/>
         <source>Inline Selected Models</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Вбудовані вибрані моделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="3910"/>
+        <location filename="../common/lc_model.cpp" line="3916"/>
         <source>Inline Model</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Розгорнути підмодель</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4326"/>
+        <location filename="../common/lc_model.cpp" line="4332"/>
         <source>Add Key Frame</source>
         <oldsource>Add KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте KeyFrame</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4326"/>
+        <location filename="../common/lc_model.cpp" line="4332"/>
         <source>Remove Key Frame</source>
         <oldsource>Remove KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Видалити KeyFrame</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4355"/>
-        <location filename="../common/lc_model.cpp" line="5942"/>
+        <location filename="../common/lc_model.cpp" line="4361"/>
+        <location filename="../common/lc_model.cpp" line="5948"/>
         <source>Paint</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Фарбувати</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4403"/>
+        <location filename="../common/lc_model.cpp" line="4409"/>
         <source>Set Show Step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Встановити Показати крок</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4434"/>
+        <location filename="../common/lc_model.cpp" line="4440"/>
         <source>Set Hide Step</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Встановити крок приховування</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="4457"/>
+        <location filename="../common/lc_model.cpp" line="4463"/>
         <source>Change Projection</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Змінити проекцію</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5236"/>
-        <location filename="../common/lc_model.cpp" line="5267"/>
+        <location filename="../common/lc_model.cpp" line="5242"/>
+        <location filename="../common/lc_model.cpp" line="5273"/>
         <source>Hide Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Сховати фрагменти</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5298"/>
-        <location filename="../common/lc_model.cpp" line="5329"/>
+        <location filename="../common/lc_model.cpp" line="5304"/>
+        <location filename="../common/lc_model.cpp" line="5335"/>
         <source>Unhide Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Показати фрагменти</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5603"/>
-        <location filename="../common/lc_model.cpp" line="6009"/>
-        <location filename="../common/lc_model.cpp" line="6125"/>
+        <location filename="../common/lc_model.cpp" line="5609"/>
+        <location filename="../common/lc_model.cpp" line="6015"/>
+        <location filename="../common/lc_model.cpp" line="6131"/>
         <source>Zoom</source>
         <translation type="unfinished">Масштабувати</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5611"/>
+        <location filename="../common/lc_model.cpp" line="5617"/>
         <source>Pan</source>
         <translation type="unfinished">Подвинути</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5619"/>
+        <location filename="../common/lc_model.cpp" line="5625"/>
         <source>Orbit</source>
         <translation type="unfinished">Прокрутити</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5627"/>
+        <location filename="../common/lc_model.cpp" line="5633"/>
         <source>Roll</source>
         <translation type="unfinished">Нахилити</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5690"/>
+        <location filename="../common/lc_model.cpp" line="5696"/>
         <source>Add Camera</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додати камеру</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5700"/>
+        <location filename="../common/lc_model.cpp" line="5706"/>
         <source>Add Point Light</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте точкове світло</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5704"/>
+        <location filename="../common/lc_model.cpp" line="5710"/>
         <source>Add Spot Light</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте точкове світло</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5708"/>
+        <location filename="../common/lc_model.cpp" line="5714"/>
         <source>Add Directional Light</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте спрямоване світло</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="5712"/>
+        <location filename="../common/lc_model.cpp" line="5718"/>
         <source>Add Area Light</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додати зону освітлення</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6103"/>
+        <location filename="../common/lc_model.cpp" line="6109"/>
         <source>Zoom Extents</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Розміри масштабування</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6147"/>
+        <location filename="../common/lc_model.cpp" line="6153"/>
         <source>Change Model Properties</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Зміна властивостей моделі</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6156"/>
-        <location filename="../common/lc_model.cpp" line="6167"/>
-        <location filename="../common/lc_model.cpp" line="6226"/>
+        <location filename="../common/lc_model.cpp" line="6162"/>
+        <location filename="../common/lc_model.cpp" line="6173"/>
+        <location filename="../common/lc_model.cpp" line="6232"/>
         <source>Piece Array</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Масив штук</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6269"/>
+        <location filename="../common/lc_model.cpp" line="6275"/>
         <source>Add Minifig</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте мініфігурку</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6044"/>
+        <location filename="../common/lc_model.cpp" line="6050"/>
         <source>Look At</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Подивіться</translation>
@@ -10456,7 +10560,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Немає чого обирати.</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6167"/>
+        <location filename="../common/lc_model.cpp" line="6173"/>
         <source>Array only has 1 element or less. No pieces added.</source>
         <oldsource>Array only has 1 element or less, no pieces added.</oldsource>
         <translatorcomment>Уточнити</translatorcomment>
@@ -10467,7 +10571,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Масив</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="6243"/>
+        <location filename="../common/lc_model.cpp" line="6249"/>
         <source>Minifig #</source>
         <translation>Мініфігура #</translation>
     </message>
@@ -10476,7 +10580,7 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Мініфігура</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_model.cpp" line="5452"/>
+        <location filename="../common/lc_model.cpp" line="5458"/>
         <source>Replace Pieces</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -10489,35 +10593,96 @@ Please visit https://www.leocad.org for information on how to download and insta
 <context>
     <name>lcModelListDialog</name>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="14"/>
+        <location filename="../common/lc_modellistdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Manage the models stored in this project. Create, rename, duplicate, delete, or reorder them, then choose OK to apply the changes. Cancel discards the list changes; files already exported remain on disk.&lt;/p&gt;&lt;p&gt;Drag list entries to change their order. Use Set Active to switch to the current list item when applying changes.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="17"/>
+        <location filename="../common/lc_modellistdialog.ui" line="28"/>
         <source>Submodels</source>
         <translation>Підмоделі</translation>
     </message>
     <message>
+        <location filename="../common/lc_modellistdialog.ui" line="25"/>
+        <source>Select models to manage, or drag them to change their order.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_modellistdialog.ui" line="31"/>
+        <source>&lt;p&gt;&lt;b&gt;Model List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select one or more entries for actions such as Rename, Duplicate, Export, or Delete. Drag entries to reorder them. Double-click an entry to apply the list changes and make that model active.&lt;/p&gt;&lt;p&gt;Names must be unique within the project; capitalization alone does not make a name unique.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="43"/>
+        <source>Add a new empty submodel to the project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="46"/>
         <source>&amp;New...</source>
         <translation>&amp;Нова...</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="38"/>
+        <location filename="../common/lc_modellistdialog.ui" line="53"/>
+        <source>Remove the selected models from the project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="56"/>
+        <source>&lt;p&gt;&lt;b&gt;Delete Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected entries after confirmation. At least one model must remain. The project is changed when you accept this dialog.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="59"/>
         <source>D&amp;elete...</source>
         <translation>Ви&amp;далити...</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="45"/>
+        <location filename="../common/lc_modellistdialog.ui" line="66"/>
+        <source>Choose a unique name for each selected model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="69"/>
         <source>&amp;Rename...</source>
         <translation>&amp;Перейменувати...</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="52"/>
+        <location filename="../common/lc_modellistdialog.ui" line="76"/>
+        <source>Save the selected models to separate LDraw files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="79"/>
+        <source>&lt;p&gt;&lt;b&gt;Export Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;For one selected model, choose its output file. For several selected models, choose an output folder. Export writes files immediately, even if you later cancel this dialog.&lt;/p&gt;&lt;p&gt;A newly created empty model has nothing to export until the list changes have been applied.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="82"/>
         <source>Export...</source>
         <translation>Експортувати...</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="59"/>
+        <location filename="../common/lc_modellistdialog.ui" line="89"/>
+        <source>Create named copies of the selected models.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="92"/>
         <source>Duplicate...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">дублікат...</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="99"/>
+        <source>Switch to the current list item when applying the changes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_modellistdialog.ui" line="102"/>
+        <source>&lt;p&gt;&lt;b&gt;Set Active&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, accepting this dialog makes the current list item the active model for editing. When unchecked, the existing active model is retained if it remains in the project.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Move &amp;Up</source>
@@ -10528,12 +10693,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Перемістити в&amp;низ</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.ui" line="66"/>
+        <location filename="../common/lc_modellistdialog.ui" line="105"/>
         <source>Set Active</source>
         <translation>Активувати</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="111"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="113"/>
         <source>New Submodel</source>
         <translation>Нова підмодель</translation>
     </message>
@@ -10542,42 +10707,42 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Помилка</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="125"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
         <source>The model cannot be empty.</source>
         <translation>Модель не може бути порожньою.</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="139"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="141"/>
         <source>Are you sure you want to delete the submodel &apos;%1&apos;?</source>
         <translation>Ви впевнені що хочете видалити підмодель &apos;%1&apos;?</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="125"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="133"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="143"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="127"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="145"/>
         <source>Delete Submodel</source>
         <translation>Видалити підмодель</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="133"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="163"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="187"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="255"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="135"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="257"/>
         <source>No submodel selected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Підмодель не вибрано.</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="163"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="174"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="165"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="176"/>
         <source>Rename Submodel</source>
         <translation>Перейменувати модель</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="187"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="217"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="239"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="189"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="219"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="241"/>
         <source>Export Submodel</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Підмодель експорту</translation>
@@ -10587,30 +10752,30 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="204"/>
         <source>Nothing to export.</source>
         <translation>Немає чого експортувати.</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="209"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Export Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Модель експорту</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="223"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="225"/>
         <source>Select Export Folder</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Виберіть Експортувати папку</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="255"/>
-        <location filename="../common/lc_modellistdialog.cpp" line="273"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="257"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="275"/>
         <source>Duplicate Submodel</source>
         <translation type="unfinished">Дублювати підмодель</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="270"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="272"/>
         <source>Copy of </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Копія </translation>
@@ -10620,12 +10785,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Зберегти модель</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="209"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="211"/>
         <source>Supported Files (*.ldr *.dat);;All Files (*.*)</source>
         <translation>Підтримувані файли (*.ldr *.dat);;Усі файли (*.*)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_modellistdialog.cpp" line="141"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="143"/>
         <source>Are you sure you want to delete %n submodels?</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -13153,8 +13318,8 @@ Unsupported video cards use face tint and colored edges.</source>
     <name>lcRenderDialog</name>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="14"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="57"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="172"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="58"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="183"/>
         <source>Render</source>
         <translation>Вимальовування</translation>
     </message>
@@ -13163,75 +13328,85 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="vanished">Налаштування</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="60"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="61"/>
         <source>Settings...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Налаштування...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="63"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="64"/>
         <source>View Log...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Переглянути журнал...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="75"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="67"/>
+        <source>Show the renderer output and diagnostic messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="68"/>
+        <source>&lt;p&gt;&lt;b&gt;View Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the renderer output to investigate a failed render or warnings. This button becomes available when a log has been captured.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="69"/>
+        <source>&lt;p&gt;&lt;b&gt;Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Start the render using the current settings. While rendering, this button becomes Cancel so you can stop the operation.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="79"/>
         <source>POV-Ray Image Render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">POV-Ray Відтворення зображень</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="77"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="92"/>
         <source>Render Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Модель візуалізації</translation>
+        <translation type="obsolete">Модель візуалізації</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="81"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="88"/>
         <source>Blender LDraw Import</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender LDraw Імпорт</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="81"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="88"/>
         <source>Blender Image Render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Відтворення зображень</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="92"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="872"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="101"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="883"/>
         <source>Blender not configured. Use Settings to configure.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender не налаштовано. Використовуйте параметри для налаштування.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="95"/>
         <source>Blender render settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Blender налаштування візуалізації</translation>
+        <translation type="obsolete">Blender налаштування візуалізації</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="99"/>
         <source>Blender import settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Імпорт налаштувань Blender</translation>
+        <translation type="obsolete">Імпорт налаштувань Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="101"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="110"/>
         <source>Open in Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Відкрити в Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="104"/>
         <source>Import and open LDraw model in Blender</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Імпортуйте та відкрийте модель LDraw у Blender</translation>
+        <translation type="obsolete">Імпортуйте та відкрийте модель LDraw у Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="235"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="246"/>
         <source>Exporting Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Модель експорту</translation>
@@ -13242,13 +13417,73 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="obsolete">Помилка візуалізації</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="364"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="81"/>
+        <source>&lt;p&gt;&lt;b&gt;POV-Ray Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step using POV-Ray. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="82"/>
+        <source>Render the current model step with POV-Ray.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="83"/>
+        <source>Set the POV-Ray image dimensions and render quality.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="84"/>
+        <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the image width and height in pixels and the rendering quality. Higher resolution and quality can increase rendering time.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="89"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step with the Blender LDraw add-on. Configure Blender and its add-on through Settings, choose an output image, then select Render.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="90"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the Blender executable, LDraw import modules, library paths, and render settings. Blender and an import module must be configured before rendering or opening the model.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="101"/>
+        <source>Render the current model step with Blender.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="104"/>
+        <source>Configure Blender, its add-on, and render settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="108"/>
+        <source>Configure Blender and its LDraw import settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="111"/>
+        <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export the current model step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.&lt;/p&gt;&lt;p&gt;This mode does not save a rendered image.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="112"/>
+        <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Import the current model step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="115"/>
+        <source>Import the current model step and open it in Blender.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="375"/>
         <source>Saving Blender Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Збереження моделі Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="456"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="467"/>
         <source>Cannot write Blender render script file &apos;%1&apos;:
 %2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -13256,45 +13491,45 @@ Unsupported video cards use face tint and colored edges.</source>
 %2.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="519"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="530"/>
         <source>errors%1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">помилки%1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="519"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="530"/>
         <source> and warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished"> і попередження</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="519"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="530"/>
         <source>warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">попередження</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="520"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="531"/>
         <source>Open in Blender Output</source>
         <oldsource>Open in Blender output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Відкрити у вихідних даних Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="521"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="532"/>
         <source>Open in Blender encountered %1. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Відкрити в Blender виявлено %1. Див. Показати деталі...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="550"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="561"/>
         <source>Error starting Blender render process.</source>
         <oldsource>Error starting Blender render process</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Помилка запуску процесу візуалізації Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="610"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="621"/>
         <source>Failed to open log file: &apos;%1&apos;:
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -13302,75 +13537,75 @@ Unsupported video cards use face tint and colored edges.</source>
 %2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="764"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="775"/>
         <source>An error occurred while rendering.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Під час візуалізації сталася помилка.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="809"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="820"/>
         <source>Render failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Помилка візуалізації.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="828"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="839"/>
         <source>POV-Ray Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">POV-Ray Налаштування</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="833"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="844"/>
         <source>Width:</source>
         <translation>Ширина:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="839"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="850"/>
         <source>Height:</source>
         <translation>Висота:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="845"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="856"/>
         <source>Quality:</source>
         <translation>Якість:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="847"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
         <source>High</source>
         <translation>Висока</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="847"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
         <source>Medium</source>
         <translation>Середня</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="847"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="858"/>
         <source>Low</source>
         <translation>Низька</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="886"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="897"/>
         <source>POV-Ray standard error file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">POV-Ray Стандартний файл помилки не знайдено: '%1'.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="891"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="902"/>
         <source>Blender standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender стандартний вихідний файл не знайдено: '%1'.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="896"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="904"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="913"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="907"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="915"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="924"/>
         <source>Render Log</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Журнал візуалізації</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="904"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="915"/>
         <source>Error opening log file &apos;%1&apos;:
 %2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -13379,27 +13614,74 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="24"/>
+        <location filename="../qt/lc_renderdialog.ui" line="40"/>
+        <source>Path and file name for the rendered image.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="27"/>
+        <location filename="../qt/lc_renderdialog.ui" line="43"/>
+        <source>&lt;p&gt;&lt;b&gt;Output Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose where to save the rendered image and its format, such as PNG, JPEG, or BMP. The output path applies to image rendering; Open in Blender does not use it.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="30"/>
         <source>Output:</source>
         <translation>Результат:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.ui" line="37"/>
+        <location filename="../qt/lc_renderdialog.ui" line="50"/>
+        <source>Choose the rendered image file and format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="53"/>
+        <source>Choose Render Output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="56"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="180"/>
+        <location filename="../qt/lc_renderdialog.ui" line="65"/>
+        <source>Preview of the rendered image.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="68"/>
+        <source>Render Preview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="71"/>
+        <source>&lt;p&gt;&lt;b&gt;Render Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The preview is scaled to fit this area. Changing the dialog size does not change the output resolution; use Settings to change the image dimensions.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="78"/>
+        <source>Progress of the current export or render.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.ui" line="81"/>
+        <source>Render Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="191"/>
         <source>Cancel Render</source>
         <translation>Скасувати вимальовування</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="180"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="191"/>
         <source>Are you sure you want to cancel the current render?</source>
         <translation>Ви впевнені що хочете скасувати поточне вимальовування?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="344"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="544"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="355"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="555"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
@@ -13408,7 +13690,7 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="vanished">Помилка</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="351"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="362"/>
         <source>Error starting POV-Ray.</source>
         <translation>Помилка запуску POV-Ray.</translation>
     </message>
@@ -13417,19 +13699,19 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="vanished">Виявлено помилку під час вимальовування. Перевірте деталі або спробуйте заново.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="787"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="798"/>
         <source>Error writing to file &apos;%1&apos;:
 %2</source>
         <translation>Помилка запису у файл &apos;%1&apos;:
 %2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="816"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="827"/>
         <source>Select Output File</source>
         <translation>Обрати вихідну теку</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="816"/>
+        <location filename="../qt/lc_renderdialog.cpp" line="827"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>Усі файли зображень (*.bmp *.png *.jpg);;BMP файли (*.bmp);;PNG файли (*.png);;JPEG файли (*.jpg);;Усі файли (*.*)</translation>
     </message>

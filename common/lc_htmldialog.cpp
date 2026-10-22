@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_htmldialog.h"
 #include "ui_lc_htmldialog.h"
 #include "project.h"
@@ -7,6 +8,7 @@ lcHTMLDialog::lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 	: QDialog(Parent), ui(new Ui::lcHTMLDialog)
 {
     ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(ui->outputFolderBrowse, &QPushButton::clicked, this, &lcHTMLDialog::OutputFolderBrowseClicked);
 

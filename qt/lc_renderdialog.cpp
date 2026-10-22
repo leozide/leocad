@@ -46,6 +46,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 	: QDialog(Parent), mDialogMode(RenderDialogMode), ui(new Ui::lcRenderDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	mWidth = lcGetProfileInt(LC_PROFILE_RENDER_WIDTH);
 	mHeight = lcGetProfileInt(LC_PROFILE_RENDER_HEIGHT);
@@ -63,6 +64,9 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 	mLogButton = new QPushButton(tr("View Log..."), ui->buttonBox);
 	ui->buttonBox->addButton(mLogButton, QDialogButtonBox::ResetRole);
 	mLogButton->setEnabled(false);
+	mLogButton->setToolTip(tr("Show the renderer output and diagnostic messages."));
+	mLogButton->setWhatsThis(tr("<p><b>View Log</b></p><p>Open the renderer output to investigate a failed render or warnings. This button becomes available when a log has been captured.</p>"));
+	mRenderButton->setWhatsThis(tr("<p><b>Render</b></p><p>Start the render using the current settings. While rendering, this button becomes Cancel so you can stop the operation.</p>"));
 
 	connect(mRenderButton, &QPushButton::clicked, this, &lcRenderDialog::RenderButtonClicked);
 	connect(mSettingsButton, &QPushButton::clicked, this, &lcRenderDialog::SettingsButtonClicked);
@@ -74,11 +78,16 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 	{
 		setWindowTitle(tr("POV-Ray Image Render"));
 
-		mRenderButton->setToolTip(tr("Render Model"));
+		setWhatsThis(tr("<p><b>POV-Ray Image Render</b></p><p>Render the current model step using POV-Ray. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
+		mRenderButton->setToolTip(tr("Render the current model step with POV-Ray."));
+		mSettingsButton->setToolTip(tr("Set the POV-Ray image dimensions and render quality."));
+		mSettingsButton->setWhatsThis(tr("<p><b>POV-Ray Settings</b></p><p>Choose the image width and height in pixels and the rendering quality. Higher resolution and quality can increase rendering time.</p>"));
 	}
 	else
 	{
 		setWindowTitle(mDialogMode == lcRenderDialogMode::OpenInBlender ? tr("Blender LDraw Import") : tr("Blender Image Render"));
+		setWhatsThis(tr("<p><b>Blender Image Render</b></p><p>Render the current model step with the Blender LDraw add-on. Configure Blender and its add-on through Settings, choose an output image, then select Render.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
+		mSettingsButton->setWhatsThis(tr("<p><b>Blender Settings</b></p><p>Configure the Blender executable, LDraw import modules, library paths, and render settings. Blender and an import module must be configured before rendering or opening the model.</p>"));
 
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
 
@@ -89,19 +98,21 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 			lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 		}
 
-		mRenderButton->setToolTip(BlenderConfigured ? tr("Render Model") : tr("Blender not configured. Use Settings to configure."));
+		mRenderButton->setToolTip(BlenderConfigured ? tr("Render the current model step with Blender.") : tr("Blender not configured. Use Settings to configure."));
 		mRenderButton->setEnabled(BlenderConfigured);
 
-		mSettingsButton->setToolTip(tr("Blender render settings"));
+		mSettingsButton->setToolTip(tr("Configure Blender, its add-on, and render settings."));
 
 		if (mDialogMode == lcRenderDialogMode::OpenInBlender)
 		{
-			mSettingsButton->setToolTip(tr("Blender import settings"));
+			mSettingsButton->setToolTip(tr("Configure Blender and its LDraw import settings."));
 
 			mRenderButton->setText(tr("Open in Blender"));
+			setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Export the current model step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.</p><p>This mode does not save a rendered image.</p>"));
+			mRenderButton->setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Import the current model step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.</p>"));
 
 			if (BlenderConfigured)
-				mRenderButton->setToolTip(tr("Import and open LDraw model in Blender"));
+				mRenderButton->setToolTip(tr("Import the current model step and open it in Blender."));
 
 			ui->outputLabel->hide();
 			ui->OutputEdit->hide();

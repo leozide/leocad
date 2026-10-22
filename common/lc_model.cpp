@@ -1684,7 +1684,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 	WaitForAssets();
 
-	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr);
+	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr, lcImageBackground::Default);
 
 	if (!Image)
 	{
@@ -1697,7 +1697,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	return Image.value();
 }
 
-lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera)
+lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, lcImageBackground Background)
 {
 	lcScopedGLContextState GLState;
 
@@ -1705,6 +1705,9 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	const lcStep CurrentStep = mCurrentStep;
 
 	lcView View(lcViewType::View, this);
+
+	if (Background == lcImageBackground::Transparent)
+		View.SetBackgroundColorOverride(LC_RGBA(0, 0, 0, 0));
 
 	if (OutputCamera)
 		View.SetCamera(OutputCamera, true);
@@ -1748,6 +1751,9 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
+
+	if (Background == lcImageBackground::Opaque)
+		Image = Image.convertToFormat(QImage::Format_RGB32);
 
 	if (Image.isNull())
 		return lcUnexpected(tr("Error creating images."));
@@ -2041,7 +2047,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 	return PainterImage;
 }
 
-lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End)
+lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, lcImageBackground Background)
 {
 	WaitForAssets();
 
@@ -2073,7 +2079,7 @@ lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuff
 		else
 			FileName = BaseName;
 
-		const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, Camera);
+		const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, Camera, Background);
 
 		if (!Image)
 			return lcUnexpected(Image.error());

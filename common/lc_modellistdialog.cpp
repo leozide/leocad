@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_modellistdialog.h"
 #include "ui_lc_modellistdialog.h"
 #include "project.h"
@@ -17,6 +18,7 @@ lcModelListDialog::lcModelListDialog(QWidget* Parent, const std::vector<std::uni
 	mActiveModelItem = nullptr;
 
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(ui->NewModel, &QPushButton::clicked, this, &lcModelListDialog::NewModelClicked);
 	connect(ui->DeleteModel, &QPushButton::clicked, this, &lcModelListDialog::DeleteModelClicked);

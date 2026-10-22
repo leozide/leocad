@@ -42,7 +42,7 @@
 <context>
     <name>lcModel</name>
     <message numerus="yes">
-        <location filename="../common/lc_model.cpp" line="5452"/>
+        <location filename="../common/lc_model.cpp" line="5458"/>
         <source>Replace Pieces</source>
         <translation>
             <numerusform>Replace Piece</numerusform>
@@ -53,7 +53,7 @@
 <context>
     <name>lcModelListDialog</name>
     <message numerus="yes">
-        <location filename="../common/lc_modellistdialog.cpp" line="141"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="143"/>
         <source>Are you sure you want to delete %n submodels?</source>
         <translation>
             <numerusform>Are you sure you want to delete %n submodel?</numerusform>

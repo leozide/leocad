@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcHTMLDialog</class>
  <widget class="QDialog" name="lcHTMLDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Export HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create browser-viewable building instructions and PNG images in the output folder. Choose which models to include, how to organize the step pages, and where to show pieces lists.&lt;/p&gt;&lt;p&gt;Keep the generated HTML and image files together when copying or sharing the instructions.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -36,6 +39,12 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="label_6">
+          <property name="toolTip">
+           <string>Folder for the generated HTML pages and images.</string>
+          </property>
+          <property name="whatsThis">
+           <string>&lt;p&gt;&lt;b&gt;Output Folder&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The exporter creates this folder if needed and writes the instruction pages and their images into it. Use a separate folder for each export to keep the generated files together.&lt;/p&gt;</string>
+          </property>
           <property name="text">
            <string>Output Folder:</string>
           </property>
@@ -45,10 +54,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="outputFolder"/>
+         <widget class="QLineEdit" name="outputFolder">
+          <property name="toolTip">
+           <string>Folder for the generated HTML pages and images.</string>
+          </property>
+          <property name="whatsThis">
+           <string>&lt;p&gt;&lt;b&gt;Output Folder&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The exporter creates this folder if needed and writes the instruction pages and their images into it. Use a separate folder for each export to keep the generated files together.&lt;/p&gt;</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QToolButton" name="outputFolderBrowse">
+          <property name="toolTip">
+           <string>Choose the folder for the exported instructions.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Choose Output Folder</string>
+          </property>
           <property name="text">
            <string>...</string>
           </property>
@@ -58,6 +80,12 @@
       </item>
       <item>
        <widget class="QCheckBox" name="transparentImages">
+        <property name="toolTip">
+         <string>Save step images with a transparent background.</string>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;p&gt;&lt;b&gt;Transparent Image Background&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, the PNG step images have a transparent background so the page background can show through. When unchecked, they include the configured solid or gradient background with no transparency.&lt;/p&gt;</string>
+        </property>
         <property name="text">
          <string>Transparent image background</string>
         </property>
@@ -68,12 +96,18 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox_4">
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export all models in the project, only the current model, or the current model with the submodels it references. When several models are exported, an overall index links to their instructions.&lt;/p&gt;</string>
+     </property>
      <property name="title">
       <string>Models</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <widget class="QRadioButton" name="allModels">
+        <property name="toolTip">
+         <string>Export instructions for every model in the project.</string>
+        </property>
         <property name="text">
          <string>All Models</string>
         </property>
@@ -81,6 +115,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="currentModelSubmodels">
+        <property name="toolTip">
+         <string>Export the current model and the submodels it references.</string>
+        </property>
         <property name="text">
          <string>Current Model and Submodels</string>
         </property>
@@ -88,6 +125,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="currentModelOnly">
+        <property name="toolTip">
+         <string>Export instructions only for the current model.</string>
+        </property>
         <property name="text">
          <string>Current Model Only</string>
         </property>
@@ -98,12 +138,18 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use positive dimensions up to 2048 pixels.&lt;/p&gt;</string>
+     </property>
      <property name="title">
       <string>Steps</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
       <item row="0" column="0" colspan="2">
        <widget class="QRadioButton" name="singlePage">
+        <property name="toolTip">
+         <string>Put all steps for each model on one HTML page.</string>
+        </property>
         <property name="text">
          <string>Single Page</string>
         </property>
@@ -111,6 +157,9 @@
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="QRadioButton" name="oneStepPerPage">
+        <property name="toolTip">
+         <string>Create a separate HTML page for each step.</string>
+        </property>
         <property name="text">
          <string>One Step per Page</string>
         </property>
@@ -118,6 +167,9 @@
       </item>
       <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="indexPage">
+        <property name="toolTip">
+         <string>Add a step index when using One Step per Page.</string>
+        </property>
         <property name="text">
          <string>Index page</string>
         </property>
@@ -125,6 +177,9 @@
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label">
+        <property name="toolTip">
+         <string>Width of each step image, in pixels.</string>
+        </property>
         <property name="text">
          <string>Width:</string>
         </property>
@@ -135,6 +190,9 @@
       </item>
       <item row="3" column="1">
        <widget class="QLineEdit" name="stepWidth">
+        <property name="toolTip">
+         <string>Width of each step image, in pixels.</string>
+        </property>
         <property name="maximumSize">
          <size>
           <width>75</width>
@@ -145,6 +203,9 @@
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_2">
+        <property name="toolTip">
+         <string>Height of each step image, in pixels.</string>
+        </property>
         <property name="text">
          <string>Height:</string>
         </property>
@@ -155,6 +216,9 @@
       </item>
       <item row="4" column="1">
        <widget class="QLineEdit" name="stepHeight">
+        <property name="toolTip">
+         <string>Height of each step image, in pixels.</string>
+        </property>
         <property name="maximumSize">
          <size>
           <width>75</width>
@@ -168,12 +232,18 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox_2">
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Pieces List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;After each step shows the pieces added in that step. At the end shows the complete model inventory after the instructions. You can enable either option, both, or neither.&lt;/p&gt;</string>
+     </property>
      <property name="title">
       <string>Pieces List</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <widget class="QCheckBox" name="partsAtTheEnd">
+        <property name="toolTip">
+         <string>Include a complete pieces list after each model's instructions.</string>
+        </property>
         <property name="text">
          <string>At the end</string>
         </property>
@@ -181,6 +251,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="partsAfterEachStep">
+        <property name="toolTip">
+         <string>Include a list of the pieces added in each step.</string>
+        </property>
         <property name="text">
          <string>After each step</string>
         </property>
@@ -195,7 +268,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

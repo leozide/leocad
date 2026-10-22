@@ -20,6 +20,12 @@
       <layout class="QHBoxLayout" name="outputLayout">
        <item>
         <widget class="QLabel" name="outputLabel">
+         <property name="toolTip">
+          <string>Path and file name for the rendered image.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Output Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose where to save the rendered image and its format, such as PNG, JPEG, or BMP. The output path applies to image rendering; Open in Blender does not use it.&lt;/p&gt;</string>
+         </property>
          <property name="text">
           <string>Output:</string>
          </property>
@@ -29,10 +35,23 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="OutputEdit"/>
+        <widget class="QLineEdit" name="OutputEdit">
+         <property name="toolTip">
+          <string>Path and file name for the rendered image.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Output Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose where to save the rendered image and its format, such as PNG, JPEG, or BMP. The output path applies to image rendering; Open in Blender does not use it.&lt;/p&gt;</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QToolButton" name="OutputBrowseButton">
+         <property name="toolTip">
+          <string>Choose the rendered image file and format.</string>
+         </property>
+         <property name="accessibleName">
+          <string>Choose Render Output</string>
+         </property>
          <property name="text">
           <string>...</string>
          </property>
@@ -41,10 +60,26 @@
       </layout>
      </item>
      <item>
-      <widget class="lcRenderPreviewWidget" name="preview" native="true"/>
+      <widget class="lcRenderPreviewWidget" name="preview" native="true">
+       <property name="toolTip">
+        <string>Preview of the rendered image.</string>
+       </property>
+       <property name="accessibleName">
+        <string>Render Preview</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;p&gt;&lt;b&gt;Render Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The preview is scaled to fit this area. Changing the dialog size does not change the output resolution; use Settings to change the image dimensions.&lt;/p&gt;</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QProgressBar" name="RenderProgress">
+       <property name="toolTip">
+        <string>Progress of the current export or render.</string>
+       </property>
+       <property name="accessibleName">
+        <string>Render Progress</string>
+       </property>
        <property name="maximum">
         <number>1</number>
        </property>
@@ -58,7 +93,7 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Help</set>
      </property>
     </widget>
    </item>

@@ -245,7 +245,7 @@ void lcRenderDialog::RenderPOVRay()
 	if (!ExportResult)
 	{
 		if (!ExportResult.error().isEmpty())
-			QMessageBox::information(this, tr("Render Error"), ExportResult.error());
+			QMessageBox::information(this, windowTitle(), ExportResult.error());
 
 		return;
 	}
@@ -348,7 +348,7 @@ void lcRenderDialog::RenderPOVRay()
 	else
 	{
 		delete Process;
-		QMessageBox::information(this, tr("Render Error"), tr("Error starting POV-Ray."));
+		QMessageBox::information(this, windowTitle(), tr("Error starting POV-Ray."));
 		CloseProcess();
 	}
 }
@@ -378,7 +378,7 @@ void lcRenderDialog::RenderBlender()
 
 	if (!ExportResult)
 	{
-		QMessageBox::warning(this, tr("Error"), ExportResult.error());
+		QMessageBox::warning(this, windowTitle(), ExportResult.error());
 		return;
 	}
 
@@ -453,7 +453,7 @@ void lcRenderDialog::RenderBlender()
 	}
 	else
 	{
-		QMessageBox::information(this, tr("Render Error"), tr("Cannot write Blender render script file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString()));
+		QMessageBox::information(this, windowTitle(), tr("Cannot write Blender render script file '%1':\n%2.").arg(ScriptFile.fileName(), ScriptFile.errorString()));
 
 		return;
 	}
@@ -548,7 +548,7 @@ void lcRenderDialog::RenderBlender()
 	else
 	{
 		Message = tr("Error starting Blender render process.");
-		QMessageBox::information(this, tr("Render Error"), Message);
+		QMessageBox::information(this, windowTitle(), Message);
 		CloseProcess();
 	}
 }
@@ -762,7 +762,7 @@ void lcRenderDialog::ShowResult()
 		ui->RenderProgress->setValue(0);
 
 		const QString Body  = tr("An error occurred while rendering.");
-		lcBlenderPreferences::ShowMessage(this, Body, tr("Render Error"), QString(), StdErrLog, 0, QMessageBox::Information);
+		lcBlenderPreferences::ShowMessage(this, Body, windowTitle(), QString(), StdErrLog, 0, QMessageBox::Information);
 		return;
 	}
 	else
@@ -784,7 +784,7 @@ void lcRenderDialog::ShowResult()
 			Success = Writer.write(mImage);
 
 			if (!Success)
-				QMessageBox::information(this, tr("Render Error"), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
+				QMessageBox::information(this, windowTitle(), tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
 		}
 
 	}
@@ -806,7 +806,7 @@ void lcRenderDialog::ShowResult()
 	}
 
 	if (!Success)
-		QMessageBox::information(this, tr("Render Error"), tr("Render failed."));
+		QMessageBox::information(this, windowTitle(), tr("Render failed."));
 
 	WriteStdOut();
 }

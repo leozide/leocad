@@ -3009,9 +3009,8 @@
         <translation>Имя подмодели:</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="297"/>
         <source>Empty Name</source>
-        <translation>Пустое имя</translation>
+        <translation type="vanished">Пустое имя</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="297"/>
@@ -3019,13 +3018,8 @@
         <translation>Имя подмодели не может быть пустым.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="317"/>
-        <location filename="../common/project.cpp" line="330"/>
-        <location filename="../common/project.cpp" line="414"/>
-        <location filename="../common/project.cpp" line="441"/>
-        <location filename="../common/project.cpp" line="498"/>
         <source>Duplicate Submodel</source>
-        <translation>Дублировать подмодель</translation>
+        <translation type="vanished">Дублировать подмодель</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
@@ -3078,11 +3072,8 @@
         <translation type="unfinished">Дублирующаяся модель '%1' была проигнорирована; имена моделей не чувствительны к регистру.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1072"/>
-        <location filename="../common/project.cpp" line="1081"/>
-        <location filename="../common/project.cpp" line="1137"/>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="vanished">Ошибка</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1072"/>
@@ -3160,6 +3151,22 @@ File format is not recognized.</source>
         <location filename="../common/project.cpp" line="2200"/>
         <source>Export 3D Studio</source>
         <translation>Экспортировать 3D Studio</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="414"/>
+        <location filename="../common/project.cpp" line="441"/>
+        <location filename="../common/project.cpp" line="498"/>
+        <source>Submodels</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Подмодели…</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1072"/>
+        <location filename="../common/project.cpp" line="1081"/>
+        <location filename="../common/project.cpp" line="1137"/>
+        <source>Load Model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Загрузить модель</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1613"/>
@@ -3339,9 +3346,8 @@ File format is not recognized.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_bricklink.cpp" line="74"/>
@@ -4639,18 +4645,29 @@ File format is not recognized.</source>
         <translation type="unfinished">Ширина скошенных кромок</translation>
     </message>
     <message>
+        <source>Error</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="obsolete">Ошибка</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qutils.cpp" line="66"/>
         <location filename="../qt/lc_qutils.cpp" line="72"/>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
-        <source>Error</source>
-        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
-        <translation type="unfinished">Ошибка</translation>
+        <source>Stop Blender Process</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Остановить процесс Blender</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 не удалось: %2</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
+        <source>Create Pieces List</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Создать список деталей</translation>
     </message>
 </context>
 <context>
@@ -6427,6 +6444,12 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="1447"/>
+        <source>Preferences</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Параметры…</translation>
+    </message>
+    <message>
         <source>Error creating OpenGL context.
 </source>
         <translation type="vanished">Ошибка при создании контекста OpenGL.
@@ -6451,12 +6474,8 @@ Please visit https://www.leocad.org for information on how to download and insta
 Информация по загрузке и установке библиотеки доступна на https://www.leocad.org.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="961"/>
-        <location filename="../common/lc_application.cpp" line="1005"/>
-        <location filename="../common/lc_application.cpp" line="1341"/>
-        <location filename="../common/lc_application.cpp" line="1447"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="788"/>
@@ -6527,6 +6546,19 @@ Please visit https://www.leocad.org for information on how to download and insta
 </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Экспорт изображений из командной строки не поддерживается в iOS.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="961"/>
+        <location filename="../common/lc_application.cpp" line="1341"/>
+        <source>Initialize Renderer</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Инициализировать модуль рендеринга</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1005"/>
+        <source>Load Pieces Library</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Загрузить библиотеку деталей</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>
@@ -6696,22 +6728,24 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>Выберите цвет кромки детали</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="233"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>По-видимому, включена автонастройка цвета кромки.&lt;br&gt;Цвет кромки чёрных деталей будет недоступен.&lt;br&gt;Продолжить?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="236"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="237"/>
         <source>Select Black Edge Color</source>
         <translation>Выберите цвет кромки чёрных деталей</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="246"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>По-видимому, включена автонастройка цвета кромки.&lt;br&gt;Цвет кромки тёмных деталей будет недоступен.&lt;br&gt;Продолжить?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="248"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="245"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="250"/>
         <source>Select Dark Edge Color</source>
         <translation>Выберите цвет кромки тёмных деталей</translation>
     </message>
@@ -6740,9 +6774,6 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3590"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw Дополнение</translation>
@@ -6949,10 +6980,34 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Тест Blender не пройден.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <source>Save Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Сохранить вывод дополнения Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
+        <source>Cancel Blender Add-on Installation</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Отменить установку дополнения Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
+        <source>Apply Render Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Применить настройки рендеринга</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
+        <source>Set LDraw Color Scheme</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Задать цветовую схему LDraw</translation>
+    </message>
+    <message>
         <source>%1 Blender LDraw Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender LDraw Дополнительные модули</translation>
+        <translation type="obsolete">%1 Blender LDraw Дополнительные модули</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1142"/>
@@ -6988,6 +7043,17 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Не удалось найти файл установки дополнения: '%1'.</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1744"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <source>Install Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Установить дополнение Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1202"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7019,7 +7085,19 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Исполняемый файл Blender не найден в '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <source>Extract Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Распаковать дополнение Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <source>Check for Blender Add-on Updates</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Проверить обновления дополнения Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7032,6 +7110,18 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Извлечение...</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
+        <source>Test Blender</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Проверить Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <source>Configure Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Настроить дополнение Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
@@ -7039,10 +7129,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Не удалось извлечь '%1' в '%2'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
         <source>Extract add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Извлечь дополнение</translation>
+        <translation type="obsolete">Извлечь дополнение</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
@@ -7051,16 +7140,34 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Не удалось проверить последнюю версию дополнения.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
         <source>Latest Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Последнее дополнение</translation>
+        <translation type="obsolete">Последнее дополнение</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Невозможно открыть архивный файл дополнения: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <source>Update Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Обновить дополнение Blender</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
@@ -7200,11 +7307,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Ошибка: установка не удалась.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>%1 Blender Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender Установка дополнения</translation>
+        <translation type="obsolete">%1 Blender Установка дополнения</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1707"/>
@@ -7223,6 +7328,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Стандартный выходной файл дополнения Blender не найден: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <source>View Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Показать вывод дополнения Blender</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1930"/>
@@ -7277,10 +7388,9 @@ Please visit https://www.leocad.org for information on how to download and insta
 %3</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
         <source>Cancel %1 Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Отменить установку дополнения %1</translation>
+        <translation type="obsolete">Отменить установку дополнения %1</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
@@ -7320,6 +7430,13 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">%1 — Настройка (%2)</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2669"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2675"/>
+        <source>Load Blender Add-on Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Загрузить настройки дополнения Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7338,10 +7455,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Найдите %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
         <source>LDraw Render Settings Conflict</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">LDraw Конфликт настроек рендеринга</translation>
+        <translation type="obsolete">LDraw Конфликт настроек рендеринга</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3125"/>
@@ -7368,10 +7484,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Для прозрачного фона установлено значение true.&lt;br&gt;.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
         <source>Custom LDraw Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Пользовательские LDraw цвета</translation>
+        <translation type="obsolete">Пользовательские LDraw цвета</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3163"/>
@@ -7386,10 +7501,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Выбрана цветовая схема «Пользовательская», но файл LDConfig не указан.&lt;br&gt;Будет использоваться цветовая схема по умолчанию '%1'.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
         <source>Render Settings Modified</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Настройки рендеринга изменены</translation>
+        <translation type="obsolete">Настройки рендеринга изменены</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
@@ -7405,43 +7519,54 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Не удалось открыть файл параметров Blender: '%1':&lt;br&gt;%2.</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3549"/>
+        <source>Export Blender Parameters</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Экспортировать параметры Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3562"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Заменить существующий файл</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3637"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3634"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Хотите скачать версию </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3638"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Больше не показывать сообщение о загрузке новой версии дополнения.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3660"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Загрузка дополнения не удалась.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <source>Download Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Скачать дополнение Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Формат записи ZipFile (HostOS %1) с индексом %2 не поддерживается. Извлечение прекращено.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
         <source>Extract Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Извлечь дополнение</translation>
+        <translation type="obsolete">Извлечь дополнение</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3873"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3870"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -7838,6 +7963,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>Папка вывода не может быть пустой.</translation>
     </message>
     <message>
+        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <source>Export HTML</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Экспорт HTML</translation>
+    </message>
+    <message>
         <location filename="../common/lc_htmldialog.cpp" line="68"/>
         <source>Select Output Folder</source>
         <translation>Выбор папки вывода</translation>
@@ -7907,14 +8038,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>по:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <location filename="../common/lc_imagedialog.cpp" line="45"/>
-        <location filename="../common/lc_imagedialog.cpp" line="53"/>
-        <location filename="../common/lc_imagedialog.cpp" line="75"/>
-        <location filename="../common/lc_imagedialog.cpp" line="83"/>
-        <location filename="../common/lc_imagedialog.cpp" line="89"/>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="vanished">Ошибка</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
@@ -8409,10 +8534,22 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">POV-Ray Экспорт</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
+        <source>Save Image</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Сохранить изображение…</translation>
+    </message>
+    <message>
         <location filename="../common/lc_mainwindow.cpp" line="1575"/>
         <source>Nothing to select.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Нечего выбирать.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
+        <source>Select Objects</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Выделение объектов</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2290"/>
@@ -8471,6 +8608,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2661"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>Merge Model</source>
         <translation>Объединение модели</translation>
     </message>
@@ -8524,11 +8662,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Невозможно вставить модель</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <source>Merged 1 submodel.</source>
@@ -8883,6 +9018,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="312"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
         <source>Import Templates</source>
         <translation>Импорт шаблонов</translation>
     </message>
@@ -8893,10 +9029,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>Файлы шаблона Minifig (*.minifig);;Все файлы (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="vanished">Ошибка</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="321"/>
@@ -8907,6 +9041,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="333"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Export Templates</source>
         <translation>Экспорт шаблонов</translation>
     </message>
@@ -8947,12 +9082,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">Дублирование деталей</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1692"/>
-        <location filename="../common/lc_model.cpp" line="3899"/>
-        <location filename="../common/lc_model.cpp" line="6156"/>
-        <location filename="../common/lc_model.cpp" line="6167"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1738"/>
@@ -9157,6 +9288,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Дублировать</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="1692"/>
+        <source>Create Step Image</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Создать изображение шага</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="1808"/>
         <location filename="../common/lc_model.cpp" line="1962"/>
         <location filename="../common/lc_model.cpp" line="1971"/>
@@ -9312,6 +9449,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Перейти к модели</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="3899"/>
+        <source>Inline Selected Models</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Вложить выбранные модели</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="3910"/>
         <source>Inline Model</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
@@ -9435,6 +9578,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Изменить свойства модели</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="6156"/>
+        <location filename="../common/lc_model.cpp" line="6167"/>
         <location filename="../common/lc_model.cpp" line="6226"/>
         <source>Piece Array</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -9592,15 +9737,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="187"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <location filename="../common/lc_modellistdialog.cpp" line="217"/>
         <location filename="../common/lc_modellistdialog.cpp" line="239"/>
         <source>Export Submodel</source>
         <translation>Экспорт подмодели</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="202"/>
@@ -11110,7 +11255,14 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Удалить категорию «%1»?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="923"/>
+        <source>Delete Category</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Удалить категорию</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
         <source>Import Categories</source>
         <translation>Импорт категорий</translation>
     </message>
@@ -11131,6 +11283,7 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
         <source>Export Categories</source>
         <translation>Экспорт категорий</translation>
     </message>
@@ -11145,9 +11298,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Загрузить категории по умолчанию?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <source>Reset Categories</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Сбросить категории</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1174"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translation>Сочетание клавиш «%1» уже назначено для «%2». Заменить его?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <source>Reset Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Сбросить сочетания кнопок мыши</translation>
     </message>
     <message>
         <source>Import shortcuts</source>
@@ -11218,6 +11383,24 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Выбор исполняемого файла POV-Ray</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <source>Import Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Импортировать сочетания клавиш</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <source>Export Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Экспортировать сочетания клавиш</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <source>Reset Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Сбросить сочетания клавиш</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
         <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
@@ -11242,9 +11425,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Экспорт сочетаний клавиш</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <source>Import Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Импортировать сочетания кнопок мыши</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
         <source>Error saving mouse shortcuts file.</source>
         <translation>Ошибка сохранения файла сочетаний клавиш мыши.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <source>Export Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Экспортировать сочетания кнопок мыши</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
@@ -12116,16 +12311,9 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="unfinished">Экспорт модели</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="248"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="351"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="456"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="551"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="765"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="787"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="809"/>
         <source>Render Error</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Ошибка рендеринга</translation>
+        <translation type="obsolete">Ошибка рендеринга</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="364"/>
@@ -12290,9 +12478,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="381"/>
         <source>Error</source>
-        <translation>Ошибка</translation>
+        <translation type="vanished">Ошибка</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="351"/>
@@ -12409,6 +12596,12 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Выберите набор из списка.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
+        <source>Set Inventory</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Задать инвентарий…</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="105"/>
         <source>Downloading</source>
         <translation>Загрузка</translation>
@@ -12422,6 +12615,12 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
         <source>Keyword cannot be empty.</source>
         <translation>Ключевое слово не может быть пустым.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <source>Search Sets</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Найти наборы</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="155"/>
@@ -12439,9 +12638,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Ошибка соединения с сервером.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
+        <source>Connect to Sets Database</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Подключиться к базе данных наборов</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
         <source>Error downloading set inventory.</source>
         <translation>Ошибка загрузки инвентаря набора.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <source>Download Set Inventory</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Скачать список деталей набора</translation>
     </message>
 </context>
 <context>
@@ -12546,10 +12757,8 @@ Unsupported video cards use face tint and colored edges.</source>
 <context>
     <name>lcView</name>
     <message>
-        <location filename="../common/lc_view.cpp" line="761"/>
-        <location filename="../common/lc_view.cpp" line="795"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_view.cpp" line="761"/>
@@ -12557,6 +12766,13 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../common/lc_view.cpp" line="805"/>
         <source>Error creating images.</source>
         <translation>Ошибка создания изображений.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_view.cpp" line="761"/>
+        <location filename="../common/lc_view.cpp" line="795"/>
+        <source>Create Step Images</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Создать изображения шагов</translation>
     </message>
     <message>
         <source>Error</source>

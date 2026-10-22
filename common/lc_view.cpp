@@ -758,7 +758,7 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 	if (!BeginRenderToImage(mWidth, mHeight))
 	{
 		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+			QMessageBox::warning(gMainWindow, tr("Create Step Images"), tr("Error creating images."));
 
 		return Images;
 	}
@@ -792,7 +792,7 @@ std::vector<QImage> lcView::GetStepImages(lcStep Start, lcStep End)
 		mModel->CalculateStep(LC_STEP_MAX);
 
 	if (RenderFailed && gMainWindow)
-		QMessageBox::warning(gMainWindow, tr("LeoCAD"), tr("Error creating images."));
+		QMessageBox::warning(gMainWindow, tr("Create Step Images"), tr("Error creating images."));
 
 	return Images;
 }

@@ -3127,9 +3127,8 @@
         <translation>Název podmodelu:</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="297"/>
         <source>Empty Name</source>
-        <translation>Prázdný název</translation>
+        <translation type="vanished">Prázdný název</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="297"/>
@@ -3137,13 +3136,8 @@
         <translation>Název podmodelu nesmí být prázdný.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="317"/>
-        <location filename="../common/project.cpp" line="330"/>
-        <location filename="../common/project.cpp" line="414"/>
-        <location filename="../common/project.cpp" line="441"/>
-        <location filename="../common/project.cpp" line="498"/>
         <source>Duplicate Submodel</source>
-        <translation>Duplikovat podmodel</translation>
+        <translation type="vanished">Duplikovat podmodel</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
@@ -3196,11 +3190,8 @@
         <translation type="unfinished">Duplicitní model '%1' byl ignorován; názvy modelů nerozlišují malá a velká písmena.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1072"/>
-        <location filename="../common/project.cpp" line="1081"/>
-        <location filename="../common/project.cpp" line="1137"/>
         <source>Error</source>
-        <translation>Chyba</translation>
+        <translation type="vanished">Chyba</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1072"/>
@@ -3278,6 +3269,22 @@ Formát souboru není rozpoznán.</translation>
         <location filename="../common/project.cpp" line="2200"/>
         <source>Export 3D Studio</source>
         <translation>Exportovat 3D Studio</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="414"/>
+        <location filename="../common/project.cpp" line="441"/>
+        <location filename="../common/project.cpp" line="498"/>
+        <source>Submodels</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Podmodely</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1072"/>
+        <location filename="../common/project.cpp" line="1081"/>
+        <location filename="../common/project.cpp" line="1137"/>
+        <source>Load Model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Načíst model</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1613"/>
@@ -3457,9 +3464,8 @@ Formát souboru není rozpoznán.</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
         <source>LeoCAD</source>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_bricklink.cpp" line="74"/>
@@ -4757,18 +4763,29 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Šířka zkosených hran</translation>
     </message>
     <message>
+        <source>Error</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="obsolete">Chyba</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qutils.cpp" line="66"/>
         <location filename="../qt/lc_qutils.cpp" line="72"/>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
-        <source>Error</source>
-        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
-        <translation type="unfinished">Chyba</translation>
+        <source>Stop Blender Process</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zastavit proces Blenderu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 selhalo: %2</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
+        <source>Create Pieces List</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořit seznam dílků</translation>
     </message>
 </context>
 <context>
@@ -6528,6 +6545,13 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
         <translation type="unfinished">Nebyl zadán žádný název souboru.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="961"/>
+        <location filename="../common/lc_application.cpp" line="1341"/>
+        <source>Initialize Renderer</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Inicializovat vykreslovací modul</translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="1000"/>
         <source>LeoCAD could not find a compatible Pieces Library so only a small number of pieces will be available.
 
@@ -6546,12 +6570,14 @@ Please visit https://www.leocad.org for information on how to download and insta
 Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese https://www.leocad.org.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="961"/>
-        <location filename="../common/lc_application.cpp" line="1005"/>
-        <location filename="../common/lc_application.cpp" line="1341"/>
         <location filename="../common/lc_application.cpp" line="1447"/>
+        <source>Preferences</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Předvolby</translation>
+    </message>
+    <message>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="788"/>
@@ -6623,6 +6649,12 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Export obrázků z příkazového řádku není v systému iOS podporován.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1005"/>
+        <source>Load Pieces Library</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Načíst knihovnu dílků</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>
@@ -6795,25 +6827,27 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Vyberte Barva okraje dílku</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="233"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zdá se, že je povolena automatizace barvy okraje.&lt;br&gt;Barva okraje černých dílků nebude dostupná.&lt;br&gt;Chcete pokračovat?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="236"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="237"/>
         <source>Select Black Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyberte Barva černého okraje</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="246"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zdá se, že je povolena automatická barva okrajů.&lt;br&gt;Barva okrajů tmavých kousků nebude dostupná.&lt;br&gt;Chcete pokračovat?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="248"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="245"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="250"/>
         <source>Select Dark Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vyberte Barva tmavého okraje</translation>
@@ -6843,9 +6877,6 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3590"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw doplněk</translation>
@@ -7052,10 +7083,34 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Test Blender se nezdařil.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <source>Save Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Uložit výstup doplňku Blenderu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
+        <source>Cancel Blender Add-on Installation</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zrušit instalaci doplňku Blenderu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
+        <source>Apply Render Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Použít nastavení vykreslování</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
+        <source>Set LDraw Color Scheme</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavit barevné schéma LDraw</translation>
+    </message>
+    <message>
         <source>%1 Blender LDraw Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender LDraw přídavné moduly</translation>
+        <translation type="obsolete">%1 Blender LDraw přídavné moduly</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1142"/>
@@ -7091,6 +7146,17 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Nelze najít instalační soubor doplňku: '%1'</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1744"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <source>Install Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Nainstalovat doplněk Blenderu</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1202"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7122,7 +7188,19 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Spustitelný soubor Blender nebyl nalezen na '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <source>Extract Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Rozbalit doplněk Blenderu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <source>Check for Blender Add-on Updates</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Vyhledat aktualizace doplňku Blenderu</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7135,6 +7213,18 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Extrakce...</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
+        <source>Test Blender</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Otestovat Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <source>Configure Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavit doplněk Blenderu</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
@@ -7142,10 +7232,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Nepodařilo se extrahovat '%1' do '%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
         <source>Extract add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Extrahovat doplněk</translation>
+        <translation type="obsolete">Extrahovat doplněk</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
@@ -7154,16 +7243,34 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Kontrola nejnovější verze doplňku se nezdařila.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
         <source>Latest Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Nejnovější doplněk</translation>
+        <translation type="obsolete">Nejnovější doplněk</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nelze otevřít soubor archivu doplňku: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <source>Update Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Aktualizovat doplněk Blenderu</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
@@ -7303,11 +7410,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Chyba: Instalace se nezdařila.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>%1 Blender Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender Instalace doplňku</translation>
+        <translation type="obsolete">%1 Blender Instalace doplňku</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1707"/>
@@ -7326,6 +7431,12 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Standardní výstupní soubor Blender doplňku nebyl nalezen: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <source>View Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit výstup doplňku Blenderu</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1930"/>
@@ -7380,10 +7491,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
 %3</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
         <source>Cancel %1 Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Zrušit instalaci doplňku %1</translation>
+        <translation type="obsolete">Zrušit instalaci doplňku %1</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
@@ -7423,6 +7533,13 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">%1 – Nastavení (%2)</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2669"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2675"/>
+        <source>Load Blender Add-on Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Načíst nastavení doplňku Blenderu</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7441,10 +7558,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Najděte %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
         <source>LDraw Render Settings Conflict</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">LDraw Konflikt nastavení vykreslování</translation>
+        <translation type="obsolete">LDraw Konflikt nastavení vykreslování</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3125"/>
@@ -7471,10 +7587,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Transparentní pozadí nastaveno na true.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
         <source>Custom LDraw Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Vlastní barvy LDraw</translation>
+        <translation type="obsolete">Vlastní barvy LDraw</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3163"/>
@@ -7489,10 +7604,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Bylo vybráno „vlastní“ barevné schéma, ale nebyl zadán žádný soubor LDConfig.&lt;br&gt;Použije se výchozí barevné schéma '%1'.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
         <source>Render Settings Modified</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Nastavení vykreslování změněno</translation>
+        <translation type="obsolete">Nastavení vykreslování změněno</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
@@ -7508,43 +7622,54 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Nepodařilo se otevřít soubor parametrů Blender: '%1':&lt;br&gt;%2</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3549"/>
+        <source>Export Blender Parameters</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportovat parametry Blenderu</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3562"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nahradit existující soubor</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3637"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3634"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chcete si stáhnout verzi </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3638"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Znovu nezobrazovat zprávu o stažení nové verze doplňku.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3660"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Stažení doplňku se nezdařilo.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <source>Download Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Stáhnout doplněk Blenderu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Formát záznamu ZipFile (HostOS %1) na indexu %2 není podporován. Extrakt ukončen.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
         <source>Extract Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Extrahovat doplněk</translation>
+        <translation type="obsolete">Extrahovat doplněk</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3873"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3870"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -7943,6 +8068,12 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>Výstupní složka nesmí být prázdná.</translation>
     </message>
     <message>
+        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <source>Export HTML</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Export HTML</translation>
+    </message>
+    <message>
         <location filename="../common/lc_htmldialog.cpp" line="68"/>
         <source>Select Output Folder</source>
         <translation>Vyberte výstupní složku</translation>
@@ -8012,14 +8143,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>Do:</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <location filename="../common/lc_imagedialog.cpp" line="45"/>
-        <location filename="../common/lc_imagedialog.cpp" line="53"/>
-        <location filename="../common/lc_imagedialog.cpp" line="75"/>
-        <location filename="../common/lc_imagedialog.cpp" line="83"/>
-        <location filename="../common/lc_imagedialog.cpp" line="89"/>
         <source>Error</source>
-        <translation>Chyba</translation>
+        <translation type="vanished">Chyba</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
@@ -8525,6 +8650,18 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>Zavřít ostatní záložky</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
+        <source>Save Image</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Uložit obrázek</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
+        <source>Select Objects</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Vybrat objekty</translation>
+    </message>
+    <message>
         <location filename="../common/lc_mainwindow.cpp" line="2911"/>
         <source>Export 3DS</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -8667,15 +8804,13 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2661"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>Merge Model</source>
         <translation>Sloučit model</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <source>Merged 1 submodel.</source>
@@ -9033,6 +9168,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="312"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
         <source>Import Templates</source>
         <translation type="unfinished">Importovat šablony</translation>
     </message>
@@ -9043,10 +9179,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Šablona Minifig souborů (*.minifig);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Error</source>
-        <translation type="unfinished">Chyba</translation>
+        <translation type="obsolete">Chyba</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="321"/>
@@ -9057,6 +9191,7 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="333"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Export Templates</source>
         <translation type="unfinished">Exportovat šablony</translation>
     </message>
@@ -9098,12 +9233,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="vanished">Duplikování dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1692"/>
-        <location filename="../common/lc_model.cpp" line="3899"/>
-        <location filename="../common/lc_model.cpp" line="6156"/>
-        <location filename="../common/lc_model.cpp" line="6167"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1738"/>
@@ -9305,6 +9436,12 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Duplikát</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="1692"/>
+        <source>Create Step Image</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořit obrázek kroku</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="1808"/>
         <location filename="../common/lc_model.cpp" line="1962"/>
         <location filename="../common/lc_model.cpp" line="1971"/>
@@ -9460,6 +9597,12 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Přejít na Model</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="3899"/>
+        <source>Inline Selected Models</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Vložit vybrané modely</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="3910"/>
         <source>Inline Model</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
@@ -9583,6 +9726,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Změňte vlastnosti modelu</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="6156"/>
+        <location filename="../common/lc_model.cpp" line="6167"/>
         <location filename="../common/lc_model.cpp" line="6226"/>
         <source>Piece Array</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -9742,15 +9887,15 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="187"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <location filename="../common/lc_modellistdialog.cpp" line="217"/>
         <location filename="../common/lc_modellistdialog.cpp" line="239"/>
         <source>Export Submodel</source>
         <translation>Exportovat podmodel</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="202"/>
@@ -11336,7 +11481,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Opravdu chcete smazat kategorii &apos;%1&apos;?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="923"/>
+        <source>Delete Category</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Odstranit kategorii</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
         <source>Import Categories</source>
         <translation>Importovat kategorie</translation>
     </message>
@@ -11357,6 +11509,7 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
         <source>Export Categories</source>
         <translation>Exportovat kategorie</translation>
     </message>
@@ -11371,10 +11524,22 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Opravdu chcete načíst výchozí kategorie?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <source>Reset Categories</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovit kategorie</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1174"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Zástupce '%1' je již přiřazen k '%2'. Chcete jej vyměnit?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <source>Reset Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovit zkratky myši</translation>
     </message>
     <message>
         <source>Import shortcuts</source>
@@ -11440,6 +11605,24 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation type="unfinished">Vykreslování obrysu není k dispozici. Použije se obličejový odstín a barevné okraje.</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <source>Import Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Importovat klávesové zkratky</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <source>Export Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportovat klávesové zkratky</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <source>Reset Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovit klávesové zkratky</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
         <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
@@ -11464,9 +11647,21 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Exportovat zkratky</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <source>Import Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Importovat zkratky myši</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
         <source>Error saving mouse shortcuts file.</source>
         <translation>Při ukládání souboru klávesových zkratek došlo k chybě.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <source>Export Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportovat zkratky myši</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
@@ -12385,16 +12580,9 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation type="unfinished">Export modelu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="248"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="351"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="456"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="551"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="765"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="787"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="809"/>
         <source>Render Error</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Chyba vykreslení</translation>
+        <translation type="obsolete">Chyba vykreslení</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="364"/>
@@ -12559,9 +12747,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Ukončit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="381"/>
         <source>Error</source>
-        <translation>Chyba</translation>
+        <translation type="vanished">Chyba</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="351"/>
@@ -12678,6 +12865,12 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Vyberte sadu ze seznamu.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
+        <source>Set Inventory</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Nastavte hodnotu zásob</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="105"/>
         <source>Downloading</source>
         <translation>Stahování</translation>
@@ -12691,6 +12884,12 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
         <source>Keyword cannot be empty.</source>
         <translation>Klíčové slovo nemůže být prázdné.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <source>Search Sets</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Hledat sady</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="155"/>
@@ -12708,9 +12907,21 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation>Při připojování k serveru došlo k chybě.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
+        <source>Connect to Sets Database</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Připojit k databázi sad</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
         <source>Error downloading set inventory.</source>
         <translation>Při stahování inventáře došlo k chybě.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <source>Download Set Inventory</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Stáhnout seznam dílků sady</translation>
     </message>
 </context>
 <context>
@@ -12815,10 +13026,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
 <context>
     <name>lcView</name>
     <message>
-        <location filename="../common/lc_view.cpp" line="761"/>
-        <location filename="../common/lc_view.cpp" line="795"/>
         <source>LeoCAD</source>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_view.cpp" line="761"/>
@@ -12826,6 +13035,13 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../common/lc_view.cpp" line="805"/>
         <source>Error creating images.</source>
         <translation type="unfinished">Při vytváření obrázků došlo k chybě.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_view.cpp" line="761"/>
+        <location filename="../common/lc_view.cpp" line="795"/>
+        <source>Create Step Images</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořit obrázky kroků</translation>
     </message>
     <message>
         <source>Error</source>

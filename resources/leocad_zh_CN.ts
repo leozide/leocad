@@ -3017,16 +3017,12 @@
 <context>
     <name>Project</name>
     <message>
-        <location filename="../common/project.cpp" line="297"/>
         <source>Empty Name</source>
-        <translation>名称为空</translation>
+        <translation type="vanished">名称为空</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1072"/>
-        <location filename="../common/project.cpp" line="1081"/>
-        <location filename="../common/project.cpp" line="1137"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
         <source>Error reading file &apos;%1&apos;:%2</source>
@@ -3072,6 +3068,14 @@
         <translation type="unfinished">此项目中已存在名为 '%1' 的零件。</translation>
     </message>
     <message>
+        <location filename="../common/project.cpp" line="414"/>
+        <location filename="../common/project.cpp" line="441"/>
+        <location filename="../common/project.cpp" line="498"/>
+        <source>Submodels</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">子模型</translation>
+    </message>
+    <message>
         <location filename="../common/project.cpp" line="474"/>
         <source>Model &apos;%1&apos; was deleted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -3103,6 +3107,14 @@
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">读取文件 '%1' 时出错：
 %2</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1072"/>
+        <location filename="../common/project.cpp" line="1081"/>
+        <location filename="../common/project.cpp" line="1137"/>
+        <source>Load Model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">加载模型</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1137"/>
@@ -3291,13 +3303,8 @@ File format is not recognized.</source>
         <translation>子模型名称不能为空。</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="317"/>
-        <location filename="../common/project.cpp" line="330"/>
-        <location filename="../common/project.cpp" line="414"/>
-        <location filename="../common/project.cpp" line="441"/>
-        <location filename="../common/project.cpp" line="498"/>
         <source>Duplicate Submodel</source>
-        <translation>子模型已存在</translation>
+        <translation type="vanished">子模型已存在</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
@@ -3374,9 +3381,8 @@ File format is not recognized.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_bricklink.cpp" line="74"/>
@@ -4673,18 +4679,29 @@ File format is not recognized.</source>
         <translation type="unfinished">斜边宽度</translation>
     </message>
     <message>
+        <source>Error</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="obsolete">错误</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qutils.cpp" line="66"/>
         <location filename="../qt/lc_qutils.cpp" line="72"/>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
-        <source>Error</source>
-        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
-        <translation type="unfinished">错误</translation>
+        <source>Stop Blender Process</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">停止 Blender 进程</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 失败：%2</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
+        <source>Create Pieces List</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">创建零件列表</translation>
     </message>
 </context>
 <context>
@@ -6478,11 +6495,20 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="961"/>
-        <location filename="../common/lc_application.cpp" line="1005"/>
         <location filename="../common/lc_application.cpp" line="1341"/>
+        <source>Initialize Renderer</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">初始化渲染器</translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="1447"/>
+        <source>Preferences</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">选项</translation>
+    </message>
+    <message>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1000"/>
@@ -6503,6 +6529,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">LeoCAD 无法加载片段库。
 
 请访问 https://www.leocad.org 了解有关如何下载和安装库的信息。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1005"/>
+        <source>Load Pieces Library</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">加载零件库</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>
@@ -6956,22 +6988,24 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>选择零件边缘颜色</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="233"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>自动边缘色似乎已启用。&lt;br&gt;黑色零件边缘颜色将不可用。&lt;br&gt;是否继续？</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="236"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="237"/>
         <source>Select Black Edge Color</source>
         <translation>选择黑色边缘颜色</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="246"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translation>自动边缘色似乎已启用。&lt;br&gt;深色零件边缘颜色将不可用。&lt;br&gt;是否继续？</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="248"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="245"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="250"/>
         <source>Select Dark Edge Color</source>
         <translation>选择深色边缘颜色</translation>
     </message>
@@ -7000,9 +7034,6 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3590"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw 附加组件</translation>
@@ -7209,10 +7240,34 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Blender 测试失败。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <source>Save Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">保存 Blender 插件输出</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
+        <source>Cancel Blender Add-on Installation</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">取消安装 Blender 插件</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
+        <source>Apply Render Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">应用渲染设置</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
+        <source>Set LDraw Color Scheme</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">设置 LDraw 配色方案</translation>
+    </message>
+    <message>
         <source>%1 Blender LDraw Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender LDraw 附加模块</translation>
+        <translation type="obsolete">%1 Blender LDraw 附加模块</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1142"/>
@@ -7248,6 +7303,17 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">找不到附加安装文件：'%1'</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1744"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <source>Install Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">安装 Blender 插件</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1202"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7279,7 +7345,19 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">在 '%1' 处找不到 Blender 可执行文件</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <source>Extract Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">解压 Blender 插件</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <source>Check for Blender Add-on Updates</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">检查 Blender 插件更新</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7292,6 +7370,18 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">正在提取...</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
+        <source>Test Blender</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">测试 Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <source>Configure Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">配置 Blender 插件</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
@@ -7299,10 +7389,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">无法将 '%1' 提取到 '%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
         <source>Extract add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">提取附加组件</translation>
+        <translation type="obsolete">提取附加组件</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
@@ -7311,16 +7400,34 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">检查最新附加版本失败。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
         <source>Latest Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">最新附加组件</translation>
+        <translation type="obsolete">最新附加组件</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法打开附加存档文件：'%1'。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <source>Update Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">更新 Blender 插件</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
@@ -7460,11 +7567,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">错误：安装失败。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>%1 Blender Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender 附加安装</translation>
+        <translation type="obsolete">%1 Blender 附加安装</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1707"/>
@@ -7483,6 +7588,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">未找到 Blender 附加标准输出文件：'%1'。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <source>View Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">查看 Blender 插件输出</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1930"/>
@@ -7537,10 +7648,9 @@ Please visit https://www.leocad.org for information on how to download and insta
 %3 时出错</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
         <source>Cancel %1 Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">取消 %1 附加安装</translation>
+        <translation type="obsolete">取消 %1 附加安装</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
@@ -7580,6 +7690,13 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">%1 - 设置 (%2)</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2669"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2675"/>
+        <source>Load Blender Add-on Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">加载 Blender 插件设置</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7598,10 +7715,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">找到%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
         <source>LDraw Render Settings Conflict</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">LDraw 渲染设置冲突</translation>
+        <translation type="obsolete">LDraw 渲染设置冲突</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3125"/>
@@ -7628,10 +7744,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">透明背景设置为 true.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
         <source>Custom LDraw Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">自定义 LDraw 颜色</translation>
+        <translation type="obsolete">自定义 LDraw 颜色</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3163"/>
@@ -7646,10 +7761,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">选择了配色方案“自定义”，但未指定 LDConfig 文件。&lt;br&gt; 将使用默认配色方案 '%1'。&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
         <source>Render Settings Modified</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">修改渲染设置</translation>
+        <translation type="obsolete">修改渲染设置</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
@@ -7665,43 +7779,54 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">无法打开 Blender 参数文件：'%1':&lt;br&gt;%2</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3549"/>
+        <source>Export Blender Parameters</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">导出 Blender 参数</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3562"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">替换现有文件</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3637"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3634"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">您要下载版本吗 </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3638"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">不再显示下载新附加版本消息。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3660"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">附加组件下载失败。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <source>Download Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">下载 Blender 插件</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">不支持索引 %2 处的 ZipFile 条目格式 (HostOS %1)。提取终止。</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
         <source>Extract Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">提取插件</translation>
+        <translation type="obsolete">提取插件</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3873"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3870"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -8092,6 +8217,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>输出文件夹不能为空。</translation>
     </message>
     <message>
+        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <source>Export HTML</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">导出 HTML</translation>
+    </message>
+    <message>
         <location filename="../common/lc_htmldialog.cpp" line="68"/>
         <source>Select Output Folder</source>
         <translation>选择输出文件夹</translation>
@@ -8167,14 +8298,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">输出文件不能为空。</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <location filename="../common/lc_imagedialog.cpp" line="45"/>
-        <location filename="../common/lc_imagedialog.cpp" line="53"/>
-        <location filename="../common/lc_imagedialog.cpp" line="75"/>
-        <location filename="../common/lc_imagedialog.cpp" line="83"/>
-        <location filename="../common/lc_imagedialog.cpp" line="89"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="75"/>
@@ -8663,10 +8788,22 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">POV-Ray 导出</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
+        <source>Save Image</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">保存图像</translation>
+    </message>
+    <message>
         <location filename="../common/lc_mainwindow.cpp" line="1575"/>
         <source>Nothing to select.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">没什么可选择的。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
+        <source>Select Objects</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">选择物体</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2290"/>
@@ -8776,6 +8913,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2661"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>Merge Model</source>
         <translation>合并模型</translation>
     </message>
@@ -8798,11 +8936,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>LEGO Digital Designer 文件 (*.lxf);;所有文件 (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <source>Error loading &apos;%1&apos;.</source>
@@ -9141,6 +9276,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="312"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
         <source>Import Templates</source>
         <translation>导入模板</translation>
     </message>
@@ -9151,10 +9287,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>人仔模板文件 (*.minifig);;所有文件 (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="321"/>
@@ -9178,6 +9312,7 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="333"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Export Templates</source>
         <translation>导出模板</translation>
     </message>
@@ -9202,12 +9337,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="vanished">正在粘贴</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1692"/>
-        <location filename="../common/lc_model.cpp" line="3899"/>
-        <location filename="../common/lc_model.cpp" line="6156"/>
-        <location filename="../common/lc_model.cpp" line="6167"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1738"/>
@@ -9336,6 +9467,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <source>Duplicate</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">复制</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1692"/>
+        <source>Create Step Image</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">创建步骤图像</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1808"/>
@@ -9493,6 +9630,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">移至模型</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="3899"/>
+        <source>Inline Selected Models</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">展开选定子模型</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="3910"/>
         <source>Inline Model</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
@@ -9616,6 +9759,8 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">更改模型属性</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="6156"/>
+        <location filename="../common/lc_model.cpp" line="6167"/>
         <location filename="../common/lc_model.cpp" line="6226"/>
         <source>Piece Array</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -9859,15 +10004,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="187"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <location filename="../common/lc_modellistdialog.cpp" line="217"/>
         <location filename="../common/lc_modellistdialog.cpp" line="239"/>
         <source>Export Submodel</source>
         <translation>导出子模型</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="202"/>
@@ -11323,7 +11468,14 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>确定要删除类别 &apos;%1&apos; 吗？</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="923"/>
+        <source>Delete Category</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">删除类别</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
         <source>Import Categories</source>
         <translation>导入类别</translation>
     </message>
@@ -11344,6 +11496,7 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
         <source>Export Categories</source>
         <translation>导出类别</translation>
     </message>
@@ -11358,9 +11511,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>确定要加载默认类别吗？</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <source>Reset Categories</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">重置类别</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1174"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translation>快捷键 &apos;%1&apos; 已分配给 &apos;%2&apos;。是否替换？</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <source>Reset Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">重置鼠标快捷方式</translation>
     </message>
     <message>
         <source>Import shortcuts</source>
@@ -11431,6 +11596,24 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>选择 POV-Ray 可执行文件</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <source>Import Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">导入键盘快捷键</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <source>Export Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">导出键盘快捷键</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <source>Reset Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">重置键盘快捷键</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
         <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
@@ -11455,9 +11638,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>导出快捷键</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <source>Import Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">导入鼠标快捷方式</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
         <source>Error saving mouse shortcuts file.</source>
         <translation>保存鼠标快捷键文件时出错。</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <source>Export Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">导出鼠标快捷方式</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
@@ -12335,16 +12530,9 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="unfinished">导出模型</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="248"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="351"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="456"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="551"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="765"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="787"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="809"/>
         <source>Render Error</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">渲染错误</translation>
+        <translation type="obsolete">渲染错误</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="364"/>
@@ -12509,9 +12697,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="381"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="351"/>
@@ -12628,6 +12815,12 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>请从列表中选择一个套装。</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
+        <source>Set Inventory</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Inventory</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="105"/>
         <source>Downloading</source>
         <translation>下载中</translation>
@@ -12641,6 +12834,12 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
         <source>Keyword cannot be empty.</source>
         <translation>关键词不能为空。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <source>Search Sets</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">搜索套装</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="155"/>
@@ -12658,9 +12857,21 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>连接服务器时出错。</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
+        <source>Connect to Sets Database</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">连接套装数据库</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
         <source>Error downloading set inventory.</source>
         <translation>下载套装清单时出错。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <source>Download Set Inventory</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">下载套装零件清单</translation>
     </message>
 </context>
 <context>
@@ -12774,10 +12985,8 @@ Unsupported video cards use face tint and colored edges.</source>
 <context>
     <name>lcView</name>
     <message>
-        <location filename="../common/lc_view.cpp" line="761"/>
-        <location filename="../common/lc_view.cpp" line="795"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_view.cpp" line="761"/>
@@ -12785,6 +12994,13 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../common/lc_view.cpp" line="805"/>
         <source>Error creating images.</source>
         <translation>创建图像时出错。</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_view.cpp" line="761"/>
+        <location filename="../common/lc_view.cpp" line="795"/>
+        <source>Create Step Images</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">创建步骤图像</translation>
     </message>
     <message>
         <source>Error</source>

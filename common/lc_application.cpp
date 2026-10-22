@@ -958,7 +958,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		StdErr << RendererResult.error() << '\n';
 
 		if (!SaveAndExit)
-			QMessageBox::critical(nullptr, tr("LeoCAD"), RendererResult.error());
+			QMessageBox::critical(nullptr, tr("Initialize Renderer"), RendererResult.error());
 
 		return lcStartupMode::Error;
 	}
@@ -1002,7 +1002,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			Message = tr("LeoCAD could not load Pieces Library.\n\nPlease visit https://www.leocad.org for information on how to download and install a library.");
 
 		if (gMainWindow)
-			QMessageBox::information(gMainWindow, tr("LeoCAD"), Message);
+			QMessageBox::information(gMainWindow, tr("Load Pieces Library"), Message);
 		else
 		{
 			StdErr << Message << "\n";
@@ -1338,7 +1338,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		if (!RendererResult)
 		{
 			StdErr << RendererResult.error() << '\n';
-			QMessageBox::critical(gMainWindow, tr("LeoCAD"), RendererResult.error());
+			QMessageBox::critical(gMainWindow, tr("Initialize Renderer"), RendererResult.error());
 			return lcStartupMode::Error;
 		}
 
@@ -1444,7 +1444,7 @@ void lcApplication::ShowPreferencesDialog()
 	lcSetProfileStudStyle(Options.StudStyle);
 
 	if (LanguageChanged || LibraryChanged || AAChanged)
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Some changes will only take effect the next time you start LeoCAD."));
+		QMessageBox::information(gMainWindow, tr("Preferences"), tr("Some changes will only take effect the next time you start LeoCAD."));
 
 	if (Options.CategoriesModified)
 	{

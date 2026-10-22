@@ -294,7 +294,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 		if (Name.isEmpty())
 		{
-			QMessageBox::information(ParentWidget, tr("Empty Name"), tr("The submodel name cannot be empty."));
+			QMessageBox::information(ParentWidget, DialogTitle, tr("The submodel name cannot be empty."));
 			continue;
 		}
 
@@ -314,7 +314,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 		if (ExistingModels.contains(Name, Qt::CaseInsensitive) && Name != CurrentName)
 		{
-			QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A submodel named '%1' already exists. Please enter a unique name.").arg(Name));
+			QMessageBox::information(ParentWidget, DialogTitle, tr("A submodel named '%1' already exists. Please enter a unique name.").arg(Name));
 			continue;
 		}
 
@@ -327,7 +327,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceData()) &&
 				(!ExistingPiece->IsModel() || ExistingModels.contains(Name, Qt::CaseInsensitive)))
 			{
-				QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project. Please enter a unique name.").arg(Name));
+				QMessageBox::information(ParentWidget, DialogTitle, tr("A piece named '%1' already exists in this project. Please enter a unique name.").arg(Name));
 				continue;
 			}
 		}
@@ -411,7 +411,7 @@ void Project::ShowModelListDialog()
 
 		if (!FinalNames.insert(Name).second)
 		{
-			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
 			return;
 		}
 
@@ -438,7 +438,7 @@ void Project::ShowModelListDialog()
 
 		if (!Vacated)
 		{
-			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
 			return;
 		}
 	}
@@ -495,7 +495,7 @@ void Project::ShowModelListDialog()
 
 		if (!lcGetPiecesLibrary()->RenameModelPieceData(Model->GetPieceData(), Entry.Name.toLatin1().constData()))
 		{
-			QMessageBox::information(gMainWindow, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
 			return;
 		}
 
@@ -1069,7 +1069,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	if (!File.open(QIODevice::ReadOnly))
 	{
 		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+			QMessageBox::warning(parent, tr("Load Model"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -1078,7 +1078,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	if (File.error() != QFileDevice::NoError)
 	{
 		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+			QMessageBox::warning(parent, tr("Load Model"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return false;
 	}
 
@@ -1134,7 +1134,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	if (mModels.empty())
 	{
 		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Error"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
+			QMessageBox::warning(parent, tr("Load Model"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 		return false;
 	}
 

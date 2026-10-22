@@ -63,13 +63,13 @@ int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid
 
 	if ((hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, PPID)) == INVALID_HANDLE_VALUE)
 	{
-		QMessageBox::warning(Parent, QObject::tr("Error"), QString("%1 failed: %1").arg("CreateToolhelp32Snapshot").arg(GetLastError()));
+		QMessageBox::warning(Parent, QObject::tr("Stop Blender Process"), QString("%1 failed: %1").arg("CreateToolhelp32Snapshot").arg(GetLastError()));
 		return -1;
 	}
 	PE32.dwSize = sizeof(PROCESSENTRY32);
 	if (Process32First(hSnapshot, &PE32) == FALSE)
 	{
-		QMessageBox::warning(Parent, QObject::tr("Error"), QString("%1 failed: %2").arg("Process32First").arg(GetLastError()));
+		QMessageBox::warning(Parent, QObject::tr("Stop Blender Process"), QString("%1 failed: %2").arg("Process32First").arg(GetLastError()));
 		CloseHandle(hSnapshot);
 		return -2;
 	}
@@ -87,7 +87,7 @@ int lcTerminateChildProcess(QWidget* Parent, const qint64 Pid, const qint64 Ppid
 			{
 				if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, PE32.th32ProcessID)) == INVALID_HANDLE_VALUE)
 				{
-					QMessageBox::warning(Parent, QObject::tr("Error"), QObject::tr("%1 failed: %2").arg("OpenProcess").arg(GetLastError()));
+					QMessageBox::warning(Parent, QObject::tr("Stop Blender Process"), QObject::tr("%1 failed: %2").arg("OpenProcess").arg(GetLastError()));
 					return -3;
 				}
 				else

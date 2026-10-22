@@ -199,7 +199,7 @@ void lcModelListDialog::ExportModelClicked()
 
 			if (!Model)
 			{
-				QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to export."));
+				QMessageBox::information(this, tr("Export Submodel"), tr("Nothing to export."));
 				return;
 			}
 		}

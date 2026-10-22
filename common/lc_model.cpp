@@ -1689,7 +1689,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	if (!Image)
 	{
 		if (gMainWindow)
-			QMessageBox::warning(gMainWindow, tr("LeoCAD"), Image.error());
+			QMessageBox::warning(gMainWindow, tr("Create Step Image"), Image.error());
 
 		return QImage();
 	}
@@ -3896,7 +3896,7 @@ void lcModel::InlineSelectedModels()
 
 	if (!Modified)
 	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No models selected."));
+		QMessageBox::information(gMainWindow, tr("Inline Selected Models"), tr("No models selected."));
 
 		DiscardHistorySequence();
 
@@ -6153,7 +6153,7 @@ void lcModel::ShowArrayDialog()
 
 	if (!GetPieceFocusOrSelectionCenter(Center))
 	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("No pieces selected."));
+		QMessageBox::information(gMainWindow, tr("Piece Array"), tr("No pieces selected."));
 		return;
 	}
 
@@ -6164,7 +6164,7 @@ void lcModel::ShowArrayDialog()
 
 	if (Dialog.mCounts[0] * Dialog.mCounts[1] * Dialog.mCounts[2] < 2)
 	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less. No pieces added."));
+		QMessageBox::information(gMainWindow, tr("Piece Array"), tr("Array only has 1 element or less. No pieces added."));
 		return;
 	}
 

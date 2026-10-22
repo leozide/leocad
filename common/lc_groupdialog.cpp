@@ -22,7 +22,7 @@ void lcGroupDialog::accept()
 
 	if (Name.isEmpty())
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Name cannot be empty."));
+		QMessageBox::information(this, windowTitle(), tr("Name cannot be empty."));
 		return;
 	}
 
@@ -30,7 +30,7 @@ void lcGroupDialog::accept()
 	{
 		if (Group->mName == Name)
 		{
-			QMessageBox::information(this, "LeoCAD", tr("A group with this name already exists."));
+			QMessageBox::information(this, windowTitle(), tr("A group with this name already exists."));
 			return;
 		}
 	}

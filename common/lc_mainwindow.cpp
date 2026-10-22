@@ -1560,7 +1560,7 @@ void lcMainWindow::ShowImageDialog()
 	const lcResult<void> Saved = lcGetActiveProject()->SaveImage(Options);
 
 	if (!Saved)
-		QMessageBox::warning(this, tr("LeoCAD"), Saved.error());
+		QMessageBox::warning(this, tr("Save Image"), Saved.error());
 }
 
 void lcMainWindow::ShowSelectDialog()
@@ -1572,7 +1572,7 @@ void lcMainWindow::ShowSelectDialog()
 
 	if (ActiveModel->GetPieces().empty() && ActiveModel->GetCameras().empty() && ActiveModel->GetLights().empty())
 	{
-		QMessageBox::information(this, tr("LeoCAD"), tr("Nothing to select."));
+		QMessageBox::information(this, tr("Select Objects"), tr("Nothing to select."));
 		return;
 	}
 
@@ -2693,7 +2693,7 @@ void lcMainWindow::ShowMergeDialog()
 		return;
 	}
 
-	QMessageBox::information(this, tr("LeoCAD"), tr("Merged %n submodels.", nullptr, static_cast<int>(ModelCount)));
+	QMessageBox::information(this, tr("Merge Model"), tr("Merged %n submodels.", nullptr, static_cast<int>(ModelCount)));
 
 	UpdateModels();
 }

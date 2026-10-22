@@ -3377,16 +3377,12 @@
 <context>
     <name>Project</name>
     <message>
-        <location filename="../common/project.cpp" line="297"/>
         <source>Empty Name</source>
-        <translation>Nome Vazio</translation>
+        <translation type="vanished">Nome Vazio</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="1072"/>
-        <location filename="../common/project.cpp" line="1081"/>
-        <location filename="../common/project.cpp" line="1137"/>
         <source>Error</source>
-        <translation>Erro</translation>
+        <translation type="vanished">Erro</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1072"/>
@@ -3441,6 +3437,14 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="unfinished">Uma peça chamada '%1' já existe neste projeto.</translation>
     </message>
     <message>
+        <location filename="../common/project.cpp" line="414"/>
+        <location filename="../common/project.cpp" line="441"/>
+        <location filename="../common/project.cpp" line="498"/>
+        <source>Submodels</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Submodelos</translation>
+    </message>
+    <message>
         <location filename="../common/project.cpp" line="474"/>
         <source>Model &apos;%1&apos; was deleted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -3463,6 +3467,14 @@ O formato do ficheiro não é reconhecido.</translation>
         <source>Duplicate model &apos;%1&apos; was ignored; model names are case-insensitive.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">O modelo duplicado '%1' foi ignorado; os nomes dos modelos não são sensíveis a maiúsculas e minúsculas.</translation>
+    </message>
+    <message>
+        <location filename="../common/project.cpp" line="1072"/>
+        <location filename="../common/project.cpp" line="1081"/>
+        <location filename="../common/project.cpp" line="1137"/>
+        <source>Load Model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Carregar modelo</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="1234"/>
@@ -3648,14 +3660,9 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="unfinished">O nome do submodelo não pode estar vazio.</translation>
     </message>
     <message>
-        <location filename="../common/project.cpp" line="317"/>
-        <location filename="../common/project.cpp" line="330"/>
-        <location filename="../common/project.cpp" line="414"/>
-        <location filename="../common/project.cpp" line="441"/>
-        <location filename="../common/project.cpp" line="498"/>
         <source>Duplicate Submodel</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Submodelo duplicado</translation>
+        <translation type="obsolete">Submodelo duplicado</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
@@ -3737,9 +3744,8 @@ O formato do ficheiro não é reconhecido.</translation>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
         <source>LeoCAD</source>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_bricklink.cpp" line="74"/>
@@ -5036,18 +5042,29 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="unfinished">Largura das arestas chanfradas</translation>
     </message>
     <message>
+        <source>Error</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="obsolete">Erro</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qutils.cpp" line="66"/>
         <location filename="../qt/lc_qutils.cpp" line="72"/>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
-        <source>Error</source>
-        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
-        <translation type="unfinished">Erro</translation>
+        <source>Stop Blender Process</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Parar o processo do Blender</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="90"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 falhou: %2</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_instructionsdialog.cpp" line="75"/>
+        <source>Create Pieces List</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Criar lista de peças</translation>
     </message>
 </context>
 <context>
@@ -6416,12 +6433,8 @@ Anisotrópico: %4</translation>
 <context>
     <name>lcApplication</name>
     <message>
-        <location filename="../common/lc_application.cpp" line="961"/>
-        <location filename="../common/lc_application.cpp" line="1005"/>
-        <location filename="../common/lc_application.cpp" line="1341"/>
-        <location filename="../common/lc_application.cpp" line="1447"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1000"/>
@@ -6931,6 +6944,13 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">A exportação de imagens de linha de comandos não é compatível com o iOS.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="961"/>
+        <location filename="../common/lc_application.cpp" line="1341"/>
+        <source>Initialize Renderer</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Inicializar o renderizador</translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="1002"/>
         <source>LeoCAD could not load Pieces Library.
 
@@ -6938,6 +6958,12 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>LeoCAD não conseguiu carregar a Biblioteca de Peças.
 
 Veja https://www.leocad.org para saber como descarragar e instalar uma biblioteca.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1005"/>
+        <source>Load Pieces Library</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Carregar biblioteca de peças</translation>
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="1061"/>
@@ -6963,6 +6989,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <source>Some changes will only take effect the next time you start LeoCAD.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Algumas alterações só entrarão em vigor na próxima vez que iniciar o LeoCAD.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1447"/>
+        <source>Preferences</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Preferências</translation>
     </message>
     <message>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
@@ -7123,25 +7155,27 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Selecione a cor da borda da peça</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="233"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">A automatização da cor da borda parece estar ativada.&lt;br&gt;A cor da borda das peças pretas não estará acessível.&lt;br&gt;Deseja continuar?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="236"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="237"/>
         <source>Select Black Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Selecione a cor da borda preta</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="244"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="246"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">A automatização da cor da borda parece estar ativada.&lt;br&gt;A cor da borda das peças escuras não estará acessível.&lt;br&gt;Deseja continuar?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="248"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="245"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="250"/>
         <source>Select Dark Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Selecione a cor da borda escura</translation>
@@ -7171,9 +7205,6 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3590"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw Complemento</translation>
@@ -7380,10 +7411,34 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">O teste Blender falhou.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2037"/>
+        <source>Save Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Salvar a saída do complemento do Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
+        <source>Cancel Blender Add-on Installation</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Cancelar a instalação do complemento do Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
+        <source>Apply Render Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Aplicar configurações de renderização</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
+        <source>Set LDraw Color Scheme</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Definir o esquema de cores do LDraw</translation>
+    </message>
+    <message>
         <source>%1 Blender LDraw Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender LDraw Módulos complementares</translation>
+        <translation type="obsolete">%1 Blender LDraw Módulos complementares</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1142"/>
@@ -7419,6 +7474,17 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Não foi possível encontrar o ficheiro de instalação do suplemento: '%1'</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1249"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1744"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <source>Install Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Instalar o complemento do Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1202"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7450,7 +7516,19 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Blender executável não encontrado em '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
+        <source>Extract Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Extrair o complemento do Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
+        <source>Check for Blender Add-on Updates</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Verificar atualizações do complemento do Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7463,6 +7541,18 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Extraindo...</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1132"/>
+        <source>Test Blender</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Testar o Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <source>Configure Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Configurar o complemento do Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
@@ -7470,10 +7560,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Falha ao extrair '%1' para '%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1347"/>
         <source>Extract add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Extrair complemento</translation>
+        <translation type="obsolete">Extrair complemento</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
@@ -7482,16 +7571,34 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Falha na verificação da versão mais recente do suplemento.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1409"/>
         <source>Latest Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Último complemento</translation>
+        <translation type="obsolete">Último complemento</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Não é possível abrir o ficheiro complementar: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1422"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1490"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1545"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1613"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <source>Update Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Atualizar o complemento do Blender</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1430"/>
@@ -7631,11 +7738,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Erro: falha na instalação.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>%1 Blender Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">%1 Blender Instalação do complemento</translation>
+        <translation type="obsolete">%1 Blender Instalação do complemento</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1707"/>
@@ -7654,6 +7759,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender ficheiro de saída padrão complementar não encontrado: '%1'.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1835"/>
+        <source>View Blender Add-on Output</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exibir a saída do complemento do Blender</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1930"/>
@@ -7708,10 +7819,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
 %3</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2045"/>
         <source>Cancel %1 Add-on Install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Cancelar instalação do suplemento %1</translation>
+        <translation type="obsolete">Cancelar instalação do suplemento %1</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
@@ -7751,6 +7861,13 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">%1 - Configuração (%2)</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2669"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2675"/>
+        <source>Load Blender Add-on Settings</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Carregar configurações do complemento do Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7769,10 +7886,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Localizar %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3124"/>
         <source>LDraw Render Settings Conflict</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">LDraw Conflito de definições de renderização</translation>
+        <translation type="obsolete">LDraw Conflito de definições de renderização</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3125"/>
@@ -7799,10 +7915,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Fundo transparente definido como verdadeiro.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3162"/>
         <source>Custom LDraw Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Cores LDraw personalizadas</translation>
+        <translation type="obsolete">Cores LDraw personalizadas</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3163"/>
@@ -7817,10 +7932,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Esquema de cores 'personalizado' selecionado, mas não foi especificado nenhum ficheiro LDConfig.&lt;br&gt;Será utilizado o esquema de cores padrão '%1'.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3177"/>
         <source>Render Settings Modified</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Configurações de renderização modificadas</translation>
+        <translation type="obsolete">Configurações de renderização modificadas</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
@@ -7836,43 +7950,54 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Falha ao abrir o ficheiro de parâmetros Blender: '%1':&lt;br&gt;%2</translation>
     </message>
     <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3549"/>
+        <source>Export Blender Parameters</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportar parâmetros do Blender</translation>
+    </message>
+    <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3562"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Substituir ficheiro existente</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3637"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3634"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Quer baixar a versão </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3638"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Não volte a mostrar a mensagem de download da nova versão do suplemento.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3660"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Falha no download do suplemento.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3657"/>
+        <source>Download Blender Add-on</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Baixar o complemento do Blender</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3805"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">O formato de entrada ZipFile (HostOS %1) no índice %2 não é suportado. Extração encerrada.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3808"/>
         <source>Extract Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Extrair complemento</translation>
+        <translation type="obsolete">Extrair complemento</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3873"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3870"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -8270,6 +8395,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation>aTem de indicar a pasta de saída.</translation>
     </message>
     <message>
+        <location filename="../common/lc_htmldialog.cpp" line="48"/>
+        <source>Export HTML</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Exportar HTML</translation>
+    </message>
+    <message>
         <location filename="../common/lc_htmldialog.cpp" line="68"/>
         <source>Select Output Folder</source>
         <translation>Selecionar a Pasta de Saída</translation>
@@ -8345,14 +8476,8 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Tem de indicar o ficheiro de saída.</translation>
     </message>
     <message>
-        <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <location filename="../common/lc_imagedialog.cpp" line="45"/>
-        <location filename="../common/lc_imagedialog.cpp" line="53"/>
-        <location filename="../common/lc_imagedialog.cpp" line="75"/>
-        <location filename="../common/lc_imagedialog.cpp" line="83"/>
-        <location filename="../common/lc_imagedialog.cpp" line="89"/>
         <source>Error</source>
-        <translation>Erro</translation>
+        <translation type="vanished">Erro</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="75"/>
@@ -8884,10 +9009,22 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">POV-Ray Exportar</translation>
     </message>
     <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
+        <source>Save Image</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Gravar Imagem</translation>
+    </message>
+    <message>
         <location filename="../common/lc_mainwindow.cpp" line="1575"/>
         <source>Nothing to select.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nada a selecionar.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
+        <source>Select Objects</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Selecionar Objetos</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2290"/>
@@ -9002,6 +9139,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2661"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>Merge Model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mesclar modelo</translation>
@@ -9019,12 +9157,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">LEGO Ficheiros do Digital Designer (*.lxf);;Todos os ficheiros (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="1563"/>
-        <location filename="../common/lc_mainwindow.cpp" line="1575"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
         <source>LeoCAD</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <source>Error loading &apos;%1&apos;.</source>
@@ -9375,6 +9510,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="312"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
         <source>Import Templates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Importar modelos</translation>
@@ -9387,10 +9523,8 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Ficheiros de modelo Minifig (*.minifig);;Todos os ficheiros (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_minifigdialog.cpp" line="321"/>
-        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Error</source>
-        <translation type="unfinished">Erro</translation>
+        <translation type="obsolete">Erro</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="321"/>
@@ -9402,6 +9536,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="333"/>
+        <location filename="../common/lc_minifigdialog.cpp" line="342"/>
         <source>Export Templates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Exportar modelos</translation>
@@ -9429,13 +9564,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="vanished">Colando</translation>
     </message>
     <message>
-        <location filename="../common/lc_model.cpp" line="1692"/>
-        <location filename="../common/lc_model.cpp" line="3899"/>
-        <location filename="../common/lc_model.cpp" line="6156"/>
-        <location filename="../common/lc_model.cpp" line="6167"/>
         <source>LeoCAD</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1738"/>
@@ -9564,6 +9695,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <source>Duplicate</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Duplicado</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_model.cpp" line="1692"/>
+        <source>Create Step Image</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Criar imagem da etapa</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="1808"/>
@@ -9721,6 +9858,12 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Mover para modelo</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="3899"/>
+        <source>Inline Selected Models</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Modelos Selecionados Inline</translation>
+    </message>
+    <message>
         <location filename="../common/lc_model.cpp" line="3910"/>
         <source>Inline Model</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
@@ -9844,6 +9987,8 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Alterar as propriedades do modelo</translation>
     </message>
     <message>
+        <location filename="../common/lc_model.cpp" line="6156"/>
+        <location filename="../common/lc_model.cpp" line="6167"/>
         <location filename="../common/lc_model.cpp" line="6226"/>
         <source>Piece Array</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -10034,6 +10179,7 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="187"/>
+        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <location filename="../common/lc_modellistdialog.cpp" line="217"/>
         <location filename="../common/lc_modellistdialog.cpp" line="239"/>
         <source>Export Submodel</source>
@@ -10041,9 +10187,8 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation type="unfinished">Exportar submodelo</translation>
     </message>
     <message>
-        <location filename="../common/lc_modellistdialog.cpp" line="202"/>
         <source>LeoCAD</source>
-        <translation>LeoCAD</translation>
+        <translation type="vanished">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.cpp" line="202"/>
@@ -11617,7 +11762,14 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation>Confirmar querer apagar a categoria &apos;%1&apos;?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="923"/>
+        <source>Delete Category</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Excluir categoria</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
         <source>Import Categories</source>
         <translation>Importar Categorias</translation>
     </message>
@@ -11638,6 +11790,7 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
         <source>Export Categories</source>
         <translation>Exportar Categorias</translation>
     </message>
@@ -11652,10 +11805,22 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation>Confirmar querer carregar as categorias por omissão?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <source>Reset Categories</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Redefinir categorias</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1174"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">O atalho '%1' já está atribuído a '%2'. Quer substituí-lo?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <source>Reset Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Redefinir atalhos do mouse</translation>
     </message>
     <message>
         <source>Import shortcuts</source>
@@ -11731,6 +11896,24 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Selecione POV-Ray Executável</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <source>Import Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Importar atalhos de teclado</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <source>Export Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportar atalhos de teclado</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <source>Reset Keyboard Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Redefinir atalhos de teclado</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
         <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
@@ -11759,10 +11942,22 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Exportar atalhos</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <source>Import Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Importar atalhos do mouse</translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
         <source>Error saving mouse shortcuts file.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erro ao guardar o ficheiro de atalhos do rato.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <source>Export Mouse Shortcuts</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Exportar atalhos do mouse</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
@@ -12586,16 +12781,9 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Exportando Modelo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="248"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="351"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="456"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="551"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="765"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="787"/>
-        <location filename="../qt/lc_renderdialog.cpp" line="809"/>
         <source>Render Error</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Erro de renderização</translation>
+        <translation type="obsolete">Erro de renderização</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="364"/>
@@ -12768,9 +12956,8 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../qt/lc_renderdialog.cpp" line="381"/>
         <source>Error</source>
-        <translation>Erro</translation>
+        <translation type="vanished">Erro</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="351"/>
@@ -12884,6 +13071,12 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Selecione um conjunto da lista.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="98"/>
+        <source>Set Inventory</source>
+        <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
+        <translation type="unfinished">Definir inventário</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="105"/>
         <source>Downloading</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -12899,6 +13092,12 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
         <source>Keyword cannot be empty.</source>
         <translation>A palavra chave não podem ser vazia.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="150"/>
+        <source>Search Sets</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Pesquisar conjuntos</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="155"/>
@@ -12919,10 +13118,22 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <translation type="unfinished">Erro ao ligar ao servidor.</translation>
     </message>
     <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="214"/>
+        <source>Connect to Sets Database</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Conectar ao banco de dados de conjuntos</translation>
+    </message>
+    <message>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
         <source>Error downloading set inventory.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erro ao descarregar o inventário do conjunto.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_setsdatabasedialog.cpp" line="261"/>
+        <source>Download Set Inventory</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Baixar inventário do conjunto</translation>
     </message>
 </context>
 <context>
@@ -13028,10 +13239,8 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
 <context>
     <name>lcView</name>
     <message>
-        <location filename="../common/lc_view.cpp" line="761"/>
-        <location filename="../common/lc_view.cpp" line="795"/>
         <source>LeoCAD</source>
-        <translation type="unfinished">LeoCAD</translation>
+        <translation type="obsolete">LeoCAD</translation>
     </message>
     <message>
         <location filename="../common/lc_view.cpp" line="761"/>
@@ -13039,6 +13248,13 @@ As placas de vídeo não suportadas utilizam a tonalidade da face e bordas color
         <location filename="../common/lc_view.cpp" line="805"/>
         <source>Error creating images.</source>
         <translation type="unfinished">Erro ao criar as imagens.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_view.cpp" line="761"/>
+        <location filename="../common/lc_view.cpp" line="795"/>
+        <source>Create Step Images</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Criar imagens das etapas</translation>
     </message>
     <message>
         <source>Error</source>

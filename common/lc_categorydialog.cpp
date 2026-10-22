@@ -30,7 +30,7 @@ void lcCategoryDialog::accept()
 
 	if (Name.isEmpty())
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Name cannot be empty."));
+		QMessageBox::information(this, windowTitle(), tr("Name cannot be empty."));
 		return;
 	}
 
@@ -38,7 +38,7 @@ void lcCategoryDialog::accept()
 
 	if (Keywords.isEmpty())
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Keywords cannot be empty."));
+		QMessageBox::information(this, windowTitle(), tr("Keywords cannot be empty."));
 		return;
 	}
 

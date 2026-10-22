@@ -72,7 +72,7 @@ void lcInstructionsPartsListItem::Update()
 		setPixmap(QPixmap());
 
 		QWidget* Parent = scene() && !scene()->views().isEmpty() ? scene()->views().front() : nullptr;
-		QMessageBox::warning(Parent, QObject::tr("LeoCAD"), PartsImage.error());
+		QMessageBox::warning(Parent, QObject::tr("Create Pieces List"), PartsImage.error());
 
 		return;
 	}

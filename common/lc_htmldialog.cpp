@@ -45,7 +45,7 @@ void lcHTMLDialog::accept()
 
 	if (pathName.isEmpty())
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Output folder cannot be empty."));
+		QMessageBox::information(this, tr("Export HTML"), tr("Output folder cannot be empty."));
 		return;
 	}
 

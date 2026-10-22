@@ -318,7 +318,7 @@ void lcMinifigDialog::TemplateImportButtonClicked()
 
 	if (!File.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(this, tr("Error"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(this, tr("Import Templates"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 		return;
 	}
 
@@ -339,7 +339,7 @@ void lcMinifigDialog::TemplateExportButtonClicked()
 
 	if (!File.open(QIODevice::WriteOnly))
 	{
-		QMessageBox::warning(this, tr("Error"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
+		QMessageBox::warning(this, tr("Export Templates"), tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 		return;
 	}
 

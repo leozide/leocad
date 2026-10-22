@@ -34,7 +34,7 @@ void lcImageDialog::accept()
 
 	if (FilePath.isEmpty())
 	{
-		QMessageBox::information(this, tr("Error"), tr("Output file cannot be empty."));
+		QMessageBox::information(this, windowTitle(), tr("Output file cannot be empty."));
 		return;
 	}
 
@@ -42,7 +42,7 @@ void lcImageDialog::accept()
 
 	if (Width < 1 || Width > 32768)
 	{
-		QMessageBox::information(this, tr("Error"), tr("Please enter a width between 1 and 32768."));
+		QMessageBox::information(this, windowTitle(), tr("Please enter a width between 1 and 32768."));
 		return;
 	}
 
@@ -50,7 +50,7 @@ void lcImageDialog::accept()
 
 	if (Height < 1 || Height > 32768)
 	{
-		QMessageBox::information(this, tr("Error"), tr("Please enter a height between 1 and 32768."));
+		QMessageBox::information(this, windowTitle(), tr("Please enter a height between 1 and 32768."));
 		return;
 	}
 
@@ -72,7 +72,7 @@ void lcImageDialog::accept()
 
 		if (Start < 1 || Start > mOptions->End)
 		{
-			QMessageBox::information(this, tr("Error"), tr("First step must be between 1 and %1.").arg(QString::number(mOptions->End)));
+			QMessageBox::information(this, windowTitle(), tr("First step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;
 		}
 
@@ -80,13 +80,13 @@ void lcImageDialog::accept()
 
 		if (End < 1 || End > mOptions->End)
 		{
-			QMessageBox::information(this, tr("Error"), tr("Last step must be between 1 and %1.").arg(QString::number(mOptions->End)));
+			QMessageBox::information(this, windowTitle(), tr("Last step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;
 		}
 
 		if (End < Start)
 		{
-			QMessageBox::information(this, tr("Error"), tr("Last step must be greater than first step."));
+			QMessageBox::information(this, windowTitle(), tr("Last step must be greater than first step."));
 			return;
 		}
 	}

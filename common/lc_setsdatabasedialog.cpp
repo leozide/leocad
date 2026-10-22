@@ -95,7 +95,7 @@ void lcSetsDatabaseDialog::accept()
 	QTreeWidgetItem* Current = ui->SetsTree->currentItem();
 	if (!Current)
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Please select a set from the list."));
+		QMessageBox::information(this, tr("Set Inventory"), tr("Please select a set from the list."));
 		return;
 	}
 
@@ -147,7 +147,7 @@ void lcSetsDatabaseDialog::SearchButtonClicked()
 
 	if (Keyword.isEmpty())
 	{
-		QMessageBox::information(this, "LeoCAD", tr("Keyword cannot be empty."));
+		QMessageBox::information(this, tr("Search Sets"), tr("Keyword cannot be empty."));
 		return;
 	}
 
@@ -211,7 +211,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 
 		if (mKeys.isEmpty())
 		{
-			QMessageBox::information(this, "LeoCAD", tr("Error connecting to server."));
+			QMessageBox::information(this, tr("Connect to Sets Database"), tr("Error connecting to server."));
 			close();
 		}
 
@@ -258,7 +258,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 		if (!Reply->error())
 			mInventory = Reply->readAll();
 		else
-			QMessageBox::information(this, "LeoCAD", tr("Error downloading set inventory."));
+			QMessageBox::information(this, tr("Download Set Inventory"), tr("Error downloading set inventory."));
 
 		mInventoryReply = nullptr;
 	}

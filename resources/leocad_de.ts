@@ -3189,7 +3189,8 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="129"/>
-        <source>&amp;Open In Blender...</source>
+        <source>&amp;Open in Blender...</source>
+        <oldsource>&amp;Open In Blender...</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&amp;Öffnen in Blender...</translation>
     </message>
@@ -3398,7 +3399,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="330"/>
-        <source>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</source>
+        <source>A piece named &apos;%1&apos; already exists in this project. Please enter a unique name.</source>
+        <oldsource>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">In diesem Projekt ist bereits ein Teil mit dem Namen '%1' vorhanden. Bitte geben Sie einen eindeutigen Namen ein.</translation>
     </message>
@@ -3623,8 +3625,9 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
-        <source>A submodel named &apos;%1&apos; already exists, please enter a unique name.</source>
-        <translation>Ein Untermodell names &apos;%1&apos; existiert bereits, bitte geben sie einen eindeutigen Namen ein.</translation>
+        <source>A submodel named &apos;%1&apos; already exists. Please enter a unique name.</source>
+        <oldsource>A submodel named &apos;%1&apos; already exists, please enter a unique name.</oldsource>
+        <translation type="unfinished">Ein Untermodell names &apos;%1&apos; existiert bereits, bitte geben sie einen eindeutigen Namen ein.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="348"/>
@@ -3806,14 +3809,16 @@ Dateiformat wird nicht erkannt.</translation>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
-        <source>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify camera definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 kann Kameradefinitionen innerhalb der ldraw-Daten angeben. Wählen Sie, ob Sie sie laden oder ignorieren möchten.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="182"/>
-        <source>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify point and sunlight definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 kann Punkt- und Sonnenlichtdefinitionen innerhalb der ldraw-Daten angeben. Wählen Sie, ob Sie sie laden oder ignorieren möchten.</translation>
     </message>
@@ -3913,7 +3918,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
-        <source>Bevel edges. Can cause some pieces to render incorrectly</source>
+        <source>Bevel edges. Can cause some pieces to render incorrectly.</source>
+        <oldsource>Bevel edges. Can cause some pieces to render incorrectly</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Kanten abschrägen. Kann dazu führen, dass einige Teile falsch gerendert werden</translation>
     </message>
@@ -3963,7 +3969,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
-        <source>Centered At Origin On Ground|Centered At Origin</source>
+        <source>Centered at Origin on Ground|Centered at Origin</source>
+        <oldsource>Centered At Origin On Ground|Centered At Origin</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Im Ursprung auf dem Boden zentriert|Im Ursprung zentriert</translation>
     </message>
@@ -4009,7 +4016,8 @@ Dateiformat wird nicht erkannt.</translation>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="112"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
-        <source>Crop the image border at opaque content. Requires transparent background set to True</source>
+        <source>Crop the image border at opaque content. Requires transparent background set to True.</source>
+        <oldsource>Crop the image border at opaque content. Requires transparent background set to True</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Beschneiden Sie den Bildrand bei undurchsichtigem Inhalt. Erfordert einen transparenten Hintergrund, der auf „True“ eingestellt ist</translation>
     </message>
@@ -4058,7 +4066,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="121"/>
-        <source>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</source>
+        <source>Each object has a five-digit prefix, e.g., 00001_car. This keeps the list in its proper order.</source>
+        <oldsource>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jedes Objekt hat ein fünfstelliges Präfix, z. 00001_Auto. Dadurch bleibt die Liste in der richtigen Reihenfolge</translation>
     </message>
@@ -4070,7 +4079,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
-        <source>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</source>
+        <source>Filesystem case sensitivity defaults to false on Windows and macOS. Set to true if the LDraw path is case-sensitive on a case-insensitive filesystem.</source>
+        <oldsource>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Die Groß-/Kleinschreibung des Dateisystems wird standardmäßig auf „falsches Windows“ und „MacOS“ eingestellt. Wird auf „true“ gesetzt, wenn der Pfad „LDraw“ auf Groß-/Kleinschreibung im Dateisystem eingestellt ist, bei dem die Groß-/Kleinschreibung nicht beachtet wird.</translation>
     </message>
@@ -4100,7 +4110,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="219"/>
-        <source>Frames Per Step</source>
+        <source>Frames per Step</source>
+        <oldsource>Frames Per Step</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Frames pro Schritt</translation>
     </message>
@@ -4190,7 +4201,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="231"/>
-        <source>How To Scale Pieces</source>
+        <source>How to Scale Pieces</source>
+        <oldsource>How To Scale Pieces</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">So skalieren Sie Teile</translation>
     </message>
@@ -4328,7 +4340,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
-        <source>Make small gaps between bricks. A small gap is more realistic</source>
+        <source>Make small gaps between bricks. A small gap is more realistic.</source>
+        <oldsource>Make small gaps between bricks. A small gap is more realistic</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Machen Sie kleine Lücken zwischen den Ziegeln. Eine kleine Lücke ist realistischer</translation>
     </message>
@@ -4428,7 +4441,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
-        <source>Parent To Empty</source>
+        <source>Parent to Empty</source>
+        <oldsource>Parent To Empty</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Übergeordnetes Element zum Leeren</translation>
     </message>
@@ -4440,13 +4454,15 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
-        <source>Photo Realistic|Lego Instructions</source>
+        <source>Photorealistic|LEGO Instructions</source>
+        <oldsource>Photo Realistic|Lego Instructions</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fotorealistische|Lego Anleitung</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
-        <source>Photo-realistic or Schematic &apos;Instruction&apos; look</source>
+        <source>Photorealistic or schematic instruction look</source>
+        <oldsource>Photo-realistic or Schematic &apos;Instruction&apos; look</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fotorealistischer oder schematischer „Anleitungs“-Look</translation>
     </message>
@@ -4526,7 +4542,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="238"/>
-        <source>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</source>
+        <source>Raised flattened logo geometry (3)|Raised rounded logo geometry (4)|Subtle rounded logo geometry (5)</source>
+        <oldsource>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erhabene, abgeflachte Logo-Geometrie(3)|Erhöhte, abgerundete Logo-Geometrie(4)|Dezente, abgerundete Logo-Geometrie(5)</translation>
     </message>
@@ -4545,13 +4562,15 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
-        <source>Recalculate Normals|Two Faces Back To Back</source>
+        <source>Recalculate Normals|Two Faces Back to Back</source>
+        <oldsource>Recalculate Normals|Two Faces Back To Back</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Normalen neu berechnen|Zwei Flächen Rücken an Rücken</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="201"/>
-        <source>Recalculate normals. Not recommended if BFC processing is active</source>
+        <source>Recalculate normals. Not recommended if BFC processing is active.</source>
+        <oldsource>Recalculate normals. Not recommended if BFC processing is active</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Normalen neu berechnen. Nicht empfohlen, wenn die BFC-Verarbeitung aktiv ist</translation>
     </message>
@@ -4596,7 +4615,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
-        <source>Rounded(4)|Flattened(3)|Subtle Rounded(5)</source>
+        <source>Rounded (4)|Flattened (3)|Subtle Rounded (5)</source>
+        <oldsource>Rounded(4)|Flattened(3)|Subtle Rounded(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Abgerundet(4)|Abgeflacht(3)|Subtil abgerundet(5)</translation>
     </message>
@@ -4744,13 +4764,15 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
-        <source>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</source>
+        <source>Some older LDraw pieces have faces with ambiguous normals. This specifies what to do with them.</source>
+        <oldsource>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Einige ältere LDraw-Teile haben Gesichter mit mehrdeutigen Normalen. Dies legt fest, was mit ihnen geschehen soll</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
-        <source>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</source>
+        <source>Source used to create flexible pieces - string, hoses, etc. (LDCad, LSynth, or both)</source>
+        <oldsource>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Quelle, die zum Erstellen flexibler Teile verwendet wird – Schnüre, Schläuche usw. (LDCad, LSynth oder beide).</translation>
     </message>
@@ -4776,7 +4798,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
-        <source>Specify whether to render a background (affects &apos;Photo-realistic look only)</source>
+        <source>Specify whether to render a background (affects the photorealistic look only)</source>
+        <oldsource>Specify whether to render a background (affects &apos;Photo-realistic look only)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Geben Sie an, ob ein Hintergrund gerendert werden soll (betrifft nur „Fotorealistisches Aussehen“)</translation>
     </message>
@@ -4857,7 +4880,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
-        <source>Treat Shortcuts As Models</source>
+        <source>Treat Shortcuts as Models</source>
+        <oldsource>Treat Shortcuts As Models</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Behandeln Sie Verknüpfungen als Vorbilder</translation>
     </message>
@@ -4932,13 +4956,15 @@ Dateiformat wird nicht erkannt.</translation>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="134"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="213"/>
-        <source>Verbose output</source>
+        <source>Verbose Output</source>
+        <oldsource>Verbose output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ausführliche Ausgabe</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="221"/>
-        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</source>
+        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport.</source>
+        <oldsource>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Welcher Maßstab soll importiert werden? Der volle Maßstab beträgt 1,0 und ist so groß, dass er im Ansichtsfenster unhandlich ist</translation>
     </message>
@@ -4956,7 +4982,8 @@ Dateiformat wird nicht erkannt.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="228"/>
-        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</source>
+        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness.</source>
+        <oldsource>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Welches Logo angezeigt werden soll. logo und logo2 werden nicht verwendet und dienen nur der Vollständigkeit</translation>
     </message>
@@ -6727,8 +6754,10 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="820"/>
-        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in CSV format.
 </source>
+        <oldsource>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">  -csv, --export-csv &lt;outfile.csv&gt;: Exportieren Sie die Liste der verwendeten Teile im CSV-Format.</translation>
     </message>
@@ -7245,7 +7274,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1030"/>
-        <source>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</source>
+        <source>A simple check to test if the selected file is Blender failed. Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer. The ticket should contain the full path to the Blender executable.</source>
+        <oldsource>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Eine einfache Prüfung, um zu testen, ob die ausgewählte Datei Blender ist, ist fehlgeschlagen. Bitte erstellen Sie ein %1 GitHub-Ticket, wenn Sie sicher sind, dass es sich bei der Datei um Blender 2.8 oder neuer handelt. Das Ticket sollte den vollständigen Pfad zur ausführbaren Datei Blender enthalten.</translation>
     </message>
@@ -7292,7 +7322,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1143"/>
-        <source>Continue with the default import module ?</source>
+        <source>Continue with the default import module?</source>
+        <oldsource>Continue with the default import module ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mit dem Standardimportmodul fortfahren?</translation>
     </message>
@@ -7311,7 +7342,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
-        <source>Could not find add-on install file: &apos;%1&apos;</source>
+        <source>Could not find add-on install file: &apos;%1&apos;.</source>
+        <oldsource>Could not find add-on install file: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Add-on-Installationsdatei konnte nicht gefunden werden: '%1'</translation>
     </message>
@@ -7341,7 +7373,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
-        <source>Blender executable not found at &apos;%1&apos;</source>
+        <source>Blender executable not found at &apos;%1&apos;.</source>
+        <oldsource>Blender executable not found at &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender ausführbare Datei nicht gefunden unter '%1'</translation>
     </message>
@@ -7360,7 +7393,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
-        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;</source>
+        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
+        <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fehler beim Extrahieren von '%1' nach '%2'</translation>
     </message>
@@ -7414,13 +7448,15 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1492"/>
-        <source>Do you want to download version %1 ?</source>
+        <source>Do you want to download version %1?</source>
+        <oldsource>Do you want to download version %1 ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Möchten Sie die Version %1 herunterladen?</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1529"/>
-        <source>Failed to properly remove Blender add-on: &apos;%1&apos;</source>
+        <source>Failed to properly remove Blender add-on: &apos;%1&apos;.</source>
+        <oldsource>Failed to properly remove Blender add-on: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Das Add-on Blender konnte nicht ordnungsgemäß entfernt werden: '%1'</translation>
     </message>
@@ -7438,19 +7474,22 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
-        <source>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</source>
+        <source>Failed to validate Blender add-on file name.&lt;br&gt;Downloaded: &apos;%1&apos;&lt;br&gt;Received: &apos;%2&apos;</source>
+        <oldsource>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fehler beim Validieren von Blender Add-on-Dateiname&lt;br&gt;Heruntergeladen:'%1'&lt;br&gt;Empfangen:'%2'</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
-        <source>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</source>
+        <source>Failed to validate Blender add-on SHA hash.&lt;br&gt;Calculated: %1&lt;br&gt;Received: %2</source>
+        <oldsource>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Validierung des Add-on-SHA-Hashs Blender fehlgeschlagen &lt;br&gt;Berechnet:%1&lt;br&gt;Empfangen:%2</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
-        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</source>
+        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;.</source>
+        <oldsource>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Der SHA-Hash für das Add-on Blender '%1.sha256' konnte nicht empfangen werden.</translation>
     </message>
@@ -7714,7 +7753,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
-        <source>Do you want to accept the modified settings before quitting ?</source>
+        <source>Do you want to accept the modified settings before quitting?</source>
+        <oldsource>Do you want to accept the modified settings before quitting ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Möchten Sie die geänderten Einstellungen vor dem Beenden akzeptieren?</translation>
     </message>
@@ -8061,8 +8101,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="40"/>
-        <source>Output folder:</source>
-        <translation>Ausgangsordner:</translation>
+        <source>Output Folder:</source>
+        <oldsource>Output folder:</oldsource>
+        <translation type="unfinished">Ausgangsordner:</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="53"/>
@@ -8171,8 +8212,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="24"/>
-        <source>File name:</source>
-        <translation>Dateiname:</translation>
+        <source>File Name:</source>
+        <oldsource>File name:</oldsource>
+        <translation type="unfinished">Dateiname:</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="48"/>
@@ -8226,8 +8268,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <source>Output File cannot be empty.</source>
-        <translation>Ausgabedatei darf nicht leer sein.</translation>
+        <source>Output file cannot be empty.</source>
+        <oldsource>Output File cannot be empty.</oldsource>
+        <translation type="unfinished">Ausgabedatei darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
@@ -8620,9 +8663,12 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1097"/>
-        <source>The model could not be fully loaded, some pieces may be missing.
+        <source>The model could not be fully loaded. Some pieces may be missing.
 
 %1</source>
+        <oldsource>The model could not be fully loaded, some pieces may be missing.
+
+%1</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Das Modell konnte nicht vollständig geladen werden, möglicherweise fehlen einige Teile.
 
@@ -8915,8 +8961,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1306"/>
-        <source>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</source>
-        <translation>Die Datei &apos;%1&apos; wurde von einer anderen Anwwendung verändert, erneut laden?</translation>
+        <source>The file &apos;%1&apos; has been modified by another application. Do you want to reload it?</source>
+        <oldsource>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</oldsource>
+        <translation type="unfinished">Die Datei &apos;%1&apos; wurde von einer anderen Anwwendung verändert, erneut laden?</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1312"/>
@@ -8943,8 +8990,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2769"/>
-        <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
-        <translation>Speichern als LCD Format wird nicht mehr unterstützt, bitte LDR oder MPD Format verwenden.</translation>
+        <source>Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead.</source>
+        <oldsource>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</oldsource>
+        <translation type="unfinished">Speichern als LCD Format wird nicht mehr unterstützt, bitte LDR oder MPD Format verwenden.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2769"/>
@@ -9643,13 +9691,15 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Add KeyFrame</source>
+        <source>Add Key Frame</source>
+        <oldsource>Add KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">KeyFrame hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Remove KeyFrame</source>
+        <source>Remove Key Frame</source>
+        <oldsource>Remove KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">KeyFrame entfernen</translation>
     </message>
@@ -9828,8 +9878,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="6167"/>
-        <source>Array only has 1 element or less, no pieces added.</source>
-        <translation>Das Array hat nur 1 Element oder weniger, keine Teile zugefügt.</translation>
+        <source>Array only has 1 element or less. No pieces added.</source>
+        <oldsource>Array only has 1 element or less, no pieces added.</oldsource>
+        <translation type="unfinished">Das Array hat nur 1 Element oder weniger, keine Teile zugefügt.</translation>
     </message>
     <message>
         <source>Array</source>
@@ -10508,8 +10559,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="127"/>
-        <source>Default author name:</source>
-        <translation>Voreinstellung für Autor:</translation>
+        <source>Default Author Name:</source>
+        <oldsource>Default author name:</oldsource>
+        <translation type="unfinished">Voreinstellung für Autor:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="208"/>
@@ -10600,13 +10652,15 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1958"/>
-        <source>Mouse sensitivity:</source>
-        <translation>Mausempfindlichkeit:</translation>
+        <source>Mouse Sensitivity:</source>
+        <oldsource>Mouse sensitivity:</oldsource>
+        <translation type="unfinished">Mausempfindlichkeit:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="77"/>
-        <source>Check for updates:</source>
-        <translation>Auf Aktualisierungen prüfen:</translation>
+        <source>Check for Updates:</source>
+        <oldsource>Check for updates:</oldsource>
+        <translation type="unfinished">Auf Aktualisierungen prüfen:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="241"/>
@@ -11066,7 +11120,8 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
-        <source>Selection rendering:</source>
+        <source>Selection Rendering:</source>
+        <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Auswahl-Rendering:</translation>
     </message>
@@ -11294,8 +11349,9 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1742"/>
-        <source>Key se&amp;quence:</source>
-        <translation>Tasten&amp;folge:</translation>
+        <source>Key Se&amp;quence:</source>
+        <oldsource>Key se&amp;quence:</oldsource>
+        <translation type="unfinished">Tasten&amp;folge:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1755"/>
@@ -11568,9 +11624,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
         <translation type="unfinished">Die Tastenkombination '%1' ist bereits '%2' zugewiesen. Möchten Sie es ersetzen?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <source>Import shortcuts</source>
-        <translation>Tastenkürzel laden</translation>
+        <translation type="vanished">Tastenkürzel laden</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
@@ -11578,9 +11633,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
         <translation>Fehler beim Laden der Tastaturkürzel-Datei.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <source>Export shortcuts</source>
-        <translation>Tastaturkürzel exportieren</translation>
+        <translation type="vanished">Tastaturkürzel exportieren</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
@@ -11641,10 +11695,12 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
-        <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
-        <translation>Dieses Tastaturkürzel ist bereits » %1 « zugewiesen, möchten sie es ersetzen?</translation>
+        <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
+        <oldsource>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</oldsource>
+        <translation type="unfinished">Dieses Tastaturkürzel ist bereits » %1 « zugewiesen, möchten sie es ersetzen?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1421"/>
         <source>Import Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -11657,6 +11713,7 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
         <translation type="unfinished">Fehler beim Laden der Mauskürzeldatei.</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1442"/>
         <source>Export Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -11893,7 +11950,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1152"/>
-        <source>Piece Id</source>
+        <source>Piece ID</source>
+        <oldsource>Piece Id</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Teil-ID</translation>
     </message>
@@ -12184,7 +12242,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1217"/>
-        <source>Power of the light in Watts</source>
+        <source>Power of the light in watts</source>
+        <oldsource>Power of the light in Watts</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Leistung des Lichts in Watt</translation>
     </message>
@@ -12587,7 +12646,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="520"/>
-        <source>Open in Blender output</source>
+        <source>Open in Blender Output</source>
+        <oldsource>Open in Blender output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">In der Ausgabe Blender öffnen</translation>
     </message>
@@ -12599,7 +12659,8 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="550"/>
-        <source>Error starting Blender render process</source>
+        <source>Error starting Blender render process.</source>
+        <oldsource>Error starting Blender render process</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fehler beim Starten des Renderprozesses Blender</translation>
     </message>

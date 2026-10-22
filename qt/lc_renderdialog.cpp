@@ -517,7 +517,7 @@ void lcRenderDialog::RenderBlender()
 						{
 							QMessageBox::Icon Icon = QMessageBox::Information;
 							const QString Items = Error ? tr("errors%1").arg(Warning ? tr(" and warnings") : "") : Warning ? tr("warnings") : "";
-							const QString Title = tr("Open in Blender output");
+							const QString Title = tr("Open in Blender Output");
 							const QString Body = tr("Open in Blender encountered %1. See Show Details...").arg(Items);
 							lcBlenderPreferences::ShowMessage(this, Body, Title, QString(), QString(Ba), 0, Icon);
 						}
@@ -547,7 +547,7 @@ void lcRenderDialog::RenderBlender()
 	}
 	else
 	{
-		Message = tr("Error starting Blender render process");
+		Message = tr("Error starting Blender render process.");
 		QMessageBox::information(this, tr("Render Error"), Message);
 		CloseProcess();
 	}

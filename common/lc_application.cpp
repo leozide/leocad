@@ -817,7 +817,7 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			Options.StdOut += tr("  -obj, --export-wavefront <outfile.obj>: Export the model to Wavefront OBJ format.\n");
 			Options.StdOut += tr("  -3ds, --export-3ds <outfile.3ds>: Export the model to 3D Studio 3DS format.\n");
 			Options.StdOut += tr("  -dae, --export-collada <outfile.dae>: Export the model to COLLADA DAE format.\n");
-			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of pieces used in csv format.\n");
+			Options.StdOut += tr("  -csv, --export-csv <outfile.csv>: Export the list of pieces used in CSV format.\n");
 			Options.StdOut += tr("  -html, --export-html <folder>: Create an HTML page for the model.\n");
 			Options.StdOut += tr("  -v, --version: Output version information and exit.\n");
 			Options.StdOut += tr("  -?, --help: Display this help message and exit.\n");

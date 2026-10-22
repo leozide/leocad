@@ -74,7 +74,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
-             <string>Check for updates:</string>
+             <string>Check for Updates:</string>
             </property>
             <property name="buddy">
              <cstring>checkForUpdates</cstring>
@@ -124,7 +124,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Default author name:</string>
+          <string>Default Author Name:</string>
          </property>
          <property name="buddy">
           <cstring>authorName</cstring>
@@ -380,7 +380,7 @@
           <item row="15" column="0">
            <widget class="QLabel" name="SelectionRenderModeLabel">
             <property name="text">
-             <string>Selection rendering:</string>
+             <string>Selection Rendering:</string>
             </property>
             <property name="buddy">
              <cstring>SelectionRenderMode</cstring>
@@ -1739,7 +1739,7 @@ Unsupported video cards use face tint and colored edges.</string>
               <item>
                <widget class="QLabel" name="label_7">
                 <property name="text">
-                 <string>Key se&amp;quence:</string>
+                 <string>Key Se&amp;quence:</string>
                 </property>
                 <property name="buddy">
                  <cstring>shortcutEdit</cstring>
@@ -1955,7 +1955,7 @@ Unsupported video cards use face tint and colored edges.</string>
          <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Mouse sensitivity:</string>
+            <string>Mouse Sensitivity:</string>
            </property>
           </widget>
          </item>

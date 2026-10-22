@@ -1628,7 +1628,8 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="129"/>
-        <source>&amp;Open In Blender...</source>
+        <source>&amp;Open in Blender...</source>
+        <oldsource>&amp;Open In Blender...</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">打开于 Blender... (&amp;O)</translation>
     </message>
@@ -3057,7 +3058,8 @@
     </message>
     <message>
         <location filename="../common/project.cpp" line="330"/>
-        <source>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</source>
+        <source>A piece named &apos;%1&apos; already exists in this project. Please enter a unique name.</source>
+        <oldsource>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</oldsource>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">此项目中已存在名为 '%1' 的零件，请输入不同的名称。</translation>
     </message>
@@ -3299,8 +3301,9 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
-        <source>A submodel named &apos;%1&apos; already exists, please enter a unique name.</source>
-        <translation>名为 &apos;%1&apos; 的子模型已存在，请输入唯一名称。</translation>
+        <source>A submodel named &apos;%1&apos; already exists. Please enter a unique name.</source>
+        <oldsource>A submodel named &apos;%1&apos; already exists, please enter a unique name.</oldsource>
+        <translation type="unfinished">名为 &apos;%1&apos; 的子模型已存在，请输入唯一名称。</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="348"/>
@@ -3478,14 +3481,16 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
-        <source>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify camera definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 可以在 ldraw 数据中指定相机定义。选择加载它们或忽略它们。</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="182"/>
-        <source>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify point and sunlight definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 可以在 ldraw 数据中指定点和阳光定义。选择加载它们或忽略它们。</translation>
     </message>
@@ -3585,7 +3590,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
-        <source>Bevel edges. Can cause some pieces to render incorrectly</source>
+        <source>Bevel edges. Can cause some pieces to render incorrectly.</source>
+        <oldsource>Bevel edges. Can cause some pieces to render incorrectly</oldsource>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">对边缘进行倒角。可能导致某些零件渲染不正确</translation>
     </message>
@@ -3635,7 +3641,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
-        <source>Centered At Origin On Ground|Centered At Origin</source>
+        <source>Centered at Origin on Ground|Centered at Origin</source>
+        <oldsource>Centered At Origin On Ground|Centered At Origin</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">以地面原点为中心|以原点为中心</translation>
     </message>
@@ -3681,7 +3688,8 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="112"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
-        <source>Crop the image border at opaque content. Requires transparent background set to True</source>
+        <source>Crop the image border at opaque content. Requires transparent background set to True.</source>
+        <oldsource>Crop the image border at opaque content. Requires transparent background set to True</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">在不透明内容处裁剪图像边框。需要将透明背景设置为 True</translation>
     </message>
@@ -3730,7 +3738,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="121"/>
-        <source>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</source>
+        <source>Each object has a five-digit prefix, e.g., 00001_car. This keeps the list in its proper order.</source>
+        <oldsource>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">每个对象都有一个五位数字的前缀，例如。 00001_汽车。这使列表保持正确的顺序</translation>
     </message>
@@ -3742,7 +3751,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
-        <source>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</source>
+        <source>Filesystem case sensitivity defaults to false on Windows and macOS. Set to true if the LDraw path is case-sensitive on a case-insensitive filesystem.</source>
+        <oldsource>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">文件系统区分大小写，Windows 和 MacOS 默认为 false。如果 LDraw 路径在不区分大小写的文件系统上设置为区分大小写，则设置为 true。</translation>
     </message>
@@ -3772,7 +3782,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="219"/>
-        <source>Frames Per Step</source>
+        <source>Frames per Step</source>
+        <oldsource>Frames Per Step</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">每步帧数</translation>
     </message>
@@ -3862,7 +3873,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="231"/>
-        <source>How To Scale Pieces</source>
+        <source>How to Scale Pieces</source>
+        <oldsource>How To Scale Pieces</oldsource>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">零件缩放方式</translation>
     </message>
@@ -4000,7 +4012,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
-        <source>Make small gaps between bricks. A small gap is more realistic</source>
+        <source>Make small gaps between bricks. A small gap is more realistic.</source>
+        <oldsource>Make small gaps between bricks. A small gap is more realistic</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">在砖块之间留出小间隙。小差距更真实</translation>
     </message>
@@ -4100,7 +4113,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
-        <source>Parent To Empty</source>
+        <source>Parent to Empty</source>
+        <oldsource>Parent To Empty</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">父级为空</translation>
     </message>
@@ -4112,13 +4126,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
-        <source>Photo Realistic|Lego Instructions</source>
+        <source>Photorealistic|LEGO Instructions</source>
+        <oldsource>Photo Realistic|Lego Instructions</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">照片逼真|Lego 说明</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
-        <source>Photo-realistic or Schematic &apos;Instruction&apos; look</source>
+        <source>Photorealistic or schematic instruction look</source>
+        <oldsource>Photo-realistic or Schematic &apos;Instruction&apos; look</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">照片般真实或示意性的“指令”外观</translation>
     </message>
@@ -4198,7 +4214,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="238"/>
-        <source>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</source>
+        <source>Raised flattened logo geometry (3)|Raised rounded logo geometry (4)|Subtle rounded logo geometry (5)</source>
+        <oldsource>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">凸起的扁平徽标几何形状(3)|凸起的圆形徽标几何形状(4)|微妙的圆形徽标几何形状(5)</translation>
     </message>
@@ -4217,13 +4234,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
-        <source>Recalculate Normals|Two Faces Back To Back</source>
+        <source>Recalculate Normals|Two Faces Back to Back</source>
+        <oldsource>Recalculate Normals|Two Faces Back To Back</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">重新计算法线|两个面背靠背</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="201"/>
-        <source>Recalculate normals. Not recommended if BFC processing is active</source>
+        <source>Recalculate normals. Not recommended if BFC processing is active.</source>
+        <oldsource>Recalculate normals. Not recommended if BFC processing is active</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">重新计算法线。如果 BFC 处理处于活动状态，则不推荐</translation>
     </message>
@@ -4268,7 +4287,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
-        <source>Rounded(4)|Flattened(3)|Subtle Rounded(5)</source>
+        <source>Rounded (4)|Flattened (3)|Subtle Rounded (5)</source>
+        <oldsource>Rounded(4)|Flattened(3)|Subtle Rounded(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">圆角(4)|扁平化(3)|微妙圆角(5)</translation>
     </message>
@@ -4416,13 +4436,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
-        <source>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</source>
+        <source>Some older LDraw pieces have faces with ambiguous normals. This specifies what to do with them.</source>
+        <oldsource>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">一些旧的 LDraw 部件的法线不明确，这指定了如何处理它们</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
-        <source>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</source>
+        <source>Source used to create flexible pieces - string, hoses, etc. (LDCad, LSynth, or both)</source>
+        <oldsource>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">用于创建柔性部件的源 - 绳子、软管等（LDCad、LSynth 或两者</translation>
     </message>
@@ -4448,7 +4470,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
-        <source>Specify whether to render a background (affects &apos;Photo-realistic look only)</source>
+        <source>Specify whether to render a background (affects the photorealistic look only)</source>
+        <oldsource>Specify whether to render a background (affects &apos;Photo-realistic look only)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">指定是否渲染背景（仅影响“照片真实感外观”）</translation>
     </message>
@@ -4529,7 +4552,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
-        <source>Treat Shortcuts As Models</source>
+        <source>Treat Shortcuts as Models</source>
+        <oldsource>Treat Shortcuts As Models</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">将快捷方式视为模型</translation>
     </message>
@@ -4604,13 +4628,15 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="134"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="213"/>
-        <source>Verbose output</source>
+        <source>Verbose Output</source>
+        <oldsource>Verbose output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">详细输出</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="221"/>
-        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</source>
+        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport.</source>
+        <oldsource>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">以什么规模进口。全比例为 1.0，太大以至于在视口中难以操作</translation>
     </message>
@@ -4628,7 +4654,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="228"/>
-        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</source>
+        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness.</source>
+        <oldsource>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">显示哪个标志。未使用 logo 和 logo2，仅出于完整性考虑而将其包含在内</translation>
     </message>
@@ -6330,8 +6357,10 @@ Anisotropic: %5
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="820"/>
-        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in CSV format.
 </source>
+        <oldsource>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">  -csv, --export-csv &lt;outfile.csv&gt;: 导出csv格式使用的片段列表.</translation>
     </message>
@@ -7145,7 +7174,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1030"/>
-        <source>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</source>
+        <source>A simple check to test if the selected file is Blender failed. Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer. The ticket should contain the full path to the Blender executable.</source>
+        <oldsource>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">测试所选文件是否为 Blender 的简单检查失败。如果您确定文件为 Blender 2.8 或更高版本，请创建 %1 GitHub 票证。该票证应包含 Blender 可执行文件的完整路径。</translation>
     </message>
@@ -7192,7 +7222,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1143"/>
-        <source>Continue with the default import module ?</source>
+        <source>Continue with the default import module?</source>
+        <oldsource>Continue with the default import module ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">继续使用默认导入模块吗？</translation>
     </message>
@@ -7211,7 +7242,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
-        <source>Could not find add-on install file: &apos;%1&apos;</source>
+        <source>Could not find add-on install file: &apos;%1&apos;.</source>
+        <oldsource>Could not find add-on install file: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">找不到附加安装文件：'%1'</translation>
     </message>
@@ -7241,7 +7273,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
-        <source>Blender executable not found at &apos;%1&apos;</source>
+        <source>Blender executable not found at &apos;%1&apos;.</source>
+        <oldsource>Blender executable not found at &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">在 '%1' 处找不到 Blender 可执行文件</translation>
     </message>
@@ -7260,7 +7293,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
-        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;</source>
+        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
+        <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法将 '%1' 提取到 '%2'</translation>
     </message>
@@ -7314,13 +7348,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1492"/>
-        <source>Do you want to download version %1 ?</source>
+        <source>Do you want to download version %1?</source>
+        <oldsource>Do you want to download version %1 ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">您想下载版本 %1 吗？</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1529"/>
-        <source>Failed to properly remove Blender add-on: &apos;%1&apos;</source>
+        <source>Failed to properly remove Blender add-on: &apos;%1&apos;.</source>
+        <oldsource>Failed to properly remove Blender add-on: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法正确删除 Blender 附加组件：'%1'</translation>
     </message>
@@ -7338,19 +7374,22 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
-        <source>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</source>
+        <source>Failed to validate Blender add-on file name.&lt;br&gt;Downloaded: &apos;%1&apos;&lt;br&gt;Received: &apos;%2&apos;</source>
+        <oldsource>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法验证 Blender 附加文件名&lt;br&gt;已下载：'%1'&lt;br&gt;已接收：'%2'</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
-        <source>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</source>
+        <source>Failed to validate Blender add-on SHA hash.&lt;br&gt;Calculated: %1&lt;br&gt;Received: %2</source>
+        <oldsource>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法验证 Blender 附加 SHA 哈希值 &lt;br&gt; 已计算：%1&lt;br&gt; 已接收：%2</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
-        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</source>
+        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;.</source>
+        <oldsource>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">无法接收 Blender 附加组件 '%1.sha256' 的 SHA 哈希值</translation>
     </message>
@@ -7614,7 +7653,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
-        <source>Do you want to accept the modified settings before quitting ?</source>
+        <source>Do you want to accept the modified settings before quitting?</source>
+        <oldsource>Do you want to accept the modified settings before quitting ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">您想在退出前接受修改后的设置吗？</translation>
     </message>
@@ -7955,8 +7995,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="40"/>
-        <source>Output folder:</source>
-        <translation>输出文件夹:</translation>
+        <source>Output Folder:</source>
+        <oldsource>Output folder:</oldsource>
+        <translation type="unfinished">输出文件夹:</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="53"/>
@@ -8065,8 +8106,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="24"/>
-        <source>File name:</source>
-        <translation>文件名:</translation>
+        <source>File Name:</source>
+        <oldsource>File name:</oldsource>
+        <translation type="unfinished">文件名:</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="48"/>
@@ -8120,8 +8162,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <source>Output File cannot be empty.</source>
-        <translation>输出文件不能为空。</translation>
+        <source>Output file cannot be empty.</source>
+        <oldsource>Output File cannot be empty.</oldsource>
+        <translation type="unfinished">输出文件不能为空。</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
@@ -8580,9 +8623,12 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1097"/>
-        <source>The model could not be fully loaded, some pieces may be missing.
+        <source>The model could not be fully loaded. Some pieces may be missing.
 
 %1</source>
+        <oldsource>The model could not be fully loaded, some pieces may be missing.
+
+%1</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">该模型无法完全加载，某些部分可能丢失。
 
@@ -8595,8 +8641,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1306"/>
-        <source>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</source>
-        <translation>文件 &apos;%1&apos; 已被其他应用程序修改，是否重新加载？</translation>
+        <source>The file &apos;%1&apos; has been modified by another application. Do you want to reload it?</source>
+        <oldsource>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</oldsource>
+        <translation type="unfinished">文件 &apos;%1&apos; 已被其他应用程序修改，是否重新加载？</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1312"/>
@@ -8798,8 +8845,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2769"/>
-        <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
-        <translation>不再支持保存为 LCD 格式，请改用 LDR 或 MPD 格式。</translation>
+        <source>Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead.</source>
+        <oldsource>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</oldsource>
+        <translation type="unfinished">不再支持保存为 LCD 格式，请改用 LDR 或 MPD 格式。</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2769"/>
@@ -9452,13 +9500,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Add KeyFrame</source>
+        <source>Add Key Frame</source>
+        <oldsource>Add KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">添加关键帧</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Remove KeyFrame</source>
+        <source>Remove Key Frame</source>
+        <oldsource>Remove KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">删除关键帧</translation>
     </message>
@@ -9692,8 +9742,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="6167"/>
-        <source>Array only has 1 element or less, no pieces added.</source>
-        <translation>阵列只有 1 个或更少元素，未添加任何零件。</translation>
+        <source>Array only has 1 element or less. No pieces added.</source>
+        <oldsource>Array only has 1 element or less, no pieces added.</oldsource>
+        <translation type="unfinished">阵列只有 1 个或更少元素，未添加任何零件。</translation>
     </message>
     <message>
         <source>Array</source>
@@ -10298,8 +10349,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="127"/>
-        <source>Default author name:</source>
-        <translation>默认作者名称:</translation>
+        <source>Default Author Name:</source>
+        <oldsource>Default author name:</oldsource>
+        <translation type="unfinished">默认作者名称:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="208"/>
@@ -10315,13 +10367,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1958"/>
-        <source>Mouse sensitivity:</source>
-        <translation>鼠标灵敏度:</translation>
+        <source>Mouse Sensitivity:</source>
+        <oldsource>Mouse sensitivity:</oldsource>
+        <translation type="unfinished">鼠标灵敏度:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="77"/>
-        <source>Check for updates:</source>
-        <translation>检查更新:</translation>
+        <source>Check for Updates:</source>
+        <oldsource>Check for updates:</oldsource>
+        <translation type="unfinished">检查更新:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="241"/>
@@ -10771,7 +10825,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
-        <source>Selection rendering:</source>
+        <source>Selection Rendering:</source>
+        <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">选择渲染：</translation>
     </message>
@@ -10982,8 +11037,9 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1742"/>
-        <source>Key se&amp;quence:</source>
-        <translation>按键序列:</translation>
+        <source>Key Se&amp;quence:</source>
+        <oldsource>Key se&amp;quence:</oldsource>
+        <translation type="unfinished">按键序列:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1784"/>
@@ -11307,9 +11363,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>快捷键 &apos;%1&apos; 已分配给 &apos;%2&apos;。是否替换？</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <source>Import shortcuts</source>
-        <translation>导入快捷键</translation>
+        <translation type="vanished">导入快捷键</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
@@ -11317,9 +11372,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>加载键盘快捷键文件时出错。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <source>Export shortcuts</source>
-        <translation>导出快捷键</translation>
+        <translation type="vanished">导出快捷键</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
@@ -11379,10 +11433,12 @@ Unsupported video cards use face tint and colored edges.</source>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
-        <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
-        <translation>此快捷键已分配给 &apos;%1&apos;，是否替换？</translation>
+        <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
+        <oldsource>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</oldsource>
+        <translation type="unfinished">此快捷键已分配给 &apos;%1&apos;，是否替换？</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1421"/>
         <source>Import Shortcuts</source>
         <translation>导入快捷键</translation>
@@ -11393,6 +11449,7 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>加载鼠标快捷键文件时出错。</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1442"/>
         <source>Export Shortcuts</source>
         <translation>导出快捷键</translation>
@@ -11605,7 +11662,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1152"/>
-        <source>Piece Id</source>
+        <source>Piece ID</source>
+        <oldsource>Piece Id</oldsource>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">零件编号</translation>
     </message>
@@ -11896,7 +11954,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1217"/>
-        <source>Power of the light in Watts</source>
+        <source>Power of the light in watts</source>
+        <oldsource>Power of the light in Watts</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">光的功率（瓦​​）</translation>
     </message>
@@ -12321,7 +12380,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="520"/>
-        <source>Open in Blender output</source>
+        <source>Open in Blender Output</source>
+        <oldsource>Open in Blender output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">在 Blender 输出中打开</translation>
     </message>
@@ -12333,7 +12393,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="550"/>
-        <source>Error starting Blender render process</source>
+        <source>Error starting Blender render process.</source>
+        <oldsource>Error starting Blender render process</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">启动 Blender 渲染进程时出错</translation>
     </message>

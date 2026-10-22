@@ -1094,7 +1094,7 @@ void lcMainWindow::UpdateAssets()
 
 	if (!FailureDetails.isEmpty())
 	{
-		QString FailureText = tr("The model could not be fully loaded, some pieces may be missing.\n\n%1").arg(FailureDetails);
+		QString FailureText = tr("The model could not be fully loaded. Some pieces may be missing.\n\n%1").arg(FailureDetails);
 
 		mStatusLoadFailureLabel->setToolTip(FailureText);
 		mStatusLoadFailureLabel->setAccessibleDescription(FailureText);
@@ -1303,7 +1303,7 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 	if (Ignore || !CurrentProject || Path.isEmpty() || QFileInfo(Path) != QFileInfo(CurrentProject->GetFileName()))
 		return;
 
-	QString Text = tr("The file '%1' has been modified by another application, do you want to reload it?").arg(QDir::toNativeSeparators(Path));
+	QString Text = tr("The file '%1' has been modified by another application. Do you want to reload it?").arg(QDir::toNativeSeparators(Path));
 
 	const QString CurrentFileName = CurrentProject->GetFileName();
 
@@ -2766,7 +2766,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
 	{
-		QMessageBox::warning(this, tr("Save Project"), tr("Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead."));
+		QMessageBox::warning(this, tr("Save Project"), tr("Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead."));
 		return false;
 	}
 

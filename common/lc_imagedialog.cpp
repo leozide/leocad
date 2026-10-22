@@ -34,7 +34,7 @@ void lcImageDialog::accept()
 
 	if (FilePath.isEmpty())
 	{
-		QMessageBox::information(this, tr("Error"), tr("Output File cannot be empty."));
+		QMessageBox::information(this, tr("Error"), tr("Output file cannot be empty."));
 		return;
 	}
 

@@ -1226,7 +1226,7 @@ void lcPreferencesDialog::ShortcutRemoveClicked()
 
 void lcPreferencesDialog::ShortcutsImportClicked()
 {
-	QString FileName = QFileDialog::getOpenFileName(this, tr("Import shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+	QString FileName = QFileDialog::getOpenFileName(this, tr("Import Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
 	if (FileName.isEmpty())
 		return;
@@ -1246,7 +1246,7 @@ void lcPreferencesDialog::ShortcutsImportClicked()
 
 void lcPreferencesDialog::ShortcutsExportClicked()
 {
-	QString FileName = QFileDialog::getSaveFileName(this, tr("Export shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
 
 	if (FileName.isEmpty())
 		return;
@@ -1362,7 +1362,7 @@ void lcPreferencesDialog::MouseAssignClicked()
 
 			if (mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button2 == Button && mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers2 == Modifiers)
 			{
-				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1'. Do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 					return;
 
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button2 = Qt::NoButton;
@@ -1371,7 +1371,7 @@ void lcPreferencesDialog::MouseAssignClicked()
 
 			if (mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button1 == Button && mOptions->MouseShortcuts.mShortcuts[ToolIdx].Modifiers1 == Modifiers)
 			{
-				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1', do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+				if (QMessageBox::question(this, tr("Override Shortcut"), tr("This shortcut is already assigned to '%1'. Do you want to replace it?").arg(tr(gToolNames[ToolIdx])), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 					return;
 
 				mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button1 = mOptions->MouseShortcuts.mShortcuts[ToolIdx].Button2;

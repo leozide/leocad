@@ -4323,7 +4323,7 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 	if (Modified)
 	{
 		EndEditHistory();
-		EndHistorySequence(KeyFrame ? tr("Add KeyFrame") : tr("Remove KeyFrame"));
+		EndHistorySequence(KeyFrame ? tr("Add Key Frame") : tr("Remove Key Frame"));
 
 		gMainWindow->UpdateSelectedObjects(false);
 	}
@@ -6164,7 +6164,7 @@ void lcModel::ShowArrayDialog()
 
 	if (Dialog.mCounts[0] * Dialog.mCounts[1] * Dialog.mCounts[2] < 2)
 	{
-		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less, no pieces added."));
+		QMessageBox::information(gMainWindow, tr("LeoCAD"), tr("Array only has 1 element or less. No pieces added."));
 		return;
 	}
 

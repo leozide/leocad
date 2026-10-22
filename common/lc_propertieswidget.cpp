@@ -1149,7 +1149,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddCategory(CategoryIndex::Piece, tr("Piece"));
 
-	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Piece"), tr("Piece Id"), false);
+	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Piece"), tr("Piece ID"), false);
 	AddPieceColorProperty(lcObjectPropertyId::PieceColor, tr("Color"), tr("Piece color"), false);
 
 	AddSpacing();
@@ -1214,7 +1214,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddCategory(CategoryIndex::LightBlender, tr("Blender Settings"));
 
-	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Power"), tr("Power of the light in Watts"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Power"), tr("Power of the light in watts"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightBlenderRadius, tr("Radius"), tr("Shadow soft size"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightBlenderAngle, tr("Angle"), tr("Angular diameter of the light"), true, 0.0f, 180.0f);
 

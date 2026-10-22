@@ -1994,7 +1994,8 @@
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="129"/>
-        <source>&amp;Open In Blender...</source>
+        <source>&amp;Open in Blender...</source>
+        <oldsource>&amp;Open In Blender...</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&amp;Відкрити в Blender...</translation>
     </message>
@@ -3493,12 +3494,14 @@
     </message>
     <message>
         <location filename="../common/project.cpp" line="317"/>
-        <source>A submodel named &apos;%1&apos; already exists, please enter a unique name.</source>
-        <translation>Підмодель з назвою &apos;%1&apos; вже існує. Оберіть унікальну назву.</translation>
+        <source>A submodel named &apos;%1&apos; already exists. Please enter a unique name.</source>
+        <oldsource>A submodel named &apos;%1&apos; already exists, please enter a unique name.</oldsource>
+        <translation type="unfinished">Підмодель з назвою &apos;%1&apos; вже існує. Оберіть унікальну назву.</translation>
     </message>
     <message>
         <location filename="../common/project.cpp" line="330"/>
-        <source>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</source>
+        <source>A piece named &apos;%1&apos; already exists in this project. Please enter a unique name.</source>
+        <oldsource>A piece named &apos;%1&apos; already exists in this project, please enter a unique name.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Частина під назвою '%1' вже існує в цьому проекті, введіть унікальну назву.</translation>
     </message>
@@ -3911,14 +3914,16 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="115"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="180"/>
-        <source>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify camera definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify camera definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 може вказати визначення камери в межах даних ldraw. Виберіть завантажити їх або проігнорувати.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="116"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="182"/>
-        <source>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</source>
+        <source>%1 can specify point and sunlight definitions within the LDraw data. Choose to load them or ignore them.</source>
+        <oldsource>%1 can specify point and sunlight definitions within the ldraw data. Choose to load them or ignore them.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 може вказувати визначення точки та сонячного світла в межах даних ldraw. Виберіть завантажити їх або проігнорувати.</translation>
     </message>
@@ -4018,7 +4023,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="171"/>
-        <source>Bevel edges. Can cause some pieces to render incorrectly</source>
+        <source>Bevel edges. Can cause some pieces to render incorrectly.</source>
+        <oldsource>Bevel edges. Can cause some pieces to render incorrectly</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Скошені краї. Може призвести до неправильного відтворення деяких фрагментів</translation>
     </message>
@@ -4068,7 +4074,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="161"/>
-        <source>Centered At Origin On Ground|Centered At Origin</source>
+        <source>Centered at Origin on Ground|Centered at Origin</source>
+        <oldsource>Centered At Origin On Ground|Centered At Origin</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">З центром у місці походження на землі|З центром у місці походження</translation>
     </message>
@@ -4114,7 +4121,8 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="112"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="178"/>
-        <source>Crop the image border at opaque content. Requires transparent background set to True</source>
+        <source>Crop the image border at opaque content. Requires transparent background set to True.</source>
+        <oldsource>Crop the image border at opaque content. Requires transparent background set to True</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Обріжте межу зображення на непрозорому вмісті. Потрібен прозорий фон, встановлений на True</translation>
     </message>
@@ -4163,7 +4171,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="121"/>
-        <source>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</source>
+        <source>Each object has a five-digit prefix, e.g., 00001_car. This keeps the list in its proper order.</source>
+        <oldsource>Each object has a five digit prefix eg. 00001_car. This keeps the list in it&apos;s proper order</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Кожен об’єкт має п’ятизначний префікс, наприклад. 00001_автомобіль. Це зберігає список у належному порядку</translation>
     </message>
@@ -4175,7 +4184,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="176"/>
-        <source>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</source>
+        <source>Filesystem case sensitivity defaults to false on Windows and macOS. Set to true if the LDraw path is case-sensitive on a case-insensitive filesystem.</source>
+        <oldsource>Filesystem case sensitive defaults to false Windows and MacOS. Set true if LDraw path set to case-sensitive on case-insensitive filesystem.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Файлова система з урахуванням регістру за замовчуванням використовує помилкові Windows і MacOS. Установіть значення true, якщо шлях LDraw чутливий до регістру у файловій системі без урахування регістру.</translation>
     </message>
@@ -4205,7 +4215,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="219"/>
-        <source>Frames Per Step</source>
+        <source>Frames per Step</source>
+        <oldsource>Frames Per Step</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Кількість кадрів на крок</translation>
     </message>
@@ -4295,7 +4306,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="231"/>
-        <source>How To Scale Pieces</source>
+        <source>How to Scale Pieces</source>
+        <oldsource>How To Scale Pieces</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Як масштабувати шматки</translation>
     </message>
@@ -4433,7 +4445,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="184"/>
-        <source>Make small gaps between bricks. A small gap is more realistic</source>
+        <source>Make small gaps between bricks. A small gap is more realistic.</source>
+        <oldsource>Make small gaps between bricks. A small gap is more realistic</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Між цеглинами зробіть невеликі зазори. Невеликий зазор більш реалістичний</translation>
     </message>
@@ -4533,7 +4546,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="197"/>
-        <source>Parent To Empty</source>
+        <source>Parent to Empty</source>
+        <oldsource>Parent To Empty</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Батьківський елемент</translation>
     </message>
@@ -4545,13 +4559,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="160"/>
-        <source>Photo Realistic|Lego Instructions</source>
+        <source>Photorealistic|LEGO Instructions</source>
+        <oldsource>Photo Realistic|Lego Instructions</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Photo Realistic|Lego Інструкції</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="148"/>
-        <source>Photo-realistic or Schematic &apos;Instruction&apos; look</source>
+        <source>Photorealistic or schematic instruction look</source>
+        <oldsource>Photo-realistic or Schematic &apos;Instruction&apos; look</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Фотореалістичний або схематичний вигляд «інструкції».</translation>
     </message>
@@ -4631,7 +4647,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="238"/>
-        <source>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</source>
+        <source>Raised flattened logo geometry (3)|Raised rounded logo geometry (4)|Subtle rounded logo geometry (5)</source>
+        <oldsource>Raised flattened logo geometry(3)|Raised rounded logo geometry(4)|Subtle rounded logo geometry(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Рельєфна сплощена геометрія логотипу(3)|Рельєфна округла геометрія логотипу(4)|Нізко округлена геометрія логотипу(5)</translation>
     </message>
@@ -4650,13 +4667,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="163"/>
-        <source>Recalculate Normals|Two Faces Back To Back</source>
+        <source>Recalculate Normals|Two Faces Back to Back</source>
+        <oldsource>Recalculate Normals|Two Faces Back To Back</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Перерахувати нормалі|Два обличчя спиною до спини</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="201"/>
-        <source>Recalculate normals. Not recommended if BFC processing is active</source>
+        <source>Recalculate normals. Not recommended if BFC processing is active.</source>
+        <oldsource>Recalculate normals. Not recommended if BFC processing is active</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Перерахувати нормалі. Не рекомендується, якщо активна обробка BFC</translation>
     </message>
@@ -4701,7 +4720,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="159"/>
-        <source>Rounded(4)|Flattened(3)|Subtle Rounded(5)</source>
+        <source>Rounded (4)|Flattened (3)|Subtle Rounded (5)</source>
+        <oldsource>Rounded(4)|Flattened(3)|Subtle Rounded(5)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Заокруглений(4)|Сплощений(3)|Тегко закруглений(5)</translation>
     </message>
@@ -4849,13 +4869,15 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="151"/>
-        <source>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</source>
+        <source>Some older LDraw pieces have faces with ambiguous normals. This specifies what to do with them.</source>
+        <oldsource>Some older LDraw pieces have faces with ambiguous normals, this specifies what to do with them</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Деякі старі частини LDraw мають грані з неоднозначними нормалями, це визначає, що з ними робити</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="146"/>
-        <source>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</source>
+        <source>Source used to create flexible pieces - string, hoses, etc. (LDCad, LSynth, or both)</source>
+        <oldsource>Source used to create flexible pieces - string, hoses etc. (LDCad, LSynth or both</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Джерело, що використовується для створення гнучких частин - струни, шлангів тощо (LDCad, LSynth або обидва</translation>
     </message>
@@ -4881,7 +4903,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="131"/>
-        <source>Specify whether to render a background (affects &apos;Photo-realistic look only)</source>
+        <source>Specify whether to render a background (affects the photorealistic look only)</source>
+        <oldsource>Specify whether to render a background (affects &apos;Photo-realistic look only)</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Укажіть, чи відображати фон (впливає лише на фотореалістичний вигляд)</translation>
     </message>
@@ -4962,7 +4985,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="209"/>
-        <source>Treat Shortcuts As Models</source>
+        <source>Treat Shortcuts as Models</source>
+        <oldsource>Treat Shortcuts As Models</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Розглядайте ярлики як моделі</translation>
     </message>
@@ -5037,13 +5061,15 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="134"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="213"/>
-        <source>Verbose output</source>
+        <source>Verbose Output</source>
+        <oldsource>Verbose output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Детальний висновок</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="221"/>
-        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</source>
+        <source>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport.</source>
+        <oldsource>What scale to import at. Full scale is 1.0 and is so huge that it is unwieldy in the viewport</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">У якому масштабі імпортувати. Повна шкала становить 1,0 і настільки величезна, що вона громіздка у вікні перегляду</translation>
     </message>
@@ -5061,7 +5087,8 @@ File format is not recognized.</source>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="228"/>
-        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</source>
+        <source>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness.</source>
+        <oldsource>Which logo to display. logo and logo2 aren&apos;t used and are only included for completeness</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Який логотип відображати. логотип і logo2 не використовуються і включені лише для повноти</translation>
     </message>
@@ -6877,8 +6904,10 @@ GL_EXT_texture_filter_anisotropic extension: %5
     </message>
     <message>
         <location filename="../common/lc_application.cpp" line="820"/>
-        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+        <source>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in CSV format.
 </source>
+        <oldsource>  -csv, --export-csv &lt;outfile.csv&gt;: Export the list of pieces used in csv format.
+</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">  -csv, --export-csv &lt;outfile.csv&gt;: Експортувати список фрагментів, що використовуються у форматі csv.</translation>
     </message>
@@ -7476,7 +7505,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1030"/>
-        <source>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</source>
+        <source>A simple check to test if the selected file is Blender failed. Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer. The ticket should contain the full path to the Blender executable.</source>
+        <oldsource>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Проста перевірка, щоб перевірити, чи вибраний файл Blender не вдалося. Будь ласка, створіть заявку %1 GitHub, якщо ви впевнені, що це файл Blender 2.8 або новішої версії. Заявка має містити повний шлях до виконуваного файлу Blender.</translation>
     </message>
@@ -7523,7 +7553,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1143"/>
-        <source>Continue with the default import module ?</source>
+        <source>Continue with the default import module?</source>
+        <oldsource>Continue with the default import module ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Продовжити використання модуля імпорту за замовчуванням?</translation>
     </message>
@@ -7542,7 +7573,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1201"/>
-        <source>Could not find add-on install file: &apos;%1&apos;</source>
+        <source>Could not find add-on install file: &apos;%1&apos;.</source>
+        <oldsource>Could not find add-on install file: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося знайти файл встановлення доповнення: '%1'</translation>
     </message>
@@ -7572,7 +7604,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1321"/>
-        <source>Blender executable not found at &apos;%1&apos;</source>
+        <source>Blender executable not found at &apos;%1&apos;.</source>
+        <oldsource>Blender executable not found at &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender виконуваний файл не знайдено в '%1'</translation>
     </message>
@@ -7591,7 +7624,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1343"/>
-        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;</source>
+        <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
+        <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося видобути '%1' до '%2'</translation>
     </message>
@@ -7645,13 +7679,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1492"/>
-        <source>Do you want to download version %1 ?</source>
+        <source>Do you want to download version %1?</source>
+        <oldsource>Do you want to download version %1 ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Бажаєте завантажити версію %1?</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1529"/>
-        <source>Failed to properly remove Blender add-on: &apos;%1&apos;</source>
+        <source>Failed to properly remove Blender add-on: &apos;%1&apos;.</source>
+        <oldsource>Failed to properly remove Blender add-on: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося належним чином видалити доповнення Blender: '%1'</translation>
     </message>
@@ -7669,19 +7705,22 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1591"/>
-        <source>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</source>
+        <source>Failed to validate Blender add-on file name.&lt;br&gt;Downloaded: &apos;%1&apos;&lt;br&gt;Received: &apos;%2&apos;</source>
+        <oldsource>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося перевірити назву файлу доповнення Blender&lt;br&gt;Завантажено: '%1'&lt;br&gt;Отримано: '%2'</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1594"/>
-        <source>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</source>
+        <source>Failed to validate Blender add-on SHA hash.&lt;br&gt;Calculated: %1&lt;br&gt;Received: %2</source>
+        <oldsource>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося перевірити хеш SHA Blender надбудови &lt;br&gt;Обчислено: %1&lt;br&gt;Отримано: %2</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
-        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</source>
+        <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;.</source>
+        <oldsource>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Не вдалося отримати хеш SHA для надбудови Blender '%1.sha256'</translation>
     </message>
@@ -7945,7 +7984,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3178"/>
-        <source>Do you want to accept the modified settings before quitting ?</source>
+        <source>Do you want to accept the modified settings before quitting?</source>
+        <oldsource>Do you want to accept the modified settings before quitting ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ви бажаєте прийняти змінені налаштування перед виходом?</translation>
     </message>
@@ -8294,8 +8334,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="40"/>
-        <source>Output folder:</source>
-        <translation>Вихідна тека:</translation>
+        <source>Output Folder:</source>
+        <oldsource>Output folder:</oldsource>
+        <translation type="unfinished">Вихідна тека:</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="53"/>
@@ -8404,8 +8445,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="24"/>
-        <source>File name:</source>
-        <translation>Назва файла:</translation>
+        <source>File Name:</source>
+        <oldsource>File name:</oldsource>
+        <translation type="unfinished">Назва файла:</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="37"/>
@@ -8469,8 +8511,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="37"/>
-        <source>Output File cannot be empty.</source>
-        <translation>Вихідний файл не може бути порожнім.</translation>
+        <source>Output file cannot be empty.</source>
+        <oldsource>Output File cannot be empty.</oldsource>
+        <translation type="unfinished">Вихідний файл не може бути порожнім.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.cpp" line="45"/>
@@ -8958,9 +9001,12 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1097"/>
-        <source>The model could not be fully loaded, some pieces may be missing.
+        <source>The model could not be fully loaded. Some pieces may be missing.
 
 %1</source>
+        <oldsource>The model could not be fully loaded, some pieces may be missing.
+
+%1</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Модель не може бути повністю завантажена, деякі елементи можуть бути відсутні.
 
@@ -8974,7 +9020,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1306"/>
-        <source>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</source>
+        <source>The file &apos;%1&apos; has been modified by another application. Do you want to reload it?</source>
+        <oldsource>The file &apos;%1&apos; has been modified by another application, do you want to reload it?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Файл '%1' було змінено іншою програмою. Перезавантажити його?</translation>
     </message>
@@ -9182,7 +9229,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2769"/>
-        <source>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</source>
+        <source>Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead.</source>
+        <oldsource>Saving files in LCD format is no longer supported, please use the LDR or MPD formats instead.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Збереження файлів у форматі LCD більше не підтримується, використовуйте натомість формати LDR або MPD.</translation>
     </message>
@@ -9811,13 +9859,15 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Add KeyFrame</source>
+        <source>Add Key Frame</source>
+        <oldsource>Add KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Додайте KeyFrame</translation>
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="4326"/>
-        <source>Remove KeyFrame</source>
+        <source>Remove Key Frame</source>
+        <oldsource>Remove KeyFrame</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Видалити KeyFrame</translation>
     </message>
@@ -9948,9 +9998,10 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../common/lc_model.cpp" line="6167"/>
-        <source>Array only has 1 element or less, no pieces added.</source>
+        <source>Array only has 1 element or less. No pieces added.</source>
+        <oldsource>Array only has 1 element or less, no pieces added.</oldsource>
         <translatorcomment>Уточнити</translatorcomment>
-        <translation>Масив містить лише 1 елемент або й менше, не додано блоків.</translation>
+        <translation type="unfinished">Масив містить лише 1 елемент або й менше, не додано блоків.</translation>
     </message>
     <message>
         <source>Array</source>
@@ -10633,8 +10684,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="127"/>
-        <source>Default author name:</source>
-        <translation>Типове ім&apos;я автора:</translation>
+        <source>Default Author Name:</source>
+        <oldsource>Default author name:</oldsource>
+        <translation type="unfinished">Типове ім&apos;я автора:</translation>
     </message>
     <message>
         <source>Custom parts library:</source>
@@ -10659,8 +10711,9 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="77"/>
-        <source>Check for updates:</source>
-        <translation>Перевіряти оновлення:</translation>
+        <source>Check for Updates:</source>
+        <oldsource>Check for updates:</oldsource>
+        <translation type="unfinished">Перевіряти оновлення:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="59"/>
@@ -11118,7 +11171,8 @@ Please visit https://www.leocad.org for information on how to download and insta
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
-        <source>Selection rendering:</source>
+        <source>Selection Rendering:</source>
+        <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Візуалізація вибору:</translation>
     </message>
@@ -11346,8 +11400,9 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1742"/>
-        <source>Key se&amp;quence:</source>
-        <translation>&amp;Послідовність клавіш:</translation>
+        <source>Key Se&amp;quence:</source>
+        <oldsource>Key se&amp;quence:</oldsource>
+        <translation type="unfinished">&amp;Послідовність клавіш:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1755"/>
@@ -11433,8 +11488,9 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1958"/>
-        <source>Mouse sensitivity:</source>
-        <translation>Чутливість миші:</translation>
+        <source>Mouse Sensitivity:</source>
+        <oldsource>Mouse sensitivity:</oldsource>
+        <translation type="unfinished">Чутливість миші:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="360"/>
@@ -11695,9 +11751,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="unfinished">Комбінація клавіш '%1' вже призначена для '%2'. Ви хочете його замінити?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <source>Import shortcuts</source>
-        <translation>Імпортувати комбінації клавіш</translation>
+        <translation type="vanished">Імпортувати комбінації клавіш</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
@@ -11705,9 +11760,8 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation>Помилка завантаження файла комбінацій клавіш.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <source>Export shortcuts</source>
-        <translation>Експортувати комбінації клавіш</translation>
+        <translation type="vanished">Експортувати комбінації клавіш</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
@@ -11768,10 +11822,12 @@ Unsupported video cards use face tint and colored edges.</source>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
-        <source>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</source>
-        <translation>Ця комбінаця клавіш вже використовується для &apos;%1&apos;. Ви хочете замінити її?</translation>
+        <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
+        <oldsource>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</oldsource>
+        <translation type="unfinished">Ця комбінаця клавіш вже використовується для &apos;%1&apos;. Ви хочете замінити її?</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1421"/>
         <source>Import Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -11784,6 +11840,7 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="unfinished">Помилка завантаження файлу ярликів миші.</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1442"/>
         <source>Export Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -12020,7 +12077,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1152"/>
-        <source>Piece Id</source>
+        <source>Piece ID</source>
+        <oldsource>Piece Id</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ідентифікатор шматка</translation>
     </message>
@@ -12311,7 +12369,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="1217"/>
-        <source>Power of the light in Watts</source>
+        <source>Power of the light in watts</source>
+        <oldsource>Power of the light in Watts</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Потужність світла у Ватах</translation>
     </message>
@@ -12714,7 +12773,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="520"/>
-        <source>Open in Blender output</source>
+        <source>Open in Blender Output</source>
+        <oldsource>Open in Blender output</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Відкрити у вихідних даних Blender</translation>
     </message>
@@ -12726,7 +12786,8 @@ Unsupported video cards use face tint and colored edges.</source>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="550"/>
-        <source>Error starting Blender render process</source>
+        <source>Error starting Blender render process.</source>
+        <oldsource>Error starting Blender render process</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Помилка запуску процесу візуалізації Blender</translation>
     </message>

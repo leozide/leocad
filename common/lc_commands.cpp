@@ -126,7 +126,7 @@ const lcCommand gCommands[] =
 	// LC_FILE_RENDER_OPEN_IN_BLENDER
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.OpenInBlender"),
-		QT_TRANSLATE_NOOP("Menu", "&Open In Blender..."),
+		QT_TRANSLATE_NOOP("Menu", "&Open in Blender..."),
 		QT_TRANSLATE_NOOP("Status", "Open the current model in Blender"),
 		""
 	},

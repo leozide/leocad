@@ -21,7 +21,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>File name:</string>
+          <string>File Name:</string>
          </property>
          <property name="buddy">
           <cstring>fileName</cstring>

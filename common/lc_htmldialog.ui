@@ -37,7 +37,7 @@
         <item>
          <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>Output folder:</string>
+           <string>Output Folder:</string>
           </property>
           <property name="buddy">
            <cstring>outputFolder</cstring>

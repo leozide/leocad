@@ -314,7 +314,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 
 		if (ExistingModels.contains(Name, Qt::CaseInsensitive) && Name != CurrentName)
 		{
-			QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A submodel named '%1' already exists, please enter a unique name.").arg(Name));
+			QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A submodel named '%1' already exists. Please enter a unique name.").arg(Name));
 			continue;
 		}
 
@@ -327,7 +327,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceData()) &&
 				(!ExistingPiece->IsModel() || ExistingModels.contains(Name, Qt::CaseInsensitive)))
 			{
-				QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project, please enter a unique name.").arg(Name));
+				QMessageBox::information(ParentWidget, tr("Duplicate Submodel"), tr("A piece named '%1' already exists in this project. Please enter a unique name.").arg(Name));
 				continue;
 			}
 		}

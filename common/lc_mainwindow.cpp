@@ -113,11 +113,14 @@ void lcMainWindow::CreateActions()
 	{
 		QAction* Action = new QAction(qApp->translate("Menu", gCommands[CommandIdx].MenuName), this);
 		Action->setStatusTip(qApp->translate("Status", gCommands[CommandIdx].StatusText));
+		if (gCommands[CommandIdx].WhatsThis[0])
+			Action->setWhatsThis(qApp->translate("WhatsThis", gCommands[CommandIdx].WhatsThis));
 		connect(Action, &QAction::triggered, this, &lcMainWindow::ActionTriggered);
 		addAction(Action);
 		mActions[CommandIdx] = Action;
 	}
 
+	mActions[LC_HELP_WHATS_THIS]->setToolTip(mActions[LC_HELP_WHATS_THIS]->statusTip());
 	mActions[LC_FILE_NEW]->setToolTip(tr("New Model"));
 	mActions[LC_FILE_OPEN]->setToolTip(tr("Open Model"));
 	mActions[LC_FILE_SAVE]->setToolTip(tr("Save Model"));
@@ -565,6 +568,7 @@ void lcMainWindow::CreateMenus()
 		ModelMenu->addAction(mActions[ModelIdx]);
 
 	QMenu* HelpMenu = menuBar()->addMenu(tr("&Help"));
+	HelpMenu->addAction(mActions[LC_HELP_WHATS_THIS]);
 	HelpMenu->addAction(mActions[LC_HELP_HOMEPAGE]);
 	HelpMenu->addAction(mActions[LC_HELP_BUG_REPORT]);
 #if !LC_DISABLE_UPDATE_CHECK
@@ -584,6 +588,8 @@ void lcMainWindow::CreateToolBars()
 
 	QAction* SelectionModeAction = new QAction(tr("Selection Mode"), this);
 	SelectionModeAction->setStatusTip(tr("Change selection mode"));
+	SelectionModeAction->setToolTip(tr("Choose which related pieces are included when selecting a piece."));
+	SelectionModeAction->setWhatsThis(tr("<p><b>Selection Mode</b></p><p>Choose the rule applied when you pick a piece in the model view. Single selects that piece; the other modes include matching piece types, matching colors, or both. For example, color selection lets you pick matching red pieces without selecting each one separately.</p>"));
 	SelectionModeAction->setIcon(QIcon(":/resources/action_select.png"));
 	SelectionModeAction->setMenu(mSelectionModeMenu);
 
@@ -596,6 +602,8 @@ void lcMainWindow::CreateToolBars()
 
 	QAction* TransformAction = new QAction(tr("Transform"), this);
 	TransformAction->setStatusTip(tr("Transform Options"));
+	TransformAction->setToolTip(tr("Choose coordinate axes and whether selected pieces rotate together."));
+	TransformAction->setWhatsThis(tr("<p><b>Transform Options</b></p><p>Choose the axes and pivot used for interactive transforms. Relative Transforms uses the focused object's orientation, so movement along X follows that object's local X axis. Absolute Transforms uses the model axes. Rotate Together rotates the selection around a shared pivot; Rotate Separately rotates each piece around its own origin.</p>"));
 	TransformAction->setIcon(QIcon(":/resources/edit_transform_relative.png"));
 	TransformAction->setMenu(mTransformMenu);
 
@@ -615,6 +623,8 @@ void lcMainWindow::CreateToolBars()
 
 	QAction* MoveAction = new QAction(tr("Movement Snap"), this);
 	MoveAction->setStatusTip(tr("Snap translations to fixed intervals"));
+	MoveAction->setToolTip(tr("Choose movement snapping intervals for XY and Z."));
+	MoveAction->setWhatsThis(tr("<p><b>Movement Snap</b></p><p>Choose how far objects move in each snapped increment. XY controls movement across the base plane; Z controls vertical movement, so they can use different intervals. Turn snapping off for free placement, then enable it again when you need consistent spacing.</p>"));
 	MoveAction->setIcon(QIcon(":/resources/edit_snap_move.png"));
 	MoveAction->setMenu(SnapMenu);
 
@@ -626,11 +636,14 @@ void lcMainWindow::CreateToolBars()
 
 	QAction* AngleAction = new QAction(tr("Rotation Snap"), this);
 	AngleAction->setStatusTip(tr("Snap rotations to fixed intervals"));
+	AngleAction->setToolTip(tr("Choose the rotation snapping interval."));
+	AngleAction->setWhatsThis(tr("<p><b>Rotation Snap</b></p><p>Choose an angle increment for interactive rotation. For example, a 90-degree increment is useful for quarter turns, while smaller increments allow finer alignment. Turn snapping off for free rotation without fixed angle increments.</p>"));
 	AngleAction->setIcon(QIcon(":/resources/edit_snap_angle.png"));
 	AngleAction->setMenu(SnapAngleMenu);
 
 	mStandardToolBar = addToolBar(tr("Standard"));
 	mStandardToolBar->setObjectName("StandardToolbar");
+	mStandardToolBar->setWhatsThis(tr("<p><b>Standard Toolbar</b></p><p>Use file controls to create, open, and save projects, and Undo or Redo to navigate edit history. Before moving or rotating objects, choose the selection rule, coordinate reference, and snapping increments from the four drop-down controls. Help > What's This? explains individual controls.</p>"));
 	mStandardToolBar->addAction(mActions[LC_FILE_NEW]);
 	mStandardToolBar->addAction(mActions[LC_FILE_OPEN]);
 	mStandardToolBar->addAction(mActions[LC_FILE_SAVE]);
@@ -642,6 +655,7 @@ void lcMainWindow::CreateToolBars()
 	mStandardToolBar->addAction(TransformAction);
 	mStandardToolBar->addAction(MoveAction);
 	mStandardToolBar->addAction(AngleAction);
+
 	((QToolButton*)mStandardToolBar->widgetForAction(SelectionModeAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(TransformAction))->setPopupMode(QToolButton::InstantPopup);
 	((QToolButton*)mStandardToolBar->widgetForAction(MoveAction))->setPopupMode(QToolButton::InstantPopup);
@@ -649,6 +663,7 @@ void lcMainWindow::CreateToolBars()
 
 	mTimeToolBar = addToolBar(tr("Time"));
 	mTimeToolBar->setObjectName("TimeToolbar");
+	mTimeToolBar->setWhatsThis(tr("<p><b>Time Toolbar</b></p><p>The arrow buttons move through building steps so you can inspect how the model is assembled. They do not change the step assigned to a piece; use the Timeline for that. Add Keys controls whether edits create animation keys at the current step, allowing properties such as position to vary between steps.</p>"));
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_FIRST]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_PREVIOUS]);
 	mTimeToolBar->addAction(mActions[LC_VIEW_TIME_NEXT]);
@@ -657,6 +672,7 @@ void lcMainWindow::CreateToolBars()
 
 	mToolsToolBar = addToolBar(tr("Tools"));
 	mToolsToolBar->setObjectName("ToolsToolbar");
+	mToolsToolBar->setWhatsThis(tr("<p><b>Tools Toolbar</b></p><p>Choose a tool, then use it in the model view. Insertion tools create pieces, lights, or cameras. Editing tools select, transform, remove, or recolor objects. Navigation tools change the viewpoint without changing model geometry. Mouse assignments can be customized in Preferences.</p>"));
 	insertToolBarBreak(mToolsToolBar);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_INSERT]);
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_POINT_LIGHT]);
@@ -679,8 +695,28 @@ void lcMainWindow::CreateToolBars()
 	mToolsToolBar->addAction(mActions[LC_EDIT_ACTION_ZOOM_REGION]);
 	mToolsToolBar->hide();
 
+	for (QToolBar* ToolBar : { mStandardToolBar, mTimeToolBar, mToolsToolBar })
+	{
+		lcSetupWidgetHelp(ToolBar, nullptr);
+
+		for (QAction* Action : ToolBar->actions())
+		{
+			if (Action->isSeparator())
+				continue;
+
+			if (QWidget* Button = ToolBar->widgetForAction(Action))
+			{
+				Button->setWhatsThis(Action->whatsThis());
+				Button->setAccessibleName(Action->text().remove('&'));
+			}
+		}
+	}
+
+
 	mPartsToolBar = new QDockWidget(tr("Pieces"), this);
 	mPartsToolBar->setObjectName("PartsToolbar");
+	mPartsToolBar->setWhatsThis(tr("<p><b>Pieces</b></p><p>Choose a category or palette and filter its pieces. Selecting a piece prepares it for insertion; drag it into the model view to place it. Double-click a piece to open its preview. Options controls filtering, thumbnails, and list display.</p>"));
+	lcSetupWidgetHelp(mPartsToolBar, nullptr);
 	mPartSelectionWidget = new lcPartSelectionWidget(false, mPartsToolBar);
 	mPartsToolBar->setWidget(mPartSelectionWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPartsToolBar);
@@ -691,6 +727,8 @@ void lcMainWindow::CreateToolBars()
 
 	mColorsToolBar = new QDockWidget(tr("Colors"), this);
 	mColorsToolBar->setObjectName("ColorsToolbar");
+	mColorsToolBar->setWhatsThis(tr("<p><b>Colors</b></p><p>Choose the current LDraw color from the swatches. This color is used when inserting or painting pieces. To recolor selected pieces, use the color button above the swatches. Hover over a swatch for its name and color code.</p>"));
+	lcSetupWidgetHelp(mColorsToolBar, nullptr);
 	mColorsToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
 	mColorList = new lcColorList();
@@ -709,18 +747,23 @@ void lcMainWindow::CreateToolBars()
 	mColorButton->setAutoRaise(true);
 	mColorButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	mColorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-	mColorButton->setToolTip(tr("Change Selection Color"));
+	mColorButton->setToolTip(tr("Apply the current color to selected pieces."));
+	mColorButton->setAccessibleName(tr("Change Selection Color"));
+	mColorButton->setWhatsThis(tr("<p><b>Change Selection Color</b></p><p>Apply the current color to selected pieces. Choosing a swatch sets the current color; this button applies that color to the selection.</p>"));
 	ColorButtonLayout->addWidget(mColorButton);
 
 	connect(mColorButton, &QToolButton::clicked, this, &lcMainWindow::ColorButtonClicked);
 
 	ColorLayout->addWidget(mColorList);
+	mColorList->setAccessibleName(tr("LDraw Colors"));
 
 	mColorsToolBar->setWidget(ColorWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
 	mPropertiesToolBar = new QDockWidget(tr("Properties"), this);
 	mPropertiesToolBar->setObjectName("PropertiesToolbar");
+	mPropertiesToolBar->setWhatsThis(tr("<p><b>Properties</b></p><p>Edit properties of the focused object or selection. Available fields depend on whether you select pieces, a camera, or a light. Expand a section to see its fields. Keyframe controls mark properties at the current building step.</p><p>The transform fields at the bottom apply an X/Y/Z translation or rotation using the chosen transform mode. Press Enter to apply the values.</p>"));
+	lcSetupWidgetHelp(mPropertiesToolBar, nullptr);
 
 	QWidget* PropertiesWidget = new QWidget(mPropertiesToolBar);
 	QVBoxLayout* PropertiesLayout = new QVBoxLayout(PropertiesWidget);
@@ -740,13 +783,21 @@ void lcMainWindow::CreateToolBars()
 	QToolButton* TransformButton = new QToolButton(TransformWidget);
 	TransformButton->setDefaultAction(mActions[LC_EDIT_TRANSFORM]);
 	TransformButton->setPopupMode(QToolButton::InstantPopup);
+	TransformButton->setToolTip(tr("Choose absolute or relative translation or rotation."));
+	TransformButton->setWhatsThis(tr("<p><b>Apply Transform</b></p><p>Choose the translation or rotation mode, enter X/Y/Z values, and press Enter to apply them. Translation values use LDraw units; rotation values use degrees.</p>"));
 	TransformLayout->addWidget(TransformButton);
 
 	mTransformXEdit = new lcTransformLineEdit();
+	mTransformXEdit->setAccessibleName(tr("Transform X"));
+	mTransformXEdit->setToolTip(tr("Enter the X translation in LDraw units or rotation in degrees."));
 	TransformLayout->addWidget(mTransformXEdit);
 	mTransformYEdit = new lcTransformLineEdit();
+	mTransformYEdit->setAccessibleName(tr("Transform Y"));
+	mTransformYEdit->setToolTip(tr("Enter the Y translation in LDraw units or rotation in degrees."));
 	TransformLayout->addWidget(mTransformYEdit);
 	mTransformZEdit = new lcTransformLineEdit();
+	mTransformZEdit->setAccessibleName(tr("Transform Z"));
+	mTransformZEdit->setToolTip(tr("Enter the Z translation in LDraw units or rotation in degrees."));
 	TransformLayout->addWidget(mTransformZEdit);
 
 	PropertiesLayout->addWidget(TransformWidget);
@@ -760,6 +811,8 @@ void lcMainWindow::CreateToolBars()
 
 	mTimelineToolBar = new QDockWidget(tr("Timeline"), this);
 	mTimelineToolBar->setObjectName("TimelineToolbar");
+	mTimelineToolBar->setWhatsThis(tr("<p><b>Timeline</b></p><p>Select a step to make it current, or select piece rows to select those pieces in the model. Drag pieces between steps or reorder them within a step. Right-click for step insertion, removal, movement, and visibility commands.</p>"));
+	lcSetupWidgetHelp(mTimelineToolBar, nullptr);
 	mTimelineToolBar->setAcceptDrops(true);
 
 	mTimelineWidget = new lcTimelineWidget(mTimelineToolBar);
@@ -807,6 +860,8 @@ void lcMainWindow::CreatePreviewWidget()
 	mPreviewToolBar = new QDockWidget(tr("Preview"), this);
 	mPreviewToolBar->setWindowTitle(tr("Preview"));
 	mPreviewToolBar->setObjectName("PreviewToolBar");
+	mPreviewToolBar->setWhatsThis(tr("<p><b>Preview</b></p><p>Inspect a piece without placing it in the model. Double-click a piece in the Pieces dock to preview it. Lock Preview keeps the current preview when the source selection changes; unlock it to allow updates.</p>"));
+	lcSetupWidgetHelp(mPreviewToolBar, nullptr);
 	mPreviewToolBar->setWidget(mPreviewWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mPreviewToolBar);
 
@@ -3576,6 +3631,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_MODEL_39:
 	case LC_MODEL_40:
 		lcGetActiveProject()->SetActiveModel(CommandId - LC_MODEL_01, true);
+		break;
+
+	case LC_HELP_WHATS_THIS:
+		QWhatsThis::enterWhatsThisMode();
 		break;
 
 	case LC_HELP_HOMEPAGE:

@@ -23,7 +23,7 @@
 <context>
     <name>lcMainWindow</name>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="2296"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2351"/>
         <source>%n objects selected</source>
         <translation>
             <numerusform>%n object selected</numerusform>
@@ -31,7 +31,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="2696"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2751"/>
         <source>Merged %n submodels.</source>
         <translation>
             <numerusform>Merged %n submodel.</numerusform>

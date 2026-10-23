@@ -276,6 +276,7 @@ enum lcCommandId
 	LC_MODEL_39,
 	LC_MODEL_40,
 	LC_MODEL_LAST = LC_MODEL_40,
+	LC_HELP_WHATS_THIS,
 	LC_HELP_HOMEPAGE,
 	LC_HELP_BUG_REPORT,
 	LC_HELP_UPDATES,
@@ -295,6 +296,7 @@ struct lcCommand
 	const char* ID;
 	const char* MenuName;
 	const char* StatusText;
+	const char* WhatsThis;
 	const char* DefaultShortcut;
 };
 

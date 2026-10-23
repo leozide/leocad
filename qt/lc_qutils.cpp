@@ -22,18 +22,25 @@ void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox)
 			QWhatsThis::showText(Widget->mapToGlobal(QPoint(0, Widget->height())), Widget->whatsThis(), Widget);
 	};
 
-	QObject::connect(ButtonBox, &QDialogButtonBox::helpRequested, Root, [Root, ShowHelp]()
-	{
-		ShowHelp(Root);
-	});
+	if (ButtonBox)
+		QObject::connect(ButtonBox, &QDialogButtonBox::helpRequested, Root, [Root, ShowHelp]()
+		{
+			ShowHelp(Root);
+		});
 
 	QShortcut* HelpShortcut = new QShortcut(QKeySequence(Qt::Key_F1), Root);
 	HelpShortcut->setContext(Qt::WidgetWithChildrenShortcut);
-	QObject::connect(HelpShortcut, &QShortcut::activated, Root, [Root, ShowHelp]()
+
+	const auto HelpActivated = [Root, ShowHelp]()
 	{
 		QWidget* Focus = QApplication::focusWidget();
-		ShowHelp(Focus && Root->isAncestorOf(Focus) ? Focus : Root);
-	});
+		// Popup windows can share the shortcut scope across a QWidget window boundary.
+		ShowHelp(Focus ? Focus : Root);
+	};
+
+	QObject::connect(HelpShortcut, &QShortcut::activated, Root, HelpActivated);
+	// A chooser can overlap its owning dock's shortcut scope; both routes start at the focused control.
+	QObject::connect(HelpShortcut, &QShortcut::activatedAmbiguously, Root, HelpActivated);
 }
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox)

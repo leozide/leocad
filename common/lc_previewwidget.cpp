@@ -15,9 +15,12 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	mPreview = new lcPreview();
 	mViewWidget = new lcViewWidget(nullptr, mPreview);
 	setCentralWidget(mViewWidget);
+	mViewWidget->setAccessibleName(tr("Piece Preview"));
+	mViewWidget->setToolTip(tr("Inspect the previewed piece without placing it in the model."));
 	setMinimumSize(200, 200);
 
 	mLockAction = new QAction(QIcon(":/resources/action_preview_unlocked.png"),tr("Lock Preview"), this);
+	mLockAction->setWhatsThis(tr("<p><b>Lock Preview</b></p><p>Keep the current piece in the preview while you browse other pieces. Unlock Preview allows the display to update again. An empty preview cannot be locked.</p>"));
 	mLockAction->setCheckable(true);
 	mLockAction->setChecked(false);
 	mLockAction->setShortcut(tr("Ctrl+L"));
@@ -46,8 +49,10 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	mToolBar = addToolBar(tr("Toolbar"));
 	mToolBar->setObjectName("Toolbar");
 	mToolBar->setStatusTip(tr("Preview Toolbar"));
+	mToolBar->setWhatsThis(mLockAction->whatsThis());
 	mToolBar->setMovable(false);
 	mToolBar->addAction(mLockAction);
+	mToolBar->widgetForAction(mLockAction)->setWhatsThis(mLockAction->whatsThis());
 	mToolBar->addSeparator();
 	mToolBar->addWidget(mLabel);
 	if (mToolBar->isHidden())

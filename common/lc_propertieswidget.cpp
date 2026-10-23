@@ -18,6 +18,25 @@ lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 	: QWidget(Parent)
 {
 	CreateWidgets();
+
+	for (PropertyWidgets& Property : mPropertyWidgets)
+	{
+		if (!Property.Editor || !Property.Label)
+			continue;
+
+		const QString Name = tr("%1: %2").arg(mCategoryWidgets[static_cast<int>(Property.Category)].Button->text(), Property.Label->text());
+		Property.Label->setBuddy(Property.Editor);
+		Property.Editor->setAccessibleName(Name);
+		Property.Editor->setWhatsThis(Property.Editor->toolTip());
+		Property.Label->setWhatsThis(Property.Editor->whatsThis());
+
+		if (Property.KeyFrame)
+		{
+			Property.KeyFrame->setAccessibleName(tr("Keyframe for %1").arg(Name));
+			Property.KeyFrame->setWhatsThis(tr("<p><b>Property Keyframe</b></p><p>Enable or remove a keyframe for this property at the current building step. Keyframes let the property's value change between steps.</p>"));
+		}
+	}
+
 	SetLayoutMode(LayoutMode::Empty);
 }
 
@@ -65,6 +84,7 @@ void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
 	mCurrentCategory->Category = Index;
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
+	CategoryButton->setToolTip(tr("Expand or collapse the %1 properties.").arg(Title));
 
 	mLayout->addWidget(CategoryButton, mLayoutRow, 0, 1, -1);
 	mCurrentCategory->Button = CategoryButton;

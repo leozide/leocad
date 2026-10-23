@@ -8,6 +8,8 @@
 lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	: QTreeWidget(Parent)
 {
+	setAccessibleName(tr("Building Steps and Pieces"));
+	setToolTip(tr("Select steps or pieces; drag pieces to reorder them or change their building step."));
 	mCurrentStepItem = nullptr;
 	mIgnoreUpdates = false;
 

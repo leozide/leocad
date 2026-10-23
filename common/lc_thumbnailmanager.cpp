@@ -436,6 +436,8 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 			ImageBits += Icon.bytesPerLine();
 		}
 
+		Painter.setRenderHint(QPainter::SmoothPixmapTransform);
+		Painter.scale(Thumbnail.DeviceScale, Thumbnail.DeviceScale);
 		Painter.drawImage(QPoint(0, 0), Icon);
 		Painter.end();
 	}

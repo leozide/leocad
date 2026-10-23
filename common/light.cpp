@@ -43,7 +43,7 @@ QString lcLight::GetLightTypeString(lcLightType LightType)
 		return QT_TRANSLATE_NOOP("Light Types", "Point Light");
 
 	case lcLightType::Spot:
-		return QT_TRANSLATE_NOOP("Light Types", "Spot Light");
+		return QT_TRANSLATE_NOOP("Light Types", "Spotlight");
 
 	case lcLightType::Directional:
 		return QT_TRANSLATE_NOOP("Light Types", "Directional Light");
@@ -175,7 +175,7 @@ void lcLight::CreateName(const std::vector<std::unique_ptr<lcLight>>& Lights)
 		break;
 
 	case lcLightType::Spot:
-		Prefix = QLatin1String("Spot Light ");
+		Prefix = QLatin1String("Spotlight ");
 		break;
 
 	case lcLightType::Directional:

@@ -170,7 +170,7 @@ void lcPropertiesWidget::UpdateKeyFrameWidget(lcObjectPropertyId PropertyId)
 void lcPropertiesWidget::AddKeyFrameWidget(lcObjectPropertyId PropertyId)
 {
 	lcKeyFrameWidget* Widget = new lcKeyFrameWidget(this);
-	Widget->setToolTip(tr("Toggle Key Frame"));
+	Widget->setToolTip(tr("Toggle Keyframe"));
 
 	connect(Widget, &QCheckBox::stateChanged, this, &lcPropertiesWidget::KeyFrameChanged);
 
@@ -1224,8 +1224,8 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Cone Angle"), tr("Angle in degrees of the spot light's beam"), true, 0.0f, 179.9f);
-	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Penumbra Angle"), tr("Angle in degrees over which the intensity of the spot light falls off to zero"), true, 0.0f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::LightSpotConeAngle, tr("Cone Angle"), tr("Angle in degrees of the spotlight's beam"), true, 0.0f, 179.9f);
+	AddFloatProperty(lcObjectPropertyId::LightSpotPenumbraAngle, tr("Penumbra Angle"), tr("Angle in degrees over which the intensity of the spotlight falls off to zero"), true, 0.0f, 179.9f);
 	AddStringListProperty(lcObjectPropertyId::LightAreaShape, tr("Area Shape"), tr("The shape of the area light"), false, lcLight::GetAreaShapeStrings());
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeX, tr("Size X"), tr("The width of the area light"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightAreaSizeY, tr("Y"), tr("The height of the area light"), true, 0.0f, FLT_MAX);
@@ -1245,7 +1245,7 @@ void lcPropertiesWidget::CreateWidgets()
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayPower, tr("Power"), tr("Power of the light (multiplicative factor)"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadePower, tr("Fade Power"), tr("Light falloff rate"), true, 0.0f, FLT_MAX);
-	AddFloatProperty(lcObjectPropertyId::LightPOVRaySpotTightness, tr("Tightness"), tr("Additional exponential spot light edge softening"), true, 0.0f, FLT_MAX);
+	AddFloatProperty(lcObjectPropertyId::LightPOVRaySpotTightness, tr("Tightness"), tr("Additional exponential spotlight edge softening"), true, 0.0f, FLT_MAX);
 	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis"), true, 1, INT_MAX);
 	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridY, tr("Y"), tr("Number of point sources along the Y axis"), true, 1, INT_MAX);
 

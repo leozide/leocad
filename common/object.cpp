@@ -90,13 +90,13 @@ QString lcObject::GetCheckpointString(lcObjectPropertyId PropertyId)
 		return QT_TRANSLATE_NOOP("Checkpoint", "Change Area Light Y Size");
 
 	case lcObjectPropertyId::LightSpotConeAngle:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spot Light Cone Angle");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spotlight Cone Angle");
 
 	case lcObjectPropertyId::LightSpotPenumbraAngle:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spot Light Penumbra Angle");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spotlight Penumbra Angle");
 
 	case lcObjectPropertyId::LightPOVRaySpotTightness:
-		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spot Light POV-Ray Tightness");
+		return QT_TRANSLATE_NOOP("Checkpoint", "Change Spotlight POV-Ray Tightness");
 
 	case lcObjectPropertyId::LightAreaShape:
 		return QT_TRANSLATE_NOOP("Checkpoint", "Change Area Light Shape");

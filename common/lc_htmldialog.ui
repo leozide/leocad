@@ -97,7 +97,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_4">
      <property name="whatsThis">
-      <string>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export all models in the project, only the current model, or the current model with the submodels it references. When several models are exported, an overall index links to their instructions.&lt;/p&gt;</string>
+      <string>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export instructions for the model and all submodels, only the model or submodel being edited, or that entry with its referenced submodels. When several entries are exported, an overall index links to their instructions.&lt;/p&gt;</string>
      </property>
      <property name="title">
       <string>Models</string>
@@ -106,7 +106,7 @@
       <item>
        <widget class="QRadioButton" name="allModels">
         <property name="toolTip">
-         <string>Export instructions for every model in the project.</string>
+         <string>Export instructions for the model and all submodels.</string>
         </property>
         <property name="text">
          <string>All Models</string>

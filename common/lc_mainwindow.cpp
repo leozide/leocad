@@ -643,7 +643,7 @@ void lcMainWindow::CreateToolBars()
 
 	mStandardToolBar = addToolBar(tr("Standard"));
 	mStandardToolBar->setObjectName("StandardToolbar");
-	mStandardToolBar->setWhatsThis(tr("<p><b>Standard Toolbar</b></p><p>Use file controls to create, open, and save projects, and Undo or Redo to navigate edit history. Before moving or rotating objects, choose the selection rule, coordinate reference, and snapping increments from the four drop-down controls. Help > What's This? explains individual controls.</p>"));
+	mStandardToolBar->setWhatsThis(tr("<p><b>Standard Toolbar</b></p><p>Use file controls to create, open, and save models, and Undo or Redo to navigate edit history. Before moving or rotating objects, choose the selection rule, coordinate reference, and snapping increments from the four drop-down controls. Help > What's This? explains individual controls.</p>"));
 	mStandardToolBar->addAction(mActions[LC_FILE_NEW]);
 	mStandardToolBar->addAction(mActions[LC_FILE_OPEN]);
 	mStandardToolBar->addAction(mActions[LC_FILE_SAVE]);
@@ -2821,7 +2821,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 	if (QFileInfo(SaveFileName).suffix().toLower() == QLatin1String("lcd"))
 	{
-		QMessageBox::warning(this, tr("Save Project"), tr("Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead."));
+		QMessageBox::warning(this, tr("Save Model"), tr("Saving files in LCD format is no longer supported. Please use the LDR or MPD formats instead."));
 		return false;
 	}
 
@@ -2829,7 +2829,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 	if (!SaveResult)
 	{
-		QMessageBox::warning(this, tr("Save Project"), SaveResult.error());
+		QMessageBox::warning(this, tr("Save Model"), SaveResult.error());
 		return false;
 	}
 

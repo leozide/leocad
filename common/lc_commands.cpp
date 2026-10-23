@@ -8,7 +8,7 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Action", "File.New"),
 		QT_TRANSLATE_NOOP("Menu", "&New"),
 		QT_TRANSLATE_NOOP("Status", "Create a new model"),
-		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>New Project</b></p><p>Start a new project with an empty model. If the current project has unsaved changes, LeoCAD asks whether to save them before replacing it.</p>"),
+		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>New Model</b></p><p>Create a new, empty model. If the current model has unsaved changes, LeoCAD asks whether to save them before replacing it.</p>"),
 		"Ctrl+N"
 	},
 	// LC_FILE_OPEN
@@ -16,7 +16,7 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Action", "File.Open"),
 		QT_TRANSLATE_NOOP("Menu", "&Open..."),
 		QT_TRANSLATE_NOOP("Status", "Open an existing model"),
-		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Open Project</b></p><p>Choose an existing model or project file to work on. If the current project has unsaved changes, save or discard those changes before opening the chosen file.</p>"),
+		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Open Model</b></p><p>Choose an existing model file to work on. If the current model has unsaved changes, save or discard those changes before opening the chosen file.</p>"),
 		"Ctrl+O"
 	},
 	// LC_FILE_MERGE
@@ -32,7 +32,7 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("Action", "File.Save"),
 		QT_TRANSLATE_NOOP("Menu", "&Save"),
 		QT_TRANSLATE_NOOP("Status", "Save the current model"),
-		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Save Project</b></p><p>Write the current project, including its submodels, to disk. The first save asks for a filename. Use Save As to save a separate copy under another name.</p>"),
+		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Save Model</b></p><p>Save the model and its submodels to disk. The first save asks for a filename. Use Save As to save a separate copy under another name.</p>"),
 		"Ctrl+S"
 	},
 	// LC_FILE_SAVEAS
@@ -328,7 +328,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SelectNone"),
 		QT_TRANSLATE_NOOP("Menu", "Select &None"),
-		QT_TRANSLATE_NOOP("Status", "De-select everything"),
+		QT_TRANSLATE_NOOP("Status", "Deselect everything"),
 		"",
 		""
 	},
@@ -432,7 +432,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Snap.Toggle"),
 		QT_TRANSLATE_NOOP("Menu", "Move Snap Enabled"),
-		QT_TRANSLATE_NOOP("Status", "Toggle snap axes"),
+		QT_TRANSLATE_NOOP("Status", "Toggle movement snapping"),
 		"",
 		""
 	},
@@ -743,8 +743,8 @@ const lcCommand gCommands[] =
 	// LC_EDIT_ACTION_SPOTLIGHT
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.SpotLight"),
-		QT_TRANSLATE_NOOP("Menu", "Spot Light"),
-		QT_TRANSLATE_NOOP("Status", "Add new spot lights to the model"),
+		QT_TRANSLATE_NOOP("Menu", "Spotlight"),
+		QT_TRANSLATE_NOOP("Status", "Add new spotlights to the model"),
 		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Spotlight Tool</b></p><p>Use the model view to create a directed cone of light. In Properties, adjust its position and target, cone angle, penumbra, and renderer-specific power.</p>"),
 		""
 	},
@@ -752,7 +752,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Tool.DirectionalLight"),
 		QT_TRANSLATE_NOOP("Menu", "Directional Light"),
-		QT_TRANSLATE_NOOP("Status", "Add new omnidirectional light sources to the model"),
+		QT_TRANSLATE_NOOP("Status", "Add new directional light sources to the model"),
 		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Directional Light Tool</b></p><p>Create a light with parallel rays, such as sunlight. Its direction determines the illumination. Select it to adjust its transform, color, and renderer-specific settings in Properties.</p>"),
 		""
 	},
@@ -896,7 +896,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.ZoomExtents"),
 		QT_TRANSLATE_NOOP("Menu", "Zoom E&xtents"),
-		QT_TRANSLATE_NOOP("Status", "Fit all pieces in the current view (hold the CTRL key down to zoom all views)"),
+		QT_TRANSLATE_NOOP("Status", "Fit all pieces in the current view"),
 		"",
 		""
 	},
@@ -1439,8 +1439,8 @@ const lcCommand gCommands[] =
 	// LC_PIECE_REMOVE_KEY_FRAMES
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.RemoveKeyFrames"),
-		QT_TRANSLATE_NOOP("Menu", "Remove &Key Frames"),
-		QT_TRANSLATE_NOOP("Status", "Remove all key frames from the selected pieces"),
+		QT_TRANSLATE_NOOP("Menu", "Remove &Keyframes"),
+		QT_TRANSLATE_NOOP("Status", "Remove all keyframes from the selected pieces"),
 		"",
 		""
 	},
@@ -1536,7 +1536,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.PlusX"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate +X"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the X axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the X axis"),
 		"",
 		"Shift+Down"
 	},
@@ -1544,7 +1544,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.MinusX"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate -X"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the X axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the X axis"),
 		"",
 		"Shift+Up"
 	},
@@ -1552,7 +1552,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.PlusY"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate +Y"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the Y axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the Y axis"),
 		"",
 		"Shift+Right"
 	},
@@ -1560,7 +1560,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.MinusY"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate -Y"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the Y axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the Y axis"),
 		"",
 		"Shift+Left"
 	},
@@ -1568,7 +1568,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.PlusZ"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate +Z"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the Z axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the Z axis"),
 		"",
 		"Shift+PgUp"
 	},
@@ -1576,7 +1576,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Rotate.MinusZ"),
 		QT_TRANSLATE_NOOP("Menu", "Rotate -Z"),
-		QT_TRANSLATE_NOOP("Status", "Rotate selected objects along the Z axis"),
+		QT_TRANSLATE_NOOP("Status", "Rotate selected objects around the Z axis"),
 		"",
 		"Shift+PgDown"
 	},

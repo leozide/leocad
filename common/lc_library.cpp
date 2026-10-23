@@ -166,7 +166,7 @@ lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInf
 	const QString Path = FileInfo.canonicalFilePath();
 
 	if (std::find(LoadingPaths.begin(), LoadingPaths.end(), Path) != LoadingPaths.end())
-		return lcUnexpected(tr("External project include cycle at '%1'.").arg(Path));
+		return lcUnexpected(tr("Circular reference between external model files at '%1'.").arg(Path));
 
 	LoadingPaths.push_back(Path);
 
@@ -179,7 +179,7 @@ lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInf
 	if (!Loaded)
 	{
 		delete ExternalProject;
-		return lcUnexpected(tr("Could not load external project '%1'.").arg(FileInfo.absoluteFilePath()));
+		return lcUnexpected(tr("Could not load external model file '%1'.").arg(FileInfo.absoluteFilePath()));
 	}
 
 	return ExternalProject;
@@ -267,7 +267,7 @@ bool lcPiecesLibrary::RemapProjectPieceData(lcPieceData* PieceData, const QStrin
 	else
 	{
 		PieceData->DetachContainer();
-		PieceData->SetFailed(tr("Could not find external project '%1'.").arg(Candidate.absoluteFilePath()));
+		PieceData->SetFailed(tr("Could not find external model file '%1'.").arg(Candidate.absoluteFilePath()));
 	}
 
 	NotifyAssetStatusChanged();

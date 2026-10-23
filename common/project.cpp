@@ -327,7 +327,7 @@ QString Project::GetNewModelName(QWidget* ParentWidget, const QString& DialogTit
 			if (ExistingPiece && (!CurrentModel || ExistingPiece != CurrentModel->GetPieceData()) &&
 				(!ExistingPiece->IsModel() || ExistingModels.contains(Name, Qt::CaseInsensitive)))
 			{
-				QMessageBox::information(ParentWidget, DialogTitle, tr("A piece named '%1' already exists in this project. Please enter a unique name.").arg(Name));
+				QMessageBox::information(ParentWidget, DialogTitle, tr("A piece named '%1' already exists in this model. Please enter a unique name.").arg(Name));
 				continue;
 			}
 		}
@@ -411,7 +411,7 @@ void Project::ShowModelListDialog()
 
 		if (!FinalNames.insert(Name).second)
 		{
-			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this model.").arg(Entry.Name));
 			return;
 		}
 
@@ -438,7 +438,7 @@ void Project::ShowModelListDialog()
 
 		if (!Vacated)
 		{
-			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this model.").arg(Entry.Name));
 			return;
 		}
 	}
@@ -495,7 +495,7 @@ void Project::ShowModelListDialog()
 
 		if (!lcGetPiecesLibrary()->RenameModelPieceData(Model->GetPieceData(), Entry.Name.toLatin1().constData()))
 		{
-			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this project.").arg(Entry.Name));
+			QMessageBox::information(gMainWindow, tr("Submodels"), tr("A piece named '%1' already exists in this model.").arg(Entry.Name));
 			return;
 		}
 
@@ -1500,7 +1500,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 			const auto Existing = MergedData.find(Name);
 
 			if (Existing != MergedData.end() && !SameEmbeddedData(*Existing->second, *Data))
-				return lcUnexpected(tr("Both projects contain different embedded data named '%1'. Rename one before merging.").arg(Data->FileName));
+				return lcUnexpected(tr("Both models contain different embedded data named '%1'. Rename one before merging.").arg(Data->FileName));
 
 			MergedData.emplace(Name, Data);
 		}
@@ -1568,7 +1568,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 		for (const std::map<std::string, lcPieceData*>::value_type& Entry : Source->mPieceIndex)
 		{
 			if (!RegisterSourcePiece(Entry.first, Entry.second))
-				return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
+				return lcUnexpected(tr("Both models contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
 		}
 
 		for (const std::unique_ptr<lcModel>& Model : Source->mModels)
@@ -1580,7 +1580,7 @@ lcResult<void> Project::MergeInternal(const std::vector<Project*>& Sources, cons
 				const std::string Name = lcPiecesLibrary::NormalizePieceDataName(Piece->GetID().toLatin1().constData());
 
 				if (!RegisterSourcePiece(Name, Piece->mPieceData.Get()))
-					return lcUnexpected(tr("Both projects contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
+					return lcUnexpected(tr("Both models contain different pieces named '%1'. Rename one before merging.").arg(ConflictName));
 			}
 		}
 	}

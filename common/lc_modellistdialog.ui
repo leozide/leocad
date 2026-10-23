@@ -3,7 +3,7 @@
  <class>lcModelListDialog</class>
  <widget class="QDialog" name="lcModelListDialog">
   <property name="whatsThis">
-   <string>&lt;p&gt;&lt;b&gt;Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Manage the models stored in this project. Create, rename, duplicate, delete, or reorder them, then choose OK to apply the changes. Cancel discards the list changes; files already exported remain on disk.&lt;/p&gt;&lt;p&gt;Drag list entries to change their order. Use Set Active to switch to the current list item when applying changes.&lt;/p&gt;</string>
+   <string>&lt;p&gt;&lt;b&gt;Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Manage the model and its submodels. Create, rename, duplicate, delete, or reorder entries, then choose OK to apply the changes. Cancel discards the list changes; files already exported remain on disk.&lt;/p&gt;&lt;p&gt;Drag list entries to change their order. Use Set Active to switch to the current list item when applying changes.&lt;/p&gt;</string>
   </property>
   <property name="geometry">
    <rect>
@@ -28,7 +28,7 @@
         <string>Submodels</string>
        </property>
        <property name="whatsThis">
-        <string>&lt;p&gt;&lt;b&gt;Model List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select one or more entries for actions such as Rename, Duplicate, Export, or Delete. Drag entries to reorder them. Double-click an entry to apply the list changes and make that model active.&lt;/p&gt;&lt;p&gt;Names must be unique within the project; capitalization alone does not make a name unique.&lt;/p&gt;</string>
+        <string>&lt;p&gt;&lt;b&gt;Model List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select one or more entries for actions such as Rename, Duplicate, Export, or Delete. Drag entries to reorder them. Double-click an entry to apply the list changes and make that entry active.&lt;/p&gt;&lt;p&gt;Model and submodel names must be unique; capitalization alone does not make a name unique.&lt;/p&gt;</string>
        </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -40,7 +40,7 @@
        <item>
         <widget class="QPushButton" name="NewModel">
          <property name="toolTip">
-          <string>Add a new empty submodel to the project.</string>
+          <string>Add a new empty submodel.</string>
          </property>
          <property name="text">
           <string>&amp;New...</string>
@@ -50,10 +50,10 @@
        <item>
         <widget class="QPushButton" name="DeleteModel">
          <property name="toolTip">
-          <string>Remove the selected models from the project.</string>
+          <string>Remove the selected entries.</string>
          </property>
          <property name="whatsThis">
-          <string>&lt;p&gt;&lt;b&gt;Delete Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected entries after confirmation. At least one model must remain. The project is changed when you accept this dialog.&lt;/p&gt;</string>
+          <string>&lt;p&gt;&lt;b&gt;Delete Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected entries after confirmation. At least one entry must remain. Changes take effect when you accept this dialog.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string>D&amp;elete...</string>
@@ -99,7 +99,7 @@
           <string>Switch to the current list item when applying the changes.</string>
          </property>
          <property name="whatsThis">
-          <string>&lt;p&gt;&lt;b&gt;Set Active&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, accepting this dialog makes the current list item the active model for editing. When unchecked, the existing active model is retained if it remains in the project.&lt;/p&gt;</string>
+          <string>&lt;p&gt;&lt;b&gt;Set Active&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, accepting this dialog makes the current list entry active for editing. When unchecked, the existing active entry is retained if it remains in the list.&lt;/p&gt;</string>
          </property>
          <property name="text">
           <string>Set Active</string>

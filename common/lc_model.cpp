@@ -3509,7 +3509,7 @@ void lcModel::RemoveSelectedObjectsKeyFrames()
 			Light->RemoveKeyFrames();
 
 	EndEditHistory();
-	EndHistorySequence(tr("Remove Key Frames"));
+	EndHistorySequence(tr("Remove Keyframes"));
 }
 
 void lcModel::InsertControlPoint()
@@ -4329,7 +4329,7 @@ void lcModel::SetObjectsKeyFrame(const std::vector<lcObject*>& Objects, lcObject
 	if (Modified)
 	{
 		EndEditHistory();
-		EndHistorySequence(KeyFrame ? tr("Add Key Frame") : tr("Remove Key Frame"));
+		EndHistorySequence(KeyFrame ? tr("Add Keyframe") : tr("Remove Keyframe"));
 
 		gMainWindow->UpdateSelectedObjects(false);
 	}
@@ -5707,7 +5707,7 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 		break;
 
 	case lcLightType::Spot:
-		ActionName = tr("Add Spot Light");
+		ActionName = tr("Add Spotlight");
 		break;
 
 	case lcLightType::Directional:

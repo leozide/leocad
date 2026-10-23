@@ -406,7 +406,7 @@
        <item row="11" column="0" colspan="2">
         <widget class="QCheckBox" name="RestoreTabLayout">
          <property name="toolTip">
-          <string>Restore saved model tabs and view layouts when opening a project.</string>
+          <string>Restore saved model tabs and view layouts when opening a model.</string>
          </property>
          <property name="text">
           <string>Restore tab layout</string>

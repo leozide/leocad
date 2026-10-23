@@ -429,47 +429,68 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 	if (lcGetPreferences().mFixedAxes)
 		return Direction;
 
-	// TODO: rewrite this
-	lcVector3 axis = Direction;
+	// Match the axes used by MoveSelectedObjects/RotateSelectedObjects before
+	// projecting them, so relative transforms do not rotate the mapping again.
+	lcMatrix33 LocalToWorld = GetActiveModel()->GetRelativeRotation();
 
-	lcVector3 Pts[3] = { lcVector3(5.0f, 5.0f, 0.1f), lcVector3(10.0f, 5.0f, 0.1f), lcVector3(5.0f, 10.0f, 0.1f) };
-	UnprojectPoints(Pts, 3);
-
-	float ax, ay;
-	lcVector3 vx((Pts[1][0] - Pts[0][0]), (Pts[1][1] - Pts[0][1]), 0);//Pts[1][2] - Pts[0][2] };
-	vx.Normalize();
-	lcVector3 x(1, 0, 0);
-	ax = acosf(lcDot(vx, x));
-
-	lcVector3 vy((Pts[2][0] - Pts[0][0]), (Pts[2][1] - Pts[0][1]), 0);//Pts[2][2] - Pts[0][2] };
-	vy.Normalize();
-	lcVector3 y(0, -1, 0);
-	ay = acosf(lcDot(vy, y));
-
-	if (ax > 135)
-		axis[0] = -axis[0];
-
-	if (ay < 45)
-		axis[1] = -axis[1];
-
-	if (ax >= 45 && ax <= 135)
+	// Separate transforms always use each piece's axes. Use the focused piece
+	// as the reference for the shared keyboard direction.
+	if (gMainWindow->GetSeparateTransform())
 	{
-		float tmp = axis[0];
+		lcObject* Focus = GetActiveModel()->GetFocusObject();
 
-		ax = acosf(lcDot(vx, y));
-		if (ax > 90)
+		if (Focus && Focus->IsPiece())
+			LocalToWorld = static_cast<lcPiece*>(Focus)->GetRelativeRotation();
+	}
+
+	if (mActiveSubmodelInstance)
+		LocalToWorld = lcMul(LocalToWorld, lcMatrix33(mActiveSubmodelTransform));
+
+	const lcMatrix33 LocalToView = lcMul(LocalToWorld, lcMatrix33(mCamera->mWorldView));
+
+	// Choose distinct X/Y axes for screen right and up. Page Up/Down keep
+	// their Z direction regardless of the camera, including bottom views.
+	float BestScore = -std::numeric_limits<float>::infinity();
+	float BestAway = -std::numeric_limits<float>::infinity();
+	lcVector3 BestRight(1.0f, 0.0f, 0.0f);
+	lcVector3 BestUp(0.0f, 1.0f, 0.0f);
+
+	for (int RightAxis = 0; RightAxis < 2; RightAxis++)
+	{
+		for (int UpAxis = 0; UpAxis < 2; UpAxis++)
 		{
-			axis[0] = -axis[1];
-			axis[1] = tmp;
-		}
-		else
-		{
-			axis[0] = axis[1];
-			axis[1] = -tmp;
+			if (RightAxis == UpAxis)
+				continue;
+
+			for (int RightSign : { 1, -1 })
+			{
+				for (int UpSign : { 1, -1 })
+				{
+					lcVector3 Right(0.0f, 0.0f, 0.0f);
+					lcVector3 Up(0.0f, 0.0f, 0.0f);
+					Right[RightAxis] = float(RightSign);
+					Up[UpAxis] = float(UpSign);
+
+					const lcVector3 ViewUp = lcMul(Up, LocalToView);
+					const float Score = lcMul(Right, LocalToView).x + ViewUp.y;
+					const float Away = -ViewUp.z;
+
+					// In edge-on views, Up moves into the scene along the remaining
+					// horizontal axis. Retain the first frame on diagonal ties.
+					if (Score > BestScore + LC_EPSILON || (fabsf(Score - BestScore) <= LC_EPSILON && Away > BestAway + LC_EPSILON))
+					{
+						BestScore = Score;
+						BestAway = Away;
+						BestRight = Right;
+						BestUp = Up;
+					}
+				}
+			}
 		}
 	}
 
-	return axis;
+	// Default bindings are +X = Down, +Y = Right, +Z = Page Up.
+	return BestRight * Direction.y - BestUp * Direction.x + lcVector3(0.0f, 0.0f, Direction.z);
 }
 
 void lcView::UpdatePiecePreview()

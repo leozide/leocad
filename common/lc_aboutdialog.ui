@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcAboutDialog</class>
  <widget class="QDialog" name="lcAboutDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;About LeoCAD&lt;/b&gt;&lt;/p&gt;&lt;p&gt;View the LeoCAD version and system information. The Qt and OpenGL details can help diagnose display problems. Select text in System Information to copy it when reporting a problem. The website link opens in your browser.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -38,6 +41,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="version">
+           <property name="toolTip">
+            <string>LeoCAD version running on this computer.</string>
+           </property>
            <property name="text">
             <string>LeoCAD Version 0.00.0</string>
            </property>
@@ -55,6 +61,9 @@
          </item>
          <item>
           <widget class="QLabel" name="label_2">
+           <property name="toolTip">
+            <string>Open the LeoCAD website in your browser.</string>
+           </property>
            <property name="text">
             <string notr="true">&lt;a href=&quot;https://www.leocad.org&quot;&gt;https://www.leocad.org&lt;/a&gt;</string>
            </property>
@@ -78,11 +87,20 @@
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="QLabel" name="info">
+          <property name="toolTip">
+           <string>Select and copy system information for a problem report.</string>
+          </property>
+          <property name="whatsThis">
+           <string>&lt;p&gt;&lt;b&gt;System Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows the Qt runtime and build versions, graphics driver and renderer, OpenGL and shader versions, buffer sizes, and supported graphics features. Select the text and copy it with the standard keyboard shortcut to include it in a problem report.&lt;/p&gt;</string>
+          </property>
+          <property name="accessibleName">
+           <string>System Information</string>
+          </property>
           <property name="text">
            <string/>
           </property>
           <property name="textInteractionFlags">
-           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard</set>
           </property>
          </widget>
         </item>
@@ -97,7 +115,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

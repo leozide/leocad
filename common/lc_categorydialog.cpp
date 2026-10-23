@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_categorydialog.h"
 #include "ui_lc_categorydialog.h"
 #include "lc_category.h"
@@ -7,6 +8,7 @@ lcCategoryDialog::lcCategoryDialog(QWidget* Parent, lcLibraryCategory* Options)
 	: QDialog(Parent), ui(new Ui::lcCategoryDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	mOptions = Options;
 

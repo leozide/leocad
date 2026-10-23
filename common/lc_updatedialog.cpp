@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_updatedialog.h"
 #include "ui_lc_updatedialog.h"
 #include "lc_application.h"
@@ -31,6 +32,7 @@ lcUpdateDialog::lcUpdateDialog(QWidget* Parent, bool InitialUpdate)
 	: QDialog(Parent), ui(new Ui::lcUpdateDialog), mInitialUpdate(InitialUpdate)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	connect(this, &QDialog::finished, this, &lcUpdateDialog::finished);
 
@@ -141,7 +143,10 @@ void lcUpdateDialog::DownloadFinished(lcHttpReply* Reply)
 	}
 
 	if (UpdateAvailable)
-		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Ignore);
+		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Ignore | QDialogButtonBox::Help);
 	else
-		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
+		ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Help);
+
+	if (QPushButton* IgnoreButton = ui->buttonBox->button(QDialogButtonBox::Ignore))
+		IgnoreButton->setToolTip(tr("Skip automatic notifications for this update information."));
 }

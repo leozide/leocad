@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcUpdateDialog</class>
  <widget class="QDialog" name="lcUpdateDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Check for Updates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check online for a newer LeoCAD version and, when an official library is loaded, new pieces. The result appears in this dialog. An internet connection is required.&lt;/p&gt;&lt;p&gt;Use the download link to open the release page in your browser. This dialog does not install updates. Ignore suppresses automatic notifications for this update information; a manual update check still shows the result. Close dismisses the dialog.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,6 +19,15 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="status">
+     <property name="toolTip">
+      <string>Update-check progress, results, and download links.</string>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;p&gt;&lt;b&gt;Update Status&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wait for the online check to finish. If an update is available, follow the download link in your browser. A connection error means the check could not complete.&lt;/p&gt;</string>
+     </property>
+     <property name="accessibleName">
+      <string>Update Status</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -33,7 +45,7 @@
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Help</set>
      </property>
     </widget>
    </item>

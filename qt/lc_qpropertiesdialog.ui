@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcPropertiesDialog</class>
  <widget class="QDialog" name="lcPropertiesDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model's author, description, and comments on the Summary tab. Measurements and Pieces Used provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,6 +23,9 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tabSummary">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Model Summary&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Author, description, and comments are stored with this model when the project is saved. Measurements show its overall size.&lt;/p&gt;</string>
+      </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
@@ -32,26 +38,52 @@
       <layout class="QFormLayout" name="formLayout_3">
        <item row="0" column="0">
         <widget class="QLabel" name="label">
+         <property name="buddy">
+          <cstring>AuthorEdit</cstring>
+         </property>
+         <property name="toolTip">
+          <string>Enter the author credited in this model.</string>
+         </property>
          <property name="text">
           <string>Author:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="AuthorEdit"/>
+        <widget class="QLineEdit" name="AuthorEdit">
+         <property name="toolTip">
+          <string>Enter the author credited in this model.</string>
+         </property>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
+         <property name="buddy">
+          <cstring>DescriptionEdit</cstring>
+         </property>
+         <property name="toolTip">
+          <string>Enter a short description of this model.</string>
+         </property>
          <property name="text">
           <string>Description:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="DescriptionEdit"/>
+        <widget class="QLineEdit" name="DescriptionEdit">
+         <property name="toolTip">
+          <string>Enter a short description of this model.</string>
+         </property>
+        </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
+         <property name="buddy">
+          <cstring>CommentsEdit</cstring>
+         </property>
+         <property name="toolTip">
+          <string>Enter plain-text notes to store with this model.</string>
+         </property>
          <property name="text">
           <string>Comments:</string>
          </property>
@@ -59,6 +91,9 @@
        </item>
        <item row="2" column="1">
         <widget class="QTextEdit" name="CommentsEdit">
+         <property name="toolTip">
+          <string>Enter plain-text notes to store with this model.</string>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -72,6 +107,12 @@
        </item>
        <item row="3" column="0">
         <widget class="QLabel" name="label_4">
+         <property name="toolTip">
+          <string>Overall model dimensions along the X, Y, and Z axes.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Model Measurements&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The dimensions of the model's bounding box are shown in centimeters, inches, and LDraw units (LDU). The values are read-only and include pieces across all steps.&lt;/p&gt;</string>
+         </property>
          <property name="text">
           <string>Measurements:</string>
          </property>
@@ -79,6 +120,15 @@
        </item>
        <item row="3" column="1">
         <widget class="QLabel" name="MeasurementsLabel">
+         <property name="toolTip">
+          <string>Overall model dimensions along the X, Y, and Z axes.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Model Measurements&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The dimensions of the model's bounding box are shown in centimeters, inches, and LDraw units (LDU). The values are read-only and include pieces across all steps.&lt;/p&gt;</string>
+         </property>
+         <property name="accessibleName">
+          <string>Model Measurements</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -93,6 +143,15 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="lcPartsTableWidget" name="PartsTable">
+         <property name="toolTip">
+          <string>View piece quantities by color; click a column heading to sort.</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;p&gt;&lt;b&gt;Pieces Used&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The piece-name column stays visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</string>
+         </property>
+         <property name="accessibleName">
+          <string>Pieces Used</string>
+         </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -123,7 +182,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

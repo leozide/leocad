@@ -236,6 +236,7 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 	: QDialog(Parent), mOptions(Options), ui(new Ui::lcPropertiesDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 	setWindowTitle(tr("%1 Properties").arg(mOptions->Properties.mFileName));
 

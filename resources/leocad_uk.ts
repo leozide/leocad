@@ -6464,37 +6464,63 @@ File format is not recognized.</source>
 <context>
     <name>lcAboutDialog</name>
     <message>
-        <location filename="../common/lc_aboutdialog.ui" line="14"/>
+        <location filename="../common/lc_aboutdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;About LeoCAD&lt;/b&gt;&lt;/p&gt;&lt;p&gt;View the LeoCAD version and system information. The Qt and OpenGL details can help diagnose display problems. Select text in System Information to copy it when reporting a problem. The website link opens in your browser.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_aboutdialog.ui" line="17"/>
         <source>About LeoCAD</source>
         <translation>Про LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.ui" line="42"/>
+        <location filename="../common/lc_aboutdialog.ui" line="45"/>
+        <source>LeoCAD version running on this computer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_aboutdialog.ui" line="48"/>
         <source>LeoCAD Version 0.00.0</source>
         <translation>LeoCAD Версія 0.00.0</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.ui" line="49"/>
+        <location filename="../common/lc_aboutdialog.ui" line="55"/>
         <source>LeoCAD is a free application for creating virtual LEGO models.</source>
         <translation>LeoCAD є вільною програмою для створення віртуальних моделей LEGO.</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.ui" line="73"/>
+        <location filename="../common/lc_aboutdialog.ui" line="65"/>
+        <source>Open the LeoCAD website in your browser.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_aboutdialog.ui" line="82"/>
+        <location filename="../common/lc_aboutdialog.ui" line="97"/>
         <source>System Information</source>
         <translation>Системна інформація</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="15"/>
+        <location filename="../common/lc_aboutdialog.ui" line="91"/>
+        <source>Select and copy system information for a problem report.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_aboutdialog.ui" line="94"/>
+        <source>&lt;p&gt;&lt;b&gt;System Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows the Qt runtime and build versions, graphics driver and renderer, OpenGL and shader versions, buffer sizes, and supported graphics features. Select the text and copy it with the standard keyboard shortcut to include it in a problem report.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_aboutdialog.cpp" line="17"/>
         <source>LeoCAD Continuous Build %1</source>
         <translation>LeoCAD Continuous Build %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="17"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="19"/>
         <source>LeoCAD Version %1</source>
         <translation>LeoCAD Версія %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="27"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="29"/>
         <source>Qt Version %1 (compiled with %2)
 
 </source>
@@ -6503,7 +6529,7 @@ File format is not recognized.</source>
 </translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="30"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="32"/>
         <source>OpenGL Version %1 (GLSL %2)
 %3 - %4
 
@@ -6514,7 +6540,7 @@ File format is not recognized.</source>
 </translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="36"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="38"/>
         <source>Color Buffer: %1 bits
 Depth Buffer: %2 bits
 Stencil Buffer: %3 bits
@@ -6526,7 +6552,7 @@ Stencil Buffer: %3 bits
 Буфер трафаретів: %3 бітів</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="39"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="41"/>
         <source>Buffers: %1
 Framebuffers: %2
 BlendFuncSeparate: %3
@@ -6573,22 +6599,22 @@ GL_EXT_texture_filter_anisotropic extension: %5
 </translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="40"/>
-        <location filename="../common/lc_aboutdialog.cpp" line="41"/>
         <location filename="../common/lc_aboutdialog.cpp" line="42"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="43"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="44"/>
         <source>Supported</source>
         <translation>Supported</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="40"/>
-        <location filename="../common/lc_aboutdialog.cpp" line="41"/>
         <location filename="../common/lc_aboutdialog.cpp" line="42"/>
         <location filename="../common/lc_aboutdialog.cpp" line="43"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="44"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="45"/>
         <source>Not supported</source>
         <translation>Not supported</translation>
     </message>
     <message>
-        <location filename="../common/lc_aboutdialog.cpp" line="43"/>
+        <location filename="../common/lc_aboutdialog.cpp" line="45"/>
         <source>Supported (max %1)</source>
         <translation>Supported (max %1)</translation>
     </message>
@@ -7448,128 +7474,210 @@ Please visit https://www.leocad.org for information on how to download and insta
 <context>
     <name>lcAutomateEdgeColorDialog</name>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="19"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="21"/>
         <source>Color Preferences</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Параметри кольору</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="22"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="27"/>
         <source>Edge Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Кольори країв</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="33"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="38"/>
         <source>Contrast:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Контраст:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="38"/>
         <source>Set the amount of contrast - 0.50 is midway.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Встановіть величину контрасту - 0,50 посередині.</translation>
+        <translation type="obsolete">Встановіть величину контрасту - 0,50 посередині.</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="43"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="64"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="97"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="115"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="133"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="151"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="52"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="81"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="116"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="134"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="152"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="170"/>
         <source>Reset</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Скинути</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="52"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="63"/>
         <source>Light/Dark Value:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Значення світло/темно:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="52"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="63"/>
         <source>Saturation:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">насиченість:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="58"/>
         <source>Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Встановіть, щоб класифікувати, де значення кольорів є світлими чи темними - напр. Темно-блакитно-сірий (72) — світлий з 0,39.</translation>
+        <translation type="obsolete">Встановіть, щоб класифікувати, де значення кольорів є світлими чи темними - напр. Темно-блакитно-сірий (72) — світлий з 0,39.</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="59"/>
         <source>Set to specify amount of edge color tint or shade from the saturation adjusted piece color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Встановіть, щоб указати кількість відтінку або відтінку кольору країв від відкоригованого кольору деталі насиченості</translation>
+        <translation type="obsolete">Встановіть, щоб указати кількість відтінку або відтінку кольору країв від відкоригованого кольору деталі насиченості</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="72"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="91"/>
         <source>High Contrast</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Високий контраст</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="87"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="106"/>
         <source>Stud Cylinder Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Колір циліндра шпильки:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="105"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="124"/>
         <source>Pieces Edge Color:</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Колір країв деталей:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="123"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="142"/>
         <source>Black Pieces Edge Color:</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Колір країв чорних деталей:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="141"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="160"/>
         <source>Dark Pieces Edge Color:</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Колір країв темних деталей:</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="219"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="260"/>
         <source>Select Stud Cylinder Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Виберіть колір циліндра шпильки</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="224"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="265"/>
         <source>Select Piece Edge Color</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Вибрати колір країв деталі</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="233"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="274"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Black pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Здається, автоматичний колір країв увімкнено.&lt;br&gt;Колір краю чорних фігур буде недоступним.&lt;br&gt;Продовжити?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="232"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="237"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="273"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="278"/>
         <source>Select Black Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Виберіть «Колір чорного краю».</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="246"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="23"/>
+        <source>&lt;p&gt;&lt;b&gt;High Contrast Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose custom stud and edge colors for high contrast stud styles. Enable an override with its checkbox, then choose its color. Light/Dark Value sets the threshold for dark-piece edge colors. Automated edge colors take precedence over the piece edge overrides.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog. Reset restores an individual control&apos;s default.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="24"/>
+        <source>&lt;p&gt;&lt;b&gt;Automated Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast and saturation used to calculate piece edge colors. Both controls range from 0.00 to 1.00. Reset restores a control to 0.50.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="43"/>
+        <source>Set edge contrast from 0.00 to 1.00 (default 0.50).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="44"/>
+        <source>&lt;p&gt;&lt;b&gt;Edge Contrast&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast used by automated edge colors to distinguish edges from piece surfaces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="53"/>
+        <source>Restore edge contrast to 0.50.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="69"/>
+        <source>Set the light/dark threshold from 0.00 to 1.00 (default 0.50).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="70"/>
+        <source>Set edge-color saturation from 0.00 to 1.00 (default 0.50).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="72"/>
+        <source>&lt;p&gt;&lt;b&gt;Light/Dark Value&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Classify piece colors by brightness to choose which pieces receive the dark-piece edge override. Colors below the threshold are treated as dark. A separate enabled black-piece override takes priority for black pieces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="73"/>
+        <source>&lt;p&gt;&lt;b&gt;Edge Saturation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the tint or shade used to calculate automated edge colors from piece colors. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
+        <source>Restore the light/dark threshold to 0.50.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
+        <source>Restore edge-color saturation to 0.50.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="182"/>
+        <source>Enable the custom color for %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="186"/>
+        <source>Restore the default color for %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="191"/>
+        <source>Enable a custom color for stud cylinders in high contrast stud styles, then use the color button to choose it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="193"/>
+        <source>Enable a custom edge color for pieces not covered by the black or dark overrides. Automated edge colors take precedence.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="195"/>
+        <source>Enable a custom edge color for black pieces. This override takes priority over the dark-piece and general edge colors. Automated edge colors take precedence.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="197"/>
+        <source>Enable a custom edge color for pieces below the light/dark threshold, except black pieces with their own enabled override. Automated edge colors take precedence.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_edgecolordialog.cpp" line="287"/>
         <source>Automate edge color appears to be enabled.&lt;br&gt;Dark pieces edge color will not be accessible.&lt;br&gt;Do you want to continue?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Схоже, що автоматичний колір країв увімкнено.&lt;br&gt;Колір країв темних деталей буде недоступним.&lt;br&gt;Продовжити?</translation>
     </message>
     <message>
-        <location filename="../common/lc_edgecolordialog.cpp" line="245"/>
-        <location filename="../common/lc_edgecolordialog.cpp" line="250"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="286"/>
+        <location filename="../common/lc_edgecolordialog.cpp" line="291"/>
         <source>Select Dark Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Виберіть Темний колір краю</translation>
@@ -8583,37 +8691,60 @@ Please visit https://www.leocad.org for information on how to download and insta
 <context>
     <name>lcCategoryDialog</name>
     <message>
-        <location filename="../common/lc_categorydialog.ui" line="14"/>
+        <location filename="../common/lc_categorydialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Piece Category&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a category and enter the expression used to find its pieces in the library. Both fields are required. Choose OK to return the category changes to Preferences, then choose OK in Preferences to keep them. Cancel discards edits in this dialog.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_categorydialog.ui" line="17"/>
         <source>Category</source>
         <translation>Категорія</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.ui" line="22"/>
+        <location filename="../common/lc_categorydialog.ui" line="25"/>
+        <location filename="../common/lc_categorydialog.ui" line="38"/>
+        <source>Enter the category name shown in the piece browser.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_categorydialog.ui" line="28"/>
         <source>Name:</source>
         <translation>Назва:</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.ui" line="35"/>
+        <location filename="../common/lc_categorydialog.ui" line="45"/>
+        <location filename="../common/lc_categorydialog.ui" line="61"/>
+        <source>Enter an expression that matches piece descriptions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_categorydialog.ui" line="48"/>
+        <location filename="../common/lc_categorydialog.ui" line="64"/>
+        <source>&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_categorydialog.ui" line="51"/>
         <source>Keywords:</source>
         <translation>Ключові слова:</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.cpp" line="14"/>
+        <location filename="../common/lc_categorydialog.cpp" line="16"/>
         <source>Edit Category</source>
         <translation>Редагувати категорію</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.cpp" line="16"/>
+        <location filename="../common/lc_categorydialog.cpp" line="18"/>
         <source>New Category</source>
         <translation>Нова категорія</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.cpp" line="33"/>
+        <location filename="../common/lc_categorydialog.cpp" line="35"/>
         <source>Name cannot be empty.</source>
         <translation>Назва не може бути порожньою.</translation>
     </message>
     <message>
-        <location filename="../common/lc_categorydialog.cpp" line="41"/>
+        <location filename="../common/lc_categorydialog.cpp" line="43"/>
         <source>Keywords cannot be empty.</source>
         <translation>Ключові слова не можуть бути порожніми.</translation>
     </message>
@@ -12932,35 +13063,90 @@ Unsupported video cards use face tint and colored edges.</source>
 <context>
     <name>lcPropertiesDialog</name>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="14"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model&apos;s author, description, and comments on the Summary tab. Measurements and Pieces Used provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="17"/>
         <source>Properties</source>
         <translation>Властивості</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="30"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="27"/>
+        <source>&lt;p&gt;&lt;b&gt;Model Summary&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Author, description, and comments are stored with this model when the project is saved. Measurements show its overall size.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="36"/>
         <source>Summary</source>
         <translation>Резюме</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="36"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="45"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="55"/>
+        <source>Enter the author credited in this model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="48"/>
         <source>Author:</source>
         <translation>Автор:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="46"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="75"/>
+        <source>Enter a short description of this model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="68"/>
         <source>Description:</source>
         <translation>Опис:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="56"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="85"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="95"/>
+        <source>Enter plain-text notes to store with this model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="88"/>
         <source>Comments:</source>
         <translation>Коментарі:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="76"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="111"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="124"/>
+        <source>Overall model dimensions along the X, Y, and Z axes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="114"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="127"/>
+        <source>&lt;p&gt;&lt;b&gt;Model Measurements&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The dimensions of the model&apos;s bounding box are shown in centimeters, inches, and LDraw units (LDU). The values are read-only and include pieces across all steps.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="117"/>
         <source>Measurements:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Розміри:</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="130"/>
+        <source>Model Measurements</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="147"/>
+        <source>View piece quantities by color; click a column heading to sort.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="150"/>
+        <source>&lt;p&gt;&lt;b&gt;Pieces Used&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The piece-name column stays visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Scene</source>
@@ -12995,17 +13181,18 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="vanished">Встановити типовими властивостями для нових проектів</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.ui" line="91"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="141"/>
+        <location filename="../qt/lc_qpropertiesdialog.ui" line="153"/>
         <source>Pieces Used</source>
         <translation>Використані блоки</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="240"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="241"/>
         <source>%1 Properties</source>
         <translation>Властивості %1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="247"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="248"/>
         <source>%1 x %2 x %3 cm
 %4 x %5 x %6 inches
 %7 x %8 x %9 LDU</source>
@@ -13015,13 +13202,13 @@ Unsupported video cards use face tint and colored edges.</source>
 %7 x %8 x %9 LDU</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="266"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="267"/>
         <source>Piece</source>
         <translation>Блок</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="277"/>
-        <location filename="../qt/lc_qpropertiesdialog.cpp" line="314"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="278"/>
+        <location filename="../qt/lc_qpropertiesdialog.cpp" line="315"/>
         <source>Total</source>
         <translation>Усього</translation>
     </message>
@@ -14349,49 +14536,74 @@ Unsupported video cards use face tint and colored edges.</source>
 <context>
     <name>lcUpdateDialog</name>
     <message>
-        <location filename="../common/lc_updatedialog.ui" line="14"/>
+        <location filename="../common/lc_updatedialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Check for Updates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check online for a newer LeoCAD version and, when an official library is loaded, new pieces. The result appears in this dialog. An internet connection is required.&lt;/p&gt;&lt;p&gt;Use the download link to open the release page in your browser. This dialog does not install updates. Ignore suppresses automatic notifications for this update information; a manual update check still shows the result. Close dismisses the dialog.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_updatedialog.ui" line="17"/>
         <source>LeoCAD Updates</source>
         <translation>Оновлення LeoCAD</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="37"/>
+        <location filename="../common/lc_updatedialog.ui" line="23"/>
+        <source>Update-check progress, results, and download links.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_updatedialog.ui" line="26"/>
+        <source>&lt;p&gt;&lt;b&gt;Update Status&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wait for the online check to finish. If an update is available, follow the download link in your browser. A connection error means the check could not complete.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_updatedialog.ui" line="29"/>
+        <source>Update Status</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_updatedialog.cpp" line="39"/>
         <source>Connecting to update server...</source>
         <translation>З&apos;єднання з сервером оновлень...</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="103"/>
+        <location filename="../common/lc_updatedialog.cpp" line="105"/>
         <source>&lt;p&gt;There&apos;s a newer version of LeoCAD available for download (%1.%2.%3).&lt;/p&gt;</source>
         <translation>&lt;p&gt;Доступна нова версія LeoCAD для завантаження (%1.%2.%3).&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="105"/>
+        <location filename="../common/lc_updatedialog.cpp" line="107"/>
         <source>&lt;p&gt;You are using the latest LeoCAD version.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Ви використовуєте найновішу версію LeoCAD.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="113"/>
+        <location filename="../common/lc_updatedialog.cpp" line="115"/>
         <source>&lt;p&gt;There are new pieces available.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Виявлено нові доступні блоки.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="117"/>
+        <location filename="../common/lc_updatedialog.cpp" line="119"/>
         <source>&lt;p&gt;There are no new pieces available at this time.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Наразі немає нових доступних блоків.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="122"/>
+        <location filename="../common/lc_updatedialog.cpp" line="124"/>
         <source>&lt;p&gt;Visit &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; to download.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Відвідайте &lt;a href=&quot;https://github.com/leozide/leocad/releases&quot;&gt;https://github.com/leozide/leocad/releases&lt;/a&gt; для завантаження.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="128"/>
+        <location filename="../common/lc_updatedialog.cpp" line="130"/>
         <source>Error parsing update information.</source>
         <translation>Помилка розбору інформації оновлення.</translation>
     </message>
     <message>
-        <location filename="../common/lc_updatedialog.cpp" line="133"/>
+        <location filename="../common/lc_updatedialog.cpp" line="135"/>
         <source>Error connecting to the update server.</source>
         <translation>Помилка з&apos;єднання з сервером оновлень.</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_updatedialog.cpp" line="151"/>
+        <source>Skip automatic notifications for this update information.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

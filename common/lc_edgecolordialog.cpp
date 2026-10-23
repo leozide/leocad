@@ -1,4 +1,6 @@
+#include "lc_global.h"
 #include "lc_edgecolordialog.h"
+#include "lc_qutils.h"
 #include "lc_application.h"
 
 lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowHighContrastDialog)
@@ -17,6 +19,9 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	mPartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
 
 	setWindowTitle(tr("Color Preferences"));
+	setWhatsThis(ShowHighContrastDialog ?
+		tr("<p><b>High Contrast Edge Colors</b></p><p>Choose custom stud and edge colors for high contrast stud styles. Enable an override with its checkbox, then choose its color. Light/Dark Value sets the threshold for dark-piece edge colors. Automated edge colors take precedence over the piece edge overrides.</p><p>Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog. Reset restores an individual control's default.</p>") :
+		tr("<p><b>Automated Edge Colors</b></p><p>Adjust the contrast and saturation used to calculate piece edge colors. Both controls range from 0.00 to 1.00. Reset restores a control to 0.50.</p><p>Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog.</p>"));
 	QVBoxLayout* MainLayout = new  QVBoxLayout(this);
 
 	QGroupBox* EdgeSettingsBox = new QGroupBox(tr("Edge Colors"), this);
@@ -35,12 +40,18 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 		PartEdgeContrastSlider = new QSlider(Qt::Horizontal, this);
 		PartEdgeContrastSlider->setRange(0, 100);
 		PartEdgeContrastSlider->setValue(mPartEdgeContrast * 100);
-		PartEdgeContrastSlider->setToolTip(tr("Set the amount of contrast - 0.50 is midway."));
+		PartEdgeContrastSlider->setToolTip(tr("Set edge contrast from 0.00 to 1.00 (default 0.50)."));
+		PartEdgeContrastSlider->setWhatsThis(tr("<p><b>Edge Contrast</b></p><p>Adjust the contrast used by automated edge colors to distinguish edges from piece surfaces. The range is 0.00 to 1.00; Reset restores 0.50.</p>"));
+		PartEdgeContrastLabel->setBuddy(PartEdgeContrastSlider);
+		PartEdgeContrastLabel->setToolTip(PartEdgeContrastSlider->toolTip());
+		PartEdgeContrastLabel->setWhatsThis(PartEdgeContrastSlider->whatsThis());
 		connect(PartEdgeContrastSlider, &QSlider::valueChanged, this, &lcAutomateEdgeColorDialog::SliderValueChanged);
 		emit PartEdgeContrastSlider->valueChanged(PartEdgeContrastSlider->value());
 
 		ResetPartEdgeContrastButton = new QToolButton(this);
 		ResetPartEdgeContrastButton->setText(tr("Reset"));
+		ResetPartEdgeContrastButton->setToolTip(tr("Restore edge contrast to 0.50."));
+		ResetPartEdgeContrastButton->setWhatsThis(PartEdgeContrastSlider->whatsThis());
 		connect(ResetPartEdgeContrastButton, &QToolButton::clicked, this, &lcAutomateEdgeColorDialog::ResetSliderButtonClicked);
 
 		EdgeSettingsLayout->addWidget(PartEdgeContrastLabel,0,0);
@@ -55,13 +66,21 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	PartColorValueLDIndexSlider->setRange(0, 100);
 	PartColorValueLDIndexSlider->setValue(mPartColorValueLDIndex * 100);
 	PartColorValueLDIndexSlider->setToolTip(ShowHighContrastDialog ?
-		tr("Set to classify where color values are light or dark - e.g. Dark Bluish Gray (72) is light at 0.39.") :
-		tr("Set to specify amount of edge color tint or shade from the saturation adjusted piece color"));
+		tr("Set the light/dark threshold from 0.00 to 1.00 (default 0.50).") :
+		tr("Set edge-color saturation from 0.00 to 1.00 (default 0.50)."));
+	PartColorValueLDIndexSlider->setWhatsThis(ShowHighContrastDialog ?
+		tr("<p><b>Light/Dark Value</b></p><p>Classify piece colors by brightness to choose which pieces receive the dark-piece edge override. Colors below the threshold are treated as dark. A separate enabled black-piece override takes priority for black pieces. The range is 0.00 to 1.00; Reset restores 0.50.</p>") :
+		tr("<p><b>Edge Saturation</b></p><p>Adjust the tint or shade used to calculate automated edge colors from piece colors. The range is 0.00 to 1.00; Reset restores 0.50.</p>"));
+	PartColorValueLDIndexLabel->setBuddy(PartColorValueLDIndexSlider);
+	PartColorValueLDIndexLabel->setToolTip(PartColorValueLDIndexSlider->toolTip());
+	PartColorValueLDIndexLabel->setWhatsThis(PartColorValueLDIndexSlider->whatsThis());
 	connect(PartColorValueLDIndexSlider, &QSlider::valueChanged, this, &lcAutomateEdgeColorDialog::SliderValueChanged);
 	emit PartColorValueLDIndexSlider->valueChanged(PartColorValueLDIndexSlider->value());
 
 	ResetPartColorValueLDIndexButton = new QToolButton(this);
 	ResetPartColorValueLDIndexButton->setText(tr("Reset"));
+	ResetPartColorValueLDIndexButton->setToolTip(ShowHighContrastDialog ? tr("Restore the light/dark threshold to 0.50.") : tr("Restore edge-color saturation to 0.50."));
+	ResetPartColorValueLDIndexButton->setWhatsThis(PartColorValueLDIndexSlider->whatsThis());
 	connect(ResetPartColorValueLDIndexButton, &QToolButton::clicked, this, &lcAutomateEdgeColorDialog::ResetSliderButtonClicked);
 
 	EdgeSettingsLayout->addWidget(PartColorValueLDIndexLabel,LDIndexRow,0);
@@ -156,8 +175,30 @@ lcAutomateEdgeColorDialog::lcAutomateEdgeColorDialog(QWidget* Parent, bool ShowH
 	HighContrastColorLayout->addWidget(DarkEdgeColorButton,3,1);
 	HighContrastColorLayout->addWidget(ResetDarkEdgeColorButton,3,2);
 
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);
+	auto SetupColorHelp = [](QCheckBox* CheckBox, QToolButton* ColorButton, QToolButton* ResetButton, const QString& Help)
+	{
+		QString Name = CheckBox->text();
+		Name.remove(':');
+		CheckBox->setToolTip(tr("Enable the custom color for %1.").arg(Name));
+		CheckBox->setWhatsThis(Help);
+		ColorButton->setAccessibleName(Name);
+		ColorButton->setWhatsThis(Help);
+		ResetButton->setToolTip(tr("Restore the default color for %1.").arg(Name));
+		ResetButton->setWhatsThis(Help);
+	};
+
+	SetupColorHelp(StudCylinderColorEnabledBox, StudCylinderColorButton, ResetStudCylinderColorButton,
+		tr("Enable a custom color for stud cylinders in high contrast stud styles, then use the color button to choose it."));
+	SetupColorHelp(PartEdgeColorEnabledBox, PartEdgeColorButton, ResetPartEdgeColorButton,
+		tr("Enable a custom edge color for pieces not covered by the black or dark overrides. Automated edge colors take precedence."));
+	SetupColorHelp(BlackEdgeColorEnabledBox, BlackEdgeColorButton, ResetBlackEdgeColorButton,
+		tr("Enable a custom edge color for black pieces. This override takes priority over the dark-piece and general edge colors. Automated edge colors take precedence."));
+	SetupColorHelp(DarkEdgeColorEnabledBox, DarkEdgeColorButton, ResetDarkEdgeColorButton,
+		tr("Enable a custom edge color for pieces below the light/dark threshold, except black pieces with their own enabled override. Automated edge colors take precedence."));
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Help, Qt::Horizontal, this);
 	MainLayout->addWidget(buttonBox);
+	lcSetupDialogHelp(this, buttonBox);
 	QObject::connect(buttonBox, &QDialogButtonBox::accepted, this, &lcAutomateEdgeColorDialog::accept);
 	QObject::connect(buttonBox, &QDialogButtonBox::rejected, this, &lcAutomateEdgeColorDialog::reject);
 

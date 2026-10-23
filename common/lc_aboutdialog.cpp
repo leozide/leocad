@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_qutils.h"
 #include "lc_aboutdialog.h"
 #include "ui_lc_aboutdialog.h"
 #include "lc_mainwindow.h"
@@ -10,6 +11,7 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcAboutDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 #ifdef LC_CONTINUOUS_BUILD
 	ui->version->setText(tr("LeoCAD Continuous Build %1").arg(QString::fromLatin1(QT_STRINGIFY(LC_CONTINUOUS_BUILD))));

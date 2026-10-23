@@ -12,6 +12,7 @@
 #include "camera.h"
 #include "lc_previewwidget.h"
 #include "lc_colors.h"
+#include "lc_qutils.h"
 
 #ifdef Q_OS_WIN
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
@@ -579,9 +580,9 @@ lcCommandLineOptions lcApplication::ParseCommandLineOptions()
 			ParseString(Options.ImageName, false);
 		}
 		else if (Option == QLatin1String("-w") || Option == QLatin1String("--width"))
-			ParseInteger(Options.ImageWidth, 1, INT_MAX);
+			ParseInteger(Options.ImageWidth, 1, LC_MAX_IMAGE_DIMENSION);
 		else if (Option == QLatin1String("-h") || Option == QLatin1String("--height"))
-			ParseInteger(Options.ImageHeight, 1, INT_MAX);
+			ParseInteger(Options.ImageHeight, 1, LC_MAX_IMAGE_DIMENSION);
 		else if (Option == QLatin1String("-f") || Option == QLatin1String("--from"))
 			ParseUnsigned(Options.ImageStart, 1, LC_STEP_MAX);
 		else if (Option == QLatin1String("-t") || Option == QLatin1String("--to"))

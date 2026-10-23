@@ -634,7 +634,12 @@ void lcPropertiesWidget::IntegerChanged()
 	if (!Model)
 		return;
 
-	const int Value = LineEdit->text().toInt();
+	bool Ok;
+	const int Value = LineEdit->validator()->locale().toInt(LineEdit->text(), &Ok);
+
+	if (!Ok || !LineEdit->hasAcceptableInput())
+		return;
+
 	Model->SetObjectsProperty(mFocusObject ? std::vector<lcObject*>{ mFocusObject } : mSelection, PropertyId, Value);
 }
 
@@ -658,7 +663,7 @@ void lcPropertiesWidget::UpdateInteger(lcObjectPropertyId PropertyId)
 	}
 	else
 	{
-		LineEdit->setText(QString::number(Value.toInt()));
+		LineEdit->setText(lcFormatIntegerLocalized(Value.toInt(), LineEdit->validator()->locale()));
 		LineEdit->setPlaceholderText(QString());
 	}
 
@@ -703,9 +708,9 @@ void lcPropertiesWidget::StepNumberChanged()
 
 	bool Ok = true;
 	QString Text = Widget->text();
-	lcStep Step = Text.isEmpty() && PropertyId == lcObjectPropertyId::PieceStepHide ? LC_STEP_MAX : Text.toUInt(&Ok);
+	lcStep Step = Text.isEmpty() && PropertyId == lcObjectPropertyId::PieceStepHide ? LC_STEP_MAX : Widget->validator()->locale().toUInt(Text, &Ok);
 
-	if (!Ok)
+	if (!Ok || !Widget->hasAcceptableInput())
 		return;
 
 	if (PropertyId == lcObjectPropertyId::PieceStepShow)
@@ -727,7 +732,7 @@ void lcPropertiesWidget::UpdateStepNumber(lcObjectPropertyId PropertyId, lcStep 
 		QSignalBlocker Blocker(Widget);
 
 		Widget->setValidator(new lcStepValidator(Min, Max, PropertyId == lcObjectPropertyId::PieceStepHide, Widget));
-		Widget->setText(Step == LC_STEP_MAX ? QString() : QString::number(Step));
+		Widget->setText(Step == LC_STEP_MAX ? QString() : lcFormatIntegerLocalized(Step, Widget->validator()->locale()));
 	}
 
 	UpdateKeyFrameWidget(PropertyId);
@@ -1246,8 +1251,8 @@ void lcPropertiesWidget::CreateWidgets()
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadePower, tr("Fade Power"), tr("Light falloff rate"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRaySpotTightness, tr("Tightness"), tr("Additional exponential spotlight edge softening"), true, 0.0f, FLT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis"), true, 1, INT_MAX);
-	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridY, tr("Y"), tr("Number of point sources along the Y axis"), true, 1, INT_MAX);
+	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridX, tr("Grid X"), tr("Number of point sources along the X axis (1 to 64)."), true, 1, LC_MAX_AREA_LIGHT_GRID);
+	AddIntegerProperty(lcObjectPropertyId::LightPOVRayAreaGridY, tr("Y"), tr("Number of point sources along the Y axis (1 to 64)."), true, 1, LC_MAX_AREA_LIGHT_GRID);
 
 	AddSpacing();
 

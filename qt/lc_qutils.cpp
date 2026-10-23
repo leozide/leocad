@@ -84,6 +84,12 @@ QString lcFormatValueLocalized(float Value)
 	return String;
 }
 
+QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale)
+{
+	Locale.setNumberOptions(Locale.numberOptions() | QLocale::OmitGroupSeparator);
+	return Locale.toString(Value);
+}
+
 float lcParseValueLocalized(const QString& Value)
 {
 	return QLocale::system().toFloat(Value);

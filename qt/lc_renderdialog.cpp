@@ -837,23 +837,23 @@ void lcRenderDialog::SettingsButtonClicked()
 		QDialog Dialog(this);
 
 		Dialog.setWindowTitle(tr("POV-Ray Settings"));
-		Dialog.setWhatsThis(tr("<p><b>POV-Ray Settings</b></p><p>Set the output image dimensions and rendering quality. Width and height are in pixels, with a minimum of 16. Larger images and higher quality can take longer to render.</p><p>Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.</p>"));
+		Dialog.setWhatsThis(tr("<p><b>POV-Ray Settings</b></p><p>Set the output image dimensions and rendering quality. Width and height are in pixels, from 1 to 32768. Larger images and higher quality can take longer to render.</p><p>Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.</p>"));
 
 		QFormLayout* Layout = new QFormLayout(&Dialog);
 
 		QLineEdit* WidthEdit = new QLineEdit(&Dialog);
 		Layout->addRow(tr("Width:"), WidthEdit);
 
-		WidthEdit->setText(QString::number(mWidth));
-		WidthEdit->setValidator(new QIntValidator(16, INT_MAX, this));
-		WidthEdit->setToolTip(tr("Set the rendered image width in pixels (minimum 16)."));
+		WidthEdit->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, WidthEdit));
+		WidthEdit->setText(lcFormatIntegerLocalized(mWidth, WidthEdit->validator()->locale()));
+		WidthEdit->setToolTip(tr("Set the rendered image width in pixels (1 to 32768)."));
 
 		QLineEdit* HeightEdit = new QLineEdit(&Dialog);
 		Layout->addRow(tr("Height:"), HeightEdit);
 
-		HeightEdit->setText(QString::number(mHeight));
-		HeightEdit->setValidator(new QIntValidator(16, INT_MAX, this));
-		HeightEdit->setToolTip(tr("Set the rendered image height in pixels (minimum 16)."));
+		HeightEdit->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, HeightEdit));
+		HeightEdit->setText(lcFormatIntegerLocalized(mHeight, HeightEdit->validator()->locale()));
+		HeightEdit->setToolTip(tr("Set the rendered image height in pixels (1 to 32768)."));
 
 		QComboBox* QualityComboBox = new QComboBox(&Dialog);
 		Layout->addRow(tr("Quality:"), QualityComboBox);
@@ -878,13 +878,39 @@ void lcRenderDialog::SettingsButtonClicked()
 		lcSetupDialogHelp(&Dialog, ButtonBox);
 
 		QObject::connect(ButtonBox, &QDialogButtonBox::rejected, &Dialog, &QDialog::reject);
-		QObject::connect(ButtonBox, &QDialogButtonBox::accepted, &Dialog, &QDialog::accept);
+		int Width = mWidth;
+		int Height = mHeight;
+
+		QObject::connect(ButtonBox, &QDialogButtonBox::accepted, &Dialog, [&Dialog, WidthEdit, HeightEdit, &Width, &Height]()
+		{
+			bool WidthOk, HeightOk;
+			const int NewWidth = WidthEdit->validator()->locale().toInt(WidthEdit->text(), &WidthOk);
+			const int NewHeight = HeightEdit->validator()->locale().toInt(HeightEdit->text(), &HeightOk);
+
+			if (!WidthOk || !WidthEdit->hasAcceptableInput())
+			{
+				QMessageBox::information(&Dialog, Dialog.windowTitle(), tr("Please enter a width between 1 and %1 pixels.").arg(QString::number(LC_MAX_IMAGE_DIMENSION)));
+				WidthEdit->setFocus();
+				return;
+			}
+
+			if (!HeightOk || !HeightEdit->hasAcceptableInput())
+			{
+				QMessageBox::information(&Dialog, Dialog.windowTitle(), tr("Please enter a height between 1 and %1 pixels.").arg(QString::number(LC_MAX_IMAGE_DIMENSION)));
+				HeightEdit->setFocus();
+				return;
+			}
+
+			Width = NewWidth;
+			Height = NewHeight;
+			Dialog.accept();
+		});
 
 		if (Dialog.exec() != QDialog::Accepted)
 			return;
 
-		mWidth = std::clamp(WidthEdit->text().toInt(), 16, INT_MAX);
-		mHeight = std::clamp(HeightEdit->text().toInt(), 16, INT_MAX);
+		mWidth = Width;
+		mHeight = Height;
 		mQuality = static_cast<lcPOVRayRenderQuality>(QualityComboBox->currentIndex());
 
 		lcSetProfileInt(LC_PROFILE_RENDER_WIDTH, mWidth);

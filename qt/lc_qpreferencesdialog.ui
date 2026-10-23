@@ -1074,7 +1074,7 @@
              <string>Grid Line Spacing</string>
             </property>
             <property name="toolTip">
-             <string>Set base-grid line spacing in studs (minimum 1).</string>
+             <string>Set base-grid line spacing in studs (1 to 10000).</string>
             </property>
             <property name="maximumSize">
              <size>

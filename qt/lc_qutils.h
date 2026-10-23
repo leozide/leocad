@@ -2,12 +2,18 @@
 
 #include <QObject>
 
+class QLocale;
 class lcPartSelectionWidget;
 class lcPartSelectionListView;
 struct lcTrainTrackConnectionType;
 
+constexpr int LC_MAX_IMAGE_DIMENSION = 32768;
+constexpr int LC_MAX_GRID_LINE_SPACING = 10000;
+constexpr int LC_MAX_AREA_LIGHT_GRID = 64;
+
 QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
+QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale);
 float lcParseValueLocalized(const QString& Value);
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
@@ -112,7 +118,7 @@ public:
 			return Acceptable;
 
 		bool Ok;
-		lcStep Step = Input.toUInt(&Ok);
+		lcStep Step = locale().toUInt(Input, &Ok);
 
 		if (Ok)
 			return (Step >= mMin && Step <= mMax) ? Acceptable : Invalid;

@@ -320,6 +320,16 @@ void lcBlenderPreferencesDialog::ResetSettings()
 
 void lcBlenderPreferencesDialog::accept()
 {
+	for (QLineEdit* Edit : findChildren<QLineEdit*>())
+	{
+		if (Edit->isEnabled() && !Edit->isReadOnly() && Edit->validator() && !Edit->hasAcceptableInput())
+		{
+			QMessageBox::information(this, windowTitle(), tr("Please enter a valid value for '%1'.").arg(Edit->accessibleName()));
+			Edit->setFocus();
+			return;
+		}
+	}
+
 	mApplyButton->setEnabled(false);
 	mPreferences->Apply(QDialog::Accepted);
 	QDialog::accept();
@@ -649,7 +659,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 	mSettingsBox = new QGroupBox(mContent);
 	mSettingsSubform = new QFormLayout(mSettingsBox);
 	mSettingsBox->setLayout(mSettingsSubform);
-	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.</p>"));
+	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels, from 1 to 32768; render percentage scales the output dimensions.</p>"));
 	mForm->addRow(mSettingsBox);
 
 	mSettingsBox->setTitle(tr("LDraw Import TN Add-on Settings"));
@@ -688,7 +698,7 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			if (LblIdx == LBL_IMAGE_WIDTH || LblIdx == LBL_IMAGE_HEIGHT)
 			{
 				connect(LineEdit, &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
-				LineEdit->setValidator(new QIntValidator(16, LC_RENDER_IMAGE_MAX_SIZE));
+				LineEdit->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION));
 			}
 			else if(LblIdx == LBL_DEFAULT_COLOUR)
 			{
@@ -699,13 +709,13 @@ void lcBlenderPreferences::InitPathsAndSettings()
 			}
 			else
 			{
-				LineEdit->setText(mBlenderSettings[LblIdx].value);
 				if (LblIdx == LBL_IMAGE_SCALE)
 					LineEdit->setValidator(new QDoubleValidator(0.01,10.0,2));
 				else if (LblIdx == LBL_RENDER_PERCENTAGE || LblIdx == LBL_CAMERA_BORDER_PERCENT)
 					LineEdit->setValidator(new QIntValidator(1,1000));
 				else
 					LineEdit->setValidator(new QDoubleValidator(0.01,100.0,2));
+				SetNumericText(LineEdit, mBlenderSettings[LblIdx].value);
 				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettings[LblIdx].tooltip);
@@ -806,7 +816,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 	mSettingsBox = new QGroupBox(mContent);
 	mSettingsSubform = new QFormLayout(mSettingsBox);
 	mSettingsBox->setLayout(mSettingsSubform);
-	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.</p>"));
+	mSettingsBox->setWhatsThis(tr("<p><b>Import and Render Settings</b></p><p>Adjust the selected importer's geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels, from 1 to 32768; render percentage scales the output dimensions.</p>"));
 	mForm->addRow(mSettingsBox);
 
 	mSettingsBox->setTitle(tr("LDraw Import MM Add-on Settings"));
@@ -845,11 +855,10 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 			if (LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{
 				connect(LineEdit, &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
-				LineEdit->setValidator(new QIntValidator(16, LC_RENDER_IMAGE_MAX_SIZE));
+				LineEdit->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION));
 			}
 			else
 			{
-				LineEdit->setText(mBlenderSettingsMM[LblIdx].value);
 				if (LblIdx == LBL_IMPORT_SCALE)
 					LineEdit->setValidator(new QDoubleValidator(0.01,10.0,2));
 				else if (LblIdx == LBL_RENDER_PERCENTAGE_MM || LblIdx == LBL_CAMERA_BORDER_PERCENT_MM)
@@ -860,6 +869,7 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 					LineEdit->setValidator(new QDoubleValidator(0.0,10.0,1));
 				else
 					LineEdit->setValidator(new QIntValidator(1, LC_RENDER_IMAGE_MAX_SIZE));
+				SetNumericText(LineEdit, mBlenderSettingsMM[LblIdx].value);
 				connect(LineEdit, &QLineEdit::textEdited, this, &lcBlenderPreferences::SettingTextChanged);
 			}
 			LineEdit->setToolTip(mBlenderSettingsMM[LblIdx].tooltip);
@@ -1742,6 +1752,43 @@ void lcBlenderPreferences::ShowResult()
 	mProcess = nullptr;
 }
 
+void lcBlenderPreferences::SetNumericText(QLineEdit* Edit, const QString& Value)
+{
+	const QValidator* Validator = Edit->validator();
+	QLocale Locale = Validator->locale();
+	Locale.setNumberOptions(Locale.numberOptions() | QLocale::OmitGroupSeparator);
+	bool Ok;
+	QString Text;
+
+	if (qobject_cast<const QIntValidator*>(Validator))
+	{
+		const int Number = Value.toInt(&Ok);
+		Text = Locale.toString(Number);
+	}
+	else
+	{
+		const double Number = Value.toDouble(&Ok);
+		Text = Locale.toString(Number, 'g', QLocale::FloatingPointShortest);
+	}
+
+	Edit->setText(Ok ? Text : Value);
+}
+
+double lcBlenderPreferences::GetNumericValue(const QLineEdit* Edit, bool& Ok)
+{
+	Ok = false;
+
+	if (!Edit->hasAcceptableInput())
+		return 0.0;
+
+	const QValidator* Validator = Edit->validator();
+
+	if (qobject_cast<const QIntValidator*>(Validator))
+		return Validator->locale().toInt(Edit->text(), &Ok);
+
+	return Validator->locale().toDouble(Edit->text(), &Ok);
+}
+
 void lcBlenderPreferences::SettingTextChanged(const QString& Value)
 {
 	bool Change = false;
@@ -2135,7 +2182,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					if (CtlIdx == CTL_RESOLUTION_WIDTH_EDIT)
 					{
 						_OldValue = Width;
-						_Width  = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+						_Width  = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2149,7 +2196,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					else if (CtlIdx == CTL_RESOLUTION_HEIGHT_EDIT)
 					{
 						_OldValue = Height;
-						_Height = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+						_Height = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2163,7 +2210,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					else if (CtlIdx == CTL_RENDER_PERCENTAGE_EDIT_MM)
 					{
 						_OldValue = Scale;
-						_Scale = gAddonPreferences->mLineEditList[CtlIdx]->text().toInt(&Ok);
+						_Scale = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2177,7 +2224,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					else
 					{
 						_OldValue = mBlenderSettingsMM[LblIdx].value.toDouble();
-						_Value = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+						_Value = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2230,7 +2277,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					if (CtlIdx == CTL_IMAGE_WIDTH_EDIT)
 					{
 						_OldValue = Width;
-						_Width  = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+						_Width  = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2244,7 +2291,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					else if (CtlIdx == CTL_IMAGE_HEIGHT_EDIT)
 					{
 						_OldValue = Height;
-						_Height = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+						_Height = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2258,7 +2305,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 					else if (CtlIdx == CTL_RENDER_PERCENTAGE_EDIT)
 					{
 						_OldValue = Scale;
-						_Scale = gAddonPreferences->mLineEditList[CtlIdx]->text().toInt(&Ok);
+						_Scale = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						if (Ok)
 						{
 							if (Update)
@@ -2279,7 +2326,7 @@ bool lcBlenderPreferences::SettingsModified(bool Update, const QString& Module)
 						else
 						{
 							_OldValue = mBlenderSettings[LblIdx].value.toDouble();
-							_Value = gAddonPreferences->mLineEditList[CtlIdx]->text().toDouble(&Ok);
+							_Value = GetNumericValue(gAddonPreferences->mLineEditList[CtlIdx], Ok);
 						}
 						if (Ok)
 						{
@@ -2401,15 +2448,15 @@ void lcBlenderPreferences::ResetSettings()
 				for (int CtlIdx = 0; CtlIdx < mLineEditList.size(); CtlIdx++)
 				{
 					if (CtlIdx == CTL_IMAGE_WIDTH_EDIT)
-						mLineEditList[CtlIdx]->setText(QString::number(mImageWidth));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mImageWidth));
 					else if (CtlIdx == CTL_IMAGE_HEIGHT_EDIT)
-						mLineEditList[CtlIdx]->setText(QString::number(mImageHeight));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mImageHeight));
 					else if (CtlIdx == CTL_RENDER_PERCENTAGE_EDIT)
-						mLineEditList[CtlIdx]->setText(QString::number(mScale * 100));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mScale * 100));
 					else if (CtlIdx == CTL_DEFAULT_COLOUR_EDIT)
 						SetDefaultColor(lcGetColorIndex(Settings[LBL_DEFAULT_COLOUR].value.toInt()));
 					else
-						mLineEditList[CtlIdx]->setText(Settings[LblIdx].value);
+						SetNumericText(mLineEditList[CtlIdx], Settings[LblIdx].value);
 					if (LblIdx < LBL_RENDER_PERCENTAGE)
 						LblIdx++;
 				}
@@ -2453,13 +2500,13 @@ void lcBlenderPreferences::ResetSettings()
 				for (int CtlIdx = 0; CtlIdx < mLineEditList.size(); CtlIdx++)
 				{
 					if (CtlIdx == CTL_RESOLUTION_WIDTH_EDIT)
-						mLineEditList[CtlIdx]->setText(QString::number(mImageWidth));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mImageWidth));
 					else if (CtlIdx == CTL_RESOLUTION_HEIGHT_EDIT)
-						mLineEditList[CtlIdx]->setText(QString::number(mImageHeight));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mImageHeight));
 					else if (CtlIdx == CTL_RENDER_PERCENTAGE_EDIT_MM)
-						mLineEditList[CtlIdx]->setText(QString::number(mScale * 100));
+						SetNumericText(mLineEditList[CtlIdx], QString::number(mScale * 100));
 					else
-						mLineEditList[CtlIdx]->setText(SettingsMM[LblIdx].value);
+						SetNumericText(mLineEditList[CtlIdx], SettingsMM[LblIdx].value);
 					if (LblIdx < LBL_STARTING_STEP_FRAME)
 						LblIdx++;
 				}
@@ -3000,7 +3047,7 @@ void lcBlenderPreferences::BrowseBlender(bool)
 	}
 }
 
-void lcBlenderPreferences::SizeChanged(const QString& Value)
+void lcBlenderPreferences::SizeChanged(const QString&)
 {
 	const bool ImportMM = mImportMMActBox->isChecked();
 	const int Keep_Aspect_Ratio = ImportMM ? int(CTL_KEEP_ASPECT_RATIO_BOX_MM) : int(CTL_KEEP_ASPECT_RATIO_BOX);
@@ -3009,15 +3056,20 @@ void lcBlenderPreferences::SizeChanged(const QString& Value)
 	BlenderSettings const* Settings = ImportMM ? mBlenderSettingsMM : mBlenderSettings;
 
 	bool Change = false;
-	int NewValue = Value.toInt();
+	const QLineEdit* Edit = qobject_cast<const QLineEdit*>(sender());
+	bool Ok = false;
+	const int NewValue = Edit ? static_cast<int>(GetNumericValue(Edit, Ok)) : 0;
+
+	if (!Edit || !Ok)
+		return;
 	if (mCheckBoxList[Keep_Aspect_Ratio]->isChecked())
 	{
 		if (sender() == mLineEditList[Width_Edit])
 		{
 			disconnect(mLineEditList[Height_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
-			const QString Height = QString::number(qRound(double(mImageHeight * NewValue / mImageWidth)));
-			mLineEditList[Height_Edit]->setText(Height);
+			const QString Height = QString::number(qRound(double(mImageHeight) * NewValue / mImageWidth));
+			SetNumericText(mLineEditList[Height_Edit], Height);
 
 			Change = Settings[Height_Edit].value != Height;
 
@@ -3027,8 +3079,8 @@ void lcBlenderPreferences::SizeChanged(const QString& Value)
 		{
 			disconnect(mLineEditList[Width_Edit], &QLineEdit::textChanged, this, &lcBlenderPreferences::SizeChanged);
 
-			const QString Width = QString::number(qRound(double(NewValue * mImageWidth / mImageHeight)));
-			mLineEditList[Width_Edit]->setText(Width);
+			const QString Width = QString::number(qRound(double(NewValue) * mImageWidth / mImageHeight));
+			SetNumericText(mLineEditList[Width_Edit], Width);
 
 			Change = Settings[Height_Edit].value != Width;
 
@@ -3139,8 +3191,8 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 	const QString Width = QString::number(CropImage ? ImageWidth : mImageWidth);
 	const QString Height = QString::number(CropImage ? ImageHeight : mImageHeight);
 
-	mLineEditList[Width_Edit]->setText(Width);
-	mLineEditList[Height_Edit]->setText(Height);
+	SetNumericText(mLineEditList[Width_Edit], Width);
+	SetNumericText(mLineEditList[Height_Edit], Height);
 
 	if (Update)
 		SettingsModified(true);

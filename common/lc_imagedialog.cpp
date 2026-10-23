@@ -12,16 +12,16 @@ lcImageDialog::lcImageDialog(QWidget* Parent, lcImageDialogOptions* Options)
 
 	connect(ui->fileNameBrowse, &QPushButton::clicked, this, &lcImageDialog::FileNameBrowseClicked);
 
-	ui->width->setValidator(new QIntValidator(1, 32768, this));
-	ui->height->setValidator(new QIntValidator(1, 32768, this));
-	ui->firstStep->setValidator(new QIntValidator(this));
-	ui->lastStep->setValidator(new QIntValidator(this));
+	ui->width->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, this));
+	ui->height->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, this));
+	ui->firstStep->setValidator(new QIntValidator(1, mOptions->End, this));
+	ui->lastStep->setValidator(new QIntValidator(1, mOptions->End, this));
 
 	ui->fileName->setText(mOptions->FilePath);
-	ui->width->setText(QString::number(mOptions->Width));
-	ui->height->setText(QString::number(mOptions->Height));
-	ui->firstStep->setText(QString::number(mOptions->Start));
-	ui->lastStep->setText(QString::number(mOptions->End));
+	ui->width->setText(lcFormatIntegerLocalized(mOptions->Width, ui->width->validator()->locale()));
+	ui->height->setText(lcFormatIntegerLocalized(mOptions->Height, ui->height->validator()->locale()));
+	ui->firstStep->setText(lcFormatIntegerLocalized(mOptions->Start, ui->firstStep->validator()->locale()));
+	ui->lastStep->setText(lcFormatIntegerLocalized(mOptions->End, ui->lastStep->validator()->locale()));
 	ui->rangeCurrent->setChecked(true);
 }
 
@@ -40,17 +40,18 @@ void lcImageDialog::accept()
 		return;
 	}
 
-	int Width = ui->width->text().toInt();
+	bool Ok;
+	int Width = ui->width->validator()->locale().toInt(ui->width->text(), &Ok);
 
-	if (Width < 1 || Width > 32768)
+	if (!Ok || Width < 1 || Width > LC_MAX_IMAGE_DIMENSION)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please enter a width between 1 and 32768."));
 		return;
 	}
 
-	int Height = ui->height->text().toInt();
+	int Height = ui->height->validator()->locale().toInt(ui->height->text(), &Ok);
 
-	if (Height < 1 || Height > 32768)
+	if (!Ok || Height < 1 || Height > LC_MAX_IMAGE_DIMENSION)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please enter a height between 1 and 32768."));
 		return;
@@ -70,17 +71,17 @@ void lcImageDialog::accept()
 	}
 	else if (ui->rangeCustom->isChecked())
 	{
-		Start = ui->firstStep->text().toInt();
+		Start = ui->firstStep->validator()->locale().toInt(ui->firstStep->text(), &Ok);
 
-		if (Start < 1 || Start > mOptions->End)
+		if (!Ok || Start < 1 || Start > mOptions->End)
 		{
 			QMessageBox::information(this, windowTitle(), tr("First step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;
 		}
 
-		End = ui->lastStep->text().toInt();
+		End = ui->lastStep->validator()->locale().toInt(ui->lastStep->text(), &Ok);
 
-		if (End < 1 || End > mOptions->End)
+		if (!Ok || End < 1 || End > mOptions->End)
 		{
 			QMessageBox::information(this, windowTitle(), tr("Last step must be between 1 and %1.").arg(QString::number(mOptions->End)));
 			return;

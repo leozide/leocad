@@ -178,7 +178,8 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->HighlightNewParts->setChecked(mOptions->Preferences.mHighlightNewParts);
 	ui->gridStuds->setChecked(mOptions->Preferences.mDrawGridStuds);
 	ui->gridLines->setChecked(mOptions->Preferences.mDrawGridLines);
-	ui->gridLineSpacing->setText(QString::number(mOptions->Preferences.mGridLineSpacing));
+	ui->gridLineSpacing->setValidator(new QIntValidator(1, LC_MAX_GRID_LINE_SPACING, ui->gridLineSpacing));
+	ui->gridLineSpacing->setText(lcFormatIntegerLocalized(mOptions->Preferences.mGridLineSpacing, ui->gridLineSpacing->validator()->locale()));
 	ui->GridOriginCheckBox->setChecked(mOptions->Preferences.mDrawGridOrigin);
 	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
 
@@ -359,10 +360,11 @@ lcPreferencesDialog::~lcPreferencesDialog()
 
 void lcPreferencesDialog::accept()
 {
-	int GridLineSpacing = ui->gridLineSpacing->text().toInt();
-	if (GridLineSpacing < 1)
+	bool Ok;
+	int GridLineSpacing = ui->gridLineSpacing->validator()->locale().toInt(ui->gridLineSpacing->text(), &Ok);
+	if (!Ok || !ui->gridLineSpacing->hasAcceptableInput())
 	{
-		QMessageBox::information(this, windowTitle(), tr("Grid spacing must be greater than 0."));
+		QMessageBox::information(this, windowTitle(), tr("Grid spacing must be between 1 and %1 studs.").arg(QString::number(LC_MAX_GRID_LINE_SPACING)));
 		return;
 	}
 

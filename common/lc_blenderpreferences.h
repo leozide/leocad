@@ -104,6 +104,9 @@ private slots:
 	void DownloadFinished(lcHttpReply*);
 
 private:
+	static void SetNumericText(QLineEdit* Edit, const QString& Value);
+	static double GetNumericValue(const QLineEdit* Edit, bool& Ok);
+
 	enum BlenderPathType
 	{
 		PATH_BLENDER,             //  0 QLineEdit/QPushButton

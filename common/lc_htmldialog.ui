@@ -139,7 +139,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="whatsThis">
-      <string>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use positive dimensions up to 2048 pixels.&lt;/p&gt;</string>
+      <string>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use dimensions from 1 to 32768 pixels.&lt;/p&gt;</string>
      </property>
      <property name="title">
       <string>Steps</string>

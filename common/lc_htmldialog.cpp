@@ -12,8 +12,8 @@ lcHTMLDialog::lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 
 	connect(ui->outputFolderBrowse, &QPushButton::clicked, this, &lcHTMLDialog::OutputFolderBrowseClicked);
 
-	ui->stepWidth->setValidator(new QIntValidator(0, 2048, ui->stepWidth));
-	ui->stepHeight->setValidator(new QIntValidator(0, 2048, ui->stepHeight));
+	ui->stepWidth->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, ui->stepWidth));
+	ui->stepHeight->setValidator(new QIntValidator(1, LC_MAX_IMAGE_DIMENSION, ui->stepHeight));
 
 	mOptions = Options;
 
@@ -30,8 +30,8 @@ lcHTMLDialog::lcHTMLDialog(QWidget* Parent, lcHTMLExportOptions* Options)
 	ui->singlePage->setChecked(mOptions->SinglePage);
 	ui->oneStepPerPage->setChecked(!mOptions->SinglePage);
 	ui->indexPage->setChecked(mOptions->SinglePage);
-	ui->stepWidth->setText(QString::number(mOptions->StepImagesWidth));
-	ui->stepHeight->setText(QString::number(mOptions->StepImagesHeight));
+	ui->stepWidth->setText(lcFormatIntegerLocalized(mOptions->StepImagesWidth, ui->stepWidth->validator()->locale()));
+	ui->stepHeight->setText(lcFormatIntegerLocalized(mOptions->StepImagesHeight, ui->stepHeight->validator()->locale()));
 	ui->partsAfterEachStep->setChecked(mOptions->PartsListStep);
 	ui->partsAtTheEnd->setChecked(mOptions->PartsListEnd);
 }
@@ -51,14 +51,32 @@ void lcHTMLDialog::accept()
 		return;
 	}
 
+	bool WidthOk, HeightOk;
+	const int Width = ui->stepWidth->validator()->locale().toInt(ui->stepWidth->text(), &WidthOk);
+	const int Height = ui->stepHeight->validator()->locale().toInt(ui->stepHeight->text(), &HeightOk);
+
+	if (!WidthOk || !ui->stepWidth->hasAcceptableInput())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please enter a width between 1 and 32768 pixels."));
+		ui->stepWidth->setFocus();
+		return;
+	}
+
+	if (!HeightOk || !ui->stepHeight->hasAcceptableInput())
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please enter a height between 1 and 32768 pixels."));
+		ui->stepHeight->setFocus();
+		return;
+	}
+
 	mOptions->PathName = pathName;
 	mOptions->SubModels = ui->currentModelSubmodels->isChecked();
 	mOptions->CurrentOnly = ui->currentModelOnly->isChecked();
 	mOptions->TransparentImages = ui->transparentImages->isChecked();
 	mOptions->SinglePage = ui->singlePage->isChecked();
 	mOptions->IndexPage = ui->indexPage->isChecked();
-	mOptions->StepImagesWidth = ui->stepWidth->text().toInt();
-	mOptions->StepImagesHeight = ui->stepHeight->text().toInt();
+	mOptions->StepImagesWidth = Width;
+	mOptions->StepImagesHeight = Height;
 	mOptions->PartsListStep = ui->partsAfterEachStep->isChecked();
 	mOptions->PartsListEnd = ui->partsAtTheEnd->isChecked();
 

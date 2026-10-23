@@ -22,7 +22,10 @@ Add the standard Help button to the dialog's button box, then call
 `lcSetupDialogHelp()` after `setupUi()`. Help shows the dialog overview. F1 shows
 help for the focused control, falling back through its parent groups to the
 dialog overview. This also handles focus inside composite controls such as
-spin boxes. Both entry points use Qt's native What's This popup.
+spin boxes. Both entry points use Qt's native What's This popup. For QWidget-based choosers
+embedded in menus, use `lcSetupWidgetHelp()` and verify that help does not accept
+a choice or close the menu. Shortcut-recording fields may capture F1 as input;
+keep the Help button available for those fields.
 
 Give unlabeled controls meaningful accessible names. Check Help, F1, and Escape
 with keyboard navigation, as well as tooltip placement and longer translated

@@ -982,6 +982,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
 
 	mFilterCategoriesWidget = new QLineEdit(CategoriesGroupWidget);
 	mFilterCategoriesWidget->setPlaceholderText(tr("Filter Categories"));
+	mFilterCategoriesWidget->setAccessibleName(tr("Filter Categories"));
+	mFilterCategoriesWidget->setToolTip(tr("Filter category names to narrow the category list."));
 	FilterCategoriesLayout->addWidget(mFilterCategoriesWidget);
 
 	mFilterCaseAction = new QAction();
@@ -997,6 +999,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
 
 	mCategoriesWidget = new QTreeWidget(mSplitter);
 	mCategoriesWidget->setHeaderHidden(true);
+	mCategoriesWidget->setAccessibleName(tr("Piece Categories"));
+	mCategoriesWidget->setToolTip(tr("Choose a category or palette to display its pieces."));
 	mCategoriesWidget->setUniformRowHeights(true);
 	mCategoriesWidget->setRootIsDecorated(false);
 
@@ -1014,11 +1018,14 @@ lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
 
 	mFilterWidget = new QLineEdit(PartsGroupWidget);
 	mFilterWidget->setPlaceholderText(tr("Filter Pieces"));
+	mFilterWidget->setAccessibleName(tr("Filter Pieces"));
+	mFilterWidget->setToolTip(tr("Filter the displayed pieces using the matching options."));
 	SearchLayout->addWidget(mFilterWidget);
 
 	QToolButton* OptionsButton = new QToolButton();
 	OptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
-	OptionsButton->setToolTip(tr("Options"));
+	OptionsButton->setToolTip(tr("Configure piece filtering and list display."));
+	OptionsButton->setAccessibleName(tr("Piece List Options"));
 	OptionsButton->setPopupMode(QToolButton::InstantPopup);
 	SearchLayout->addWidget(OptionsButton);
 
@@ -1027,6 +1034,8 @@ lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
 	connect(OptionsMenu, &QMenu::aboutToShow, this, &lcPartSelectionWidget::OptionsMenuAboutToShow);
 
 	mPartsWidget = new lcPartSelectionListView(PartsGroupWidget, this);
+	mPartsWidget->setAccessibleName(tr("Available Pieces"));
+	mPartsWidget->setToolTip(tr("Select a piece from the filtered list."));
 	if (mIsPopup)
 		mPartsWidget->setMinimumSize(0, 0);
 	PartsLayout->addWidget(mPartsWidget);

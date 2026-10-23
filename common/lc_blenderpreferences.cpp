@@ -316,7 +316,6 @@ void lcBlenderPreferencesDialog::EnableButton(bool Change)
 void lcBlenderPreferencesDialog::ResetSettings()
 {
 	mPreferences->ResetSettings();
-	mApplyButton->setEnabled(false);
 }
 
 void lcBlenderPreferencesDialog::accept()
@@ -2339,13 +2338,15 @@ void lcBlenderPreferences::ResetSettings()
 
 	QDialog* Dialog = new QDialog(this);
 	Dialog->setWindowTitle(tr("Add-on Reset"));
-	Dialog->setWhatsThis(tr("Select how to reset settings. Choice is since last apply or system default."));
+	Dialog->setWhatsThis(tr("<p><b>Reset Add-on Settings</b></p><p>Choose Last Apply to restore the saved paths and settings, or System Default to load the built-in defaults. Choose OK to update the settings form, then Apply in the parent dialog to save them. Cancel keeps the current edits.</p>"));
 	QVBoxLayout* Layout = new QVBoxLayout(Dialog);
 	QGroupBox* DlgGroup = new QGroupBox(Dialog);
 	QHBoxLayout* DlgLayout = new QHBoxLayout(DlgGroup);
 	QRadioButton* LastButton = new QRadioButton(tr("Last Apply"));
+	LastButton->setToolTip(tr("Restore paths and settings to the last applied values."));
 	DlgLayout->addWidget(LastButton);
 	QRadioButton* DefaultButton = new QRadioButton(tr("System Default"));
+	DefaultButton->setToolTip(tr("Replace paths and settings with the built-in defaults."));
 	DlgLayout->addWidget(DefaultButton);
 	DlgGroup->setLayout(DlgLayout);
 	Layout->addWidget(DlgGroup);
@@ -2353,20 +2354,21 @@ void lcBlenderPreferences::ResetSettings()
 
 	LastButton->setChecked(true);
 
-	QDialogButtonBox ButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+	QDialogButtonBox ButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Help,
 							   Qt::Horizontal, Dialog);
 	Layout->addWidget(&ButtonBox);
+	lcSetupDialogHelp(Dialog, &ButtonBox);
 	connect(&ButtonBox, &QDialogButtonBox::accepted, Dialog, &QDialog::accept);
 	connect(&ButtonBox, &QDialogButtonBox::rejected, Dialog, &QDialog::reject);
 
-	if (Dialog->exec() == QDialog::Accepted)
+	if (Dialog->exec() != QDialog::Accepted)
+		return;
+
+	if (DefaultButton->isChecked())
 	{
-		if (DefaultButton->isChecked())
-		{
-			Paths = mDefaultPaths;
-			Settings = mDefaultSettings;
-			SettingsMM = mDefaultSettingsMM;
-		}
+		Paths = mDefaultPaths;
+		Settings = mDefaultSettings;
+		SettingsMM = mDefaultSettingsMM;
 	}
 
 	mConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();

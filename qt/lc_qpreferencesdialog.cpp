@@ -24,6 +24,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	: QDialog(Parent), mOptions(Options), ui(new Ui::lcPreferencesDialog)
 {
 	ui->setupUi(this);
+	lcSetupDialogHelp(this, ui->buttonBox);
 
 #if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
 	ui->povrayLabel->hide();
@@ -345,6 +346,10 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->mouseTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 	ui->mouseTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 	MouseTreeItemChanged(nullptr);
+
+	for (QLabel* Label : findChildren<QLabel*>())
+		if (QWidget* Control = Label->buddy())
+			Label->setToolTip(Control->toolTip());
 }
 
 lcPreferencesDialog::~lcPreferencesDialog()

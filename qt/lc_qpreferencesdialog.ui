@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>lcPreferencesDialog</class>
  <widget class="QDialog" name="lcPreferencesDialog">
+  <property name="whatsThis">
+   <string>&lt;p&gt;&lt;b&gt;Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the application, display, colors, piece categories, and keyboard and mouse shortcuts. Choose OK to save the changes or Cancel to discard edits in Preferences. Language, piece-library, and antialiasing changes may require restarting LeoCAD.&lt;/p&gt;&lt;p&gt;Export buttons write files immediately. Blender add-on settings have their own Apply action and can configure Blender before you close Preferences.&lt;/p&gt;</string>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,6 +23,9 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;General Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set application behavior and custom library, configuration, and renderer paths. Leave optional configuration paths empty to use the built-in settings.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>General</string>
       </attribute>
@@ -35,6 +41,9 @@
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="1" column="0">
            <widget class="QLabel" name="label_19">
+            <property name="toolTip">
+             <string>Choose the interface language used after restarting LeoCAD.</string>
+            </property>
             <property name="text">
              <string>Language:</string>
             </property>
@@ -45,6 +54,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="Language">
+            <property name="accessibleName">
+             <string>Language</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the interface language used after restarting LeoCAD.</string>
+            </property>
             <item>
              <property name="text">
               <string>Default</string>
@@ -54,6 +69,12 @@
           </item>
           <item row="2" column="1">
            <widget class="QComboBox" name="checkForUpdates">
+            <property name="accessibleName">
+             <string>Check for Updates</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how often to check automatically for application and piece-library updates.</string>
+            </property>
             <item>
              <property name="text">
               <string>Never</string>
@@ -73,6 +94,9 @@
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_10">
+            <property name="toolTip">
+             <string>Choose how often to check automatically for application and piece-library updates.</string>
+            </property>
             <property name="text">
              <string>Check for Updates:</string>
             </property>
@@ -96,16 +120,25 @@
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_25">
+            <property name="toolTip">
+             <string>Choose the interface theme and optionally reset its colors.</string>
+            </property>
             <property name="text">
              <string>Color Theme:</string>
             </property>
             <property name="buddy">
-             <cstring>Language</cstring>
+             <cstring>ColorTheme</cstring>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="ColorTheme">
+            <property name="accessibleName">
+             <string>Color Theme</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the interface theme and optionally reset its colors.</string>
+            </property>
             <item>
              <property name="text">
               <string>Dark</string>
@@ -123,6 +156,9 @@
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_4">
+         <property name="toolTip">
+          <string>Set the author name used for new models.</string>
+         </property>
          <property name="text">
           <string>Default Author Name:</string>
          </property>
@@ -132,10 +168,20 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="authorName"/>
+        <widget class="QLineEdit" name="authorName">
+         <property name="accessibleName">
+          <string>Default Author Name</string>
+         </property>
+         <property name="toolTip">
+          <string>Set the author name used for new models.</string>
+         </property>
+        </widget>
        </item>
        <item row="9" column="0" colspan="2">
         <widget class="QCheckBox" name="fixedDirectionKeys">
+         <property name="toolTip">
+          <string>Move pieces along fixed model axes instead of view-relative directions.</string>
+         </property>
          <property name="text">
           <string>Fixed direction keys</string>
          </property>
@@ -143,6 +189,9 @@
        </item>
        <item row="10" column="0" colspan="2">
         <widget class="QCheckBox" name="autoLoadMostRecent">
+         <property name="toolTip">
+          <string>Open the most recently used file when LeoCAD starts.</string>
+         </property>
          <property name="text">
           <string>Open most recent file on startup</string>
          </property>
@@ -156,6 +205,9 @@
          <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
            <widget class="QLabel" name="label_5">
+            <property name="toolTip">
+             <string>Choose a piece-library folder or supported archive to load after restarting LeoCAD.</string>
+            </property>
             <property name="text">
              <string>Pieces Library:</string>
             </property>
@@ -167,10 +219,20 @@
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QLineEdit" name="partsLibrary"/>
+             <widget class="QLineEdit" name="partsLibrary">
+              <property name="accessibleName">
+               <string>Pieces Library</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose a piece-library folder or supported archive to load after restarting LeoCAD.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QToolButton" name="partsLibraryBrowse">
+              <property name="toolTip">
+               <string>Choose a piece-library folder.</string>
+              </property>
               <property name="icon">
                <iconset resource="../leocad.qrc">
                 <normaloff>:/resources/file_open.png</normaloff>:/resources/file_open.png</iconset>
@@ -179,6 +241,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="partsArchiveBrowse">
+              <property name="toolTip">
+               <string>Choose a piece-library ZIP or BIN archive.</string>
+              </property>
               <property name="icon">
                <iconset resource="../leocad.qrc">
                 <normaloff>:/resources/archive.png</normaloff>:/resources/archive.png</iconset>
@@ -189,6 +254,9 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_17">
+            <property name="toolTip">
+             <string>Choose a custom LDraw color configuration file, or leave empty to use the library colors.</string>
+            </property>
             <property name="text">
              <string>Color Configuration:</string>
             </property>
@@ -200,10 +268,20 @@
           <item row="1" column="1">
            <layout class="QHBoxLayout" name="ColorConfigLayout">
             <item>
-             <widget class="QLineEdit" name="ColorConfigEdit"/>
+             <widget class="QLineEdit" name="ColorConfigEdit">
+              <property name="accessibleName">
+               <string>Color Configuration</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose a custom LDraw color configuration file, or leave empty to use the library colors.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QToolButton" name="ColorConfigBrowseButton">
+              <property name="toolTip">
+               <string>Choose a custom LDraw color configuration file.</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -213,6 +291,9 @@
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_18">
+            <property name="toolTip">
+             <string>Choose a custom minifigure settings file, or leave empty to use the built-in choices.</string>
+            </property>
             <property name="text">
              <string>Minifig Settings:</string>
             </property>
@@ -224,10 +305,20 @@
           <item row="2" column="1">
            <layout class="QHBoxLayout" name="MinifigSettingsLayout">
             <item>
-             <widget class="QLineEdit" name="MinifigSettingsEdit"/>
+             <widget class="QLineEdit" name="MinifigSettingsEdit">
+              <property name="accessibleName">
+               <string>Minifig Settings</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose a custom minifigure settings file, or leave empty to use the built-in choices.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QToolButton" name="MinifigSettingsBrowseButton">
+              <property name="toolTip">
+               <string>Choose a minifigure settings INI file.</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -237,6 +328,9 @@
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="povrayLabel">
+            <property name="toolTip">
+             <string>Set the POV-Ray executable used for rendering.</string>
+            </property>
             <property name="text">
              <string>PO&amp;V-Ray Executable:</string>
             </property>
@@ -248,10 +342,20 @@
           <item row="3" column="1">
            <layout class="QHBoxLayout" name="povrayLayout">
             <item>
-             <widget class="QLineEdit" name="povrayExecutable"/>
+             <widget class="QLineEdit" name="povrayExecutable">
+              <property name="accessibleName">
+               <string>POV-Ray Executable</string>
+              </property>
+              <property name="toolTip">
+               <string>Set the POV-Ray executable used for rendering.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QToolButton" name="povrayExecutableBrowse">
+              <property name="toolTip">
+               <string>Locate the POV-Ray executable.</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -261,6 +365,9 @@
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_9">
+            <property name="toolTip">
+             <string>Set the LGEO library folder used by POV-Ray exports.</string>
+            </property>
             <property name="text">
              <string>&amp;LGEO Library:</string>
             </property>
@@ -272,10 +379,20 @@
           <item row="4" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <widget class="QLineEdit" name="lgeoPath"/>
+             <widget class="QLineEdit" name="lgeoPath">
+              <property name="accessibleName">
+               <string>LGEO Library</string>
+              </property>
+              <property name="toolTip">
+               <string>Set the LGEO library folder used by POV-Ray exports.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QToolButton" name="lgeoPathBrowse">
+              <property name="toolTip">
+               <string>Choose the LGEO library folder.</string>
+              </property>
               <property name="text">
                <string>...</string>
               </property>
@@ -288,6 +405,9 @@
        </item>
        <item row="11" column="0" colspan="2">
         <widget class="QCheckBox" name="RestoreTabLayout">
+         <property name="toolTip">
+          <string>Restore saved model tabs and view layouts when opening a project.</string>
+         </property>
          <property name="text">
           <string>Restore tab layout</string>
          </property>
@@ -296,6 +416,9 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabRendering">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Rendering Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Control shading, stud geometry, selection appearance, edges, and step effects. Some options are unavailable when the graphics system does not support them.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Rendering</string>
       </attribute>
@@ -305,6 +428,12 @@
          <layout class="QGridLayout" name="gridLayout">
           <item row="10" column="1">
            <widget class="QToolButton" name="FadeStepsColor">
+            <property name="accessibleName">
+             <string>Previous Step Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the tint used for pieces from previous steps.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -312,6 +441,12 @@
           </item>
           <item row="14" column="1">
            <widget class="QComboBox" name="ShadingMode">
+            <property name="accessibleName">
+             <string>Shading Mode</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how piece surfaces and edges are drawn in model views.</string>
+            </property>
             <item>
              <property name="text">
               <string>Wireframe</string>
@@ -331,6 +466,9 @@
           </item>
           <item row="12" column="0">
            <widget class="QCheckBox" name="MeshLOD">
+            <property name="toolTip">
+             <string>Use simpler meshes for distant pieces to improve display performance.</string>
+            </property>
             <property name="text">
              <string>Mesh LOD</string>
             </property>
@@ -338,6 +476,9 @@
           </item>
           <item row="10" column="0">
            <widget class="QCheckBox" name="FadeSteps">
+            <property name="toolTip">
+             <string>Tint pieces from previous building steps with the chosen fade color.</string>
+            </property>
             <property name="text">
              <string>Fade Previous Steps</string>
             </property>
@@ -358,6 +499,9 @@
           </item>
           <item row="11" column="0">
            <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="toolTip">
+             <string>Highlight pieces introduced in the current building step.</string>
+            </property>
             <property name="text">
              <string>Highlight New Pieces</string>
             </property>
@@ -365,6 +509,12 @@
           </item>
           <item row="11" column="1">
            <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="accessibleName">
+             <string>New Piece Highlight Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the highlight color for pieces in the current step.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -372,6 +522,15 @@
           </item>
           <item row="18" column="1">
            <widget class="QToolButton" name="BlenderAddonSettingsButton">
+            <property name="accessibleName">
+             <string>Blender LDraw Render</string>
+            </property>
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
             <property name="text">
              <string>Add-on Settings...</string>
             </property>
@@ -379,6 +538,12 @@
           </item>
           <item row="15" column="0">
            <widget class="QLabel" name="SelectionRenderModeLabel">
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how selected pieces are highlighted.</string>
+            </property>
             <property name="text">
              <string>Selection Rendering:</string>
             </property>
@@ -389,6 +554,12 @@
           </item>
           <item row="12" column="1">
            <widget class="QSlider" name="MeshLODSlider">
+            <property name="accessibleName">
+             <string>Mesh Detail Distance</string>
+            </property>
+            <property name="toolTip">
+             <string>Set the distance in LDraw units at which simpler piece meshes are used.</string>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -405,6 +576,9 @@
           </item>
           <item row="13" column="2">
            <widget class="QToolButton" name="HighContrastButton">
+            <property name="toolTip">
+             <string>Configure colors and the light/dark threshold for high contrast stud styles.</string>
+            </property>
             <property name="text">
              <string>Contrast Settings...</string>
             </property>
@@ -412,6 +586,12 @@
           </item>
           <item row="14" column="0">
            <widget class="QLabel" name="label_3">
+            <property name="toolTip">
+             <string>Choose how piece surfaces and edges are drawn in model views.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ShadingMode</cstring>
+            </property>
             <property name="text">
              <string>Shading Mode:</string>
             </property>
@@ -419,6 +599,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="antiAliasingSamples">
+            <property name="accessibleName">
+             <string>Antialiasing Samples</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the antialiasing sample count; more samples can use more graphics resources.</string>
+            </property>
             <item>
              <property name="text">
               <string>2x</string>
@@ -438,6 +624,15 @@
           </item>
           <item row="18" column="0">
            <widget class="QLabel" name="label_39">
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
+            <property name="buddy">
+             <cstring>BlenderAddonSettingsButton</cstring>
+            </property>
             <property name="text">
              <string>Blender LDraw Render:</string>
             </property>
@@ -445,6 +640,12 @@
           </item>
           <item row="13" column="1">
            <widget class="QComboBox" name="studStyleCombo">
+            <property name="accessibleName">
+             <string>Stud Style</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose stud geometry and the high contrast stud styles.</string>
+            </property>
             <item>
              <property name="text">
               <string>Plain</string>
@@ -496,6 +697,9 @@
           </item>
           <item row="0" column="0">
            <widget class="QCheckBox" name="antiAliasing">
+            <property name="toolTip">
+             <string>Smooth jagged edges in model views; changes require restarting LeoCAD.</string>
+            </property>
             <property name="text">
              <string>Anti-aliasing</string>
             </property>
@@ -503,6 +707,12 @@
           </item>
           <item row="13" column="0">
            <widget class="QLabel" name="label_24">
+            <property name="toolTip">
+             <string>Choose stud geometry and the high contrast stud styles.</string>
+            </property>
+            <property name="buddy">
+             <cstring>studStyleCombo</cstring>
+            </property>
             <property name="text">
              <string>Stud Style</string>
             </property>
@@ -510,11 +720,14 @@
           </item>
           <item row="15" column="1">
            <widget class="QComboBox" name="SelectionRenderMode">
+            <property name="accessibleName">
+             <string>Selection Rendering</string>
+            </property>
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</string>
+            </property>
             <property name="toolTip">
-             <string>Controls how selected pieces are rendered, the options are:
-- Outline with a faint selection-colored fill for obscured portions
-- Face tint and colored edges.
-Unsupported video cards use face tint and colored edges.</string>
+             <string>Choose how selected pieces are highlighted.</string>
             </property>
             <item>
              <property name="text">
@@ -546,6 +759,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="ConditionalLinesCheckBox">
+            <property name="toolTip">
+             <string>Draw conditional lines where needed to show curved piece surfaces.</string>
+            </property>
             <property name="text">
              <string>Conditional Lines</string>
             </property>
@@ -566,6 +782,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_26">
+            <property name="toolTip">
+             <string>Set edge-line width within the range supported by the graphics system.</string>
+            </property>
+            <property name="buddy">
+             <cstring>LineWidthSlider</cstring>
+            </property>
             <property name="text">
              <string>Line Width:</string>
             </property>
@@ -573,6 +795,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="3" column="1">
            <widget class="QSlider" name="LineWidthSlider">
+            <property name="accessibleName">
+             <string>Line Width</string>
+            </property>
+            <property name="toolTip">
+             <string>Set edge-line width within the range supported by the graphics system.</string>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -589,6 +817,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0">
            <widget class="QCheckBox" name="edgeLines">
+            <property name="toolTip">
+             <string>Draw the edge lines defined by each piece.</string>
+            </property>
             <property name="text">
              <string>Edge Lines</string>
             </property>
@@ -596,6 +827,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="0">
            <widget class="QCheckBox" name="AutomateEdgeColor">
+            <property name="toolTip">
+             <string>Calculate edge colors from piece colors instead of using their defined edge colors.</string>
+            </property>
             <property name="text">
              <string>Automate Edge Color</string>
             </property>
@@ -603,6 +837,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="1">
            <widget class="QToolButton" name="AutomateEdgeColorButton">
+            <property name="toolTip">
+             <string>Configure the contrast and saturation used for automated edge colors.</string>
+            </property>
             <property name="text">
              <string>Settings...</string>
             </property>
@@ -627,6 +864,9 @@ Unsupported video cards use face tint and colored edges.</string>
       </layout>
      </widget>
      <widget class="QWidget" name="tab">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;View Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose navigation aids for model views and the piece preview, and configure the base grid. Locations select the corner where each navigation aid appears.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Views</string>
       </attribute>
@@ -639,6 +879,9 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
            <widget class="QCheckBox" name="AxisIconCheckBox">
+            <property name="toolTip">
+             <string>Show the model-axis indicator in model views.</string>
+            </property>
             <property name="text">
              <string>Axis Icon</string>
             </property>
@@ -646,6 +889,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="2">
            <widget class="QLabel" name="ViewSphereLocationLabel">
+            <property name="toolTip">
+             <string>Choose the corner for the model-view navigation sphere.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ViewSphereLocationCombo</cstring>
+            </property>
             <property name="text">
              <string>Location:</string>
             </property>
@@ -653,6 +902,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_21">
+            <property name="toolTip">
+             <string>Choose the model-view navigation sphere size, or disable it.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ViewSphereSizeCombo</cstring>
+            </property>
             <property name="text">
              <string>View Sphere:</string>
             </property>
@@ -660,6 +915,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="ViewSphereSizeCombo">
+            <property name="accessibleName">
+             <string>View Sphere</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the model-view navigation sphere size, or disable it.</string>
+            </property>
             <item>
              <property name="text">
               <string>Disabled</string>
@@ -684,6 +945,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="3">
            <widget class="QComboBox" name="ViewSphereLocationCombo">
+            <property name="accessibleName">
+             <string>Location</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the corner for the model-view navigation sphere.</string>
+            </property>
             <item>
              <property name="text">
               <string>Top Left</string>
@@ -721,6 +988,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="2">
            <widget class="QLabel" name="AxisIconLocationLabel">
+            <property name="toolTip">
+             <string>Choose the corner for the model-axis indicator.</string>
+            </property>
+            <property name="buddy">
+             <cstring>AxisIconLocationCombo</cstring>
+            </property>
             <property name="text">
              <string>Location:</string>
             </property>
@@ -728,6 +1001,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="3">
            <widget class="QComboBox" name="AxisIconLocationCombo">
+            <property name="accessibleName">
+             <string>Location</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the corner for the model-axis indicator.</string>
+            </property>
             <item>
              <property name="text">
               <string>Top Left</string>
@@ -781,6 +1060,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="gridLines">
+            <property name="toolTip">
+             <string>Show base-grid lines at the specified spacing.</string>
+            </property>
             <property name="text">
              <string>Draw lines every</string>
             </property>
@@ -788,6 +1070,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="gridLineSpacing">
+            <property name="accessibleName">
+             <string>Grid Line Spacing</string>
+            </property>
+            <property name="toolTip">
+             <string>Set base-grid line spacing in studs (minimum 1).</string>
+            </property>
             <property name="maximumSize">
              <size>
               <width>75</width>
@@ -798,6 +1086,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="0" colspan="3">
            <widget class="QCheckBox" name="GridOriginCheckBox">
+            <property name="toolTip">
+             <string>Emphasize the base-grid lines through the model origin.</string>
+            </property>
             <property name="text">
              <string>Draw origin lines</string>
             </property>
@@ -805,6 +1096,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0" colspan="3">
            <widget class="QCheckBox" name="gridStuds">
+            <property name="toolTip">
+             <string>Show stud positions on the base grid.</string>
+            </property>
             <property name="text">
              <string>Draw studs</string>
             </property>
@@ -821,6 +1115,9 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="2" column="0" colspan="2">
            <widget class="QCheckBox" name="PreviewAxisIconCheckBox">
+            <property name="toolTip">
+             <string>Show the model-axis indicator in the piece preview.</string>
+            </property>
             <property name="text">
              <string>Axis Icon</string>
             </property>
@@ -828,6 +1125,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="3">
            <widget class="QComboBox" name="PreviewViewSphereLocationCombo">
+            <property name="accessibleName">
+             <string>Location</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the corner for the piece-preview navigation sphere.</string>
+            </property>
             <item>
              <property name="text">
               <string>Top Left</string>
@@ -852,6 +1155,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="2">
            <widget class="QLabel" name="PreviewViewSphereLocationLabel">
+            <property name="toolTip">
+             <string>Choose the corner for the piece-preview navigation sphere.</string>
+            </property>
+            <property name="buddy">
+             <cstring>PreviewViewSphereLocationCombo</cstring>
+            </property>
             <property name="text">
              <string>Location:</string>
             </property>
@@ -859,6 +1168,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="PreviewViewSphereSizeCombo">
+            <property name="accessibleName">
+             <string>View Sphere</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the piece-preview navigation sphere size, or disable it.</string>
+            </property>
             <item>
              <property name="text">
               <string>Disabled</string>
@@ -883,6 +1198,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_8">
+            <property name="toolTip">
+             <string>Choose the piece-preview navigation sphere size, or disable it.</string>
+            </property>
+            <property name="buddy">
+             <cstring>PreviewViewSphereSizeCombo</cstring>
+            </property>
             <property name="text">
              <string>View Sphere:</string>
             </property>
@@ -920,6 +1241,9 @@ Unsupported video cards use face tint and colored edges.</string>
       </layout>
      </widget>
      <widget class="QWidget" name="ColorTab">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Display Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose colors for the background, objects, grid, and interface. These settings control the display; they do not change the LDraw colors assigned to model pieces.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Colors</string>
       </attribute>
@@ -932,6 +1256,12 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="3" column="0">
            <widget class="QLabel" name="label_15">
+            <property name="toolTip">
+             <string>Choose the display color for the selection rectangle border.</string>
+            </property>
+            <property name="buddy">
+             <cstring>MarqueeBorderColorButton</cstring>
+            </property>
             <property name="text">
              <string>Marquee Border:</string>
             </property>
@@ -939,6 +1269,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="3" column="1">
            <widget class="QToolButton" name="MarqueeBorderColorButton">
+            <property name="accessibleName">
+             <string>Marquee Border</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the selection rectangle border.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -946,6 +1282,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="3">
            <widget class="QLabel" name="label_32">
+            <property name="toolTip">
+             <string>Choose the display color for inactive view borders.</string>
+            </property>
+            <property name="buddy">
+             <cstring>InactiveViewColorButton</cstring>
+            </property>
             <property name="text">
              <string>Inactive View Border:</string>
             </property>
@@ -953,6 +1295,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="3" column="4">
            <widget class="QToolButton" name="MarqueeFillColorButton">
+            <property name="accessibleName">
+             <string>Marquee Fill</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the selection rectangle fill.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -960,6 +1308,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_14">
+            <property name="toolTip">
+             <string>Choose the display color for view text.</string>
+            </property>
+            <property name="buddy">
+             <cstring>TextColorButton</cstring>
+            </property>
             <property name="text">
              <string>Text Color:</string>
             </property>
@@ -967,6 +1321,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="4">
            <widget class="QToolButton" name="TextHaloColorButton">
+            <property name="accessibleName">
+             <string>Text Halo Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the halo behind view text.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -974,6 +1334,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="3" column="3">
            <widget class="QLabel" name="label_16">
+            <property name="toolTip">
+             <string>Choose the display color for the selection rectangle fill.</string>
+            </property>
+            <property name="buddy">
+             <cstring>MarqueeFillColorButton</cstring>
+            </property>
             <property name="text">
              <string>Marquee Fill:</string>
             </property>
@@ -981,6 +1347,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="4">
            <widget class="QToolButton" name="InactiveViewColorButton">
+            <property name="accessibleName">
+             <string>Inactive View Border</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for inactive view borders.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -988,6 +1360,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="5" column="0">
            <widget class="QLabel" name="label_2">
+            <property name="toolTip">
+             <string>Choose the display color for view overlays.</string>
+            </property>
+            <property name="buddy">
+             <cstring>OverlayColorButton</cstring>
+            </property>
             <property name="text">
              <string>Overlay Color:</string>
             </property>
@@ -995,6 +1373,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="3">
            <widget class="QLabel" name="label_31">
+            <property name="toolTip">
+             <string>Choose the display color for the halo behind view text.</string>
+            </property>
+            <property name="buddy">
+             <cstring>TextHaloColorButton</cstring>
+            </property>
             <property name="text">
              <string>Text Halo Color:</string>
             </property>
@@ -1002,6 +1386,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="1">
            <widget class="QToolButton" name="TextColorButton">
+            <property name="accessibleName">
+             <string>Text Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for view text.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1009,6 +1399,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="5" column="1">
            <widget class="QToolButton" name="OverlayColorButton">
+            <property name="accessibleName">
+             <string>Overlay Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for view overlays.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1016,6 +1412,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="1">
            <widget class="QToolButton" name="ActiveViewColorButton">
+            <property name="accessibleName">
+             <string>Active View Border</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the active view border.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1036,6 +1438,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_6">
+            <property name="toolTip">
+             <string>Choose the display color for the active view border.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ActiveViewColorButton</cstring>
+            </property>
             <property name="text">
              <string>Active View Border:</string>
             </property>
@@ -1068,6 +1476,12 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QHBoxLayout" name="horizontalLayout_16">
           <item>
            <widget class="QLabel" name="label_22">
+            <property name="toolTip">
+             <string>Choose the display color for the navigation sphere.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ViewSphereColorButton</cstring>
+            </property>
             <property name="text">
              <string>Color:</string>
             </property>
@@ -1075,6 +1489,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QToolButton" name="ViewSphereColorButton">
+            <property name="accessibleName">
+             <string>View Sphere Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the navigation sphere.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1098,6 +1518,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QLabel" name="label_23">
+            <property name="toolTip">
+             <string>Choose the display color for navigation sphere text.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ViewSphereTextColorButton</cstring>
+            </property>
             <property name="text">
              <string>Text Color:</string>
             </property>
@@ -1105,6 +1531,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QToolButton" name="ViewSphereTextColorButton">
+            <property name="accessibleName">
+             <string>View Sphere Text Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for navigation sphere text.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1128,6 +1560,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QLabel" name="label_20">
+            <property name="toolTip">
+             <string>Choose the display color for the highlighted region of the navigation sphere.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ViewSphereHighlightColorButton</cstring>
+            </property>
             <property name="text">
              <string>Highlight Color:</string>
             </property>
@@ -1135,6 +1573,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QToolButton" name="ViewSphereHighlightColorButton">
+            <property name="accessibleName">
+             <string>View Sphere Highlight Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the highlighted region of the navigation sphere.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1177,6 +1621,12 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
           <item>
            <widget class="QLabel" name="label_29">
+            <property name="toolTip">
+             <string>Choose the display color for base-grid lines.</string>
+            </property>
+            <property name="buddy">
+             <cstring>gridLineColor</cstring>
+            </property>
             <property name="text">
              <string>Lines:</string>
             </property>
@@ -1184,6 +1634,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QToolButton" name="gridLineColor">
+            <property name="accessibleName">
+             <string>Grid Line Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for base-grid lines.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1207,6 +1663,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QLabel" name="label_30">
+            <property name="toolTip">
+             <string>Choose the display color for base-grid stud markers.</string>
+            </property>
+            <property name="buddy">
+             <cstring>gridStudColor</cstring>
+            </property>
             <property name="text">
              <string>Studs:</string>
             </property>
@@ -1214,6 +1676,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QToolButton" name="gridStudColor">
+            <property name="accessibleName">
+             <string>Grid Stud Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for base-grid stud markers.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1245,6 +1713,12 @@ Unsupported video cards use face tint and colored edges.</string>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="label_27">
+              <property name="toolTip">
+               <string>Choose the display color for the top of the background gradient.</string>
+              </property>
+              <property name="buddy">
+               <cstring>BackgroundGradient1ColorButton</cstring>
+              </property>
               <property name="text">
                <string>Top Color:</string>
               </property>
@@ -1252,6 +1726,12 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QToolButton" name="BackgroundGradient1ColorButton">
+              <property name="accessibleName">
+               <string>Background Top Color</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose the display color for the top of the background gradient.</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1275,6 +1755,12 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QLabel" name="label_28">
+              <property name="toolTip">
+               <string>Choose the display color for the bottom of the background gradient.</string>
+              </property>
+              <property name="buddy">
+               <cstring>BackgroundGradient2ColorButton</cstring>
+              </property>
               <property name="text">
                <string>Bottom Color:</string>
               </property>
@@ -1282,6 +1768,12 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QToolButton" name="BackgroundGradient2ColorButton">
+              <property name="accessibleName">
+               <string>Background Bottom Color</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose the display color for the bottom of the background gradient.</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1304,6 +1796,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0">
            <widget class="QRadioButton" name="BackgroundSolidRadio">
+            <property name="toolTip">
+             <string>Use a single color for the model-view background.</string>
+            </property>
             <property name="text">
              <string>So&amp;lid Color</string>
             </property>
@@ -1311,6 +1806,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="0">
            <widget class="QRadioButton" name="BackgroundGradientRadio">
+            <property name="toolTip">
+             <string>Blend the top and bottom colors in the model-view background.</string>
+            </property>
             <property name="text">
              <string>&amp;Gradient</string>
             </property>
@@ -1320,6 +1818,12 @@ Unsupported video cards use face tint and colored edges.</string>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QToolButton" name="BackgroundSolidColorButton">
+              <property name="accessibleName">
+               <string>Background Solid Color</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose the display color for the solid background.</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1351,6 +1855,12 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QGridLayout" name="gridLayout_10">
           <item row="1" column="3">
            <widget class="QLabel" name="label_37">
+            <property name="toolTip">
+             <string>Choose the display color for light-object outlines.</string>
+            </property>
+            <property name="buddy">
+             <cstring>LightColorButton</cstring>
+            </property>
             <property name="text">
              <string>Light:</string>
             </property>
@@ -1358,6 +1868,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="4">
            <widget class="QToolButton" name="LightColorButton">
+            <property name="accessibleName">
+             <string>Light Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for light-object outlines.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1381,6 +1897,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="3">
            <widget class="QLabel" name="label_38">
+            <property name="toolTip">
+             <string>Choose the display color for the focused object.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ObjectFocusedColorButton</cstring>
+            </property>
             <property name="text">
              <string>Focused:</string>
             </property>
@@ -1388,6 +1910,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="1">
            <widget class="QToolButton" name="CameraColorButton">
+            <property name="accessibleName">
+             <string>Camera Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for camera-object outlines.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1395,6 +1923,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="3">
            <widget class="QLabel" name="label_36">
+            <property name="toolTip">
+             <string>Choose the display color for the focused control point.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ControlPointFocusedColorButton</cstring>
+            </property>
             <property name="text">
              <string>Control Point Focused:</string>
             </property>
@@ -1402,6 +1936,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="1">
            <widget class="QToolButton" name="ControlPointColorButton">
+            <property name="accessibleName">
+             <string>Control Point Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for control points.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1409,6 +1949,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="4">
            <widget class="QToolButton" name="ControlPointFocusedColorButton">
+            <property name="accessibleName">
+             <string>Focused Control Point Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the focused control point.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1416,6 +1962,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="1">
            <widget class="QToolButton" name="ObjectSelectedColorButton">
+            <property name="accessibleName">
+             <string>Selected Object Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for selected objects.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1423,6 +1975,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="4">
            <widget class="QToolButton" name="ObjectFocusedColorButton">
+            <property name="accessibleName">
+             <string>Focused Object Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the display color for the focused object.</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -1430,6 +1988,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_35">
+            <property name="toolTip">
+             <string>Choose the display color for control points.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ControlPointColorButton</cstring>
+            </property>
             <property name="text">
              <string>Control Point:</string>
             </property>
@@ -1437,6 +2001,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_33">
+            <property name="toolTip">
+             <string>Choose the display color for selected objects.</string>
+            </property>
+            <property name="buddy">
+             <cstring>ObjectSelectedColorButton</cstring>
+            </property>
             <property name="text">
              <string>Selected:</string>
             </property>
@@ -1444,6 +2014,12 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_34">
+            <property name="toolTip">
+             <string>Choose the display color for camera-object outlines.</string>
+            </property>
+            <property name="buddy">
+             <cstring>CameraColorButton</cstring>
+            </property>
             <property name="text">
              <string>Camera:</string>
             </property>
@@ -1468,6 +2044,9 @@ Unsupported video cards use face tint and colored edges.</string>
       </layout>
      </widget>
      <widget class="QWidget" name="tabCategories">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Piece Categories&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create, edit, reorder, or import categories for the piece browser. The right-hand list shows pieces matching the selected category. Imported and edited categories are saved when you choose OK in Preferences; Export writes the current list immediately.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Categories</string>
       </attribute>
@@ -1490,6 +2069,12 @@ Unsupported video cards use face tint and colored edges.</string>
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <widget class="QTreeWidget" name="categoriesTree">
+             <property name="accessibleName">
+              <string>Piece Categories</string>
+             </property>
+             <property name="toolTip">
+              <string>Select a category to inspect or edit; drag categories to reorder them.</string>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>1</horstretch>
@@ -1518,6 +2103,12 @@ Unsupported video cards use face tint and colored edges.</string>
              </column>
             </widget>
             <widget class="QTreeWidget" name="partsTree">
+             <property name="accessibleName">
+              <string>Matching Pieces</string>
+             </property>
+             <property name="toolTip">
+              <string>View the library pieces matching the selected category.</string>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>2</horstretch>
@@ -1562,6 +2153,9 @@ Unsupported video cards use face tint and colored edges.</string>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QPushButton" name="importCategories">
+              <property name="toolTip">
+               <string>Replace the category list with categories from a text file.</string>
+              </property>
               <property name="text">
                <string>Import...</string>
               </property>
@@ -1569,6 +2163,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QPushButton" name="exportCategories">
+              <property name="toolTip">
+               <string>Save the current category list to a text file immediately.</string>
+              </property>
               <property name="text">
                <string>Export...</string>
               </property>
@@ -1576,6 +2173,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QPushButton" name="resetCategories">
+              <property name="toolTip">
+               <string>Restore the default category list after confirmation.</string>
+              </property>
               <property name="text">
                <string>Reset...</string>
               </property>
@@ -1607,6 +2207,9 @@ Unsupported video cards use face tint and colored edges.</string>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <widget class="QPushButton" name="newCategory">
+            <property name="toolTip">
+             <string>Create a category with a name and a keyword expression.</string>
+            </property>
             <property name="text">
              <string>New...</string>
             </property>
@@ -1614,6 +2217,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QPushButton" name="editCategory">
+            <property name="toolTip">
+             <string>Edit the selected category name and keyword expression.</string>
+            </property>
             <property name="text">
              <string>Edit...</string>
             </property>
@@ -1621,6 +2227,9 @@ Unsupported video cards use face tint and colored edges.</string>
           </item>
           <item>
            <widget class="QPushButton" name="deleteCategory">
+            <property name="toolTip">
+             <string>Remove the selected category after confirmation.</string>
+            </property>
             <property name="text">
              <string>Delete...</string>
             </property>
@@ -1645,6 +2254,9 @@ Unsupported video cards use face tint and colored edges.</string>
       </layout>
      </widget>
      <widget class="QWidget" name="tabKeyboard">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Keyboard Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a command, click Key Sequence, press the desired key combination, then choose Assign. Remove clears the selected command's shortcut. Import replaces the shortcut list; Export writes the current list immediately. Choose OK in Preferences to save changes.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Keyboard</string>
       </attribute>
@@ -1661,6 +2273,12 @@ Unsupported video cards use face tint and colored edges.</string>
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QTreeWidget" name="commandList">
+                <property name="accessibleName">
+                 <string>Commands and Keyboard Shortcuts</string>
+                </property>
+                <property name="toolTip">
+                 <string>Select the command whose keyboard shortcut you want to change.</string>
+                </property>
                 <property name="rootIsDecorated">
                  <bool>true</bool>
                 </property>
@@ -1681,6 +2299,12 @@ Unsupported video cards use face tint and colored edges.</string>
               </item>
               <item>
                <widget class="QLineEdit" name="KeyboardFilterEdit">
+                <property name="accessibleName">
+                 <string>Filter Commands</string>
+                </property>
+                <property name="toolTip">
+                 <string>Filter commands by name or shortcut.</string>
+                </property>
                 <property name="placeholderText">
                  <string>Search shortcuts</string>
                 </property>
@@ -1690,6 +2314,9 @@ Unsupported video cards use face tint and colored edges.</string>
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <item>
                  <widget class="QPushButton" name="shortcutsImport">
+                  <property name="toolTip">
+                   <string>Replace keyboard shortcuts with assignments from a text file.</string>
+                  </property>
                   <property name="text">
                    <string>Import...</string>
                   </property>
@@ -1697,6 +2324,9 @@ Unsupported video cards use face tint and colored edges.</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="shortcutsExport">
+                  <property name="toolTip">
+                   <string>Save the current keyboard shortcuts to a text file immediately.</string>
+                  </property>
                   <property name="text">
                    <string>Export...</string>
                   </property>
@@ -1704,6 +2334,9 @@ Unsupported video cards use face tint and colored edges.</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="shortcutsReset">
+                  <property name="toolTip">
+                   <string>Restore the default keyboard shortcuts after confirmation.</string>
+                  </property>
                   <property name="text">
                    <string>Reset...</string>
                   </property>
@@ -1738,6 +2371,12 @@ Unsupported video cards use face tint and colored edges.</string>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QLabel" name="label_7">
+                <property name="whatsThis">
+                 <string>&lt;p&gt;&lt;b&gt;Key Sequence&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click here and press the key combination you want to assign. Function keys, including F1, are recorded as shortcut candidates in this field. Use the Help button for guidance. Assign asks before replacing a shortcut already used by another command.&lt;/p&gt;</string>
+                </property>
+                <property name="toolTip">
+                 <string>Press the key combination to assign, then choose Assign.</string>
+                </property>
                 <property name="text">
                  <string>Key Se&amp;quence:</string>
                 </property>
@@ -1747,10 +2386,23 @@ Unsupported video cards use face tint and colored edges.</string>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="shortcutEdit"/>
+               <widget class="QLineEdit" name="shortcutEdit">
+                <property name="accessibleName">
+                 <string>Key Sequence</string>
+                </property>
+                <property name="whatsThis">
+                 <string>&lt;p&gt;&lt;b&gt;Key Sequence&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click here and press the key combination you want to assign. Function keys, including F1, are recorded as shortcut candidates in this field. Use the Help button for guidance. Assign asks before replacing a shortcut already used by another command.&lt;/p&gt;</string>
+                </property>
+                <property name="toolTip">
+                 <string>Press the key combination to assign, then choose Assign.</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="shortcutAssign">
+                <property name="toolTip">
+                 <string>Assign the entered key combination to the selected command.</string>
+                </property>
                 <property name="text">
                  <string>Assign</string>
                 </property>
@@ -1758,6 +2410,9 @@ Unsupported video cards use face tint and colored edges.</string>
               </item>
               <item>
                <widget class="QPushButton" name="shortcutRemove">
+                <property name="toolTip">
+                 <string>Clear the selected command's keyboard shortcut.</string>
+                </property>
                 <property name="text">
                  <string>Remove</string>
                 </property>
@@ -1780,6 +2435,9 @@ Unsupported video cards use face tint and colored edges.</string>
       </layout>
      </widget>
      <widget class="QWidget" name="tabMouse">
+      <property name="whatsThis">
+       <string>&lt;p&gt;&lt;b&gt;Mouse Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a tool, choose a mouse button and optional modifiers, then choose Assign. Each tool can have two shortcuts; a new assignment becomes the primary shortcut. Remove clears the primary shortcut and promotes the secondary shortcut. Choose OK in Preferences to save changes.&lt;/p&gt;</string>
+      </property>
       <attribute name="title">
        <string>Mouse</string>
       </attribute>
@@ -1796,6 +2454,12 @@ Unsupported video cards use face tint and colored edges.</string>
              <layout class="QVBoxLayout" name="verticalLayout_12">
               <item>
                <widget class="QTreeWidget" name="mouseTree">
+                <property name="accessibleName">
+                 <string>Tools and Mouse Shortcuts</string>
+                </property>
+                <property name="toolTip">
+                 <string>Select a tool to edit its primary and secondary mouse shortcuts.</string>
+                </property>
                 <property name="rootIsDecorated">
                  <bool>false</bool>
                 </property>
@@ -1823,6 +2487,9 @@ Unsupported video cards use face tint and colored edges.</string>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
                  <widget class="QPushButton" name="MouseImportButton">
+                  <property name="toolTip">
+                   <string>Replace mouse shortcuts with assignments from a text file.</string>
+                  </property>
                   <property name="text">
                    <string>Import...</string>
                   </property>
@@ -1830,6 +2497,9 @@ Unsupported video cards use face tint and colored edges.</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="MouseExportButton">
+                  <property name="toolTip">
+                   <string>Save the current mouse shortcuts to a text file immediately.</string>
+                  </property>
                   <property name="text">
                    <string>Export...</string>
                   </property>
@@ -1837,6 +2507,9 @@ Unsupported video cards use face tint and colored edges.</string>
                 </item>
                 <item>
                  <widget class="QPushButton" name="mouseReset">
+                  <property name="toolTip">
+                   <string>Restore the default mouse shortcuts after confirmation.</string>
+                  </property>
                   <property name="text">
                    <string>Reset...</string>
                   </property>
@@ -1874,6 +2547,12 @@ Unsupported video cards use face tint and colored edges.</string>
            <layout class="QHBoxLayout" name="horizontalLayout_14">
             <item>
              <widget class="QLabel" name="label_11">
+              <property name="toolTip">
+               <string>Choose the mouse button to assign to the selected tool.</string>
+              </property>
+              <property name="buddy">
+               <cstring>mouseButton</cstring>
+              </property>
               <property name="text">
                <string>Button:</string>
               </property>
@@ -1881,6 +2560,12 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QComboBox" name="mouseButton">
+              <property name="accessibleName">
+               <string>Button</string>
+              </property>
+              <property name="toolTip">
+               <string>Choose the mouse button to assign to the selected tool.</string>
+              </property>
               <item>
                <property name="text">
                 <string>None</string>
@@ -1912,6 +2597,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QCheckBox" name="mouseControl">
+              <property name="toolTip">
+               <string>Require the Control modifier for this mouse shortcut.</string>
+              </property>
               <property name="text">
                <string>Control</string>
               </property>
@@ -1919,6 +2607,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QCheckBox" name="mouseAlt">
+              <property name="toolTip">
+               <string>Require the Alt modifier for this mouse shortcut.</string>
+              </property>
               <property name="text">
                <string>Alt</string>
               </property>
@@ -1926,6 +2617,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QCheckBox" name="mouseShift">
+              <property name="toolTip">
+               <string>Require the Shift modifier for this mouse shortcut.</string>
+              </property>
               <property name="text">
                <string>Shift</string>
               </property>
@@ -1933,6 +2627,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QPushButton" name="mouseAssign">
+              <property name="toolTip">
+               <string>Assign the chosen mouse button and modifiers to the selected tool.</string>
+              </property>
               <property name="text">
                <string>Assign</string>
               </property>
@@ -1940,6 +2637,9 @@ Unsupported video cards use face tint and colored edges.</string>
             </item>
             <item>
              <widget class="QPushButton" name="mouseRemove">
+              <property name="toolTip">
+               <string>Remove the primary mouse shortcut and promote the secondary shortcut.</string>
+              </property>
               <property name="text">
                <string>Remove</string>
               </property>
@@ -1954,6 +2654,12 @@ Unsupported video cards use face tint and colored edges.</string>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
           <widget class="QLabel" name="label_13">
+           <property name="toolTip">
+            <string>Adjust how strongly mouse motion affects navigation.</string>
+           </property>
+           <property name="buddy">
+            <cstring>mouseSensitivity</cstring>
+           </property>
            <property name="text">
             <string>Mouse Sensitivity:</string>
            </property>
@@ -1961,6 +2667,12 @@ Unsupported video cards use face tint and colored edges.</string>
          </item>
          <item>
           <widget class="QSlider" name="mouseSensitivity">
+           <property name="accessibleName">
+            <string>Mouse Sensitivity</string>
+           </property>
+           <property name="toolTip">
+            <string>Adjust how strongly mouse motion affects navigation.</string>
+           </property>
            <property name="minimum">
             <number>1</number>
            </property>
@@ -1987,7 +2699,7 @@ Unsupported video cards use face tint and colored edges.</string>
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Help|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

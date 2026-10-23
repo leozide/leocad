@@ -938,17 +938,21 @@ void lcRenderDialog::LogButtonClicked()
 	QDialog Dialog(this);
 
 	Dialog.setWindowTitle(tr("Render Log"));
+	Dialog.setWhatsThis(tr("<p><b>Render Log</b></p><p>Read the renderer output to investigate warnings or a failed render. Select text and copy it with the standard keyboard shortcut when reporting a problem. Close returns to the Render dialog.</p>"));
 	Dialog.resize(800, 600);
 
 	QVBoxLayout* Layout = new QVBoxLayout(&Dialog);
 
 	QTextBrowser* TextBrowser = new QTextBrowser(&Dialog);
 	Layout->addWidget(TextBrowser);
+	TextBrowser->setAccessibleName(tr("Renderer Output"));
+	TextBrowser->setToolTip(tr("Read and copy renderer output and diagnostic messages."));
 
 	TextBrowser->setText(Text);
 
-	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, &Dialog);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Close | QDialogButtonBox::Help, Qt::Horizontal, &Dialog);
 	Layout->addWidget(ButtonBox);
+	lcSetupDialogHelp(&Dialog, ButtonBox);
 
 	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, &Dialog, &QDialog::reject);
 	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, &Dialog, &QDialog::accept);

@@ -11,6 +11,7 @@ QString lcFormatValueLocalized(float Value);
 float lcParseValueLocalized(const QString& Value);
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
+void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox);
 
 #ifdef Q_OS_WIN
 

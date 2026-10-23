@@ -2,10 +2,14 @@
 #include "lc_partselectionpopup.h"
 #include "lc_partselectionwidget.h"
 #include "lc_piecedata.h"
+#include "lc_qutils.h"
 
 lcPartSelectionPopup::lcPartSelectionPopup(lcPieceData* InitialPart, QWidget* Parent)
 	: QWidget(Parent), mInitialPart(InitialPart)
 {
+	setAccessibleName(tr("Choose Piece"));
+	setWhatsThis(tr("<p><b>Choose Piece</b></p><p>Select a piece, then choose OK or double-click it to use it. Cancel keeps the original choice. Filter the list to find a piece; Options controls matching and list display. When None is available, select it to omit the piece.</p>"));
+
 	QVBoxLayout* Layout = new QVBoxLayout(this);
 
 	mPartSelectionWidget = new lcPartSelectionWidget(true, this);
@@ -17,8 +21,9 @@ lcPartSelectionPopup::lcPartSelectionPopup(lcPieceData* InitialPart, QWidget* Pa
 	connect(mPartSelectionWidget, &lcPartSelectionWidget::PartPicked, this, &lcPartSelectionPopup::Accept);
 	connect(mPartSelectionWidget, &lcPartSelectionWidget::LayoutChanged, this, &lcPartSelectionPopup::ResizeToContents, Qt::QueuedConnection);
 
-	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Help, this);
 	Layout->addWidget(ButtonBox);
+	lcSetupWidgetHelp(this, ButtonBox);
 
 	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcPartSelectionPopup::Accept);
 	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcPartSelectionPopup::Reject);

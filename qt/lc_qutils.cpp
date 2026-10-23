@@ -11,29 +11,34 @@
 #include <TlHelp32.h>
 #endif
 
-void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox)
+void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox)
 {
-	const auto ShowHelp = [Dialog](QWidget* Widget)
+	const auto ShowHelp = [Root](QWidget* Widget)
 	{
-		while (Widget && Widget->whatsThis().isEmpty() && Widget != Dialog)
+		while (Widget && Widget->whatsThis().isEmpty() && Widget != Root)
 			Widget = Widget->parentWidget();
 
 		if (Widget && !Widget->whatsThis().isEmpty())
 			QWhatsThis::showText(Widget->mapToGlobal(QPoint(0, Widget->height())), Widget->whatsThis(), Widget);
 	};
 
-	QObject::connect(ButtonBox, &QDialogButtonBox::helpRequested, Dialog, [Dialog, ShowHelp]()
+	QObject::connect(ButtonBox, &QDialogButtonBox::helpRequested, Root, [Root, ShowHelp]()
 	{
-		ShowHelp(Dialog);
+		ShowHelp(Root);
 	});
 
-	QShortcut* HelpShortcut = new QShortcut(QKeySequence(Qt::Key_F1), Dialog);
+	QShortcut* HelpShortcut = new QShortcut(QKeySequence(Qt::Key_F1), Root);
 	HelpShortcut->setContext(Qt::WidgetWithChildrenShortcut);
-	QObject::connect(HelpShortcut, &QShortcut::activated, Dialog, [Dialog, ShowHelp]()
+	QObject::connect(HelpShortcut, &QShortcut::activated, Root, [Root, ShowHelp]()
 	{
 		QWidget* Focus = QApplication::focusWidget();
-		ShowHelp(Focus && Dialog->isAncestorOf(Focus) ? Focus : Dialog);
+		ShowHelp(Focus && Root->isAncestorOf(Focus) ? Focus : Root);
 	});
+}
+
+void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox)
+{
+	lcSetupWidgetHelp(Dialog, ButtonBox);
 }
 
 QString lcFormatValue(float Value, int Precision)
@@ -288,6 +293,9 @@ QVariant lcPieceIdStringModel::data(const QModelIndex& Index, int Role) const
 lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Parent)
 	: QWidget(Parent)
 {
+	setAccessibleName(tr("Choose Color"));
+	setWhatsThis(tr("<p><b>Choose Color</b></p><p>Pick a color using the swatches or enter its component values. Choose OK to use the selected color, or Cancel to keep the original color. Editing the controls alone does not apply the color.</p>"));
+
 	QVBoxLayout* Layout = new QVBoxLayout(this);
 	Layout->setContentsMargins(0, 0, 0, 0);
 
@@ -296,9 +304,12 @@ lcColorDialogPopup::lcColorDialogPopup(const QColor& InitialColor, QWidget* Pare
 	mColorDialog->setOptions(QColorDialog::DontUseNativeDialog | QColorDialog::NoButtons);
 
 	Layout->addWidget(mColorDialog);
+	mColorDialog->setAccessibleName(tr("Custom Color"));
+	mColorDialog->setToolTip(tr("Choose a color or enter its component values."));
 
-	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+	QDialogButtonBox* ButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel|QDialogButtonBox::Help, this);
 	Layout->addWidget(ButtonBox);
+	lcSetupWidgetHelp(this, ButtonBox);
 
 	QObject::connect(ButtonBox, &QDialogButtonBox::accepted, this, &lcColorDialogPopup::Accept);
 	QObject::connect(ButtonBox, &QDialogButtonBox::rejected, this, &lcColorDialogPopup::Reject);

@@ -3728,13 +3728,13 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation type="obsolete">Erreur</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3570"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3572"/>
         <source>Existing file &apos;%1&apos; detected.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fichier existant '%1' détecté.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3571"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3573"/>
         <source>&apos;%1&apos;&lt;br&gt;This file already exists.&lt;br&gt;Replace existing file?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">'%1'&lt;br&gt;Ce fichier existe déjà.&lt;br&gt;Remplacer le fichier existant ?</translation>
@@ -5050,15 +5050,15 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation type="obsolete">Erreur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qutils.cpp" line="91"/>
-        <location filename="../qt/lc_qutils.cpp" line="97"/>
-        <location filename="../qt/lc_qutils.cpp" line="115"/>
+        <location filename="../qt/lc_qutils.cpp" line="96"/>
+        <location filename="../qt/lc_qutils.cpp" line="102"/>
+        <location filename="../qt/lc_qutils.cpp" line="120"/>
         <source>Stop Blender Process</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Arrêter le processus Blender</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qutils.cpp" line="115"/>
+        <location filename="../qt/lc_qutils.cpp" line="120"/>
         <source>%1 failed: %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 a échoué : %2</translation>
@@ -7523,58 +7523,58 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcBlenderPreferences</name>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="359"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="358"/>
         <source>Blender LDraw Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender LDraw Paramètres du module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="378"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="377"/>
         <source>Blender Executable</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Exécutable</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="380"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="379"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Executable&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the Blender executable. Finishing an edit to this path starts Blender configuration and may install or update the LDraw add-on. Configuration must complete before add-on paths and settings become available.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="391"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="390"/>
         <source>Installed Blender version reported during configuration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="392"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="391"/>
         <source>Blender Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="405"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="629"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="786"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="404"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="628"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="785"/>
         <source>Browse...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Parcourir...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="408"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="407"/>
         <source>Locate the Blender executable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="411"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="410"/>
         <source>%1 Blender LDraw Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Blender LDraw Module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="413"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="412"/>
         <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Update downloads or reconfigures the LDraw add-on. Output opens the configuration log when available. The update-check preference takes effect as soon as you change it.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="418"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="417"/>
         <source>Prompt to download new add-on version when available</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Invite à télécharger la nouvelle version du module complémentaire lorsqu'elle est disponible</translation>
@@ -7585,7 +7585,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">%1 Blender LDraw module complémentaire d'importation et de rendu d'image</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="441"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="440"/>
         <source>Update</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mise à jour</translation>
@@ -7596,7 +7596,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Mettre à jour le module complémentaire %1 Blender LDraw</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="446"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="445"/>
         <source>Output...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sortir...</translation>
@@ -7607,13 +7607,13 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Ouvrir le journal de sortie standard</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="452"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="451"/>
         <source>Enabled Add-on Modules</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Modules complémentaires activés</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="458"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="457"/>
         <source>LDraw Import TN</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer le TN</translation>
@@ -7624,7 +7624,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Activer le module d'importation complémentaire (adapté de LDraw Import par Toby Nelson) dans Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="463"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="462"/>
         <source>LDraw Import MM</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer MM</translation>
@@ -7635,7 +7635,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Activer le module d'importation complémentaire (adapté de LDraw Import par Matthew Morrison) dans Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="468"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="467"/>
         <source>%1 Image Render</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 Rendu d'image</translation>
@@ -7646,96 +7646,96 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Module complémentaire de rendu d'image dans Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="500"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1186"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1642"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1719"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="499"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1185"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1718"/>
         <source>Blender</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="500"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1199"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1728"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="499"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1198"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1727"/>
         <source>Blender Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Module complémentaire Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="514"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="513"/>
         <source>Blender not configured.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender non configuré.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="526"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="525"/>
         <source>Add-on not configured - Update.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Module complémentaire non configuré - Mise à jour.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="528"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="527"/>
         <source>Add-on not configured.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Module complémentaire non configuré.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="602"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="601"/>
         <source>LDraw Import TN Add-on Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer les chemins du module complémentaire TN</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="605"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="762"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="761"/>
         <source>&lt;p&gt;&lt;b&gt;Add-on Paths&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="630"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="787"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="629"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="786"/>
         <source>Choose a file or folder for %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="653"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="810"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="652"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="809"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the selected importer&apos;s geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="656"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="655"/>
         <source>LDraw Import TN Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer les paramètres du module complémentaire TN</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="759"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="758"/>
         <source>LDraw Import MM Add-on Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer les chemins du module complémentaire MM</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="813"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="812"/>
         <source>LDraw Import MM Add-on Settings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">LDraw Importer les paramètres du module complémentaire MM</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="977"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="976"/>
         <source>add-on install</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">installation du module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="989"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="988"/>
         <source>test</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">test</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1012"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1011"/>
         <source>Cannot start Blender %1 process.
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7743,7 +7743,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1021"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1020"/>
         <source>Failed to execute Blender %1.
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7751,28 +7751,28 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1038"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1037"/>
         <source>A simple check to test if the selected file is Blender failed. Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer. The ticket should contain the full path to the Blender executable.</source>
         <oldsource>A simple check to test if the selected file is Blender failed.Please create a %1 GitHub ticket if you are sure the file is Blender 2.8 or newer.The ticket should contain the full path to the Blender executable.</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Une simple vérification pour tester si le fichier sélectionné est Blender a échoué. Veuillez créer un ticket %1 GitHub si vous êtes sûr que le fichier est Blender 2.8 ou plus récent. Le ticket doit contenir le chemin complet de l'exécutable Blender.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1060"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1059"/>
         <source>Blender %1 process completed. Version: %2 validated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender %1 processus terminé. Version : %2 validée.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1081"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1213"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1080"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1212"/>
         <source>Installing...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Installation...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1117"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1311"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1116"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1310"/>
         <source>Error writing to file &apos;%1&apos;:
 %2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7780,33 +7780,48 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 %2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1131"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1141"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1130"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1140"/>
         <source>Blender test failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le test Blender a échoué.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2036"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2035"/>
         <source>Save Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Enregistrer la sortie de l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2047"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2046"/>
         <source>Cancel Blender Add-on Installation</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Annuler l’installation de l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3127"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3183"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2341"/>
+        <source>&lt;p&gt;&lt;b&gt;Reset Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose Last Apply to restore the saved paths and settings, or System Default to load the built-in defaults. Choose OK to update the settings form, then Apply in the parent dialog to save them. Cancel keeps the current edits.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
+        <source>Restore paths and settings to the last applied values.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2349"/>
+        <source>Replace paths and settings with the built-in defaults.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3185"/>
         <source>Apply Render Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Appliquer les paramètres de rendu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3165"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3167"/>
         <source>Set LDraw Color Scheme</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Définir le jeu de couleurs LDraw</translation>
@@ -7817,20 +7832,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">%1 Blender LDraw Modules complémentaires</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1150"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1149"/>
         <source>No import module enabled. If you continue, the default import module (Import TN) will be used.&lt;br&gt;If you select No, all add-on modules will be disabled.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Aucun module d'importation activé. Si vous continuez, le module d'importation par défaut (Import TN) sera utilisé.&lt;br&gt;Si vous sélectionnez Non, tous les modules complémentaires seront désactivés.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1151"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1150"/>
         <source>Continue with the default import module?</source>
         <oldsource>Continue with the default import module ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Continuer avec le module d'importation par défaut ?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1177"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1176"/>
         <source>Downloading...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Téléchargement...</translation>
@@ -7841,137 +7856,137 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Afficher la version complémentaire de rendu Blender et %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1208"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1207"/>
         <source>Could not find add-on install file: &apos;%1&apos;.</source>
         <oldsource>Could not find add-on install file: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible de trouver le fichier d'installation du module complémentaire : '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1208"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1256"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1328"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1709"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1988"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1207"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1255"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1327"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1708"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1987"/>
         <source>Install Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Installer l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1209"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1208"/>
         <source>Not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pas trouvé.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1235"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1234"/>
         <source>Blender Add-on Install Arguments: &apos;%1&apos; %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender Arguments d'installation du module complémentaire : '%1' %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1256"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1255"/>
         <source>Cannot read add-on file &apos;%1&apos;&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible de lire le fichier complémentaire '%1'&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1325"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1324"/>
         <source>Install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">L'installation a échoué.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1328"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1327"/>
         <source>Blender executable not found at &apos;%1&apos;.</source>
         <oldsource>Blender executable not found at &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Exécutable Blender introuvable sur '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1354"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3812"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1353"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3814"/>
         <source>Extract Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Extraire l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1416"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1415"/>
         <source>Check for Blender Add-on Updates</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Rechercher les mises à jour de l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1710"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1709"/>
         <source>Add-on install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">L'installation du module complémentaire a échoué.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1342"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1341"/>
         <source>Extracting...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Extraction...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="419"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="418"/>
         <source>Check for add-on updates; this preference is saved immediately.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="432"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="431"/>
         <source>Installed %1 Blender LDraw import and render add-on version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="435"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
         <source>Blender LDraw Add-on Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="442"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="441"/>
         <source>Download or reconfigure the %1 Blender LDraw add-on.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="447"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="446"/>
         <source>Open the standard output log.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="455"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="454"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Modules&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose TN or MM to select the LDraw importer and its options. Changing the importer configures Blender immediately. The image render module is managed automatically; an import module is required to import or render a model.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="459"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="458"/>
         <source>Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="464"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="463"/>
         <source>Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="469"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="468"/>
         <source>Add-on image render module in Blender.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1140"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1139"/>
         <source>Test Blender</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Tester Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1149"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1148"/>
         <source>Configure Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Configurer l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1350"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1349"/>
         <source>Failed to extract &apos;%1&apos; to &apos;%2&apos;.</source>
         <oldsource>Failed to extract &apos;%1&apos; to &apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -7983,7 +7998,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Extraire le module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1416"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1415"/>
         <source>Check latest add-on version failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">La vérification de la dernière version du module complémentaire a échoué.</translation>
@@ -7994,151 +8009,151 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Dernier module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1429"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1428"/>
         <source>Cannot open add-on archive file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible d'ouvrir le fichier d'archive du module complémentaire : '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1429"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1444"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1453"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1497"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1552"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1605"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1608"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1611"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1617"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1620"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1626"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1428"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1436"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1443"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1452"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1496"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1551"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1597"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1600"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1607"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1616"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1625"/>
         <source>Update Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Mettre à jour l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1437"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1436"/>
         <source>Cannot extract add-on archive version file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible d'extraire le fichier de version d'archive du module complémentaire : '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1444"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1443"/>
         <source>Cannot read add-on archive version file: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible de lire le fichier de version d'archive du module complémentaire : '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1453"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1452"/>
         <source>Cannot read add-on version file: &apos;%1&apos;&lt;br&gt;%2.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Impossible de lire le fichier de version du module complémentaire : '%1'&lt;br&gt;%2.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1498"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1497"/>
         <source>Detected %1 Blender LDraw add-on %2. A newer version %3 exists.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Détection du module complémentaire %1 Blender LDraw %2. Une version plus récente %3 existe.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1499"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1498"/>
         <source>Do you want to download version %1?</source>
         <oldsource>Do you want to download version %1 ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Voulez-vous télécharger la version %1 ?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1536"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1535"/>
         <source>Failed to properly remove Blender add-on: &apos;%1&apos;.</source>
         <oldsource>Failed to properly remove Blender add-on: &apos;%1&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la suppression correcte du module complémentaire Blender : '%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1536"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1535"/>
         <source>Remove Existing Add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Supprimer le module complémentaire existant</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1552"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1551"/>
         <source>Failed to rename existing Blender add-on archive &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec du renommage de l'archive complémentaire Blender existante '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1598"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1597"/>
         <source>Failed to validate Blender add-on file name.&lt;br&gt;Downloaded: &apos;%1&apos;&lt;br&gt;Received: &apos;%2&apos;</source>
         <oldsource>Failed to validate Blender add-on file name&lt;br&gt;Downloaded:&apos;%1&apos;&lt;br&gt;Received:&apos;%2&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la validation du nom du fichier complémentaire Blender&lt;br&gt;Téléchargé :'%1'&lt;br&gt;Reçu :'%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1601"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1600"/>
         <source>Failed to validate Blender add-on SHA hash.&lt;br&gt;Calculated: %1&lt;br&gt;Received: %2</source>
         <oldsource>Failed to validate Blender add-on SHA hash &lt;br&gt;Calculated:%1&lt;br&gt;Received:%2</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la validation du hachage SHA du module complémentaire Blender &lt;br&gt;Calculé :%1&lt;br&gt;Reçu :%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1605"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1604"/>
         <source>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;.</source>
         <oldsource>Failed to receive SHA hash for Blender add-on &apos;%1.sha256&apos;</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la réception du hachage SHA pour le module complémentaire Blender '%1.sha256'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1608"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1607"/>
         <source>Failed to read Blender add-on archive:&lt;br&gt;&apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la lecture de l'archive du module complémentaire Blender :&lt;br&gt;'%1':&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1611"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1610"/>
         <source>Failed to write Blender add-on archive:&lt;br&gt;&apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de l'écriture de l'archive complémentaire Blender :&lt;br&gt;'%1' :&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1617"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1616"/>
         <source>Failed to remove invalid Blender add-on archive:&lt;br&gt;&apos;%1&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la suppression de l'archive du module complémentaire Blender non valide :&lt;br&gt;'%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1620"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1619"/>
         <source>Failed to restore Blender add-on archive:&lt;br&gt;&apos;%1&apos; from &apos;%2&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de la restauration de l'archive du module complémentaire Blender :&lt;br&gt;'%1' à partir de '%2'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1626"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1625"/>
         <source>Failed to download Blender add-on archive:&lt;br&gt;&apos;%1&apos;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec du téléchargement de l'archive du module complémentaire Blender :&lt;br&gt;'%1'</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1631"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1630"/>
         <source>Download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le téléchargement a échoué.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1642"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1641"/>
         <source>Blender add-on</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Module complémentaire Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1665"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1664"/>
         <source>%1 not configured</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 non configuré</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1676"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1675"/>
         <source>%1 setup...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Configuration %1...</translation>
@@ -8149,7 +8164,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">L'installation du module complémentaire a échoué. Voir '%1/stderr-blender-add-on-install' pour plus de détails.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1706"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1705"/>
         <source>Error: Install failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erreur : l'installation a échoué.</translation>
@@ -8160,7 +8175,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">%1 Blender Installation du module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1711"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1710"/>
         <source>LDraw add-on install encountered one or more errors. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">L'installation du module complémentaire LDraw a rencontré une ou plusieurs erreurs. Voir Afficher les détails...</translation>
@@ -8171,55 +8186,55 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Blender version %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1834"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1833"/>
         <source>Blender add-on standard output file not found: &apos;%1&apos;.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fichier de sortie standard du module complémentaire Blender introuvable : '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1834"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1833"/>
         <source>View Blender Add-on Output</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Afficher la sortie de l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1929"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1928"/>
         <source>v%1</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
         <translation type="unfinished">v%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1985"/>
         <source>errors%1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">erreurs%1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1985"/>
         <source> and warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished"> et avertissements</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1986"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1985"/>
         <source>warnings</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">avertissements</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1988"/>
         <source>Add-on install standard output.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sortie standard d'installation du module complémentaire.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="1990"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="1989"/>
         <source>LDraw add-on install encountered %1. See Show Details...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">L'installation du module complémentaire LDraw a rencontré %1. Voir Afficher les détails...</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2009"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2008"/>
         <source>Failed to open log file: &apos;%1&apos;:
 %2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -8227,7 +8242,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 %2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2036"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2035"/>
         <source>Error writing to %1 file &apos;%2&apos;:
 %3</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -8240,25 +8255,24 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Annuler l'installation du module complémentaire %1</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2048"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2047"/>
         <source>Are you sure you want to cancel the add-on installation?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Êtes-vous sûr de vouloir annuler l'installation du module complémentaire ?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2341"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2340"/>
         <source>Add-on Reset</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Réinitialisation du module complémentaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2342"/>
         <source>Select how to reset settings. Choice is since last apply or system default.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Sélectionnez comment réinitialiser les paramètres. Le choix est depuis la dernière application ou par défaut du système.</translation>
+        <translation type="obsolete">Sélectionnez comment réinitialiser les paramètres. Le choix est depuis la dernière application ou par défaut du système.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2345"/>
         <source>Last Apply</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Dernière candidature</translation>
@@ -8270,33 +8284,33 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished">Système par défaut</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2634"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2652"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2636"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2654"/>
         <source>%1 - Setting (%2)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">%1 - Paramètre (%2)</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2671"/>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2676"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2673"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2678"/>
         <source>Load Blender Add-on Settings</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Charger les paramètres de l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2676"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2678"/>
         <source>Blender config file was not found. Install log check failed:&lt;br&gt;%1:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le fichier de configuration Blender est introuvable. Échec de la vérification du journal d'installation :&lt;br&gt;%1:&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2946"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2948"/>
         <source>Select Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="2961"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="2963"/>
         <source>Locate %1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Localisez %1</translation>
@@ -8307,25 +8321,25 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">LDraw Conflit de paramètres de rendu</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3128"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3130"/>
         <source>Crop image configuration settings conflict were resolved.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le conflit des paramètres de configuration de l’image de recadrage a été résolu.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3131"/>
         <source>Keep aspect ratio set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Conservez le rapport hauteur/largeur défini sur false.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3131"/>
         <source>Add environment (backdrop and base plane) set to false.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ajouter un environnement (toile de fond et plan de base) défini sur false.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3131"/>
         <source>Transparent background set to true.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Arrière-plan transparent défini sur true.&lt;br&gt;</translation>
@@ -8336,13 +8350,13 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Couleurs LDraw personnalisées</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3166"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3168"/>
         <source>Color scheme &apos;custom&apos; cannot be enabled. Custom LDConfig file not found.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le jeu de couleurs « personnalisé » ne peut pas être activé. Fichier LDConfig personnalisé introuvable.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3167"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3169"/>
         <source>Color scheme &apos;custom&apos; selected but no LDConfig file was specified.&lt;br&gt;The default color scheme &apos;%1&apos; will be used.&lt;br&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Jeu de couleurs « personnalisé » sélectionné mais aucun fichier LDConfig n'a été spécifié.&lt;br&gt;Le jeu de couleurs par défaut '%1' sera utilisé.&lt;br&gt;</translation>
@@ -8353,56 +8367,56 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Paramètres de rendu modifiés</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3184"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3186"/>
         <source>Do you want to accept the modified settings before quitting?</source>
         <oldsource>Do you want to accept the modified settings before quitting ?</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Voulez-vous accepter les paramètres modifiés avant de quitter ?</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3553"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3555"/>
         <source>Failed to open Blender parameter file: &apos;%1&apos;:&lt;br&gt;%2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Échec de l'ouverture du fichier de paramètres Blender : '%1':&lt;br&gt;%2</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3556"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3558"/>
         <source>Export Blender Parameters</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Exporter les paramètres Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3569"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3571"/>
         <source>Replace Existing File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Remplacer le fichier existant</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3641"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3643"/>
         <source>Do you want to download version </source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Voulez-vous télécharger la version </translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3645"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3647"/>
         <source>Do not show download new add-on version message again.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ne plus afficher le message de téléchargement de la nouvelle version du module complémentaire.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3664"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3666"/>
         <source>Add-on download failed.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le téléchargement du module complémentaire a échoué.</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3664"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3666"/>
         <source>Download Blender Add-on</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Télécharger l’extension Blender</translation>
     </message>
     <message>
-        <location filename="../common/lc_blenderpreferences.cpp" line="3812"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3814"/>
         <source>ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le format d'entrée ZipFile (HostOS %1) à l'index %2 n'est pas pris en charge. Extrait terminé.</translation>
@@ -8413,7 +8427,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Extraire le module complémentaire</translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3877"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3879"/>
         <source>%1 of %n files extracted.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -8422,7 +8436,7 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3548"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3550"/>
         <source>Finished writing Blender parameter entries. Processed %n lines in file &apos;%1&apos;.</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">
@@ -8582,6 +8596,29 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_categorydialog.cpp" line="43"/>
         <source>Keywords cannot be empty.</source>
         <translation>Le champ mots clés ne peut pas être vide.</translation>
+    </message>
+</context>
+<context>
+    <name>lcColorDialogPopup</name>
+    <message>
+        <location filename="../qt/lc_qutils.cpp" line="296"/>
+        <source>Choose Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qutils.cpp" line="297"/>
+        <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pick a color using the swatches or enter its component values. Choose OK to use the selected color, or Cancel to keep the original color. Editing the controls alone does not apply the color.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qutils.cpp" line="307"/>
+        <source>Custom Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qutils.cpp" line="308"/>
+        <source>Choose a color or enter its component values.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -11356,148 +11393,202 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     </message>
 </context>
 <context>
+    <name>lcPartSelectionPopup</name>
+    <message>
+        <location filename="../common/lc_partselectionpopup.cpp" line="10"/>
+        <source>Choose Piece</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionpopup.cpp" line="11"/>
+        <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a piece, then choose OK or double-click it to use it. Cancel keeps the original choice. Filter the list to find a piece; Options controls matching and list display. When None is available, select it to omit the piece.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>lcPartSelectionWidget</name>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="984"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="985"/>
         <source>Filter Categories</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Filtrer les catégories</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="989"/>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1355"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="991"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1364"/>
         <source>Match Case</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Étui de correspondance</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1021"/>
         <source>Options</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Possibilités</translation>
+        <translation type="obsolete">Possibilités</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1277"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1286"/>
         <source>Edit Palettes...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Modifier les palettes...</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1303"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1312"/>
         <source>Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Icônes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1307"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1316"/>
         <source>No Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Aucune icône</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1312"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1321"/>
         <source>Small Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Petites icônes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1317"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1326"/>
         <source>Medium Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Icônes moyennes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1322"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1331"/>
         <source>Large Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Grandes icônes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1327"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1336"/>
         <source>Extra Large Icons</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Icônes extra grandes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1342"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1351"/>
         <source>Lock Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur de verrouillage</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1349"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1358"/>
         <source>Filter</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Filtre</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1351"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1360"/>
         <source>Regular Expression</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Expression régulière</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1361"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1370"/>
         <source>Piece ID</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">ID de la pièce</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1366"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1375"/>
         <source>Piece Description</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Description de la pièce</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1286"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1295"/>
         <source>Show Piece Names</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Afficher les noms des pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1016"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="986"/>
+        <source>Filter category names to narrow the category list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1002"/>
+        <source>Piece Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1003"/>
+        <source>Choose a category or palette to display its pieces.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1020"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1021"/>
         <source>Filter Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Pièces filtrantes</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1291"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1022"/>
+        <source>Filter the displayed pieces using the matching options.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1027"/>
+        <source>Configure piece filtering and list display.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1028"/>
+        <source>Piece List Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1037"/>
+        <source>Available Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1038"/>
+        <source>Select a piece from the filtered list.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1300"/>
         <source>Show Decorated Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Afficher les pièces décorées</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1295"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1304"/>
         <source>Show Piece Aliases</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Afficher les alias des pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1336"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1345"/>
         <source>List Mode</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mode liste</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1408"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1417"/>
         <source>Favorites</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Favoris</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1541"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1550"/>
         <source>All Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Toutes les pièces</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1547"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1556"/>
         <source>In Use</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Utilisé</translation>
     </message>
     <message>
-        <location filename="../common/lc_partselectionwidget.cpp" line="1553"/>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1562"/>
         <source>Submodels</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sous-modèles</translation>
@@ -11640,26 +11731,26 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
 <context>
     <name>lcPreferencesDialog</name>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="14"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="17"/>
         <source>Preferences</source>
         <translation>Préférences</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="24"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="30"/>
         <source>General</source>
         <translation>Général</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="127"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="163"/>
         <source>Default Author Name:</source>
         <oldsource>Default author name:</oldsource>
         <translation type="unfinished">Auteur par défaut :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="208"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="232"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="256"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="280"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="286"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="323"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="360"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="397"/>
         <source>...</source>
         <translation>...</translation>
     </message>
@@ -11668,123 +11759,265 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="vanished">Bibliothèque de pièces personnalisées :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="147"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="196"/>
         <source>Open most recent file on startup</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ouvrir le fichier le plus récent au démarrage</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1784"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
+        <source>Set the distance in LDraw units at which simpler piece meshes are used.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1493"/>
+        <source>View Sphere Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1535"/>
+        <source>View Sphere Text Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1577"/>
+        <source>View Sphere Highlight Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1638"/>
+        <source>Grid Line Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1680"/>
+        <source>Grid Stud Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1730"/>
+        <source>Background Top Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1772"/>
+        <source>Background Bottom Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1872"/>
+        <source>Light Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1914"/>
+        <source>Camera Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1940"/>
+        <source>Control Point Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1953"/>
+        <source>Focused Control Point Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1966"/>
+        <source>Selected Object Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1979"/>
+        <source>Focused Object Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2439"/>
+        <source>&lt;p&gt;&lt;b&gt;Mouse Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a tool, choose a mouse button and optional modifiers, then choose Assign. Each tool can have two shortcuts; a new assignment becomes the primary shortcut. Remove clears the primary shortcut and promotes the secondary shortcut. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2442"/>
         <source>Mouse</source>
         <translation>Souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1792"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2450"/>
         <source>Mouse Shortcuts</source>
         <translation>Raccourcis souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1807"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2458"/>
+        <source>Tools and Mouse Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2461"/>
+        <source>Select a tool to edit its primary and secondary mouse shortcuts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2471"/>
         <source>Action</source>
         <translation>Action</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1812"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2476"/>
         <source>Shortcut 1</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Raccourci 1</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1817"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2481"/>
         <source>Shortcut 2</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Raccourci 2</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1878"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2491"/>
+        <source>Replace mouse shortcuts with assignments from a text file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2501"/>
+        <source>Save the current mouse shortcuts to a text file immediately.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2511"/>
+        <source>Restore the default mouse shortcuts after confirmation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2551"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2567"/>
+        <source>Choose the mouse button to assign to the selected tool.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2557"/>
         <source>Button:</source>
         <translation>Bouton :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1886"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2564"/>
+        <source>Button</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2571"/>
         <source>None</source>
         <translation>Aucun</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1891"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2576"/>
         <source>Left</source>
         <translation>Gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1896"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2581"/>
         <source>Middle</source>
         <translation>Central</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1901"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2586"/>
         <source>Right</source>
         <translation>Droit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1909"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2594"/>
         <source>Modifiers:</source>
         <translation>Modificateurs :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1916"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2601"/>
+        <source>Require the Control modifier for this mouse shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2604"/>
         <source>Control</source>
         <translation>Contrôle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1923"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2611"/>
+        <source>Require the Alt modifier for this mouse shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2614"/>
         <source>Alt</source>
         <translation>Alt</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1930"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2621"/>
+        <source>Require the Shift modifier for this mouse shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2624"/>
         <source>Shift</source>
         <translation>Maj</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1958"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2631"/>
+        <source>Assign the chosen mouse button and modifiers to the selected tool.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2641"/>
+        <source>Remove the primary mouse shortcut and promote the secondary shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2658"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2674"/>
+        <source>Adjust how strongly mouse motion affects navigation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2664"/>
         <source>Mouse Sensitivity:</source>
         <oldsource>Mouse sensitivity:</oldsource>
         <translation type="unfinished">Sensibilité de la souris :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="77"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="101"/>
         <source>Check for Updates:</source>
         <oldsource>Check for updates:</oldsource>
         <translation type="unfinished">Vérifier les mises à jour :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="241"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="335"/>
         <source>PO&amp;V-Ray Executable:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Exécutable PO&amp;V-Ray :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="59"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="80"/>
         <source>Never</source>
         <translation>Jamais</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="64"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="85"/>
         <source>Once a day</source>
         <translation>Tous les jours</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="69"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="90"/>
         <source>Once a week</source>
         <translation>Toutes les semaines</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="140"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="186"/>
         <source>Fixed direction keys</source>
         <translation>Touches de directions fixes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="300"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="423"/>
         <source>Rendering</source>
         <translation>Rendu</translation>
     </message>
@@ -11801,209 +12034,212 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="vanished">largeur</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="500"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="704"/>
         <source>Anti-aliasing</source>
         <translation>Anti-aliasing</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="610"/>
         <source>2x</source>
         <translation>2x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="429"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="615"/>
         <source>4x</source>
         <translation>4x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="434"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="620"/>
         <source>8x</source>
         <translation>8x</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="416"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="596"/>
         <source>Shading Mode:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mode d'ombrage :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="317"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="452"/>
         <source>Wireframe</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Filaire</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="322"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="457"/>
         <source>Flat Shading</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ombrage plat</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="327"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="462"/>
         <source>Default Lights</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lumières par défaut</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="759"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1038"/>
         <source>Base Grid</source>
         <translation>Grille de base</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="809"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1103"/>
         <source>Draw studs</source>
         <translation>Dessiner les tenons</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="765"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1044"/>
         <source>studs</source>
         <translation>tenons</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="785"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1067"/>
         <source>Draw lines every</source>
         <translation>Dessine des lignes tous les</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1066"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="919"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1172"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1474"/>
         <source>View Sphere</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Voir la sphère</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="665"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="864"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="926"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1179"/>
         <source>Disabled</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Désactivé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="670"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="869"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="931"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1184"/>
         <source>Small</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Petit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="675"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="874"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="936"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1189"/>
         <source>Medium</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Moyen</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="680"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="879"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="941"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1194"/>
         <source>Large</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Grand</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1132"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1570"/>
         <source>Highlight Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur de surbrillance :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1072"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1486"/>
         <source>Color:</source>
         <translation type="unfinished">Couleur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="964"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1102"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1318"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1528"/>
         <source>Text Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur du texte :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="650"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="725"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="856"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="899"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="998"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1165"/>
         <source>Location:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Emplacement:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="33"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="39"/>
         <source>Application</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Application</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="39"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="48"/>
         <source>Language:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Langue:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="50"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="65"/>
         <source>Default</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Défaut</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="100"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="127"/>
         <source>Color Theme:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Thème de couleur :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="111"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="144"/>
         <source>Dark</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sombre</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="116"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="149"/>
         <source>System</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Système</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="154"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="203"/>
         <source>Custom Paths</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Chemins personnalisés</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="160"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="212"/>
         <source>Pieces Library:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Bibliothèque de pièces :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="193"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="261"/>
         <source>Color Configuration:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Configuration des couleurs :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="217"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="298"/>
         <source>Minifig Settings:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Paramètres des minifigs :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="265"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="372"/>
         <source>&amp;LGEO Library:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&amp;LGEO Bibliothèque :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="292"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="412"/>
         <source>Restore tab layout</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Restaurer la disposition des onglets</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="507"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="644"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="717"/>
         <source>Stud Style</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Style de goujon</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="335"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="473"/>
         <source>Mesh LOD</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Niveau de détail du maillage</translation>
@@ -12013,520 +12249,1204 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="obsolete">Mettre en évidence les nouvelles pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="450"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
         <source>Plain</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Plaine</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="455"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="656"/>
         <source>Thin Lines Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Logo de lignes fines</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="460"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="661"/>
         <source>Outline Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Logo de contour</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="465"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="666"/>
         <source>Sharp Top Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Logo supérieur pointu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="470"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="671"/>
         <source>Rounded Top Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Logo supérieur arrondi</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="475"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="676"/>
         <source>Flattened Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Logo aplati</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="681"/>
         <source>High Contrast</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Contraste élevé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="485"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="686"/>
         <source>High Contrast with Logo</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Contraste élevé avec logo</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="607"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="844"/>
         <source>Settings...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Paramètres...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="583"/>
         <source>Contrast Settings...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Paramètres de contraste...</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="6"/>
+        <source>&lt;p&gt;&lt;b&gt;Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the application, display, colors, piece categories, and keyboard and mouse shortcuts. Choose OK to save the changes or Cancel to discard edits in Preferences. Language, piece-library, and antialiasing changes may require restarting LeoCAD.&lt;/p&gt;&lt;p&gt;Export buttons write files immediately. Blender add-on settings have their own Apply action and can configure Blender before you close Preferences.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="27"/>
+        <source>&lt;p&gt;&lt;b&gt;General Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set application behavior and custom library, configuration, and renderer paths. Leave optional configuration paths empty to use the built-in settings.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="45"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
+        <source>Choose the interface language used after restarting LeoCAD.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="58"/>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="73"/>
+        <source>Check for Updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="76"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="98"/>
+        <source>Choose how often to check automatically for application and piece-library updates.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="124"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="140"/>
+        <source>Choose the interface theme and optionally reset its colors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="137"/>
+        <source>Color Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="160"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="176"/>
+        <source>Set the author name used for new models.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="173"/>
+        <source>Default Author Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="183"/>
+        <source>Move pieces along fixed model axes instead of view-relative directions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="193"/>
+        <source>Open the most recently used file when LeoCAD starts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="209"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="227"/>
+        <source>Choose a piece-library folder or supported archive to load after restarting LeoCAD.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="224"/>
+        <source>Pieces Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
+        <source>Choose a piece-library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="245"/>
+        <source>Choose a piece-library ZIP or BIN archive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="258"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="276"/>
+        <source>Choose a custom LDraw color configuration file, or leave empty to use the library colors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="273"/>
+        <source>Color Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="283"/>
+        <source>Choose a custom LDraw color configuration file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="295"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="313"/>
+        <source>Choose a custom minifigure settings file, or leave empty to use the built-in choices.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="310"/>
+        <source>Minifig Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="320"/>
+        <source>Choose a minifigure settings INI file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="332"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="350"/>
+        <source>Set the POV-Ray executable used for rendering.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="347"/>
+        <source>POV-Ray Executable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="357"/>
+        <source>Locate the POV-Ray executable.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="369"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="387"/>
+        <source>Set the LGEO library folder used by POV-Ray exports.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="384"/>
+        <source>LGEO Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="394"/>
+        <source>Choose the LGEO library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>Restore saved model tabs and view layouts when opening a project.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="420"/>
+        <source>&lt;p&gt;&lt;b&gt;Rendering Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Control shading, stud geometry, selection appearance, edges, and step effects. Some options are unavailable when the graphics system does not support them.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="432"/>
+        <source>Previous Step Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="435"/>
+        <source>Choose the tint used for pieces from previous steps.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="445"/>
+        <source>Shading Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="448"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="590"/>
+        <source>Choose how piece surfaces and edges are drawn in model views.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="470"/>
+        <source>Use simpler meshes for distant pieces to improve display performance.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
+        <source>Tint pieces from previous building steps with the chosen fade color.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="503"/>
+        <source>Highlight pieces introduced in the current building step.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="513"/>
+        <source>New Piece Highlight Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="516"/>
+        <source>Choose the highlight color for pieces in the current step.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="526"/>
+        <source>Blender LDraw Render</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="529"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="628"/>
+        <source>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="532"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="631"/>
+        <source>Configure Blender and its LDraw import and render add-ons.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
+        <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
+        <source>Choose how selected pieces are highlighted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
+        <source>Mesh Detail Distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="580"/>
+        <source>Configure colors and the light/dark threshold for high contrast stud styles.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="603"/>
+        <source>Antialiasing Samples</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="606"/>
+        <source>Choose the antialiasing sample count; more samples can use more graphics resources.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="647"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="711"/>
+        <source>Choose stud geometry and the high contrast stud styles.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="701"/>
+        <source>Smooth jagged edges in model views; changes require restarting LeoCAD.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
+        <source>Selection Rendering</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
+        <source>Draw conditional lines where needed to show curved piece surfaces.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="786"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="802"/>
+        <source>Set edge-line width within the range supported by the graphics system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="799"/>
+        <source>Line Width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="821"/>
+        <source>Draw the edge lines defined by each piece.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="831"/>
+        <source>Calculate edge colors from piece colors instead of using their defined edge colors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="841"/>
+        <source>Configure the contrast and saturation used for automated edge colors.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="868"/>
+        <source>&lt;p&gt;&lt;b&gt;View Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose navigation aids for model views and the piece preview, and configure the base grid. Locations select the corner where each navigation aid appears.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="871"/>
         <source>Views</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vues</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="877"/>
         <source>Model Views</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Vues du modèle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="643"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="825"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="883"/>
+        <source>Show the model-axis indicator in model views.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="886"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1122"/>
         <source>Axis Icon</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Icône de l'axe</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="657"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="887"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="952"/>
+        <source>Choose the corner for the model-view navigation sphere.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="906"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="922"/>
+        <source>Choose the model-view navigation sphere size, or disable it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="912"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1208"/>
         <source>View Sphere:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Afficher la sphère :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="689"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="733"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="833"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="949"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1005"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1129"/>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="956"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1012"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1136"/>
         <source>Top Left</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">En haut à gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="694"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="738"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="838"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="961"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1017"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1141"/>
         <source>Top Right</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">En haut à droite</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="699"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="743"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="843"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="966"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1022"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1146"/>
         <source>Bottom Left</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">En bas à gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="704"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="748"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="848"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="971"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1027"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1151"/>
         <source>Bottom Right</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">En bas à droite</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="802"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="992"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1008"/>
+        <source>Choose the corner for the model-axis indicator.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1064"/>
+        <source>Show base-grid lines at the specified spacing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1074"/>
+        <source>Grid Line Spacing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1077"/>
+        <source>Set base-grid line spacing in studs (minimum 1).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1090"/>
+        <source>Emphasize the base-grid lines through the model origin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1093"/>
         <source>Draw origin lines</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Tracer des lignes d'origine</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="819"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1100"/>
+        <source>Show stud positions on the base grid.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1113"/>
         <source>Piece Preview</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Aperçu de la pièce</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="924"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1119"/>
+        <source>Show the model-axis indicator in the piece preview.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1132"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1159"/>
+        <source>Choose the corner for the piece-preview navigation sphere.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1175"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1202"/>
+        <source>Choose the piece-preview navigation sphere size, or disable it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1245"/>
+        <source>&lt;p&gt;&lt;b&gt;Display Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose colors for the background, objects, grid, and interface. These settings control the display; they do not change the LDraw colors assigned to model pieces.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1248"/>
         <source>Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleurs</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1241"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1260"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1276"/>
+        <source>Choose the display color for the selection rectangle border.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1273"/>
+        <source>Marquee Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1286"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1354"/>
+        <source>Choose the display color for inactive view borders.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1299"/>
+        <source>Marquee Fill</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1302"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1338"/>
+        <source>Choose the display color for the selection rectangle fill.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1312"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1393"/>
+        <source>Choose the display color for view text.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1325"/>
+        <source>Text Halo Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1328"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1377"/>
+        <source>Choose the display color for the halo behind view text.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1351"/>
+        <source>Inactive View Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1364"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1406"/>
+        <source>Choose the display color for view overlays.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1390"/>
+        <source>Text Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1403"/>
+        <source>Overlay Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1416"/>
+        <source>Active View Border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1419"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1442"/>
+        <source>Choose the display color for the active view border.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1480"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1496"/>
+        <source>Choose the display color for the navigation sphere.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1522"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1538"/>
+        <source>Choose the display color for navigation sphere text.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1564"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1580"/>
+        <source>Choose the display color for the highlighted region of the navigation sphere.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1625"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1641"/>
+        <source>Choose the display color for base-grid lines.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1667"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1683"/>
+        <source>Choose the display color for base-grid stud markers.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1709"/>
         <source>Background</source>
         <translation type="unfinished">Fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1249"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1717"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1733"/>
+        <source>Choose the display color for the top of the background gradient.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1723"/>
         <source>Top Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur supérieure :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1279"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1759"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1775"/>
+        <source>Choose the display color for the bottom of the background gradient.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1765"/>
         <source>Bottom Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur du bas :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1308"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1800"/>
+        <source>Use a single color for the model-view background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1803"/>
         <source>So&amp;lid Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Cou&amp;leur unie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1315"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1810"/>
+        <source>Blend the top and bottom colors in the model-view background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1813"/>
         <source>&amp;Gradient</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&amp;Pente</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="930"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2671"/>
+        <source>Mouse Sensitivity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1254"/>
         <source>Interface</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Interface</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="950"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1292"/>
         <source>Inactive View Border:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Bordure de vue inactive :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="992"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1370"/>
         <source>Overlay Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur de superposition :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1040"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1448"/>
         <source>Active View Border:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Bordure Active View :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="936"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1266"/>
         <source>Marquee Border:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Bordure de chapiteau :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="362"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="506"/>
         <source>Highlight New Pieces</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Mettre en valeur les nouvelles pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="342"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="483"/>
         <source>Fade Previous Steps</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fondu les étapes précédentes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="376"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="535"/>
         <source>Add-on Settings...</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Paramètres du module complémentaire...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="383"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
         <source>Selection Rendering:</source>
         <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Rendu de sélection :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="442"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
         <source>Blender LDraw Render:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Blender LDraw Rendu :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="514"/>
         <source>Controls how selected pieces are rendered, the options are:
 - Outline with a faint selection-colored fill for obscured portions
 - Face tint and colored edges.
 Unsupported video cards use face tint and colored edges.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Contrôle la manière dont les pièces sélectionnées sont rendues. Les options sont :
+        <translation type="obsolete">Contrôle la manière dont les pièces sélectionnées sont rendues. Les options sont :
 - Contour avec un léger remplissage de couleur de sélection pour les parties obscurcies
 - Teinte de visage et bords colorés.
 Les cartes vidéo non prises en charge utilisent une teinte de visage et des bords colorés.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="521"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="734"/>
         <source>Outline</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Contour</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="526"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="739"/>
         <source>Tint and Edges</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Teinte et bords</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="537"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="750"/>
         <source>Lines</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lignes</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="550"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="766"/>
         <source>Conditional Lines</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lignes conditionnelles</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="570"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="792"/>
         <source>Line Width:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Largeur de ligne :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="593"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="824"/>
         <source>Edge Lines</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lignes de bord</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="600"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="834"/>
         <source>Automate Edge Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Automatiser la couleur des bords</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="978"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1344"/>
         <source>Marquee Fill:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Remplissage du chapiteau :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="999"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1383"/>
         <source>Text Halo Color:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Couleur du halo du texte :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1175"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1619"/>
         <source>Grid</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Grille</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1181"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1631"/>
         <source>Lines:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lignes :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1211"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1673"/>
         <source>Studs:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Goujons :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1349"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1822"/>
+        <source>Background Solid Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1825"/>
+        <source>Choose the display color for the solid background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1853"/>
         <source>Objects</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Objets</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1355"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1859"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1875"/>
+        <source>Choose the display color for light-object outlines.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1865"/>
         <source>Light:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Lumière:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1385"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1901"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1982"/>
+        <source>Choose the display color for the focused object.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1907"/>
         <source>Focused:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Concentré :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1399"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1917"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2018"/>
+        <source>Choose the display color for camera-object outlines.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1927"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1956"/>
+        <source>Choose the display color for the focused control point.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1933"/>
         <source>Control Point Focused:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Centré sur les points de contrôle :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1434"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1943"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1992"/>
+        <source>Choose the display color for control points.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1969"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2005"/>
+        <source>Choose the display color for selected objects.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="1998"/>
         <source>Control Point:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Point de contrôle :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1441"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2011"/>
         <source>Selected:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Choisi:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1448"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2024"/>
         <source>Camera:</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Caméra:</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1472"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1516"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2048"/>
+        <source>&lt;p&gt;&lt;b&gt;Piece Categories&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create, edit, reorder, or import categories for the piece browser. The right-hand list shows pieces matching the selected category. Imported and edited categories are saved when you choose OK in Preferences; Export writes the current list immediately.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2051"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2101"/>
         <source>Categories</source>
         <translation>Catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1478"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2057"/>
         <source>Pieces Library Categories</source>
         <translation>Catégories de la bibliothèque de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1550"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2073"/>
+        <source>Piece Categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2076"/>
+        <source>Select a category to inspect or edit; drag categories to reorder them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2107"/>
+        <source>Matching Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2110"/>
+        <source>View the library pieces matching the selected category.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2141"/>
         <source>Name</source>
         <translation>Nom</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1555"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2146"/>
         <source>Number</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1566"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1694"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1827"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2157"/>
+        <source>Replace the category list with categories from a text file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2160"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2321"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2494"/>
         <source>Import...</source>
         <translation>Importer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1573"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1701"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1834"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2167"/>
+        <source>Save the current category list to a text file immediately.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2170"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2331"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2504"/>
         <source>Export...</source>
         <translation>Exporter…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1580"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1708"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1841"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2177"/>
+        <source>Restore the default category list after confirmation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2180"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2341"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2514"/>
         <source>Reset...</source>
         <translation>Réinitialiser…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1605"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2205"/>
         <source>Category</source>
         <translation>Catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1611"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2211"/>
+        <source>Create a category with a name and a keyword expression.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2214"/>
         <source>New...</source>
         <translation>Nouveau…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1618"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2221"/>
+        <source>Edit the selected category name and keyword expression.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2224"/>
         <source>Edit...</source>
         <translation>Éditer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1625"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2231"/>
+        <source>Remove the selected category after confirmation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2234"/>
         <source>Delete...</source>
         <translation>Supprimer…</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1649"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2258"/>
+        <source>&lt;p&gt;&lt;b&gt;Keyboard Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a command, click Key Sequence, press the desired key combination, then choose Assign. Remove clears the selected command&apos;s shortcut. Import replaces the shortcut list; Export writes the current list immediately. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2261"/>
         <source>Keyboard</source>
         <translation>Clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1659"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2271"/>
         <source>Keyboard Shortcuts</source>
         <translation>Raccourcis clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1672"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2277"/>
+        <source>Commands and Keyboard Shortcuts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2280"/>
+        <source>Select the command whose keyboard shortcut you want to change.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2290"/>
         <source>Command</source>
         <translation>Commande</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1677"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1736"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1870"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2295"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2369"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2543"/>
         <source>Shortcut</source>
         <translation>Raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1685"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2303"/>
+        <source>Filter Commands</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2306"/>
+        <source>Filter commands by name or shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2309"/>
         <source>Search shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Raccourcis de recherche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1742"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2318"/>
+        <source>Replace keyboard shortcuts with assignments from a text file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2328"/>
+        <source>Save the current keyboard shortcuts to a text file immediately.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2338"/>
+        <source>Restore the default keyboard shortcuts after confirmation.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2375"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2394"/>
+        <source>&lt;p&gt;&lt;b&gt;Key Sequence&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click here and press the key combination you want to assign. Function keys, including F1, are recorded as shortcut candidates in this field. Use the Help button for guidance. Assign asks before replacing a shortcut already used by another command.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2378"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2397"/>
+        <source>Press the key combination to assign, then choose Assign.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2381"/>
         <source>Key Se&amp;quence:</source>
         <oldsource>Key se&amp;quence:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sé&amp;quence de touches :</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1755"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1937"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2391"/>
+        <source>Key Sequence</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2404"/>
+        <source>Assign the entered key combination to the selected command.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2407"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2634"/>
         <source>Assign</source>
         <translation>Attribuer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1762"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="1944"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2414"/>
+        <source>Clear the selected command&apos;s keyboard shortcut.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2417"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="2644"/>
         <source>Remove</source>
         <translation>Supprimer</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="360"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="365"/>
         <source>Grid spacing must be greater than 0.</source>
         <translation>L’espacement de la grille doit être plus grand que 0.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="452"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="457"/>
         <source>Select Pieces Library Folder</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionner le dossier de la bibliothèque de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="460"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="465"/>
         <source>Supported Archives (*.zip *.bin);;All Files (*.*)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Archives prises en charge (*.zip *.bin);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="460"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="465"/>
         <source>Select Pieces Library Archive</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionner les archives de la bibliothèque de pièces</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="483"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="488"/>
         <source>Select Color Configuration File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez le fichier de configuration des couleurs</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="483"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="488"/>
         <source>Settings Files (*.ldr);;All Files (*.*)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fichiers de paramètres (*.ldr);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="491"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="496"/>
         <source>Select Minifig Settings File</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez le fichier de paramètres Minifig</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="491"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="496"/>
         <source>Settings Files (*.ini);;All Files (*.*)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fichiers de paramètres (*.ini);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="500"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="505"/>
         <source>Executable Files (*.exe);;All Files (*.*)</source>
         <translation>Fichiers exécutables (*.exe);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="502"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="507"/>
         <source>All Files (*.*)</source>
         <translation>Tous les fichiers (*.*)</translation>
     </message>
@@ -12535,224 +13455,224 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <translation type="vanished">Lancer l’exécutable POV-Ray</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="513"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>Ouvrir le dossier LGEO</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="523"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>
         <source>Reset Colors</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Réinitialiser les couleurs</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="523"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>
         <source>Would you like to also reset the interface colors to match the color theme?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Souhaitez-vous également réinitialiser les couleurs de l’interface pour qu’elles correspondent au thème de couleurs ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="537"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="542"/>
         <source>Select Background Color</source>
         <translation type="unfinished">Choisir la couleur de fond</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="547"/>
         <source>Select Gradient Top Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur supérieure du dégradé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="547"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="552"/>
         <source>Select Gradient Bottom Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur du fond du dégradé</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="552"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="557"/>
         <source>Select Text Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur du texte</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="557"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="562"/>
         <source>Select Text Halo Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur du halo du texte</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="563"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="568"/>
         <source>Select Marquee Border Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de la bordure du chapiteau</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="568"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="573"/>
         <source>Select Marquee Fill Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de remplissage du rectangle de sélection</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="574"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="579"/>
         <source>Select Overlay Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de superposition</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="579"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="584"/>
         <source>Select Active View Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur d’Active View</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="584"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="589"/>
         <source>Select Inactive View Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de la vue inactive</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="589"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="594"/>
         <source>Select Fade Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de fondu</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="595"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="600"/>
         <source>Select Highlight Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de surbrillance</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="601"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="606"/>
         <source>Select Grid Stud Color</source>
         <translation>Choisir le couleur des tenons de la grille</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="607"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="612"/>
         <source>Select Grid Line Color</source>
         <translation>Choisir la couleur des lignes de la grille</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="612"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="617"/>
         <source>Select View Sphere Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez Afficher la couleur de la sphère</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="617"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="622"/>
         <source>Select View Sphere Text Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur du texte de la sphère d'affichage</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="622"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="627"/>
         <source>Select View Sphere Highlight Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de surbrillance de la sphère d'affichage</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="627"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="632"/>
         <source>Select Object Selected Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionner la couleur sélectionnée de l'objet</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="632"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="637"/>
         <source>Select Object Focused Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionner la couleur focalisée sur l'objet</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="637"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="642"/>
         <source>Select Camera Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de la caméra</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="642"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="647"/>
         <source>Select Light Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur de la lumière</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="647"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="652"/>
         <source>Select Control Point Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez la couleur du point de contrôle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="653"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="658"/>
         <source>Select Control Point Focused Color</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionner la couleur ciblée du point de contrôle</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="783"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="788"/>
         <source>Unassigned</source>
         <translation>Non-attribué</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="922"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="927"/>
         <source>Are you sure you want to delete the category &apos;%1&apos;?</source>
         <translation>Êtes-vous sûr de vouloir supprimer la catégorie « %1 » ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="923"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="928"/>
         <source>Delete Category</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Supprimer la catégorie</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="940"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="948"/>
         <source>Import Categories</source>
         <translation>Importer les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="935"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1421"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1442"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="940"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="959"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1234"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1254"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1426"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1447"/>
         <source>Text Files (*.txt);;All Files (*.*)</source>
         <translation>Fichiers texte (*.txt);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="943"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="948"/>
         <source>Error loading categories file.</source>
         <translation>Erreur au chargement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="954"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="959"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="966"/>
         <source>Export Categories</source>
         <translation>Exporter les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="961"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="966"/>
         <source>Error saving categories file.</source>
         <translation>Erreur à l’enregistrement du fichier des catégories.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="973"/>
         <source>Are you sure you want to load the default categories?</source>
         <translation>Êtes-vous sûr de vouloir charger les catégories par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="968"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="973"/>
         <source>Reset Categories</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Réinitialiser les catégories</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1174"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1179"/>
         <source>The shortcut &apos;%1&apos; is already assigned to &apos;%2&apos;. Do you want to replace it?</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le raccourci '%1' est déjà attribué à '%2'. Voulez-vous le remplacer ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Reset Mouse Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Réinitialiser les raccourcis souris</translation>
@@ -12762,7 +13682,7 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <translation type="vanished">Importer les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1242"/>
         <source>Error loading keyboard shortcuts file.</source>
         <translation>Erreur au chargement du fichier des raccourcis clavier.</translation>
     </message>
@@ -12771,126 +13691,126 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <translation type="vanished">Exporter les raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1261"/>
         <source>Error saving keyboard shortcuts file.</source>
         <translation>Erreur à l’enregistrement du fichier des raccourcis clavier.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1268"/>
         <source>Are you sure you want to load the default keyboard shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis clavier par défaut ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1290"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1295"/>
         <source>Left Button</source>
         <translation>Bouton gauche</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1294"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1299"/>
         <source>Middle Button</source>
         <translation>Bouton central</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1298"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1303"/>
         <source>Right Button</source>
         <translation>Bouton droit</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1176"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1181"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1370"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1379"/>
         <source>Override Shortcut</source>
         <translation>Écraser le raccourcis</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="249"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="250"/>
         <source>Default Lights is unavailable. Flat shading is used instead.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Les lumières par défaut ne sont pas disponibles. Un ombrage plat est utilisé à la place.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="262"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="263"/>
         <source>View sphere rendering is unavailable.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le rendu de la sphère de vue n'est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="284"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="285"/>
         <source>Outline rendering is unavailable. Face tint and colored edges will be used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Le rendu du contour n'est pas disponible. Une teinte faciale et des bords colorés seront utilisés.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="505"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="510"/>
         <source>Select POV-Ray Executable</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Sélectionnez POV-Ray Exécutable</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1237"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1242"/>
         <source>Import Keyboard Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Importer les raccourcis clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1256"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1261"/>
         <source>Export Keyboard Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Exporter les raccourcis clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1263"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1268"/>
         <source>Reset Keyboard Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Réinitialiser les raccourcis clavier</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1365"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1374"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1370"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1379"/>
         <source>This shortcut is already assigned to &apos;%1&apos;. Do you want to replace it?</source>
         <oldsource>This shortcut is already assigned to &apos;%1&apos;, do you want to replace it?</oldsource>
         <translation type="unfinished">Ce raccourcis est déjà attribué à « %1 », voulez-vous le remplacer ?</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1229"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1421"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1234"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1426"/>
         <source>Import Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Raccourcis d’importation</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1434"/>
         <source>Error loading mouse shortcuts file.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erreur lors du chargement du fichier de raccourcis de la souris.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1249"/>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1442"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1254"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1447"/>
         <source>Export Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Raccourcis d'exportation</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1429"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1434"/>
         <source>Import Mouse Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Importer les raccourcis souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
         <source>Error saving mouse shortcuts file.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erreur lors de l'enregistrement du fichier de raccourcis souris.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1448"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
         <source>Export Mouse Shortcuts</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
         <translation type="unfinished">Exporter les raccourcis souris</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1453"/>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis souris par défaut ?</translation>
     </message>
@@ -14007,6 +14927,21 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Erreur lors de l'ouverture du fichier journal '%1':
 %2.</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="941"/>
+        <source>&lt;p&gt;&lt;b&gt;Render Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Read the renderer output to investigate warnings or a failed render. Select text and copy it with the standard keyboard shortcut when reporting a problem. Close returns to the Render dialog.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="948"/>
+        <source>Renderer Output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="949"/>
+        <source>Read and copy renderer output and diagnostic messages.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="859"/>

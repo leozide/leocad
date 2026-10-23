@@ -4,7 +4,7 @@
 <context>
     <name>lcBlenderPreferences</name>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3877"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3879"/>
         <source>%1 of %n files extracted.</source>
         <translation>
             <numerusform>%1 of %n file extracted.</numerusform>
@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3548"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3550"/>
         <source>Finished writing Blender parameter entries. Processed %n lines in file &apos;%1&apos;.</source>
         <translation>
             <numerusform>Finished writing Blender parameter entries. Processed %n line in file &apos;%1&apos;.</numerusform>

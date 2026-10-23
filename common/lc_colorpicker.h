@@ -11,6 +11,7 @@ public:
 	virtual ~lcColorPickerPopup();
 
 	void exec();
+	void SetPosition(const QWidget* Anchor);
 
 signals:
 	void Changed(int ColorIndex);

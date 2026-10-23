@@ -2948,28 +2948,7 @@ void lcBlenderPreferences::ColorButtonClicked(bool)
 	lcColorPickerPopup* Popup = new lcColorPickerPopup(Parent, ColorIndex);
 	connect(Popup, &lcColorPickerPopup::Selected, this, &lcBlenderPreferences::SetDefaultColor);
 	Popup->setMinimumSize(300, 200);
-
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	QScreen* Screen = screen();
-	const QRect DesktopGeom = Screen ? Screen->geometry() : QRect();
-#else
-	const QRect DesktopGeom = QApplication::desktop()->geometry();
-#endif
-
-	QPoint Pos = Parent->mapToGlobal(Parent->rect().bottomLeft());
-	if (Pos.x() < DesktopGeom.left())
-		Pos.setX(DesktopGeom.left());
-
-	if (Pos.y() < DesktopGeom.top())
-		Pos.setY(DesktopGeom.top());
-
-	if ((Pos.x() + Popup->width()) > DesktopGeom.width())
-		Pos.setX(DesktopGeom.width() - Popup->width());
-
-	if ((Pos.y() + Popup->height()) > DesktopGeom.bottom())
-		Pos.setY(DesktopGeom.bottom() - Popup->height());
-
-	Popup->move(Pos);
+	Popup->SetPosition(Parent);
 
 	Popup->setFocus();
 	Popup->show();

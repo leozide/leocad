@@ -11,6 +11,23 @@
 #include <TlHelp32.h>
 #endif
 
+QPoint lcGetPopupPosition(const QPoint& Position, const QSize& Size, const QPoint& ScreenPosition)
+{
+	QScreen* Screen = QGuiApplication::screenAt(ScreenPosition);
+
+	if (!Screen)
+		Screen = QGuiApplication::primaryScreen();
+
+	if (!Screen)
+		return Position;
+
+	const QRect AvailableGeometry = Screen->availableGeometry();
+	const int X = qBound(AvailableGeometry.left(), Position.x(), qMax(AvailableGeometry.left(), AvailableGeometry.right() - Size.width() + 1));
+	const int Y = qBound(AvailableGeometry.top(), Position.y(), qMax(AvailableGeometry.top(), AvailableGeometry.bottom() - Size.height() + 1));
+
+	return QPoint(X, Y);
+}
+
 void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox)
 {
 	const auto ShowHelp = [Root](QWidget* Widget)

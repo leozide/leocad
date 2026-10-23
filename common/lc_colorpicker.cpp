@@ -2,6 +2,7 @@
 #include "lc_colorpicker.h"
 #include "lc_colorlist.h"
 #include "lc_colors.h"
+#include "lc_qutils.h"
 
 lcColorPickerPopup::lcColorPickerPopup(QWidget* Parent, int ColorIndex, bool AllowNoColor)
 	: QFrame(Parent, Qt::Popup)
@@ -42,6 +43,16 @@ void lcColorPickerPopup::exec()
 	mEventLoop = &EventLoop;
 	(void) EventLoop.exec();
 	mEventLoop = nullptr;
+}
+
+void lcColorPickerPopup::SetPosition(const QWidget* Anchor)
+{
+	ensurePolished();
+	adjustSize();
+
+	const QPoint Position = Anchor->mapToGlobal(Anchor->rect().bottomLeft());
+	const QPoint ScreenPosition = Anchor->mapToGlobal(Anchor->rect().center());
+	move(lcGetPopupPosition(Position, size(), ScreenPosition));
 }
 
 void lcColorPickerPopup::mouseReleaseEvent(QMouseEvent* MouseEvent)
@@ -124,25 +135,7 @@ void lcColorPicker::ButtonPressed(bool Toggled)
 	connect(Popup, &lcColorPickerPopup::Selected, this, &lcColorPicker::Selected);
 	connect(Popup, &lcColorPickerPopup::Hid, this, &lcColorPicker::PopupClosed);
 	Popup->setMinimumSize(300, 200);
-
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	QScreen* Screen = screen();
-	const QRect Desktop = Screen ? Screen->geometry() : QRect();
-#else
-	const QRect Desktop = QApplication::desktop()->geometry();
-#endif
-
-	QPoint Pos = mapToGlobal(rect().bottomLeft());
-	if (Pos.x() < Desktop.left())
-		Pos.setX(Desktop.left());
-	if (Pos.y() < Desktop.top())
-		Pos.setY(Desktop.top());
-
-	if ((Pos.x() + Popup->width()) > Desktop.width())
-		Pos.setX(Desktop.width() - Popup->width());
-	if ((Pos.y() + Popup->height()) > Desktop.bottom())
-		Pos.setY(Desktop.bottom() - Popup->height());
-	Popup->move(Pos);
+	Popup->SetPosition(this);
 
 	clearFocus();
 	update();

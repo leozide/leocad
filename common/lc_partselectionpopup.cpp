@@ -137,17 +137,7 @@ void lcPartSelectionPopup::ResizeToContents()
 		}
 	}
 
-	for (QScreen* Screen : QGuiApplication::screens())
-	{
-		const QRect AvailableGeometry = Screen->availableGeometry();
-		if (!Screen->geometry().contains(Menu->pos()))
-			continue;
-
-		const int X = qBound(AvailableGeometry.left(), Menu->x(), qMax(AvailableGeometry.left(), AvailableGeometry.right() - Menu->width() + 1));
-		const int Y = qBound(AvailableGeometry.top(), Menu->y(), qMax(AvailableGeometry.top(), AvailableGeometry.bottom() - Menu->height() + 1));
-		Menu->move(X, Y);
-		break;
-	}
+	Menu->move(lcGetPopupPosition(Menu->pos(), Menu->size(), Menu->pos()));
 }
 
 void lcPartSelectionPopup::Close()

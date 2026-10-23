@@ -20,6 +20,9 @@ std::optional<float> lcParseFloatLocalized(const QString& Value, QLocale Locale)
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
 void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox);
 
+// ScreenPosition selects the monitor independently of the desired popup position.
+QPoint lcGetPopupPosition(const QPoint& Position, const QSize& Size, const QPoint& ScreenPosition);
+
 #ifdef Q_OS_WIN
 
 #include <windows.h>

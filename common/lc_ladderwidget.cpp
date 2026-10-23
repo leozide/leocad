@@ -13,36 +13,15 @@ lcLadderWidget::lcLadderWidget(QAbstractSpinBox* SpinBox, lcFloatPropertySnap Sn
 
 void lcLadderWidget::Show()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-	QScreen* Screen = screen();
-	const QRect Desktop = Screen ? Screen->geometry() : QRect();
-#else
-	const QRect Desktop = QApplication::desktop()->geometry();
-#endif
-
 	int LineHeight = QFontMetrics(font()).height();
 	int CellSize = LineHeight * 4;
 
 	setFixedSize(CellSize, static_cast<int>(mSteps.size()) * CellSize);
 	adjustSize();
 
-	int HalfWidth = width() / 2;
-	int HalfHeight = height() / 2;
-	QPoint Position = QCursor::pos() - QPoint(HalfWidth, HalfHeight);
-
-	if (Position.x() - HalfWidth < Desktop.left())
-		Position.setX(Desktop.left() + HalfWidth);
-
-	if (Position.y() - HalfHeight < Desktop.top())
-		Position.setY(Desktop.top() + HalfHeight);
-
-	if ((Position.x() + HalfHeight) > Desktop.width())
-		Position.setX(Desktop.width() - HalfHeight);
-
-	if (Position.y() + HalfHeight > Desktop.bottom())
-		Position.setY(Desktop.bottom() - HalfHeight);
-
-	move(Position);
+	const QPoint CursorPosition = QCursor::pos();
+	const QPoint Position = CursorPosition - QPoint(width() / 2, height() / 2);
+	move(lcGetPopupPosition(Position, size(), CursorPosition));
 
 	mLastMousePositionX = mapFromGlobal(QCursor::pos()).x();
 	UpdateMousePosition();

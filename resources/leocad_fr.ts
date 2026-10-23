@@ -1554,7 +1554,8 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="2073"/>
         <source>Help.WhatsThis</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
+        <translation type="unfinished">Help.WhatsThis</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2081"/>
@@ -3178,7 +3179,8 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="2074"/>
         <source>What&apos;s This?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Qu'est-ce que c'est ?</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2090"/>
@@ -4645,7 +4647,8 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="48"/>
         <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure Blender and its LDraw import and render add-ons. Choose the Blender executable first. Editing its path or changing an import module can configure the add-on immediately.&lt;/p&gt;&lt;p&gt;Choose an import module, then adjust its library paths and rendering options. TN and MM have separate settings. Use the scroll bar to reach all options; Show Paths and Hide Paths control the paths section.&lt;/p&gt;&lt;p&gt;Image dimensions and render percentage start with the values from the Render dialog. Crop Image calculates dimensions for the current model. Choose Apply to save the paths and settings and close this dialog. Reset restores the last applied values or system defaults.&lt;/p&gt;&lt;p&gt;Cancel closes without applying pending path and setting edits. Add-on installation, module configuration, and the update-check preference can take effect before Apply.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres du module complémentaire LDraw de Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configurez Blender et ses modules complémentaires d'importation et de rendu LDraw. Choisissez d’abord l’exécutable Blender. La modification de son chemin ou la modification d'un module d'importation peut configurer le module complémentaire immédiatement.&lt;/p&gt;&lt;p&gt;Choisissez un module d'importation, puis ajustez ses chemins de bibliothèque et ses options de rendu. TN et MM ont des paramètres distincts. Utilisez la barre de défilement pour accéder à toutes les options ; Afficher les chemins et masquer les chemins contrôlent la section des chemins.&lt;/p&gt;&lt;p&gt;Les dimensions de l'image et le pourcentage de rendu commencent par les valeurs de la boîte de dialogue Rendu. Recadrer l’image calcule les dimensions du modèle actuel. Choisissez Appliquer pour enregistrer les chemins et les paramètres et fermer cette boîte de dialogue. La réinitialisation restaure les dernières valeurs appliquées ou les paramètres par défaut du système.&lt;/p&gt;&lt;p&gt;Annuler ferme la boîte de dialogue sans appliquer les modifications en attente des chemins et des paramètres. L'installation du module complémentaire, la configuration du module et la préférence de vérification des mises à jour peuvent prendre effet avant de choisir Appliquer.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
@@ -6273,7 +6276,8 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_commands.cpp" line="2075"/>
         <source>Click a control to read its contextual help</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cliquez sur un champ pour lire son aide contextuelle</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2083"/>
@@ -6333,137 +6337,164 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_commands.cpp" line="11"/>
         <source>&lt;p&gt;&lt;b&gt;New Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Start a new project with an empty model. If the current project has unsaved changes, LeoCAD asks whether to save them before replacing it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nouveau projet&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Démarrez un nouveau projet avec un modèle vide. Si le projet actuel comporte des modifications non enregistrées, LeoCAD vous demande s'il faut les enregistrer avant de le remplacer.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="19"/>
         <source>&lt;p&gt;&lt;b&gt;Open Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an existing model or project file to work on. If the current project has unsaved changes, save or discard those changes before opening the chosen file.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Ouvrir le projet&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez un modèle ou un fichier de projet existant sur lequel travailler. Si le projet actuel comporte des modifications non enregistrées, enregistrez ou supprimez ces modifications avant d'ouvrir le fichier choisi.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="35"/>
         <source>&lt;p&gt;&lt;b&gt;Save Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write the current project, including its submodels, to disk. The first save asks for a filename. Use Save As to save a separate copy under another name.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Enregistrer le projet&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Écrivez le projet actuel, y compris ses sous-modèles, sur le disque. La première sauvegarde demande un nom de fichier. Utilisez Enregistrer sous pour enregistrer une copie distincte sous un autre nom.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="220"/>
         <source>&lt;p&gt;&lt;b&gt;Undo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reverse the most recent model edit, such as inserting, moving, painting, or deleting an object. Repeat Undo to move backward through the edit history.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Annuler&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Inversez la modification du modèle la plus récente, comme l'insertion, le déplacement, la peinture ou la suppression d'un objet. Répétez Annuler pour revenir en arrière dans l'historique des modifications.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="228"/>
         <source>&lt;p&gt;&lt;b&gt;Redo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reapply an edit that was reversed with Undo. Making a new edit after Undo replaces the redo history with the new sequence of edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rétablir&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Réappliquer une modification qui a été annulée avec Annuler. Effectuer une nouvelle modification après l'annulation remplace l'historique de rétablissement par la nouvelle séquence de modifications.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="732"/>
         <source>&lt;p&gt;&lt;b&gt;Insert Piece Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece in the Pieces dock and a color in Colors, then use this tool in the model view to place the piece. Movement snapping controls placement increments. Use the preview to check placement before inserting the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Insérer une pièce&lt;/b&gt;&lt;/p&gt;&lt;p&gt; Choisissez une pièce dans le dock Pièces et une couleur dans Couleurs, puis utilisez cet outil dans la vue modèle pour placer la pièce. L'accrochage au mouvement contrôle les incréments de placement. Utilisez l'aperçu pour vérifier le placement avant d'insérer la pièce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="740"/>
         <source>&lt;p&gt;&lt;b&gt;Point Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the model view to place a light that emits in all directions from a point. Select the light afterward to edit its color, shadow settings, and renderer-specific power in Properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Lumière ponctuelle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Utilisez la vue modèle pour placer une lumière qui émet dans toutes les directions à partir d'un point. Sélectionnez ensuite la lumière pour modifier sa couleur, ses paramètres d'ombre et la puissance spécifique au moteur de rendu dans Propriétés.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="748"/>
         <source>&lt;p&gt;&lt;b&gt;Spotlight Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the model view to create a directed cone of light. In Properties, adjust its position and target, cone angle, penumbra, and renderer-specific power.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Spotlight&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Utilisez la vue modèle pour créer un cône de lumière dirigé. Dans Propriétés, ajustez sa position et sa cible, l'angle du cône, la pénombre et la puissance spécifique au moteur de rendu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="756"/>
         <source>&lt;p&gt;&lt;b&gt;Directional Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a light with parallel rays, such as sunlight. Its direction determines the illumination. Select it to adjust its transform, color, and renderer-specific settings in Properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil de lumière directionnelle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez une lumière avec des rayons parallèles, comme la lumière du soleil. Sa direction détermine l'éclairage. Sélectionnez-le pour ajuster ses paramètres spécifiques à la transformation, à la couleur et au moteur de rendu dans Propriétés.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="764"/>
         <source>&lt;p&gt;&lt;b&gt;Area Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a light that emits over an area. Select it to set the area shape and size in Properties, along with color and renderer-specific settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil d'éclairage de zone&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez une lumière qui émet sur une zone. Sélectionnez-le pour définir la forme et la taille de la zone dans Propriétés, ainsi que les paramètres spécifiques à la couleur et au moteur de rendu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="772"/>
         <source>&lt;p&gt;&lt;b&gt;Camera Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a camera in the model view. Select the camera to edit its position, target, projection, and field of view in Properties. To look through the camera, choose it from View &amp;gt; Cameras.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Caméra&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez une caméra dans la vue modèle. Sélectionnez la caméra pour modifier sa position, sa cible, sa projection et son champ de vision dans Propriétés. Pour regarder à travers la caméra, choisissez-la dans Affichage &gt; Caméras.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="780"/>
         <source>&lt;p&gt;&lt;b&gt;Select Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pick objects in the model view or drag a selection rectangle. Selection Mode controls whether matching piece types or colors are included. The focused object provides the reference for relative transforms.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez des objets dans la vue du modèle ou faites glisser un rectangle de sélection. Le mode de sélection contrôle si les types de pièces ou les couleurs correspondants sont inclus. L'objet ciblé fournit la référence pour les transformations relatives.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="788"/>
         <source>&lt;p&gt;&lt;b&gt;Move Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select the objects to move, then drag in the model view. Use the manipulator to constrain movement to an axis or plane. Movement Snap sets the increments, and Transform Options selects the coordinate reference.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil de déplacement&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez les objets à déplacer, puis faites-les glisser dans la vue modèle. Utilisez le manipulateur pour contraindre le mouvement à un axe ou un plan. Movement Snap définit les incréments et Transform Options sélectionne la référence de coordonnées.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="796"/>
         <source>&lt;p&gt;&lt;b&gt;Rotate Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select objects, then drag a rotation handle in the model view. Rotation Snap sets the angle increments. Transform Options chooses relative or model axes and whether pieces rotate together or separately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Rotation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez des objets, puis faites glisser une poignée de rotation dans la vue modèle. Rotation Snap définit les incréments d’angle. Les options de transformation choisissent les axes relatifs ou de modèle et si les pièces tournent ensemble ou séparément.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="804"/>
         <source>&lt;p&gt;&lt;b&gt;Eraser Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use this tool to remove objects by clicking them in the model view. This is different from deleting the current selection as a single command. Undo restores an object removed by the tool.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Gomme&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Utilisez cet outil pour supprimer des objets en cliquant dessus dans la vue modèle. Ceci est différent de la suppression de la sélection actuelle en une seule commande. Annuler restaure un objet supprimé par l'outil.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="812"/>
         <source>&lt;p&gt;&lt;b&gt;Paint Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the replacement color in the Colors dock, then click pieces in the model view to recolor them. To recolor the current selection together, use the color button above the swatches.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil de peinture&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez la couleur de remplacement dans le dock Couleurs, puis cliquez sur les pièces dans la vue du modèle pour les recolorer. Pour recolorer ensemble la sélection actuelle, utilisez le bouton de couleur au-dessus des échantillons.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="820"/>
         <source>&lt;p&gt;&lt;b&gt;Color Picker Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click a piece in the model view to make its color the current color. You can then use that color for insertion or painting; sampling it does not recolor the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil de sélection de couleurs&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Cliquez sur une pièce dans la vue du modèle pour que sa couleur soit la couleur actuelle. Vous pouvez ensuite utiliser cette couleur pour l'insertion ou la peinture ; l'échantillonnage ne recolore pas la pièce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="828"/>
         <source>&lt;p&gt;&lt;b&gt;Zoom Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag in the model view to move the viewpoint closer to or farther from the model. This changes the view rather than resizing pieces. Use Zoom Region to frame a particular area.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Zoom&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faites glisser la vue du modèle pour rapprocher ou éloigner le point de vue du modèle. Cela change la vue plutôt que de redimensionner les pièces. Utilisez Zoom Région pour cadrer une zone particulière.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="836"/>
         <source>&lt;p&gt;&lt;b&gt;Pan Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to shift the view sideways or vertically without moving the model. Use this to reposition the model on screen while keeping the viewing direction.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Panoramique&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faites glisser pour déplacer la vue latéralement ou verticalement sans déplacer le modèle. Utilisez-le pour repositionner le modèle à l'écran tout en conservant la direction de visualisation.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="844"/>
         <source>&lt;p&gt;&lt;b&gt;Orbit Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to orbit the view around its center and inspect the model from another direction. This rotates the viewpoint rather than the selected pieces; use Rotate for object edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Orbite&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faites glisser pour mettre la vue en orbite autour de son centre et inspecter le modèle depuis une autre direction. Cela fait pivoter le point de vue plutôt que les pièces sélectionnées ; utilisez Rotation pour les modifications d'objets.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="852"/>
         <source>&lt;p&gt;&lt;b&gt;Roll Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to turn the view around its viewing axis, tilting what appears upright on screen. Model pieces keep their positions and orientations.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Rouler&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faites glisser pour faire pivoter la vue autour de son axe de visualisation, en inclinant ce qui apparaît verticalement à l'écran. Les pièces du modèle conservent leurs positions et orientations.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="860"/>
         <source>&lt;p&gt;&lt;b&gt;Zoom Region Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag a rectangle around the area you want to inspect. The view zooms to frame that region without changing model geometry.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Outil Zoom sur la région&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faites glisser un rectangle autour de la zone que vous souhaitez inspecter. La vue effectue un zoom pour encadrer cette région sans modifier la géométrie du modèle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1156"/>
         <source>&lt;p&gt;&lt;b&gt;First Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the model at its first building step. Step navigation changes which pieces are visible; it does not move pieces to a different step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Première étape&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affichez le modèle lors de sa première étape de construction. La navigation par étapes modifie les pièces visibles ; cela ne déplace pas les pièces vers une étape différente.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1164"/>
         <source>&lt;p&gt;&lt;b&gt;Previous Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the model one building step earlier. Pieces introduced in later steps are hidden so you can inspect the earlier stage of construction.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Étape précédente&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affichez le modèle une étape de construction plus tôt. Les pièces introduites lors des étapes ultérieures sont masquées afin que vous puissiez inspecter la première étape de la construction.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1172"/>
         <source>&lt;p&gt;&lt;b&gt;Next Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the next building step to reveal the next stage of the model. Use the Timeline to change which step introduces a piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Étape suivante&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affichez la prochaine étape de construction pour révéler la prochaine étape du modèle. Utilisez la chronologie pour modifier l'étape qui introduit une pièce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1180"/>
         <source>&lt;p&gt;&lt;b&gt;Last Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the last building step of the current model. Use this to return to the completed model after inspecting earlier steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dernière étape&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affichez la dernière étape de construction du modèle actuel. Utilisez-le pour revenir au modèle terminé après avoir inspecté les étapes précédentes.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1212"/>
         <source>&lt;p&gt;&lt;b&gt;Add Keys&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enable this when an edit should create a new animation key at the current step. For example, moving a piece at a later step can give it a different position there. The diamond controls in Properties show and toggle keys for individual properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Ajouter des clés&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Activez cette option lorsqu'une modification doit créer une nouvelle clé d'animation à l'étape en cours. Par exemple, déplacer une pièce à une étape ultérieure peut lui donner une position différente. Les commandes en forme de diamant dans Propriétés affichent et activent les touches pour les propriétés individuelles.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -6471,7 +6502,8 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;About LeoCAD&lt;/b&gt;&lt;/p&gt;&lt;p&gt;View the LeoCAD version and system information. The Qt and OpenGL details can help diagnose display problems. Select text in System Information to copy it when reporting a problem. The website link opens in your browser.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;À propos de LeoCAD&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affichez la version de LeoCAD et les informations système. Les détails de Qt et OpenGL peuvent aider à diagnostiquer les problèmes d'affichage. Sélectionnez le texte dans les informations système pour le copier lors du signalement d'un problème. Le lien du site Web s'ouvre dans votre navigateur.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="17"/>
@@ -6481,7 +6513,8 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="45"/>
         <source>LeoCAD version running on this computer.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Version LeoCAD exécutée sur cet ordinateur.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="48"/>
@@ -6496,7 +6529,8 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="65"/>
         <source>Open the LeoCAD website in your browser.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ouvrez le site Web LeoCAD dans votre navigateur.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="82"/>
@@ -6507,12 +6541,14 @@ Le format du fichier n'est pas reconnu.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="91"/>
         <source>Select and copy system information for a problem report.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez et copiez les informations système pour un rapport de problème.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="94"/>
         <source>&lt;p&gt;&lt;b&gt;System Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows the Qt runtime and build versions, graphics driver and renderer, OpenGL and shader versions, buffer sizes, and supported graphics features. Select the text and copy it with the standard keyboard shortcut to include it in a problem report.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Informations système&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Affiche les versions d'exécution et de build de Qt, le pilote et le moteur de rendu graphiques, les versions OpenGL et shader, les tailles de tampon et les fonctionnalités graphiques prises en charge. Sélectionnez le texte et copiez-le avec le raccourci clavier standard pour l'inclure dans un rapport de problème.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.cpp" line="19"/>
@@ -7194,7 +7230,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_arraydialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Array&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create repeated copies of the selected pieces using up to three array dimensions. Each row defines a count, an offset, and a rotation increment.&lt;/p&gt;&lt;p&gt;Counts include the original selection. For example, counts of 3, 2, and 1 create five new copies of each selected piece. Set an offset or rotation to keep copies from overlapping.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Matrice&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez des copies répétées des pièces sélectionnées en utilisant jusqu'à trois dimensions de matrice. Chaque ligne définit un nombre, un décalage et un incrément de rotation.&lt;/p&gt;&lt;p&gt;Les nombres incluent la sélection d'origine. Par exemple, les comptes de 3, 2 et 1 créent cinq nouvelles copies de chaque pièce sélectionnée. Définissez un décalage ou une rotation pour empêcher les copies de se chevaucher.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="17"/>
@@ -7204,7 +7241,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_arraydialog.ui" line="25"/>
         <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row controls one array dimension, with a count from 1 to 1000. The product of the three counts includes the original selection. A count of 1 adds no copies along that dimension.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Chaque ligne contrôle une dimension du tableau, avec un nombre compris entre 1 et 1 000. Le produit des trois nombres inclut la sélection d'origine. Un nombre de 1 n'ajoute aucune copie le long de cette dimension.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="28"/>
@@ -7214,37 +7252,44 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_arraydialog.ui" line="36"/>
         <source>Number of positions in dimension 3, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nombre de positions dans la dimension 3, y compris l'original.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="39"/>
         <source>Dimension 3 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimension 3 points</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="52"/>
         <source>Number of positions in dimension 1, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nombre de positions dans la dimension 1, y compris l'original.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="55"/>
         <source>Dimension 1 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimension 1 compte</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="68"/>
         <source>Number of positions in dimension 2, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nombre de positions dans la dimension 2, y compris l'original.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="71"/>
         <source>Dimension 2 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimension 2 points</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="89"/>
         <source>&lt;p&gt;&lt;b&gt;Offsets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the X, Y, and Z displacement per step in the corresponding array dimension. Values use the model axes and LDraw units; 20 units equal one stud width. Negative values reverse the direction.&lt;/p&gt;&lt;p&gt;For a straight row spaced one stud apart along X, use a count greater than 1 and an X offset of 20 in the same row.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Décalages&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Chaque ligne définit le déplacement X, Y et Z par étape dans la dimension du tableau correspondante. Les valeurs utilisent les axes du modèle et les unités LDraw ; 20 unités équivalent à une largeur de montant. Les valeurs négatives inversent la direction.&lt;/p&gt;&lt;p&gt;Pour une rangée droite espacée d'un montant le long de X, utilisez un nombre supérieur à 1 et un décalage X de 20 dans la même rangée.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="92"/>
@@ -7254,97 +7299,116 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_arraydialog.ui" line="98"/>
         <source>Y offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Y par pas dans la dimension 1, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="101"/>
         <source>Dimension 1 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 1 Décalage Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="108"/>
         <source>X offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage X par pas dans la dimension 2, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="111"/>
         <source>Dimension 2 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 2 X décalage</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="118"/>
         <source>X offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage X par pas dans la dimension 1, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="121"/>
         <source>Dimension 1 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 1 X décalage</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="128"/>
         <source>X offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage X par pas dans la dimension 3, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="131"/>
         <source>Dimension 3 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 3 X décalage</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="138"/>
         <source>Z offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Z par pas dans la dimension 1, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="141"/>
         <source>Dimension 1 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 1 Décalage Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="148"/>
         <source>Y offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Y par pas dans la dimension 2, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="151"/>
         <source>Dimension 2 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 2 Décalage Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="158"/>
         <source>Y offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Y par pas dans la dimension 3, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="161"/>
         <source>Dimension 3 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 3 Décalage Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="168"/>
         <source>Z offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Z par pas dans la dimension 2, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="171"/>
         <source>Dimension 2 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 2 Décalage Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="178"/>
         <source>Z offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décalage Z par pas dans la dimension 3, en unités LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="181"/>
         <source>Dimension 3 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 3 Décalage Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="191"/>
         <source>&lt;p&gt;&lt;b&gt;Rotations&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the rotation increment around the X, Y, and Z model axes, in degrees, for its array dimension. Rotations from all three dimensions are added, then applied in X, Y, Z order before the offset.&lt;/p&gt;&lt;p&gt;Copies rotate around the focused piece origin, or the selection center when no piece has focus. Negative values reverse the rotation.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rotations&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Chaque ligne définit l'incrément de rotation autour des axes du modèle X, Y et Z, en degrés, pour la dimension de son tableau. Les rotations des trois dimensions sont ajoutées, puis appliquées dans l'ordre X, Y, Z avant le décalage.&lt;/p&gt;&lt;p&gt;Les copies pivotent autour de l'origine de la pièce focalisée ou du centre de sélection lorsqu'aucune pièce n'a le focus. Les valeurs négatives inversent la rotation.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="194"/>
@@ -7354,92 +7418,110 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_arraydialog.ui" line="200"/>
         <source>Z rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Z par pas en dimension 3, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="203"/>
         <source>Dimension 3 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation dimension 3 Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="210"/>
         <source>X rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation X par pas en dimension 3, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="213"/>
         <source>Dimension 3 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimension 3 X rotation</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="220"/>
         <source>X rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation X par pas en dimension 1, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="223"/>
         <source>Dimension 1 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 1 X rotation</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="230"/>
         <source>Z rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Z par pas en dimension 2, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="233"/>
         <source>Dimension 2 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation dimension 2 Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="240"/>
         <source>Z rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Z par pas en dimension 1, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="243"/>
         <source>Dimension 1 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 1 Rotation Z</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="250"/>
         <source>X rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation X par pas en dimension 2, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="253"/>
         <source>Dimension 2 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cote 2 X rotation</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="260"/>
         <source>Y rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Y par pas dans la dimension 1, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="263"/>
         <source>Dimension 1 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimension 1 rotation Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="270"/>
         <source>Y rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Y par pas en dimension 2, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="273"/>
         <source>Dimension 2 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Y dimension 2</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="280"/>
         <source>Y rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Y par pas en dimension 3, en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="283"/>
         <source>Dimension 3 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation Y dimension 3</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.cpp" line="75"/>
@@ -7577,87 +7659,104 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;High Contrast Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose custom stud and edge colors for high contrast stud styles. Enable an override with its checkbox, then choose its color. Light/Dark Value sets the threshold for dark-piece edge colors. Automated edge colors take precedence over the piece edge overrides.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog. Reset restores an individual control&apos;s default.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Couleurs de bords à contraste élevé&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez des couleurs de clous et de bords personnalisées pour les styles de clous à contraste élevé. Activez un remplacement avec sa case à cocher, puis choisissez sa couleur. La valeur Lumière/Sombre définit le seuil pour les couleurs des bords des pièces sombres. Les couleurs des bords automatisées ont priorité sur les remplacements des bords des pièces.&lt;/p&gt;&lt;p&gt;Choisissez OK pour rétablir les modifications dans les Préférences, puis choisissez OK dans les Préférences pour les conserver. Annuler annule les modifications dans cette boîte de dialogue. La réinitialisation restaure la valeur par défaut d'un contrôle individuel.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="24"/>
         <source>&lt;p&gt;&lt;b&gt;Automated Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast and saturation used to calculate piece edge colors. Both controls range from 0.00 to 1.00. Reset restores a control to 0.50.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Couleurs des bords automatisées&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajustez le contraste et la saturation utilisés pour calculer les couleurs des bords des pièces. Les deux contrôles vont de 0,00 à 1,00. La réinitialisation restaure un contrôle à 0,50.&lt;/p&gt;&lt;p&gt;Choisissez OK pour renvoyer les modifications apportées aux Préférences, puis choisissez OK dans les Préférences pour les conserver. Annuler annule les modifications dans cette boîte de dialogue.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="43"/>
         <source>Set edge contrast from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Réglez le contraste des bords de 0,00 à 1,00 (0,50 par défaut).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="44"/>
         <source>&lt;p&gt;&lt;b&gt;Edge Contrast&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast used by automated edge colors to distinguish edges from piece surfaces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Contraste des bords&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajustez le contraste utilisé par les couleurs de bords automatisées pour distinguer les bords des surfaces des pièces. La plage est de 0,00 à 1,00 ; La réinitialisation restaure 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="53"/>
         <source>Restore edge contrast to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez le contraste des bords à 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="69"/>
         <source>Set the light/dark threshold from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Réglez le seuil clair/obscur de 0,00 à 1,00 (0,50 par défaut).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="70"/>
         <source>Set edge-color saturation from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez la saturation des couleurs des bords de 0,00 à 1,00 (0,50 par défaut).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="72"/>
         <source>&lt;p&gt;&lt;b&gt;Light/Dark Value&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Classify piece colors by brightness to choose which pieces receive the dark-piece edge override. Colors below the threshold are treated as dark. A separate enabled black-piece override takes priority for black pieces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Valeur claire/foncée&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Classez les couleurs des pièces par luminosité pour choisir les pièces qui reçoivent le remplacement des bords des pièces sombres. Les couleurs inférieures au seuil sont traitées comme sombres. Un remplacement de pièce noire activé séparément a la priorité pour les pièces noires. La plage est de 0,00 à 1,00 ; La réinitialisation restaure 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="73"/>
         <source>&lt;p&gt;&lt;b&gt;Edge Saturation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the tint or shade used to calculate automated edge colors from piece colors. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Saturation des bords&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajustez la teinte ou la nuance utilisée pour calculer automatiquement les couleurs des bords à partir des couleurs des pièces. La plage est de 0,00 à 1,00 ; La réinitialisation restaure 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
         <source>Restore the light/dark threshold to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rétablissez le seuil clair/obscur à 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
         <source>Restore edge-color saturation to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez la saturation des couleurs des bords à 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="182"/>
         <source>Enable the custom color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez la couleur personnalisée pour %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="186"/>
         <source>Restore the default color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez la couleur par défaut pour %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="191"/>
         <source>Enable a custom color for stud cylinders in high contrast stud styles, then use the color button to choose it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez une couleur personnalisée pour les cylindres de montants dans les styles de montants à contraste élevé, puis utilisez le bouton de couleur pour la choisir.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="193"/>
         <source>Enable a custom edge color for pieces not covered by the black or dark overrides. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez une couleur de bord personnalisée pour les pièces non couvertes par les remplacements noirs ou sombres. Les couleurs de bords automatisées sont prioritaires.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="195"/>
         <source>Enable a custom edge color for black pieces. This override takes priority over the dark-piece and general edge colors. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez une couleur de bord personnalisée pour les pièces noires. Ce remplacement a la priorité sur les couleurs des pièces sombres et des bords généraux. Les couleurs de bords automatisées sont prioritaires.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="197"/>
         <source>Enable a custom edge color for pieces below the light/dark threshold, except black pieces with their own enabled override. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez une couleur de bord personnalisée pour les pièces situées en dessous du seuil clair/foncé, à l'exception des pièces noires avec leur propre remplacement activé. Les couleurs de bords automatisées sont prioritaires.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="287"/>
@@ -7690,17 +7789,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="379"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Executable&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the Blender executable. Finishing an edit to this path starts Blender configuration and may install or update the LDraw add-on. Configuration must complete before add-on paths and settings become available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Exécutable de Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez l'exécutable de Blender. Terminer une modification de ce chemin démarre la configuration de Blender et peut installer ou mettre à jour le module complémentaire LDraw. La configuration doit être terminée avant que les chemins et les paramètres des modules complémentaires soient disponibles.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="390"/>
         <source>Installed Blender version reported during configuration.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Version de Blender installée signalée lors de la configuration.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="391"/>
         <source>Blender Version</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Version mélangeur</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="404"/>
@@ -7713,7 +7815,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="407"/>
         <source>Locate the Blender executable.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Localisez l'exécutable de Blender.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="410"/>
@@ -7724,7 +7827,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="412"/>
         <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Update downloads or reconfigures the LDraw add-on. Output opens the configuration log when available. The update-check preference takes effect as soon as you change it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Module complémentaire LDraw de Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;La mise à jour télécharge ou reconfigure le module complémentaire LDraw. La sortie ouvre le journal de configuration lorsqu'il est disponible. La préférence de vérification des mises à jour prend effet dès que vous la modifiez.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="417"/>
@@ -7843,19 +7947,22 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_blenderpreferences.cpp" line="604"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="761"/>
         <source>&lt;p&gt;&lt;b&gt;Add-on Paths&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Chemins des modules complémentaires&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Définissez les fichiers et dossiers utilisés par l'importateur sélectionné. Utilisez Parcourir pour localiser une entrée. TN et MM utilisent des chemins facultatifs différents. Configurez d'abord Blender pour activer ces contrôles.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="629"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="786"/>
         <source>Choose a file or folder for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un fichier ou un dossier pour %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="652"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="809"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the selected importer&apos;s geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres d'importation et de rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajustez les options de géométrie, de matériaux, de caméra et d'image de l'importateur sélectionné. Passez la souris sur un contrôle ou appuyez sur F1 pour obtenir sa description. La largeur et la hauteur de l'image sont en pixels ; Le pourcentage de rendu met à l'échelle les dimensions de sortie.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="655"/>
@@ -7954,17 +8061,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2341"/>
         <source>&lt;p&gt;&lt;b&gt;Reset Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose Last Apply to restore the saved paths and settings, or System Default to load the built-in defaults. Choose OK to update the settings form, then Apply in the parent dialog to save them. Cancel keeps the current edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Réinitialiser les paramètres du module complémentaire&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez Dernière application pour restaurer les chemins et paramètres enregistrés, ou Paramètres par défaut du système pour charger les paramètres par défaut intégrés. Choisissez OK pour mettre à jour le formulaire de paramètres, puis Appliquer dans la boîte de dialogue parent pour les enregistrer. Annuler conserve les modifications actuelles.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
         <source>Restore paths and settings to the last applied values.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez les chemins et les paramètres aux dernières valeurs appliquées.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2349"/>
         <source>Replace paths and settings with the built-in defaults.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Remplacez les chemins et les paramètres par les valeurs par défaut intégrées.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
@@ -8084,47 +8194,56 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="418"/>
         <source>Check for add-on updates; this preference is saved immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vérifiez les mises à jour des modules complémentaires ; cette préférence est enregistrée immédiatement.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="431"/>
         <source>Installed %1 Blender LDraw import and render add-on version.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Version complémentaire d'importation et de rendu %1 Blender LDraw installée.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
         <source>Blender LDraw Add-on Version</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Version complémentaire de Blender LDraw</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="441"/>
         <source>Download or reconfigure the %1 Blender LDraw add-on.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Téléchargez ou reconfigurez le module complémentaire %1 Blender LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="446"/>
         <source>Open the standard output log.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ouvrez le journal de sortie standard.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="454"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Modules&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose TN or MM to select the LDraw importer and its options. Changing the importer configures Blender immediately. The image render module is managed automatically; an import module is required to import or render a model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modules d'importation et de rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez TN ou MM pour sélectionner l'importateur LDraw et ses options. Changer l'importateur configure Blender immédiatement. Le module de rendu d'image est géré automatiquement ; un module d'importation est requis pour importer ou restituer un modèle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="458"/>
         <source>Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez le module d'importation complémentaire (adapté de LDraw Import de Toby Nelson) dans Blender.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="463"/>
         <source>Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Activez le module d'importation complémentaire (adapté de LDraw Import par Matthew Morrison) dans Blender.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="468"/>
         <source>Add-on image render module in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Module complémentaire de rendu d'image dans Blender.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1139"/>
@@ -8615,29 +8734,34 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="241"/>
         <source>Save the add-on paths and settings and close this dialog.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez les chemins et les paramètres du module complémentaire et fermez cette boîte de dialogue.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="247"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="313"/>
         <source>Hide the add-on paths section.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Masquez la section des chemins complémentaires.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="253"/>
         <source>Restore the last applied paths and settings or the system defaults.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez les derniers chemins et paramètres appliqués ou les paramètres par défaut du système.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="300"/>
         <source>Show Paths</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher les chemins</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
         <source>Show the add-on paths section.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher la section des chemins complémentaires.</translation>
     </message>
     <message>
         <source>Apply add-on paths and settings preferences</source>
@@ -8695,7 +8819,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_categorydialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Category&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a category and enter the expression used to find its pieces in the library. Both fields are required. Choose OK to return the category changes to Preferences, then choose OK in Preferences to keep them. Cancel discards edits in this dialog.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Catégorie de pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nommez une catégorie et saisissez l’expression permettant de retrouver ses pièces dans la bibliothèque. Les deux champs sont obligatoires. Choisissez OK pour reporter les modifications dans les Préférences, puis OK dans les Préférences pour les enregistrer. Annuler abandonne les modifications de cette boîte de dialogue.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Syntaxe des mots clés&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Les expressions recherchent du texte dans les descriptions des pièces de la bibliothèque sans tenir compte de la casse.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: recherche ce texte n’importe où dans la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: recherche Brick comme mot entier.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: recherche Brick au début de la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: exige un mot entier au début de la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: recherche une correspondance avec au moins une des expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: recherche une correspondance avec les deux expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclut les descriptions correspondant à A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: regroupe les expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Placez des espaces autour de &lt;tt&gt;|&lt;/tt&gt; et &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Utilisez des parenthèses lorsque vous combinez des opérateurs.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Exemples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; recherche les descriptions commençant par le mot Brick ou Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; exclut aussi les descriptions contenant Pattern.&lt;/p&gt;&lt;p&gt;Utilisez la langue des descriptions de la bibliothèque pour les termes de recherche ; ne traduisez pas les symboles de syntaxe.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="17"/>
@@ -8706,7 +8831,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_categorydialog.ui" line="25"/>
         <location filename="../common/lc_categorydialog.ui" line="38"/>
         <source>Enter the category name shown in the piece browser.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Entrez le nom de la catégorie affiché dans le navigateur de pièces.</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="28"/>
@@ -8717,13 +8843,15 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_categorydialog.ui" line="45"/>
         <location filename="../common/lc_categorydialog.ui" line="61"/>
         <source>Enter an expression that matches piece descriptions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez une expression qui correspond aux descriptions des pièces.</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="48"/>
         <location filename="../common/lc_categorydialog.ui" line="64"/>
         <source>&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Syntaxe des mots clés&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Les expressions recherchent du texte dans les descriptions des pièces de la bibliothèque sans tenir compte de la casse.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: recherche ce texte n’importe où dans la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: recherche Brick comme mot entier.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: recherche Brick au début de la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: exige un mot entier au début de la description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: recherche une correspondance avec au moins une des expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: recherche une correspondance avec les deux expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclut les descriptions correspondant à A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: regroupe les expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Placez des espaces autour de &lt;tt&gt;|&lt;/tt&gt; et &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Utilisez des parenthèses lorsque vous combinez des opérateurs.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Exemples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; recherche les descriptions commençant par le mot Brick ou Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; exclut aussi les descriptions contenant Pattern.&lt;/p&gt;&lt;p&gt;Utilisez la langue des descriptions de la bibliothèque pour les termes de recherche ; ne traduisez pas les symboles de syntaxe.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="51"/>
@@ -8756,22 +8884,26 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qutils.cpp" line="303"/>
         <source>Choose Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="304"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pick a color using the swatches or enter its component values. Choose OK to use the selected color, or Cancel to keep the original color. Editing the controls alone does not apply the color.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Choisir une couleur&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez une couleur à l'aide des échantillons ou entrez les valeurs de ses composants. Choisissez OK pour utiliser la couleur sélectionnée ou Annuler pour conserver la couleur d'origine. La seule modification des contrôles n'applique pas la couleur.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="314"/>
         <source>Custom Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur personnalisée</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="315"/>
         <source>Choose a color or enter its component values.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez une couleur ou entrez les valeurs de ses composants.</translation>
     </message>
 </context>
 <context>
@@ -8840,7 +8972,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Edit Groups&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reorganize the model&apos;s pieces and groups in the tree. Drag pieces or groups into a group, or to the top level to remove them from a parent group. Double-click a group name to rename it.&lt;/p&gt;&lt;p&gt;New Group creates a group inside the selected group, or beside an ungrouped piece. Choose OK to apply the hierarchy, or Cancel to discard the changes. Empty groups are removed when changes are applied.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modifier les groupes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Réorganisez les pièces et les groupes du modèle dans l'arborescence. Faites glisser des éléments ou des groupes dans un groupe ou vers le niveau supérieur pour les supprimer d'un groupe parent. Double-cliquez sur le nom d'un groupe pour le renommer.&lt;/p&gt;&lt;p&gt;Nouveau groupe crée un groupe à l'intérieur du groupe sélectionné ou à côté d'une pièce non groupée. Choisissez OK pour appliquer la hiérarchie ou Annuler pour ignorer les modifications. Les groupes vides sont supprimés lorsque les modifications sont appliquées.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="17"/>
@@ -8850,17 +8983,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="23"/>
         <source>Drag pieces and groups to reorganize them; double-click a group name to rename it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Faites glisser les pièces et les groupes pour les réorganiser ; double-cliquez sur le nom d'un groupe pour le renommer.</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Group Hierarchy&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drop an item onto a group to make it a member of that group. Move it to the top level to remove its parent group. Only group names can be edited; names must be unique and nonempty.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Hiérarchie des groupes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Déposez un élément sur un groupe pour en faire un membre de ce groupe. Déplacez-le au niveau supérieur pour supprimer son groupe parent. Seuls les noms de groupes peuvent être modifiés ; les noms doivent être uniques et non vides.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="29"/>
         <source>Piece and Group Hierarchy</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Hiérarchie des pièces et des groupes</translation>
     </message>
     <message>
         <source>New Group</source>
@@ -8875,12 +9011,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="46"/>
         <source>Create a group under the selected group or at the top level.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez un groupe sous le groupe sélectionné ou au niveau supérieur.</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="47"/>
         <source>&lt;p&gt;&lt;b&gt;New Group&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a group to create a subgroup inside it. If a piece is selected, the new group is created beside that piece. With no selection, the new group is created at the top level. Rename the new group by editing its name, then drag pieces into it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nouveau groupe&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez un groupe pour créer un sous-groupe à l'intérieur. Si une pièce est sélectionnée, le nouveau groupe est créé à côté de cette pièce. Sans sélection, le nouveau groupe est créé au niveau supérieur. Renommez le nouveau groupe en modifiant son nom, puis faites-y glisser des morceaux.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="96"/>
@@ -8944,7 +9082,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_groupdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Group Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a new group for the selected pieces so you can select and move them together. Choose OK to create it, or Cancel to leave the groups unchanged.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Grouper les pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nommez un nouveau groupe pour les pièces sélectionnées afin de pouvoir les sélectionner et les déplacer ensemble. Choisissez OK pour le créer ou Annuler pour laisser les groupes inchangés.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="17"/>
@@ -8955,13 +9094,15 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_groupdialog.ui" line="25"/>
         <location filename="../common/lc_groupdialog.ui" line="41"/>
         <source>Enter a unique, nonempty name for the new group.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Entrez un nom unique et non vide pour le nouveau groupe.</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="28"/>
         <location filename="../common/lc_groupdialog.ui" line="44"/>
         <source>&lt;p&gt;&lt;b&gt;Group Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a name that is not already used by another group in this model. The new group contains the selected pieces and their existing groups.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nom du groupe&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez un nom qui n'est pas déjà utilisé par un autre groupe dans ce modèle. Le nouveau groupe contient les pièces sélectionnées et leurs groupes existants.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="31"/>
@@ -9011,13 +9152,15 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="171"/>
         <source>Add a step index when using One Step per Page.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ajoutez un index d’étape lorsque vous utilisez «Une étape par page».</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="181"/>
         <location filename="../common/lc_htmldialog.ui" line="194"/>
         <source>Width of each step image, in pixels.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Largeur de chaque image d'étape, en pixels.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="184"/>
@@ -9028,7 +9171,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_htmldialog.ui" line="207"/>
         <location filename="../common/lc_htmldialog.ui" line="220"/>
         <source>Height of each step image, in pixels.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Hauteur de chaque image d'étape, en pixels.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="210"/>
@@ -9043,44 +9187,52 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Export HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create browser-viewable building instructions and PNG images in the output folder. Choose which models to include, how to organize the step pages, and where to show pieces lists.&lt;/p&gt;&lt;p&gt;Keep the generated HTML and image files together when copying or sharing the instructions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Exporter du HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez des instructions de construction visibles dans le navigateur et des images PNG dans le dossier de sortie. Choisissez les modèles à inclure, comment organiser les pages d'étapes et où afficher les listes de pièces.&lt;/p&gt;&lt;p&gt;Conservez les fichiers HTML et image générés ensemble lors de la copie ou du partage des instructions.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="43"/>
         <location filename="../common/lc_htmldialog.ui" line="59"/>
         <source>Folder for the generated HTML pages and images.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dossier pour les pages et images HTML générées.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="46"/>
         <location filename="../common/lc_htmldialog.ui" line="62"/>
         <source>&lt;p&gt;&lt;b&gt;Output Folder&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The exporter creates this folder if needed and writes the instruction pages and their images into it. Use a separate folder for each export to keep the generated files together.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dossier de sortie&lt;/b&gt;&lt;/p&gt;&lt;p&gt;L'exportateur crée ce dossier si nécessaire et y écrit les pages d'instructions et leurs images. Utilisez un dossier distinct pour chaque exportation afin de conserver les fichiers générés ensemble.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="69"/>
         <source>Choose the folder for the exported instructions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le dossier pour les instructions exportées.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="72"/>
         <source>Choose Output Folder</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisir le dossier de sortie</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="84"/>
         <source>Save step images with a transparent background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez les images des étapes avec un arrière-plan transparent.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="87"/>
         <source>&lt;p&gt;&lt;b&gt;Transparent Image Background&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, the PNG step images have a transparent background so the page background can show through. When unchecked, they include the configured solid or gradient background with no transparency.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Arrière-plan de l'image transparent&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Lorsque cette case est cochée, les images d'étape PNG ont un arrière-plan transparent afin que l'arrière-plan de la page puisse apparaître. Lorsqu'elles ne sont pas cochées, elles incluent l'arrière-plan uni ou dégradé configuré sans transparence.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="100"/>
         <source>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export all models in the project, only the current model, or the current model with the submodels it references. When several models are exported, an overall index links to their instructions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Exportez tous les modèles du projet, uniquement le modèle actuel ou le modèle actuel avec les sous-modèles auxquels il fait référence. Lorsque plusieurs modèles sont exportés, un index global renvoie vers leurs instructions.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="103"/>
@@ -9090,7 +9242,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="109"/>
         <source>Export instructions for every model in the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportez les instructions pour chaque modèle du projet.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="112"/>
@@ -9100,7 +9253,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="119"/>
         <source>Export the current model and the submodels it references.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportez le modèle actuel et les sous-modèles auxquels il fait référence.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="122"/>
@@ -9110,7 +9264,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="129"/>
         <source>Export instructions only for the current model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportez les instructions uniquement pour le modèle actuel.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="132"/>
@@ -9120,7 +9275,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="142"/>
         <source>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use positive dimensions up to 2048 pixels.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Étapes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Page unique place toutes les étapes de chaque modèle sur une seule page HTML. Une étape par page crée des pages distinctes avec des liens de navigation. Dans ce mode, la page d'index ajoute une page reliant les étapes.&lt;/p&gt;&lt;p&gt;La largeur et la hauteur définissent la taille de l'image de l'étape en pixels. Utilisez des dimensions positives jusqu'à 2 048 pixels.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="145"/>
@@ -9130,7 +9286,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="151"/>
         <source>Put all steps for each model on one HTML page.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mettez toutes les étapes de chaque modèle sur une seule page HTML.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="154"/>
@@ -9140,7 +9297,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="161"/>
         <source>Create a separate HTML page for each step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez une page HTML distincte pour chaque étape.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="164"/>
@@ -9150,7 +9308,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="236"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;After each step shows the pieces added in that step. At the end shows the complete model inventory after the instructions. You can enable either option, both, or neither.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Liste des pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Après chaque étape, affiche les pièces ajoutées à cette étape. À la fin montre l'inventaire complet du modèle après les instructions. Vous pouvez activer l'une ou l'autre option, les deux ou aucune.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Highlight new parts</source>
@@ -9164,7 +9323,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="245"/>
         <source>Include a complete pieces list after each model&apos;s instructions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Incluez une liste complète des pièces après les instructions de chaque modèle.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="248"/>
@@ -9174,7 +9334,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_htmldialog.ui" line="255"/>
         <source>Include a list of the pieces added in each step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Incluez une liste des pièces ajoutées à chaque étape.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="258"/>
@@ -9223,29 +9384,34 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_imagedialog.ui" line="27"/>
         <location filename="../common/lc_imagedialog.ui" line="43"/>
         <source>Path and file name for the exported image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Chemin et nom de fichier de l'image exportée.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="30"/>
         <location filename="../common/lc_imagedialog.ui" line="46"/>
         <location filename="../common/lc_imagedialog.ui" line="56"/>
         <source>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, &apos;model.png&apos; becomes &apos;model01.png&apos;, &apos;model02.png&apos;, and so on.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nom du fichier&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez un dossier de sortie, un nom de fichier et une extension d'image, telle que .png, .jpg ou .bmp.&lt;/p&gt;&lt;p&gt;Lors de l'enregistrement de plusieurs étapes, le numéro de l'étape est ajouté avant l'extension. Par exemple, « model.png » devient « model01.png », « model02.png », et ainsi de suite.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="53"/>
         <source>Choose the image file and format.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le fichier image et le format.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="59"/>
         <source>Choose Image File</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisir un fichier image</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="73"/>
         <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the exported image width and height in pixels. Each value must be between 1 and 32768. Larger images use more memory and may exceed the graphics hardware limits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Définissez la largeur et la hauteur de l'image exportée en pixels. Chaque valeur doit être comprise entre 1 et 32 768. Les images plus grandes utilisent plus de mémoire et peuvent dépasser les limites du matériel graphique.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="76"/>
@@ -9256,18 +9422,21 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_imagedialog.ui" line="82"/>
         <location filename="../common/lc_imagedialog.ui" line="95"/>
         <source>Width of the saved image, in pixels (1 to 32768).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Largeur de l'image enregistrée, en pixels (1 à 32768).</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="114"/>
         <location filename="../common/lc_imagedialog.ui" line="127"/>
         <source>Height of the saved image, in pixels (1 to 32768).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Hauteur de l'image enregistrée, en pixels (1 à 32768).</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="149"/>
         <source>&lt;p&gt;&lt;b&gt;Step Range&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose All Steps, Current Step, or Custom Range. The From and To fields are used only for Custom Range. Both endpoints are included, and To may equal From to save just one step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Plage de pas&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez Toutes les étapes, Étape actuelle ou Plage personnalisée. Les champs De et À sont utilisés uniquement pour la plage personnalisée. Les deux points de terminaison sont inclus et To peut être égal à From pour enregistrer une seule étape.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="152"/>
@@ -9277,7 +9446,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_imagedialog.ui" line="158"/>
         <source>Save an image for every step in the active model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez une image pour chaque étape du modèle actif.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="161"/>
@@ -9287,7 +9457,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_imagedialog.ui" line="168"/>
         <source>Save only the current step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez uniquement l'étape en cours.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="171"/>
@@ -9297,7 +9468,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_imagedialog.ui" line="180"/>
         <source>Save the steps between From and To, including both endpoints.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez les étapes entre De et À, y compris les deux points de terminaison.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="183"/>
@@ -9313,12 +9485,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_imagedialog.ui" line="190"/>
         <location filename="../common/lc_imagedialog.ui" line="203"/>
         <source>First step to save when Custom Range is selected.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Première étape à enregistrer lorsque la plage personnalisée est sélectionnée.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="206"/>
         <source>First Step</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Première étape</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="231"/>
@@ -9329,12 +9503,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../common/lc_imagedialog.ui" line="225"/>
         <location filename="../common/lc_imagedialog.ui" line="238"/>
         <source>Last step to save when Custom Range is selected.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dernière étape à enregistrer lorsque la plage personnalisée est sélectionnée.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="241"/>
         <source>Last Step</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dernière étape</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="85"/>
@@ -9344,7 +9520,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_imagedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Save Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Save images of the active model using the current view. Choose a destination file, image dimensions, and the steps to include.&lt;/p&gt;&lt;p&gt;Saving one step produces one image. Saving several steps produces a separate numbered image for each step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Enregistrer l'image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enregistrer les images du modèle actif en utilisant la vue actuelle. Choisissez un fichier de destination, les dimensions de l'image et les étapes à inclure.&lt;/p&gt;&lt;p&gt;L'enregistrement d'une étape produit une image. L'enregistrement de plusieurs étapes produit une image numérotée distincte pour chaque étape.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="117"/>
@@ -9785,22 +9962,26 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="591"/>
         <source>Choose which related pieces are included when selecting a piece.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez les pièces associées qui sont incluses lors de la sélection d'une pièce.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="605"/>
         <source>Choose coordinate axes and whether selected pieces rotate together.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez les axes de coordonnées et si les pièces sélectionnées tournent ensemble.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="626"/>
         <source>Choose movement snapping intervals for XY and Z.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez les intervalles d'accrochage de mouvement pour XY et Z.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Choose the rotation snapping interval.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez l’intervalle d’accrochage de rotation.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="664"/>
@@ -9810,7 +9991,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="675"/>
         <source>&lt;p&gt;&lt;b&gt;Tools Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a tool, then use it in the model view. Insertion tools create pieces, lights, or cameras. Editing tools select, transform, remove, or recolor objects. Navigation tools change the viewpoint without changing model geometry. Mouse assignments can be customized in Preferences.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Barre d'outils Outils&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez un outil, puis utilisez-le dans la vue modèle. Les outils d'insertion créent des pièces, des lumières ou des caméras. Les outils d'édition sélectionnent, transforment, suppriment ou recolorent des objets. Les outils de navigation modifient le point de vue sans modifier la géométrie du modèle. Les affectations de souris peuvent être personnalisées dans les Préférences.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="716"/>
@@ -9820,7 +10002,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="718"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a category or palette and filter its pieces. Selecting a piece prepares it for insertion; drag it into the model view to place it. Double-click a piece to open its preview. Options controls filtering, thumbnails, and list display.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez une catégorie ou une palette et filtrez ses pièces. La sélection d'une pièce la prépare à l'insertion ; faites-le glisser dans la vue modèle pour le placer. Double-cliquez sur une pièce pour ouvrir son aperçu. Les options contrôlent le filtrage, les miniatures et l'affichage de la liste.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="728"/>
@@ -9831,12 +10014,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="730"/>
         <source>&lt;p&gt;&lt;b&gt;Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the current LDraw color from the swatches. This color is used when inserting or painting pieces. To recolor selected pieces, use the color button above the swatches. Hover over a swatch for its name and color code.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Couleurs&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez la couleur LDraw actuelle parmi les échantillons. Cette couleur est utilisée lors de l’insertion ou de la peinture de pièces. Pour recolorer les pièces sélectionnées, utilisez le bouton de couleur au-dessus des échantillons. Passez la souris sur un échantillon pour connaître son nom et son code couleur.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="750"/>
         <source>Apply the current color to selected pieces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Applique la couleur actuelle aux pièces sélectionnées.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="751"/>
@@ -9847,12 +10032,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="752"/>
         <source>&lt;p&gt;&lt;b&gt;Change Selection Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Apply the current color to selected pieces. Choosing a swatch sets the current color; this button applies that color to the selection.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modifier la couleur de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Appliquer la couleur actuelle aux pièces sélectionnées. Le choix d'un échantillon définit la couleur actuelle ; ce bouton applique cette couleur à la sélection.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="758"/>
         <source>LDraw Colors</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleurs LDraw</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="763"/>
@@ -9862,47 +10049,56 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="765"/>
         <source>&lt;p&gt;&lt;b&gt;Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit properties of the focused object or selection. Available fields depend on whether you select pieces, a camera, or a light. Expand a section to see its fields. Keyframe controls mark properties at the current building step.&lt;/p&gt;&lt;p&gt;The transform fields at the bottom apply an X/Y/Z translation or rotation using the chosen transform mode. Press Enter to apply the values.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Propriétés&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Modifiez les propriétés de l'objet ou de la sélection sélectionné. Les champs disponibles dépendent de si vous sélectionnez des pièces, une caméra ou une lumière. Développez une section pour voir ses champs. Les contrôles d'images clés marquent les propriétés à l'étape de construction en cours.&lt;/p&gt;&lt;p&gt;Les champs de transformation en bas appliquent une translation ou une rotation X/Y/Z en utilisant le mode de transformation choisi. Appuyez sur Entrée pour appliquer les valeurs.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="786"/>
         <source>Choose absolute or relative translation or rotation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez une translation ou une rotation absolue ou relative.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="787"/>
         <source>&lt;p&gt;&lt;b&gt;Apply Transform&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the translation or rotation mode, enter X/Y/Z values, and press Enter to apply them. Translation values use LDraw units; rotation values use degrees.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Appliquer la transformation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez le mode de translation ou de rotation, saisissez les valeurs X/Y/Z et appuyez sur Entrée pour les appliquer. Les valeurs de traduction utilisent des unités LDraw ; les valeurs de rotation utilisent des degrés.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="791"/>
         <source>Transform X</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformer X</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="792"/>
         <source>Enter the X translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez la translation X en unités LDraw ou la rotation en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="795"/>
         <source>Transform Y</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformer Y</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="796"/>
         <source>Enter the Y translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez la translation Y en unités LDraw ou la rotation en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="799"/>
         <source>Transform Z</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformer Z</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="800"/>
         <source>Enter the Z translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Entrez la translation Z en unités LDraw ou la rotation en degrés.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="812"/>
@@ -9912,7 +10108,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="814"/>
         <source>&lt;p&gt;&lt;b&gt;Timeline&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a step to make it current, or select piece rows to select those pieces in the model. Drag pieces between steps or reorder them within a step. Right-click for step insertion, removal, movement, and visibility commands.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Chronologie&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez une étape pour la rendre actuelle ou sélectionnez des rangées de pièces pour sélectionner ces pièces dans le modèle. Faites glisser les éléments entre les étapes ou réorganisez-les au sein d’une étape. Cliquez avec le bouton droit pour les commandes d'insertion, de suppression, de mouvement et de visibilité d'étape.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="860"/>
@@ -9924,7 +10121,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="863"/>
         <source>&lt;p&gt;&lt;b&gt;Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Inspect a piece without placing it in the model. Double-click a piece in the Pieces dock to preview it. Lock Preview keeps the current preview when the source selection changes; unlock it to allow updates.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Aperçu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Inspectez une pièce sans la placer dans le modèle. Double-cliquez sur une pièce dans le dock Pièces pour la prévisualiser. Lock Preview conserve l'aperçu actuel lorsque la sélection de source change ; déverrouillez-le pour autoriser les mises à jour.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1006"/>
@@ -10131,32 +10329,38 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="592"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Mode&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the rule applied when you pick a piece in the model view. Single selects that piece; the other modes include matching piece types, matching colors, or both. For example, color selection lets you pick matching red pieces without selecting each one separately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Mode de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez la règle appliquée lorsque vous choisissez une pièce dans la vue du modèle. Single sélectionne cette pièce ; les autres modes incluent la correspondance des types de pièces, la correspondance des couleurs ou les deux. Par exemple, la sélection des couleurs vous permet de choisir des pièces rouges assorties sans les sélectionner séparément.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="606"/>
         <source>&lt;p&gt;&lt;b&gt;Transform Options&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the axes and pivot used for interactive transforms. Relative Transforms uses the focused object&apos;s orientation, so movement along X follows that object&apos;s local X axis. Absolute Transforms uses the model axes. Rotate Together rotates the selection around a shared pivot; Rotate Separately rotates each piece around its own origin.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Options de transformation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez les axes et le pivot utilisés pour les transformations interactives. Les transformations relatives utilisent l'orientation de l'objet ciblé, de sorte que le mouvement le long de X suit l'axe X local de cet objet. Absolute Transforms utilise les axes du modèle. Rotation ensemble fait pivoter la sélection autour d'un pivot partagé ; Rotation Fait pivoter séparément chaque pièce autour de sa propre origine.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="627"/>
         <source>&lt;p&gt;&lt;b&gt;Movement Snap&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how far objects move in each snapped increment. XY controls movement across the base plane; Z controls vertical movement, so they can use different intervals. Turn snapping off for free placement, then enable it again when you need consistent spacing.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Accrochage au mouvement&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez la distance dans laquelle les objets se déplacent dans chaque incrément capturé. XY contrôle le mouvement sur le plan de base ; Z contrôle le mouvement vertical, afin qu'ils puissent utiliser différents intervalles. Désactivez l'accrochage pour un placement libre, puis réactivez-le lorsque vous avez besoin d'un espacement cohérent.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="640"/>
         <source>&lt;p&gt;&lt;b&gt;Rotation Snap&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an angle increment for interactive rotation. For example, a 90-degree increment is useful for quarter turns, while smaller increments allow finer alignment. Turn snapping off for free rotation without fixed angle increments.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rotation Snap&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez un incrément d'angle pour une rotation interactive. Par exemple, un incrément de 90 degrés est utile pour les quarts de tour, tandis que des incréments plus petits permettent un alignement plus fin. Désactivez l'accrochage pour une rotation libre sans incréments d'angle fixe.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="646"/>
         <source>&lt;p&gt;&lt;b&gt;Standard Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use file controls to create, open, and save projects, and Undo or Redo to navigate edit history. Before moving or rotating objects, choose the selection rule, coordinate reference, and snapping increments from the four drop-down controls. Help &gt; What&apos;s This? explains individual controls.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Barre d'outils standard&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Utilisez les contrôles de fichiers pour créer, ouvrir et enregistrer des projets, ainsi que Annuler ou Rétablir pour parcourir l'historique des modifications. Avant de déplacer ou de faire pivoter des objets, choisissez la règle de sélection, la référence de coordonnées et les incréments d'accrochage dans les quatre commandes déroulantes. Aide &gt; Qu'est-ce que c'est ? explique les contrôles individuels.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="666"/>
         <source>&lt;p&gt;&lt;b&gt;Time Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The arrow buttons move through building steps so you can inspect how the model is assembled. They do not change the step assigned to a piece; use the Timeline for that. Add Keys controls whether edits create animation keys at the current step, allowing properties such as position to vary between steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Barre d'outils temporelle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Les boutons fléchés vous permettent de parcourir les étapes de construction afin que vous puissiez inspecter la façon dont le modèle est assemblé. Ils ne changent pas le pas attribué à une pièce ; utilisez la chronologie pour cela. Ajouter des clés contrôle si les modifications créent des clés d'animation à l'étape actuelle, permettant aux propriétés telles que la position de varier d'une étape à l'autre.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2359"/>
@@ -10345,7 +10549,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Minifig Wizard&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Build a minifigure by choosing its pieces, colors, and pose. The preview updates as you make changes. Choose OK to insert the minifigure into the current model, or Cancel to close without inserting it.&lt;/p&gt;&lt;p&gt;Templates let you reuse a configuration. Saved, deleted, and imported templates are retained even if you cancel the wizard.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Assistant Minifig&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Construisez une figurine en choisissant ses pièces, ses couleurs et sa pose. L'aperçu est mis à jour à mesure que vous apportez des modifications. Choisissez OK pour insérer la figurine dans le modèle actuel, ou Annuler pour fermer sans l'insérer.&lt;/p&gt;&lt;p&gt;Les modèles vous permettent de réutiliser une configuration. Les modèles enregistrés, supprimés et importés sont conservés même si vous annulez l'assistant.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="17"/>
@@ -10355,12 +10560,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;Minifigure Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each section has a piece selector and a color button. Some sections also have a rotation control in degrees. Choose None in a piece selector to omit that piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Pièces de figurine&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Chaque section possède un sélecteur de pièces et un bouton de couleur. Certaines sections disposent également d'un contrôle de rotation en degrés. Choisissez Aucun dans un sélecteur de pièces pour omettre cette pièce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Load a saved configuration of pieces, colors, and angles, or save the current configuration under a name. Choosing another template replaces the current preview configuration.&lt;/p&gt;&lt;p&gt;Changes to the preview are not saved as a template until you use Save. Template operations are retained when the wizard closes, including after Cancel.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Chargez une configuration enregistrée de pièces, de couleurs et d'angles, ou enregistrez la configuration actuelle sous un nom. Le choix d'un autre modèle remplace la configuration actuelle de l'aperçu.&lt;/p&gt;&lt;p&gt;Les modifications apportées à l'aperçu ne sont enregistrées en tant que modèle que lorsque vous utilisez Enregistrer. Les opérations du modèle sont conservées à la fermeture de l'assistant, y compris après l'annulation.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="40"/>
@@ -10371,22 +10578,26 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="46"/>
         <source>Load a saved configuration of pieces, colors, and angles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Chargez une configuration enregistrée de pièces, de couleurs et d'angles.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="49"/>
         <source>Minifigure Template</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Modèle de figurine</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="62"/>
         <source>Save the current minifigure configuration as a named template.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez la configuration actuelle de la figurine en tant que modèle nommé.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="65"/>
         <source>&lt;p&gt;&lt;b&gt;Save Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a name for the current pieces, colors, and pose. Reusing an existing name asks before replacing that template. The Default template cannot be overwritten.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Enregistrer le modèle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Entrez un nom pour les pièces, les couleurs et la pose actuelles. La réutilisation d'un nom existant est demandée avant de remplacer ce modèle. Le modèle par défaut ne peut pas être écrasé.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="68"/>
@@ -10397,12 +10608,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="75"/>
         <source>Delete the selected saved template.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Supprimez le modèle enregistré sélectionné.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="78"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected named template after confirmation. This does not remove pieces from the preview or an existing model. The Default template cannot be deleted.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Supprimer le modèle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Supprimez le modèle nommé sélectionné après confirmation. Cela ne supprime pas les pièces de l'aperçu ou d'un modèle existant. Le modèle par défaut ne peut pas être supprimé.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="81"/>
@@ -10412,12 +10625,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="88"/>
         <source>Add templates from a .minifig file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ajoutez des modèles à partir d'un fichier .minifig.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="91"/>
         <source>&lt;p&gt;&lt;b&gt;Import Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add saved configurations from a .minifig file to the template collection. Existing template names are kept when the imported file contains the same names.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Importer des modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajoutez des configurations enregistrées à partir d'un fichier .minifig à la collection de modèles. Les noms de modèles existants sont conservés lorsque le fichier importé contient les mêmes noms.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="94"/>
@@ -10427,12 +10642,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="101"/>
         <source>Save the entire template collection to a .minifig file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez toute la collection de modèles dans un fichier .minifig.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="104"/>
         <source>&lt;p&gt;&lt;b&gt;Export Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write all templates to a .minifig file for backup or sharing. Export includes the entire collection, not just the selected template.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Exporter des modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Écrivez tous les modèles dans un fichier .minifig pour la sauvegarde ou le partage. L'exportation inclut la collection entière, pas seulement le modèle sélectionné.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="107"/>
@@ -10544,62 +10761,74 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="51"/>
         <source>%1 piece</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">%1 pièce</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="52"/>
         <source>Choose the piece for %1, or None to omit it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la pièce pour %1, ou Aucune pour l'omettre.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="53"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece for this section of the minifigure. Select None to omit it. The preview updates when you select a different piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Choisir une pièce&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez une pièce pour cette section de la figurine. Sélectionnez Aucun pour l'omettre. L'aperçu se met à jour lorsque vous sélectionnez une autre pièce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="60"/>
         <source>%1 color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">%1 couleur</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="61"/>
         <source>Choose the color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur pour %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="62"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Change the color of this minifigure piece. The preview updates immediately, and saving a template includes the chosen color.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Choisissez la couleur&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Changez la couleur de cette figurine. L'aperçu est mis à jour immédiatement et l'enregistrement d'un modèle inclut la couleur choisie.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="75"/>
         <source>%1 rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotation %1</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="76"/>
         <source>Rotate %1, in degrees (-360 to 360).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Faites pivoter %1, en degrés (-360 à 360).</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="77"/>
         <source>&lt;p&gt;&lt;b&gt;Rotation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust this piece&apos;s angle to pose the minifigure. Values range from -360 to 360 degrees. The available rotation depends on the selected minifigure section.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rotation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ajustez l'angle de cette pièce pour poser la figurine. Les valeurs vont de -360 à 360 degrés. La rotation disponible dépend de la section de figurine sélectionnée.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="127"/>
         <source>Minifigure Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aperçu de la figurine</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="128"/>
         <source>Preview of the chosen pieces, colors, and pose.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aperçu des pièces, couleurs et pose choisies.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="129"/>
         <source>&lt;p&gt;&lt;b&gt;Minifigure Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check the assembled minifigure as you change pieces, colors, or angles. Choose OK to add this configuration to the current model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Aperçu de la figurine&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vérifiez la figurine assemblée lorsque vous changez de pièces, de couleurs ou d'angles. Choisissez OK pour ajouter cette configuration au modèle actuel.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="271"/>
@@ -11238,7 +11467,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Manage the models stored in this project. Create, rename, duplicate, delete, or reorder them, then choose OK to apply the changes. Cancel discards the list changes; files already exported remain on disk.&lt;/p&gt;&lt;p&gt;Drag list entries to change their order. Use Set Active to switch to the current list item when applying changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Sous-modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Gérez les modèles stockés dans ce projet. Créez, renommez, dupliquez, supprimez ou réorganisez-les, puis choisissez OK pour appliquer les modifications. Annuler annule les modifications de la liste ; les fichiers déjà exportés restent sur le disque.&lt;/p&gt;&lt;p&gt;Faites glisser les entrées de la liste pour modifier leur ordre. Utilisez Définir actif pour passer à l'élément de liste actuel lors de l'application des modifications.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="17"/>
@@ -11250,17 +11480,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="25"/>
         <source>Select models to manage, or drag them to change their order.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez les modèles à gérer ou faites-les glisser pour modifier leur ordre.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Model List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select one or more entries for actions such as Rename, Duplicate, Export, or Delete. Drag entries to reorder them. Double-click an entry to apply the list changes and make that model active.&lt;/p&gt;&lt;p&gt;Names must be unique within the project; capitalization alone does not make a name unique.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Liste des modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez une ou plusieurs entrées pour des actions telles que Renommer, Dupliquer, Exporter ou Supprimer. Faites glisser les entrées pour les réorganiser. Double-cliquez sur une entrée pour appliquer les modifications de la liste et rendre ce modèle actif.&lt;/p&gt;&lt;p&gt;Les noms doivent être uniques au sein du projet ; la majuscule à elle seule ne rend pas un nom unique.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="43"/>
         <source>Add a new empty submodel to the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ajoutez un nouveau sous-modèle vide au projet.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="46"/>
@@ -11271,12 +11504,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="53"/>
         <source>Remove the selected models from the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Supprimez les modèles sélectionnés du projet.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="56"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected entries after confirmation. At least one model must remain. The project is changed when you accept this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Supprimer les sous-modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Supprimez les entrées sélectionnées après confirmation. Il doit rester au moins un modèle. Le projet est modifié lorsque vous acceptez cette boîte de dialogue.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="59"/>
@@ -11286,7 +11521,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="66"/>
         <source>Choose a unique name for each selected model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un nom unique pour chaque modèle sélectionné.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="69"/>
@@ -11296,12 +11532,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="76"/>
         <source>Save the selected models to separate LDraw files.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez les modèles sélectionnés dans des fichiers LDraw séparés.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="79"/>
         <source>&lt;p&gt;&lt;b&gt;Export Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;For one selected model, choose its output file. For several selected models, choose an output folder. Export writes files immediately, even if you later cancel this dialog.&lt;/p&gt;&lt;p&gt;A newly created empty model has nothing to export until the list changes have been applied.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Exporter les sous-modèles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pour un modèle sélectionné, choisissez son fichier de sortie. Pour plusieurs modèles sélectionnés, choisissez un dossier de sortie. L'exportation écrit les fichiers immédiatement, même si vous annulez ultérieurement cette boîte de dialogue.&lt;/p&gt;&lt;p&gt;Un modèle vide nouvellement créé n'a rien à exporter tant que les modifications de la liste n'ont pas été appliquées.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="82"/>
@@ -11311,7 +11549,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="89"/>
         <source>Create named copies of the selected models.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez des copies nommées des modèles sélectionnés.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="92"/>
@@ -11322,12 +11561,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="99"/>
         <source>Switch to the current list item when applying the changes.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Basculez vers l’élément de liste actuel lors de l’application des modifications.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="102"/>
         <source>&lt;p&gt;&lt;b&gt;Set Active&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, accepting this dialog makes the current list item the active model for editing. When unchecked, the existing active model is retained if it remains in the project.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Définir actif&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Lorsque cette case est cochée, l'acceptation de cette boîte de dialogue fait de l'élément de liste actuel le modèle actif pour la modification. Lorsque cette case n'est pas cochée, le modèle actif existant est conservé s'il reste dans le projet.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Move &amp;Up</source>
@@ -11521,7 +11762,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Palettes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Organize reusable collections of pieces in the piece browser. Create, rename, delete, import, or reorder palettes, then choose OK to apply the changes. Cancel discards these palette changes.&lt;/p&gt;&lt;p&gt;Palettes organize piece choices; they do not change pieces already placed in a model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Palettes de pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Organisez des collections de pièces réutilisables dans le navigateur de pièces. Créez, renommez, supprimez, importez ou réorganisez les palettes, puis choisissez OK pour appliquer les modifications. Annuler annule ces modifications de palette.&lt;/p&gt;&lt;p&gt;Les palettes organisent les choix de pièces ; ils ne changent pas les pièces déjà placées dans un modèle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="17"/>
@@ -11533,17 +11775,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="25"/>
         <source>Select the palette to rename, delete, or move.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez la palette à renommer, supprimer ou déplacer.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Palette List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a palette before using Rename, Delete, Move Up, or Move Down. The list order determines the palette order in the piece browser.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Liste des palettes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez une palette avant d'utiliser Renommer, Supprimer, Monter ou Descendre. L'ordre de la liste détermine l'ordre de la palette dans le navigateur de pièces.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="40"/>
         <source>Create a new empty piece palette.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez une nouvelle palette de pièces vides.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="43"/>
@@ -11553,12 +11798,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="50"/>
         <source>Remove the selected palette after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Supprimez la palette sélectionnée après confirmation.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="53"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected palette and its list of piece choices. Library pieces and pieces already used in models are not deleted. At least one palette must remain.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Supprimer la palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Supprimez la palette sélectionnée et sa liste de choix de pièces. Les éléments de bibliothèque et les éléments déjà utilisés dans les modèles ne sont pas supprimés. Il doit rester au moins une palette.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="56"/>
@@ -11568,7 +11815,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="63"/>
         <source>Change the name of the selected palette.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Changez le nom de la palette sélectionnée.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="66"/>
@@ -11579,12 +11827,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="73"/>
         <source>Create a palette from an online set inventory.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez une palette à partir d'un inventaire d'ensembles en ligne.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="76"/>
         <source>&lt;p&gt;&lt;b&gt;Import Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open Import Set Inventory to search for a set and download its inventory. The new palette uses the set description as its name.&lt;/p&gt;&lt;p&gt;The palette stores piece IDs; inventory colors and quantities are not stored. An internet connection is required.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Palette d'importation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ouvrez l'inventaire d'ensemble d'importation pour rechercher un ensemble et télécharger son inventaire. La nouvelle palette utilise la description de l'ensemble comme nom.&lt;/p&gt;&lt;p&gt;La palette stocke les identifiants des pièces ; Les couleurs et les quantités d'inventaire ne sont pas stockées. Une connexion Internet est requise.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="79"/>
@@ -11594,7 +11844,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="86"/>
         <source>Move the selected palette one position earlier in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Déplace la palette sélectionnée d'une position plus tôt dans la liste.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="89"/>
@@ -11605,7 +11856,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="96"/>
         <source>Move the selected palette one position later in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Déplacez la palette sélectionnée une position plus loin dans la liste.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="99"/>
@@ -11685,12 +11937,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partselectionpopup.cpp" line="10"/>
         <source>Choose Piece</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisir une pièce</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionpopup.cpp" line="11"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a piece, then choose OK or double-click it to use it. Cancel keeps the original choice. Filter the list to find a piece; Options controls matching and list display. When None is available, select it to omit the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Choisir un morceau&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez un morceau, puis choisissez OK ou double-cliquez dessus pour l'utiliser. Annuler conserve le choix initial. Filtrez la liste pour trouver une pièce ; Les options contrôlent la correspondance et l’affichage de la liste. Lorsque Aucun n'est disponible, sélectionnez-le pour omettre la pièce.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -11795,17 +12049,20 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="986"/>
         <source>Filter category names to narrow the category list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrez les noms de catégories pour affiner la liste des catégories.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1002"/>
         <source>Piece Categories</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Catégories de pièces</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1003"/>
         <source>Choose a category or palette to display its pieces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez une catégorie ou une palette pour afficher ses pièces.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1020"/>
@@ -11817,27 +12074,32 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1022"/>
         <source>Filter the displayed pieces using the matching options.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrez les pièces affichées en utilisant les options correspondantes.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1027"/>
         <source>Configure piece filtering and list display.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez le filtrage des pièces et l’affichage de la liste.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1028"/>
         <source>Piece List Options</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Options de liste de pièces</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1037"/>
         <source>Available Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pièces disponibles</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1038"/>
         <source>Select a piece from the filtered list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez une pièce dans la liste filtrée.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1300"/>
@@ -12055,77 +12317,92 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
         <source>Set the distance in LDraw units at which simpler piece meshes are used.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez la distance en unités LDraw à laquelle des maillages de pièces plus simples sont utilisés.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1493"/>
         <source>View Sphere Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher la couleur de la sphère</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1535"/>
         <source>View Sphere Text Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher la couleur du texte de la sphère</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1577"/>
         <source>View Sphere Highlight Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher la couleur de surbrillance de la sphère</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1638"/>
         <source>Grid Line Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de la ligne de grille</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1680"/>
         <source>Grid Stud Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur des goujons de la grille</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1730"/>
         <source>Background Top Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du haut de l'arrière-plan</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1772"/>
         <source>Background Bottom Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du bas de l'arrière-plan</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1872"/>
         <source>Light Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de la lumière</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1914"/>
         <source>Camera Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de la caméra</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1940"/>
         <source>Control Point Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du point de contrôle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1953"/>
         <source>Focused Control Point Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du point de contrôle ciblé</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1966"/>
         <source>Selected Object Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de l'objet sélectionné</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1979"/>
         <source>Focused Object Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de l'objet ciblé</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2439"/>
         <source>&lt;p&gt;&lt;b&gt;Mouse Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a tool, choose a mouse button and optional modifiers, then choose Assign. Each tool can have two shortcuts; a new assignment becomes the primary shortcut. Remove clears the primary shortcut and promotes the secondary shortcut. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Raccourcis de souris&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez un outil, choisissez un bouton de souris et des modificateurs facultatifs, puis choisissez Attribuer. Chaque outil peut avoir deux raccourcis ; une nouvelle affectation devient le raccourci principal. Supprimer efface le raccourci principal et favorise le raccourci secondaire. Choisissez OK dans les Préférences pour enregistrer les modifications.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2442"/>
@@ -12140,12 +12417,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2458"/>
         <source>Tools and Mouse Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Outils et raccourcis souris</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2461"/>
         <source>Select a tool to edit its primary and secondary mouse shortcuts.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez un outil pour modifier ses raccourcis de souris principaux et secondaires.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2471"/>
@@ -12167,23 +12446,27 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2491"/>
         <source>Replace mouse shortcuts with assignments from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Remplacez les raccourcis de la souris par les affectations d'un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2501"/>
         <source>Save the current mouse shortcuts to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez immédiatement les raccourcis de souris actuels dans un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2511"/>
         <source>Restore the default mouse shortcuts after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez les raccourcis souris par défaut après confirmation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2551"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2567"/>
         <source>Choose the mouse button to assign to the selected tool.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le bouton de la souris pour l'attribuer à l'outil sélectionné.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2557"/>
@@ -12193,7 +12476,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2564"/>
         <source>Button</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bouton</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2571"/>
@@ -12223,7 +12507,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2601"/>
         <source>Require the Control modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exiger le modificateur Contrôle pour ce raccourci de souris.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2604"/>
@@ -12233,7 +12518,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2611"/>
         <source>Require the Alt modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exiger le modificateur Alt pour ce raccourci de souris.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2614"/>
@@ -12243,7 +12529,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2621"/>
         <source>Require the Shift modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exiger le modificateur Shift pour ce raccourci de souris.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2624"/>
@@ -12253,18 +12540,21 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2631"/>
         <source>Assign the chosen mouse button and modifiers to the selected tool.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Attribuez le bouton de la souris et les modificateurs choisis à l'outil sélectionné.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2641"/>
         <source>Remove the primary mouse shortcut and promote the secondary shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Supprimez le raccourci principal de la souris et promouvez le raccourci secondaire.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2658"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2674"/>
         <source>Adjust how strongly mouse motion affects navigation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ajustez l'impact du mouvement de la souris sur la navigation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2664"/>
@@ -12599,308 +12889,366 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the application, display, colors, piece categories, and keyboard and mouse shortcuts. Choose OK to save the changes or Cancel to discard edits in Preferences. Language, piece-library, and antialiasing changes may require restarting LeoCAD.&lt;/p&gt;&lt;p&gt;Export buttons write files immediately. Blender add-on settings have their own Apply action and can configure Blender before you close Preferences.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Préférences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configurez l'application, l'affichage, les couleurs, les catégories de pièces et les raccourcis clavier et souris. Choisissez OK pour enregistrer les modifications ou Annuler pour ignorer les modifications dans les Préférences. Les modifications de langue, de bibliothèque de pièces et d'anticrénelage peuvent nécessiter le redémarrage de LeoCAD.&lt;/p&gt;&lt;p&gt;Les boutons d'exportation écrivent les fichiers immédiatement. Les paramètres du module complémentaire Blender ont leur propre action Appliquer et peuvent configurer Blender avant de fermer les Préférences.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="27"/>
         <source>&lt;p&gt;&lt;b&gt;General Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set application behavior and custom library, configuration, and renderer paths. Leave optional configuration paths empty to use the built-in settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Préférences générales&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Définissez le comportement de l'application et les chemins de bibliothèque, de configuration et de rendu personnalisés. Laissez les chemins de configuration facultatifs vides pour utiliser les paramètres intégrés.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="45"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
         <source>Choose the interface language used after restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la langue de l'interface utilisée après le redémarrage de LeoCAD.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="58"/>
         <source>Language</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Langue</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="73"/>
         <source>Check for Updates</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vérifier les mises à jour</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="76"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="98"/>
         <source>Choose how often to check automatically for application and piece-library updates.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la fréquence à laquelle vérifier automatiquement les mises à jour des applications et de la bibliothèque de pièces.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="124"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="140"/>
         <source>Choose the interface theme and optionally reset its colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le thème de l'interface et éventuellement réinitialisez ses couleurs.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="137"/>
         <source>Color Theme</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Thème de couleur</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="160"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="176"/>
         <source>Set the author name used for new models.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez le nom de l'auteur utilisé pour les nouveaux modèles.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="173"/>
         <source>Default Author Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nom de l'auteur par défaut</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="183"/>
         <source>Move pieces along fixed model axes instead of view-relative directions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Déplacez les pièces le long des axes fixes du modèle plutôt que dans des directions relatives à la vue.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="193"/>
         <source>Open the most recently used file when LeoCAD starts.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ouvrez le fichier le plus récemment utilisé au démarrage de LeoCAD.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="209"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="227"/>
         <source>Choose a piece-library folder or supported archive to load after restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un dossier de bibliothèque de pièces ou une archive prise en charge à charger après le redémarrage de LeoCAD.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="224"/>
         <source>Pieces Library</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bibliothèque de pièces</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
         <source>Choose a piece-library folder.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un dossier de bibliothèque de pièces.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="245"/>
         <source>Choose a piece-library ZIP or BIN archive.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez une archive ZIP ou BIN de bibliothèque de pièces.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="258"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="276"/>
         <source>Choose a custom LDraw color configuration file, or leave empty to use the library colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un fichier de configuration de couleur LDraw personnalisé ou laissez vide pour utiliser les couleurs de la bibliothèque.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="273"/>
         <source>Color Configuration</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configuration des couleurs</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="283"/>
         <source>Choose a custom LDraw color configuration file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un fichier de configuration de couleur LDraw personnalisé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="295"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="313"/>
         <source>Choose a custom minifigure settings file, or leave empty to use the built-in choices.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un fichier de paramètres de figurine personnalisé ou laissez vide pour utiliser les choix intégrés.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="310"/>
         <source>Minifig Settings</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Paramètres de minifig</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="320"/>
         <source>Choose a minifigure settings INI file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez un fichier INI de paramètres de figurine.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="332"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="350"/>
         <source>Set the POV-Ray executable used for rendering.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez l'exécutable POV-Ray utilisé pour le rendu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="347"/>
         <source>POV-Ray Executable</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exécutable POV-Ray</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="357"/>
         <source>Locate the POV-Ray executable.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Localisez l'exécutable POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="369"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="387"/>
         <source>Set the LGEO library folder used by POV-Ray exports.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez le dossier de la bibliothèque LGEO utilisé par les exportations POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="384"/>
         <source>LGEO Library</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bibliothèque LGEO</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="394"/>
         <source>Choose the LGEO library folder.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le dossier de la bibliothèque LGEO.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
         <source>Restore saved model tabs and view layouts when opening a project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez les onglets de modèle enregistrés et affichez les dispositions lors de l'ouverture d'un projet.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="420"/>
         <source>&lt;p&gt;&lt;b&gt;Rendering Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Control shading, stud geometry, selection appearance, edges, and step effects. Some options are unavailable when the graphics system does not support them.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Préférences de rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Contrôlez l'ombrage, la géométrie des montants, l'apparence de la sélection, les bords et les effets de pas. Certaines options ne sont pas disponibles lorsque le système graphique ne les prend pas en charge.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="432"/>
         <source>Previous Step Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de l'étape précédente</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="435"/>
         <source>Choose the tint used for pieces from previous steps.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la teinte utilisée pour les pièces des étapes précédentes.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="445"/>
         <source>Shading Mode</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mode d'ombrage</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="448"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="590"/>
         <source>Choose how piece surfaces and edges are drawn in model views.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la façon dont les surfaces et les arêtes des pièces sont dessinées dans les vues du modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="470"/>
         <source>Use simpler meshes for distant pieces to improve display performance.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Utilisez des maillages plus simples pour les pièces distantes afin d'améliorer les performances d'affichage.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
         <source>Tint pieces from previous building steps with the chosen fade color.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Teintez les pièces des étapes de construction précédentes avec la couleur de fondu choisie.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="503"/>
         <source>Highlight pieces introduced in the current building step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mettez en surbrillance les pièces introduites lors de l’étape de construction en cours.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="513"/>
         <source>New Piece Highlight Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de surbrillance de la nouvelle pièce</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="516"/>
         <source>Choose the highlight color for pieces in the current step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur de surbrillance des pièces de l'étape en cours.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="526"/>
         <source>Blender LDraw Render</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rendu LDraw de Blender</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="529"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="628"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres du module complémentaire Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ouvrez la boîte de dialogue de configuration séparée de Blender. Son action Appliquer enregistre ses paramètres indépendamment des préférences, et le choix d'un exécutable ou d'un importateur peut configurer Blender immédiatement.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="532"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="631"/>
         <source>Configure Blender and its LDraw import and render add-ons.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez Blender et ses modules complémentaires d'importation et de rendu LDraw.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rendu de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Contour dessine un contour et un léger remplissage de couleur de sélection sur les parties obscurcies. Face Tint utilise des visages teintés et des bords colorés. Les systèmes sans prise en charge des contours utilisent Face Tint.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la façon dont les pièces sélectionnées sont mises en surbrillance.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
         <source>Mesh Detail Distance</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Distance de détail du maillage</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="580"/>
         <source>Configure colors and the light/dark threshold for high contrast stud styles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez les couleurs et le seuil clair/foncé pour les styles de montants à contraste élevé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="603"/>
         <source>Antialiasing Samples</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exemples d'anticrénelage</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="606"/>
         <source>Choose the antialiasing sample count; more samples can use more graphics resources.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le nombre d'échantillons d'anticrénelage ; plus d'échantillons peuvent utiliser plus de ressources graphiques.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="647"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="711"/>
         <source>Choose stud geometry and the high contrast stud styles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la géométrie des crampons et les styles de crampons à contraste élevé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="701"/>
         <source>Smooth jagged edges in model views; changes require restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bords irréguliers lisses dans les vues du modèle ; les modifications nécessitent le redémarrage de LeoCAD.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rendu de sélection</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
         <source>Draw conditional lines where needed to show curved piece surfaces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Tracez des lignes conditionnelles là où cela est nécessaire pour afficher les surfaces courbes des pièces.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="786"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="802"/>
         <source>Set edge-line width within the range supported by the graphics system.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez la largeur de la ligne de bord dans la plage prise en charge par le système graphique.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="799"/>
         <source>Line Width</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Largeur de ligne</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="821"/>
         <source>Draw the edge lines defined by each piece.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Tracez les lignes de bord définies par chaque pièce.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="831"/>
         <source>Calculate edge colors from piece colors instead of using their defined edge colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Calculez les couleurs des bords à partir des couleurs des pièces au lieu d'utiliser leurs couleurs de bords définies.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="841"/>
         <source>Configure the contrast and saturation used for automated edge colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez le contraste et la saturation utilisés pour les couleurs de bords automatisées.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="868"/>
         <source>&lt;p&gt;&lt;b&gt;View Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose navigation aids for model views and the piece preview, and configure the base grid. Locations select the corner where each navigation aid appears.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Afficher les préférences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez les aides à la navigation pour les vues du modèle et l'aperçu de la pièce, et configurez la grille de base. Les emplacements sélectionnent le coin où apparaît chaque aide à la navigation.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="871"/>
@@ -12917,7 +13265,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="883"/>
         <source>Show the model-axis indicator in model views.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher l'indicateur d'axe du modèle dans les vues du modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="886"/>
@@ -12930,13 +13279,15 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="952"/>
         <source>Choose the corner for the model-view navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le coin de la sphère de navigation de la vue modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="906"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="922"/>
         <source>Choose the model-view navigation sphere size, or disable it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la taille de la sphère de navigation de la vue modèle ou désactivez-la.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="912"/>
@@ -12950,7 +13301,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1005"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1129"/>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Emplacement</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="956"/>
@@ -12988,27 +13340,32 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="992"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1008"/>
         <source>Choose the corner for the model-axis indicator.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le coin de l'indicateur d'axe du modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1064"/>
         <source>Show base-grid lines at the specified spacing.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher les lignes de la grille de base à l'espacement spécifié.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1074"/>
         <source>Grid Line Spacing</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Espacement des lignes de grille</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1077"/>
         <source>Set base-grid line spacing in studs (minimum 1).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez l’espacement des lignes de base et de la grille en montants (minimum 1).</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1090"/>
         <source>Emphasize the base-grid lines through the model origin.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Insistez sur les lignes de la grille de base jusqu'à l'origine du modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1093"/>
@@ -13019,7 +13376,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1100"/>
         <source>Show stud positions on the base grid.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher les positions des montants sur la grille de base.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1113"/>
@@ -13030,24 +13388,28 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1119"/>
         <source>Show the model-axis indicator in the piece preview.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Affichez l'indicateur d'axe du modèle dans l'aperçu de la pièce.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1132"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1159"/>
         <source>Choose the corner for the piece-preview navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le coin de la sphère de navigation d’aperçu des pièces.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1175"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1202"/>
         <source>Choose the piece-preview navigation sphere size, or disable it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la taille de la sphère de navigation d’aperçu des pièces ou désactivez-la.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1245"/>
         <source>&lt;p&gt;&lt;b&gt;Display Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose colors for the background, objects, grid, and interface. These settings control the display; they do not change the LDraw colors assigned to model pieces.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Couleurs d'affichage&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez les couleurs pour l'arrière-plan, les objets, la grille et l'interface. Ces paramètres contrôlent l'affichage ; ils ne modifient pas les couleurs LDraw attribuées aux pièces du modèle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1248"/>
@@ -13059,108 +13421,127 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1260"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1276"/>
         <source>Choose the display color for the selection rectangle border.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage de la bordure du rectangle de sélection.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1273"/>
         <source>Marquee Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bordure du rectangle de sélection</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1286"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1354"/>
         <source>Choose the display color for inactive view borders.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage des bordures de vue inactives.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1299"/>
         <source>Marquee Fill</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Remplissage du rectangle de sélection</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1302"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1338"/>
         <source>Choose the display color for the selection rectangle fill.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage du remplissage du rectangle de sélection.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1312"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1393"/>
         <source>Choose the display color for view text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage pour afficher le texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1325"/>
         <source>Text Halo Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du halo du texte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1328"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1377"/>
         <source>Choose the display color for the halo behind view text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage du texte du halo derrière la vue.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1351"/>
         <source>Inactive View Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bordure de vue inactive</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1364"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1406"/>
         <source>Choose the display color for view overlays.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage pour les superpositions de vues.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1390"/>
         <source>Text Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur du texte</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1403"/>
         <source>Overlay Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur de superposition</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1416"/>
         <source>Active View Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Bordure Active View</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1419"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1442"/>
         <source>Choose the display color for the active view border.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage de la bordure de la vue active.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1480"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1496"/>
         <source>Choose the display color for the navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage de la sphère de navigation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1522"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1538"/>
         <source>Choose the display color for navigation sphere text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage du texte de la sphère de navigation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1564"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1580"/>
         <source>Choose the display color for the highlighted region of the navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage de la région en surbrillance de la sphère de navigation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1625"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1641"/>
         <source>Choose the display color for base-grid lines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage des lignes de la grille de base.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1667"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1683"/>
         <source>Choose the display color for base-grid stud markers.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage des marqueurs de montants de la grille de base.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1709"/>
@@ -13171,7 +13552,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1717"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1733"/>
         <source>Choose the display color for the top of the background gradient.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage pour le haut du dégradé d'arrière-plan.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1723"/>
@@ -13183,7 +13565,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1759"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1775"/>
         <source>Choose the display color for the bottom of the background gradient.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage du bas du dégradé d’arrière-plan.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1765"/>
@@ -13194,7 +13577,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1800"/>
         <source>Use a single color for the model-view background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Utilisez une seule couleur pour l’arrière-plan de la vue modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1803"/>
@@ -13205,7 +13589,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1810"/>
         <source>Blend the top and bottom colors in the model-view background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mélangez les couleurs du haut et du bas dans l’arrière-plan de la vue modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1813"/>
@@ -13216,7 +13601,8 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2671"/>
         <source>Mouse Sensitivity</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sensibilité de la souris</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1254"/>
@@ -13365,12 +13751,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1822"/>
         <source>Background Solid Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Couleur unie de fond</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1825"/>
         <source>Choose the display color for the solid background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage pour l'arrière-plan uni.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1853"/>
@@ -13382,7 +13770,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1859"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1875"/>
         <source>Choose the display color for light-object outlines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage des contours des objets lumineux.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1865"/>
@@ -13394,7 +13783,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1901"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1982"/>
         <source>Choose the display color for the focused object.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage de l'objet ciblé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1907"/>
@@ -13406,13 +13796,15 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1917"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2018"/>
         <source>Choose the display color for camera-object outlines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage des contours des objets de la caméra.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1927"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1956"/>
         <source>Choose the display color for the focused control point.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d’affichage du point de contrôle ciblé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1933"/>
@@ -13424,13 +13816,15 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1943"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1992"/>
         <source>Choose the display color for control points.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage des points de contrôle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1969"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2005"/>
         <source>Choose the display color for selected objects.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la couleur d'affichage des objets sélectionnés.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1998"/>
@@ -13453,7 +13847,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2048"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Categories&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create, edit, reorder, or import categories for the piece browser. The right-hand list shows pieces matching the selected category. Imported and edited categories are saved when you choose OK in Preferences; Export writes the current list immediately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Catégories de pièces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Créez, modifiez, réorganisez ou importez des catégories pour le navigateur de pièces. La liste de droite montre les pièces correspondant à la catégorie sélectionnée. Les catégories importées et modifiées sont enregistrées lorsque vous choisissez OK dans les Préférences ; L'exportation écrit immédiatement la liste actuelle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2051"/>
@@ -13469,22 +13864,26 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2073"/>
         <source>Piece Categories</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Catégories de pièces</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2076"/>
         <source>Select a category to inspect or edit; drag categories to reorder them.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez une catégorie à inspecter ou à modifier ; faites glisser les catégories pour les réorganiser.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2107"/>
         <source>Matching Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pièces assorties</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2110"/>
         <source>View the library pieces matching the selected category.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Affichez les pièces de la bibliothèque correspondant à la catégorie sélectionnée.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2141"/>
@@ -13499,7 +13898,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2157"/>
         <source>Replace the category list with categories from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Remplacez la liste des catégories par les catégories d'un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2160"/>
@@ -13511,7 +13911,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2167"/>
         <source>Save the current category list to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez immédiatement la liste de catégories actuelle dans un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2170"/>
@@ -13523,7 +13924,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2177"/>
         <source>Restore the default category list after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez la liste des catégories par défaut après confirmation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2180"/>
@@ -13540,7 +13942,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2211"/>
         <source>Create a category with a name and a keyword expression.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Créez une catégorie avec un nom et une expression de mot-clé.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2214"/>
@@ -13550,7 +13953,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2221"/>
         <source>Edit the selected category name and keyword expression.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Modifiez le nom de la catégorie et l'expression du mot-clé sélectionnés.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2224"/>
@@ -13560,7 +13964,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2231"/>
         <source>Remove the selected category after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Supprimez la catégorie sélectionnée après confirmation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2234"/>
@@ -13570,7 +13975,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2258"/>
         <source>&lt;p&gt;&lt;b&gt;Keyboard Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a command, click Key Sequence, press the desired key combination, then choose Assign. Remove clears the selected command&apos;s shortcut. Import replaces the shortcut list; Export writes the current list immediately. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Raccourcis clavier&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Sélectionnez une commande, cliquez sur Séquence de touches, appuyez sur la combinaison de touches souhaitée, puis choisissez Attribuer. Supprimer efface le raccourci de la commande sélectionnée. L'importation remplace la liste de raccourcis ; L'exportation écrit immédiatement la liste actuelle. Choisissez OK dans les Préférences pour enregistrer les modifications.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2261"/>
@@ -13585,12 +13991,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2277"/>
         <source>Commands and Keyboard Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Commandes et raccourcis clavier</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2280"/>
         <source>Select the command whose keyboard shortcut you want to change.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez la commande dont vous souhaitez modifier le raccourci clavier.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2290"/>
@@ -13607,12 +14015,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2303"/>
         <source>Filter Commands</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Commandes de filtre</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2306"/>
         <source>Filter commands by name or shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrez les commandes par nom ou raccourci.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2309"/>
@@ -13623,29 +14033,34 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2318"/>
         <source>Replace keyboard shortcuts with assignments from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Remplacez les raccourcis clavier par les affectations d'un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2328"/>
         <source>Save the current keyboard shortcuts to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Enregistrez immédiatement les raccourcis clavier actuels dans un fichier texte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2338"/>
         <source>Restore the default keyboard shortcuts after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Restaurez les raccourcis clavier par défaut après confirmation.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2375"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2394"/>
         <source>&lt;p&gt;&lt;b&gt;Key Sequence&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click here and press the key combination you want to assign. Function keys, including F1, are recorded as shortcut candidates in this field. Use the Help button for guidance. Assign asks before replacing a shortcut already used by another command.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Séquence de touches&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Cliquez ici et appuyez sur la combinaison de touches que vous souhaitez attribuer. Les touches de fonction, y compris F1, sont enregistrées comme raccourcis candidats dans ce champ. Utilisez le bouton Aide pour obtenir des conseils. Attribuez des demandes avant de remplacer un raccourci déjà utilisé par une autre commande.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2378"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2397"/>
         <source>Press the key combination to assign, then choose Assign.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Appuyez sur la combinaison de touches à attribuer, puis choisissez Attribuer.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2381"/>
@@ -13657,12 +14072,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2391"/>
         <source>Key Sequence</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Séquence de touches</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2404"/>
         <source>Assign the entered key combination to the selected command.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Attribuez la combinaison de touches saisie à la commande sélectionnée.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2407"/>
@@ -13673,7 +14090,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2414"/>
         <source>Clear the selected command&apos;s keyboard shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Effacez le raccourci clavier de la commande sélectionnée.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2417"/>
@@ -14108,12 +14526,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="18"/>
         <source>Piece Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Translation reused from another context; requires human review.</translatorcomment>
+        <translation type="unfinished">Aperçu de la pièce</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="19"/>
         <source>Inspect the previewed piece without placing it in the model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Inspectez la pièce prévisualisée sans la placer dans le modèle.</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="22"/>
@@ -14125,7 +14545,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;Lock Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Keep the current piece in the preview while you browse other pieces. Unlock Preview allows the display to update again. An empty preview cannot be locked.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Verrouiller l'aperçu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Conservez la pièce actuelle dans l'aperçu pendant que vous parcourez d'autres pièces. L'aperçu de déverrouillage permet à l'affichage de se mettre à jour à nouveau. Un aperçu vide ne peut pas être verrouillé.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="26"/>
@@ -14186,7 +14607,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model&apos;s author, description, and comments on the Summary tab. Measurements and Pieces Used provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Propriétés du modèle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Modifiez l'auteur, la description et les commentaires du modèle actuel dans l'onglet Résumé. Les mesures et les pièces utilisées fournissent des informations en lecture seule. Choisissez OK pour appliquer les modifications de métadonnées ou Annuler pour les ignorer.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="17"/>
@@ -14196,7 +14618,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="27"/>
         <source>&lt;p&gt;&lt;b&gt;Model Summary&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Author, description, and comments are stored with this model when the project is saved. Measurements show its overall size.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Résumé du modèle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;L'auteur, la description et les commentaires sont stockés avec ce modèle lorsque le projet est enregistré. Les mesures montrent sa taille globale.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="36"/>
@@ -14207,7 +14630,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpropertiesdialog.ui" line="45"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="55"/>
         <source>Enter the author credited in this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez l'auteur crédité dans ce modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="48"/>
@@ -14218,7 +14642,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="75"/>
         <source>Enter a short description of this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Entrez une brève description de ce modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="68"/>
@@ -14229,7 +14654,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpropertiesdialog.ui" line="85"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="95"/>
         <source>Enter plain-text notes to store with this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez des notes en texte brut à stocker avec ce modèle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="88"/>
@@ -14240,13 +14666,15 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpropertiesdialog.ui" line="111"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="124"/>
         <source>Overall model dimensions along the X, Y, and Z axes.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dimensions globales du modèle le long des axes X, Y et Z.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="114"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="127"/>
         <source>&lt;p&gt;&lt;b&gt;Model Measurements&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The dimensions of the model&apos;s bounding box are shown in centimeters, inches, and LDraw units (LDU). The values are read-only and include pieces across all steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Mesures du modèle&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Les dimensions du cadre de délimitation du modèle sont affichées en centimètres, en pouces et en unités LDraw (LDU). Les valeurs sont en lecture seule et incluent des éléments à toutes les étapes.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="117"/>
@@ -14257,17 +14685,20 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="130"/>
         <source>Model Measurements</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mesures du modèle</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="147"/>
         <source>View piece quantities by color; click a column heading to sort.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher les quantités de pièces par couleur ; cliquez sur un en-tête de colonne pour trier.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="150"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces Used&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The piece-name column stays visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Pièces utilisées&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Le tableau compte les pièces à toutes les étapes, y compris les pièces à l'intérieur des sous-modèles. Les colonnes de couleurs indiquent les quantités et les totaux résument chaque pièce, chaque couleur et l'ensemble du modèle. Cliquez sur un en-tête de colonne pour trier. La colonne du nom de la pièce reste visible pendant que vous faites défiler horizontalement. Les décomptes ne peuvent pas être modifiés ici.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14351,22 +14782,26 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="27"/>
         <source>%1: %2</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
+        <translation type="unfinished">%1: %2</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="35"/>
         <source>Keyframe for %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Image clé pour %1</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="36"/>
         <source>&lt;p&gt;&lt;b&gt;Property Keyframe&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enable or remove a keyframe for this property at the current building step. Keyframes let the property&apos;s value change between steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Image clé de propriété&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Activer ou supprimer une image clé pour cette propriété à l'étape de construction en cours. Les images clés permettent à la valeur de la propriété de changer entre les étapes.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="87"/>
         <source>Expand or collapse the %1 properties.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Développez ou réduisez les propriétés %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="173"/>
@@ -14957,17 +15392,20 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="67"/>
         <source>Show the renderer output and diagnostic messages.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Afficher la sortie du moteur de rendu et les messages de diagnostic.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="68"/>
         <source>&lt;p&gt;&lt;b&gt;View Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the renderer output to investigate a failed render or warnings. This button becomes available when a log has been captured.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Afficher le journal&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ouvrez la sortie du moteur de rendu pour enquêter sur un échec de rendu ou des avertissements. Ce bouton devient disponible lorsqu'un journal a été capturé.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="69"/>
         <source>&lt;p&gt;&lt;b&gt;Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Start the render using the current settings. While rendering, this button becomes Cancel so you can stop the operation.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Démarrez le rendu en utilisant les paramètres actuels. Lors du rendu, ce bouton devient Annuler afin que vous puissiez arrêter l'opération.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="79"/>
@@ -15034,62 +15472,74 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="81"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step using POV-Ray. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rendu d'image POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Rendu l'étape actuelle du modèle à l'aide de POV-Ray. Choisissez une image de sortie, puis utilisez Paramètres pour définir ses dimensions et sa qualité. Sélectionnez Rendu pour démarrer.&lt;/p&gt;&lt;p&gt;L'aperçu est mis à l'échelle pour s'adapter à la boîte de dialogue. Afficher le journal affiche la sortie de diagnostic lorsqu'elle est disponible.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="82"/>
         <source>Render the current model step with POV-Ray.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rendre l'étape actuelle du modèle avec POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="83"/>
         <source>Set the POV-Ray image dimensions and render quality.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez les dimensions de l'image POV-Ray et la qualité du rendu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="84"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the image width and height in pixels and the rendering quality. Higher resolution and quality can increase rendering time.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez la largeur et la hauteur de l'image en pixels ainsi que la qualité du rendu. Une résolution et une qualité plus élevées peuvent augmenter le temps de rendu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="89"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step with the Blender LDraw add-on. Configure Blender and its add-on through Settings, choose an output image, then select Render.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Rendez l'étape actuelle du modèle avec le module complémentaire Blender LDraw. Configurez Blender et son module complémentaire via Paramètres, choisissez une image de sortie, puis sélectionnez Rendu.&lt;/p&gt;&lt;p&gt;L'aperçu est mis à l'échelle pour s'adapter à la boîte de dialogue. Afficher le journal affiche la sortie de diagnostic lorsqu'elle est disponible.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="90"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the Blender executable, LDraw import modules, library paths, and render settings. Blender and an import module must be configured before rendering or opening the model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres de Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configurez l'exécutable de Blender, les modules d'importation LDraw, les chemins de bibliothèque et les paramètres de rendu. Blender et un module d'importation doivent être configurés avant le rendu ou l'ouverture du modèle.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="101"/>
         <source>Render the current model step with Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rendre l'étape actuelle du modèle avec Blender.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="104"/>
         <source>Configure Blender, its add-on, and render settings.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez Blender, son module complémentaire et les paramètres de rendu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="108"/>
         <source>Configure Blender and its LDraw import settings.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Configurez Blender et ses paramètres d'importation LDraw.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="111"/>
         <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export the current model step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.&lt;/p&gt;&lt;p&gt;This mode does not save a rendered image.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Ouvrir dans Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Exportez l'étape actuelle du modèle et ouvrez-la dans Blender pour la modifier. Utilisez Paramètres pour configurer Blender et son module complémentaire d'importation LDraw, puis sélectionnez Ouvrir dans Blender.&lt;/p&gt;&lt;p&gt;Ce mode n'enregistre pas une image rendue.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="112"/>
         <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Import the current model step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Ouvrir dans Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Importez l'étape actuelle du modèle dans Blender pour la modifier. Configurez Blender et son module complémentaire d'importation LDraw via Paramètres si cette action n'est pas disponible.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="115"/>
         <source>Import the current model step and open it in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Importez l'étape actuelle du modèle et ouvrez-la dans Blender.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="375"/>
@@ -15172,7 +15622,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="840"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the output image dimensions and rendering quality. Width and height are in pixels, with a minimum of 16. Larger images and higher quality can take longer to render.&lt;/p&gt;&lt;p&gt;Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paramètres POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Définissez les dimensions de l'image de sortie et la qualité du rendu. La largeur et la hauteur sont en pixels, avec un minimum de 16. Le rendu des images plus grandes et de meilleure qualité peut prendre plus de temps.&lt;/p&gt;&lt;p&gt;Choisissez OK pour enregistrer ces paramètres pour les rendus ultérieurs, ou Annuler pour conserver les paramètres précédents. Cette boîte de dialogue ne démarre pas le rendu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="845"/>
@@ -15183,7 +15634,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="849"/>
         <source>Set the rendered image width in pixels (minimum 16).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez la largeur de l'image rendue en pixels (minimum 16).</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="852"/>
@@ -15193,7 +15645,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="856"/>
         <source>Set the rendered image height in pixels (minimum 16).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définissez la hauteur de l'image rendue en pixels (minimum 16).</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="861"/>
@@ -15216,12 +15669,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="863"/>
         <source>Choose the rendering quality; higher quality can take longer.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la qualité du rendu ; une qualité supérieure peut prendre plus de temps.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="864"/>
         <source>&lt;p&gt;&lt;b&gt;Rendering Quality&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Low uses POV-Ray&apos;s default quality without additional antialiasing options. Medium uses quality level 5 with antialiasing. High uses quality level 11 with additional antialiasing settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Qualité du rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Faible utilise la qualité par défaut de POV-Ray sans options d'anticrénelage supplémentaires. Medium utilise le niveau de qualité 5 avec antialiasing. High utilise le niveau de qualité 11 avec des paramètres d'anticrénelage supplémentaires.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="913"/>
@@ -15254,17 +15709,20 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="941"/>
         <source>&lt;p&gt;&lt;b&gt;Render Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Read the renderer output to investigate warnings or a failed render. Select text and copy it with the standard keyboard shortcut when reporting a problem. Close returns to the Render dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Journal de rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Lisez la sortie du moteur de rendu pour enquêter sur les avertissements ou sur un échec de rendu. Sélectionnez du texte et copiez-le avec le raccourci clavier standard lorsque vous signalez un problème. Fermer renvoie à la boîte de dialogue Rendu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="948"/>
         <source>Renderer Output</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sortie du moteur de rendu</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="949"/>
         <source>Read and copy renderer output and diagnostic messages.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Lire et copier la sortie du moteur de rendu et les messages de diagnostic.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="859"/>
@@ -15276,13 +15734,15 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_renderdialog.ui" line="24"/>
         <location filename="../qt/lc_renderdialog.ui" line="40"/>
         <source>Path and file name for the rendered image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Chemin et nom de fichier de l'image rendue.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="27"/>
         <location filename="../qt/lc_renderdialog.ui" line="43"/>
         <source>&lt;p&gt;&lt;b&gt;Output Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose where to save the rendered image and its format, such as PNG, JPEG, or BMP. The output path applies to image rendering; Open in Blender does not use it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Image de sortie&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choisissez où enregistrer l'image rendue et son format, tel que PNG, JPEG ou BMP. Le chemin de sortie s'applique au rendu des images ; Ouvrir dans Blender ne l'utilise pas.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="30"/>
@@ -15293,12 +15753,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="50"/>
         <source>Choose the rendered image file and format.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez le fichier et le format de l'image rendue.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="53"/>
         <source>Choose Render Output</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Choisissez la sortie de rendu</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="56"/>
@@ -15308,27 +15770,32 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="65"/>
         <source>Preview of the rendered image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aperçu de l'image rendue.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="68"/>
         <source>Render Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aperçu du rendu</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="71"/>
         <source>&lt;p&gt;&lt;b&gt;Render Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The preview is scaled to fit this area. Changing the dialog size does not change the output resolution; use Settings to change the image dimensions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Aperçu du rendu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;L'aperçu est mis à l'échelle pour s'adapter à cette zone. La modification de la taille de la boîte de dialogue ne modifie pas la résolution de sortie ; utilisez les paramètres pour modifier les dimensions de l'image.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="78"/>
         <source>Progress of the current export or render.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Progression de l’exportation ou du rendu en cours.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="81"/>
         <source>Render Progress</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Progression du rendu</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="191"/>
@@ -15390,7 +15857,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_selectdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Select Objects&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the checkboxes to choose visible pieces, cameras, and lights in the current model. Choose OK to replace the current selection with the checked objects, or Cancel to keep the current selection.&lt;/p&gt;&lt;p&gt;Pieces in the same top-level group are selected together. All, None, and Invert change the checkboxes in this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Sélectionner des objets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Utilisez les cases à cocher pour choisir les pièces, caméras et lumières visibles dans le modèle actuel. Choisissez OK pour remplacer la sélection actuelle par les objets cochés, ou Annuler pour conserver la sélection actuelle.&lt;/p&gt;&lt;p&gt;Les pièces du même groupe de niveau supérieur sont sélectionnées ensemble. Tout, Aucun et Inverser modifient les cases à cocher dans cette boîte de dialogue.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="17"/>
@@ -15400,22 +15868,26 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_selectdialog.ui" line="23"/>
         <source>Check the objects to include in the selection.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cochez les objets à inclure dans la sélection.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Object List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The list includes pieces visible in the current step and visible cameras and lights. Expand groups to see their pieces. Checking or clearing a grouped piece applies the same state to all pieces in its top-level group.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Liste d'objets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;La liste comprend les pièces visibles dans l'étape en cours ainsi que les caméras et lumières visibles. Développez les groupes pour voir leurs pièces. Cocher ou effacer une pièce groupée applique le même état à toutes les pièces de son groupe de niveau supérieur.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="29"/>
         <source>Objects to Select</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Objets à sélectionner</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="46"/>
         <source>Check every object in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vérifiez chaque objet de la liste.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="49"/>
@@ -15425,7 +15897,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_selectdialog.ui" line="56"/>
         <source>Clear every object checkbox in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Décochez chaque case d’objet dans la liste.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="59"/>
@@ -15435,7 +15908,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_selectdialog.ui" line="66"/>
         <source>Check unchecked objects and clear checked objects.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vérifiez les objets non cochés et effacez les objets cochés.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="69"/>
@@ -15453,19 +15927,22 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Import Set Inventory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Search the online Rebrickable database by set name or number. Select a result and choose OK, or double-click it, to download the set inventory for the operation that opened this dialog.&lt;/p&gt;&lt;p&gt;An internet connection is required for searching and downloading inventories.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Importer l'inventaire des ensembles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Recherchez dans la base de données Rebrickable en ligne par nom ou numéro d'ensemble. Sélectionnez un résultat et choisissez OK, ou double-cliquez dessus pour télécharger l'inventaire défini pour l'opération qui a ouvert cette boîte de dialogue.&lt;/p&gt;&lt;p&gt;Une connexion Internet est requise pour rechercher et télécharger les inventaires.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="17"/>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="100"/>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="216"/>
         <source>Import Set Inventory</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Importer l'inventaire des ensembles</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="25"/>
         <source>Enter a set name or number, then press Enter or choose Search.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Saisissez un nom ou un numéro défini, puis appuyez sur Entrée ou choisissez Rechercher.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="28"/>
@@ -15477,12 +15954,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Search Sets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a set number or words from its name. Press Enter or choose Search to retrieve matching sets. Refine the search if the set you want is not listed.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rechercher des ensembles&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Entrez un numéro d'ensemble ou des mots à partir de son nom. Appuyez sur Entrée ou choisissez Rechercher pour récupérer les ensembles correspondants. Affinez la recherche si l'ensemble souhaité n'est pas répertorié.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="41"/>
         <source>Search the online database using the entered name or number.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Recherchez dans la base de données en ligne en utilisant le nom ou le numéro saisi.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="44"/>
@@ -15493,17 +15972,20 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="53"/>
         <source>Select a set to download its piece inventory.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez un ensemble pour télécharger son inventaire de pièces.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
         <source>Set Search Results</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définir les résultats de la recherche</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="59"/>
         <source>&lt;p&gt;&lt;b&gt;Search Results&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Results show the set number, name, release year, and piece count. Select the desired set and choose OK, or double-click its row, to download its inventory.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Résultats de la recherche&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Les résultats affichent le numéro de l'ensemble, le nom, l'année de sortie et le nombre de pièces. Sélectionnez l'ensemble souhaité et choisissez OK, ou double-cliquez sur sa ligne pour télécharger son inventaire.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="75"/>
@@ -15529,7 +16011,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="98"/>
         <source>Set data provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Définir les données fournies par &lt;a href="https://www.rebrickable.com"&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
@@ -15655,12 +16138,14 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="11"/>
         <source>Building Steps and Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Étapes et pièces de construction</translation>
     </message>
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="12"/>
         <source>Select steps or pieces; drag pieces to reorder them or change their building step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sélectionnez des étapes ou des pièces ; faites glisser les pièces pour les réorganiser ou modifier leur étape de construction.</translation>
     </message>
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="125"/>
@@ -15673,7 +16158,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_updatedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Check for Updates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check online for a newer LeoCAD version and, when an official library is loaded, new pieces. The result appears in this dialog. An internet connection is required.&lt;/p&gt;&lt;p&gt;Use the download link to open the release page in your browser. This dialog does not install updates. Ignore suppresses automatic notifications for this update information; a manual update check still shows the result. Close dismisses the dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rechercher les mises à jour&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vérifiez en ligne une version plus récente de LeoCAD et, lorsqu'une bibliothèque officielle est chargée, de nouvelles pièces. Le résultat apparaît dans cette boîte de dialogue. Une connexion Internet est requise.&lt;/p&gt;&lt;p&gt;Utilisez le lien de téléchargement pour ouvrir la page de version dans votre navigateur. Cette boîte de dialogue n'installe pas les mises à jour. Ignorer supprime les notifications automatiques pour ces informations de mise à jour ; une vérification de mise à jour manuelle affiche toujours le résultat. Fermer ferme la boîte de dialogue.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="17"/>
@@ -15683,17 +16169,20 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_updatedialog.ui" line="23"/>
         <source>Update-check progress, results, and download links.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Mise à jour : vérifiez la progression, les résultats et les liens de téléchargement.</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Update Status&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wait for the online check to finish. If an update is available, follow the download link in your browser. A connection error means the check could not complete.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;État de la mise à jour&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Attendez la fin de la vérification en ligne. Si une mise à jour est disponible, suivez le lien de téléchargement dans votre navigateur. Une erreur de connexion signifie que la vérification n'a pas pu se terminer.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="29"/>
         <source>Update Status</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Statut de la mise à jour</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="39"/>
@@ -15739,7 +16228,8 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="151"/>
         <source>Skip automatic notifications for this update information.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Ignorez les notifications automatiques pour ces informations de mise à jour.</translation>
     </message>
 </context>
 <context>

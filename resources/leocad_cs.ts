@@ -1357,7 +1357,8 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="2073"/>
         <source>Help.WhatsThis</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
+        <translation type="unfinished">Help.WhatsThis</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2081"/>
@@ -2953,7 +2954,8 @@
     <message>
         <location filename="../common/lc_commands.cpp" line="2074"/>
         <source>What&apos;s This?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">co je to?</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2082"/>
@@ -4367,7 +4369,8 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="48"/>
         <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure Blender and its LDraw import and render add-ons. Choose the Blender executable first. Editing its path or changing an import module can configure the add-on immediately.&lt;/p&gt;&lt;p&gt;Choose an import module, then adjust its library paths and rendering options. TN and MM have separate settings. Use the scroll bar to reach all options; Show Paths and Hide Paths control the paths section.&lt;/p&gt;&lt;p&gt;Image dimensions and render percentage start with the values from the Render dialog. Crop Image calculates dimensions for the current model. Choose Apply to save the paths and settings and close this dialog. Reset restores the last applied values or system defaults.&lt;/p&gt;&lt;p&gt;Cancel closes without applying pending path and setting edits. Add-on installation, module configuration, and the update-check preference can take effect before Apply.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení doplňku Blender LDraw&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nakonfigurujte Blender a jeho doplňky LDraw pro import a vykreslování. Nejprve vyberte spustitelný soubor Blender. Úpravou jeho cesty nebo změnou modulu importu můžete doplněk nakonfigurovat okamžitě.&lt;/p&gt;&lt;p&gt;Vyberte modul importu a poté upravte jeho cesty ke knihovně a možnosti vykreslování. TN a MM mají samostatné nastavení. Pomocí posuvníku získáte všechny možnosti; Zobrazit cesty a Skrýt cesty řídí sekci cest.&lt;/p&gt;&lt;p&gt;Rozměry obrázku a procento vykreslení začínají hodnotami z dialogu Vykreslení. Oříznout obrázek vypočítá rozměry pro aktuální model. Zvolte Použít pro uložení cest a nastavení a zavřete tento dialog. Reset obnoví naposledy použité hodnoty nebo výchozí nastavení systému.&lt;/p&gt;&lt;p&gt;Zrušit se zavře bez použití čekajících úprav cesty a nastavení. Instalace doplňku, konfigurace modulu a preference kontroly aktualizací se mohou projevit před Použít.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="118"/>
@@ -5921,7 +5924,8 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_commands.cpp" line="2075"/>
         <source>Click a control to read its contextual help</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Kliknutím na ovládací prvek si můžete přečíst jeho kontextovou nápovědu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="2083"/>
@@ -6004,137 +6008,164 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_commands.cpp" line="11"/>
         <source>&lt;p&gt;&lt;b&gt;New Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Start a new project with an empty model. If the current project has unsaved changes, LeoCAD asks whether to save them before replacing it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nový projekt&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Začněte nový projekt s prázdným modelem. Pokud aktuální projekt obsahuje neuložené změny, LeoCAD se zeptá, zda je má uložit, než jej nahradí.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="19"/>
         <source>&lt;p&gt;&lt;b&gt;Open Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an existing model or project file to work on. If the current project has unsaved changes, save or discard those changes before opening the chosen file.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Otevřít projekt&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte existující model nebo soubor projektu, na kterém chcete pracovat. Pokud aktuální projekt obsahuje neuložené změny, uložte nebo zahoďte tyto změny před otevřením zvoleného souboru.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="35"/>
         <source>&lt;p&gt;&lt;b&gt;Save Project&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write the current project, including its submodels, to disk. The first save asks for a filename. Use Save As to save a separate copy under another name.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Uložit projekt&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zapište aktuální projekt, včetně jeho podmodelů, na disk. První uložení se zeptá na název souboru. Použijte Uložit jako k uložení samostatné kopie pod jiným jménem.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="220"/>
         <source>&lt;p&gt;&lt;b&gt;Undo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reverse the most recent model edit, such as inserting, moving, painting, or deleting an object. Repeat Undo to move backward through the edit history.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Zpět&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vrátí zpět poslední úpravy modelu, jako je vložení, přesun, malování nebo odstranění objektu. Opakováním Zpět se přesunete zpět v historii úprav.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="228"/>
         <source>&lt;p&gt;&lt;b&gt;Redo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reapply an edit that was reversed with Undo. Making a new edit after Undo replaces the redo history with the new sequence of edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Opakovat&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Znovu použijte úpravu, která byla zrušena pomocí Zpět. Provedení nové úpravy po zpět nahradí historii opakování novou sekvencí úprav.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="732"/>
         <source>&lt;p&gt;&lt;b&gt;Insert Piece Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece in the Pieces dock and a color in Colors, then use this tool in the model view to place the piece. Movement snapping controls placement increments. Use the preview to check placement before inserting the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Vložit díl&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte díl v doku Dílů a barvu v Barvách a poté použijte tento nástroj v zobrazení modelu k umístění dílu. Přichycení pohybu řídí přírůstky umístění. Před vložením dílu zkontrolujte umístění pomocí náhledu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="740"/>
         <source>&lt;p&gt;&lt;b&gt;Point Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the model view to place a light that emits in all directions from a point. Select the light afterward to edit its color, shadow settings, and renderer-specific power in Properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Bodové světlo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pomocí pohledu modelu umístěte světlo, které z bodu vyzařuje všemi směry. Poté vyberte světlo a upravte jeho barvu, nastavení stínů a výkon specifický pro renderer ve vlastnostech.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="748"/>
         <source>&lt;p&gt;&lt;b&gt;Spotlight Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the model view to create a directed cone of light. In Properties, adjust its position and target, cone angle, penumbra, and renderer-specific power.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Spotlight&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pomocí pohledu modelu vytvořte směrovaný kužel světla. Ve vlastnostech upravte jeho polohu a cíl, úhel kužele, polostín a výkon specifický pro renderer.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="756"/>
         <source>&lt;p&gt;&lt;b&gt;Directional Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a light with parallel rays, such as sunlight. Its direction determines the illumination. Select it to adjust its transform, color, and renderer-specific settings in Properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Směrové světlo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvořte světlo s paralelními paprsky, jako je sluneční světlo. Jeho směr určuje osvětlení. Vyberte jej, chcete-li upravit jeho transformaci, barvu a nastavení specifické pro vykreslovací modul v okně Vlastnosti.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="764"/>
         <source>&lt;p&gt;&lt;b&gt;Area Light Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a light that emits over an area. Select it to set the area shape and size in Properties, along with color and renderer-specific settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Plošné světlo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvořte světlo, které vyzařuje přes oblast. Vyberte ji, chcete-li nastavit tvar a velikost oblasti ve vlastnostech spolu s nastavením pro barvu a vykreslovací modul.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="772"/>
         <source>&lt;p&gt;&lt;b&gt;Camera Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create a camera in the model view. Select the camera to edit its position, target, projection, and field of view in Properties. To look through the camera, choose it from View &amp;gt; Cameras.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Kamera&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvořte kameru v zobrazení modelu. Vyberte kameru, kterou chcete upravit její polohu, cíl, projekci a zorné pole ve vlastnostech. Chcete-li se dívat skrz kameru, vyberte ji z nabídky Zobrazit &gt; Kamery.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="780"/>
         <source>&lt;p&gt;&lt;b&gt;Select Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pick objects in the model view or drag a selection rectangle. Selection Mode controls whether matching piece types or colors are included. The focused object provides the reference for relative transforms.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj pro výběr&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte objekty v zobrazení modelu nebo přetáhněte obdélník výběru. Režim výběru řídí, zda jsou zahrnuty odpovídající typy nebo barvy dílů. Zaměřený objekt poskytuje referenci pro relativní transformace.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="788"/>
         <source>&lt;p&gt;&lt;b&gt;Move Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select the objects to move, then drag in the model view. Use the manipulator to constrain movement to an axis or plane. Movement Snap sets the increments, and Transform Options selects the coordinate reference.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj pro přesun&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte objekty, které chcete přesunout, a poté je přetáhněte v zobrazení modelu. Použijte manipulátor k omezení pohybu na osu nebo rovinu. Uchopení pohybu nastaví přírůstky a Možnosti transformace vyberou referenci souřadnic.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="796"/>
         <source>&lt;p&gt;&lt;b&gt;Rotate Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select objects, then drag a rotation handle in the model view. Rotation Snap sets the angle increments. Transform Options chooses relative or model axes and whether pieces rotate together or separately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj otočení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte objekty a poté přetáhněte úchyt otáčení v pohledu modelu. Rotation Snap nastavuje přírůstky úhlu. Možnosti transformace volí relativní nebo modelové osy a to, zda se díly otáčejí společně nebo samostatně.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="804"/>
         <source>&lt;p&gt;&lt;b&gt;Eraser Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use this tool to remove objects by clicking them in the model view. This is different from deleting the current selection as a single command. Undo restores an object removed by the tool.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Guma&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Tento nástroj použijte k odstranění objektů kliknutím na ně v zobrazení modelu. To se liší od odstranění aktuálního výběru jako jednoho příkazu. Zpět obnoví objekt odstraněný nástrojem.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="812"/>
         <source>&lt;p&gt;&lt;b&gt;Paint Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the replacement color in the Colors dock, then click pieces in the model view to recolor them. To recolor the current selection together, use the color button above the swatches.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Malování&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte náhradní barvu v doku Barvy a poté kliknutím na díly v zobrazení modelu je přebarvěte. Chcete-li přebarvit aktuální výběr společně, použijte tlačítko barvy nad vzorníkem.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="820"/>
         <source>&lt;p&gt;&lt;b&gt;Color Picker Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click a piece in the model view to make its color the current color. You can then use that color for insertion or painting; sampling it does not recolor the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj pro výběr barvy&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Kliknutím na díl v zobrazení modelu změníte jeho barvu na aktuální barvu. Tuto barvu pak můžete použít pro vkládání nebo malování; vzorkováním se díl nepřebarví.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="828"/>
         <source>&lt;p&gt;&lt;b&gt;Zoom Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag in the model view to move the viewpoint closer to or farther from the model. This changes the view rather than resizing pieces. Use Zoom Region to frame a particular area.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Lupa&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetažením v pohledu modelu přesunete bod pohledu blíže nebo dále od modelu. Tím se změní pohled spíše než změna velikosti dílů. Použijte Zoom Region k orámování konkrétní oblasti.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="836"/>
         <source>&lt;p&gt;&lt;b&gt;Pan Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to shift the view sideways or vertically without moving the model. Use this to reposition the model on screen while keeping the viewing direction.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Posouvat&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetažením posunete pohled do strany nebo svisle, aniž byste pohnuli modelem. Použijte toto k přemístění modelu na obrazovce při zachování směru pohledu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="844"/>
         <source>&lt;p&gt;&lt;b&gt;Orbit Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to orbit the view around its center and inspect the model from another direction. This rotates the viewpoint rather than the selected pieces; use Rotate for object edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Orbit&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetažením můžete obíhat pohled kolem jeho středu a prohlížet model z jiného směru. Tím se otočí hledisko spíše než vybrané díly; pro úpravy objektů použijte Otočit.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="852"/>
         <source>&lt;p&gt;&lt;b&gt;Roll Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag to turn the view around its viewing axis, tilting what appears upright on screen. Model pieces keep their positions and orientations.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj Roll&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetažením otočíte pohled kolem jeho osy zobrazení a nakloníte to, co se na obrazovce objeví svisle. Modelové díly si zachovávají svou polohu a orientaci.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="860"/>
         <source>&lt;p&gt;&lt;b&gt;Zoom Region Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drag a rectangle around the area you want to inspect. The view zooms to frame that region without changing model geometry.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nástroj oblasti přiblížení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetáhněte obdélník kolem oblasti, kterou chcete zkontrolovat. Pohled se přiblíží tak, aby rámoval tuto oblast, aniž by se změnila geometrie modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1156"/>
         <source>&lt;p&gt;&lt;b&gt;First Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the model at its first building step. Step navigation changes which pieces are visible; it does not move pieces to a different step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;První krok&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazte model v jeho prvním kroku sestavení. Kroková navigace mění, které díly jsou viditelné; neposouvá figurky do jiného kroku.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1164"/>
         <source>&lt;p&gt;&lt;b&gt;Previous Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the model one building step earlier. Pieces introduced in later steps are hidden so you can inspect the earlier stage of construction.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Předchozí krok&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazte model o jeden stavební krok dříve. Díly představené v pozdějších krocích jsou skryté, takže si můžete prohlédnout dřívější fázi výstavby.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1172"/>
         <source>&lt;p&gt;&lt;b&gt;Next Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the next building step to reveal the next stage of the model. Use the Timeline to change which step introduces a piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Další krok&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazte další krok stavby, abyste odhalili další fázi modelu. Pomocí časové osy změňte, který krok zavádí díl.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1180"/>
         <source>&lt;p&gt;&lt;b&gt;Last Step&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Display the last building step of the current model. Use this to return to the completed model after inspecting earlier steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Poslední krok&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazí poslední krok budování aktuálního modelu. Použijte toto k návratu k dokončenému modelu po kontrole předchozích kroků.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1212"/>
         <source>&lt;p&gt;&lt;b&gt;Add Keys&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enable this when an edit should create a new animation key at the current step. For example, moving a piece at a later step can give it a different position there. The diamond controls in Properties show and toggle keys for individual properties.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Přidat klíče&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Povolte, když má úprava v aktuálním kroku vytvořit nový klíč animace. Například posunutím figurky v pozdějším kroku může mít jinou pozici. Diamantové ovládací prvky ve vlastnostech zobrazují a přepínají klávesy pro jednotlivé vlastnosti.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -6142,7 +6173,8 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;About LeoCAD&lt;/b&gt;&lt;/p&gt;&lt;p&gt;View the LeoCAD version and system information. The Qt and OpenGL details can help diagnose display problems. Select text in System Information to copy it when reporting a problem. The website link opens in your browser.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;O LeoCADu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazit verzi LeoCADu a systémové informace. Podrobnosti Qt a OpenGL mohou pomoci diagnostikovat problémy se zobrazením. Vyberte text v Systémových informacích, který chcete zkopírovat při hlášení problému. Odkaz na web se otevře ve vašem prohlížeči.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="17"/>
@@ -6152,7 +6184,8 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="45"/>
         <source>LeoCAD version running on this computer.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Verze LeoCAD běžící na tomto počítači.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="48"/>
@@ -6167,7 +6200,8 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="65"/>
         <source>Open the LeoCAD website in your browser.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otevřete webovou stránku LeoCAD ve svém prohlížeči.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="82"/>
@@ -6178,12 +6212,14 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="91"/>
         <source>Select and copy system information for a problem report.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte a zkopírujte systémové informace pro hlášení problému.</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.ui" line="94"/>
         <source>&lt;p&gt;&lt;b&gt;System Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows the Qt runtime and build versions, graphics driver and renderer, OpenGL and shader versions, buffer sizes, and supported graphics features. Select the text and copy it with the standard keyboard shortcut to include it in a problem report.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Informace o systému&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zobrazuje runtime Qt a verze sestavení, grafický ovladač a renderer, verze OpenGL a shaderů, velikosti vyrovnávací paměti a podporované grafické funkce. Vyberte text a zkopírujte jej pomocí standardní klávesové zkratky, abyste jej zahrnuli do zprávy o problému.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_aboutdialog.cpp" line="17"/>
@@ -6869,7 +6905,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_arraydialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Array&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create repeated copies of the selected pieces using up to three array dimensions. Each row defines a count, an offset, and a rotation increment.&lt;/p&gt;&lt;p&gt;Counts include the original selection. For example, counts of 3, 2, and 1 create five new copies of each selected piece. Set an offset or rotation to keep copies from overlapping.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Pole&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvářejte opakované kopie vybraných dílů pomocí až tří rozměrů pole. Každý řádek definuje počet, posun a přírůstek otočení.&lt;/p&gt;&lt;p&gt;Počty zahrnují původní výběr. Například počty 3, 2 a 1 vytvoří pět nových kopií každého vybraného dílu. Nastavte odsazení nebo otočení, aby se kopie nepřekrývaly.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="17"/>
@@ -6879,7 +6916,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_arraydialog.ui" line="25"/>
         <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row controls one array dimension, with a count from 1 to 1000. The product of the three counts includes the original selection. A count of 1 adds no copies along that dimension.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dimenze&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Každý řádek řídí jednu dimenzi pole s počtem od 1 do 1000. Součin tří počtů zahrnuje původní výběr. Počet 1 nepřidává žádné kopie podél této dimenze.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="28"/>
@@ -6889,37 +6927,44 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_arraydialog.ui" line="36"/>
         <source>Number of positions in dimension 3, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počet pozic v dimenzi 3 včetně originálu.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="39"/>
         <source>Dimension 3 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 počet</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="52"/>
         <source>Number of positions in dimension 1, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počet pozic v dimenzi 1 včetně originálu.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="55"/>
         <source>Dimension 1 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počet rozměrů 1</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="68"/>
         <source>Number of positions in dimension 2, including the original.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počet pozic v dimenzi 2 včetně originálu.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="71"/>
         <source>Dimension 2 count</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počet rozměrů 2</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="89"/>
         <source>&lt;p&gt;&lt;b&gt;Offsets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the X, Y, and Z displacement per step in the corresponding array dimension. Values use the model axes and LDraw units; 20 units equal one stud width. Negative values reverse the direction.&lt;/p&gt;&lt;p&gt;For a straight row spaced one stud apart along X, use a count greater than 1 and an X offset of 20 in the same row.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Posuny&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Každý řádek nastavuje posunutí X, Y a Z na krok v odpovídající dimenzi pole. Hodnoty používají osy modelu a jednotky LDraw; 20 jednotek se rovná jedné šířce čepu. Záporné hodnoty obrátí směr.&lt;/p&gt;&lt;p&gt;Pro rovnou řadu s odstupem jednoho čepu podél X použijte počet větší než 1 a posun X 20 ve stejné řadě.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="92"/>
@@ -6929,97 +6974,116 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_arraydialog.ui" line="98"/>
         <source>Y offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun Y na krok v rozměru 1, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="101"/>
         <source>Dimension 1 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 Y offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="108"/>
         <source>X offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun X na krok v rozměru 2, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="111"/>
         <source>Dimension 2 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 X posunutý</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="118"/>
         <source>X offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun X na krok v rozměru 1, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="121"/>
         <source>Dimension 1 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 X posunutý</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="128"/>
         <source>X offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun X na krok v rozměru 3, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="131"/>
         <source>Dimension 3 X offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 X offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="138"/>
         <source>Z offset per step in dimension 1, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odsazení Z na krok v rozměru 1, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="141"/>
         <source>Dimension 1 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 Z posunutí</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="148"/>
         <source>Y offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun Y na krok v rozměru 2, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="151"/>
         <source>Dimension 2 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 Y offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="158"/>
         <source>Y offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posun Y na krok v rozměru 3, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="161"/>
         <source>Dimension 3 Y offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 Y offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="168"/>
         <source>Z offset per step in dimension 2, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odsazení Z na krok v rozměru 2, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="171"/>
         <source>Dimension 2 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 Z offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="178"/>
         <source>Z offset per step in dimension 3, in LDraw units.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odsazení Z na krok v rozměru 3, v jednotkách LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="181"/>
         <source>Dimension 3 Z offset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 Z offset</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="191"/>
         <source>&lt;p&gt;&lt;b&gt;Rotations&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each row sets the rotation increment around the X, Y, and Z model axes, in degrees, for its array dimension. Rotations from all three dimensions are added, then applied in X, Y, Z order before the offset.&lt;/p&gt;&lt;p&gt;Copies rotate around the focused piece origin, or the selection center when no piece has focus. Negative values reverse the rotation.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Otočení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Každý řádek nastavuje přírůstek rotace kolem os modelu X, Y a Z ve stupních pro svůj rozměr pole. Přidají se rotace ze všech tří rozměrů a poté se aplikují v pořadí X, Y, Z před odsazením.&lt;/p&gt;&lt;p&gt;Kopie se otáčejí kolem počátku zaostřeného dílu nebo středu výběru, když není zaostřený žádný díl. Záporné hodnoty obrátí rotaci.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="194"/>
@@ -7029,92 +7093,110 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_arraydialog.ui" line="200"/>
         <source>Z rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení Z na krok v rozměru 3, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="203"/>
         <source>Dimension 3 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 Z rotace</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="210"/>
         <source>X rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotace X na krok v rozměru 3, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="213"/>
         <source>Dimension 3 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 X otočení</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="220"/>
         <source>X rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení X na krok v rozměru 1, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="223"/>
         <source>Dimension 1 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 X otočení</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="230"/>
         <source>Z rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení Z na krok v rozměru 2, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="233"/>
         <source>Dimension 2 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 Z rotace</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="240"/>
         <source>Z rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení Z na krok v rozměru 1, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="243"/>
         <source>Dimension 1 Z rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 Z otočení</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="250"/>
         <source>X rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotace X na krok v rozměru 2, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="253"/>
         <source>Dimension 2 X rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 X otočení</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="260"/>
         <source>Y rotation per step in dimension 1, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení Y na krok v rozměru 1, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="263"/>
         <source>Dimension 1 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 1 otočení Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="270"/>
         <source>Y rotation per step in dimension 2, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rotace Y na krok v rozměru 2, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="273"/>
         <source>Dimension 2 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 2 Y rotace</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="280"/>
         <source>Y rotation per step in dimension 3, in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočení Y na krok v rozměru 3, ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.ui" line="283"/>
         <source>Dimension 3 Y rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozměr 3 otočení Y</translation>
     </message>
     <message>
         <location filename="../common/lc_arraydialog.cpp" line="75"/>
@@ -7252,87 +7334,104 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;High Contrast Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose custom stud and edge colors for high contrast stud styles. Enable an override with its checkbox, then choose its color. Light/Dark Value sets the threshold for dark-piece edge colors. Automated edge colors take precedence over the piece edge overrides.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog. Reset restores an individual control&apos;s default.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vysoce kontrastní barvy hran&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte si vlastní barvy cvočků a hran pro vysoce kontrastní styly cvočků. Povolte přepsání pomocí jeho zaškrtávacího políčka a poté vyberte jeho barvu. Světlá/tmavá hodnota nastavuje práh pro barvy okrajů tmavých částí. Automatizované barvy hran mají přednost před přepsáním hran dílu.&lt;/p&gt;&lt;p&gt;Zvolte OK pro návrat změn do Předvoleb a poté zvolte OK v Předvolbách, chcete-li je zachovat. Zrušit zruší změny v tomto dialogu. Reset obnoví výchozí nastavení jednotlivých ovládacích prvků.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="24"/>
         <source>&lt;p&gt;&lt;b&gt;Automated Edge Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast and saturation used to calculate piece edge colors. Both controls range from 0.00 to 1.00. Reset restores a control to 0.50.&lt;/p&gt;&lt;p&gt;Choose OK to return changes to Preferences, then choose OK in Preferences to keep them. Cancel discards changes in this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Automatické barvy okrajů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte kontrast a sytost použité k výpočtu barev okrajů dílu. Oba ovládací prvky se pohybují od 0,00 do 1,00. Reset obnoví hodnotu ovládacího prvku na 0,50.&lt;/p&gt;&lt;p&gt;Zvolte OK pro návrat změn do Preferences a poté zvolte OK v Preferences, chcete-li je zachovat. Zrušit zahodí změny v tomto dialogu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="43"/>
         <source>Set edge contrast from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte kontrast hran od 0,00 do 1,00 (výchozí 0,50).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="44"/>
         <source>&lt;p&gt;&lt;b&gt;Edge Contrast&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the contrast used by automated edge colors to distinguish edges from piece surfaces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kontrast hran&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte kontrast používaný automatickými barvami hran k rozlišení hran od povrchů dílu. Rozsah je 0,00 až 1,00; Reset obnoví 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="53"/>
         <source>Restore edge contrast to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte kontrast hran na 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="69"/>
         <source>Set the light/dark threshold from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte práh světla/tmy od 0,00 do 1,00 (výchozí 0,50).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="70"/>
         <source>Set edge-color saturation from 0.00 to 1.00 (default 0.50).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte sytost barev okrajů od 0,00 do 1,00 (výchozí 0,50).</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="72"/>
         <source>&lt;p&gt;&lt;b&gt;Light/Dark Value&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Classify piece colors by brightness to choose which pieces receive the dark-piece edge override. Colors below the threshold are treated as dark. A separate enabled black-piece override takes priority for black pieces. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Hodnota světlé/tmavé&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Klasifikujte barvy dílků podle jasu a vyberte, u kterých dílků se přepíše okraj tmavých dílků. Barvy pod prahem jsou považovány za tmavé. Samostatné aktivované potlačení černé figury má přednost pro černé figurky. Rozsah je 0,00 až 1,00; Reset obnoví 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="73"/>
         <source>&lt;p&gt;&lt;b&gt;Edge Saturation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the tint or shade used to calculate automated edge colors from piece colors. The range is 0.00 to 1.00; Reset restores 0.50.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Sytost okrajů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte odstín nebo odstín používaný k výpočtu automatických barev okrajů z barev dílu. Rozsah je 0,00 až 1,00; Reset obnoví 0,50.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
         <source>Restore the light/dark threshold to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte práh světla/tmy na 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="82"/>
         <source>Restore edge-color saturation to 0.50.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte sytost barev okrajů na 0,50.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="182"/>
         <source>Enable the custom color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolit vlastní barvu pro %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="186"/>
         <source>Restore the default color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte výchozí barvu pro %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="191"/>
         <source>Enable a custom color for stud cylinders in high contrast stud styles, then use the color button to choose it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolte vlastní barvu pro válcové čepy ve vysoce kontrastních stylech čepů a poté ji vyberte pomocí tlačítka barvy.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="193"/>
         <source>Enable a custom edge color for pieces not covered by the black or dark overrides. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolte vlastní barvu okraje pro díly, které nejsou pokryty černým nebo tmavým přepsáním. Automatizované barvy okrajů mají přednost.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="195"/>
         <source>Enable a custom edge color for black pieces. This override takes priority over the dark-piece and general edge colors. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolit vlastní barvu okraje pro černé díly. Toto přepsání má přednost před tmavými barvami a obecnými barvami okrajů. Automatizované barvy okrajů mají přednost.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="197"/>
         <source>Enable a custom edge color for pieces below the light/dark threshold, except black pieces with their own enabled override. Automated edge colors take precedence.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolte vlastní barvu okraje pro díly pod prahem světla/tmy, kromě černých dílů s vlastním povoleným přepsáním. Automatizované barvy okrajů mají přednost.</translation>
     </message>
     <message>
         <location filename="../common/lc_edgecolordialog.cpp" line="287"/>
@@ -7365,17 +7464,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="379"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Executable&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the Blender executable. Finishing an edit to this path starts Blender configuration and may install or update the LDraw add-on. Configuration must complete before add-on paths and settings become available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Spustitelný soubor Blenderu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte spustitelný soubor Blenderu. Dokončením úprav této cesty se spustí konfigurace Blenderu a může se nainstalovat nebo aktualizovat doplněk LDraw. Konfigurace musí být dokončena, než budou dostupné cesty a nastavení doplňků.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="390"/>
         <source>Installed Blender version reported during configuration.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nainstalovaná verze Blenderu hlášena během konfigurace.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="391"/>
         <source>Blender Version</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Verze mixéru</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="404"/>
@@ -7388,7 +7490,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="407"/>
         <source>Locate the Blender executable.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyhledejte spustitelný soubor Blender.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="410"/>
@@ -7399,7 +7502,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="412"/>
         <source>&lt;p&gt;&lt;b&gt;Blender LDraw Add-on&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Update downloads or reconfigures the LDraw add-on. Output opens the configuration log when available. The update-check preference takes effect as soon as you change it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Doplněk Blender LDraw&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Aktualizujte stahování nebo překonfigurujte doplněk LDraw. Výstup otevře konfigurační protokol, je-li k dispozici. Předvolba kontroly aktualizací se projeví, jakmile ji změníte.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="417"/>
@@ -7518,19 +7622,22 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_blenderpreferences.cpp" line="604"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="761"/>
         <source>&lt;p&gt;&lt;b&gt;Add-on Paths&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the files and folders used by the selected importer. Use Browse to locate an entry. TN and MM use different optional paths. Configure Blender first to enable these controls.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Cesty doplňku&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nastavte soubory a složky používané vybraným importérem. Použijte Procházet k nalezení záznamu. TN a MM používají různé volitelné cesty. Nejprve nakonfigurujte Blender, abyste povolili tyto ovládací prvky.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="629"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="786"/>
         <source>Choose a file or folder for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte soubor nebo složku pro %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="652"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="809"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust the selected importer&apos;s geometry, materials, camera, and image options. Hover over a control or press F1 for its description. Image width and height are in pixels; render percentage scales the output dimensions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení importu a vykreslení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte geometrii, materiály, fotoaparát a možnosti obrázku vybraného importéra. Umístěte ukazatel myši na ovládací prvek nebo stiskněte klávesu F1 pro jeho popis. Šířka a výška obrázku jsou v pixelech; procento renderu měří výstupní rozměry.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="655"/>
@@ -7629,17 +7736,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2341"/>
         <source>&lt;p&gt;&lt;b&gt;Reset Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose Last Apply to restore the saved paths and settings, or System Default to load the built-in defaults. Choose OK to update the settings form, then Apply in the parent dialog to save them. Cancel keeps the current edits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Resetovat nastavení doplňku&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zvolte Poslední použít, chcete-li obnovit uložené cesty a nastavení, nebo Výchozí nastavení systému, chcete-li načíst vestavěná výchozí nastavení. Zvolte OK pro aktualizaci formuláře nastavení a poté Použít v nadřazeném dialogu pro uložení. Zrušit zachová aktuální úpravy.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2346"/>
         <source>Restore paths and settings to the last applied values.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte cesty a nastavení na poslední použité hodnoty.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="2349"/>
         <source>Replace paths and settings with the built-in defaults.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nahraďte cesty a nastavení vestavěnými výchozími hodnotami.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="3129"/>
@@ -7759,47 +7869,56 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="418"/>
         <source>Check for add-on updates; this preference is saved immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zkontrolujte aktualizace doplňků; tato předvolba se okamžitě uloží.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="431"/>
         <source>Installed %1 Blender LDraw import and render add-on version.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nainstalováno %1 verze doplňku Blender LDraw pro import a render.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="434"/>
         <source>Blender LDraw Add-on Version</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Verze doplňku Blender LDraw</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="441"/>
         <source>Download or reconfigure the %1 Blender LDraw add-on.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Stáhněte nebo překonfigurujte doplněk %1 Blender LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="446"/>
         <source>Open the standard output log.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otevřete protokol standardního výstupu.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="454"/>
         <source>&lt;p&gt;&lt;b&gt;Import and Render Modules&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose TN or MM to select the LDraw importer and its options. Changing the importer configures Blender immediately. The image render module is managed automatically; an import module is required to import or render a model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Import a moduly vykreslení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zvolte TN nebo MM a vyberte importér LDraw a jeho možnosti. Změna importéru nakonfiguruje Blender okamžitě. Modul vykreslování obrázků je spravován automaticky; k importu nebo vykreslení modelu je vyžadován modul importu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="458"/>
         <source>Enable add-on import module (adapted from LDraw Import by Toby Nelson) in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolte doplňkový modul importu (upravený z LDraw Import od Toby Nelsona) v Blenderu.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="463"/>
         <source>Enable add-on import module (adapted from LDraw Import by Matthew Morrison) in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Povolte doplňkový modul importu (upravený z LDraw Import od Matthewa Morrisona) v Blenderu.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="468"/>
         <source>Add-on image render module in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přídavný modul vykreslování obrázků v Blenderu.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="1139"/>
@@ -8292,29 +8411,34 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="241"/>
         <source>Save the add-on paths and settings and close this dialog.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte cesty a nastavení doplňku a zavřete toto dialogové okno.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="247"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
         <location filename="../common/lc_blenderpreferences.cpp" line="313"/>
         <source>Hide the add-on paths section.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Skryjte sekci cest doplňků.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="253"/>
         <source>Restore the last applied paths and settings or the system defaults.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte naposledy použité cesty a nastavení nebo výchozí nastavení systému.</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="300"/>
         <source>Show Paths</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit cesty</translation>
     </message>
     <message>
         <location filename="../common/lc_blenderpreferences.cpp" line="301"/>
         <source>Show the add-on paths section.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit sekci cest doplňků.</translation>
     </message>
     <message>
         <source>Apply add-on paths and settings preferences</source>
@@ -8372,7 +8496,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_categorydialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Category&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a category and enter the expression used to find its pieces in the library. Both fields are required. Choose OK to return the category changes to Preferences, then choose OK in Preferences to keep them. Cancel discards edits in this dialog.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kategorie dílů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pojmenujte kategorii a zadejte výraz pro vyhledání dílů v knihovně. Obě pole jsou povinná. Tlačítkem OK přenesete změny do Předvoleb; dalším stisknutím OK v Předvolbách je uložíte. Zrušit zahodí úpravy v tomto dialogu.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Syntaxe klíčových slov&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Výrazy hledají text v popisech dílů v knihovně bez rozlišení velkých a malých písmen.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: vyhledá tento text kdekoli v popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: vyhledá Brick jako celé slovo.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: vyhledá Brick na začátku popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: vyžaduje celé slovo na začátku popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: vyhledá shodu alespoň s jedním výrazem.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: vyhledá shodu s oběma výrazy.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: vyloučí popisy odpovídající A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: seskupuje výrazy.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Vložte mezery kolem &lt;tt&gt;|&lt;/tt&gt; a &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Při kombinování operátorů používejte závorky.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Příklady&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; odpovídá popisům začínajícím slovem Brick nebo Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; také vyloučí popisy obsahující Pattern.&lt;/p&gt;&lt;p&gt;Vyhledávací výrazy zadávejte v jazyce popisů knihovny; symboly syntaxe nepřekládejte.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="17"/>
@@ -8383,7 +8508,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_categorydialog.ui" line="25"/>
         <location filename="../common/lc_categorydialog.ui" line="38"/>
         <source>Enter the category name shown in the piece browser.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte název kategorie zobrazený v prohlížeči dílů.</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="28"/>
@@ -8394,13 +8520,15 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_categorydialog.ui" line="45"/>
         <location filename="../common/lc_categorydialog.ui" line="61"/>
         <source>Enter an expression that matches piece descriptions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte výraz, který odpovídá popisům dílů.</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="48"/>
         <location filename="../common/lc_categorydialog.ui" line="64"/>
         <source>&lt;p&gt;&lt;b&gt;Keyword Syntax&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Expressions match text in library piece descriptions, ignoring case.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: match this text anywhere in the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: match Brick as a whole word.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: match Brick at the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: require both a whole word and the beginning of the description.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: match either expression.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: match both expressions.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: exclude descriptions matching A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: group expressions.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Put spaces around &lt;tt&gt;|&lt;/tt&gt; and &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Use parentheses when combining operators.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Examples&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; matches descriptions beginning with the word Brick or Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; also excludes descriptions containing Pattern.&lt;/p&gt;&lt;p&gt;Use the language of the library descriptions for search terms; do not translate the syntax symbols.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Syntaxe klíčových slov&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Výrazy hledají text v popisech dílů v knihovně bez rozlišení velkých a malých písmen.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;tt&gt;Brick&lt;/tt&gt;: vyhledá tento text kdekoli v popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^Brick&lt;/tt&gt;: vyhledá Brick jako celé slovo.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;%Brick&lt;/tt&gt;: vyhledá Brick na začátku popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;^%Brick&lt;/tt&gt;: vyžaduje celé slovo na začátku popisu.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A | B&lt;/tt&gt;: vyhledá shodu alespoň s jedním výrazem.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;A &amp;amp; B&lt;/tt&gt;: vyhledá shodu s oběma výrazy.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;!A&lt;/tt&gt;: vyloučí popisy odpovídající A.&lt;/li&gt;&lt;li&gt;&lt;tt&gt;(A | B)&lt;/tt&gt;: seskupuje výrazy.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Vložte mezery kolem &lt;tt&gt;|&lt;/tt&gt; a &lt;tt&gt;&amp;amp;&lt;/tt&gt;. Při kombinování operátorů používejte závorky.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Příklady&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;tt&gt;^%Brick | ^%Plate&lt;/tt&gt; odpovídá popisům začínajícím slovem Brick nebo Plate.&lt;br&gt;&lt;tt&gt;(^%Brick | ^%Plate) &amp;amp; !Pattern&lt;/tt&gt; také vyloučí popisy obsahující Pattern.&lt;/p&gt;&lt;p&gt;Vyhledávací výrazy zadávejte v jazyce popisů knihovny; symboly syntaxe nepřekládejte.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_categorydialog.ui" line="51"/>
@@ -8433,22 +8561,26 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qutils.cpp" line="303"/>
         <source>Choose Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte Barva</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="304"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pick a color using the swatches or enter its component values. Choose OK to use the selected color, or Cancel to keep the original color. Editing the controls alone does not apply the color.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vyberte barvu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte barvu pomocí vzorníku nebo zadejte hodnoty jejích složek. Zvolte OK, chcete-li použít vybranou barvu, nebo Zrušit, chcete-li zachovat původní barvu. Samotná úprava ovládacích prvků barvu nepoužije.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="314"/>
         <source>Custom Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vlastní barva</translation>
     </message>
     <message>
         <location filename="../qt/lc_qutils.cpp" line="315"/>
         <source>Choose a color or enter its component values.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu nebo zadejte hodnoty jejích složek.</translation>
     </message>
 </context>
 <context>
@@ -8517,7 +8649,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Edit Groups&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reorganize the model&apos;s pieces and groups in the tree. Drag pieces or groups into a group, or to the top level to remove them from a parent group. Double-click a group name to rename it.&lt;/p&gt;&lt;p&gt;New Group creates a group inside the selected group, or beside an ungrouped piece. Choose OK to apply the hierarchy, or Cancel to discard the changes. Empty groups are removed when changes are applied.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Upravit skupiny&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přeorganizujte části a skupiny modelu ve stromu. Přetažením dílů nebo skupin do skupiny nebo na nejvyšší úroveň je odeberte z nadřazené skupiny. Dvojitým kliknutím na název skupiny ji přejmenujete.&lt;/p&gt;&lt;p&gt;Nová skupina vytvoří skupinu uvnitř vybrané skupiny nebo vedle neseskupené části. Zvolte OK pro použití hierarchie nebo Storno pro zrušení změn. Prázdné skupiny jsou při použití změn odstraněny.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="17"/>
@@ -8527,17 +8660,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="23"/>
         <source>Drag pieces and groups to reorganize them; double-click a group name to rename it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přetažením dílů a skupin je reorganizujte; poklepáním na název skupiny ji přejmenujete.</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Group Hierarchy&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Drop an item onto a group to make it a member of that group. Move it to the top level to remove its parent group. Only group names can be edited; names must be unique and nonempty.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Hierarchie skupiny&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přetažením položky do skupiny se stane členem této skupiny. Přesuňte jej na nejvyšší úroveň, abyste odstranili jeho nadřazenou skupinu. Upravovat lze pouze názvy skupin; názvy musí být jedinečné a prázdné.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.ui" line="29"/>
         <source>Piece and Group Hierarchy</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dílová a skupinová hierarchie</translation>
     </message>
     <message>
         <source>New Group</source>
@@ -8552,12 +8688,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="46"/>
         <source>Create a group under the selected group or at the top level.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořte skupinu pod vybranou skupinou nebo na nejvyšší úrovni.</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="47"/>
         <source>&lt;p&gt;&lt;b&gt;New Group&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a group to create a subgroup inside it. If a piece is selected, the new group is created beside that piece. With no selection, the new group is created at the top level. Rename the new group by editing its name, then drag pieces into it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nová skupina&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte skupinu a vytvořte v ní podskupinu. Pokud je vybrán díl, nová skupina se vytvoří vedle tohoto dílu. Bez výběru se nová skupina vytvoří na nejvyšší úrovni. Přejmenujte novou skupinu úpravou jejího názvu a poté do ní přetáhněte její části.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_editgroupsdialog.cpp" line="96"/>
@@ -8621,7 +8759,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_groupdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Group Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Name a new group for the selected pieces so you can select and move them together. Choose OK to create it, or Cancel to leave the groups unchanged.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Skupinové díly&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pojmenujte novou skupinu pro vybrané díly, abyste je mohli vybrat a přesunout dohromady. Zvolte OK, chcete-li je vytvořit, nebo Zrušit, chcete-li skupiny ponechat beze změny.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="17"/>
@@ -8632,13 +8771,15 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_groupdialog.ui" line="25"/>
         <location filename="../common/lc_groupdialog.ui" line="41"/>
         <source>Enter a unique, nonempty name for the new group.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte jedinečný, neprázdný název pro novou skupinu.</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="28"/>
         <location filename="../common/lc_groupdialog.ui" line="44"/>
         <source>&lt;p&gt;&lt;b&gt;Group Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a name that is not already used by another group in this model. The new group contains the selected pieces and their existing groups.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Název skupiny&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte název, který již nepoužívá jiná skupina v tomto modelu. Nová skupina obsahuje vybrané díly a jejich stávající skupiny.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_groupdialog.ui" line="31"/>
@@ -8662,7 +8803,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Export HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create browser-viewable building instructions and PNG images in the output folder. Choose which models to include, how to organize the step pages, and where to show pieces lists.&lt;/p&gt;&lt;p&gt;Keep the generated HTML and image files together when copying or sharing the instructions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Export HTML&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvořte ve výstupní složce pokyny k sestavení a obrázky PNG, které lze zobrazit v prohlížeči. Vyberte, které modely chcete zahrnout, jak uspořádat stránky s kroky a kde se mají zobrazovat kusovníky.&lt;/p&gt;&lt;p&gt;Při kopírování nebo sdílení pokynů mějte vygenerované soubory HTML a obrázky pohromadě.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="23"/>
@@ -8678,13 +8820,15 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_htmldialog.ui" line="43"/>
         <location filename="../common/lc_htmldialog.ui" line="59"/>
         <source>Folder for the generated HTML pages and images.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Složka pro vygenerované HTML stránky a obrázky.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="46"/>
         <location filename="../common/lc_htmldialog.ui" line="62"/>
         <source>&lt;p&gt;&lt;b&gt;Output Folder&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The exporter creates this folder if needed and writes the instruction pages and their images into it. Use a separate folder for each export to keep the generated files together.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Výstupní složka&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Exportér tuto složku v případě potřeby vytvoří a zapíše do ní stránky s instrukcemi a jejich obrázky. Pro každý export použijte samostatnou složku, aby vygenerované soubory zůstaly pohromadě.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="49"/>
@@ -8695,12 +8839,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="69"/>
         <source>Choose the folder for the exported instructions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte složku pro exportované pokyny.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="72"/>
         <source>Choose Output Folder</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte výstupní složku</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="75"/>
@@ -8710,12 +8856,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="84"/>
         <source>Save step images with a transparent background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte obrázky kroků s průhledným pozadím.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="87"/>
         <source>&lt;p&gt;&lt;b&gt;Transparent Image Background&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, the PNG step images have a transparent background so the page background can show through. When unchecked, they include the configured solid or gradient background with no transparency.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Průhledné pozadí obrázku&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pokud je zaškrtnuto, mají obrázky kroků PNG průhledné pozadí, takže může prosvítat pozadí stránky. Pokud není zaškrtnuto, zahrnují nakonfigurované plné nebo přechodové pozadí bez průhlednosti.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="90"/>
@@ -8725,7 +8873,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="100"/>
         <source>&lt;p&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export all models in the project, only the current model, or the current model with the submodels it references. When several models are exported, an overall index links to their instructions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Modely&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Exportujte všechny modely v projektu, pouze aktuální model nebo aktuální model s podmodely, na které odkazuje. Když je exportováno několik modelů, celkový index odkazuje na jejich pokyny.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="103"/>
@@ -8735,7 +8884,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="109"/>
         <source>Export instructions for every model in the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportujte pokyny pro každý model v projektu.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="112"/>
@@ -8745,7 +8895,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="119"/>
         <source>Export the current model and the submodels it references.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportujte aktuální model a podmodely, na které odkazuje.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="122"/>
@@ -8755,7 +8906,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="129"/>
         <source>Export instructions only for the current model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Exportujte pokyny pouze pro aktuální model.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="132"/>
@@ -8765,7 +8917,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="142"/>
         <source>&lt;p&gt;&lt;b&gt;Steps&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Single Page places all steps for each model on one HTML page. One Step per Page creates separate pages with navigation links. In that mode, Index page adds a page linking to the steps.&lt;/p&gt;&lt;p&gt;Width and Height set the step image size in pixels. Use positive dimensions up to 2048 pixels.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kroky&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Jedna stránka umístí všechny kroky pro každý model na jednu HTML stránku. Jeden krok na stránku vytvoří samostatné stránky s navigačními odkazy. V tomto režimu stránka Index přidá stránku odkazující na kroky.&lt;/p&gt;&lt;p&gt;Šířka a výška nastavují velikost obrázku kroku v pixelech. Použijte kladné rozměry až do 2048 pixelů.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="145"/>
@@ -8775,7 +8928,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="151"/>
         <source>Put all steps for each model on one HTML page.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vložte všechny kroky pro každý model na jednu HTML stránku.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="154"/>
@@ -8785,7 +8939,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="161"/>
         <source>Create a separate HTML page for each step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro každý krok vytvořte samostatnou stránku HTML.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="164"/>
@@ -8795,7 +8950,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="171"/>
         <source>Add a step index when using One Step per Page.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Při použití jednoho kroku na stránku přidejte index kroků.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="174"/>
@@ -8806,7 +8962,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_htmldialog.ui" line="181"/>
         <location filename="../common/lc_htmldialog.ui" line="194"/>
         <source>Width of each step image, in pixels.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Šířka každého kroku obrázku v pixelech.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="184"/>
@@ -8817,7 +8974,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_htmldialog.ui" line="207"/>
         <location filename="../common/lc_htmldialog.ui" line="220"/>
         <source>Height of each step image, in pixels.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Výška každého kroku obrázku v pixelech.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="210"/>
@@ -8827,17 +8985,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_htmldialog.ui" line="236"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;After each step shows the pieces added in that step. At the end shows the complete model inventory after the instructions. You can enable either option, both, or neither.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Seznam dílů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Po každém kroku se zobrazí díly přidané v tomto kroku. Na konci ukazuje kompletní inventář modelu podle pokynů. Můžete povolit kteroukoli možnost, obě nebo žádnou.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="245"/>
         <source>Include a complete pieces list after each model&apos;s instructions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Za pokyny pro každý model přiložte kompletní seznam dílů.</translation>
     </message>
     <message>
         <location filename="../common/lc_htmldialog.ui" line="255"/>
         <source>Include a list of the pieces added in each step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zahrňte seznam dílů přidaných v každém kroku.</translation>
     </message>
     <message>
         <source>Highlight new parts</source>
@@ -8888,7 +9049,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_imagedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Save Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Save images of the active model using the current view. Choose a destination file, image dimensions, and the steps to include.&lt;/p&gt;&lt;p&gt;Saving one step produces one image. Saving several steps produces a separate numbered image for each step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Uložit obrázek&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Uložte obrázky aktivního modelu pomocí aktuálního zobrazení. Vyberte cílový soubor, rozměry obrázku a kroky, které chcete zahrnout.&lt;/p&gt;&lt;p&gt;Uložením jednoho kroku vytvoříte jeden obrázek. Uložením několika kroků vytvoříte pro každý krok samostatný očíslovaný obrázek.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="17"/>
@@ -8905,24 +9067,28 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_imagedialog.ui" line="27"/>
         <location filename="../common/lc_imagedialog.ui" line="43"/>
         <source>Path and file name for the exported image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cesta a název souboru pro exportovaný obrázek.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="30"/>
         <location filename="../common/lc_imagedialog.ui" line="46"/>
         <location filename="../common/lc_imagedialog.ui" line="56"/>
         <source>&lt;p&gt;&lt;b&gt;File Name&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an output folder, file name, and image extension, such as .png, .jpg, or .bmp.&lt;/p&gt;&lt;p&gt;When saving several steps, the step number is added before the extension. For example, &apos;model.png&apos; becomes &apos;model01.png&apos;, &apos;model02.png&apos;, and so on.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Název souboru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte výstupní složku, název souboru a příponu obrázku, například .png, .jpg nebo .bmp.&lt;/p&gt;&lt;p&gt;Při ukládání několika kroků se před příponu přidá číslo kroku. Například „model.png“ se změní na „model01.png“, „model02.png“ a tak dále.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="53"/>
         <source>Choose the image file and format.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte soubor obrázku a formát.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="59"/>
         <source>Choose Image File</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte Soubor obrázku</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="62"/>
@@ -8932,7 +9098,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_imagedialog.ui" line="73"/>
         <source>&lt;p&gt;&lt;b&gt;Dimensions&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the exported image width and height in pixels. Each value must be between 1 and 32768. Larger images use more memory and may exceed the graphics hardware limits.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rozměry&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nastavte šířku a výšku exportovaného obrázku v pixelech. Každá hodnota musí být mezi 1 a 32768. Větší obrázky využívají více paměti a mohou překročit limity grafického hardwaru.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="76"/>
@@ -8948,7 +9115,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_imagedialog.ui" line="82"/>
         <location filename="../common/lc_imagedialog.ui" line="95"/>
         <source>Width of the saved image, in pixels (1 to 32768).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Šířka uloženého obrázku v pixelech (1 až 32768).</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="117"/>
@@ -8959,12 +9127,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_imagedialog.ui" line="114"/>
         <location filename="../common/lc_imagedialog.ui" line="127"/>
         <source>Height of the saved image, in pixels (1 to 32768).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Výška uloženého obrázku v pixelech (1 až 32768).</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="149"/>
         <source>&lt;p&gt;&lt;b&gt;Step Range&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose All Steps, Current Step, or Custom Range. The From and To fields are used only for Custom Range. Both endpoints are included, and To may equal From to save just one step.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rozsah kroků&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte Všechny kroky, Aktuální krok nebo Vlastní rozsah. Pole Od a Do se používají pouze pro Vlastní rozsah. Jsou zahrnuty oba koncové body a To se může rovnat From, aby se ušetřil pouze jeden krok.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="152"/>
@@ -8974,7 +9144,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_imagedialog.ui" line="158"/>
         <source>Save an image for every step in the active model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte obrázek pro každý krok v aktivním modelu.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="161"/>
@@ -8984,7 +9155,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_imagedialog.ui" line="168"/>
         <source>Save only the current step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte pouze aktuální krok.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="171"/>
@@ -8994,7 +9166,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_imagedialog.ui" line="180"/>
         <source>Save the steps between From and To, including both endpoints.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte kroky mezi Od a Do, včetně obou koncových bodů.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="183"/>
@@ -9010,12 +9183,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_imagedialog.ui" line="190"/>
         <location filename="../common/lc_imagedialog.ui" line="203"/>
         <source>First step to save when Custom Range is selected.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">První krok k uložení, když je vybrána možnost Vlastní rozsah.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="206"/>
         <source>First Step</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">První krok</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="231"/>
@@ -9026,12 +9201,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../common/lc_imagedialog.ui" line="225"/>
         <location filename="../common/lc_imagedialog.ui" line="238"/>
         <source>Last step to save when Custom Range is selected.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Poslední krok k uložení, když je vybrána možnost Vlastní rozsah.</translation>
     </message>
     <message>
         <location filename="../common/lc_imagedialog.ui" line="241"/>
         <source>Last Step</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Poslední krok</translation>
     </message>
     <message>
         <source>Error</source>
@@ -9404,7 +9581,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="591"/>
         <source>Choose which related pieces are included when selecting a piece.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Při výběru dílu zvolte, které související díly jsou zahrnuty.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="604"/>
@@ -9415,7 +9593,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="605"/>
         <source>Choose coordinate axes and whether selected pieces rotate together.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte souřadnicové osy a zda se vybrané díly otáčejí společně.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="610"/>
@@ -9447,7 +9626,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="626"/>
         <source>Choose movement snapping intervals for XY and Z.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte intervaly uchopení pohybu pro XY a Z.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="631"/>
@@ -9467,7 +9647,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="639"/>
         <source>Choose the rotation snapping interval.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte interval přichycení otáčení.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="644"/>
@@ -9477,12 +9658,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="646"/>
         <source>&lt;p&gt;&lt;b&gt;Standard Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use file controls to create, open, and save projects, and Undo or Redo to navigate edit history. Before moving or rotating objects, choose the selection rule, coordinate reference, and snapping increments from the four drop-down controls. Help &gt; What&apos;s This? explains individual controls.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Standardní panel nástrojů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pomocí ovládacích prvků souborů můžete vytvářet, otevírat a ukládat projekty a vrátit zpět nebo opakovat k procházení historie úprav. Před přesouváním nebo otáčením objektů zvolte pravidlo výběru, referenci souřadnic a přírůstky uchopení ze čtyř rozevíracích ovládacích prvků. Nápověda &gt; Co je to? vysvětluje jednotlivé ovládací prvky.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="666"/>
         <source>&lt;p&gt;&lt;b&gt;Time Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The arrow buttons move through building steps so you can inspect how the model is assembled. They do not change the step assigned to a piece; use the Timeline for that. Add Keys controls whether edits create animation keys at the current step, allowing properties such as position to vary between steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Panel nástrojů Čas&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Tlačítka se šipkami se pohybují po krocích stavby, takže můžete zkontrolovat, jak je model sestaven. Nemění krok přiřazený dílu; použijte k tomu časovou osu. Přidat klávesy řídí, zda úpravy vytvoří animační klávesy v aktuálním kroku, což umožňuje, aby se vlastnosti, jako je poloha, mezi jednotlivými kroky měnily.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="664"/>
@@ -9492,27 +9675,32 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="592"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Mode&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the rule applied when you pick a piece in the model view. Single selects that piece; the other modes include matching piece types, matching colors, or both. For example, color selection lets you pick matching red pieces without selecting each one separately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Režim výběru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte pravidlo, které se použije při výběru dílu v zobrazení modelu. Single vybere ten díl; ostatní režimy zahrnují shodu typů dílů, shodu barev nebo obojí. Například výběr barev vám umožňuje vybrat odpovídající červené díly, aniž byste museli vybírat každý zvlášť.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="606"/>
         <source>&lt;p&gt;&lt;b&gt;Transform Options&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the axes and pivot used for interactive transforms. Relative Transforms uses the focused object&apos;s orientation, so movement along X follows that object&apos;s local X axis. Absolute Transforms uses the model axes. Rotate Together rotates the selection around a shared pivot; Rotate Separately rotates each piece around its own origin.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Možnosti transformace&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte osy a pivot použité pro interaktivní transformace. Relativní transformace používá orientaci zaostřeného objektu, takže pohyb podél X sleduje lokální osu X tohoto objektu. Absolutní transformace používá osy modelu. Rotate Together otočí výběr kolem sdíleného pivotu; Otočit samostatně otočí každý díl kolem jeho vlastního počátku.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="627"/>
         <source>&lt;p&gt;&lt;b&gt;Movement Snap&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how far objects move in each snapped increment. XY controls movement across the base plane; Z controls vertical movement, so they can use different intervals. Turn snapping off for free placement, then enable it again when you need consistent spacing.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Uchopení pohybu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zvolte, jak daleko se objekty posouvají v jednotlivých krocích. XY řídí pohyb přes základní rovinu; Z řídí vertikální pohyb, takže mohou používat různé intervaly. Vypněte přichycení pro volné umístění a poté jej znovu povolte, až budete potřebovat konzistentní mezery.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="640"/>
         <source>&lt;p&gt;&lt;b&gt;Rotation Snap&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose an angle increment for interactive rotation. For example, a 90-degree increment is useful for quarter turns, while smaller increments allow finer alignment. Turn snapping off for free rotation without fixed angle increments.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Zachycení rotace&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zvolte přírůstek úhlu pro interaktivní rotaci. Například 90stupňový přírůstek je užitečný pro čtvrtotáčky, zatímco menší přírůstky umožňují jemnější vyrovnání. Vypněte uchycení pro volné otáčení bez pevných přírůstků úhlu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="675"/>
         <source>&lt;p&gt;&lt;b&gt;Tools Toolbar&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a tool, then use it in the model view. Insertion tools create pieces, lights, or cameras. Editing tools select, transform, remove, or recolor objects. Navigation tools change the viewpoint without changing model geometry. Mouse assignments can be customized in Preferences.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Panel nástrojů Nástroje&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte nástroj a poté jej použijte v zobrazení modelu. Nástroje pro vkládání vytvářejí díly, světla nebo kamery. Nástroje pro úpravy vybírají, transformují, odebírají nebo přebarvují objekty. Navigační nástroje mění pohled bez změny geometrie modelu. Přiřazení myši lze upravit v Předvolbách.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="716"/>
@@ -9522,7 +9710,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="718"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a category or palette and filter its pieces. Selecting a piece prepares it for insertion; drag it into the model view to place it. Double-click a piece to open its preview. Options controls filtering, thumbnails, and list display.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Díly&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte kategorii nebo paletu a filtrujte její kousky. Výběr dílu jej připraví na vložení; přetažením do pohledu modelu jej umístěte. Poklepáním na díl otevřete jeho náhled. Možnosti řídí filtrování, miniatury a zobrazení seznamu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="728"/>
@@ -9532,12 +9721,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="730"/>
         <source>&lt;p&gt;&lt;b&gt;Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the current LDraw color from the swatches. This color is used when inserting or painting pieces. To recolor selected pieces, use the color button above the swatches. Hover over a swatch for its name and color code.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Barvy&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zvolte aktuální barvu LDraw ze vzorníku. Tato barva se používá při vkládání nebo malování dílů. Chcete-li vybrané díly přebarvit, použijte barevné tlačítko nad vzorníkem. Umístěním ukazatele myši na vzorek zobrazíte jeho název a kód barvy.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="750"/>
         <source>Apply the current color to selected pieces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aplikujte aktuální barvu na vybrané díly.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="751"/>
@@ -9548,12 +9739,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="752"/>
         <source>&lt;p&gt;&lt;b&gt;Change Selection Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Apply the current color to selected pieces. Choosing a swatch sets the current color; this button applies that color to the selection.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Změnit barvu výběru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Použít aktuální barvu na vybrané díly. Výběrem políčka nastavíte aktuální barvu; toto tlačítko použije tuto barvu na výběr.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="758"/>
         <source>LDraw Colors</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">LDraw Barvy</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="763"/>
@@ -9563,47 +9756,56 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="765"/>
         <source>&lt;p&gt;&lt;b&gt;Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit properties of the focused object or selection. Available fields depend on whether you select pieces, a camera, or a light. Expand a section to see its fields. Keyframe controls mark properties at the current building step.&lt;/p&gt;&lt;p&gt;The transform fields at the bottom apply an X/Y/Z translation or rotation using the chosen transform mode. Press Enter to apply the values.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vlastnosti&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte vlastnosti vybraného objektu nebo výběru. Dostupná pole závisí na tom, zda vyberete díly, fotoaparát nebo světlo. Rozbalením sekce zobrazíte její pole. Ovládací prvky klíčového snímku označují vlastnosti v aktuálním kroku vytváření.&lt;/p&gt;&lt;p&gt;Pole transformace ve spodní části aplikují X/Y/Z posun nebo rotaci pomocí zvoleného režimu transformace. Stisknutím klávesy Enter hodnoty použijete.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="786"/>
         <source>Choose absolute or relative translation or rotation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte absolutní nebo relativní posunutí nebo otočení.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="787"/>
         <source>&lt;p&gt;&lt;b&gt;Apply Transform&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the translation or rotation mode, enter X/Y/Z values, and press Enter to apply them. Translation values use LDraw units; rotation values use degrees.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Použít transformaci&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte režim posunutí nebo otočení, zadejte hodnoty X/Y/Z a stisknutím klávesy Enter je použijte. Překladové hodnoty používají jednotky LDraw; hodnoty rotace používají stupně.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="791"/>
         <source>Transform X</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformace X</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="792"/>
         <source>Enter the X translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte posunutí X v jednotkách LDraw nebo otočení ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="795"/>
         <source>Transform Y</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformace Y</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="796"/>
         <source>Enter the Y translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte Y posunutí v jednotkách LDraw nebo otočení ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="799"/>
         <source>Transform Z</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Transformace Z</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="800"/>
         <source>Enter the Z translation in LDraw units or rotation in degrees.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte posun Z v jednotkách LDraw nebo otočení ve stupních.</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="812"/>
@@ -9613,7 +9815,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="814"/>
         <source>&lt;p&gt;&lt;b&gt;Timeline&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a step to make it current, or select piece rows to select those pieces in the model. Drag pieces between steps or reorder them within a step. Right-click for step insertion, removal, movement, and visibility commands.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Časová osa&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte krok, aby byl aktuální, nebo vyberte řádky dílů a vyberte tyto díly v modelu. Přetahujte kousky mezi kroky nebo v rámci kroku změňte jejich pořadí. Kliknutím pravým tlačítkem myši zobrazíte příkazy pro vkládání, odebírání, pohyb a viditelnost.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="860"/>
@@ -9625,7 +9828,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="863"/>
         <source>&lt;p&gt;&lt;b&gt;Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Inspect a piece without placing it in the model. Double-click a piece in the Pieces dock to preview it. Lock Preview keeps the current preview when the source selection changes; unlock it to allow updates.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Náhled&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zkontrolujte díl, aniž byste jej umístili do modelu. Dvojitým kliknutím na díl v doku Pieces zobrazíte jeho náhled. Uzamknout náhled zachová aktuální náhled, když se změní výběr zdroje; odemkněte jej a povolte aktualizace.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="1006"/>
@@ -10019,7 +10223,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Minifig Wizard&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Build a minifigure by choosing its pieces, colors, and pose. The preview updates as you make changes. Choose OK to insert the minifigure into the current model, or Cancel to close without inserting it.&lt;/p&gt;&lt;p&gt;Templates let you reuse a configuration. Saved, deleted, and imported templates are retained even if you cancel the wizard.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Průvodce minifigem&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Postavte si minifigurku výběrem jejích dílků, barev a pózy. Náhled se aktualizuje při provádění změn. Zvolte OK pro vložení minifigurky do aktuálního modelu nebo Zrušit pro zavření bez vložení.&lt;/p&gt;&lt;p&gt;Šablony vám umožňují znovu použít konfiguraci. Uložené, odstraněné a importované šablony zůstanou zachovány, i když zrušíte průvodce.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="17"/>
@@ -10029,12 +10234,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;Minifigure Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Each section has a piece selector and a color button. Some sections also have a rotation control in degrees. Choose None in a piece selector to omit that piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Dílky minifigurek&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Každá sekce má výběr figur a tlačítko barvy. Některé sekce mají také ovládání rotace ve stupních. Chcete-li daný díl vynechat, zvolte Žádný ve výběru dílu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Load a saved configuration of pieces, colors, and angles, or save the current configuration under a name. Choosing another template replaces the current preview configuration.&lt;/p&gt;&lt;p&gt;Changes to the preview are not saved as a template until you use Save. Template operations are retained when the wizard closes, including after Cancel.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Šablony&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Načtěte uloženou konfiguraci dílů, barev a úhlů nebo uložte aktuální konfiguraci pod názvem. Výběr jiné šablony nahradí aktuální konfiguraci náhledu.&lt;/p&gt;&lt;p&gt;Změny náhledu se neuloží jako šablona, ​​dokud nepoužijete možnost Uložit. Operace se šablonami jsou zachovány, když se průvodce zavře, včetně po zrušení.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="40"/>
@@ -10044,22 +10251,26 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="46"/>
         <source>Load a saved configuration of pieces, colors, and angles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Načtěte uloženou konfiguraci dílů, barev a úhlů.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="49"/>
         <source>Minifigure Template</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Šablona minifigurky</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="62"/>
         <source>Save the current minifigure configuration as a named template.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte aktuální konfiguraci minifigurky jako pojmenovanou šablonu.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="65"/>
         <source>&lt;p&gt;&lt;b&gt;Save Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a name for the current pieces, colors, and pose. Reusing an existing name asks before replacing that template. The Default template cannot be overwritten.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Uložit šablonu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zadejte název pro aktuální kousky, barvy a pózu. Opětovné použití existujícího názvu se před nahrazením šablony zeptá. Výchozí šablonu nelze přepsat.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="68"/>
@@ -10069,12 +10280,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="75"/>
         <source>Delete the selected saved template.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odstraňte vybranou uloženou šablonu.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="78"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Template&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected named template after confirmation. This does not remove pieces from the preview or an existing model. The Default template cannot be deleted.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Odstranit šablonu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Po potvrzení odeberte vybranou pojmenovanou šablonu. Toto neodstraní díly z náhledu nebo existujícího modelu. Výchozí šablonu nelze smazat.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="81"/>
@@ -10084,12 +10297,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="88"/>
         <source>Add templates from a .minifig file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přidejte šablony ze souboru .minifig.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="91"/>
         <source>&lt;p&gt;&lt;b&gt;Import Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add saved configurations from a .minifig file to the template collection. Existing template names are kept when the imported file contains the same names.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Import šablon&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přidejte uložené konfigurace ze souboru .minifig do kolekce šablon. Stávající názvy šablon jsou zachovány, pokud importovaný soubor obsahuje stejné názvy.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="94"/>
@@ -10099,12 +10314,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="101"/>
         <source>Save the entire template collection to a .minifig file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte celou kolekci šablon do souboru .minifig.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="104"/>
         <source>&lt;p&gt;&lt;b&gt;Export Templates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Write all templates to a .minifig file for backup or sharing. Export includes the entire collection, not just the selected template.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Export šablon&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zapište všechny šablony do souboru .minifig pro zálohování nebo sdílení. Export zahrnuje celou kolekci, nejen vybranou šablonu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.ui" line="107"/>
@@ -10217,62 +10434,74 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="51"/>
         <source>%1 piece</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">%1 díl</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="52"/>
         <source>Choose the piece for %1, or None to omit it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte díl pro %1, nebo zvolte Žádný, chcete-li jej vynechat.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="53"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece for this section of the minifigure. Select None to omit it. The preview updates when you select a different piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vyberte dílek&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte dílek pro tuto část minifigurky. Chcete-li jej vynechat, vyberte možnost Žádný. Náhled se aktualizuje, když vyberete jiný díl.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="60"/>
         <source>%1 color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">%1 barva</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="61"/>
         <source>Choose the color for %1.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu pro %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="62"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Color&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Change the color of this minifigure piece. The preview updates immediately, and saving a template includes the chosen color.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vyberte barvu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Změňte barvu tohoto dílku minifigurky. Náhled se okamžitě aktualizuje a uložení šablony obsahuje vybranou barvu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="75"/>
         <source>%1 rotation</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">%1 otočení</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="76"/>
         <source>Rotate %1, in degrees (-360 to 360).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Otočit %1 ve stupních (-360 až 360).</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="77"/>
         <source>&lt;p&gt;&lt;b&gt;Rotation&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Adjust this piece&apos;s angle to pose the minifigure. Values range from -360 to 360 degrees. The available rotation depends on the selected minifigure section.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Otáčení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte úhel tohoto dílku, abyste postavili minifigurku. Hodnoty se pohybují od -360 do 360 stupňů. Dostupná rotace závisí na vybrané sekci minifigurky.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="127"/>
         <source>Minifigure Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Náhled minifigurky</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="128"/>
         <source>Preview of the chosen pieces, colors, and pose.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Náhled vybraných dílů, barev a pózy.</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="129"/>
         <source>&lt;p&gt;&lt;b&gt;Minifigure Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check the assembled minifigure as you change pieces, colors, or angles. Choose OK to add this configuration to the current model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Náhled minifigurky&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Kontrolujte sestavenou minifigurku, jak měníte dílky, barvy nebo úhly. Zvolte OK pro přidání této konfigurace do aktuálního modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_minifigdialog.cpp" line="271"/>
@@ -10951,7 +11180,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Manage the models stored in this project. Create, rename, duplicate, delete, or reorder them, then choose OK to apply the changes. Cancel discards the list changes; files already exported remain on disk.&lt;/p&gt;&lt;p&gt;Drag list entries to change their order. Use Set Active to switch to the current list item when applying changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Podmodely&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Spravujte modely uložené v tomto projektu. Vytvořte je, přejmenujte, duplikujte, odstraňte nebo změňte jejich pořadí a poté klepněte na OK pro použití změn. Zrušit zruší změny seznamu; již exportované soubory zůstávají na disku.&lt;/p&gt;&lt;p&gt;Přetažením položek seznamu změňte jejich pořadí. Pomocí Nastavit aktivní přepněte při použití změn na aktuální položku seznamu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="17"/>
@@ -10962,17 +11192,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="25"/>
         <source>Select models to manage, or drag them to change their order.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte modely, které chcete spravovat, nebo je přetáhněte a změňte jejich pořadí.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Model List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select one or more entries for actions such as Rename, Duplicate, Export, or Delete. Drag entries to reorder them. Double-click an entry to apply the list changes and make that model active.&lt;/p&gt;&lt;p&gt;Names must be unique within the project; capitalization alone does not make a name unique.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Seznam modelů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte jednu nebo více položek pro akce, jako je Přejmenovat, Duplikovat, Exportovat nebo Smazat. Přetažením položek změníte jejich pořadí. Poklepáním na položku aplikujte změny seznamu a aktivujte daný model.&lt;/p&gt;&lt;p&gt;Názvy musí být v rámci projektu jedinečné; samotná velká písmena nečiní jméno jedinečným.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="43"/>
         <source>Add a new empty submodel to the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přidejte do projektu nový prázdný podmodel.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="46"/>
@@ -10982,12 +11215,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="53"/>
         <source>Remove the selected models from the project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odeberte vybrané modely z projektu.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="56"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected entries after confirmation. At least one model must remain. The project is changed when you accept this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Odstranit podmodely&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Po potvrzení odeberte vybrané položky. Musí zůstat alespoň jeden model. Když toto dialogové okno přijmete, projekt se změní.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="59"/>
@@ -10997,7 +11232,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="66"/>
         <source>Choose a unique name for each selected model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte jedinečný název pro každý vybraný model.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="69"/>
@@ -11007,12 +11243,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="76"/>
         <source>Save the selected models to separate LDraw files.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Uložte vybrané modely do samostatných souborů LDraw.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="79"/>
         <source>&lt;p&gt;&lt;b&gt;Export Submodels&lt;/b&gt;&lt;/p&gt;&lt;p&gt;For one selected model, choose its output file. For several selected models, choose an output folder. Export writes files immediately, even if you later cancel this dialog.&lt;/p&gt;&lt;p&gt;A newly created empty model has nothing to export until the list changes have been applied.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Export podmodelů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pro jeden vybraný model vyberte jeho výstupní soubor. Pro několik vybraných modelů vyberte výstupní složku. Export zapíše soubory okamžitě, i když toto dialogové okno později zrušíte.&lt;/p&gt;&lt;p&gt;Nově vytvořený prázdný model nemá co exportovat, dokud nebudou použity změny seznamu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="82"/>
@@ -11022,7 +11260,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="89"/>
         <source>Create named copies of the selected models.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořte pojmenované kopie vybraných modelů.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="92"/>
@@ -11033,12 +11272,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="99"/>
         <source>Switch to the current list item when applying the changes.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Při použití změn přepněte na aktuální položku seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_modellistdialog.ui" line="102"/>
         <source>&lt;p&gt;&lt;b&gt;Set Active&lt;/b&gt;&lt;/p&gt;&lt;p&gt;When checked, accepting this dialog makes the current list item the active model for editing. When unchecked, the existing active model is retained if it remains in the project.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavit jako aktivní&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pokud je zaškrtnuto, přijetím tohoto dialogu se aktuální položka seznamu stane aktivním modelem pro úpravy. Pokud není zaškrtnuto, stávající aktivní model zůstane zachován, pokud zůstane v projektu.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Move &amp;Up</source>
@@ -11234,7 +11475,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Palettes&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Organize reusable collections of pieces in the piece browser. Create, rename, delete, import, or reorder palettes, then choose OK to apply the changes. Cancel discards these palette changes.&lt;/p&gt;&lt;p&gt;Palettes organize piece choices; they do not change pieces already placed in a model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Palety dílů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Uspořádejte opakovaně použitelné sbírky dílů v prohlížeči dílů. Vytvořte, přejmenujte, odstraňte, importujte nebo změňte pořadí palet a poté klepněte na OK pro použití změn. Zrušit zruší tyto změny palety.&lt;/p&gt;&lt;p&gt;Palety organizují výběr dílů; nemění díly již umístěné v modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="17"/>
@@ -11245,17 +11487,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="25"/>
         <source>Select the palette to rename, delete, or move.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte paletu, kterou chcete přejmenovat, odstranit nebo přesunout.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Palette List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a palette before using Rename, Delete, Move Up, or Move Down. The list order determines the palette order in the piece browser.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Seznam palet&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Před použitím Přejmenovat, Odstranit, Posunout nahoru nebo Posunout dolů vyberte paletu. Pořadí seznamu určuje pořadí palet v prohlížeči dílů.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="40"/>
         <source>Create a new empty piece palette.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořte novou prázdnou paletu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="43"/>
@@ -11265,12 +11510,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="50"/>
         <source>Remove the selected palette after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Po potvrzení odeberte vybranou paletu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="53"/>
         <source>&lt;p&gt;&lt;b&gt;Delete Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Remove the selected palette and its list of piece choices. Library pieces and pieces already used in models are not deleted. At least one palette must remain.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Odstranit paletu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Odstraní vybranou paletu a její seznam položek. Položky knihovny a položky již použité v modelech nebudou odstraněny. Musí zůstat alespoň jedna paleta.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="56"/>
@@ -11280,7 +11527,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="63"/>
         <source>Change the name of the selected palette.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Změňte název vybrané palety.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="66"/>
@@ -11290,12 +11538,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="73"/>
         <source>Create a palette from an online set inventory.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořte paletu z online inventáře sady.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="76"/>
         <source>&lt;p&gt;&lt;b&gt;Import Palette&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open Import Set Inventory to search for a set and download its inventory. The new palette uses the set description as its name.&lt;/p&gt;&lt;p&gt;The palette stores piece IDs; inventory colors and quantities are not stored. An internet connection is required.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Paleta importu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Otevřete položku Importovat inventář sady a vyhledejte sadu a stáhněte si její inventář. Nová paleta používá jako název popis sady.&lt;/p&gt;&lt;p&gt;Paleta ukládá ID dílů; barvy a množství inventáře nejsou uloženy. Je vyžadováno připojení k internetu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="79"/>
@@ -11305,7 +11555,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="86"/>
         <source>Move the selected palette one position earlier in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Posuňte vybranou paletu o jednu pozici dříve v seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="89"/>
@@ -11315,7 +11566,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="96"/>
         <source>Move the selected palette one position later in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přesuňte vybranou paletu o jednu pozici dále v seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partpalettedialog.ui" line="99"/>
@@ -11387,12 +11639,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partselectionpopup.cpp" line="10"/>
         <source>Choose Piece</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte Díl</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionpopup.cpp" line="11"/>
         <source>&lt;p&gt;&lt;b&gt;Choose Piece&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a piece, then choose OK or double-click it to use it. Cancel keeps the original choice. Filter the list to find a piece; Options controls matching and list display. When None is available, select it to omit the piece.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vybrat díl&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte díl a poté zvolte OK nebo na něj dvakrát klikněte, abyste jej mohli použít. Zrušit zachová původní výběr. Filtrujte seznam a najděte díl; Možnosti řídí shodu a zobrazení seznamu. Když je k dispozici Žádná, vyberte ji, chcete-li díl vynechat.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -11495,17 +11749,20 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="986"/>
         <source>Filter category names to narrow the category list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrování názvů kategorií zúží seznam kategorií.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1002"/>
         <source>Piece Categories</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Kategorie dílů</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1003"/>
         <source>Choose a category or palette to display its pieces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte kategorii nebo paletu pro zobrazení jejích částí.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1020"/>
@@ -11517,27 +11774,32 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1022"/>
         <source>Filter the displayed pieces using the matching options.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrujte zobrazené díly pomocí odpovídajících možností.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1027"/>
         <source>Configure piece filtering and list display.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte filtrování dílů a zobrazení seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1028"/>
         <source>Piece List Options</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Možnosti seznamu dílů</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1037"/>
         <source>Available Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Dostupné díly</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1038"/>
         <source>Select a piece from the filtered list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte díl z filtrovaného seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_partselectionwidget.cpp" line="1300"/>
@@ -12073,7 +12335,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="561"/>
         <source>Set the distance in LDraw units at which simpler piece meshes are used.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte vzdálenost v jednotkách LDraw, při které se používají jednodušší sítě dílů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="651"/>
@@ -12138,308 +12401,366 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the application, display, colors, piece categories, and keyboard and mouse shortcuts. Choose OK to save the changes or Cancel to discard edits in Preferences. Language, piece-library, and antialiasing changes may require restarting LeoCAD.&lt;/p&gt;&lt;p&gt;Export buttons write files immediately. Blender add-on settings have their own Apply action and can configure Blender before you close Preferences.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Předvolby&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nakonfigurujte aplikaci, zobrazení, barvy, kategorie dílů a klávesové zkratky a myši. Zvolte OK pro uložení změn nebo Storno pro zrušení úprav v Předvolbách. Změny jazyka, knihovny částí a antialiasingu mohou vyžadovat restartování LeoCADu.&lt;/p&gt;&lt;p&gt;Tlačítka Export zapisují soubory okamžitě. Nastavení doplňků Blenderu mají vlastní akci Použít a mohou nakonfigurovat Blender před zavřením Předvoleb.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="27"/>
         <source>&lt;p&gt;&lt;b&gt;General Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set application behavior and custom library, configuration, and renderer paths. Leave optional configuration paths empty to use the built-in settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Obecné předvolby&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nastavte chování aplikace a cesty vlastní knihovny, konfigurace a vykreslovacího modulu. Chcete-li použít vestavěná nastavení, ponechte volitelné konfigurační cesty prázdné.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="45"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="61"/>
         <source>Choose the interface language used after restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte jazyk rozhraní použitý po restartování LeoCADu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="58"/>
         <source>Language</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Jazyk</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="73"/>
         <source>Check for Updates</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zkontrolujte aktualizace</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="76"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="98"/>
         <source>Choose how often to check automatically for application and piece-library updates.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zvolte, jak často se mají automaticky kontrolovat aktualizace aplikací a dílčí knihovny.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="124"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="140"/>
         <source>Choose the interface theme and optionally reset its colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte motiv rozhraní a případně obnovte jeho barvy.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="137"/>
         <source>Color Theme</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barevný motiv</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="160"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="176"/>
         <source>Set the author name used for new models.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte jméno autora používané pro nové modely.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="173"/>
         <source>Default Author Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Výchozí jméno autora</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="183"/>
         <source>Move pieces along fixed model axes instead of view-relative directions.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přesouvejte díly podél pevných os modelu namísto směrů relativních k pohledu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="193"/>
         <source>Open the most recently used file when LeoCAD starts.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Při spuštění LeoCADu otevřete naposledy použitý soubor.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="209"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="227"/>
         <source>Choose a piece-library folder or supported archive to load after restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte složku dílčí knihovny nebo podporovaný archiv, který se má načíst po restartování LeoCADu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="224"/>
         <source>Pieces Library</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Knihovna dílů</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="234"/>
         <source>Choose a piece-library folder.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte složku knihovny.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="245"/>
         <source>Choose a piece-library ZIP or BIN archive.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte archiv ZIP nebo BIN s dílčí knihovnou.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="258"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="276"/>
         <source>Choose a custom LDraw color configuration file, or leave empty to use the library colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte vlastní konfigurační soubor barev LDraw nebo ponechte prázdné, chcete-li použít barvy knihovny.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="273"/>
         <source>Color Configuration</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Konfigurace barev</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="283"/>
         <source>Choose a custom LDraw color configuration file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zvolte vlastní konfigurační soubor barev LDraw.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="295"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="313"/>
         <source>Choose a custom minifigure settings file, or leave empty to use the built-in choices.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte si vlastní soubor s nastavením minifigurky nebo ponechte prázdné, abyste mohli použít vestavěné možnosti.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="310"/>
         <source>Minifig Settings</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavení Minifig</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="320"/>
         <source>Choose a minifigure settings INI file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte soubor INI nastavení minifigurky.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="332"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="350"/>
         <source>Set the POV-Ray executable used for rendering.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte spustitelný soubor POV-Ray používaný pro vykreslování.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="347"/>
         <source>POV-Ray Executable</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Spustitelný soubor POV-Ray</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="357"/>
         <source>Locate the POV-Ray executable.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyhledejte spustitelný soubor POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="369"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="387"/>
         <source>Set the LGEO library folder used by POV-Ray exports.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte složku knihovny LGEO používanou exporty POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="384"/>
         <source>LGEO Library</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Knihovna LGEO</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="394"/>
         <source>Choose the LGEO library folder.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte složku knihovny LGEO.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
         <source>Restore saved model tabs and view layouts when opening a project.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Obnovte uložené karty modelu a rozvržení zobrazení při otevření projektu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="420"/>
         <source>&lt;p&gt;&lt;b&gt;Rendering Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Control shading, stud geometry, selection appearance, edges, and step effects. Some options are unavailable when the graphics system does not support them.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Předvolby vykreslování&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ovládejte stínování, geometrii výstupků, vzhled výběru, hrany a efekty kroků. Některé možnosti jsou nedostupné, pokud je grafický systém nepodporuje.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="432"/>
         <source>Previous Step Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva předchozího kroku</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="435"/>
         <source>Choose the tint used for pieces from previous steps.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte odstín použitý pro díly z předchozích kroků.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="445"/>
         <source>Shading Mode</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Režim stínování</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="448"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="590"/>
         <source>Choose how piece surfaces and edges are drawn in model views.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zvolte způsob kreslení povrchů a hran dílu v pohledech modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="470"/>
         <source>Use simpler meshes for distant pieces to improve display performance.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro zlepšení výkonu zobrazení použijte jednodušší sítě pro vzdálené díly.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="480"/>
         <source>Tint pieces from previous building steps with the chosen fade color.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odbarvujte kousky z předchozích stavebních kroků zvolenou barvou vyblednutí.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="503"/>
         <source>Highlight pieces introduced in the current building step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zvýrazněte díly představené v aktuálním kroku budování.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="513"/>
         <source>New Piece Highlight Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva zvýraznění nového dílu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="516"/>
         <source>Choose the highlight color for pieces in the current step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zvýraznění dílů v aktuálním kroku.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="526"/>
         <source>Blender LDraw Render</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vykreslování LDraw v Blenderu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="529"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="628"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení doplňku Blenderu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Otevřete samostatné dialogové okno konfigurace Blenderu. Jeho akce Apply uloží svá nastavení nezávisle na Preferences a výběrem spustitelného souboru nebo importéru můžete Blender okamžitě nakonfigurovat.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="532"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="631"/>
         <source>Configure Blender and its LDraw import and render add-ons.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte Blender a jeho doplňky pro import a vykreslování LDraw.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vykreslování výběru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Obrys vykreslí obrys a slabou výběrovou výplň přes zakryté části. Tónování obličeje používá tónované plochy a barevné okraje. Systémy bez podpory obrysů používají Tónování obličeje.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte způsob zvýraznění vybraných dílů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
         <source>Mesh Detail Distance</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vzdálenost detailů sítě</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="580"/>
         <source>Configure colors and the light/dark threshold for high contrast stud styles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte barvy a práh světla/tmy pro vysoce kontrastní styly kolíků.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="603"/>
         <source>Antialiasing Samples</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vzorky vyhlazování</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="606"/>
         <source>Choose the antialiasing sample count; more samples can use more graphics resources.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte počet vzorků vyhlazování; více vzorků může použít více grafických zdrojů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="647"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="711"/>
         <source>Choose stud geometry and the high contrast stud styles.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte si geometrii čepů a vysoce kontrastní styly čepů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="701"/>
         <source>Smooth jagged edges in model views; changes require restarting LeoCAD.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Hladké zubaté okraje v pohledech modelu; změny vyžadují restartování LeoCADu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vykreslování výběru</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
         <source>Draw conditional lines where needed to show curved piece surfaces.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">V případě potřeby nakreslete podmíněné čáry pro zobrazení zakřivených povrchů dílů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="786"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="802"/>
         <source>Set edge-line width within the range supported by the graphics system.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte šířku okrajové čáry v rozsahu podporovaném grafickým systémem.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="799"/>
         <source>Line Width</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Šířka čáry</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="821"/>
         <source>Draw the edge lines defined by each piece.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakreslete okrajové čáry definované každým dílem.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="831"/>
         <source>Calculate edge colors from piece colors instead of using their defined edge colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Počítejte barvy hran z barev dílů namísto použití jejich definovaných barev hran.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="841"/>
         <source>Configure the contrast and saturation used for automated edge colors.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte kontrast a sytost používané pro automatické barvy okrajů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="868"/>
         <source>&lt;p&gt;&lt;b&gt;View Preferences&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose navigation aids for model views and the piece preview, and configure the base grid. Locations select the corner where each navigation aid appears.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Předvolby zobrazení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte navigační pomůcky pro zobrazení modelu a náhled dílu a nakonfigurujte základní mřížku. Místa vybírají roh, kde se zobrazí jednotlivé navigační pomůcky.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="871"/>
@@ -12456,7 +12777,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="883"/>
         <source>Show the model-axis indicator in model views.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit indikátor osy modelu v pohledech modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="886"/>
@@ -12469,13 +12791,15 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="893"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="952"/>
         <source>Choose the corner for the model-view navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte roh pro sféru navigace zobrazení modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="906"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="922"/>
         <source>Choose the model-view navigation sphere size, or disable it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte velikost navigační koule zobrazení modelu nebo ji deaktivujte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="912"/>
@@ -12489,7 +12813,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1005"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1129"/>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Umístění</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="956"/>
@@ -12523,27 +12848,32 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="992"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1008"/>
         <source>Choose the corner for the model-axis indicator.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte roh pro indikátor osy modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1064"/>
         <source>Show base-grid lines at the specified spacing.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit čáry základní mřížky v určeném rozestupu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1074"/>
         <source>Grid Line Spacing</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Řádkování mřížky</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1077"/>
         <source>Set base-grid line spacing in studs (minimum 1).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte rozteč čar základní mřížky v čepech (minimálně 1).</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1090"/>
         <source>Emphasize the base-grid lines through the model origin.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zdůrazněte čáry základní mřížky přes počátek modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1093"/>
@@ -12554,7 +12884,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1100"/>
         <source>Show stud positions on the base grid.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit pozice čepů na základní mřížce.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1113"/>
@@ -12565,24 +12896,28 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1119"/>
         <source>Show the model-axis indicator in the piece preview.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit indikátor osy modelu v náhledu dílu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1132"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1159"/>
         <source>Choose the corner for the piece-preview navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte roh pro sféru navigace s náhledem části.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1175"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1202"/>
         <source>Choose the piece-preview navigation sphere size, or disable it.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte velikost navigační koule náhledu části nebo ji deaktivujte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1245"/>
         <source>&lt;p&gt;&lt;b&gt;Display Colors&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose colors for the background, objects, grid, and interface. These settings control the display; they do not change the LDraw colors assigned to model pieces.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Barvy zobrazení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte barvy pro pozadí, objekty, mřížku a rozhraní. Tato nastavení řídí displej; nemění barvy LDraw přiřazené dílům modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1248"/>
@@ -12593,108 +12928,127 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1260"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1276"/>
         <source>Choose the display color for the selection rectangle border.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro ohraničení obdélníku výběru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1273"/>
         <source>Marquee Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Okraj výběrového obdélníku</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1286"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1354"/>
         <source>Choose the display color for inactive view borders.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro neaktivní ohraničení pohledu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1299"/>
         <source>Marquee Fill</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Výplň výběrového obdélníku</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1302"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1338"/>
         <source>Choose the display color for the selection rectangle fill.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení výplně výběrového obdélníku.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1312"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1393"/>
         <source>Choose the display color for view text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro zobrazení textu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1325"/>
         <source>Text Halo Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva svatozáře textu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1328"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1377"/>
         <source>Choose the display color for the halo behind view text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro svatozář za textem zobrazení.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1351"/>
         <source>Inactive View Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Neaktivní ohraničení zobrazení</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1364"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1406"/>
         <source>Choose the display color for view overlays.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro překryvné vrstvy.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1390"/>
         <source>Text Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva textu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1403"/>
         <source>Overlay Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva překrytí</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1416"/>
         <source>Active View Border</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Hranice Active View</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1419"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1442"/>
         <source>Choose the display color for the active view border.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro ohraničení aktivního pohledu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1480"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1496"/>
         <source>Choose the display color for the navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro navigační kouli.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1522"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1538"/>
         <source>Choose the display color for navigation sphere text.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení textu navigační koule.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1564"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1580"/>
         <source>Choose the display color for the highlighted region of the navigation sphere.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro zvýrazněnou oblast navigační koule.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1625"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1641"/>
         <source>Choose the display color for base-grid lines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro čáry základní mřížky.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1667"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1683"/>
         <source>Choose the display color for base-grid stud markers.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro značky svorníků základní mřížky.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1709"/>
@@ -12705,7 +13059,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1717"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1733"/>
         <source>Choose the display color for the top of the background gradient.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení horní části přechodu pozadí.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1723"/>
@@ -12717,7 +13072,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1759"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1775"/>
         <source>Choose the display color for the bottom of the background gradient.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro spodní část přechodu pozadí.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1765"/>
@@ -12728,7 +13084,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1800"/>
         <source>Use a single color for the model-view background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro pozadí pohledu modelu použijte jednu barvu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1803"/>
@@ -12738,7 +13095,8 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1810"/>
         <source>Blend the top and bottom colors in the model-view background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Smíchejte horní a spodní barvy na pozadí pohledu modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1813"/>
@@ -12748,37 +13106,44 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1872"/>
         <source>Light Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Světlá barva</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1914"/>
         <source>Camera Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva fotoaparátu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1940"/>
         <source>Control Point Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva kontrolního bodu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1953"/>
         <source>Focused Control Point Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva zaostřeného kontrolního bodu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1966"/>
         <source>Selected Object Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva vybraného objektu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1979"/>
         <source>Focused Object Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva zaostřeného objektu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2671"/>
         <source>Mouse Sensitivity</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Citlivost myši</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1292"/>
@@ -12896,17 +13261,20 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1493"/>
         <source>View Sphere Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit barvu koule</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1535"/>
         <source>View Sphere Text Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit barvu textu koule</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1577"/>
         <source>View Sphere Highlight Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit barvu zvýraznění koule</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1619"/>
@@ -12923,7 +13291,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1638"/>
         <source>Grid Line Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva čáry mřížky</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1673"/>
@@ -12934,27 +13303,32 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1680"/>
         <source>Grid Stud Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Barva mřížky</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1730"/>
         <source>Background Top Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Horní barva pozadí</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1772"/>
         <source>Background Bottom Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pozadí Spodní Barva</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1822"/>
         <source>Background Solid Color</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pozadí Jednobarevné</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1825"/>
         <source>Choose the display color for the solid background.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení plného pozadí.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1853"/>
@@ -12966,7 +13340,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1859"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1875"/>
         <source>Choose the display color for light-object outlines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení obrysů světelných objektů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1865"/>
@@ -12978,7 +13353,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1901"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1982"/>
         <source>Choose the display color for the focused object.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro zaostřený objekt.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1907"/>
@@ -12990,13 +13366,15 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1917"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2018"/>
         <source>Choose the display color for camera-object outlines.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení obrysů objektu kamery.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1927"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1956"/>
         <source>Choose the display color for the focused control point.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro zaostřený kontrolní bod.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1933"/>
@@ -13008,13 +13386,15 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1943"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1992"/>
         <source>Choose the display color for control points.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro kontrolní body.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1969"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2005"/>
         <source>Choose the display color for selected objects.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte barvu zobrazení pro vybrané objekty.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="1998"/>
@@ -13037,7 +13417,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2048"/>
         <source>&lt;p&gt;&lt;b&gt;Piece Categories&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create, edit, reorder, or import categories for the piece browser. The right-hand list shows pieces matching the selected category. Imported and edited categories are saved when you choose OK in Preferences; Export writes the current list immediately.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kategorie dílů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vytvářejte, upravujte, změňte pořadí nebo importujte kategorie pro prohlížeč dílů. V pravém seznamu jsou zobrazeny díly odpovídající zvolené kategorii. Importované a upravené kategorie se uloží, když v Předvolbách zvolíte OK; Export okamžitě zapíše aktuální seznam.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2051"/>
@@ -13054,22 +13435,26 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2073"/>
         <source>Piece Categories</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Kategorie dílů</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2076"/>
         <source>Select a category to inspect or edit; drag categories to reorder them.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte kategorii, kterou chcete zkontrolovat nebo upravit; přetažením kategorií změníte jejich pořadí.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2107"/>
         <source>Matching Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odpovídající díly</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2110"/>
         <source>View the library pieces matching the selected category.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazte položky knihovny odpovídající vybrané kategorii.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2141"/>
@@ -13084,7 +13469,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2157"/>
         <source>Replace the category list with categories from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nahraďte seznam kategorií kategoriemi z textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2160"/>
@@ -13096,7 +13482,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2167"/>
         <source>Save the current category list to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Okamžitě uložte aktuální seznam kategorií do textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2170"/>
@@ -13108,7 +13495,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2177"/>
         <source>Restore the default category list after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Po potvrzení obnovte výchozí seznam kategorií.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2180"/>
@@ -13126,7 +13514,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2211"/>
         <source>Create a category with a name and a keyword expression.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vytvořte kategorii s názvem a výrazem klíčových slov.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2214"/>
@@ -13136,7 +13525,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2221"/>
         <source>Edit the selected category name and keyword expression.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Upravte název vybrané kategorie a výraz klíčového slova.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2224"/>
@@ -13146,7 +13536,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2231"/>
         <source>Remove the selected category after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Po potvrzení odeberte vybranou kategorii.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2234"/>
@@ -13156,7 +13547,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2258"/>
         <source>&lt;p&gt;&lt;b&gt;Keyboard Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a command, click Key Sequence, press the desired key combination, then choose Assign. Remove clears the selected command&apos;s shortcut. Import replaces the shortcut list; Export writes the current list immediately. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Klávesové zkratky&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte příkaz, klikněte na Sekvence kláves, stiskněte požadovanou kombinaci kláves a poté zvolte Přiřadit. Odebrat vymaže zástupce vybraného příkazu. Import nahradí seznam zástupců; Export okamžitě zapíše aktuální seznam. Uložte změny kliknutím na OK v Předvolbách.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2261"/>
@@ -13172,12 +13564,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2277"/>
         <source>Commands and Keyboard Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Příkazy a klávesové zkratky</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2280"/>
         <source>Select the command whose keyboard shortcut you want to change.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte příkaz, jehož klávesovou zkratku chcete změnit.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2290"/>
@@ -13194,12 +13588,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2303"/>
         <source>Filter Commands</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Příkazy filtru</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2306"/>
         <source>Filter commands by name or shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Filtrujte příkazy podle názvu nebo zkratky.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2309"/>
@@ -13209,29 +13605,34 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2318"/>
         <source>Replace keyboard shortcuts with assignments from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nahraďte klávesové zkratky přiřazením z textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2328"/>
         <source>Save the current keyboard shortcuts to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Okamžitě uložte aktuální klávesové zkratky do textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2338"/>
         <source>Restore the default keyboard shortcuts after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Po potvrzení obnovte výchozí klávesové zkratky.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2375"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2394"/>
         <source>&lt;p&gt;&lt;b&gt;Key Sequence&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Click here and press the key combination you want to assign. Function keys, including F1, are recorded as shortcut candidates in this field. Use the Help button for guidance. Assign asks before replacing a shortcut already used by another command.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Posloupnost kláves&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Klikněte sem a stiskněte kombinaci kláves, kterou chcete přiřadit. Funkční klávesy, včetně F1, jsou v tomto poli zaznamenány jako kandidáti na zkratky. Pro orientaci použijte tlačítko Nápověda. Před nahrazením zástupce, který již byl použit jiným příkazem, přiřadit dotaz.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2378"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2397"/>
         <source>Press the key combination to assign, then choose Assign.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Stiskněte kombinaci kláves, kterou chcete přiřadit, a poté zvolte Přiřadit.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2381"/>
@@ -13242,12 +13643,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2391"/>
         <source>Key Sequence</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Sekvence kláves</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2404"/>
         <source>Assign the entered key combination to the selected command.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přiřaďte zadanou kombinaci kláves k vybranému příkazu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2407"/>
@@ -13258,7 +13661,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2414"/>
         <source>Clear the selected command&apos;s keyboard shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vymažte klávesovou zkratku vybraného příkazu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2417"/>
@@ -13269,7 +13673,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2439"/>
         <source>&lt;p&gt;&lt;b&gt;Mouse Shortcuts&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select a tool, choose a mouse button and optional modifiers, then choose Assign. Each tool can have two shortcuts; a new assignment becomes the primary shortcut. Remove clears the primary shortcut and promotes the secondary shortcut. Choose OK in Preferences to save changes.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Zkratky myši&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte nástroj, vyberte tlačítko myši a volitelné modifikátory a poté zvolte Přiřadit. Každý nástroj může mít dvě zkratky; nový úkol se stane primárním zástupcem. Odebrat vymaže primárního zástupce a povýší sekundárního zástupce. Uložte změny kliknutím na OK v Předvolbách.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2442"/>
@@ -13284,12 +13689,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2458"/>
         <source>Tools and Mouse Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nástroje a Zkratky myši</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2461"/>
         <source>Select a tool to edit its primary and secondary mouse shortcuts.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte nástroj, který chcete upravit jeho primární a sekundární zkratky myši.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2471"/>
@@ -13309,23 +13716,27 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2491"/>
         <source>Replace mouse shortcuts with assignments from a text file.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nahraďte zkratky myši přiřazením z textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2501"/>
         <source>Save the current mouse shortcuts to a text file immediately.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Okamžitě uložte aktuální zástupce myši do textového souboru.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2511"/>
         <source>Restore the default mouse shortcuts after confirmation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Po potvrzení obnovte výchozí klávesové zkratky myši.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2551"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2567"/>
         <source>Choose the mouse button to assign to the selected tool.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte tlačítko myši, které chcete přiřadit k vybranému nástroji.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2557"/>
@@ -13335,7 +13746,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2564"/>
         <source>Button</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Tlačítko</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2571"/>
@@ -13365,7 +13777,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2601"/>
         <source>Require the Control modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro tuto klávesovou zkratku vyžadovat modifikátor Control.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2604"/>
@@ -13375,7 +13788,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2611"/>
         <source>Require the Alt modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro tuto klávesovou zkratku vyžadovat modifikátor Alt.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2614"/>
@@ -13385,7 +13799,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2621"/>
         <source>Require the Shift modifier for this mouse shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Pro tuto klávesovou zkratku vyžadovat modifikátor Shift.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2624"/>
@@ -13395,18 +13810,21 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2631"/>
         <source>Assign the chosen mouse button and modifiers to the selected tool.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přiřaďte zvolené tlačítko myši a modifikátory vybranému nástroji.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2641"/>
         <source>Remove the primary mouse shortcut and promote the secondary shortcut.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Odeberte primární zástupce myši a propagujte sekundárního zástupce.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2658"/>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2674"/>
         <source>Adjust how strongly mouse motion affects navigation.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Upravte, jak silně pohyb myši ovlivňuje navigaci.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="2664"/>
@@ -13826,12 +14244,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="18"/>
         <source>Piece Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Translation reused from another context; requires human review.</translatorcomment>
+        <translation type="unfinished">Náhled dílku</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="19"/>
         <source>Inspect the previewed piece without placing it in the model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Prohlédněte si zobrazený díl, aniž byste jej umístili do modelu.</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="22"/>
@@ -13843,7 +14263,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="23"/>
         <source>&lt;p&gt;&lt;b&gt;Lock Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Keep the current piece in the preview while you browse other pieces. Unlock Preview allows the display to update again. An empty preview cannot be locked.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Uzamknout náhled&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Ponechat aktuální skladbu v náhledu, zatímco budete procházet další skladby. Odemknout náhled umožňuje zobrazení znovu aktualizovat. Prázdný náhled nelze zamknout.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_previewwidget.cpp" line="26"/>
@@ -13904,7 +14325,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model&apos;s author, description, and comments on the Summary tab. Measurements and Pieces Used provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vlastnosti modelu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upravte autora, popis a komentáře aktuálního modelu na kartě Souhrn. Měření a použité díly poskytují informace pouze pro čtení. Zvolte OK pro použití změn metadat, nebo Zrušit pro jejich zrušení.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="17"/>
@@ -13914,7 +14336,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="27"/>
         <source>&lt;p&gt;&lt;b&gt;Model Summary&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Author, description, and comments are stored with this model when the project is saved. Measurements show its overall size.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Shrnutí modelu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Autor, popis a komentáře jsou uloženy s tímto modelem při uložení projektu. Míry ukazují jeho celkovou velikost.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="36"/>
@@ -13925,7 +14348,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpropertiesdialog.ui" line="45"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="55"/>
         <source>Enter the author credited in this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte autora uvedeného v tomto modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="48"/>
@@ -13936,7 +14360,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpropertiesdialog.ui" line="65"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="75"/>
         <source>Enter a short description of this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte krátký popis tohoto modelu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="68"/>
@@ -13947,7 +14372,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpropertiesdialog.ui" line="85"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="95"/>
         <source>Enter plain-text notes to store with this model.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte poznámky ve formátu prostého textu, které chcete uložit s tímto modelem.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="88"/>
@@ -13958,13 +14384,15 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpropertiesdialog.ui" line="111"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="124"/>
         <source>Overall model dimensions along the X, Y, and Z axes.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Celkové rozměry modelu podél os X, Y a Z.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="114"/>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="127"/>
         <source>&lt;p&gt;&lt;b&gt;Model Measurements&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The dimensions of the model&apos;s bounding box are shown in centimeters, inches, and LDraw units (LDU). The values are read-only and include pieces across all steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Měry modelu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Rozměry ohraničovacího rámečku modelu jsou uvedeny v centimetrech, palcích a jednotkách LDraw (LDU). Hodnoty jsou pouze pro čtení a zahrnují části ve všech krocích.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="117"/>
@@ -13975,17 +14403,20 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="130"/>
         <source>Model Measurements</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Měření modelu</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="147"/>
         <source>View piece quantities by color; click a column heading to sort.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazení množství dílů podle barvy; kliknutím na záhlaví sloupce seřadíte.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpropertiesdialog.ui" line="150"/>
         <source>&lt;p&gt;&lt;b&gt;Pieces Used&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The piece-name column stays visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Použité díly&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Tabulka počítá díly ve všech krocích, včetně dílů uvnitř podmodelů. Barevné sloupce zobrazují množství a součty shrnují každý díl, každou barvu a celý model. Kliknutím na záhlaví sloupce seřadíte. Při vodorovném posouvání zůstane sloupec s názvem dílu viditelný. Počty zde nelze upravovat.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Scene</source>
@@ -14078,22 +14509,26 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="27"/>
         <source>%1: %2</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
+        <translation type="unfinished">%1: %2</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="35"/>
         <source>Keyframe for %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Klíčový snímek pro %1</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="36"/>
         <source>&lt;p&gt;&lt;b&gt;Property Keyframe&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enable or remove a keyframe for this property at the current building step. Keyframes let the property&apos;s value change between steps.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Klíčový snímek vlastnosti&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Povolte nebo odeberte klíčový snímek pro tuto vlastnost v aktuálním kroku budování. Klíčové snímky umožňují měnit hodnotu vlastnosti mezi jednotlivými kroky.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="87"/>
         <source>Expand or collapse the %1 properties.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Rozbalte nebo sbalte vlastnosti %1.</translation>
     </message>
     <message>
         <location filename="../common/lc_propertieswidget.cpp" line="173"/>
@@ -14763,17 +15198,20 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="67"/>
         <source>Show the renderer output and diagnostic messages.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit výstup rendereru a diagnostické zprávy.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="68"/>
         <source>&lt;p&gt;&lt;b&gt;View Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the renderer output to investigate a failed render or warnings. This button becomes available when a log has been captured.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Zobrazit protokol&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Otevřete výstup rendereru a prozkoumejte neúspěšné vykreslení nebo varování. Toto tlačítko bude dostupné, jakmile bude zaznamenán protokol.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="69"/>
         <source>&lt;p&gt;&lt;b&gt;Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Start the render using the current settings. While rendering, this button becomes Cancel so you can stop the operation.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Spusťte vykreslování s aktuálním nastavením. Během vykreslování se toto tlačítko změní na Zrušit, abyste mohli operaci zastavit.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="79"/>
@@ -14840,62 +15278,74 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="81"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step using POV-Ray. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vykreslení obrazu POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vykreslení aktuálního kroku modelu pomocí POV-Ray. Vyberte výstupní obrázek a poté pomocí Nastavení nastavte jeho rozměry a kvalitu. Začněte výběrem možnosti Render.&lt;/p&gt;&lt;p&gt;Náhled je upraven tak, aby odpovídal dialogu. Zobrazit protokol zobrazuje diagnostický výstup, pokud je k dispozici.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="82"/>
         <source>Render the current model step with POV-Ray.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vykreslete aktuální krok modelu pomocí POV-Ray.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="83"/>
         <source>Set the POV-Ray image dimensions and render quality.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte rozměry obrazu POV-Ray a kvalitu vykreslení.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="84"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose the image width and height in pixels and the rendering quality. Higher resolution and quality can increase rendering time.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte šířku a výšku obrázku v pixelech a kvalitu vykreslování. Vyšší rozlišení a kvalita může prodloužit dobu vykreslování.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="89"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the current model step with the Blender LDraw add-on. Configure Blender and its add-on through Settings, choose an output image, then select Render.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Renderujte aktuální krok modelu pomocí doplňku Blender LDraw. Nakonfigurujte Blender a jeho doplněk pomocí Nastavení, vyberte výstupní obrázek a poté vyberte Render.&lt;/p&gt;&lt;p&gt;Náhled se přizpůsobí dialogu. Zobrazit protokol zobrazuje diagnostický výstup, pokud je k dispozici.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="90"/>
         <source>&lt;p&gt;&lt;b&gt;Blender Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure the Blender executable, LDraw import modules, library paths, and render settings. Blender and an import module must be configured before rendering or opening the model.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení Blenderu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nakonfigurujte spustitelný soubor Blenderu, moduly pro import LDraw, cesty knihoven a nastavení vykreslování. Blender a modul importu musí být nakonfigurovány před vykreslením nebo otevřením modelu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="101"/>
         <source>Render the current model step with Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyrenderujte aktuální krok modelu pomocí Blenderu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="104"/>
         <source>Configure Blender, its add-on, and render settings.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte Blender, jeho doplněk a nastavení vykreslování.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="108"/>
         <source>Configure Blender and its LDraw import settings.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nakonfigurujte Blender a jeho nastavení importu LDraw.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="111"/>
         <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export the current model step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.&lt;/p&gt;&lt;p&gt;This mode does not save a rendered image.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Otevřít v Blenderu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Exportujte aktuální krok modelu a otevřete jej v Blenderu pro úpravy. Pomocí Nastavení nakonfigurujte Blender a jeho doplněk LDraw pro import a poté vyberte Otevřít v Blenderu.&lt;/p&gt;&lt;p&gt;Tento režim neukládá vykreslený obrázek.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="112"/>
         <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Import the current model step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Otevřít v Blenderu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Importujte aktuální krok modelu do Blenderu pro úpravy. Pokud tato akce není k dispozici, nakonfigurujte Blender a jeho doplněk pro import LDraw prostřednictvím Nastavení.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="115"/>
         <source>Import the current model step and open it in Blender.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Importujte aktuální krok modelu a otevřete jej v Blenderu.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="375"/>
@@ -14978,7 +15428,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="840"/>
         <source>&lt;p&gt;&lt;b&gt;POV-Ray Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set the output image dimensions and rendering quality. Width and height are in pixels, with a minimum of 16. Larger images and higher quality can take longer to render.&lt;/p&gt;&lt;p&gt;Choose OK to save these settings for subsequent renders, or Cancel to keep the previous settings. This dialog does not start rendering.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Nastavení POV-Ray&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nastavte výstupní rozměry obrazu a kvalitu vykreslování. Šířka a výška jsou v pixelech, minimálně 16. Vykreslení větších obrázků a vyšší kvality může trvat déle.&lt;/p&gt;&lt;p&gt;Chcete-li uložit tato nastavení pro následující vykreslování, zvolte možnost Zrušit. Chcete-li zachovat předchozí nastavení, zvolte možnost Zrušit. Tento dialog se nezačne vykreslovat.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="845"/>
@@ -14988,7 +15439,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="849"/>
         <source>Set the rendered image width in pixels (minimum 16).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte šířku vykresleného obrázku v pixelech (minimálně 16).</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="852"/>
@@ -14998,7 +15450,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="856"/>
         <source>Set the rendered image height in pixels (minimum 16).</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavte výšku vykresleného obrázku v pixelech (minimálně 16).</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="859"/>
@@ -15023,12 +15476,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="863"/>
         <source>Choose the rendering quality; higher quality can take longer.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte kvalitu vykreslování; vyšší kvalita může trvat déle.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="864"/>
         <source>&lt;p&gt;&lt;b&gt;Rendering Quality&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Low uses POV-Ray&apos;s default quality without additional antialiasing options. Medium uses quality level 5 with antialiasing. High uses quality level 11 with additional antialiasing settings.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kvalita vykreslování&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Nízká používá výchozí kvalitu POV-Ray bez dalších možností vyhlazování. Střední používá úroveň kvality 5 s antialiasingem. Vysoká používá úroveň kvality 11 s dalšími nastaveními vyhlazování.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="913"/>
@@ -15061,29 +15516,34 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="941"/>
         <source>&lt;p&gt;&lt;b&gt;Render Log&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Read the renderer output to investigate warnings or a failed render. Select text and copy it with the standard keyboard shortcut when reporting a problem. Close returns to the Render dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Protokol vykreslení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Přečtěte si výstup vykreslovacího modulu a prozkoumejte varování nebo neúspěšné vykreslení. Při hlášení problému vyberte text a zkopírujte jej pomocí standardní klávesové zkratky. Zavřít se vrátí do dialogového okna Render.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="948"/>
         <source>Renderer Output</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Výstup rendereru</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="949"/>
         <source>Read and copy renderer output and diagnostic messages.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Čtení a kopírování výstupu rendereru a diagnostických zpráv.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="24"/>
         <location filename="../qt/lc_renderdialog.ui" line="40"/>
         <source>Path and file name for the rendered image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Cesta a název souboru pro vykreslený obrázek.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="27"/>
         <location filename="../qt/lc_renderdialog.ui" line="43"/>
         <source>&lt;p&gt;&lt;b&gt;Output Image&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose where to save the rendered image and its format, such as PNG, JPEG, or BMP. The output path applies to image rendering; Open in Blender does not use it.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Výstupní obrázek&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyberte, kam se má vykreslený obrázek uložit, a jeho formát, například PNG, JPEG nebo BMP. Výstupní cesta platí pro vykreslování obrazu; Open in Blender jej nepoužívá.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="30"/>
@@ -15093,12 +15553,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="50"/>
         <source>Choose the rendered image file and format.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte soubor vykresleného obrázku a formát.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="53"/>
         <source>Choose Render Output</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zvolte Výstup vykreslení</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="56"/>
@@ -15108,27 +15570,32 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="65"/>
         <source>Preview of the rendered image.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Náhled vykresleného obrázku.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="68"/>
         <source>Render Preview</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Náhled vykreslení</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="71"/>
         <source>&lt;p&gt;&lt;b&gt;Render Preview&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The preview is scaled to fit this area. Changing the dialog size does not change the output resolution; use Settings to change the image dimensions.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Náhled vykreslení&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Náhled je upraven tak, aby odpovídal této oblasti. Změna velikosti dialogu nezmění výstupní rozlišení; pomocí Nastavení změňte rozměry obrázku.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="78"/>
         <source>Progress of the current export or render.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Průběh aktuálního exportu nebo vykreslení.</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.ui" line="81"/>
         <source>Render Progress</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Průběh vykreslování</translation>
     </message>
     <message>
         <location filename="../qt/lc_renderdialog.cpp" line="191"/>
@@ -15199,7 +15666,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_selectdialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Select Objects&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Use the checkboxes to choose visible pieces, cameras, and lights in the current model. Choose OK to replace the current selection with the checked objects, or Cancel to keep the current selection.&lt;/p&gt;&lt;p&gt;Pieces in the same top-level group are selected together. All, None, and Invert change the checkboxes in this dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vybrat objekty&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Pomocí zaškrtávacích políček vyberte viditelné části, kamery a světla v aktuálním modelu. Zvolte OK, chcete-li nahradit aktuální výběr zaškrtnutými objekty, nebo Zrušit, chcete-li zachovat aktuální výběr.&lt;/p&gt;&lt;p&gt;Díly ve stejné skupině nejvyšší úrovně jsou vybrány společně. All, None a Invert mění zaškrtávací políčka v tomto dialogu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="17"/>
@@ -15209,22 +15677,26 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_selectdialog.ui" line="23"/>
         <source>Check the objects to include in the selection.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zaškrtněte objekty, které chcete zahrnout do výběru.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Object List&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The list includes pieces visible in the current step and visible cameras and lights. Expand groups to see their pieces. Checking or clearing a grouped piece applies the same state to all pieces in its top-level group.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Seznam objektů&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Seznam obsahuje díly viditelné v aktuálním kroku a viditelné kamery a světla. Rozbalte skupiny, abyste viděli jejich kousky. Kontrola nebo vymazání seskupeného dílu aplikuje stejný stav na všechny díly v jeho skupině nejvyšší úrovně.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="29"/>
         <source>Objects to Select</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Objekty k výběru</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="46"/>
         <source>Check every object in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zkontrolujte každý objekt v seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="49"/>
@@ -15234,7 +15706,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_selectdialog.ui" line="56"/>
         <source>Clear every object checkbox in the list.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zrušte zaškrtnutí všech políček objektu v seznamu.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="59"/>
@@ -15244,7 +15717,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_selectdialog.ui" line="66"/>
         <source>Check unchecked objects and clear checked objects.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zkontrolujte nezaškrtnuté objekty a zrušte zaškrtnuté objekty.</translation>
     </message>
     <message>
         <location filename="../common/lc_selectdialog.ui" line="69"/>
@@ -15261,19 +15735,22 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Import Set Inventory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Search the online Rebrickable database by set name or number. Select a result and choose OK, or double-click it, to download the set inventory for the operation that opened this dialog.&lt;/p&gt;&lt;p&gt;An internet connection is required for searching and downloading inventories.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Importovat inventář sady&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Prohledávejte online databázi Rebrickable podle názvu sady nebo čísla. Vyberte výsledek a zvolte OK, nebo na něj dvakrát klikněte, abyste stáhli inventář nastavený pro operaci, která otevřela toto dialogové okno.&lt;/p&gt;&lt;p&gt;Pro vyhledávání a stahování inventářů je vyžadováno připojení k internetu.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="17"/>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="100"/>
         <location filename="../common/lc_setsdatabasedialog.cpp" line="216"/>
         <source>Import Set Inventory</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Importovat inventář sady</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="25"/>
         <source>Enter a set name or number, then press Enter or choose Search.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Zadejte název sady nebo číslo a stiskněte Enter nebo zvolte Hledat.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="28"/>
@@ -15284,12 +15761,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="31"/>
         <source>&lt;p&gt;&lt;b&gt;Search Sets&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Enter a set number or words from its name. Press Enter or choose Search to retrieve matching sets. Refine the search if the set you want is not listed.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Hledat sady&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Zadejte číslo sady nebo slova z jejího názvu. Stisknutím klávesy Enter nebo výběrem možnosti Hledat vyhledejte odpovídající sady. Upřesněte vyhledávání, pokud požadovaná sada není uvedena.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="41"/>
         <source>Search the online database using the entered name or number.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Prohledejte online databázi pomocí zadaného jména nebo čísla.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="44"/>
@@ -15299,17 +15778,20 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="53"/>
         <source>Select a set to download its piece inventory.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte sadu a stáhněte si její inventář dílů.</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="56"/>
         <source>Set Search Results</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Nastavit výsledky hledání</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="59"/>
         <source>&lt;p&gt;&lt;b&gt;Search Results&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Results show the set number, name, release year, and piece count. Select the desired set and choose OK, or double-click its row, to download its inventory.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Výsledky vyhledávání&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Výsledky zobrazují číslo sady, název, rok vydání a počet dílů. Vyberte požadovanou sadu a zvolte OK nebo dvakrát klikněte na její řádek, abyste si stáhli její inventář.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="75"/>
@@ -15334,7 +15816,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_setsdatabasedialog.ui" line="98"/>
         <source>Set data provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Data sady poskytuje &lt;a href="https://www.rebrickable.com"&gt;Rebrickable&lt;/a&gt;</translation>
     </message>
     <message>
         <source>Sets Database provided by &lt;a href=&quot;https://www.rebrickable.com&quot;&gt;Rebrickable&lt;/a&gt;</source>
@@ -15451,12 +15934,14 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="11"/>
         <source>Building Steps and Pieces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Stavební kroky a díly</translation>
     </message>
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="12"/>
         <source>Select steps or pieces; drag pieces to reorder them or change their building step.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Vyberte kroky nebo díly; přetažením dílů změníte jejich pořadí nebo změníte jejich stavební krok.</translation>
     </message>
     <message>
         <location filename="../common/lc_timelinewidget.cpp" line="125"/>
@@ -15469,7 +15954,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_updatedialog.ui" line="6"/>
         <source>&lt;p&gt;&lt;b&gt;Check for Updates&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Check online for a newer LeoCAD version and, when an official library is loaded, new pieces. The result appears in this dialog. An internet connection is required.&lt;/p&gt;&lt;p&gt;Use the download link to open the release page in your browser. This dialog does not install updates. Ignore suppresses automatic notifications for this update information; a manual update check still shows the result. Close dismisses the dialog.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Kontrola aktualizací&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vyhledejte online novější verzi LeoCADu a po načtení oficiální knihovny i nové díly. Výsledek se zobrazí v tomto dialogu. Je vyžadováno připojení k internetu.&lt;/p&gt;&lt;p&gt;Pomocí odkazu ke stažení otevřete v prohlížeči stránku vydání. Tento dialog neinstaluje aktualizace. Ignorovat potlačí automatická upozornění na tyto informace o aktualizaci; ruční kontrola aktualizací stále zobrazuje výsledek. Zavřít dialogové okno zavře.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="17"/>
@@ -15479,17 +15965,20 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_updatedialog.ui" line="23"/>
         <source>Update-check progress, results, and download links.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Aktualizace – kontrola průběhu, výsledků a odkazů ke stažení.</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="26"/>
         <source>&lt;p&gt;&lt;b&gt;Update Status&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wait for the online check to finish. If an update is available, follow the download link in your browser. A connection error means the check could not complete.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Stav aktualizace&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Počkejte na dokončení online kontroly. Pokud je k dispozici aktualizace, klikněte na odkaz ke stažení v prohlížeči. Chyba připojení znamená, že kontrolu nebylo možné dokončit.&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.ui" line="29"/>
         <source>Update Status</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Stav aktualizace</translation>
     </message>
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="39"/>
@@ -15534,7 +16023,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
     <message>
         <location filename="../common/lc_updatedialog.cpp" line="151"/>
         <source>Skip automatic notifications for this update information.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
+        <translation type="unfinished">Přeskočit automatická upozornění na tyto informace o aktualizaci.</translation>
     </message>
 </context>
 <context>

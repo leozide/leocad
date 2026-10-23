@@ -66,7 +66,7 @@ void lcDoubleSpinBox::LadderWidgetCanceled()
 
 QString	lcDoubleSpinBox::textFromValue(double Value) const
 {
-	return lcFormatValueLocalized(Value);
+	return lcFormatFloatLocalized(Value, locale());
 }
 
 void lcDoubleSpinBox::ValueChanged()

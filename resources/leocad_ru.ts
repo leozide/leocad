@@ -4823,9 +4823,8 @@ File format is not recognized.</source>
         <translation>Выбрать все детали модели</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>Снять выделение</translation>
+        <translation type="vanished">Снять выделение</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -4895,6 +4894,12 @@ File format is not recognized.</source>
         <translation>Заменить все детали, совпадающие с условиями поиска</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Снять всё выделение</translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Select one piece at a time</source>
         <translation>Выбрать одну деталь за раз</translation>
@@ -4945,9 +4950,8 @@ File format is not recognized.</source>
         <translation>Переключить вращение выбранных деталей отдельно</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>Переключить привязку осей</translation>
+        <translation type="vanished">Переключить привязку осей</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="443"/>
@@ -5155,10 +5159,9 @@ File format is not recognized.</source>
         <translation type="unfinished">Добавьте в модель новые точечные светильники</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Добавьте в модель новые всенаправленные источники света.</translation>
+        <translation type="obsolete">Добавьте в модель новые всенаправленные источники света.</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
@@ -5247,9 +5250,26 @@ File format is not recognized.</source>
         <translation>Уменьшить</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>Вписать все детали в текущий вид (удерживайте клавишу CTRL для масштабирования всех видов)</translation>
+        <translation type="vanished">Вписать все детали в текущий вид (удерживайте клавишу CTRL для масштабирования всех видов)</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Включить или отключить привязку перемещения</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Добавить в модель новые направленные источники света</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Показать все детали в текущем виде</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5583,20 +5603,35 @@ File format is not recognized.</source>
     <message>
         <location filename="../common/lc_commands.cpp" line="1539"/>
         <location filename="../common/lc_commands.cpp" line="1547"/>
-        <source>Rotate selected objects along the X axis</source>
-        <translation>Вращать выбранные объекты по оси X</translation>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Повернуть выбранные объекты вокруг оси X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1555"/>
         <location filename="../common/lc_commands.cpp" line="1563"/>
-        <source>Rotate selected objects along the Y axis</source>
-        <translation>Вращать выбранные объекты по оси Y</translation>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Повернуть выбранные объекты вокруг оси Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1571"/>
         <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Повернуть выбранные объекты вокруг оси Z</translation>
+    </message>
+    <message>
+        <source>Rotate selected objects along the X axis</source>
+        <translation type="vanished">Вращать выбранные объекты по оси X</translation>
+    </message>
+    <message>
+        <source>Rotate selected objects along the Y axis</source>
+        <translation type="vanished">Вращать выбранные объекты по оси Y</translation>
+    </message>
+    <message>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Вращать выбранные объекты по оси Z</translation>
+        <translation type="vanished">Вращать выбранные объекты по оси Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

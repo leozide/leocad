@@ -211,6 +211,12 @@ public:
 		mLast = false;
 	}
 
+	lcPartsTableWidgetItem(int Count, QLocale Locale)
+		: QTableWidgetItem(lcFormatIntegerLocalized(Count, Locale)), mLast(false)
+	{
+		setData(Qt::UserRole, Count);
+	}
+
 	bool operator<(const QTableWidgetItem& Other) const override
 	{
 		if (mLast)
@@ -221,8 +227,8 @@ public:
 
 		if (column() > 0)
 		{
-			int Count = text().toInt();
-			int OtherCount = Other.text().toInt();
+			int Count = data(Qt::UserRole).toInt();
+			int OtherCount = Other.data(Qt::UserRole).toInt();
 			return Count < OtherCount;
 		}
 
@@ -246,9 +252,9 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 
 	const lcVector3 Dimensions = Options->BoundingBox.Max - Options->BoundingBox.Min;
 	QString Format = tr("%1 x %2 x %3 cm\n%4 x %5 x %6 inches\n%7 x %8 x %9 LDU");
-	QString Measurements = Format.arg(QString::number(Dimensions.x * 0.04, 'f', 2), QString::number(Dimensions.y * 0.04, 'f', 2), QString::number(Dimensions.z * 0.04, 'f', 2),
-	                                  QString::number(Dimensions.x / 64.0, 'f', 2), QString::number(Dimensions.y / 64.0, 'f', 2), QString::number(Dimensions.z / 64.0, 'f', 2),
-	                                  QString::number(Dimensions.x, 'f', 2), QString::number(Dimensions.y, 'f', 2), QString::number(Dimensions.z, 'f', 2));
+	QString Measurements = Format.arg(lcFormatDoubleLocalized(Dimensions.x * 0.04, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.y * 0.04, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.z * 0.04, locale(), 'f', 2),
+	                                  lcFormatDoubleLocalized(Dimensions.x / 64.0, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.y / 64.0, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.z / 64.0, locale(), 'f', 2),
+	                                  lcFormatDoubleLocalized(Dimensions.x, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.y, locale(), 'f', 2), lcFormatDoubleLocalized(Dimensions.z, locale(), 'f', 2));
 
 	ui->MeasurementsLabel->setText(Measurements);
 
@@ -296,7 +302,7 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 			int ColorIndex = ColorIt.first;
 			int Count = ColorIt.second;
 
-			lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(QString::number(Count));
+			lcPartsTableWidgetItem* Item = new lcPartsTableWidgetItem(Count, locale());
 			Item->setTextAlignment(Qt::AlignCenter);
 			PartsTable->setItem(Row, ColorColumns[ColorIndex] + 1, Item);
 
@@ -318,20 +324,20 @@ lcPropertiesDialog::lcPropertiesDialog(QWidget* Parent, lcPropertiesDialogOption
 
 	for (Row = 0; Row < (int)InfoTotals.size(); Row++)
 	{
-		Item = new lcPartsTableWidgetItem(QString::number(InfoTotals[Row]));
+		Item = new lcPartsTableWidgetItem(InfoTotals[Row], locale());
 		Item->setTextAlignment(Qt::AlignCenter);
 		PartsTable->setItem(Row, ColorCount + 1, Item);
 	}
 
 	for (int ColorIndex = 0; ColorIndex < ColorCount; ColorIndex++)
 	{
-		Item = new lcPartsTableWidgetItem(QString::number(ColorTotals[ColorIndex]));
+		Item = new lcPartsTableWidgetItem(ColorTotals[ColorIndex], locale());
 		Item->mLast = true;
 		Item->setTextAlignment(Qt::AlignCenter);
 		PartsTable->setItem((int)InfoTotals.size(), ColorIndex + 1, Item);
 	}
 
-	Item = new lcPartsTableWidgetItem(QString::number(Total));
+	Item = new lcPartsTableWidgetItem(Total, locale());
 	Item->mLast = true;
 	Item->setTextAlignment(Qt::AlignCenter);
 	PartsTable->setItem((int)InfoTotals.size(), ColorCount + 1, Item);

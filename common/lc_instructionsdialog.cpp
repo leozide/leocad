@@ -5,6 +5,7 @@
 #include "lc_model.h"
 #include "lc_view.h"
 #include "lc_collapsiblewidget.h"
+#include "lc_qutils.h"
 
 lcInstructionsStepImageItem::lcInstructionsStepImageItem(QGraphicsItem* Parent, lcInstructions* Instructions, lcModel* Model, lcStep Step)
 	: QGraphicsPixmapItem(Parent), mInstructions(Instructions), mModel(Model), mStep(Step)
@@ -419,7 +420,7 @@ void lcInstructionsPropertiesWidget::AddFontProperty(lcInstructionsPropertyType 
 	auto UpdateButton = [this, Type, FontButton]()
 	{
 		QFont Font = mInstructions->GetFontProperty(Type, mModel, mStep);
-		QString FontName = QString("%1 %2").arg(Font.family(), QString::number(Font.pointSize()));
+		QString FontName = QString("%1 %2").arg(Font.family(), lcFormatIntegerLocalized(Font.pointSize(), locale()));
 		FontButton->setText(FontName);
 	};
 
@@ -581,7 +582,7 @@ lcInstructionsDialog::lcInstructionsDialog(QWidget* Parent, Project* Project)
 	PageDirectionGroup->addAction(mHorizontalPageAction);
 
 	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
-		mPageListWidget->mThumbnailsWidget->addItem(QString(tr("Page %1")).arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(QString(tr("Page %1")).arg(lcFormatIntegerLocalized(PageNumber + 1, locale())));
 
 	connect(mPageListWidget->mThumbnailsWidget, &QListWidget::currentRowChanged, this, &lcInstructionsDialog::CurrentThumbnailChanged);
 	mPageListWidget->mThumbnailsWidget->setCurrentRow(0);
@@ -710,7 +711,7 @@ void lcInstructionsDialog::UpdatePageSettings()
 
 	mPageListWidget->mThumbnailsWidget->clear();
 	for (size_t PageNumber = 0; PageNumber < mInstructions->mPages.size(); PageNumber++)
-		mPageListWidget->mThumbnailsWidget->addItem(tr("Page %1").arg(PageNumber + 1));
+		mPageListWidget->mThumbnailsWidget->addItem(tr("Page %1").arg(lcFormatIntegerLocalized(PageNumber + 1, locale())));
 
 //	mThumbnailsWidget->setCurrentRow(0);
 

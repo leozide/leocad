@@ -239,12 +239,12 @@ void lcAutomateEdgeColorDialog::SliderValueChanged(int Value)
 	if (sender() == PartEdgeContrastSlider)
 	{
 		mPartEdgeContrast = Value * 0.01f;
-		PartEdgeContrast->setText(QString::number(mPartEdgeContrast, 'f', 2));
+		PartEdgeContrast->setText(lcFormatDoubleLocalized(mPartEdgeContrast, locale(), 'f', 2));
 	}
 	else if (sender() == PartColorValueLDIndexSlider)
 	{
 		mPartColorValueLDIndex = Value * 0.01f;
-		PartColorValueLDIndex->setText(QString::number(mPartColorValueLDIndex, 'f', 2));
+		PartColorValueLDIndex->setText(lcFormatDoubleLocalized(mPartColorValueLDIndex, locale(), 'f', 2));
 	}
 }
 

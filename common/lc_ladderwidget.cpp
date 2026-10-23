@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_ladderwidget.h"
 #include "lc_objectproperty.h"
+#include "lc_qutils.h"
 
 lcLadderWidget::lcLadderWidget(QAbstractSpinBox* SpinBox, lcFloatPropertySnap Snap)
 	: QWidget(SpinBox, Qt::Popup | Qt::Sheet), mSpinBox(SpinBox)
@@ -168,7 +169,7 @@ void lcLadderWidget::paintEvent(QPaintEvent* Event)
 	{
 		QRect Rect(0, Step * CellHeight, CellWidth, CellHeight);
 		QTextOption TextOption(Qt::AlignCenter);
-		QString Text = QString::number(mSteps[Step]);
+		QString Text = lcFormatDoubleLocalized(mSteps[Step], mSpinBox->locale(), 'g', 6);
 
 		if (Step == mCurrentStep && mSpinBox)
 			Text = QString("%1\n\n(%2)").arg(Text, mSpinBox->text());

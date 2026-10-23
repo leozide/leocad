@@ -2010,6 +2010,11 @@ void lcMainWindow::SetAngleSnapEnabled(bool Enabled)
 	UpdateSnap();
 }
 
+QString lcMainWindow::GetAngleSnapText() const
+{
+	return mAngleSnapEnabled ? lcFormatDoubleLocalized(GetAngleSnap(), locale(), 'g', 6) : tr("None");
+}
+
 void lcMainWindow::SetMoveXYSnapIndex(int Index)
 {
 	mMoveXYSnapIndex = Index;
@@ -2089,7 +2094,7 @@ std::optional<lcVector3> lcMainWindow::GetTransformAmount()
 			continue;
 		}
 
-		const std::optional<float> Value = lcParseFloatValueLocalized(Text, Edit->locale());
+		const std::optional<float> Value = lcParseFloatLocalized(Text, Edit->locale());
 
 		if (!Value)
 		{
@@ -2414,7 +2419,7 @@ void lcMainWindow::UpdateCurrentStep()
 	mActions[LC_VIEW_TIME_NEXT]->setEnabled(CurrentStep < LC_STEP_MAX);
 	mActions[LC_VIEW_TIME_LAST]->setEnabled(CurrentStep != LastStep);
 
-	mStatusTimeLabel->setText(QString(tr("Step %1")).arg(QString::number(CurrentStep)));
+	mStatusTimeLabel->setText(QString(tr("Step %1")).arg(lcFormatIntegerLocalized(CurrentStep, locale())));
 }
 
 void lcMainWindow::SetAddKeys(bool AddKeys)

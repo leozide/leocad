@@ -702,13 +702,13 @@ void lcPreferencesDialog::ConditionalLinesCheckBoxToggled()
 void lcPreferencesDialog::LineWidthSliderValueChanged()
 {
 	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
-	ui->LineWidthLabel->setText(QString::number(Value));
+	ui->LineWidthLabel->setText(lcFormatDoubleLocalized(Value, locale(), 'g', 6));
 }
 
 void lcPreferencesDialog::MeshLODSliderValueChanged()
 {
 	float Value = ui->MeshLODSlider->value() * mMeshLODMultiplier;
-	ui->MeshLODLabel->setText(QString::number(static_cast<int>(Value)));
+	ui->MeshLODLabel->setText(lcFormatIntegerLocalized(static_cast<int>(Value), locale()));
 }
 
 void lcPreferencesDialog::FadeStepsToggled()

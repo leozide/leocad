@@ -4970,9 +4970,8 @@ Formát souboru není rozpoznán.</translation>
         <translation>Vybrat všechny části modelu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>Zrušte všechny výběry</translation>
+        <translation type="vanished">Zrušte všechny výběry</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -5072,6 +5071,12 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Vyměňte všechny dílky, které odpovídají kritériím vyhledávání</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zrušit celý výběr</translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="395"/>
         <source>Move and rotate objects in absolute coordinates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -5102,9 +5107,8 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Samostatně přepínat otáčení vybraných dílků</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>Přepnout osy přichycení</translation>
+        <translation type="vanished">Přepnout osy přichycení</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="443"/>
@@ -5380,9 +5384,8 @@ Formát souboru není rozpoznán.</translation>
         <translation>Oddálit</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>Přizpůsobit všechny dílky v aktuálním pohledu (stisknutím klávesy CTRL zvětšíte všechna zobrazení)</translation>
+        <translation type="vanished">Přizpůsobit všechny dílky v aktuálním pohledu (stisknutím klávesy CTRL zvětšíte všechna zobrazení)</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5532,16 +5535,33 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Přidejte do modelu nová bodová světla</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Přidejte do modelu nové všesměrové světelné zdroje</translation>
+        <translation type="obsolete">Přidejte do modelu nové všesměrové světelné zdroje</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zapnout nebo vypnout přichytávání pohybu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Přidat do modelu nové směrové světelné zdroje</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
         <source>Add new area light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Přidejte do modelu nové plošné zdroje světla</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Zobrazit všechny díly v aktuálním pohledu</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1203"/>
@@ -5754,20 +5774,35 @@ Formát souboru není rozpoznán.</translation>
     <message>
         <location filename="../common/lc_commands.cpp" line="1539"/>
         <location filename="../common/lc_commands.cpp" line="1547"/>
-        <source>Rotate selected objects along the X axis</source>
-        <translation>Otočit vybrané objekty podél osy X</translation>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Otočit vybrané objekty kolem osy X</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1555"/>
         <location filename="../common/lc_commands.cpp" line="1563"/>
-        <source>Rotate selected objects along the Y axis</source>
-        <translation>Otočit vybrané objekty podél osy Y</translation>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Otočit vybrané objekty kolem osy Y</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1571"/>
         <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Otočit vybrané objekty kolem osy Z</translation>
+    </message>
+    <message>
+        <source>Rotate selected objects along the X axis</source>
+        <translation type="vanished">Otočit vybrané objekty podél osy X</translation>
+    </message>
+    <message>
+        <source>Rotate selected objects along the Y axis</source>
+        <translation type="vanished">Otočit vybrané objekty podél osy Y</translation>
+    </message>
+    <message>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Otočit vybrané objekty podél osy Z</translation>
+        <translation type="vanished">Otočit vybrané objekty podél osy Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

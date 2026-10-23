@@ -4775,9 +4775,8 @@ File format is not recognized.</source>
         <translation type="vanished">查找下一个对象</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>取消全选</translation>
+        <translation type="vanished">取消全选</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -4790,9 +4789,8 @@ File format is not recognized.</source>
         <translation>按名称选择物体</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>切换吸附轴</translation>
+        <translation type="vanished">切换吸附轴</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="603"/>
@@ -5008,6 +5006,12 @@ File format is not recognized.</source>
         <translation>选择模型中的所有零件</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">取消全部选择</translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Select one piece at a time</source>
         <translation>每次选择一个零件</translation>
@@ -5056,6 +5060,12 @@ File format is not recognized.</source>
         <location filename="../common/lc_commands.cpp" line="427"/>
         <source>Toggle rotating selected pieces separately</source>
         <translation>切换分别旋转选定零件</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">切换移动捕捉</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="635"/>
@@ -5121,6 +5131,12 @@ File format is not recognized.</source>
         <location filename="../common/lc_commands.cpp" line="731"/>
         <source>Add new pieces to the model</source>
         <translation>向模型添加新零件</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">向模型添加新的定向光源</translation>
     </message>
     <message>
         <source>Add new omni light sources to the model</source>
@@ -5211,9 +5227,8 @@ File format is not recognized.</source>
         <translation>缩小</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>使所有零件适应当前视图（按住 CTRL 键可缩放所有视图）</translation>
+        <translation type="vanished">使所有零件适应当前视图（按住 CTRL 键可缩放所有视图）</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5348,6 +5363,27 @@ File format is not recognized.</source>
         <location filename="../common/lc_commands.cpp" line="1323"/>
         <source>Close current tab</source>
         <translation>关闭当前标签页</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1539"/>
+        <location filename="../common/lc_commands.cpp" line="1547"/>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">绕 X 轴旋转所选对象</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1555"/>
+        <location filename="../common/lc_commands.cpp" line="1563"/>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">绕 Y 轴旋转所选对象</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">绕 Z 轴旋转所选对象</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1603"/>
@@ -5528,16 +5564,21 @@ File format is not recognized.</source>
         <translation type="unfinished">向模型添加新的聚光灯</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">向模型添加新的全向光源</translation>
+        <translation type="obsolete">向模型添加新的全向光源</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
         <source>Add new area light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">向模型添加新的区域光源</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">调整当前视图以显示所有零件</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1187"/>
@@ -5738,22 +5779,16 @@ File format is not recognized.</source>
         <translation>沿 Z 轴移动选定物体</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1539"/>
-        <location filename="../common/lc_commands.cpp" line="1547"/>
         <source>Rotate selected objects along the X axis</source>
-        <translation>沿 X 轴旋转选定物体</translation>
+        <translation type="vanished">沿 X 轴旋转选定物体</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1555"/>
-        <location filename="../common/lc_commands.cpp" line="1563"/>
         <source>Rotate selected objects along the Y axis</source>
-        <translation>沿 Y 轴旋转选定物体</translation>
+        <translation type="vanished">沿 Y 轴旋转选定物体</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1571"/>
-        <location filename="../common/lc_commands.cpp" line="1579"/>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>沿 Z 轴旋转选定物体</translation>
+        <translation type="vanished">沿 Z 轴旋转选定物体</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

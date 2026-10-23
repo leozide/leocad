@@ -65,16 +65,15 @@ QString lcFormatValue(float Value, int Precision)
 	return String;
 }
 
-QString lcFormatValueLocalized(float Value)
+QString lcFormatFloatLocalized(float Value, QLocale Locale)
 {
-	QLocale Locale = QLocale::system();
-	Locale.setNumberOptions(QLocale::OmitGroupSeparator);
+	Locale.setNumberOptions(Locale.numberOptions() | QLocale::OmitGroupSeparator);
 	QString DecimalPoint = Locale.decimalPoint();
 	QString String = Locale.toString(Value, 'f', 4);
 
 	if (String.indexOf(DecimalPoint) != -1)
 	{
-		while (String.endsWith('0'))
+		while (String.endsWith(Locale.zeroDigit()))
 			String.chop(1);
 
 		if (String.endsWith(DecimalPoint))
@@ -84,13 +83,19 @@ QString lcFormatValueLocalized(float Value)
 	return String;
 }
 
+QString lcFormatDoubleLocalized(double Value, QLocale Locale, char Format, int Precision)
+{
+	Locale.setNumberOptions(Locale.numberOptions() | QLocale::OmitGroupSeparator);
+	return Locale.toString(Value, Format, Precision);
+}
+
 QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale)
 {
 	Locale.setNumberOptions(Locale.numberOptions() | QLocale::OmitGroupSeparator);
 	return Locale.toString(Value);
 }
 
-std::optional<float> lcParseFloatValueLocalized(const QString& Value, QLocale Locale)
+std::optional<float> lcParseFloatLocalized(const QString& Value, QLocale Locale)
 {
 	bool Ok;
 	const float Number = Locale.toFloat(Value, &Ok);

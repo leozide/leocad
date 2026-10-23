@@ -5103,9 +5103,8 @@ Dateiformat wird nicht erkannt.</translation>
         <translation type="vanished">Nächstes Objekt finden</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>Auswahl aufheben</translation>
+        <translation type="vanished">Auswahl aufheben</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -5118,9 +5117,8 @@ Dateiformat wird nicht erkannt.</translation>
         <translation>Objekte per Namen auswählen</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>Einrasten an Achsen umschalten</translation>
+        <translation type="vanished">Einrasten an Achsen umschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="603"/>
@@ -5131,6 +5129,18 @@ Dateiformat wird nicht erkannt.</translation>
         <location filename="../common/lc_commands.cpp" line="443"/>
         <source>Do not snap movement along the XY plane</source>
         <translation>Bewegung in der XY-Eben kontinuierlich</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Auswahl aufheben</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Bewegungsraster ein- oder ausschalten</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="451"/>
@@ -5549,9 +5559,8 @@ Dateiformat wird nicht erkannt.</translation>
         <translation>Verkleinern</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>Ansicht für alle Teile anpassen</translation>
+        <translation type="vanished">Ansicht für alle Teile anpassen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5691,6 +5700,27 @@ Dateiformat wird nicht erkannt.</translation>
         <location filename="../common/lc_commands.cpp" line="1459"/>
         <source>Remove the selected control point</source>
         <translation>Ausgewählten Steuerungspunkt entfernen</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1539"/>
+        <location filename="../common/lc_commands.cpp" line="1547"/>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ausgewählte Objekte um die X-Achse drehen</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1555"/>
+        <location filename="../common/lc_commands.cpp" line="1563"/>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ausgewählte Objekte um die Y-Achse drehen</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ausgewählte Objekte um die Z-Achse drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1611"/>
@@ -5873,16 +5903,27 @@ Dateiformat wird nicht erkannt.</translation>
         <translation type="unfinished">Fügen Sie dem Modell neue Scheinwerfer hinzu</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Fügen Sie dem Modell neue omnidirektionale Lichtquellen hinzu</translation>
+        <translation type="obsolete">Fügen Sie dem Modell neue omnidirektionale Lichtquellen hinzu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Neue gerichtete Lichtquellen zum Modell hinzufügen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
         <source>Add new area light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fügen Sie dem Modell neue Flächenlichtquellen hinzu</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Alle Teile in die aktuelle Ansicht einpassen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1187"/>
@@ -6093,22 +6134,16 @@ Dateiformat wird nicht erkannt.</translation>
         <translation>Ausgewählte Teile entlang der Z-Achse bewegen</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1539"/>
-        <location filename="../common/lc_commands.cpp" line="1547"/>
         <source>Rotate selected objects along the X axis</source>
-        <translation>Ausgewählte Teile entlang der X-Achse drehen</translation>
+        <translation type="vanished">Ausgewählte Teile entlang der X-Achse drehen</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1555"/>
-        <location filename="../common/lc_commands.cpp" line="1563"/>
         <source>Rotate selected objects along the Y axis</source>
-        <translation>Ausgewählte Teile entlang der Y-Achse drehen</translation>
+        <translation type="vanished">Ausgewählte Teile entlang der Y-Achse drehen</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1571"/>
-        <location filename="../common/lc_commands.cpp" line="1579"/>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Ausgewählte Teile entlang der Z-Achse drehen</translation>
+        <translation type="vanished">Ausgewählte Teile entlang der Z-Achse drehen</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

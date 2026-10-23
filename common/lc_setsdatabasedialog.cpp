@@ -238,7 +238,7 @@ void lcSetsDatabaseDialog::DownloadFinished(lcHttpReply* Reply)
 				SetInfo << SetObject["set_num"].toString();
 				SetInfo << SetObject["name"].toString();
 				SetInfo << QString::number(SetObject["year"].toInt());
-				SetInfo << QString::number(SetObject["num_parts"].toInt());
+				SetInfo << lcFormatIntegerLocalized(SetObject["num_parts"].toInt(), locale());
 
 				new QTreeWidgetItem(ui->SetsTree, SetInfo);
 			}

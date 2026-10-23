@@ -5137,9 +5137,8 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation type="vanished">Trouver l’objet suivant</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>Vider la sélection</translation>
+        <translation type="vanished">Vider la sélection</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -5152,9 +5151,8 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation>Sélectionner des objets par leur nom</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>Basculer l’usage de pas pour les déplacements</translation>
+        <translation type="vanished">Basculer l’usage de pas pour les déplacements</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="603"/>
@@ -5388,6 +5386,12 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation type="unfinished">Sélectionnez toutes les pièces du modèle</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Tout désélectionner</translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Select one piece at a time</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -5446,6 +5450,12 @@ Le format du fichier n'est pas reconnu.</translation>
         <source>Toggle rotating selected pieces separately</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Basculer la rotation des pièces sélectionnées séparément</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Activer ou désactiver l’accrochage des déplacements</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="635"/>
@@ -5511,6 +5521,12 @@ Le format du fichier n'est pas reconnu.</translation>
         <location filename="../common/lc_commands.cpp" line="731"/>
         <source>Add new pieces to the model</source>
         <translation>Ajouter des nouvelles pièces au modèle</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ajouter de nouvelles sources de lumière directionnelle au modèle</translation>
     </message>
     <message>
         <source>Add new omni light sources to the model</source>
@@ -5602,9 +5618,8 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation>Dézoomer</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>Zoomer pour voir toutes les pièces dans la vue courante (maintenir la touche Ctrl enfoncée pour zoomer toutes les vues)</translation>
+        <translation type="vanished">Zoomer pour voir toutes les pièces dans la vue courante (maintenir la touche Ctrl enfoncée pour zoomer toutes les vues)</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5753,6 +5768,27 @@ Le format du fichier n'est pas reconnu.</translation>
         <source>Remove the selected control point</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Supprimer le point de contrôle sélectionné</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1539"/>
+        <location filename="../common/lc_commands.cpp" line="1547"/>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Faire tourner les objets sélectionnés autour de l’axe X</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1555"/>
+        <location filename="../common/lc_commands.cpp" line="1563"/>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Faire tourner les objets sélectionnés autour de l’axe Y</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Faire tourner les objets sélectionnés autour de l’axe Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1603"/>
@@ -5949,16 +5985,21 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation type="unfinished">Ajouter de nouveaux spots au modèle</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Ajouter de nouvelles sources de lumière omnidirectionnelles au modèle</translation>
+        <translation type="obsolete">Ajouter de nouvelles sources de lumière omnidirectionnelles au modèle</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
         <source>Add new area light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Ajouter de nouvelles sources lumineuses de zone au modèle</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ajuster la vue actuelle pour afficher toutes les pièces</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1187"/>
@@ -6174,22 +6215,16 @@ Le format du fichier n'est pas reconnu.</translation>
         <translation>Déplacer les objets sélectionnés sur l’axe Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1539"/>
-        <location filename="../common/lc_commands.cpp" line="1547"/>
         <source>Rotate selected objects along the X axis</source>
-        <translation>Tourner les objets sélections suivant l’axe X</translation>
+        <translation type="vanished">Tourner les objets sélections suivant l’axe X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1555"/>
-        <location filename="../common/lc_commands.cpp" line="1563"/>
         <source>Rotate selected objects along the Y axis</source>
-        <translation>Tourner les objets sélections suivant l’axe Y</translation>
+        <translation type="vanished">Tourner les objets sélections suivant l’axe Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1571"/>
-        <location filename="../common/lc_commands.cpp" line="1579"/>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Tourner les objets sélections suivant l’axe Z</translation>
+        <translation type="vanished">Tourner les objets sélections suivant l’axe Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

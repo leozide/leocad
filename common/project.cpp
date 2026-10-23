@@ -3087,6 +3087,16 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		return lcResult<void>();
 	};
 
+	auto WriteHeader = [](QTextStream& Stream, const QString& Title)
+	{
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+		Stream.setCodec("UTF-8");
+#endif
+		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<META CHARSET=\"UTF-8\">\r\n<TITLE>%1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(Title.toHtmlEscaped());
+	};
+
+	const QString CreatedBy = tr("Created by %1").toHtmlEscaped().arg(QLatin1String("<A HREF=\"https://www.leocad.org\">LeoCAD</A>"));
+
 	for (lcModel* Model : Models)
 	{
 		const QString& BaseName = ModelBaseNames.at(Model);
@@ -3098,8 +3108,6 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 		else
 			PageTitle = ProjectTitle;
 
-		const QString EscapedPageTitle = PageTitle.toHtmlEscaped();
-
 		if (Options.SinglePage)
 		{
 			QString FileName = QFileInfo(Dir, BaseName + QLatin1String(".html")).absoluteFilePath();
@@ -3110,12 +3118,12 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 			QTextStream Stream(&File);
 
-			Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle);
+			WriteHeader(Stream, tr("Instructions for %1").arg(PageTitle));
 
 			for (lcStep Step = 1; Step <= LastStep; Step++)
 			{
 				QString StepString = QString::fromLatin1("%1").arg(Step, 2, 10, QLatin1Char('0'));
-				Stream << QString::fromLatin1("<p><IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5></p><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+				Stream << QString::fromLatin1("<p><IMG SRC=\"%1-%2.png\" ALT=\"%3\" WIDTH=%4 HEIGHT=%5></p><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, tr("Step %1").arg(StepString).toHtmlEscaped(), QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
 				{
@@ -3134,7 +3142,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 					return PartsImageSaved;
 			}
 
-			Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></I></B><BR></HTML>\r\n");
+			Stream << QString::fromLatin1("</CENTER>\r\n<BR><HR><BR><B><I>%1</I></B><BR></HTML>\r\n").arg(CreatedBy);
 		}
 		else
 		{
@@ -3148,15 +3156,15 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle);
+				WriteHeader(Stream, tr("Instructions for %1").arg(PageTitle));
 
 				for (lcStep Step = 1; Step <= LastStep; Step++)
-					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">%3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), tr("Step %1").arg(QString::number(Step)).toHtmlEscaped());
 
 				if (Options.PartsListEnd)
-					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">%2</A><BR>\r\n").arg(BaseName, tr("Pieces Used").toHtmlEscaped());
 
-				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+				Stream << QString::fromLatin1("</CENTER>\r\n<BR><HR><BR><B><I>%1</I></B><BR></HTML>\r\n").arg(CreatedBy);
 			}
 
 			for (lcStep Step = 1; Step <= LastStep; Step++)
@@ -3170,8 +3178,8 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>%1 - Step %2</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(EscapedPageTitle, QString::number(Step));
-				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"Step %3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, StepString, QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
+				WriteHeader(Stream, tr("%1 - Step %2").arg(PageTitle, QString::number(Step)));
+				Stream << QString::fromLatin1("<IMG SRC=\"%1-%2.png\" ALT=\"%3\" WIDTH=%4 HEIGHT=%5><BR><BR>\r\n").arg(BaseName.toHtmlEscaped(), StepString, tr("Step %1").arg(StepString).toHtmlEscaped(), QString::number(Options.StepImagesWidth), QString::number(Options.StepImagesHeight));
 
 				if (Options.PartsListStep)
 				{
@@ -3183,15 +3191,15 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
 				if (Step != 1)
-					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(Step - 1, 2, 10, QLatin1Char('0')));
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">%3</A> ").arg(BaseName, QString("%1").arg(Step - 1, 2, 10, QLatin1Char('0')), tr("Previous").toHtmlEscaped());
 
 				if (Options.IndexPage)
-					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
+					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">%2</A> ").arg(BaseName, tr("Index").toHtmlEscaped());
 
 				if (Step != LastStep)
-					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Next</A>").arg(BaseName, QString("%1").arg(Step + 1, 2, 10, QLatin1Char('0')));
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">%3</A>").arg(BaseName, QString("%1").arg(Step + 1, 2, 10, QLatin1Char('0')), tr("Next").toHtmlEscaped());
 				else if (Options.PartsListEnd)
-					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A>").arg(BaseName);
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">%2</A>").arg(BaseName, tr("Pieces Used").toHtmlEscaped());
 
 				Stream << QLatin1String("<BR></HTML>\r\n");
 			}
@@ -3206,7 +3214,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 				QTextStream Stream(&File);
 
-				Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Pieces used by %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\n").arg(EscapedPageTitle);
+				WriteHeader(Stream, tr("Pieces used by %1").arg(PageTitle));
 
 				const lcResult<void> PartsImageSaved = AddPartsListImage(Stream, Model, 0, BaseName);
 
@@ -3214,10 +3222,10 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 					return PartsImageSaved;
 
 				Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR>");
-				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Previous</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')));
+				Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">%3</A> ").arg(BaseName, QString("%1").arg(LastStep, 2, 10, QLatin1Char('0')), tr("Previous").toHtmlEscaped());
 
 				if (Options.IndexPage)
-					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">Index</A> ").arg(BaseName);
+					Stream << QString::fromLatin1("<A HREF=\"%1-index.html\">%2</A> ").arg(BaseName, tr("Index").toHtmlEscaped());
 
 				Stream << QLatin1String("<BR></HTML>\r\n");
 			}
@@ -3240,7 +3248,7 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 
 		QTextStream Stream(&File);
 
-		Stream << QString::fromLatin1("<HTML>\r\n<HEAD>\r\n<TITLE>Instructions for %1</TITLE>\r\n</HEAD>\r\n<BR>\r\n<CENTER>\r\n").arg(ProjectTitle.toHtmlEscaped());
+		WriteHeader(Stream, tr("Instructions for %1").arg(ProjectTitle));
 
 		for (const lcModel* Model : Models)
 		{
@@ -3263,14 +3271,14 @@ lcResult<void> Project::ExportHTML(const lcHTMLExportOptions& Options)
 				Stream << QString::fromLatin1("<p>%1</p>").arg(Model->GetProperties().mFileName.toHtmlEscaped());
 
 				for (lcStep Step = 1; Step <= LastStep; Step++)
-					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">Step %3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), QString::number(Step));
+					Stream << QString::fromLatin1("<A HREF=\"%1-%2.html\">%3<BR>\r\n</A>").arg(BaseName, QString("%1").arg(Step, 2, 10, QLatin1Char('0')), tr("Step %1").arg(QString::number(Step)).toHtmlEscaped());
 
 				if (Options.PartsListEnd)
-					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">Pieces Used</A><BR>\r\n").arg(BaseName);
+					Stream << QString::fromLatin1("<A HREF=\"%1-pieces.html\">%2</A><BR>\r\n").arg(BaseName, tr("Pieces Used").toHtmlEscaped());
 			}
 		}
 
-		Stream << QLatin1String("</CENTER>\r\n<BR><HR><BR><B><I>Created by <A HREF=\"https://www.leocad.org\">LeoCAD</A></B></I><BR></HTML>\r\n");
+		Stream << QString::fromLatin1("</CENTER>\r\n<BR><HR><BR><B><I>%1</I></B><BR></HTML>\r\n").arg(CreatedBy);
 	}
 
 	return lcResult<void>();

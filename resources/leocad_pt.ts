@@ -5138,9 +5138,8 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="vanished">Procurar objecto seguinte</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="331"/>
         <source>De-select everything</source>
-        <translation>De-selecciona tudo</translation>
+        <translation type="vanished">De-selecciona tudo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="339"/>
@@ -5153,9 +5152,8 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation>Selecciona objectos por nome</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle snap axes</source>
-        <translation>Bascula a grelha nos eixos</translation>
+        <translation type="vanished">Bascula a grelha nos eixos</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="603"/>
@@ -5389,6 +5387,12 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="unfinished">Selecione todas as peças do modelo</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="331"/>
+        <source>Deselect everything</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Desselecionar tudo</translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Select one piece at a time</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -5447,6 +5451,12 @@ O formato do ficheiro não é reconhecido.</translation>
         <source>Toggle rotating selected pieces separately</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Alternar a rotação das peças selecionadas em separado</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="435"/>
+        <source>Toggle movement snapping</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ativar ou desativar o ajuste do movimento</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="635"/>
@@ -5512,6 +5522,12 @@ O formato do ficheiro não é reconhecido.</translation>
         <location filename="../common/lc_commands.cpp" line="731"/>
         <source>Add new pieces to the model</source>
         <translation>Adiciona novas peças ao modelo</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="755"/>
+        <source>Add new directional light sources to the model</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Adicionar novas fontes de luz direcional ao modelo</translation>
     </message>
     <message>
         <source>Add new omni light sources to the model</source>
@@ -5603,9 +5619,8 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation>Ampliar</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="899"/>
         <source>Fit all pieces in the current view (hold the CTRL key down to zoom all views)</source>
-        <translation>Faz caber todas as peças na vista actual (carregue na tecla CTRL para aplicar a todas as vistas)</translation>
+        <translation type="vanished">Faz caber todas as peças na vista actual (carregue na tecla CTRL para aplicar a todas as vistas)</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="907"/>
@@ -5747,6 +5762,27 @@ O formato do ficheiro não é reconhecido.</translation>
         <source>Close current tab</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Fechar separador atual</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1539"/>
+        <location filename="../common/lc_commands.cpp" line="1547"/>
+        <source>Rotate selected objects around the X axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Rodar os objetos selecionados em torno do eixo X</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1555"/>
+        <location filename="../common/lc_commands.cpp" line="1563"/>
+        <source>Rotate selected objects around the Y axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Rodar os objetos selecionados em torno do eixo Y</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="1571"/>
+        <location filename="../common/lc_commands.cpp" line="1579"/>
+        <source>Rotate selected objects around the Z axis</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Rodar os objetos selecionados em torno do eixo Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1603"/>
@@ -5949,16 +5985,21 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation type="unfinished">Adicione novos focos de luz ao modelo</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="755"/>
         <source>Add new omnidirectional light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Adicione novas fontes de luz omnidirecionais ao modelo</translation>
+        <translation type="obsolete">Adicione novas fontes de luz omnidirecionais ao modelo</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="763"/>
         <source>Add new area light sources to the model</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Adicione novas fontes de luz de área ao modelo</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="899"/>
+        <source>Fit all pieces in the current view</source>
+        <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
+        <translation type="unfinished">Ajustar a vista atual para mostrar todas as peças</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1187"/>
@@ -6182,22 +6223,16 @@ O formato do ficheiro não é reconhecido.</translation>
         <translation>Move os objectos seleccionados no eixo Z</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1539"/>
-        <location filename="../common/lc_commands.cpp" line="1547"/>
         <source>Rotate selected objects along the X axis</source>
-        <translation>Roda os objectos seleccionados no eixo X</translation>
+        <translation type="vanished">Roda os objectos seleccionados no eixo X</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1555"/>
-        <location filename="../common/lc_commands.cpp" line="1563"/>
         <source>Rotate selected objects along the Y axis</source>
-        <translation>Roda os objectos seleccionados no eixo Y</translation>
+        <translation type="vanished">Roda os objectos seleccionados no eixo Y</translation>
     </message>
     <message>
-        <location filename="../common/lc_commands.cpp" line="1571"/>
-        <location filename="../common/lc_commands.cpp" line="1579"/>
         <source>Rotate selected objects along the Z axis</source>
-        <translation>Roda os objectos seleccionados no eixo Z</translation>
+        <translation type="vanished">Roda os objectos seleccionados no eixo Z</translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="1587"/>

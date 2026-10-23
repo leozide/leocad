@@ -121,10 +121,7 @@ public:
 		return mMoveSnapEnabled ? SnapZText[mMoveZSnapIndex] : tr("None");
 	}
 
-	QString GetAngleSnapText() const
-	{
-		return mAngleSnapEnabled ? QString::number(GetAngleSnap()) : tr("None");
-	}
+	QString GetAngleSnapText() const;
 
 	bool GetRelativeTransform() const
 	{

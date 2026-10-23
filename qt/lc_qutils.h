@@ -12,9 +12,10 @@ constexpr int LC_MAX_GRID_LINE_SPACING = 10000;
 constexpr int LC_MAX_AREA_LIGHT_GRID = 64;
 
 QString lcFormatValue(float Value, int Precision);
-QString lcFormatValueLocalized(float Value);
+QString lcFormatFloatLocalized(float Value, QLocale Locale);
+QString lcFormatDoubleLocalized(double Value, QLocale Locale, char Format, int Precision);
 QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale);
-std::optional<float> lcParseFloatValueLocalized(const QString& Value, QLocale Locale);
+std::optional<float> lcParseFloatLocalized(const QString& Value, QLocale Locale);
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
 void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox);

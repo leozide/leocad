@@ -37,24 +37,24 @@ lcArrayDialog::lcArrayDialog(QWidget* Parent)
 	ui->count1->setValue(mCounts[0]);
 	ui->count2->setValue(mCounts[1]);
 	ui->count3->setValue(mCounts[2]);
-	ui->offset1x->setText(lcFormatValueLocalized(mOffsets[0].x));
-	ui->offset1y->setText(lcFormatValueLocalized(mOffsets[0].y));
-	ui->offset1z->setText(lcFormatValueLocalized(mOffsets[0].z));
-	ui->offset2x->setText(lcFormatValueLocalized(mOffsets[1].x));
-	ui->offset2y->setText(lcFormatValueLocalized(mOffsets[1].y));
-	ui->offset2z->setText(lcFormatValueLocalized(mOffsets[1].z));
-	ui->offset3x->setText(lcFormatValueLocalized(mOffsets[2].x));
-	ui->offset3y->setText(lcFormatValueLocalized(mOffsets[2].y));
-	ui->offset3z->setText(lcFormatValueLocalized(mOffsets[2].z));
-	ui->rotation1x->setText(lcFormatValueLocalized(mRotations[0].x));
-	ui->rotation1y->setText(lcFormatValueLocalized(mRotations[0].y));
-	ui->rotation1z->setText(lcFormatValueLocalized(mRotations[0].z));
-	ui->rotation2x->setText(lcFormatValueLocalized(mRotations[1].x));
-	ui->rotation2y->setText(lcFormatValueLocalized(mRotations[1].y));
-	ui->rotation2z->setText(lcFormatValueLocalized(mRotations[1].z));
-	ui->rotation3x->setText(lcFormatValueLocalized(mRotations[2].x));
-	ui->rotation3y->setText(lcFormatValueLocalized(mRotations[2].y));
-	ui->rotation3z->setText(lcFormatValueLocalized(mRotations[2].z));
+	ui->offset1x->setText(lcFormatFloatLocalized(mOffsets[0].x, locale()));
+	ui->offset1y->setText(lcFormatFloatLocalized(mOffsets[0].y, locale()));
+	ui->offset1z->setText(lcFormatFloatLocalized(mOffsets[0].z, locale()));
+	ui->offset2x->setText(lcFormatFloatLocalized(mOffsets[1].x, locale()));
+	ui->offset2y->setText(lcFormatFloatLocalized(mOffsets[1].y, locale()));
+	ui->offset2z->setText(lcFormatFloatLocalized(mOffsets[1].z, locale()));
+	ui->offset3x->setText(lcFormatFloatLocalized(mOffsets[2].x, locale()));
+	ui->offset3y->setText(lcFormatFloatLocalized(mOffsets[2].y, locale()));
+	ui->offset3z->setText(lcFormatFloatLocalized(mOffsets[2].z, locale()));
+	ui->rotation1x->setText(lcFormatFloatLocalized(mRotations[0].x, locale()));
+	ui->rotation1y->setText(lcFormatFloatLocalized(mRotations[0].y, locale()));
+	ui->rotation1z->setText(lcFormatFloatLocalized(mRotations[0].z, locale()));
+	ui->rotation2x->setText(lcFormatFloatLocalized(mRotations[1].x, locale()));
+	ui->rotation2y->setText(lcFormatFloatLocalized(mRotations[1].y, locale()));
+	ui->rotation2z->setText(lcFormatFloatLocalized(mRotations[1].z, locale()));
+	ui->rotation3x->setText(lcFormatFloatLocalized(mRotations[2].x, locale()));
+	ui->rotation3y->setText(lcFormatFloatLocalized(mRotations[2].y, locale()));
+	ui->rotation3z->setText(lcFormatFloatLocalized(mRotations[2].z, locale()));
 }
 
 lcArrayDialog::~lcArrayDialog()
@@ -96,7 +96,7 @@ void lcArrayDialog::accept()
 			for (int Axis = 0; Axis < 3; Axis++)
 			{
 				QLineEdit* Edit = Edits[Type][Dimension][Axis];
-				const std::optional<float> Value = lcParseFloatValueLocalized(Edit->text(), Edit->validator()->locale());
+				const std::optional<float> Value = lcParseFloatLocalized(Edit->text(), Edit->validator()->locale());
 
 				if (!Value || !Edit->hasAcceptableInput())
 				{

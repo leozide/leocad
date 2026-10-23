@@ -370,6 +370,7 @@ void lcViewWidget::dropEvent(QDropEvent* DropEvent)
 	if (MimeData->hasFormat("application/vnd.leocad-part") || MimeData->hasFormat("application/vnd.leocad-color"))
 	{
 		mView->EndDrag(true);
+		window()->activateWindow();
 		setFocus(Qt::MouseFocusReason);
 
 		DropEvent->accept();

@@ -259,7 +259,7 @@ public:
 	void UpdateModified(bool Modified);
 	void UpdateShortcuts();
 
-	lcVector3 GetTransformAmount();
+	std::optional<lcVector3> GetTransformAmount();
 
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 

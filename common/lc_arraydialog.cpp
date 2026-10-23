@@ -76,27 +76,44 @@ void lcArrayDialog::accept()
 		return;
 	}
 
-	mCounts[0] = Counts[0];
-	mCounts[1] = Counts[1];
-	mCounts[2] = Counts[2];
-	mOffsets[0].x = lcParseValueLocalized(ui->offset1x->text());
-	mOffsets[0].y = lcParseValueLocalized(ui->offset1y->text());
-	mOffsets[0].z = lcParseValueLocalized(ui->offset1z->text());
-	mOffsets[1].x = lcParseValueLocalized(ui->offset2x->text());
-	mOffsets[1].y = lcParseValueLocalized(ui->offset2y->text());
-	mOffsets[1].z = lcParseValueLocalized(ui->offset2z->text());
-	mOffsets[2].x = lcParseValueLocalized(ui->offset3x->text());
-	mOffsets[2].y = lcParseValueLocalized(ui->offset3y->text());
-	mOffsets[2].z = lcParseValueLocalized(ui->offset3z->text());
-	mRotations[0].x = lcParseValueLocalized(ui->rotation1x->text());
-	mRotations[0].y = lcParseValueLocalized(ui->rotation1y->text());
-	mRotations[0].z = lcParseValueLocalized(ui->rotation1z->text());
-	mRotations[1].x = lcParseValueLocalized(ui->rotation2x->text());
-	mRotations[1].y = lcParseValueLocalized(ui->rotation2y->text());
-	mRotations[1].z = lcParseValueLocalized(ui->rotation2z->text());
-	mRotations[2].x = lcParseValueLocalized(ui->rotation3x->text());
-	mRotations[2].y = lcParseValueLocalized(ui->rotation3y->text());
-	mRotations[2].z = lcParseValueLocalized(ui->rotation3z->text());
+	QLineEdit* Edits[2][3][3] =
+	{
+		{
+			{ ui->offset1x, ui->offset1y, ui->offset1z },
+			{ ui->offset2x, ui->offset2y, ui->offset2z },
+			{ ui->offset3x, ui->offset3y, ui->offset3z }
+		},
+		{
+			{ ui->rotation1x, ui->rotation1y, ui->rotation1z },
+			{ ui->rotation2x, ui->rotation2y, ui->rotation2z },
+			{ ui->rotation3x, ui->rotation3y, ui->rotation3z }
+		}
+	};
+	lcVector3 Values[2][3];
+
+	for (int Type = 0; Type < 2; Type++)
+		for (int Dimension = 0; Dimension < 3; Dimension++)
+			for (int Axis = 0; Axis < 3; Axis++)
+			{
+				QLineEdit* Edit = Edits[Type][Dimension][Axis];
+				const std::optional<float> Value = lcParseFloatValueLocalized(Edit->text(), Edit->validator()->locale());
+
+				if (!Value || !Edit->hasAcceptableInput())
+				{
+					QMessageBox::information(this, windowTitle(), tr("Please enter a valid value for '%1'.").arg(Edit->accessibleName()));
+					Edit->setFocus();
+					return;
+				}
+
+				Values[Type][Dimension][Axis] = *Value;
+			}
+
+	for (int Dimension = 0; Dimension < 3; Dimension++)
+	{
+		mCounts[Dimension] = Counts[Dimension];
+		mOffsets[Dimension] = Values[0][Dimension];
+		mRotations[Dimension] = Values[1][Dimension];
+	}
 
 	QDialog::accept();
 }

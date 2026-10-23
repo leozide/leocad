@@ -2073,15 +2073,35 @@ void lcMainWindow::SetInsertPieceData(lcPieceData* PieceData)
 		lcGetPiecesLibrary()->RequestPieceDataLoad(mInsertPieceData.Get(), lcLoadPriority::Normal);
 }
 
-lcVector3 lcMainWindow::GetTransformAmount()
+std::optional<lcVector3> lcMainWindow::GetTransformAmount()
 {
-	lcVector3 Transform;
+	QLineEdit* Edits[] = { mTransformXEdit, mTransformYEdit, mTransformZEdit };
+	lcVector3 Values;
 
-	Transform.x = lcParseValueLocalized(mTransformXEdit->text());
-	Transform.y = lcParseValueLocalized(mTransformYEdit->text());
-	Transform.z = lcParseValueLocalized(mTransformZEdit->text());
+	for (int Axis = 0; Axis < 3; Axis++)
+	{
+		QLineEdit* Edit = Edits[Axis];
+		const QString Text = Edit->text().trimmed();
 
-	return Transform;
+		if (Text.isEmpty())
+		{
+			Values[Axis] = 0.0f;
+			continue;
+		}
+
+		const std::optional<float> Value = lcParseFloatValueLocalized(Text, Edit->locale());
+
+		if (!Value)
+		{
+			QMessageBox::information(this, tr("Transform"), tr("Please enter a valid value for '%1'.").arg(Edit->accessibleName()));
+			Edit->setFocus();
+			return std::nullopt;
+		}
+
+		Values[Axis] = *Value;
+	}
+
+	return Values;
 }
 
 void lcMainWindow::SplitView(Qt::Orientation Orientation)
@@ -3730,7 +3750,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_EDIT_TRANSFORM:
 		if (ActiveModel)
-			ActiveModel->TransformSelectedObjects(GetTransformType(), GetTransformAmount());
+		{
+			const std::optional<lcVector3> Transform = GetTransformAmount();
+
+			if (Transform)
+				ActiveModel->TransformSelectedObjects(GetTransformType(), *Transform);
+		}
 		break;
 
 	case LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION:

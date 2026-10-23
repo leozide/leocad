@@ -90,9 +90,15 @@ QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale)
 	return Locale.toString(Value);
 }
 
-float lcParseValueLocalized(const QString& Value)
+std::optional<float> lcParseFloatValueLocalized(const QString& Value, QLocale Locale)
 {
-	return QLocale::system().toFloat(Value);
+	bool Ok;
+	const float Number = Locale.toFloat(Value, &Ok);
+
+	if (!Ok || !std::isfinite(Number))
+		return std::nullopt;
+
+	return Number;
 }
 
 #ifdef Q_OS_WIN

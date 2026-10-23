@@ -14,7 +14,7 @@ constexpr int LC_MAX_AREA_LIGHT_GRID = 64;
 QString lcFormatValue(float Value, int Precision);
 QString lcFormatValueLocalized(float Value);
 QString lcFormatIntegerLocalized(qlonglong Value, QLocale Locale);
-float lcParseValueLocalized(const QString& Value);
+std::optional<float> lcParseFloatValueLocalized(const QString& Value, QLocale Locale);
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
 void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox);

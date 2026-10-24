@@ -208,6 +208,7 @@ public:
 	void SetLastInsertedColorIndex(int ColorIndex);
 	void SetInsertColorMode(lcInsertColorMode InsertColorMode);
 	void UpdatePiecesColor();
+	void ColorOptionsMenuAboutToShow();
 	void SetMoveSnapEnabled(bool Enabled);
 	void SetAngleSnapEnabled(bool Enabled);
 	void SetMoveXYSnapIndex(int Index);

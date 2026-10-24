@@ -754,6 +754,18 @@ void lcMainWindow::CreateToolBars()
 
 	connect(mColorButton, &QToolButton::clicked, this, &lcMainWindow::ColorButtonClicked);
 
+	QToolButton* ColorOptionsButton = new QToolButton(ColorWidget);
+	ColorOptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
+	ColorOptionsButton->setToolTip(tr("Choose how inserted pieces are colored."));
+	ColorOptionsButton->setAccessibleName(tr("Color Options"));
+	ColorOptionsButton->setPopupMode(QToolButton::InstantPopup);
+	ColorOptionsButton->setAutoRaise(true);
+	ColorButtonLayout->addWidget(ColorOptionsButton);
+
+	QMenu* ColorOptionsMenu = new QMenu(ColorOptionsButton);
+	ColorOptionsButton->setMenu(ColorOptionsMenu);
+	connect(ColorOptionsMenu, &QMenu::aboutToShow, this, &lcMainWindow::ColorOptionsMenuAboutToShow);
+
 	ColorLayout->addWidget(mColorList);
 	mColorList->setAccessibleName(tr("LDraw Colors"));
 
@@ -2032,6 +2044,38 @@ void lcMainWindow::SetInsertColorMode(lcInsertColorMode InsertColorMode)
 	lcSetProfileInt(LC_PROFILE_INSERT_COLOR_MODE, static_cast<int>(InsertColorMode));
 
 	UpdatePiecesColor();
+}
+
+void lcMainWindow::ColorOptionsMenuAboutToShow()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(sender());
+	Menu->clear();
+
+	// Each entry runs the matching command so keyboard shortcuts and the menu stay in sync.
+	auto AddCommand = [this](QMenu* TargetMenu, const QString& Text, lcCommandId CommandId, bool Checked)
+	{
+		QAction* Action = TargetMenu->addAction(Text, this, [this, CommandId]()
+		{
+			HandleCommand(CommandId);
+		});
+
+		Action->setCheckable(true);
+		Action->setChecked(Checked);
+		Action->setShortcut(mActions[CommandId]->shortcut());
+		Action->setShortcutContext(Qt::WidgetShortcut);
+
+		return Action;
+	};
+
+	const lcInsertColorMode InsertColorMode = lcGetPreferences().mInsertColorMode;
+
+	QMenu* InsertMenu = Menu->addMenu(tr("Insert Color"));
+	QActionGroup* InsertGroup = new QActionGroup(InsertMenu);
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Current Color"), LC_PIECE_INSERT_COLOR_CURRENT, InsertColorMode == lcInsertColorMode::CurrentColor));
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Selected Piece Color"), LC_PIECE_INSERT_COLOR_SELECTED, InsertColorMode == lcInsertColorMode::SelectedPieceColor));
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Last Inserted Piece Color"), LC_PIECE_INSERT_COLOR_LAST_INSERTED, InsertColorMode == lcInsertColorMode::LastInsertedColor));
+
+	AddCommand(Menu, tr("Lock Pieces Color"), LC_VIEW_PIECES_TOGGLE_LOCK_COLOR, mPartSelectionWidget && mPartSelectionWidget->IsColorLocked());
 }
 
 void lcMainWindow::UpdatePiecesColor()

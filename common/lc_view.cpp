@@ -152,10 +152,22 @@ std::vector<lcModel*> lcView::GetModelEditingPath() const
 {
 	std::vector<lcModel*> Models = { mModel };
 
-	for (const std::pair<lcPiece*, lcMatrix44>& Entry : mSubmodelEditingPath)
-		Models.push_back(Entry.first->mPieceData->GetModel());
+	for (const lcPiece* Piece : mSubmodelEditingPath)
+		Models.push_back(Piece->mPieceData->GetModel());
 
 	return Models;
+}
+
+void lcView::RestoreModelEditingContext()
+{
+	mModel->SetActive(true);
+	mActiveSubmodelTransform = lcMatrix44Identity();
+
+	for (lcPiece* Piece : mSubmodelEditingPath)
+	{
+		mActiveSubmodelTransform = lcMul(Piece->mModelWorld, mActiveSubmodelTransform);
+		Piece->mPieceData->GetModel()->SetActive(true);
+	}
 }
 
 void lcView::SetSubmodelActive(size_t Depth)
@@ -165,26 +177,22 @@ void lcView::SetSubmodelActive(size_t Depth)
 
 	StopTracking(true);
 
-	lcModel* ActiveModel = GetActiveModel();
+	const std::vector<lcModel*> EditingModels = GetModelEditingPath();
 
-	if (mActiveSubmodelInstance)
-	{
-		ActiveModel->SetActive(false);
+	for (size_t Index = EditingModels.size(); Index > Depth + 1; Index--)
+		EditingModels[Index - 1]->SetActive(false);
 
-		std::vector<lcModel*> UpdatedModels;
-		ActiveModel->UpdatePieceData(UpdatedModels);
-	}
+	std::vector<lcModel*> UpdatedModels;
+	for (size_t Index = EditingModels.size(); Index > Depth + 1; Index--)
+		EditingModels[Index - 1]->UpdatePieceData(UpdatedModels);
 
 	mSubmodelEditingPath.resize(Depth);
 	mActiveSubmodelInstance = nullptr;
 
 	if (!mSubmodelEditingPath.empty())
-	{
-		mActiveSubmodelInstance = mSubmodelEditingPath.back().first;
-		mActiveSubmodelTransform = mSubmodelEditingPath.back().second;
-	}
+		mActiveSubmodelInstance = mSubmodelEditingPath.back();
 
-	GetActiveModel()->SetActive(true);
+	RestoreModelEditingContext();
 	GetActiveModel()->UpdateInterface();
 }
 
@@ -206,22 +214,13 @@ void lcView::SetSelectedSubmodelActive()
 	if (!Piece->mPieceData->IsModel())
 		return;
 
-	// Preserve the selected instance path and capture its transform before SetActive(false) changes the step.
-	lcMatrix44 SubmodelTransform = Piece->mModelWorld;
-
-	if (mActiveSubmodelInstance)
-		SubmodelTransform = lcMul(SubmodelTransform, mActiveSubmodelTransform);
-
-	if (mActiveSubmodelInstance)
-		ActiveModel->SetActive(false);
-
-	mSubmodelEditingPath.emplace_back(Piece, SubmodelTransform);
-	mActiveSubmodelTransform = SubmodelTransform;
+	// Keep ancestor models at their chosen steps so the selected instance stays in place.
+	mSubmodelEditingPath.push_back(Piece);
 	mActiveSubmodelInstance = Piece;
 
 	ActiveModel = mActiveSubmodelInstance->mPieceData->GetModel();
 	ActiveModel->SetTemporaryStep(ActiveModel->GetLastStep());
-	ActiveModel->SetActive(true);
+	RestoreModelEditingContext();
 
 	RemoveCamera();
 
@@ -1048,7 +1047,7 @@ void lcView::OnDraw()
 
 	mScene->Begin(mCamera->mWorldView);
 
-	mScene->SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform);
+	mScene->SetActiveSubmodelInstance(mActiveSubmodelInstance, mActiveSubmodelTransform, GetModelEditingPath());
 	mScene->SetDrawInterface(DrawInterface);
 
 	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });

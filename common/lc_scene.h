@@ -35,10 +35,16 @@ class lcScene
 public:
 	lcScene();
 
-	void SetActiveSubmodelInstance(lcPiece* ActiveSubmodelInstance, const lcMatrix44& ActiveSubmodelTransform)
+	void SetActiveSubmodelInstance(lcPiece* ActiveSubmodelInstance, const lcMatrix44& ActiveSubmodelTransform, const std::vector<lcModel*>& ModelEditingPath)
 	{
 		mActiveSubmodelInstance = ActiveSubmodelInstance;
 		mActiveSubmodelTransform = ActiveSubmodelTransform;
+		mModelEditingPath = ModelEditingPath;
+	}
+
+	bool IsModelEditing(const lcModel* Model) const
+	{
+		return mDrawInterface && mActiveSubmodelInstance && std::find(mModelEditingPath.begin(), mModelEditingPath.end(), Model) != mModelEditingPath.end();
 	}
 
 	lcPiece* GetActiveSubmodelInstance() const
@@ -165,6 +171,7 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
 	lcPiece* mActiveSubmodelInstance = nullptr;
+	std::vector<lcModel*> mModelEditingPath;
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
 	lcHighlightRenderMode mHighlightRenderMode;

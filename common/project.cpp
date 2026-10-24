@@ -234,12 +234,13 @@ void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 	{
 		gMainWindow->SetCurrentModelTab(mActiveModel, true);
 
-		// The tab may still be editing a nested submodel at its current step.
-		lcModel* EditingModel = gMainWindow->GetActiveModel();
-		if (EditingModel)
+		// Restore the current steps of the editing target and its surrounding ancestors.
+		lcView* EditingView = gMainWindow->GetActiveView();
+
+		if (EditingView)
 		{
-			EditingModel->SetActive(true);
-			EditingModel->UpdateInterface();
+			EditingView->RestoreModelEditingContext();
+			EditingView->GetActiveModel()->UpdateInterface();
 		}
 	}
 }

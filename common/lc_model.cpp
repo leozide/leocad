@@ -1660,9 +1660,11 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
+	const bool Editing = ParentActive || Scene->IsModelEditing(this);
+
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		const bool Visible = ParentActive ? (Piece->IsSelected() || Piece->IsVisible(mCurrentStep)) : Piece->IsVisibleInSubModel();
+		const bool Visible = Editing ? (Piece->IsSelected() || Piece->IsVisible(mCurrentStep)) : Piece->IsVisibleInSubModel();
 
 		if (Visible)
 		{

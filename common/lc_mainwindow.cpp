@@ -3611,7 +3611,8 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_MODEL_PROPERTIES:
-		lcGetActiveModel()->ShowPropertiesDialog();
+		if (ActiveModel)
+			ActiveModel->ShowPropertiesDialog();
 		break;
 
 	case LC_MODEL_LIST:

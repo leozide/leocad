@@ -21,6 +21,7 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 	mHighlightRenderMode = lcHighlightRenderMode::Tint;
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
+	mModelEditingPath.clear();
 	mRenderMeshes.clear();
 	mOpaqueMeshes.clear();
 	mTranslucentMeshes.clear();

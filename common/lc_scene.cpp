@@ -438,9 +438,8 @@ void lcScene::Draw(lcContext* Context, const std::function<void()>& PreTransluce
 
 	Context->SetViewMatrix(mViewMatrix);
 
-	const lcPreferences& Preferences = lcGetPreferences();
-	const bool DrawLines = Preferences.mDrawEdgeLines && Preferences.mLineWidth > 0.0f;
-	const bool DrawConditional = Preferences.mDrawConditionalLines && Preferences.mLineWidth > 0.0f && lcContext::SupportsMaterial(lcMaterialType::UnlitColorConditional);
+	const bool DrawLines = mDrawEdgeLines && mLineWidth > 0.0f;
+	const bool DrawConditional = mDrawConditionalLines && mLineWidth > 0.0f && lcContext::SupportsMaterial(lcMaterialType::UnlitColorConditional);
 
 	lcShadingMode ShadingMode = mShadingMode;
 

@@ -1652,10 +1652,7 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 
 	UpdateShadingMode();
 
-	lcView::UpdateAllViews();
-
-	if (mPartSelectionWidget)
-		mPartSelectionWidget->UpdateThumbnails();
+	UpdatePartsRendering();
 }
 
 void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)
@@ -1694,6 +1691,132 @@ void lcMainWindow::ToggleFadePreviousSteps()
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, lcGetPreferences().mFadeSteps);
 
 	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::ToggleEdgeLines(lcRenderTarget Target)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+
+	if (Target == lcRenderTarget::ModelView)
+	{
+		Preferences.mDrawEdgeLines = !Preferences.mDrawEdgeLines;
+		lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, Preferences.mDrawEdgeLines);
+	}
+	else
+	{
+		lcTargetRenderSettings& TargetSettings = Preferences.GetTargetRenderSettings(Target);
+
+		// Changing a target setting stops following the model view settings.
+		TargetSettings.Settings = Preferences.GetRenderSettings(Target);
+		TargetSettings.Settings.DrawEdgeLines = !TargetSettings.Settings.DrawEdgeLines;
+		TargetSettings.SyncRendering = false;
+		Preferences.SaveRenderTarget(Target);
+	}
+
+	UpdatePartsRendering();
+}
+
+void lcMainWindow::ToggleConditionalLines(lcRenderTarget Target)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+
+	if (Target == lcRenderTarget::ModelView)
+	{
+		Preferences.mDrawConditionalLines = !Preferences.mDrawConditionalLines;
+		lcSetProfileInt(LC_PROFILE_DRAW_CONDITIONAL_LINES, Preferences.mDrawConditionalLines);
+	}
+	else
+	{
+		lcTargetRenderSettings& TargetSettings = Preferences.GetTargetRenderSettings(Target);
+
+		TargetSettings.Settings = Preferences.GetRenderSettings(Target);
+		TargetSettings.Settings.DrawConditionalLines = !TargetSettings.Settings.DrawConditionalLines;
+		TargetSettings.SyncRendering = false;
+		Preferences.SaveRenderTarget(Target);
+	}
+
+	UpdatePartsRendering();
+}
+
+void lcMainWindow::ToggleSyncRendering(lcRenderTarget Target)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+	lcTargetRenderSettings& TargetSettings = Preferences.GetTargetRenderSettings(Target);
+
+	TargetSettings.SyncRendering = !TargetSettings.SyncRendering;
+	Preferences.SaveRenderTarget(Target);
+
+	UpdatePartsRendering();
+}
+
+void lcMainWindow::SetTargetShadingMode(lcRenderTarget Target, lcShadingMode ShadingMode)
+{
+	lcPreferences& Preferences = lcGetPreferences();
+	lcTargetRenderSettings& TargetSettings = Preferences.GetTargetRenderSettings(Target);
+
+	TargetSettings.Settings = Preferences.GetRenderSettings(Target);
+	TargetSettings.Settings.ShadingMode = ShadingMode;
+	TargetSettings.SyncRendering = false;
+	Preferences.SaveRenderTarget(Target);
+
+	UpdatePartsRendering();
+}
+
+void lcMainWindow::AddRenderTargetActions(QMenu* Menu, lcRenderTarget Target)
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcRenderSettings RenderSettings = Preferences.GetRenderSettings(Target);
+	const bool Pieces = Target == lcRenderTarget::Pieces;
+
+	// Each entry runs the matching command so keyboard shortcuts and menus stay in sync.
+	auto AddCommand = [this](QMenu* TargetMenu, const QString& Text, lcCommandId CommandId, bool Checked)
+	{
+		QAction* Action = TargetMenu->addAction(Text, this, [this, CommandId]()
+		{
+			HandleCommand(CommandId);
+		});
+
+		Action->setCheckable(true);
+		Action->setChecked(Checked);
+		Action->setShortcut(mActions[CommandId]->shortcut());
+		Action->setShortcutContext(Qt::WidgetShortcut);
+		return Action;
+	};
+
+	AddCommand(Menu, tr("Use Model View Settings"), Pieces ? LC_VIEW_TOGGLE_PIECES_SYNC_RENDERING : LC_VIEW_TOGGLE_PREVIEW_SYNC_RENDERING, Preferences.GetTargetRenderSettings(Target).SyncRendering);
+
+	QMenu* ShadingMenu = Menu->addMenu(tr("Shading"));
+	QActionGroup* ShadingGroup = new QActionGroup(ShadingMenu);
+	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Wireframe"), Pieces ? LC_VIEW_PIECES_SHADING_WIREFRAME : LC_VIEW_PREVIEW_SHADING_WIREFRAME, RenderSettings.ShadingMode == lcShadingMode::Wireframe));
+	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Flat Shading"), Pieces ? LC_VIEW_PIECES_SHADING_FLAT : LC_VIEW_PREVIEW_SHADING_FLAT, RenderSettings.ShadingMode == lcShadingMode::Flat));
+	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Default Lights"), Pieces ? LC_VIEW_PIECES_SHADING_DEFAULT_LIGHTS : LC_VIEW_PREVIEW_SHADING_DEFAULT_LIGHTS, RenderSettings.ShadingMode == lcShadingMode::DefaultLights));
+
+	AddCommand(Menu, tr("Edge Lines"), Pieces ? LC_VIEW_TOGGLE_PIECES_EDGE_LINES : LC_VIEW_TOGGLE_PREVIEW_EDGE_LINES, RenderSettings.DrawEdgeLines);
+	AddCommand(Menu, tr("Conditional Lines"), Pieces ? LC_VIEW_TOGGLE_PIECES_CONDITIONAL_LINES : LC_VIEW_TOGGLE_PREVIEW_CONDITIONAL_LINES, RenderSettings.DrawConditionalLines);
+}
+
+void lcMainWindow::TogglePreviewViewSphere()
+{
+	lcGetPreferences().mPreviewViewSphereEnabled = !lcGetPreferences().mPreviewViewSphereEnabled;
+	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED, lcGetPreferences().mPreviewViewSphereEnabled);
+
+	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::TogglePreviewAxisIcon()
+{
+	lcGetPreferences().mDrawPreviewAxis = !lcGetPreferences().mDrawPreviewAxis;
+	lcSetProfileInt(LC_PROFILE_PREVIEW_DRAW_AXES, lcGetPreferences().mDrawPreviewAxis);
+
+	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::UpdatePartsRendering()
+{
+	lcView::UpdateAllViews();
+
+	if (mPartSelectionWidget)
+		mPartSelectionWidget->UpdateThumbnails();
 }
 
 QByteArray lcMainWindow::GetTabLayout()
@@ -3244,6 +3367,70 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_VIEW_TOGGLE_EDGE_LINES:
+		ToggleEdgeLines(lcRenderTarget::ModelView);
+		break;
+
+	case LC_VIEW_TOGGLE_CONDITIONAL_LINES:
+		ToggleConditionalLines(lcRenderTarget::ModelView);
+		break;
+
+	case LC_VIEW_TOGGLE_PREVIEW_SYNC_RENDERING:
+		ToggleSyncRendering(lcRenderTarget::Preview);
+		break;
+
+	case LC_VIEW_PREVIEW_SHADING_WIREFRAME:
+		SetTargetShadingMode(lcRenderTarget::Preview, lcShadingMode::Wireframe);
+		break;
+
+	case LC_VIEW_PREVIEW_SHADING_FLAT:
+		SetTargetShadingMode(lcRenderTarget::Preview, lcShadingMode::Flat);
+		break;
+
+	case LC_VIEW_PREVIEW_SHADING_DEFAULT_LIGHTS:
+		SetTargetShadingMode(lcRenderTarget::Preview, lcShadingMode::DefaultLights);
+		break;
+
+	case LC_VIEW_TOGGLE_PREVIEW_EDGE_LINES:
+		ToggleEdgeLines(lcRenderTarget::Preview);
+		break;
+
+	case LC_VIEW_TOGGLE_PREVIEW_CONDITIONAL_LINES:
+		ToggleConditionalLines(lcRenderTarget::Preview);
+		break;
+
+	case LC_VIEW_TOGGLE_PIECES_SYNC_RENDERING:
+		ToggleSyncRendering(lcRenderTarget::Pieces);
+		break;
+
+	case LC_VIEW_PIECES_SHADING_WIREFRAME:
+		SetTargetShadingMode(lcRenderTarget::Pieces, lcShadingMode::Wireframe);
+		break;
+
+	case LC_VIEW_PIECES_SHADING_FLAT:
+		SetTargetShadingMode(lcRenderTarget::Pieces, lcShadingMode::Flat);
+		break;
+
+	case LC_VIEW_PIECES_SHADING_DEFAULT_LIGHTS:
+		SetTargetShadingMode(lcRenderTarget::Pieces, lcShadingMode::DefaultLights);
+		break;
+
+	case LC_VIEW_TOGGLE_PIECES_EDGE_LINES:
+		ToggleEdgeLines(lcRenderTarget::Pieces);
+		break;
+
+	case LC_VIEW_TOGGLE_PIECES_CONDITIONAL_LINES:
+		ToggleConditionalLines(lcRenderTarget::Pieces);
+		break;
+
+	case LC_VIEW_TOGGLE_PREVIEW_VIEW_SPHERE:
+		TogglePreviewViewSphere();
+		break;
+
+	case LC_VIEW_TOGGLE_PREVIEW_AXIS_ICON:
+		TogglePreviewAxisIcon();
 		break;
 
 	case LC_PIECE_INSERT:

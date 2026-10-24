@@ -1376,6 +1376,12 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 	PartDescriptionFilter->setCheckable(true);
 	PartDescriptionFilter->setChecked(ListModel->GetPartDescriptionFilter());
 	PartDescriptionFilter->setEnabled(ListModel->GetFileNameFilter());
+
+	if (gSupportsFramebufferObject && gMainWindow)
+	{
+		QMenu* RenderingMenu = Menu->addMenu(tr("Rendering"));
+		gMainWindow->AddRenderTargetActions(RenderingMenu, lcRenderTarget::Pieces);
+	}
 }
 
 void lcPartSelectionWidget::EditPartPalettes()

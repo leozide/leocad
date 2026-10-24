@@ -994,11 +994,20 @@ void lcView::OnDraw()
 	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
 
-	lcShadingMode ShadingMode = Preferences.mShadingMode;
+	lcRenderTarget RenderTarget = lcRenderTarget::ModelView;
+
+	if (mViewType == lcViewType::PartsList)
+		RenderTarget = lcRenderTarget::Pieces;
+	else if (mViewType == lcViewType::Preview || mViewType == lcViewType::Minifig)
+		RenderTarget = lcRenderTarget::Preview;
+
+	const lcRenderSettings RenderSettings = Preferences.GetRenderSettings(RenderTarget);
+	lcShadingMode ShadingMode = RenderSettings.ShadingMode;
 	if (ShadingMode == lcShadingMode::Wireframe && !mWidget)
 		ShadingMode = lcShadingMode::Flat;
 
 	mScene->SetShadingMode(ShadingMode);
+	mScene->SetLineSettings(RenderSettings.DrawEdgeLines, RenderSettings.DrawConditionalLines, RenderSettings.LineWidth);
 	mScene->SetAllowLOD(Preferences.mAllowLOD && mWidget != nullptr);
 	mScene->SetRequireCompleteAssets(static_cast<bool>(mRenderFramebuffer));
 	mScene->SetRequireGeneratedMeshes(mRenderFramebuffer && mViewType != lcViewType::PartsList);
@@ -1067,7 +1076,7 @@ void lcView::OnDraw()
 				mContext->SetProjectionMatrix(GetProjectionMatrix());
 			}
 
-			mContext->SetLineWidth(Preferences.mLineWidth);
+			mContext->SetLineWidth(RenderSettings.LineWidth);
 
 			const bool OutlineEnabled = DrawInterface && !mRenderFramebuffer && mRenderImage.isNull() &&
 				ShadingMode != lcShadingMode::Wireframe && Preferences.mHighlightRenderMode == lcHighlightRenderMode::Outline &&

@@ -1222,6 +1222,230 @@
             </property>
            </spacer>
           </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="QCheckBox" name="PreviewSyncRendering">
+            <property name="toolTip">
+             <string>Use the model view rendering settings for the piece preview.</string>
+            </property>
+            <property name="text">
+             <string>Use model view settings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="PreviewShadingModeLabel">
+            <property name="toolTip">
+             <string>Choose how pieces are drawn in the piece preview.</string>
+            </property>
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
+            <property name="buddy">
+             <cstring>PreviewShadingMode</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="PreviewShadingMode">
+            <property name="accessibleName">
+             <string>Preview Shading Mode</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how pieces are drawn in the piece preview.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="PreviewEdgeLines">
+            <property name="toolTip">
+             <string>Draw edge lines on pieces in the piece preview.</string>
+            </property>
+            <property name="text">
+             <string>Edge Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="PreviewConditionalLines">
+            <property name="toolTip">
+             <string>Draw conditional lines on pieces in the piece preview.</string>
+            </property>
+            <property name="text">
+             <string>Conditional Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="PreviewLineWidthTitle">
+            <property name="toolTip">
+             <string>Set the line width used in the piece preview.</string>
+            </property>
+            <property name="text">
+             <string>Line Width:</string>
+            </property>
+            <property name="buddy">
+             <cstring>PreviewLineWidthSlider</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QSlider" name="PreviewLineWidthSlider">
+            <property name="accessibleName">
+             <string>Preview Line Width</string>
+            </property>
+            <property name="toolTip">
+             <string>Set the line width used in the piece preview.</string>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="2">
+           <widget class="QLabel" name="PreviewLineWidthLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="PiecesGroup">
+         <property name="title">
+          <string>Pieces</string>
+         </property>
+         <layout class="QGridLayout" name="PiecesLayout">
+          <item row="0" column="0" colspan="3">
+           <widget class="QCheckBox" name="PiecesSyncRendering">
+            <property name="toolTip">
+             <string>Use the model view rendering settings for the pieces list and parts list images.</string>
+            </property>
+            <property name="text">
+             <string>Use model view settings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="PiecesShadingModeLabel">
+            <property name="toolTip">
+             <string>Choose how pieces are drawn in the pieces list and parts list images.</string>
+            </property>
+            <property name="text">
+             <string>Shading Mode:</string>
+            </property>
+            <property name="buddy">
+             <cstring>PiecesShadingMode</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="PiecesShadingMode">
+            <property name="accessibleName">
+             <string>Pieces Shading Mode</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how pieces are drawn in the pieces list and parts list images.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="PiecesEdgeLines">
+            <property name="toolTip">
+             <string>Draw edge lines on pieces in the pieces list and parts list images.</string>
+            </property>
+            <property name="text">
+             <string>Edge Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="PiecesConditionalLines">
+            <property name="toolTip">
+             <string>Draw conditional lines on pieces in the pieces list and parts list images.</string>
+            </property>
+            <property name="text">
+             <string>Conditional Lines</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="PiecesLineWidthTitle">
+            <property name="toolTip">
+             <string>Set the line width used in the pieces list and parts list images.</string>
+            </property>
+            <property name="text">
+             <string>Line Width:</string>
+            </property>
+            <property name="buddy">
+             <cstring>PiecesLineWidthSlider</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSlider" name="PiecesLineWidthSlider">
+            <property name="accessibleName">
+             <string>Pieces Line Width</string>
+            </property>
+            <property name="toolTip">
+             <string>Set the line width used in the pieces list and parts list images.</string>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="PiecesLineWidthLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <spacer name="PiecesSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
        </item>
@@ -2754,6 +2978,16 @@
   <tabstop>PreviewViewSphereSizeCombo</tabstop>
   <tabstop>PreviewViewSphereLocationCombo</tabstop>
   <tabstop>PreviewAxisIconCheckBox</tabstop>
+  <tabstop>PreviewSyncRendering</tabstop>
+  <tabstop>PreviewShadingMode</tabstop>
+  <tabstop>PreviewEdgeLines</tabstop>
+  <tabstop>PreviewConditionalLines</tabstop>
+  <tabstop>PreviewLineWidthSlider</tabstop>
+  <tabstop>PiecesSyncRendering</tabstop>
+  <tabstop>PiecesShadingMode</tabstop>
+  <tabstop>PiecesEdgeLines</tabstop>
+  <tabstop>PiecesConditionalLines</tabstop>
+  <tabstop>PiecesLineWidthSlider</tabstop>
   <tabstop>BackgroundSolidRadio</tabstop>
   <tabstop>BackgroundSolidColorButton</tabstop>
   <tabstop>BackgroundGradientRadio</tabstop>

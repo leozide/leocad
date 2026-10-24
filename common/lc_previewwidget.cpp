@@ -8,6 +8,7 @@
 #include "lc_application.h"
 #include "lc_viewwidget.h"
 #include "lc_view.h"
+#include "lc_mainwindow.h"
 
 lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	: QMainWindow(Parent)
@@ -55,8 +56,50 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 	mToolBar->widgetForAction(mLockAction)->setWhatsThis(mLockAction->whatsThis());
 	mToolBar->addSeparator();
 	mToolBar->addWidget(mLabel);
+
+	QWidget* Spacer = new QWidget(mToolBar);
+	Spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	mToolBar->addWidget(Spacer);
+
+	QToolButton* OptionsButton = new QToolButton(mToolBar);
+	OptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
+	OptionsButton->setToolTip(tr("Configure the piece preview and parts rendering."));
+	OptionsButton->setAccessibleName(tr("Piece Preview Options"));
+	OptionsButton->setPopupMode(QToolButton::InstantPopup);
+	mToolBar->addWidget(OptionsButton);
+
+	QMenu* OptionsMenu = new QMenu(this);
+	OptionsButton->setMenu(OptionsMenu);
+	connect(OptionsMenu, &QMenu::aboutToShow, this, &lcPreviewDockWidget::OptionsMenuAboutToShow);
+
 	if (mToolBar->isHidden())
 		mToolBar->show();
+}
+
+void lcPreviewDockWidget::OptionsMenuAboutToShow()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(sender());
+	Menu->clear();
+
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	QAction* ViewSphere = Menu->addAction(tr("View Sphere"), this, []()
+	{
+		gMainWindow->HandleCommand(LC_VIEW_TOGGLE_PREVIEW_VIEW_SPHERE);
+	});
+	ViewSphere->setCheckable(true);
+	ViewSphere->setChecked(Preferences.mPreviewViewSphereEnabled);
+
+	QAction* AxisIcon = Menu->addAction(tr("Axis Icon"), this, []()
+	{
+		gMainWindow->HandleCommand(LC_VIEW_TOGGLE_PREVIEW_AXIS_ICON);
+	});
+	AxisIcon->setCheckable(true);
+	AxisIcon->setChecked(Preferences.mDrawPreviewAxis);
+
+	Menu->addSeparator();
+
+	gMainWindow->AddRenderTargetActions(Menu, lcRenderTarget::Preview);
 }
 
 bool lcPreviewDockWidget::SetCurrentPiece(lcPieceData* PieceData, int ColorCode)

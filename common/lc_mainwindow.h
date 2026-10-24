@@ -217,6 +217,14 @@ public:
 	void ToggleAxisIcon();
 	void ToggleGrid();
 	void ToggleFadePreviousSteps();
+	void ToggleEdgeLines(lcRenderTarget Target);
+	void ToggleConditionalLines(lcRenderTarget Target);
+	void ToggleSyncRendering(lcRenderTarget Target);
+	void SetTargetShadingMode(lcRenderTarget Target, lcShadingMode ShadingMode);
+	void AddRenderTargetActions(QMenu* Menu, lcRenderTarget Target);
+	void TogglePreviewViewSphere();
+	void TogglePreviewAxisIcon();
+	void UpdatePartsRendering();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);

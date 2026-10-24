@@ -296,10 +296,6 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		ViewItem->setData(0, Qt::UserRole + 1, QVariant::fromValue<uint>(StepView.first));
 		ViewItem->setToolTip(0, tr("Step view saved as an MLCAD ROTSTEP line. Double-click to edit it."));
 
-		QFont Font = ViewItem->font(0);
-		Font.setItalic(true);
-		ViewItem->setFont(0, Font);
-
 		ViewStepItem->addChild(ViewItem);
 	}
 

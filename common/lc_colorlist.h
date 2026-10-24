@@ -25,6 +25,7 @@ public:
 	QSize sizeHint() const override;
 
 	void SetCurrentColor(int colorIndex);
+	void ToggleGroupCollapsed(int GroupIndex);
 
 signals:
 	void ColorChanged(int colorIndex);

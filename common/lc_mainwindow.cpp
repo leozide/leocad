@@ -3252,6 +3252,18 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		ToggleFadePreviousSteps();
 		break;
 
+	case LC_VIEW_COLORS_TOGGLE_SOLID:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_SOLID);
+		break;
+
+	case LC_VIEW_COLORS_TOGGLE_TRANSLUCENT:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_TRANSLUCENT);
+		break;
+
+	case LC_VIEW_COLORS_TOGGLE_SPECIAL:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_SPECIAL);
+		break;
+
 	case LC_PIECE_INSERT:
 		if (ActiveModel)
 			ActiveModel->AddPiece(nullptr, LC_PIECE_SECTION_INVALID);

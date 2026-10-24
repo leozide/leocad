@@ -138,6 +138,17 @@ void lcColorList::UpdateRects()
 	}
 }
 
+void lcColorList::ToggleGroupCollapsed(int GroupIndex)
+{
+	if (GroupIndex < 0 || GroupIndex >= static_cast<int>(mGroups.size()))
+		return;
+
+	mGroups[GroupIndex].Collapsed = !mGroups[GroupIndex].Collapsed;
+
+	UpdateRects();
+	update();
+}
+
 void lcColorList::ColorsLoaded()
 {
 	UpdateCells();
@@ -228,9 +239,7 @@ void lcColorList::mousePressEvent(QMouseEvent* MouseEvent)
 		if (!Group.Rect.contains(MouseEvent->pos()))
 			continue;
 
-		Group.Collapsed = !Group.Collapsed;
-		UpdateRects();
-		update();
+		ToggleGroupCollapsed(static_cast<int>(&Group - mGroups.data()));
 
 		return;
 	}

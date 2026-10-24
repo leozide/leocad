@@ -74,20 +74,23 @@ void lcColorList::UpdateRects()
 
 	// Tiles are always square: the width sets the tile size and the rows set the height.
 	const int TargetCellSize = Metrics.height() * 3 / 2;
-	mColumns = qMax(5, (width() + 1) / qMax(TargetCellSize, 1));
+	mColumns = qMax(5, width() / qMax(TargetCellSize, 1));
 	mRows = 0;
 
 	for (const lcColorListGroup& Group : mGroups)
 		if (!Group.Collapsed)
 			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
 
-	const float CellWidth = (float)(width() + 1) / (float)mColumns;
+	const float CellWidth = (float)width() / (float)mColumns;
 	const float CellHeight = CellWidth;
 
 	mPreferredHeight = TextHeight + qCeil(CellHeight * mRows);
 
 	if (height() != mPreferredHeight)
+	{
 		setFixedHeight(mPreferredHeight);
+		emit HeightChanged();
+	}
 
 	int CurCell = 0;
 	float GroupY = 0.0f;
@@ -111,8 +114,8 @@ void lcColorList::UpdateRects()
 
 		for (size_t ColorIdx = 0; ColorIdx < Group.Cells.size(); ColorIdx++)
 		{
-			const int Left = CellWidth * CurColumn - 1;
-			const int Right = (CurColumn + 1) * CellWidth - 1;
+			const int Left = CellWidth * CurColumn;
+			const int Right = (CurColumn + 1 == mColumns) ? width() - 1 : (CurColumn + 1) * CellWidth;
 			const int Top = GroupY + CellHeight * NumRows;
 			const int Bottom = GroupY + CellHeight * (NumRows + 1);
 

@@ -757,6 +757,12 @@ void lcMainWindow::CreateToolBars()
 	ColorLayout->addWidget(mColorList);
 	mColorList->setAccessibleName(tr("LDraw Colors"));
 
+	// The panel is always exactly as tall as the color button and the tiles.
+	connect(mColorList, &lcColorList::HeightChanged, this, [ColorWidget, ColorLayout]()
+	{
+		ColorWidget->setFixedHeight(ColorLayout->sizeHint().height());
+	});
+
 	mColorsToolBar->setWidget(ColorWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 

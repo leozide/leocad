@@ -29,6 +29,7 @@ public:
 signals:
 	void ColorChanged(int colorIndex);
 	void ColorSelected(int colorIndex);
+	void HeightChanged();
 
 protected slots:
 	void ColorsLoaded();

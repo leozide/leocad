@@ -33,170 +33,6 @@
        <property name="fieldGrowthPolicy">
         <enum>QFormLayout::FieldGrowthPolicy::ExpandingFieldsGrow</enum>
        </property>
-       <item row="1" column="0" colspan="2">
-        <widget class="QGroupBox" name="ApplicationGroup">
-         <property name="title">
-          <string>Application</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_19">
-            <property name="toolTip">
-             <string>Choose the interface language used after restarting LeoCAD.</string>
-            </property>
-            <property name="text">
-             <string>Language:</string>
-            </property>
-            <property name="buddy">
-             <cstring>Language</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="Language">
-            <property name="accessibleName">
-             <string>Language</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose the interface language used after restarting LeoCAD.</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>Default</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="checkForUpdates">
-            <property name="accessibleName">
-             <string>Check for Updates</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose how often to check automatically for application and piece-library updates.</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>Never</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Once a day</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Once a week</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="toolTip">
-             <string>Choose how often to check automatically for application and piece-library updates.</string>
-            </property>
-            <property name="text">
-             <string>Check for Updates:</string>
-            </property>
-            <property name="buddy">
-             <cstring>checkForUpdates</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <spacer name="horizontalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_25">
-            <property name="toolTip">
-             <string>Choose the interface theme and optionally reset its colors.</string>
-            </property>
-            <property name="text">
-             <string>Color Theme:</string>
-            </property>
-            <property name="buddy">
-             <cstring>ColorTheme</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="ColorTheme">
-            <property name="accessibleName">
-             <string>Color Theme</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose the interface theme and optionally reset its colors.</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>Dark</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>System</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="toolTip">
-          <string>Set the author name used for new models.</string>
-         </property>
-         <property name="text">
-          <string>Default Author Name:</string>
-         </property>
-         <property name="buddy">
-          <cstring>authorName</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="authorName">
-         <property name="accessibleName">
-          <string>Default Author Name</string>
-         </property>
-         <property name="toolTip">
-          <string>Set the author name used for new models.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QCheckBox" name="fixedDirectionKeys">
-         <property name="toolTip">
-          <string>Move pieces along fixed model axes instead of view-relative directions.</string>
-         </property>
-         <property name="text">
-          <string>Fixed direction keys</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="0" colspan="2">
-        <widget class="QCheckBox" name="autoLoadMostRecent">
-         <property name="toolTip">
-          <string>Open the most recently used file when LeoCAD starts.</string>
-         </property>
-         <property name="text">
-          <string>Open most recent file on startup</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" colspan="2">
         <widget class="QGroupBox" name="CustomPathsGroup">
          <property name="title">
@@ -403,14 +239,196 @@
          </layout>
         </widget>
        </item>
-       <item row="11" column="0" colspan="2">
-        <widget class="QCheckBox" name="RestoreTabLayout">
-         <property name="toolTip">
-          <string>Restore saved model tabs and view layouts when opening a model.</string>
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="ApplicationGroup">
+         <property name="title">
+          <string>Application</string>
          </property>
-         <property name="text">
-          <string>Restore tab layout</string>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="toolTip">
+             <string>Choose the interface language used after restarting LeoCAD.</string>
+            </property>
+            <property name="text">
+             <string>Language:</string>
+            </property>
+            <property name="buddy">
+             <cstring>Language</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="Language">
+            <property name="accessibleName">
+             <string>Language</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the interface language used after restarting LeoCAD.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Default</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="checkForUpdates">
+            <property name="accessibleName">
+             <string>Check for Updates</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how often to check automatically for application and piece-library updates.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Never</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a day</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Once a week</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="toolTip">
+             <string>Choose how often to check automatically for application and piece-library updates.</string>
+            </property>
+            <property name="text">
+             <string>Check for Updates:</string>
+            </property>
+            <property name="buddy">
+             <cstring>checkForUpdates</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="toolTip">
+             <string>Choose the interface theme and optionally reset its colors.</string>
+            </property>
+            <property name="text">
+             <string>Color Theme:</string>
+            </property>
+            <property name="buddy">
+             <cstring>ColorTheme</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="ColorTheme">
+            <property name="accessibleName">
+             <string>Color Theme</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the interface theme and optionally reset its colors.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Dark</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>System</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QGroupBox" name="FilesGroup">
+         <property name="title">
+          <string>Files</string>
          </property>
+         <layout class="QGridLayout" name="FilesLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="toolTip">
+             <string>Set the author name used for new models.</string>
+            </property>
+            <property name="text">
+             <string>Default Author Name:</string>
+            </property>
+            <property name="buddy">
+             <cstring>authorName</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="authorName">
+            <property name="accessibleName">
+             <string>Default Author Name</string>
+            </property>
+            <property name="toolTip">
+             <string>Set the author name used for new models.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="autoLoadMostRecent">
+            <property name="toolTip">
+             <string>Open the most recently used file when LeoCAD starts.</string>
+            </property>
+            <property name="text">
+             <string>Open most recent file on startup</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="RestoreTabLayout">
+            <property name="toolTip">
+             <string>Restore saved model tabs and view layouts when opening a model.</string>
+            </property>
+            <property name="text">
+             <string>Restore tab layout</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QGroupBox" name="EditingGroup">
+         <property name="title">
+          <string>Editing</string>
+         </property>
+         <layout class="QGridLayout" name="EditingLayout">
+          <item row="0" column="0" colspan="2">
+           <widget class="QCheckBox" name="fixedDirectionKeys">
+            <property name="toolTip">
+             <string>Move pieces along fixed model axes instead of view-relative directions.</string>
+            </property>
+            <property name="text">
+             <string>Fixed direction keys</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -424,176 +442,18 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <widget class="QWidget" name="widget" native="true">
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="10" column="1">
-           <widget class="QToolButton" name="FadeStepsColor">
-            <property name="accessibleName">
-             <string>Previous Step Color</string>
-            </property>
+        <widget class="QGroupBox" name="QualityGroup">
+         <property name="title">
+          <string>Quality</string>
+         </property>
+         <layout class="QGridLayout" name="QualityLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="antiAliasing">
             <property name="toolTip">
-             <string>Choose the tint used for pieces from previous steps.</string>
+             <string>Smooth jagged edges in model views; changes require restarting LeoCAD.</string>
             </property>
             <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="1">
-           <widget class="QComboBox" name="ShadingMode">
-            <property name="accessibleName">
-             <string>Shading Mode</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose how piece surfaces and edges are drawn in model views.</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>Wireframe</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat Shading</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Default Lights</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QCheckBox" name="MeshLOD">
-            <property name="toolTip">
-             <string>Use simpler meshes for distant pieces to improve display performance.</string>
-            </property>
-            <property name="text">
-             <string>Mesh LOD</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QCheckBox" name="FadeSteps">
-            <property name="toolTip">
-             <string>Tint pieces from previous building steps with the chosen fade color.</string>
-            </property>
-            <property name="text">
-             <string>Fade Previous Steps</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="11" column="0">
-           <widget class="QCheckBox" name="HighlightNewParts">
-            <property name="toolTip">
-             <string>Highlight pieces introduced in the current building step.</string>
-            </property>
-            <property name="text">
-             <string>Highlight New Pieces</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QToolButton" name="HighlightNewPartsColor">
-            <property name="accessibleName">
-             <string>New Piece Highlight Color</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose the highlight color for pieces in the current step.</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="18" column="1">
-           <widget class="QToolButton" name="BlenderAddonSettingsButton">
-            <property name="accessibleName">
-             <string>Blender LDraw Render</string>
-            </property>
-            <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
-            </property>
-            <property name="toolTip">
-             <string>Configure Blender and its LDraw import and render add-ons.</string>
-            </property>
-            <property name="text">
-             <string>Add-on Settings...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="HighlightRenderModeLabel">
-            <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose how selected pieces and new pieces are highlighted in the viewport.</string>
-            </property>
-            <property name="text">
-             <string>Highlight Style:</string>
-            </property>
-            <property name="buddy">
-             <cstring>HighlightRenderMode</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="QSlider" name="MeshLODSlider">
-            <property name="accessibleName">
-             <string>Mesh Detail Distance</string>
-            </property>
-            <property name="toolTip">
-             <string>Set the distance in LDraw units at which simpler piece meshes are used.</string>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TickPosition::NoTicks</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="2">
-           <widget class="QToolButton" name="HighContrastButton">
-            <property name="toolTip">
-             <string>Configure colors and the light/dark threshold for high contrast stud styles.</string>
-            </property>
-            <property name="text">
-             <string>Contrast Settings...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="toolTip">
-             <string>Choose how piece surfaces and edges are drawn in model views.</string>
-            </property>
-            <property name="buddy">
-             <cstring>ShadingMode</cstring>
-            </property>
-            <property name="text">
-             <string>Shading Mode:</string>
+             <string>Anti-aliasing</string>
             </property>
            </widget>
           </item>
@@ -622,23 +482,149 @@
             </item>
            </widget>
           </item>
-          <item row="18" column="0">
-           <widget class="QLabel" name="label_39">
-            <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="StepsGroup">
+         <property name="title">
+          <string>Building Steps</string>
+         </property>
+         <layout class="QGridLayout" name="StepsLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
             <property name="toolTip">
-             <string>Configure Blender and its LDraw import and render add-ons.</string>
-            </property>
-            <property name="buddy">
-             <cstring>BlenderAddonSettingsButton</cstring>
+             <string>Tint pieces from previous building steps with the chosen fade color.</string>
             </property>
             <property name="text">
-             <string>Blender LDraw Render:</string>
+             <string>Fade Previous Steps</string>
             </property>
            </widget>
           </item>
-          <item row="13" column="1">
+          <item row="0" column="1">
+           <widget class="QToolButton" name="FadeStepsColor">
+            <property name="accessibleName">
+             <string>Previous Step Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the tint used for pieces from previous steps.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="toolTip">
+             <string>Highlight pieces introduced in the current building step.</string>
+            </property>
+            <property name="text">
+             <string>Highlight New Pieces</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="accessibleName">
+             <string>New Piece Highlight Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the highlight color for pieces in the current step.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="StepsSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="PiecesGroup">
+         <property name="title">
+          <string>Pieces</string>
+         </property>
+         <layout class="QGridLayout" name="PiecesLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="MeshLOD">
+            <property name="toolTip">
+             <string>Use simpler meshes for distant pieces to improve display performance.</string>
+            </property>
+            <property name="text">
+             <string>Mesh LOD</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSlider" name="MeshLODSlider">
+            <property name="accessibleName">
+             <string>Mesh Detail Distance</string>
+            </property>
+            <property name="toolTip">
+             <string>Set the distance in LDraw units at which simpler piece meshes are used.</string>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TickPosition::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="MeshLODLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="toolTip">
+             <string>Choose stud geometry and the high contrast stud styles.</string>
+            </property>
+            <property name="buddy">
+             <cstring>studStyleCombo</cstring>
+            </property>
+            <property name="text">
+             <string>Stud Style</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="QComboBox" name="studStyleCombo">
             <property name="accessibleName">
              <string>Stud Style</string>
@@ -688,37 +674,71 @@
             </item>
            </widget>
           </item>
-          <item row="12" column="2">
-           <widget class="QLabel" name="MeshLODLabel">
+          <item row="1" column="2">
+           <widget class="QToolButton" name="HighContrastButton">
+            <property name="toolTip">
+             <string>Configure colors and the light/dark threshold for high contrast stud styles.</string>
+            </property>
             <property name="text">
-             <string/>
+             <string>Contrast Settings...</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="antiAliasing">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="toolTip">
-             <string>Smooth jagged edges in model views; changes require restarting LeoCAD.</string>
-            </property>
-            <property name="text">
-             <string>Anti-aliasing</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="0">
-           <widget class="QLabel" name="label_24">
-            <property name="toolTip">
-             <string>Choose stud geometry and the high contrast stud styles.</string>
+             <string>Choose how piece surfaces and edges are drawn in model views.</string>
             </property>
             <property name="buddy">
-             <cstring>studStyleCombo</cstring>
+             <cstring>ShadingMode</cstring>
             </property>
             <property name="text">
-             <string>Stud Style</string>
+             <string>Shading Mode:</string>
             </property>
            </widget>
           </item>
-          <item row="15" column="1">
+          <item row="2" column="1">
+           <widget class="QComboBox" name="ShadingMode">
+            <property name="accessibleName">
+             <string>Shading Mode</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how piece surfaces and edges are drawn in model views.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Wireframe</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Flat Shading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Default Lights</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="HighlightRenderModeLabel">
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose how selected pieces and new pieces are highlighted in the viewport.</string>
+            </property>
+            <property name="text">
+             <string>Highlight Style:</string>
+            </property>
+            <property name="buddy">
+             <cstring>HighlightRenderMode</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QComboBox" name="HighlightRenderMode">
             <property name="accessibleName">
              <string>Highlight Style</string>
@@ -740,6 +760,73 @@
              </property>
             </item>
            </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="PiecesSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="BlenderGroup">
+         <property name="title">
+          <string>Blender</string>
+         </property>
+         <layout class="QGridLayout" name="BlenderLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_39">
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
+            <property name="buddy">
+             <cstring>BlenderAddonSettingsButton</cstring>
+            </property>
+            <property name="text">
+             <string>Blender LDraw Render:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="BlenderAddonSettingsButton">
+            <property name="accessibleName">
+             <string>Blender LDraw Render</string>
+            </property>
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
+            <property name="text">
+             <string>Add-on Settings...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="BlenderSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -2651,43 +2738,52 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15">
-         <item>
-          <widget class="QLabel" name="label_13">
-           <property name="toolTip">
-            <string>Adjust how strongly mouse motion affects navigation.</string>
-           </property>
-           <property name="buddy">
-            <cstring>mouseSensitivity</cstring>
-           </property>
-           <property name="text">
-            <string>Mouse Sensitivity:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSlider" name="mouseSensitivity">
-           <property name="accessibleName">
-            <string>Mouse Sensitivity</string>
-           </property>
-           <property name="toolTip">
-            <string>Adjust how strongly mouse motion affects navigation.</string>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>20</number>
-           </property>
-           <property name="pageStep">
-            <number>5</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="MouseSensitivityGroup">
+         <property name="title">
+          <string>Navigation</string>
+         </property>
+         <layout class="QVBoxLayout" name="MouseSensitivityLayout">
+          <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QLabel" name="label_13">
+               <property name="toolTip">
+                <string>Adjust how strongly mouse motion affects navigation.</string>
+               </property>
+               <property name="buddy">
+                <cstring>mouseSensitivity</cstring>
+               </property>
+               <property name="text">
+                <string>Mouse Sensitivity:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="mouseSensitivity">
+               <property name="accessibleName">
+                <string>Mouse Sensitivity</string>
+               </property>
+               <property name="toolTip">
+                <string>Adjust how strongly mouse motion affects navigation.</string>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>20</number>
+               </property>
+               <property name="pageStep">
+                <number>5</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -2722,9 +2818,9 @@
   <tabstop>Language</tabstop>
   <tabstop>checkForUpdates</tabstop>
   <tabstop>authorName</tabstop>
-  <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>RestoreTabLayout</tabstop>
+  <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>FadeSteps</tabstop>

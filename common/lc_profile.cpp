@@ -86,6 +86,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "GridOrigin", 0),                                                           // LC_PROFILE_GRID_ORIGIN
 	lcProfileEntry("Settings", "GridHeightXZ", 0),                                                         // LC_PROFILE_GRID_HEIGHT_XZ
 	lcProfileEntry("Settings", "GridHeightYZ", 0),                                                         // LC_PROFILE_GRID_HEIGHT_YZ
+	lcProfileEntry("Settings", "GridHeightBehindModel", 0),                                                // LC_PROFILE_GRID_HEIGHT_BEHIND_MODEL
 	lcProfileEntry("Settings", "AASamples", 1),                                                            // LC_PROFILE_ANTIALIASING_SAMPLES
 	lcProfileEntry("Settings", "ViewSphereEnabled", 1),                                                    // LC_PROFILE_VIEW_SPHERE_ENABLED
 	lcProfileEntry("Settings", "ViewSphereLocation", (int)lcViewSphereLocation::TopRight),                 // LC_PROFILE_VIEW_SPHERE_LOCATION

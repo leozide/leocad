@@ -3258,6 +3258,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		lcView::UpdateAllViews();
 		break;
 
+	case LC_VIEW_GRID_TOGGLE_HEIGHT_BEHIND:
+		lcGetPreferences().mGridHeightBehindModel = !lcGetPreferences().mGridHeightBehindModel;
+		lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_BEHIND_MODEL, lcGetPreferences().mGridHeightBehindModel);
+		lcView::UpdateAllViews();
+		break;
+
 	case LC_PIECE_INSERT:
 		if (ActiveModel)
 			ActiveModel->AddPiece(nullptr, LC_PIECE_SECTION_INVALID);

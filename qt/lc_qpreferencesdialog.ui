@@ -1114,6 +1114,16 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="0" colspan="3">
+           <widget class="QCheckBox" name="GridHeightBehindCheckBox">
+            <property name="toolTip">
+             <string>Draw the height grids on the side of the model facing away from the camera instead of through the origin axes.</string>
+            </property>
+            <property name="text">
+             <string>Draw height grids behind the model</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0" colspan="3">
            <widget class="QCheckBox" name="gridStuds">
             <property name="toolTip">
@@ -2773,6 +2783,7 @@
   <tabstop>GridOriginCheckBox</tabstop>
   <tabstop>GridHeightXZCheckBox</tabstop>
   <tabstop>GridHeightYZCheckBox</tabstop>
+  <tabstop>GridHeightBehindCheckBox</tabstop>
   <tabstop>PreviewViewSphereSizeCombo</tabstop>
   <tabstop>PreviewViewSphereLocationCombo</tabstop>
   <tabstop>PreviewAxisIconCheckBox</tabstop>

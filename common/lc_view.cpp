@@ -1817,7 +1817,7 @@ void lcView::DrawGrid()
 
 	if (Preferences.mDrawGridHeightXZ || Preferences.mDrawGridHeightYZ)
 	{
-		// Vertical grids through the origin axes with a line every plate height.
+		// Vertical grids through the origin axes, or behind the model, with a line every plate height.
 		constexpr float PlateHeight = 8.0f;
 		const float LineSpacing = 20.0f * Spacing;
 		const float Left = MinX * LineSpacing;
@@ -1826,12 +1826,14 @@ void lcView::DrawGrid()
 		const float Back = MaxY * LineSpacing;
 		const int PlateCount = lcMax(static_cast<int>(ceilf((GridSizeValid && std::isfinite(Max[2]) ? Max[2] : 0.0f) / PlateHeight)) + 3, 9);
 		const float Top = PlateCount * PlateHeight;
+		const lcVector3 CameraPosition = mCamera->mPosition;
+		const bool BehindModel = Preferences.mGridHeightBehindModel;
 
 		std::vector<lcVector3> Lines;
 
 		if (Preferences.mDrawGridHeightXZ)
 		{
-			const float Y = 0.0f;
+			const float Y = !BehindModel ? 0.0f : CameraPosition.y > (Front + Back) * 0.5f ? Front : Back;
 
 			for (int Step = MinX; Step <= MaxX; Step++)
 			{
@@ -1848,7 +1850,7 @@ void lcView::DrawGrid()
 
 		if (Preferences.mDrawGridHeightYZ)
 		{
-			const float X = 0.0f;
+			const float X = !BehindModel ? 0.0f : CameraPosition.x > (Left + Right) * 0.5f ? Left : Right;
 
 			for (int Step = MinY; Step <= MaxY; Step++)
 			{

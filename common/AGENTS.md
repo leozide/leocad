@@ -21,4 +21,4 @@
 # Dialog help and translations
 
 - Follow `docs/dialog-help.md` when adding or changing dialog controls, including help text, label buddies, and Help/F1 behavior.
-- Keep UI strings translatable and refresh affected catalogs. Preserve existing translations and review status; leave new untranslated or generated translations unfinished.
+- Keep UI strings translatable.

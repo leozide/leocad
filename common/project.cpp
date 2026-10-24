@@ -1791,12 +1791,28 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	mModels[0]->WaitForAssets();
 
+	struct lcScopedModelSteps
+	{
+		std::vector<std::pair<lcModel*, bool>> States;
+
+		~lcScopedModelSteps()
+		{
+			for (const std::pair<lcModel*, bool>& State : States)
+				State.first->SetActive(State.second);
+		}
+	};
+
+	// Export completed geometry without changing which models are being edited.
+	lcScopedModelSteps ModelSteps;
+	ModelSteps.States.reserve(mModels.size());
+
 	for (const std::unique_ptr<lcModel>& Model : mModels)
+	{
+		ModelSteps.States.emplace_back(Model.get(), Model->IsActive());
 		Model->CalculateStep(LC_STEP_MAX);
+	}
 
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
-
-	SetActiveModel(mActiveModel, false);
 
 	ModelParts.erase(std::remove_if(ModelParts.begin(), ModelParts.end(), [](const lcModelPartsEntry& ModelPart)
 	{

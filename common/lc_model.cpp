@@ -591,6 +591,22 @@ void lcModel::UpdatePieceData(std::vector<lcModel*>& UpdatedModels)
 	mPieceData->SetBoundingBox(Min, Max);
 }
 
+static QString lcGetStepEndLine(const lcModelProperties& Properties, lcStep Step)
+{
+	const std::map<lcStep, lcStepView>::const_iterator StepView = Properties.mStepViews.find(Step);
+
+	if (StepView == Properties.mStepViews.end())
+		return QLatin1String("0 STEP\r\n");
+
+	if (StepView->second.Mode == lcStepViewMode::End)
+		return QLatin1String("0 ROTSTEP END\r\n");
+
+	const char* Modes[] = { "REL", "ABS", "ADD" };
+	const lcVector3& Angles = StepView->second.Angles;
+
+	return QString("0 ROTSTEP %1 %2 %3 %4\r\n").arg(lcFormatValue(Angles.x, 2), lcFormatValue(Angles.y, 2), lcFormatValue(Angles.z, 2), QLatin1String(Modes[static_cast<int>(StepView->second.Mode)]));
+}
+
 void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
 {
 	const QLatin1String LineEnding("\r\n");
@@ -622,6 +638,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 			QString Token;
 			LineStream >> Token;
 			bool Skip = false;
+			bool StepLine = false;
 
 			if (Token == QLatin1String("0"))
 			{
@@ -638,6 +655,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 						}
 
 						Step++;
+						StepLine = true;
 					}
 					else
 						Skip = true;
@@ -646,7 +664,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 			if (!Skip)
 			{
-				Stream << mFileLines[CurrentLine];
+				Stream << (StepLine ? lcGetStepEndLine(mProperties, Step - 1) : mFileLines[CurrentLine]);
 				if (AddedSteps > 0)
 					AddedSteps--;
 			}
@@ -658,7 +676,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 
 		while (Piece->GetStepShow() > Step)
 		{
-			Stream << QLatin1String("0 STEP\r\n");
+			Stream << lcGetStepEndLine(mProperties, Step);
 			AddedSteps++;
 			Step++;
 		}
@@ -743,6 +761,7 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 		QString Token;
 		LineStream >> Token;
 		bool Skip = false;
+		bool StepLine = false;
 
 		if (Token == QLatin1String("0"))
 		{
@@ -758,12 +777,13 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 						break;
 
 					Step++;
+					StepLine = true;
 				}
 			}
 		}
 
 		if (!Skip)
-			Stream << mFileLines[CurrentLine];
+			Stream << (StepLine ? lcGetStepEndLine(mProperties, Step - 1) : mFileLines[CurrentLine]);
 		CurrentLine++;
 	}
 
@@ -798,6 +818,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 	mProperties.mAuthor.clear();
 	mProperties.mDescription.clear();
 	mProperties.mComments.clear();
+	mProperties.mStepViews.clear();
 	mAssetSourceDirectories.clear();
 	mPreferCurrentAssetDirectory = true;
 	bool ReadingHeader = true;
@@ -843,8 +864,33 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 					continue;
 			}
 
-			if (Token == QLatin1String("STEP"))
+			if (Token == QLatin1String("STEP") || Token == QLatin1String("ROTSTEP"))
 			{
+				// ROTSTEP ends the step like STEP and sets its view rotation.
+				if (Token == QLatin1String("ROTSTEP"))
+				{
+					lcStepView StepView;
+					QString Value;
+					LineStream >> Value;
+
+					if (Value.compare(QLatin1String("END"), Qt::CaseInsensitive) == 0)
+						StepView.Mode = lcStepViewMode::End;
+					else
+					{
+						QString Mode;
+						StepView.Angles.x = Value.toFloat();
+						LineStream >> StepView.Angles.y >> StepView.Angles.z >> Mode;
+
+						if (Mode.compare(QLatin1String("ABS"), Qt::CaseInsensitive) == 0)
+							StepView.Mode = lcStepViewMode::Absolute;
+						else if (Mode.compare(QLatin1String("ADD"), Qt::CaseInsensitive) == 0)
+							StepView.Mode = lcStepViewMode::Add;
+					}
+
+					mProperties.mStepViews[CurrentStep] = StepView;
+					OriginalLine = QLatin1String(OriginalLine.endsWith(QLatin1String("\r\n")) ? "0 STEP\r\n" : "0 STEP\n");
+				}
+
 				delete Piece;
 				Piece = nullptr;
 				CurrentStep++;
@@ -2392,7 +2438,18 @@ void lcModel::EndEditHistory()
 
 void lcModel::LoadModelPropertiesState(const lcModelProperties& ModelProperties)
 {
+	const bool StepViewsChanged = mProperties.mStepViews != ModelProperties.mStepViews;
 	mProperties = ModelProperties;
+
+	// Undo and redo of step views update the Timeline and turn the view again.
+	if (StepViewsChanged && gMainWindow && !mIsPreview)
+	{
+		gMainWindow->UpdateTimeline(false, false);
+
+		if (lcGetPreferences().mFollowStepViews)
+			for (lcView* View : lcView::GetModelViews(this))
+				View->ApplyStepView();
+	}
 
 	if (gMainWindow)
 		gMainWindow->GetPreviewWidget()->UpdatePreview();
@@ -2605,11 +2662,18 @@ void lcModel::CalculateStep(lcStep Step)
 
 void lcModel::SetCurrentStep(lcStep Step)
 {
+	const bool StepChanged = Step != mCurrentStep;
 	mCurrentStep = Step;
 	CalculateStep(Step);
 
 	gMainWindow->UpdateTimeline(false, false);
 	gMainWindow->UpdateSelectedObjects(true);
+
+	// Only a step change turns the view, so edits within a step keep the camera where it is.
+	if (StepChanged && lcGetPreferences().mFollowStepViews && !mIsPreview)
+		for (lcView* View : lcView::GetModelViews(this))
+			View->ApplyStepView();
+
 	UpdateAllViews();
 	gMainWindow->UpdateCurrentStep();
 }
@@ -2676,6 +2740,78 @@ void lcModel::InsertStep(lcStep Step)
 		Light->InsertTime(Step, 1);
 }
 
+void lcModel::SetStepView(lcStep Step, const std::optional<lcStepView>& StepView)
+{
+	lcModelProperties Properties = mProperties;
+
+	if (StepView)
+		Properties.mStepViews[Step] = *StepView;
+	else
+		Properties.mStepViews.erase(Step);
+
+	if (Properties == mProperties)
+		return;
+
+	BeginHistorySequence();
+	SetModelProperties(Properties);
+	EndHistorySequence(tr("Set Step View"));
+
+	SetCurrentStep(mCurrentStep);
+}
+
+std::optional<lcStepView> lcModel::GetEffectiveStepView(lcStep Step) const
+{
+	std::optional<lcStepView> Effective;
+
+	// A view set at the end of a step applies to that step and carries on until it is changed or ended.
+	for (const std::pair<const lcStep, lcStepView>& StepView : mProperties.mStepViews)
+	{
+		if (StepView.first > Step)
+			break;
+
+		switch (StepView.second.Mode)
+		{
+		case lcStepViewMode::End:
+			Effective.reset();
+			break;
+
+		case lcStepViewMode::Relative:
+		case lcStepViewMode::Absolute:
+			Effective = StepView.second;
+			break;
+
+		case lcStepViewMode::Add:
+			if (Effective)
+				Effective->Angles += StepView.second.Angles;
+			else
+				Effective = lcStepView{ lcStepViewMode::Relative, StepView.second.Angles };
+			break;
+		}
+	}
+
+	return Effective;
+}
+
+void lcModel::ShiftStepViews(lcStep Step, int Offset)
+{
+	lcModelProperties Properties = mProperties;
+	std::map<lcStep, lcStepView> StepViews;
+
+	// Step views move with their steps; removing a step drops its view.
+	for (const std::pair<const lcStep, lcStepView>& StepView : mProperties.mStepViews)
+	{
+		if (StepView.first < Step)
+			StepViews[StepView.first] = StepView.second;
+		else if (Offset > 0)
+			StepViews[StepView.first + Offset] = StepView.second;
+		else if (StepView.first > Step)
+			StepViews[StepView.first + Offset] = StepView.second;
+	}
+
+	Properties.mStepViews = std::move(StepViews);
+	SetModelProperties(Properties);
+}
+
 void lcModel::InsertStepAction(lcStep Step)
 {
 	BeginHistorySequence();
@@ -2684,6 +2820,7 @@ void lcModel::InsertStepAction(lcStep Step)
 	InsertStep(Step);
 
 	EndEditHistory();
+	ShiftStepViews(Step, 1);
 	EndHistorySequence(tr("Insert Step"));
 
 	SetCurrentStep(mCurrentStep);
@@ -2704,6 +2841,7 @@ void lcModel::RemoveStepAction(lcStep Step)
 		Light->RemoveTime(Step, 1);
 
 	EndEditHistory();
+	ShiftStepViews(Step, -1);
 	EndHistorySequence(tr("Remove Step"));
 
 	SetCurrentStep(mCurrentStep);

@@ -33,6 +33,7 @@ void lcPreferences::LoadDefaults()
 	mBackgroundGradientColorTop = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_TOP);
 	mBackgroundGradientColorBottom = lcGetProfileUInt(LC_PROFILE_GRADIENT_COLOR_BOTTOM);
 	mDrawAxes = lcGetProfileInt(LC_PROFILE_DRAW_AXES);
+	mFollowStepViews = lcGetProfileInt(LC_PROFILE_FOLLOW_STEP_VIEWS);
 	mAxisIconLocation = lcGetProfileAxisIconLocation();
 	mTextColor = lcGetProfileUInt(LC_PROFILE_TEXT_COLOR);
 	mTextHaloColor = lcGetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR);
@@ -95,6 +96,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileShadingMode(mShadingMode);
 	lcSetProfileHighlightRenderMode(mHighlightRenderMode);
 	lcSetProfileInt(LC_PROFILE_DRAW_AXES, mDrawAxes);
+	lcSetProfileInt(LC_PROFILE_FOLLOW_STEP_VIEWS, mFollowStepViews);
 	lcSetProfileAxisIconLocation(mAxisIconLocation);
 	lcSetProfileUInt(LC_PROFILE_TEXT_COLOR, mTextColor);
 	lcSetProfileUInt(LC_PROFILE_TEXT_HALO_COLOR, mTextHaloColor);

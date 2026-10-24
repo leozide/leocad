@@ -25,6 +25,17 @@ lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	connect(this, &QTreeWidget::currentItemChanged, this, &lcTimelineWidget::CurrentItemChanged);
 	connect(this, &QTreeWidget::itemSelectionChanged, this, &lcTimelineWidget::ItemSelectionChanged);
 	connect(this, &QWidget::customContextMenuRequested, this, &lcTimelineWidget::CustomMenuRequested);
+	connect(this, &QTreeWidget::itemDoubleClicked, this, [](QTreeWidgetItem* Item)
+	{
+		const QVariant ViewStep = Item ? Item->data(0, Qt::UserRole + 1) : QVariant();
+		lcModel* Model = gMainWindow->GetActiveModel();
+
+		if (!ViewStep.isValid() || !Model)
+			return;
+
+		Model->SetCurrentStep(ViewStep.toUInt());
+		gMainWindow->HandleCommand(LC_VIEW_STEP_VIEW_EDIT);
+	});
 }
 
 lcTimelineWidget::~lcTimelineWidget()
@@ -33,6 +44,13 @@ lcTimelineWidget::~lcTimelineWidget()
 
 void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
+	// Right-clicking a step view row makes its step current, so the step view entries act on it.
+	QTreeWidgetItem* ClickedItem = itemAt(Pos);
+	const QVariant ViewStep = ClickedItem ? ClickedItem->data(0, Qt::UserRole + 1) : QVariant();
+
+	if (ViewStep.isValid())
+		gMainWindow->GetActiveModel()->SetCurrentStep(ViewStep.toUInt());
+
 	QMenu* Menu = new QMenu(this);
 
 	lcObject* FocusObject = gMainWindow->GetActiveModel()->GetFocusObject();
@@ -54,6 +72,11 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_BEFORE]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
+	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_EDIT]);
+
+	// Removing is only offered on a step view row.
+	if (ViewStep.isValid())
+		Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_REMOVE]);
 
 	Menu->addSeparator();
 
@@ -95,6 +118,16 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		mCurrentStepItem = nullptr;
 		mItems.clear();
 		clear();
+	}
+
+	// Step view rows are rebuilt after the piece rows.
+	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
+	{
+		QTreeWidgetItem* StepItem = topLevelItem(TopLevelItemIdx);
+
+		for (int ChildIdx = StepItem->childCount() - 1; ChildIdx >= 0; ChildIdx--)
+			if (StepItem->child(ChildIdx)->data(0, Qt::UserRole + 1).isValid())
+				delete StepItem->child(ChildIdx);
 	}
 
 	lcStep LastStep = Model->GetLastStep();
@@ -248,6 +281,33 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		Step++;
 		StepItem = topLevelItem(Step - 1);
 		PieceItemIndex = 0;
+	}
+
+	// A step view is its own row closing the step, like the ROTSTEP line that ends it.
+	const std::map<lcStep, lcStepView>& StepViews = Model->GetProperties().mStepViews;
+
+	for (const std::pair<const lcStep, lcStepView>& StepView : StepViews)
+	{
+		QTreeWidgetItem* ViewStepItem = StepView.first <= static_cast<lcStep>(topLevelItemCount()) ? topLevelItem(StepView.first - 1) : nullptr;
+
+		if (!ViewStepItem)
+			continue;
+
+		const QString Modes[] = { tr("relative"), tr("absolute"), tr("added") };
+		const lcVector3& Angles = StepView.second.Angles;
+		QString Label;
+
+		if (StepView.second.Mode == lcStepViewMode::End)
+			Label = tr("View: back to default");
+		else
+			Label = tr("View: %1, %2, %3 %4").arg(Angles.x).arg(Angles.y).arg(Angles.z).arg(Modes[static_cast<int>(StepView.second.Mode)]);
+
+		QTreeWidgetItem* ViewItem = new QTreeWidgetItem(QStringList(Label));
+		ViewItem->setFlags(Qt::ItemIsEnabled);
+		ViewItem->setData(0, Qt::UserRole + 1, QVariant::fromValue<uint>(StepView.first));
+		ViewItem->setToolTip(0, tr("Step view saved as an MLCAD ROTSTEP line. Double-click to edit it."));
+
+		ViewStepItem->addChild(ViewItem);
 	}
 
 	UpdateCurrentStepItem();
@@ -616,6 +676,9 @@ void lcTimelineWidget::UpdateModel()
 		{
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
 			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+			if (!Piece)
+				continue;
 
 			PieceSteps.emplace_back(std::pair<lcPiece*, lcStep>(Piece, TopLevelItemIdx + 1));
 		}

@@ -11,6 +11,7 @@ struct lcColorListGroup
 	QRect Rect;
 	QString Name;
 	std::vector<size_t> Cells;
+	bool Collapsed = false;
 };
 
 class lcColorList : public QWidget
@@ -22,12 +23,15 @@ public:
 	~lcColorList() = default;
 
 	QSize sizeHint() const override;
+	int GetHeightForWidth(int Width, int* Columns = nullptr, int* Rows = nullptr) const;
 
 	void SetCurrentColor(int colorIndex);
+	void ToggleGroupCollapsed(int GroupIndex);
 
 signals:
 	void ColorChanged(int colorIndex);
 	void ColorSelected(int colorIndex);
+	void HeightChanged();
 
 protected slots:
 	void ColorsLoaded();

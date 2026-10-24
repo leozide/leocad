@@ -757,6 +757,12 @@ void lcMainWindow::CreateToolBars()
 	ColorLayout->addWidget(mColorList);
 	mColorList->setAccessibleName(tr("LDraw Colors"));
 
+	// The panel is always exactly as tall as the color button and the tiles.
+	connect(mColorList, &lcColorList::HeightChanged, this, [ColorWidget, ColorLayout]()
+	{
+		ColorWidget->setFixedHeight(ColorLayout->sizeHint().height());
+	});
+
 	mColorsToolBar->setWidget(ColorWidget);
 	addDockWidget(Qt::RightDockWidgetArea, mColorsToolBar);
 
@@ -3244,6 +3250,18 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_VIEW_COLORS_TOGGLE_SOLID:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_SOLID);
+		break;
+
+	case LC_VIEW_COLORS_TOGGLE_TRANSLUCENT:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_TRANSLUCENT);
+		break;
+
+	case LC_VIEW_COLORS_TOGGLE_SPECIAL:
+		mColorList->ToggleGroupCollapsed(LC_COLORGROUP_SPECIAL);
 		break;
 
 	case LC_PIECE_INSERT:

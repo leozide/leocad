@@ -233,7 +233,14 @@ void Project::SetActiveModel(lcModel* ActiveModel, bool UpdateInterface)
 	if (!mIsPreview && gMainWindow && UpdateInterface)
 	{
 		gMainWindow->SetCurrentModelTab(mActiveModel, true);
-		mActiveModel->UpdateInterface();
+
+		// The tab may still be editing a nested submodel at its current step.
+		lcModel* EditingModel = gMainWindow->GetActiveModel();
+		if (EditingModel)
+		{
+			EditingModel->SetActive(true);
+			EditingModel->UpdateInterface();
+		}
 	}
 }
 

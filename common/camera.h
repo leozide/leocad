@@ -189,6 +189,7 @@ public:
 	QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const override;
 	bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) override;
 	bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const override;
+	lcStep GetLastStep() const override;
 	bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) override;
 	void RemoveKeyFrames() override;
 	lcCameraHistoryState GetHistoryState() const;

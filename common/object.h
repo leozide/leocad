@@ -144,6 +144,7 @@ public:
 	virtual QVariant GetPropertyValue(lcObjectPropertyId PropertyId) const = 0;
 	virtual bool SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool AddKey, QVariant Value) = 0;
 	virtual bool HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const = 0;
+	virtual lcStep GetLastStep() const = 0;
 	virtual bool SetKeyFrame(lcObjectPropertyId PropertyId, lcStep Time, bool KeyFrame) = 0;
 	virtual void RemoveKeyFrames() = 0;
 	virtual QString GetName() const = 0;

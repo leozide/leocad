@@ -1309,6 +1309,15 @@ bool lcLight::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	return false;
 }
 
+lcStep lcLight::GetLastStep() const
+{
+	return std::max({ mPosition.GetLastKeyFrame(), mRotation.GetLastKeyFrame(), mColor.GetLastKeyFrame(),
+		mBlenderPower.GetLastKeyFrame(), mBlenderRadius.GetLastKeyFrame(), mBlenderAngle.GetLastKeyFrame(),
+		mPOVRayPower.GetLastKeyFrame(), mPOVRayFadeDistance.GetLastKeyFrame(), mPOVRayFadePower.GetLastKeyFrame(),
+		mSpotConeAngle.GetLastKeyFrame(), mSpotPenumbraAngle.GetLastKeyFrame(), mPOVRaySpotTightness.GetLastKeyFrame(),
+		mAreaSizeX.GetLastKeyFrame(), mAreaSizeY.GetLastKeyFrame(), mPOVRayAreaGridX.GetLastKeyFrame(), mPOVRayAreaGridY.GetLastKeyFrame() });
+}
+
 bool lcLight::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 {
 	switch (PropertyId)

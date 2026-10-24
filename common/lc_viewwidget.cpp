@@ -11,6 +11,8 @@
 #include "lc_mesh.h"
 #include "lc_profile.h"
 #include "lc_previewwidget.h"
+#include "lc_qutils.h"
+#include "lc_viewsphere.h"
 
 lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 	: QOpenGLWidget(Parent), mView(View)
@@ -23,6 +25,62 @@ lcViewWidget::lcViewWidget(QWidget* Parent, lcView* View)
 	{
 		setFocusPolicy(Qt::StrongFocus);
 		setAcceptDrops(true);
+
+		mOverlay = new QWidget(this);
+		mOverlay->setObjectName(QStringLiteral("ViewOverlay"));
+		mOverlayLayout = new QVBoxLayout(mOverlay);
+		mOverlayLayout->setContentsMargins(0, 0, 0, 0);
+		mOverlayLayout->setSpacing(2);
+		mOverlayLayout->setSizeConstraint(QLayout::SetNoConstraint);
+		mOverlay->installEventFilter(this);
+
+		mModelEditingBar = new QWidget(mOverlay);
+		mModelEditingBar->setObjectName(QStringLiteral("ModelEditingBar"));
+		mModelEditingBar->setAutoFillBackground(true);
+		QPalette Palette = palette();
+		Palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Button));
+		mModelEditingBar->setPalette(Palette);
+		mModelEditingBar->setWhatsThis(tr("<p><b>In-place Editing</b></p><p>The path shows the model being edited inside this view. The last name is the current editing target. Choose an earlier name to edit that ancestor, or the close button to return to the tab's model.</p>"));
+
+		QHBoxLayout* EditingLayout = new QHBoxLayout(mModelEditingBar);
+		EditingLayout->setContentsMargins(5, 3, 5, 3);
+
+		mModelEditingLabel = new QLabel(mModelEditingBar);
+		mModelEditingLabel->setObjectName(QStringLiteral("ModelEditingPath"));
+		mModelEditingLabel->setTextFormat(Qt::RichText);
+		mModelEditingLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
+		mModelEditingLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+		mModelEditingLabel->setMinimumWidth(0);
+		EditingLayout->addWidget(mModelEditingLabel, 1);
+
+		mEndEditingButton = new QToolButton(mModelEditingBar);
+		mEndEditingButton->setIcon(QIcon(":/stylesheet/close.svg"));
+		mEndEditingButton->setAccessibleName(tr("End Editing"));
+		mEndEditingButton->setToolTip(tr("Return to editing the tab's model."));
+		mEndEditingButton->setAutoRaise(true);
+		EditingLayout->addWidget(mEndEditingButton);
+		mOverlayLayout->addWidget(mModelEditingBar);
+
+		connect(mModelEditingLabel, &QLabel::linkActivated, this, [this](const QString& Link)
+		{
+			bool Valid;
+			const uint Depth = Link.toUInt(&Valid);
+
+			if (!Valid || Depth + 1 >= static_cast<uint>(mModelEditingNames.size()))
+				return;
+
+			setFocus(Qt::OtherFocusReason);
+			mView->SetSubmodelActive(Depth);
+		});
+
+		connect(mEndEditingButton, &QToolButton::clicked, this, [this]()
+		{
+			setFocus(Qt::OtherFocusReason);
+			mView->SetTopSubmodelActive();
+		});
+
+		lcSetupWidgetHelp(mModelEditingBar, nullptr);
+		UpdateModelEditingPath();
 	}
 }
 
@@ -68,6 +126,142 @@ void lcViewWidget::SetView(lcView* View)
 	}
 
 	mView = std::unique_ptr<lcView>(View);
+	UpdateModelEditingPath();
+}
+
+void lcViewWidget::UpdateModelEditingPath()
+{
+	if (!mOverlay || !mView)
+		return;
+
+	QStringList Names;
+
+	for (const lcModel* Model : mView->GetModelEditingPath())
+		Names.append(Model->GetProperties().mFileName);
+
+	if (Names != mModelEditingNames)
+	{
+		mModelEditingNames = Names;
+		const QString Path = Names.join(QStringLiteral(" \u203a "));
+		mModelEditingLabel->setToolTip(Path);
+		mModelEditingLabel->setAccessibleName(tr("Editing model: %1").arg(Path));
+		mModelEditingBar->setVisible(Names.size() > 1);
+	}
+
+	UpdateOverlayGeometry();
+}
+
+void lcViewWidget::SetFindReplaceWidget(QWidget* Widget)
+{
+	if (!mOverlay)
+		return;
+
+	mFindReplaceWidget = Widget;
+	mOverlayLayout->addWidget(Widget);
+	UpdateOverlayGeometry();
+}
+
+void lcViewWidget::UpdateOverlayGeometry()
+{
+	if (!mOverlay)
+		return;
+
+	const bool Editing = mModelEditingNames.size() > 1;
+
+	mOverlay->setVisible(Editing || mFindReplaceWidget);
+
+	if (!Editing && !mFindReplaceWidget)
+		return;
+
+	int Left = 1;
+	int Right = width() - 1;
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	if (Preferences.mViewSphereEnabled && Preferences.mViewSphereSize > 0)
+	{
+		if (Preferences.mViewSphereLocation == lcViewSphereLocation::TopLeft)
+			Left += Preferences.mViewSphereSize + 2;
+		else if (Preferences.mViewSphereLocation == lcViewSphereLocation::TopRight)
+			Right -= Preferences.mViewSphereSize + 2;
+	}
+
+	int PreferredWidth = 0;
+
+	if (Editing)
+	{
+		QFont Font = mModelEditingLabel->font();
+		Font.setBold(true);
+		const QFontMetrics Metrics(Font);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+		PreferredWidth = Metrics.horizontalAdvance(mModelEditingNames.join(QStringLiteral(" \u203a ")));
+#else
+		PreferredWidth = Metrics.width(mModelEditingNames.join(QStringLiteral(" \u203a ")));
+#endif
+		PreferredWidth += mEndEditingButton->sizeHint().width() + mModelEditingBar->layout()->spacing() + 10;
+	}
+
+	if (mFindReplaceWidget)
+		PreferredWidth = lcMax(PreferredWidth, mFindReplaceWidget->sizeHint().width());
+
+	const int OverlayWidth = lcClamp(PreferredWidth, 1, lcMax(1, Right - Left));
+
+	mOverlay->setGeometry(Left, 1, OverlayWidth, mOverlayLayout->sizeHint().height());
+	mOverlayLayout->activate();
+	mModelEditingBar->layout()->activate();
+
+	UpdateModelEditingLabel();
+}
+
+void lcViewWidget::UpdateModelEditingLabel()
+{
+	if (mModelEditingNames.size() < 2)
+		return;
+
+	const QString Separator = QStringLiteral(" \u203a ");
+	QFont Font = mModelEditingLabel->font();
+	Font.setBold(true);
+	const QFontMetrics Metrics(Font);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+	const int SeparatorWidth = Metrics.horizontalAdvance(Separator);
+	const int PathWidth = Metrics.horizontalAdvance(mModelEditingNames.join(Separator));
+#else
+	const int SeparatorWidth = Metrics.width(Separator);
+	const int PathWidth = Metrics.width(mModelEditingNames.join(Separator));
+#endif
+	const int NameCount = static_cast<int>(mModelEditingNames.size());
+	const int NameWidth = lcMax(0, (mModelEditingLabel->width() - SeparatorWidth * (NameCount - 1)) / NameCount);
+	QStringList Segments;
+
+	for (int Index = 0; Index < mModelEditingNames.size(); Index++)
+	{
+		QString Name = mModelEditingNames[Index];
+
+		if (PathWidth > mModelEditingLabel->width())
+			Name = Metrics.elidedText(Name, Qt::ElideMiddle, NameWidth);
+
+		Name = Name.toHtmlEscaped();
+
+		if (Index + 1 == mModelEditingNames.size())
+			Segments.append(QStringLiteral("<b>%1</b>").arg(Name));
+		else
+			Segments.append(QStringLiteral("<a href=\"%1\">%2</a>").arg(Index).arg(Name));
+	}
+
+	mModelEditingLabel->setText(Segments.join(Separator));
+}
+
+bool lcViewWidget::eventFilter(QObject* Object, QEvent* Event)
+{
+	if (Object == mOverlay && Event->type() == QEvent::LayoutRequest)
+		UpdateOverlayGeometry();
+
+	return QOpenGLWidget::eventFilter(Object, Event);
+}
+
+void lcViewWidget::resizeEvent(QResizeEvent* Event)
+{
+	QOpenGLWidget::resizeEvent(Event);
+	UpdateOverlayGeometry();
 }
 
 void lcViewWidget::UpdateMousePosition()

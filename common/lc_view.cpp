@@ -105,7 +105,10 @@ void lcView::MakeCurrent()
 void lcView::Redraw()
 {
 	if (mWidget)
+	{
+		mWidget->UpdateModelEditingPath();
 		mWidget->update();
+	}
 }
 
 void lcView::SetOffscreenContext()
@@ -145,17 +148,49 @@ lcModel* lcView::GetActiveModel() const
 	return !mActiveSubmodelInstance ? mModel : mActiveSubmodelInstance->mPieceData->GetModel();
 }
 
-void lcView::SetTopSubmodelActive()
+std::vector<lcModel*> lcView::GetModelEditingPath() const
 {
+	std::vector<lcModel*> Models = { mModel };
+
+	for (const std::pair<lcPiece*, lcMatrix44>& Entry : mSubmodelEditingPath)
+		Models.push_back(Entry.first->mPieceData->GetModel());
+
+	return Models;
+}
+
+void lcView::SetSubmodelActive(size_t Depth)
+{
+	if (Depth > mSubmodelEditingPath.size())
+		return;
+
+	StopTracking(true);
+
 	lcModel* ActiveModel = GetActiveModel();
 
 	if (mActiveSubmodelInstance)
 	{
 		ActiveModel->SetActive(false);
-		mActiveSubmodelInstance = nullptr;
+
+		std::vector<lcModel*> UpdatedModels;
+		ActiveModel->UpdatePieceData(UpdatedModels);
 	}
 
+	mSubmodelEditingPath.resize(Depth);
+	mActiveSubmodelInstance = nullptr;
+
+	if (!mSubmodelEditingPath.empty())
+	{
+		mActiveSubmodelInstance = mSubmodelEditingPath.back().first;
+		mActiveSubmodelTransform = mSubmodelEditingPath.back().second;
+	}
+
+	GetActiveModel()->SetActive(true);
 	GetActiveModel()->UpdateInterface();
+}
+
+void lcView::SetTopSubmodelActive()
+{
+	SetSubmodelActive(0);
 }
 
 void lcView::SetSelectedSubmodelActive()
@@ -163,26 +198,32 @@ void lcView::SetSelectedSubmodelActive()
 	lcModel* ActiveModel = GetActiveModel();
 	lcObject* Object = ActiveModel->GetFocusObject();
 
+	if (!Object || !Object->IsPiece())
+		return;
+
+	lcPiece* Piece = (lcPiece*)Object;
+
+	if (!Piece->mPieceData->IsModel())
+		return;
+
+	// Preserve the selected instance path and capture its transform before SetActive(false) changes the step.
+	lcMatrix44 SubmodelTransform = Piece->mModelWorld;
+
 	if (mActiveSubmodelInstance)
-	{
+		SubmodelTransform = lcMul(SubmodelTransform, mActiveSubmodelTransform);
+
+	if (mActiveSubmodelInstance)
 		ActiveModel->SetActive(false);
-		mActiveSubmodelInstance = nullptr;
-	}
 
-	if (Object && Object->IsPiece())
-	{
-		lcPiece* Piece = (lcPiece*)Object;
+	mSubmodelEditingPath.emplace_back(Piece, SubmodelTransform);
+	mActiveSubmodelTransform = SubmodelTransform;
+	mActiveSubmodelInstance = Piece;
 
-		if (Piece->mPieceData->IsModel())
-		{
-			mActiveSubmodelTransform = lcMatrix44Identity();
-			mModel->GetPieceWorldMatrix(Piece, mActiveSubmodelTransform);
-			mActiveSubmodelInstance = Piece;
-			ActiveModel = mActiveSubmodelInstance->mPieceData->GetModel();
-			ActiveModel->SetActive(true);
-			RemoveCamera();
-		}
-	}
+	ActiveModel = mActiveSubmodelInstance->mPieceData->GetModel();
+	ActiveModel->SetTemporaryStep(ActiveModel->GetLastStep());
+	ActiveModel->SetActive(true);
+
+	RemoveCamera();
 
 	GetActiveModel()->UpdateInterface();
 }
@@ -422,6 +463,7 @@ void lcView::ShowFindReplaceWidget(bool Replace)
 	delete mFindWidget;
 	mFindReplaceParams = lcFindReplaceParams();
 	mFindWidget = new lcFindReplaceWidget(mWidget, GetActiveModel(), Replace);
+	mWidget->SetFindReplaceWidget(mFindWidget);
 }
 
 lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const

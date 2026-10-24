@@ -12,6 +12,8 @@ public:
 	void SetView(lcView* View);
 
 	void UpdateMousePosition();
+	void UpdateModelEditingPath();
+	void SetFindReplaceWidget(QWidget* Widget);
 
 	QSize sizeHint() const override;
 
@@ -29,6 +31,8 @@ protected:
 	void resizeGL(int Width, int Height) override;
 	void paintGL() override;
 	bool event(QEvent* Event) override;
+	bool eventFilter(QObject* Object, QEvent* Event) override;
+	void resizeEvent(QResizeEvent* Event) override;
 	void focusInEvent(QFocusEvent* FocusEvent) override;
 	void focusOutEvent(QFocusEvent* FocusEvent) override;
 	void keyPressEvent(QKeyEvent* KeyEvent) override;
@@ -44,7 +48,17 @@ protected:
 	void dragMoveEvent(QDragMoveEvent* DragMoveEvent) override;
 	void dropEvent(QDropEvent* DropEvent) override;
 
+	void UpdateOverlayGeometry();
+	void UpdateModelEditingLabel();
+
 	std::unique_ptr<lcView> mView;
+	QWidget* mOverlay = nullptr;
+	QVBoxLayout* mOverlayLayout = nullptr;
+	QWidget* mModelEditingBar = nullptr;
+	QLabel* mModelEditingLabel = nullptr;
+	QToolButton* mEndEditingButton = nullptr;
+	QPointer<QWidget> mFindReplaceWidget;
+	QStringList mModelEditingNames;
 	QSize mPreferredSize;
 	int mWheelAccumulator = 0;
 };

@@ -99,6 +99,11 @@ public:
 		mKeys.clear();
 	}
 
+	lcStep GetLastKeyFrame() const
+	{
+		return mKeys.empty() ? 0 : mKeys.back().Step;
+	}
+
 	void Update(lcStep Step);
 	bool ChangeKey(const T& Value, lcStep Step, bool AddKey);
 	void InsertTime(lcStep Start, lcStep Time);

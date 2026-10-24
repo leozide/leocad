@@ -15969,4 +15969,27 @@ Las tarjetas de video no compatibles usan tinte frontal y bordes coloreados.</tr
 %2</translation>
     </message>
 </context>
+<context>
+    <name>lcViewWidget</name>
+    <message>
+        <location filename="../common/lc_viewwidget.cpp" line="43"/>
+        <source>&lt;p&gt;&lt;b&gt;In-place Editing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The path shows the model being edited inside this view. The last name is the current editing target. Choose an earlier name to edit that ancestor, or the close button to return to the tab&apos;s model.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_viewwidget.cpp" line="58"/>
+        <source>End Editing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_viewwidget.cpp" line="59"/>
+        <source>Return to editing the tab&apos;s model.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_viewwidget.cpp" line="147"/>
+        <source>Editing model: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

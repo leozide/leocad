@@ -792,6 +792,11 @@ bool lcCamera::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool
 	return false;
 }
 
+lcStep lcCamera::GetLastStep() const
+{
+	return std::max({ mPosition.GetLastKeyFrame(), mTargetPosition.GetLastKeyFrame(), mUpVector.GetLastKeyFrame() });
+}
+
 bool lcCamera::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 {
 	switch (PropertyId)

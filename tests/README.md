@@ -1,7 +1,8 @@
 # LeoCAD tests
 
 All tests run in one Qt Test executable, `leocad_tests`. The current tests cover
-object history and property-key comparisons, including 8,000 deterministic
+object history, property-key comparisons, and the final animation key after
+step insertion, removal, and key deletion, including 8,000 deterministic
 randomized undo/redo and merge transitions.
 
 The executable creates a `QCoreApplication`; it does not open windows or require

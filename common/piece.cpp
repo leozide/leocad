@@ -864,6 +864,16 @@ bool lcPiece::SetPropertyValue(lcObjectPropertyId PropertyId, lcStep Step, bool 
 	return false;
 }
 
+lcStep lcPiece::GetLastStep() const
+{
+	lcStep Step = std::max({ mStepShow, mPosition.GetLastKeyFrame(), mRotation.GetLastKeyFrame() });
+
+	if (mStepHide != LC_STEP_MAX)
+		Step = lcMax(Step, mStepHide);
+
+	return Step;
+}
+
 bool lcPiece::HasKeyFrame(lcObjectPropertyId PropertyId, lcStep Time) const
 {
 	switch (PropertyId)

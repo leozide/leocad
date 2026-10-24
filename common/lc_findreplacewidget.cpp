@@ -126,7 +126,6 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	mFindPartComboBox->setFocus();
 	adjustSize();
-	move(1, 1);
 	show();
 }
 

@@ -115,6 +115,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "RecentFile4", ""),                                             // LC_PROFILE_RECENT_FILE4
 	lcProfileEntry("Settings", "AutoLoadMostRecent", false),                                   // LC_PROFILE_AUTOLOAD_MOSTRECENT
 	lcProfileEntry("Settings", "RestoreTabLayout", true),                                      // LC_PROFILE_RESTORE_TAB_LAYOUT
+	lcProfileEntry("Settings", "FirstPieceAtOrigin", false),                                   // LC_PROFILE_FIRST_PIECE_AT_ORIGIN
 	lcProfileEntry("Settings", "AutosaveInterval", 10),                                        // LC_PROFILE_AUTOSAVE_INTERVAL
 	lcProfileEntry("Settings", "MouseSensitivity", 11),                                        // LC_PROFILE_MOUSE_SENSITIVITY
 	lcProfileEntry("Settings", "ImageWidth", 1280),                                            // LC_PROFILE_IMAGE_WIDTH

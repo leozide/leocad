@@ -1381,9 +1381,9 @@ void lcView::DrawAxes() const
 		quint32 Color;
 	};
 
-	const quint32 Red = LC_RGBA(204, 0, 0, 255);
-	const quint32 Green = LC_RGBA(0, 204, 0, 255);
-	const quint32 Blue = LC_RGBA(0, 0, 204, 255);
+	const quint32 Red = Preferences.mAxisXColor;
+	const quint32 Green = Preferences.mAxisYColor;
+	const quint32 Blue = Preferences.mAxisZColor;
 
 	const lcAxisVertex Verts[30] =
 	{
@@ -1823,8 +1823,8 @@ void lcView::DrawGrid()
 			quint32 Color;
 		};
 
-		const quint32 Red = LC_RGBA(204, 0, 0, 255);
-		const quint32 Green = LC_RGBA(0, 204, 0, 255);
+		const quint32 Red = Preferences.mAxisXColor;
+		const quint32 Green = Preferences.mAxisYColor;
 		const float Scale = 20.0f * Spacing;
 
 		const lcGridVertex Verts[4] =

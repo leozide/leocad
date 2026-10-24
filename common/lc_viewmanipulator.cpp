@@ -15,6 +15,23 @@
 lcVertexBuffer lcViewManipulator::mRotateMoveVertexBuffer;
 lcIndexBuffer lcViewManipulator::mRotateMoveIndexBuffer;
 lcVector3 lcViewManipulator::mRotateMoveVertices[51 + 138 + 10 + 74 + 28 + 24];
+
+lcVector4 lcViewManipulator::GetAxisColor(int AxisIndex, bool Selected)
+{
+	const lcPreferences& Preferences = lcGetPreferences();
+	const quint32 AxisColors[3] = { Preferences.mAxisXColor, Preferences.mAxisYColor, Preferences.mAxisZColor };
+	lcVector4 Color = lcVector4FromColor(AxisColors[AxisIndex]);
+
+	// Selected handles use a lighter version of the axis color.
+	if (Selected)
+	{
+		Color.x += (1.0f - Color.x) * 0.45f;
+		Color.y += (1.0f - Color.y) * 0.45f;
+		Color.z += (1.0f - Color.z) * 0.45f;
+	}
+
+	return Color;
+}
 const GLushort lcViewManipulator::mRotateMoveIndices[mIndexCount] =
 {
 	// Move X
@@ -335,12 +352,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if ((TrackTool == lcTrackTool::MoveX) || (TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveXZ))
 			{
-				Context->SetColor(mColorXAxisSelected);
+				Context->SetColor(GetAxisColor(0, true));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 			}
 			else
 			{
-				Context->SetColor(mColorXAxis);
+				Context->SetColor(GetAxisColor(0, false));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 			}
 		}
@@ -349,12 +366,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if (((TrackTool == lcTrackTool::MoveY) || (TrackTool == lcTrackTool::MoveXY) || (TrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Y))
 			{
-				Context->SetColor(mColorYAxisSelected);
+				Context->SetColor(GetAxisColor(1, true));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 			}
 			else
 			{
-				Context->SetColor(mColorYAxis);
+				Context->SetColor(GetAxisColor(1, false));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 36 * 2);
 			}
 		}
@@ -363,12 +380,12 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		{
 			if (((TrackTool == lcTrackTool::MoveZ) || (TrackTool == lcTrackTool::MoveXZ) || (TrackTool == lcTrackTool::MoveYZ)) && (AllowedTransforms & LC_OBJECT_TRANSFORM_MOVE_Z))
 			{
-				Context->SetColor(mColorZAxisSelected);
+				Context->SetColor(GetAxisColor(2, true));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 			}
 			else
 			{
-				Context->SetColor(mColorZAxis);
+				Context->SetColor(GetAxisColor(2, false));
 				Context->DrawIndexedPrimitives(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 72 * 2);
 			}
 		}
@@ -379,9 +396,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_X)
 		{
 			if (TrackTool == lcTrackTool::RotateX)
-				Context->SetColor(mColorXAxisSelected);
+				Context->SetColor(GetAxisColor(0, true));
 			else
-				Context->SetColor(mColorXAxis);
+				Context->SetColor(GetAxisColor(0, false));
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, 108 * 2);
 		}
@@ -389,9 +406,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Y)
 		{
 			if (TrackTool == lcTrackTool::RotateY)
-				Context->SetColor(mColorYAxisSelected);
+				Context->SetColor(GetAxisColor(1, true));
 			else
-				Context->SetColor(mColorYAxis);
+				Context->SetColor(GetAxisColor(1, false));
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 120) * 2);
 		}
@@ -399,9 +416,9 @@ void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool Tr
 		if (AllowedTransforms & LC_OBJECT_TRANSFORM_ROTATE_Z)
 		{
 			if (TrackTool == lcTrackTool::RotateZ)
-				Context->SetColor(mColorZAxisSelected);
+				Context->SetColor(GetAxisColor(2, true));
 			else
-				Context->SetColor(mColorZAxis);
+				Context->SetColor(GetAxisColor(2, false));
 
 			Context->DrawIndexedPrimitives(GL_TRIANGLES, 120, GL_UNSIGNED_SHORT, (108 + 240) * 2);
 		}
@@ -657,13 +674,13 @@ std::optional<lcViewManipulator::lcRotationDiscInfo> lcViewManipulator::GetRotat
 	switch (TrackTool)
 	{
 	case lcTrackTool::RotateX:
-		return lcRotationDiscInfo{ 0, mOverlayRotateRadius, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), mColorXAxis, mColorXAxisSelected, false };
+		return lcRotationDiscInfo{ 0, mOverlayRotateRadius, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), GetAxisColor(0, false), GetAxisColor(0, true), false };
 
 	case lcTrackTool::RotateY:
-		return lcRotationDiscInfo{ 1, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, 0.0f, 1.0f), mColorYAxis, mColorYAxisSelected, false };
+		return lcRotationDiscInfo{ 1, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, 0.0f, 1.0f), GetAxisColor(1, false), GetAxisColor(1, true), false };
 
 	case lcTrackTool::RotateZ:
-		return lcRotationDiscInfo{ 2, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, -1.0f, 0.0f), mColorZAxis, mColorZAxisSelected, false };
+		return lcRotationDiscInfo{ 2, mOverlayRotateRadius, lcVector4(90.0f, 0.0f, -1.0f, 0.0f), GetAxisColor(2, false), GetAxisColor(2, true), false };
 
 	case lcTrackTool::RotateCamera:
 		return lcRotationDiscInfo{ 0, mOverlayRotateCameraRadius, lcVector4(0.0f, 0.0f, 0.0f, 1.0f), mColorCamera, mColorCameraSelected, true };
@@ -678,13 +695,13 @@ std::optional<lcViewManipulator::lcMoveAxisInfo> lcViewManipulator::GetMoveAxisI
 	switch (TrackTool)
 	{
 	case lcTrackTool::MoveX:
-		return lcMoveAxisInfo{ mColorXAxisSelected };
+		return lcMoveAxisInfo{ GetAxisColor(0, true) };
 
 	case lcTrackTool::MoveY:
-		return lcMoveAxisInfo{ mColorYAxisSelected };
+		return lcMoveAxisInfo{ GetAxisColor(1, true) };
 
 	case lcTrackTool::MoveZ:
-		return lcMoveAxisInfo{ mColorZAxisSelected };
+		return lcMoveAxisInfo{ GetAxisColor(2, true) };
 
 	default:
 		return std::nullopt;
@@ -872,13 +889,13 @@ void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrack
 		switch (PlaneIndex)
 		{
 		case 0:
-			Context->SetColor(Selected ? mColorXAxisSelected : mColorXAxis);
+			Context->SetColor(Selected ? GetAxisColor(0, true) : GetAxisColor(0, false));
 			break;
 		case 1:
-			Context->SetColor(Selected ? mColorYAxisSelected : mColorYAxis);
+			Context->SetColor(Selected ? GetAxisColor(1, true) : GetAxisColor(1, false));
 			break;
 		case 2:
-			Context->SetColor(Selected ? mColorZAxisSelected : mColorZAxis);
+			Context->SetColor(Selected ? GetAxisColor(2, true) : GetAxisColor(2, false));
 			break;
 		}
 

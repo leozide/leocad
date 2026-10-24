@@ -802,22 +802,18 @@ void lcMainWindow::CreateToolBars()
 
 	PropertiesLayout->addWidget(TransformWidget);
 
-	// The panel is only as tall as the rows it shows.
+	// The panel is always exactly as tall as the rows it shows, so nothing is cut off or scrolled.
+	PropertiesScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 	auto UpdatePropertiesHeight = [this, PropertiesWidget, PropertiesLayout, PropertiesScrollArea, TransformWidget]()
 	{
-		const int ScrollHeight = mPropertiesWidget->sizeHint().height() + 2 * PropertiesScrollArea->frameWidth();
+		const int Margin = 6;
+		const int ScrollHeight = mPropertiesWidget->sizeHint().height() + 2 * PropertiesScrollArea->frameWidth() + Margin;
 		const QMargins Margins = PropertiesLayout->contentsMargins();
-
 		const int PanelHeight = ScrollHeight + PropertiesLayout->spacing() + TransformWidget->sizeHint().height() + Margins.top() + Margins.bottom();
 
-		PropertiesScrollArea->setMaximumHeight(ScrollHeight);
-		PropertiesWidget->setMaximumHeight(PanelHeight);
-
-		// A docked panel does not grow back on its own once its limit is raised.
-		if (mPropertiesToolBar->isFloating())
-			mPropertiesToolBar->adjustSize();
-		else if (mPropertiesToolBar->isVisible())
-			resizeDocks({ mPropertiesToolBar }, { PanelHeight + mPropertiesToolBar->height() - PropertiesWidget->height() }, Qt::Vertical);
+		PropertiesScrollArea->setFixedHeight(ScrollHeight);
+		PropertiesWidget->setFixedHeight(PanelHeight);
 	};
 
 	connect(mPropertiesWidget, &lcPropertiesWidget::LayoutChanged, this, [UpdatePropertiesHeight]()

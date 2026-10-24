@@ -802,6 +802,19 @@ void lcMainWindow::CreateToolBars()
 
 	PropertiesLayout->addWidget(TransformWidget);
 
+	// The panel is only as tall as the rows it shows.
+	auto UpdatePropertiesHeight = [this, PropertiesWidget, PropertiesLayout, PropertiesScrollArea, TransformWidget]()
+	{
+		const int ScrollHeight = mPropertiesWidget->sizeHint().height() + 2 * PropertiesScrollArea->frameWidth();
+		const QMargins Margins = PropertiesLayout->contentsMargins();
+
+		PropertiesScrollArea->setMaximumHeight(ScrollHeight);
+		PropertiesWidget->setMaximumHeight(ScrollHeight + PropertiesLayout->spacing() + TransformWidget->sizeHint().height() + Margins.top() + Margins.bottom());
+	};
+
+	connect(mPropertiesWidget, &lcPropertiesWidget::LayoutChanged, this, UpdatePropertiesHeight);
+	UpdatePropertiesHeight();
+
 	connect(mTransformXEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 	connect(mTransformYEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 	connect(mTransformZEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);

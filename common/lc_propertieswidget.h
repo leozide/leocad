@@ -15,6 +15,9 @@ public:
 
 	void Update(const std::vector<lcObject*>& Selection, lcObject* Focus);
 
+signals:
+	void LayoutChanged();
+
 protected slots:
 	void CategoryStateChanged(bool Expanded);
 	void KeyFrameChanged();
@@ -89,7 +92,8 @@ protected:
 	lcObjectPropertyId GetEditorWidgetPropertyId(QWidget* Widget) const;
 	lcObjectPropertyId GetKeyFrameWidgetPropertyId(QWidget* Widget) const;
 
-	void AddCategory(CategoryIndex Index, const QString& Title);
+	void AddCategory(CategoryIndex Index, const QString& Title, bool Collapsible);
+	bool event(QEvent* Event) override;
 	void AddSpacing();
 	void AddLabel(lcObjectPropertyId PropertyId, const QString& Text, const QString& ToolTip);
 	void AddKeyFrameWidget(lcObjectPropertyId PropertyId);

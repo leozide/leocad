@@ -64,6 +64,17 @@ lcObjectPropertyId lcPropertiesWidget::GetKeyFrameWidgetPropertyId(QWidget* Widg
 	return lcObjectPropertyId::Count;
 }
 
+bool lcPropertiesWidget::event(QEvent* Event)
+{
+	const bool Result = QWidget::event(Event);
+
+	// Shown rows changed, so the panel can be resized to fit them.
+	if (Event->type() == QEvent::LayoutRequest)
+		emit LayoutChanged();
+
+	return Result;
+}
+
 void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 {
 	QObject* Button = sender();
@@ -78,13 +89,16 @@ void lcPropertiesWidget::CategoryStateChanged(bool Expanded)
 	}
 }
 
-void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title)
+void lcPropertiesWidget::AddCategory(CategoryIndex Index, const QString& Title, bool Collapsible)
 {
 	mCurrentCategory = &mCategoryWidgets[static_cast<int>(Index)];
 	mCurrentCategory->Category = Index;
 
 	lcCollapsibleWidgetButton* CategoryButton = new lcCollapsibleWidgetButton(Title);
-	CategoryButton->setToolTip(tr("Expand or collapse the %1 properties.").arg(Title));
+	CategoryButton->SetCollapsible(Collapsible);
+
+	if (Collapsible)
+		CategoryButton->setToolTip(tr("Expand or collapse the %1 properties.").arg(Title));
 
 	mLayout->addWidget(CategoryButton, mLayoutRow, 0, 1, -1);
 	mCurrentCategory->Button = CategoryButton;
@@ -1172,7 +1186,7 @@ void lcPropertiesWidget::CreateWidgets()
 	mLayout = new QGridLayout(this);
 	mLayout->setVerticalSpacing(1);
 
-	AddCategory(CategoryIndex::Piece, tr("Piece"));
+	AddCategory(CategoryIndex::Piece, tr("Piece"), false);
 
 	AddPieceIdProperty(lcObjectPropertyId::PieceId, tr("Piece"), tr("Piece ID"), false);
 	AddPieceColorProperty(lcObjectPropertyId::PieceColor, tr("Color"), tr("Piece color"), false);
@@ -1184,7 +1198,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::Camera, tr("Camera"));
+	AddCategory(CategoryIndex::Camera, tr("Camera"), false);
 
 	AddStringProperty(lcObjectPropertyId::CameraName, tr("Name"), tr("Camera name"), false);
 	AddStringListProperty(lcObjectPropertyId::CameraProjection, tr("Projection"), tr("Camera projection"), false, lcCamera::GetCameraProjectionStrings());
@@ -1197,7 +1211,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::CameraTransform, tr("Transform"));
+	AddCategory(CategoryIndex::CameraTransform, tr("Transform"), false);
 
 	AddFloatProperty(lcObjectPropertyId::CameraPositionX, tr("Position X"), tr("Camera position"), true, -FLT_MAX, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::CameraPositionY, tr("Y"), tr("Camera position"), true, -FLT_MAX, FLT_MAX);
@@ -1217,7 +1231,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::Light, tr("Light"));
+	AddCategory(CategoryIndex::Light, tr("Light"), false);
 
 	AddStringProperty(lcObjectPropertyId::LightName, tr("Name"), tr("Light name"), false);
 	AddStringListProperty(lcObjectPropertyId::LightType, tr("Type"), tr("Light type"), false, lcLight::GetLightTypeStrings());
@@ -1237,7 +1251,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::LightBlender, tr("Blender Settings"));
+	AddCategory(CategoryIndex::LightBlender, tr("Blender Settings"), true);
 
 	AddFloatProperty(lcObjectPropertyId::LightBlenderPower, tr("Power"), tr("Power of the light in watts"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightBlenderRadius, tr("Radius"), tr("Shadow soft size"), true, 0.0f, FLT_MAX);
@@ -1245,7 +1259,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::LightPOVRay, tr("POV-Ray Settings"));
+	AddCategory(CategoryIndex::LightPOVRay, tr("POV-Ray Settings"), true);
 
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayPower, tr("Power"), tr("Power of the light (multiplicative factor)"), true, 0.0f, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::LightPOVRayFadeDistance, tr("Fade Distance"), tr("The distance at which the full light intensity arrives"), true, 0.0f, FLT_MAX);
@@ -1256,7 +1270,7 @@ void lcPropertiesWidget::CreateWidgets()
 
 	AddSpacing();
 
-	AddCategory(CategoryIndex::ObjectTransform, tr("Transform"));
+	AddCategory(CategoryIndex::ObjectTransform, tr("Transform"), false);
 
 	AddFloatProperty(lcObjectPropertyId::ObjectPositionX, tr("Position X"), tr("Position of the object"), true, -FLT_MAX, FLT_MAX);
 	AddFloatProperty(lcObjectPropertyId::ObjectPositionY, tr("Y"), tr("Position of the object"), true, -FLT_MAX, FLT_MAX);

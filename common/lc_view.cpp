@@ -1995,10 +1995,19 @@ static void lcGetStepViewBase(lcStepViewMode Mode, lcVector3& Direction, lcVecto
 
 void lcView::ApplyStepView()
 {
+	if (mViewType != lcViewType::View)
+		return;
+
 	const std::optional<lcStepView> StepView = mModel->GetEffectiveStepView(mModel->GetCurrentStep());
 
-	if (!StepView || mViewType != lcViewType::View)
+	// Steps without a view use the default view, but only in models that use step views.
+	if (!StepView)
+	{
+		if (!mModel->GetProperties().mStepViews.empty())
+			SetViewpoint(lcViewpoint::Home);
+
 		return;
+	}
 
 	lcVector3 Direction, Up;
 	lcGetStepViewBase(StepView->Mode, Direction, Up);

@@ -1688,6 +1688,39 @@ void lcMainWindow::ToggleGrid()
 	lcView::UpdateAllViews();
 }
 
+static void lcTogglePreference(bool& Value, LC_PROFILE_KEY Key)
+{
+	Value = !Value;
+	lcSetProfileInt(Key, Value);
+
+	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::SetHighlightRenderMode(lcHighlightRenderMode HighlightRenderMode)
+{
+	lcGetPreferences().mHighlightRenderMode = HighlightRenderMode;
+	lcSetProfileHighlightRenderMode(HighlightRenderMode);
+
+	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::ToggleAutomateEdgeColor()
+{
+	lcGetPreferences().mAutomateEdgeColor = !lcGetPreferences().mAutomateEdgeColor;
+	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, lcGetPreferences().mAutomateEdgeColor);
+
+	lcGetPiecesLibrary()->LoadColors();
+	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::SetStudStyle(lcStudStyle StudStyle)
+{
+	lcSetProfileStudStyle(StudStyle);
+	lcGetPiecesLibrary()->UpdateStudStyleAndColors(StudStyle, lcGetPreferences().mStudCylinderColorEnabled);
+
+	lcView::UpdateAllViews();
+}
+
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
@@ -3244,6 +3277,86 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_FILE_TOGGLE_OPEN_MOST_RECENT:
+		lcTogglePreference(lcGetPreferences().mAutoLoadMostRecent, LC_PROFILE_AUTOLOAD_MOSTRECENT);
+		break;
+
+	case LC_FILE_TOGGLE_RESTORE_TAB_LAYOUT:
+		lcTogglePreference(lcGetPreferences().mRestoreTabLayout, LC_PROFILE_RESTORE_TAB_LAYOUT);
+		break;
+
+	case LC_EDIT_TOGGLE_FIXED_DIRECTION_KEYS:
+		lcTogglePreference(lcGetPreferences().mFixedAxes, LC_PROFILE_FIXED_AXES);
+		break;
+
+	case LC_VIEW_TOGGLE_MESH_LOD:
+		lcTogglePreference(lcGetPreferences().mAllowLOD, LC_PROFILE_ALLOW_LOD);
+		break;
+
+	case LC_VIEW_TOGGLE_HIGHLIGHT_NEW_PIECES:
+		lcTogglePreference(lcGetPreferences().mHighlightNewParts, LC_PROFILE_HIGHLIGHT_NEW_PARTS);
+		break;
+
+	case LC_VIEW_TOGGLE_GRID_STUDS:
+		lcTogglePreference(lcGetPreferences().mDrawGridStuds, LC_PROFILE_GRID_STUDS);
+		break;
+
+	case LC_VIEW_TOGGLE_GRID_LINES:
+		lcTogglePreference(lcGetPreferences().mDrawGridLines, LC_PROFILE_GRID_LINES);
+		break;
+
+	case LC_VIEW_TOGGLE_GRID_ORIGIN:
+		lcTogglePreference(lcGetPreferences().mDrawGridOrigin, LC_PROFILE_GRID_ORIGIN);
+		break;
+
+	case LC_VIEW_TOGGLE_BACKGROUND_GRADIENT:
+		lcTogglePreference(lcGetPreferences().mBackgroundGradient, LC_PROFILE_BACKGROUND_GRADIENT);
+		break;
+
+	case LC_VIEW_TOGGLE_AUTOMATE_EDGE_COLOR:
+		ToggleAutomateEdgeColor();
+		break;
+
+	case LC_VIEW_HIGHLIGHT_STYLE_OUTLINE:
+		SetHighlightRenderMode(lcHighlightRenderMode::Outline);
+		break;
+
+	case LC_VIEW_HIGHLIGHT_STYLE_TINT:
+		SetHighlightRenderMode(lcHighlightRenderMode::Tint);
+		break;
+
+	case LC_VIEW_STUD_STYLE_PLAIN:
+		SetStudStyle(lcStudStyle::Plain);
+		break;
+
+	case LC_VIEW_STUD_STYLE_THIN_LINES_LOGO:
+		SetStudStyle(lcStudStyle::ThinLinesLogo);
+		break;
+
+	case LC_VIEW_STUD_STYLE_OUTLINE_LOGO:
+		SetStudStyle(lcStudStyle::OutlineLogo);
+		break;
+
+	case LC_VIEW_STUD_STYLE_SHARP_TOP_LOGO:
+		SetStudStyle(lcStudStyle::SharpTopLogo);
+		break;
+
+	case LC_VIEW_STUD_STYLE_ROUNDED_TOP_LOGO:
+		SetStudStyle(lcStudStyle::RoundedTopLogo);
+		break;
+
+	case LC_VIEW_STUD_STYLE_FLATTENED_LOGO:
+		SetStudStyle(lcStudStyle::FlattenedLogo);
+		break;
+
+	case LC_VIEW_STUD_STYLE_HIGH_CONTRAST:
+		SetStudStyle(lcStudStyle::HighContrast);
+		break;
+
+	case LC_VIEW_STUD_STYLE_HIGH_CONTRAST_LOGO:
+		SetStudStyle(lcStudStyle::HighContrastLogo);
 		break;
 
 	case LC_PIECE_INSERT:

@@ -1396,6 +1396,166 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_FILE_TOGGLE_OPEN_MOST_RECENT
+	{
+		QT_TRANSLATE_NOOP("Action", "File.ToggleOpenMostRecent"),
+		QT_TRANSLATE_NOOP("Menu", "Open Most Recent File on Startup"),
+		QT_TRANSLATE_NOOP("Status", "Toggle opening the most recently used file when LeoCAD starts"),
+		"",
+		""
+	},
+	// LC_FILE_TOGGLE_RESTORE_TAB_LAYOUT
+	{
+		QT_TRANSLATE_NOOP("Action", "File.ToggleRestoreTabLayout"),
+		QT_TRANSLATE_NOOP("Menu", "Restore Tab Layout"),
+		QT_TRANSLATE_NOOP("Status", "Toggle restoring saved model tabs and view layouts when opening a model"),
+		"",
+		""
+	},
+	// LC_EDIT_TOGGLE_FIXED_DIRECTION_KEYS
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.ToggleFixedDirectionKeys"),
+		QT_TRANSLATE_NOOP("Menu", "Fixed Direction Keys"),
+		QT_TRANSLATE_NOOP("Status", "Toggle moving pieces along fixed model axes instead of view-relative directions"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_MESH_LOD
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleMeshLOD"),
+		QT_TRANSLATE_NOOP("Menu", "Mesh LOD"),
+		QT_TRANSLATE_NOOP("Status", "Toggle using simpler meshes for distant pieces"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_HIGHLIGHT_NEW_PIECES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleHighlightNewPieces"),
+		QT_TRANSLATE_NOOP("Menu", "Highlight New Pieces"),
+		QT_TRANSLATE_NOOP("Status", "Toggle highlighting pieces added in the current step"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_GRID_STUDS
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleStuds"),
+		QT_TRANSLATE_NOOP("Menu", "Grid Studs"),
+		QT_TRANSLATE_NOOP("Status", "Toggle drawing studs on the base grid"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_GRID_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleLines"),
+		QT_TRANSLATE_NOOP("Menu", "Grid Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle drawing lines on the base grid"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_GRID_ORIGIN
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleOrigin"),
+		QT_TRANSLATE_NOOP("Menu", "Grid Origin Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle drawing the base grid origin lines"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_BACKGROUND_GRADIENT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleBackgroundGradient"),
+		QT_TRANSLATE_NOOP("Menu", "Gradient Background"),
+		QT_TRANSLATE_NOOP("Status", "Toggle between a gradient and a solid background"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_AUTOMATE_EDGE_COLOR
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleAutomateEdgeColor"),
+		QT_TRANSLATE_NOOP("Menu", "Automate Edge Color"),
+		QT_TRANSLATE_NOOP("Status", "Toggle automatically computing piece edge colors"),
+		"",
+		""
+	},
+	// LC_VIEW_HIGHLIGHT_STYLE_OUTLINE
+	{
+		QT_TRANSLATE_NOOP("Action", "View.HighlightStyle.Outline"),
+		QT_TRANSLATE_NOOP("Menu", "Outline Highlight"),
+		QT_TRANSLATE_NOOP("Status", "Highlight selected and new pieces with outlines"),
+		"",
+		""
+	},
+	// LC_VIEW_HIGHLIGHT_STYLE_TINT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.HighlightStyle.TintAndEdges"),
+		QT_TRANSLATE_NOOP("Menu", "Tint and Edges Highlight"),
+		QT_TRANSLATE_NOOP("Status", "Highlight selected and new pieces with tinted faces and colored edges"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_PLAIN
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.Plain"),
+		QT_TRANSLATE_NOOP("Menu", "Plain Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the plain style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_THIN_LINES_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.ThinLinesLogo"),
+		QT_TRANSLATE_NOOP("Menu", "Thin Lines Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the thin lines logo style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_OUTLINE_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.OutlineLogo"),
+		QT_TRANSLATE_NOOP("Menu", "Outline Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the outline logo style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_SHARP_TOP_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.SharpTopLogo"),
+		QT_TRANSLATE_NOOP("Menu", "Sharp Top Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the sharp top logo style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_ROUNDED_TOP_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.RoundedTopLogo"),
+		QT_TRANSLATE_NOOP("Menu", "Rounded Top Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the rounded top logo style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_FLATTENED_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.FlattenedLogo"),
+		QT_TRANSLATE_NOOP("Menu", "Flattened Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the flattened logo style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_HIGH_CONTRAST
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.HighContrast"),
+		QT_TRANSLATE_NOOP("Menu", "High Contrast Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the high contrast style"),
+		"",
+		""
+	},
+	// LC_VIEW_STUD_STYLE_HIGH_CONTRAST_LOGO
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StudStyle.HighContrastLogo"),
+		QT_TRANSLATE_NOOP("Menu", "High Contrast with Logo Studs"),
+		QT_TRANSLATE_NOOP("Status", "Draw studs with the high contrast with logo style"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

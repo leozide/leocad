@@ -5982,6 +5982,15 @@ void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
 	lcVector3 Center;
 	GetSelectionCenter(Center);
 
+	// With orbit snapping the camera turns in whole steps of the rotation snap angle.
+	const float OrbitSnap = gMainWindow->GetOrbitSnap() * LC_DTOR;
+
+	if (OrbitSnap > 0.0f)
+	{
+		MouseX = roundf(MouseX / OrbitSnap) * OrbitSnap;
+		MouseY = roundf(MouseY / OrbitSnap) * OrbitSnap;
+	}
+
 	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;

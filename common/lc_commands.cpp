@@ -684,6 +684,22 @@ const lcCommand gCommands[] =
 		"",
 		"Shift+9"
 	},
+	// LC_EDIT_SNAP_ANGLE_CUSTOM
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SnapAngle.Custom"),
+		QT_TRANSLATE_NOOP("Menu", "Custom..."),
+		QT_TRANSLATE_NOOP("Status", "Snap rotations to a custom angle"),
+		"",
+		""
+	},
+	// LC_EDIT_SNAP_ORBIT_TOGGLE
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SnapAngle.ToggleOrbit"),
+		QT_TRANSLATE_NOOP("Menu", "Snap Camera Orbit"),
+		QT_TRANSLATE_NOOP("Status", "Toggle orbiting the camera in steps of the rotation snap angle"),
+		"",
+		""
+	},
 	// LC_EDIT_TRANSFORM
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.Transform"),

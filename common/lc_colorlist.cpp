@@ -40,7 +40,8 @@ void lcColorList::UpdateCells()
 		mGroups[LC_COLORGROUP_SPECIAL].Cells.emplace_back(mCells.size());
 	}
 
-	mPreferredHeight = GetHeightForWidth(width() > 0 ? width() : 200, &mColumns, &mRows);
+	// Before the first layout the width is only a placeholder, so estimate with the hinted width.
+	mPreferredHeight = GetHeightForWidth(isVisible() ? width() : sizeHint().width(), &mColumns, &mRows);
 }
 
 int lcColorList::GetHeightForWidth(int Width, int* Columns, int* Rows) const

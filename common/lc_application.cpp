@@ -56,6 +56,9 @@ void lcPreferences::LoadDefaults()
 	mGridLineSpacing = lcGetProfileInt(LC_PROFILE_GRID_LINE_SPACING);
 	mGridLineColor = lcGetProfileUInt(LC_PROFILE_GRID_LINE_COLOR);
 	mDrawGridOrigin = lcGetProfileInt(LC_PROFILE_GRID_ORIGIN);
+	mDrawGridHeightXZ = lcGetProfileInt(LC_PROFILE_GRID_HEIGHT_XZ);
+	mDrawGridHeightYZ = lcGetProfileInt(LC_PROFILE_GRID_HEIGHT_YZ);
+	mGridHeightBehindModel = lcGetProfileInt(LC_PROFILE_GRID_HEIGHT_BEHIND_MODEL);
 	mViewSphereEnabled = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED);
 	mViewSphereLocation = lcGetProfileViewSphereLocation();
 	mViewSphereSize = lcGetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE);
@@ -122,6 +125,9 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_GRID_LINE_SPACING, mGridLineSpacing);
 	lcSetProfileUInt(LC_PROFILE_GRID_LINE_COLOR, mGridLineColor);
 	lcSetProfileInt(LC_PROFILE_GRID_ORIGIN, mDrawGridOrigin);
+	lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_XZ, mDrawGridHeightXZ);
+	lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_YZ, mDrawGridHeightYZ);
+	lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_BEHIND_MODEL, mGridHeightBehindModel);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_ENABLED, mViewSphereEnabled);
 	lcSetProfileViewSphereLocation(mViewSphereLocation);
 	lcSetProfileInt(LC_PROFILE_VIEW_SPHERE_SIZE, mViewSphereSize);

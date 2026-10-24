@@ -1396,6 +1396,30 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_VIEW_GRID_TOGGLE_HEIGHT_XZ
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleHeightXZ"),
+		QT_TRANSLATE_NOOP("Menu", "XZ Height Grid"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the vertical XZ height grid"),
+		"",
+		""
+	},
+	// LC_VIEW_GRID_TOGGLE_HEIGHT_YZ
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleHeightYZ"),
+		QT_TRANSLATE_NOOP("Menu", "YZ Height Grid"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the vertical YZ height grid"),
+		"",
+		""
+	},
+	// LC_VIEW_GRID_TOGGLE_HEIGHT_BEHIND
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Grid.ToggleHeightBehindModel"),
+		QT_TRANSLATE_NOOP("Menu", "Height Grids Behind Model"),
+		QT_TRANSLATE_NOOP("Status", "Toggle drawing the height grids behind the model instead of through the origin axes"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

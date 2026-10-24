@@ -37,7 +37,8 @@ lcPropertiesWidget::lcPropertiesWidget(QWidget* Parent)
 		}
 	}
 
-	SetLayoutMode(LayoutMode::Empty);
+	SetLayoutMode(LayoutMode::Piece);
+	setEnabled(false);
 }
 
 lcObjectPropertyId lcPropertiesWidget::GetEditorWidgetPropertyId(QWidget* Widget) const
@@ -1348,7 +1349,9 @@ void lcPropertiesWidget::SetCategoryVisible(CategoryIndex Index, bool Visible)
 
 void lcPropertiesWidget::SetEmpty()
 {
-	SetLayoutMode(LayoutMode::Empty);
+	// Keep the piece rows on screen, disabled, so the panel keeps its height.
+	SetPiece({}, nullptr);
+	setEnabled(false);
 
 	mFocusObject = nullptr;
 	mSelection.clear();
@@ -1620,6 +1623,7 @@ void lcPropertiesWidget::Update(const std::vector<lcObject*>& Selection, lcObjec
 	mLastRotation.reset();
 	mFocusObject = nullptr;
 	mSelection.clear();
+	setEnabled(true);
 
 	LayoutMode Mode = LayoutMode::Empty;
 

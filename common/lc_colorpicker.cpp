@@ -22,6 +22,12 @@ lcColorPickerPopup::lcColorPickerPopup(QWidget* Parent, int ColorIndex, bool All
 	connect(mColorList, &lcColorList::ColorSelected, this, &lcColorPickerPopup::ColorSelected);
 	layout->addWidget(mColorList);
 
+	// Resize the popup when the tiles need a different height, so none are cut off.
+	connect(mColorList, &lcColorList::HeightChanged, this, [this]()
+	{
+		adjustSize();
+	});
+
 	mColorList->blockSignals(true);
 	mColorList->SetCurrentColor(ColorIndex);
 	mColorList->blockSignals(false);

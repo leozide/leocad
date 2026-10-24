@@ -40,51 +40,49 @@ void lcColorList::UpdateCells()
 		mGroups[LC_COLORGROUP_SPECIAL].Cells.emplace_back(mCells.size());
 	}
 
-	mColumns = 14;
-	mRows = 0;
+	mPreferredHeight = GetHeightForWidth(width() > 0 ? width() : 200, &mColumns, &mRows);
+}
 
-	for (const lcColorListGroup& Group : mGroups)
-		mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
-
+int lcColorList::GetHeightForWidth(int Width, int* Columns, int* Rows) const
+{
 	QFontMetrics Metrics(font());
 	int TextHeight = 0;
 
-	for (lcColorListGroup& Group : mGroups)
-	{
-		Group.Rect = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group.Name);
+	for (const lcColorListGroup& Group : mGroups)
+		TextHeight += qMax(Metrics.boundingRect(Group.Name).height(), 16) + 4;
 
-		TextHeight += Group.Rect.height();
-	}
+	// Tiles are always square: the width sets the tile size and the rows set the height.
+	const int TargetCellSize = Metrics.height() * 3 / 2;
+	const int ColumnCount = qMax(5, Width / qMax(TargetCellSize, 1));
+	int RowCount = 0;
 
-	mPreferredHeight = TextHeight + 10 * mRows;
+	for (const lcColorListGroup& Group : mGroups)
+		if (!Group.Collapsed)
+			RowCount += ((int)Group.Cells.size() + ColumnCount - 1) / ColumnCount;
+
+	if (Columns)
+		*Columns = ColumnCount;
+
+	if (Rows)
+		*Rows = RowCount;
+
+	return TextHeight + qCeil((float)Width / (float)ColumnCount * RowCount);
 }
 
 void lcColorList::UpdateRects()
 {
 	QFontMetrics Metrics(font());
-	int TextHeight = 0;
 
 	for (lcColorListGroup& Group : mGroups)
 	{
 		Group.Rect = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group.Name);
 		Group.Rect.setHeight(qMax(Group.Rect.height(), 16) + 4);
-
-		TextHeight += Group.Rect.height();
 	}
 
-	// Tiles are always square: the width sets the tile size and the rows set the height.
-	const int TargetCellSize = Metrics.height() * 3 / 2;
-	mColumns = qMax(5, width() / qMax(TargetCellSize, 1));
-	mRows = 0;
-
-	for (const lcColorListGroup& Group : mGroups)
-		if (!Group.Collapsed)
-			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
+	mPreferredHeight = GetHeightForWidth(width(), &mColumns, &mRows);
 
 	const float CellWidth = (float)width() / (float)mColumns;
 	const float CellHeight = CellWidth;
-
-	mPreferredHeight = TextHeight + qCeil(CellHeight * mRows);
 
 	if (height() != mPreferredHeight)
 	{

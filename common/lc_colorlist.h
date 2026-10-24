@@ -23,6 +23,7 @@ public:
 	~lcColorList() = default;
 
 	QSize sizeHint() const override;
+	int GetHeightForWidth(int Width, int* Columns = nullptr, int* Rows = nullptr) const;
 
 	void SetCurrentColor(int colorIndex);
 	void ToggleGroupCollapsed(int GroupIndex);

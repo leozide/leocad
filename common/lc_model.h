@@ -113,6 +113,31 @@ struct lcModelAssetSourceState
 	bool PreferCurrentDirectory;
 };
 
+enum class lcStepViewMode
+{
+	Relative,
+	Absolute,
+	Add,
+	End
+};
+
+// View rotation of a step, stored as an MLCAD 0 ROTSTEP line ending that step.
+struct lcStepView
+{
+	lcStepViewMode Mode = lcStepViewMode::Relative;
+	lcVector3 Angles = lcVector3(0.0f, 0.0f, 0.0f);
+
+	bool operator==(const lcStepView& Other) const
+	{
+		return Mode == Other.Mode && Angles == Other.Angles;
+	}
+
+	bool operator!=(const lcStepView& Other) const
+	{
+		return !(*this == Other);
+	}
+};
+
 class lcModelProperties
 {
 public:
@@ -126,6 +151,9 @@ public:
 			return false;
 
 		if (mAmbientColor != Properties.mAmbientColor)
+			return false;
+
+		if (mStepViews != Properties.mStepViews)
 			return false;
 
 		return true;
@@ -147,6 +175,7 @@ public:
 	QString mComments;
 
 	lcVector3 mAmbientColor;
+	std::map<lcStep, lcStepView> mStepViews;
 };
 
 class lcPOVRayOptions
@@ -301,6 +330,9 @@ public:
 	void ShowPreviousStep();
 	void ShowNextStep();
 	void InsertStepAction(lcStep Step);
+	void ShiftStepViews(lcStep Step, int Offset);
+	void SetStepView(lcStep Step, const std::optional<lcStepView>& StepView);
+	std::optional<lcStepView> GetEffectiveStepView(lcStep Step) const;
 	void RemoveStepAction(lcStep Step);
 
 	void LoadEditHistoryState(const lcModelHistoryEditState& HistoryState);

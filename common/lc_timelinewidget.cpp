@@ -54,6 +54,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_BEFORE]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
+	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_EDIT]);
 
 	Menu->addSeparator();
 
@@ -126,6 +127,27 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
 		addTopLevelItem(StepItem);
 		StepItem->setExpanded(true);
+	}
+
+	// Steps with a view rotation say so in their label.
+	const std::map<lcStep, lcStepView>& StepViews = Model->GetProperties().mStepViews;
+	const char* ModeNames[] = { "REL", "ABS", "ADD" };
+
+	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
+	{
+		const std::map<lcStep, lcStepView>::const_iterator StepView = StepViews.find(TopLevelItemIdx + 1);
+		QString Label = tr("Step %1").arg(TopLevelItemIdx + 1);
+
+		if (StepView != StepViews.end())
+		{
+			if (StepView->second.Mode == lcStepViewMode::End)
+				Label += tr(" - view END");
+			else
+				Label += tr(" - view %1 %2 %3 %4").arg(StepView->second.Angles.x).arg(StepView->second.Angles.y).arg(StepView->second.Angles.z).arg(QLatin1String(ModeNames[static_cast<int>(StepView->second.Mode)]));
+		}
+
+		if (topLevelItem(TopLevelItemIdx)->text(0) != Label)
+			topLevelItem(TopLevelItemIdx)->setText(0, Label);
 	}
 
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();

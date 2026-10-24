@@ -68,6 +68,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "GradientColorTop", LC_RGB(54, 72, 95)),                                    // LC_PROFILE_GRADIENT_COLOR_TOP
 	lcProfileEntry("Settings", "GradientColorBottom", LC_RGB(49, 52, 55)),                                 // LC_PROFILE_GRADIENT_COLOR_BOTTOM
 	lcProfileEntry("Settings", "DrawAxes", 0),                                                             // LC_PROFILE_DRAW_AXES
+	lcProfileEntry("Settings", "FollowStepViews", 1),                                                      // LC_PROFILE_FOLLOW_STEP_VIEWS
 	lcProfileEntry("Settings", "DrawAxesLocation", static_cast<int>(lcAxisIconLocation::BottomLeft)),      // LC_PROFILE_DRAW_AXES_LOCATION
 	lcProfileEntry("Settings", "TextColor", LC_RGBA(214, 220, 227, 255)),                                  // LC_PROFILE_TEXT_COLOR
 	lcProfileEntry("Settings", "TextHaloColor", LC_RGBA(17, 19, 24, 160)),                                // LC_PROFILE_TEXT_HALO_COLOR

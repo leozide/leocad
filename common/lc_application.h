@@ -49,6 +49,7 @@ public:
 	quint32 mBackgroundGradientColorTop;
 	quint32 mBackgroundGradientColorBottom;
 	bool mDrawAxes;
+	bool mFollowStepViews;
 	lcAxisIconLocation mAxisIconLocation;
 	quint32 mTextColor;
 	quint32 mTextHaloColor;

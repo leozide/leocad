@@ -1970,6 +1970,87 @@ void lcView::SetViewpoint(const lcVector3& Position)
 	Redraw();
 }
 
+// Step view angles rotate the model about the LDraw X, Y and Z axes, in that order.
+static lcMatrix44 lcGetStepViewRotation(const lcVector3& Angles)
+{
+	const lcMatrix44 Rotation = lcMul(lcMul(lcMatrix44RotationX(Angles.x * LC_DTOR), lcMatrix44RotationY(Angles.y * LC_DTOR)), lcMatrix44RotationZ(Angles.z * LC_DTOR));
+
+	return lcMatrix44LDrawToLeoCAD(Rotation);
+}
+
+static void lcGetStepViewBase(lcStepViewMode Mode, lcVector3& Direction, lcVector3& Up)
+{
+	// Relative views start from the home view, absolute views from the front view.
+	if (Mode == lcStepViewMode::Absolute)
+	{
+		Direction = lcVector3(0.0f, -1.0f, 0.0f);
+		Up = lcVector3(0.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		Direction = lcNormalize(lcVector3(375.0f, -375.0f, 187.5f));
+		Up = lcNormalize(lcVector3(0.2357f, -0.2357f, 0.94281f));
+	}
+}
+
+void lcView::ApplyStepView()
+{
+	const std::optional<lcStepView> StepView = mModel->GetEffectiveStepView(mModel->GetCurrentStep());
+
+	if (!StepView || mViewType != lcViewType::View)
+		return;
+
+	lcVector3 Direction, Up;
+	lcGetStepViewBase(StepView->Mode, Direction, Up);
+
+	// Turning the model by the step rotation is the same as turning the camera the opposite way.
+	const lcMatrix44 Inverse = lcMatrix44Transpose(lcGetStepViewRotation(StepView->Angles));
+
+	Direction = lcNormalize(lcMul30(Direction, Inverse));
+	Up = lcNormalize(lcMul30(Up, Inverse));
+
+	SetViewpoint(Direction * 1250.0f, lcVector3(0.0f, 0.0f, 0.0f), Up);
+	ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
+}
+
+lcVector3 lcView::GetStepViewAngles() const
+{
+	lcVector3 BaseDirection, BaseUp;
+	lcGetStepViewBase(lcStepViewMode::Absolute, BaseDirection, BaseUp);
+
+	const lcVector3 Direction = lcNormalize(mCamera->mPosition - mCamera->mTargetPosition);
+	const lcVector3 Right = lcNormalize(lcCross(mCamera->mUpVector, Direction));
+	const lcVector3 Up = lcCross(Direction, Right);
+	const lcVector3 BaseRight = lcNormalize(lcCross(BaseUp, BaseDirection));
+
+	// The camera frame expressed against the front view frame gives the model rotation.
+	const lcMatrix44 Base(lcVector4(BaseRight, 0.0f), lcVector4(BaseUp, 0.0f), lcVector4(BaseDirection, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	const lcMatrix44 Current(lcVector4(Right, 0.0f), lcVector4(Up, 0.0f), lcVector4(Direction, 0.0f), lcVector4(0.0f, 0.0f, 0.0f, 1.0f));
+	const lcMatrix44 Rotation = lcMatrix44LeoCADToLDraw(lcMul(lcMatrix44Transpose(Current), Base));
+
+	float X, Y, Z;
+	const float SinY = lcClamp(-Rotation[0][2], -1.0f, 1.0f);
+	Y = asinf(SinY);
+
+	if (fabsf(SinY) < 0.9999f)
+	{
+		X = atan2f(Rotation[1][2], Rotation[2][2]);
+		Z = atan2f(Rotation[0][1], Rotation[0][0]);
+	}
+	else
+	{
+		X = atan2f(-Rotation[2][1], Rotation[1][1]);
+		Z = 0.0f;
+	}
+
+	auto Round = [](float Radians)
+	{
+		return qRound(Radians * LC_RTOD * 100.0f) / 100.0f;
+	};
+
+	return lcVector3(Round(X), Round(Y), Round(Z));
+}
+
 void lcView::SetViewpoint(const lcVector3& Position, const lcVector3& Target, const lcVector3& Up)
 {
 	if (!mCamera || !mCamera->IsSimple())

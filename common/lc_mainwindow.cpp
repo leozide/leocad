@@ -283,6 +283,8 @@ void lcMainWindow::CreateActions()
 	mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]->setCheckable(true);
 	mActions[LC_VIEW_CAMERA_NONE]->setCheckable(true);
 	mActions[LC_VIEW_TIME_ADD_KEYS]->setCheckable(true);
+	mActions[LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW]->setCheckable(true);
+	mActions[LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW]->setChecked(lcGetPreferences().mFollowStepViews);
 
 	for (int ActionIndex = LC_VIEW_TOOLBAR_FIRST; ActionIndex <= LC_VIEW_TOOLBAR_LAST; ActionIndex++)
 		mActions[ActionIndex]->setCheckable(true);
@@ -400,6 +402,9 @@ void lcMainWindow::CreateMenus()
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_TOP]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
+	mViewpointMenu->addSeparator();
+	mViewpointMenu->addAction(mActions[LC_VIEW_STEP_VIEW_EDIT]);
+	mViewpointMenu->addAction(mActions[LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW]);
 
 	mProjectionMenu = new QMenu(tr("Projection"), this);
 	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
@@ -1686,6 +1691,95 @@ void lcMainWindow::ToggleGrid()
 	lcGetPreferences().mGridEnabled = !lcGetPreferences().mGridEnabled;
 
 	lcView::UpdateAllViews();
+}
+
+void lcMainWindow::ShowStepViewDialog()
+{
+	lcModel* ActiveModel = GetActiveModel();
+	lcView* ActiveView = GetActiveView();
+
+	if (!ActiveModel || !ActiveView)
+		return;
+
+	const lcStep Step = ActiveModel->GetCurrentStep();
+	const std::map<lcStep, lcStepView>& StepViews = ActiveModel->GetProperties().mStepViews;
+	const std::map<lcStep, lcStepView>::const_iterator Current = StepViews.find(Step);
+
+	QDialog Dialog(this);
+	Dialog.setWindowTitle(tr("Step %1 View").arg(Step));
+
+	QFormLayout* Layout = new QFormLayout(&Dialog);
+
+	QComboBox* ModeCombo = new QComboBox(&Dialog);
+	ModeCombo->addItems({ tr("No view change"), tr("Relative to the default view"), tr("Absolute"), tr("Added to the previous view"), tr("Back to the default view") });
+	ModeCombo->setToolTip(tr("How this step turns the view, saved as an MLCAD ROTSTEP line ending the step."));
+	Layout->addRow(tr("Rotation:"), ModeCombo);
+
+	QDoubleSpinBox* AngleEdits[3];
+	const QString AxisNames[3] = { tr("X:"), tr("Y:"), tr("Z:") };
+
+	for (int Axis = 0; Axis < 3; Axis++)
+	{
+		AngleEdits[Axis] = new QDoubleSpinBox(&Dialog);
+		AngleEdits[Axis]->setRange(-360.0, 360.0);
+		AngleEdits[Axis]->setDecimals(2);
+		AngleEdits[Axis]->setSuffix(tr(" deg."));
+		Layout->addRow(AxisNames[Axis], AngleEdits[Axis]);
+	}
+
+	QPushButton* CurrentViewButton = new QPushButton(tr("Use Current View"), &Dialog);
+	CurrentViewButton->setToolTip(tr("Fill in the absolute rotation that matches the current view."));
+	Layout->addRow(QString(), CurrentViewButton);
+
+	QDialogButtonBox* Buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &Dialog);
+	Layout->addRow(Buttons);
+
+	auto UpdateEnabled = [ModeCombo, AngleEdits]()
+	{
+		const bool HasAngles = ModeCombo->currentIndex() >= 1 && ModeCombo->currentIndex() <= 3;
+
+		for (QDoubleSpinBox* AngleEdit : AngleEdits)
+			AngleEdit->setEnabled(HasAngles);
+	};
+
+	if (Current != StepViews.end())
+	{
+		ModeCombo->setCurrentIndex(static_cast<int>(Current->second.Mode) + 1);
+
+		for (int Axis = 0; Axis < 3; Axis++)
+			AngleEdits[Axis]->setValue(Current->second.Angles[Axis]);
+	}
+
+	UpdateEnabled();
+
+	connect(ModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), &Dialog, UpdateEnabled);
+	connect(CurrentViewButton, &QPushButton::clicked, &Dialog, [ActiveView, ModeCombo, AngleEdits]()
+	{
+		const lcVector3 Angles = ActiveView->GetStepViewAngles();
+
+		ModeCombo->setCurrentIndex(static_cast<int>(lcStepViewMode::Absolute) + 1);
+
+		for (int Axis = 0; Axis < 3; Axis++)
+			AngleEdits[Axis]->setValue(Angles[Axis]);
+	});
+	connect(Buttons, &QDialogButtonBox::accepted, &Dialog, &QDialog::accept);
+	connect(Buttons, &QDialogButtonBox::rejected, &Dialog, &QDialog::reject);
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return;
+
+	std::optional<lcStepView> StepView;
+
+	if (ModeCombo->currentIndex() > 0)
+	{
+		StepView = lcStepView();
+		StepView->Mode = static_cast<lcStepViewMode>(ModeCombo->currentIndex() - 1);
+
+		if (StepView->Mode != lcStepViewMode::End)
+			StepView->Angles = lcVector3(AngleEdits[0]->value(), AngleEdits[1]->value(), AngleEdits[2]->value());
+	}
+
+	ActiveModel->SetStepView(Step, StepView);
 }
 
 void lcMainWindow::ToggleFadePreviousSteps()
@@ -3244,6 +3338,19 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_VIEW_STEP_VIEW_EDIT:
+		ShowStepViewDialog();
+		break;
+
+	case LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW:
+		lcGetPreferences().mFollowStepViews = !lcGetPreferences().mFollowStepViews;
+		lcSetProfileInt(LC_PROFILE_FOLLOW_STEP_VIEWS, lcGetPreferences().mFollowStepViews);
+		mActions[LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW]->setChecked(lcGetPreferences().mFollowStepViews);
+
+		if (lcGetPreferences().mFollowStepViews && ActiveView)
+			ActiveView->ApplyStepView();
 		break;
 
 	case LC_PIECE_INSERT:

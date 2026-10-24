@@ -21,6 +21,7 @@ public:
 
 protected slots:
 	void SetPreviewLock();
+	void OptionsMenuAboutToShow();
 
 protected:
 	void RefreshPendingAssets();

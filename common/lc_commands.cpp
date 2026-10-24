@@ -1396,6 +1396,134 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_VIEW_TOGGLE_EDGE_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleEdgeLines"),
+		QT_TRANSLATE_NOOP("Menu", "Edge Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle edge lines in model views"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_CONDITIONAL_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.ToggleConditionalLines"),
+		QT_TRANSLATE_NOOP("Menu", "Conditional Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle conditional lines in model views"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PREVIEW_SYNC_RENDERING
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleSyncRendering"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Uses Model View Settings"),
+		QT_TRANSLATE_NOOP("Status", "Toggle using the model view rendering settings for the pieces preview"),
+		"",
+		""
+	},
+	// LC_VIEW_PREVIEW_SHADING_WIREFRAME
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.Wireframe"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Wireframe"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview as wireframe"),
+		"",
+		""
+	},
+	// LC_VIEW_PREVIEW_SHADING_FLAT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.Flat"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Flat Shading"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview without any shading or lights"),
+		"",
+		""
+	},
+	// LC_VIEW_PREVIEW_SHADING_DEFAULT_LIGHTS
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.DefaultLights"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Default Lights"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview with the default lights"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PREVIEW_EDGE_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleEdgeLines"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Edge Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle edge lines in the pieces preview"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PREVIEW_CONDITIONAL_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleConditionalLines"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Conditional Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle conditional lines in the pieces preview"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PIECES_SYNC_RENDERING
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.ToggleSyncRendering"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Use Model View Settings"),
+		QT_TRANSLATE_NOOP("Status", "Toggle using the model view rendering settings for the pieces list"),
+		"",
+		""
+	},
+	// LC_VIEW_PIECES_SHADING_WIREFRAME
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.Shade.Wireframe"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Wireframe"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces list as wireframe"),
+		"",
+		""
+	},
+	// LC_VIEW_PIECES_SHADING_FLAT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.Shade.Flat"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Flat Shading"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces list without any shading or lights"),
+		"",
+		""
+	},
+	// LC_VIEW_PIECES_SHADING_DEFAULT_LIGHTS
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.Shade.DefaultLights"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Default Lights"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces list with the default lights"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PIECES_EDGE_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.ToggleEdgeLines"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Edge Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle edge lines in the pieces list"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PIECES_CONDITIONAL_LINES
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.ToggleConditionalLines"),
+		QT_TRANSLATE_NOOP("Menu", "Pieces Conditional Lines"),
+		QT_TRANSLATE_NOOP("Status", "Toggle conditional lines in the pieces list"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PREVIEW_VIEW_SPHERE
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleViewSphere"),
+		QT_TRANSLATE_NOOP("Menu", "Preview View Sphere"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the view sphere in the pieces preview"),
+		"",
+		""
+	},
+	// LC_VIEW_TOGGLE_PREVIEW_AXIS_ICON
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleAxisIcon"),
+		QT_TRANSLATE_NOOP("Menu", "Preview Axis Icon"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the axis icon in the pieces preview"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

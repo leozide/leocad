@@ -106,6 +106,13 @@ public:
 		mShadingMode = ShadingMode;
 	}
 
+	void SetLineSettings(bool DrawEdgeLines, bool DrawConditionalLines, float LineWidth)
+	{
+		mDrawEdgeLines = DrawEdgeLines;
+		mDrawConditionalLines = DrawConditionalLines;
+		mLineWidth = LineWidth;
+	}
+
 	void SetAllowLOD(bool AllowLOD)
 	{
 		mAllowLOD = AllowLOD;
@@ -173,6 +180,9 @@ protected:
 	bool mMissingAssets = false;
 	bool mDrawInsertPreview = false;
 	bool mAllowLOD = true;
+	bool mDrawEdgeLines = true;
+	bool mDrawConditionalLines = true;
+	float mLineWidth = 1.0f;
 	float mMeshLODDistance;
 
 	lcVector4 mFadeColor;

@@ -57,8 +57,6 @@ void lcColorList::UpdateCells()
 	}
 
 	mPreferredHeight = TextHeight + 10 * mRows;
-
-	setMinimumHeight(TextHeight + 5 * mRows);
 }
 
 void lcColorList::UpdateRects()
@@ -73,44 +71,24 @@ void lcColorList::UpdateRects()
 		TextHeight += Group.Rect.height();
 	}
 
-	mPreferredHeight = TextHeight + 10 * mRows;
+	// Tiles are always square: the width sets the tile size and the rows set the height.
+	const int TargetCellSize = Metrics.height() * 3 / 2;
+	mColumns = qMax(5, (width() + 1) / qMax(TargetCellSize, 1));
+	mRows = 0;
 
-	float CellWidth = (float)(width() + 1) / (float)mColumns;
-	float CellHeight = (float)(height() - TextHeight) / (float)mRows;
+	for (const lcColorListGroup& Group : mGroups)
+		mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
 
-	while (CellWidth / CellHeight > 1.5f)
-	{
-		mColumns++;
-		mRows = 0;
+	const float CellWidth = (float)(width() + 1) / (float)mColumns;
+	const float CellHeight = CellWidth;
 
-		for (const lcColorListGroup& Group : mGroups)
-			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
+	mPreferredHeight = TextHeight + qCeil(CellHeight * mRows);
 
-		CellWidth = (float)(width() + 1) / (float)mColumns;
-		CellHeight = (float)(height() - TextHeight) / (float)mRows;
-
-		if (mRows <= LC_NUM_COLORGROUPS)
-			break;
-	}
-
-	while (CellHeight / CellWidth > 1.5f)
-	{
-		mColumns--;
-		mRows = 0;
-
-		for (const lcColorListGroup& Group : mGroups)
-			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
-
-		CellWidth = (float)(width() + 1) / (float)mColumns;
-		CellHeight = (float)(height() - TextHeight) / (float)mRows;
-
-		if (mColumns <= 5)
-			break;
-	}
+	if (height() != mPreferredHeight)
+		setFixedHeight(mPreferredHeight);
 
 	int CurCell = 0;
 	float GroupY = 0.0f;
-	int TotalRows = 1;
 
 	for (lcColorListGroup& Group : mGroups)
 	{
@@ -125,7 +103,7 @@ void lcColorList::UpdateRects()
 			const int Left = CellWidth * CurColumn - 1;
 			const int Right = (CurColumn + 1) * CellWidth - 1;
 			const int Top = GroupY + CellHeight * NumRows;
-			const int Bottom = (TotalRows != mRows) ? GroupY + CellHeight * (NumRows + 1) : height() - 1;
+			const int Bottom = GroupY + CellHeight * (NumRows + 1);
 
 			mCells[CurCell].Rect = QRect(Left, Top, Right - Left, Bottom - Top);
 
@@ -134,17 +112,13 @@ void lcColorList::UpdateRects()
 			{
 				CurColumn = 0;
 				NumRows++;
-				TotalRows++;
 			}
 
 			CurCell++;
 		}
 
 		if (CurColumn != 0)
-		{
 			NumRows++;
-			TotalRows++;
-		}
 
 		GroupY += NumRows * CellHeight;
 	}

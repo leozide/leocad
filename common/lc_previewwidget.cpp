@@ -83,19 +83,8 @@ void lcPreviewDockWidget::OptionsMenuAboutToShow()
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	QAction* ViewSphere = Menu->addAction(tr("View Sphere"), this, []()
-	{
-		gMainWindow->HandleCommand(LC_VIEW_TOGGLE_PREVIEW_VIEW_SPHERE);
-	});
-	ViewSphere->setCheckable(true);
-	ViewSphere->setChecked(Preferences.mPreviewViewSphereEnabled);
-
-	QAction* AxisIcon = Menu->addAction(tr("Axis Icon"), this, []()
-	{
-		gMainWindow->HandleCommand(LC_VIEW_TOGGLE_PREVIEW_AXIS_ICON);
-	});
-	AxisIcon->setCheckable(true);
-	AxisIcon->setChecked(Preferences.mDrawPreviewAxis);
+	gMainWindow->AddMenuCommand(Menu, tr("View Sphere"), LC_VIEW_TOGGLE_PREVIEW_VIEW_SPHERE, Preferences.mPreviewViewSphereEnabled);
+	gMainWindow->AddMenuCommand(Menu, tr("Axis Icon"), LC_VIEW_TOGGLE_PREVIEW_AXIS_ICON, Preferences.mDrawPreviewAxis);
 
 	Menu->addSeparator();
 

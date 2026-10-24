@@ -90,6 +90,18 @@ void lcMainWindow::CreateWidgets()
 	mModelTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 	setCentralWidget(mModelTabWidget);
 
+	QToolButton* ModelViewOptionsButton = new QToolButton(mModelTabWidget);
+	ModelViewOptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
+	ModelViewOptionsButton->setToolTip(tr("Configure the model view display and rendering."));
+	ModelViewOptionsButton->setAccessibleName(tr("Model View Options"));
+	ModelViewOptionsButton->setPopupMode(QToolButton::InstantPopup);
+	ModelViewOptionsButton->setAutoRaise(true);
+	mModelTabWidget->setCornerWidget(ModelViewOptionsButton, Qt::TopRightCorner);
+
+	QMenu* ModelViewOptionsMenu = new QMenu(ModelViewOptionsButton);
+	ModelViewOptionsButton->setMenu(ModelViewOptionsMenu);
+	connect(ModelViewOptionsMenu, &QMenu::aboutToShow, this, &lcMainWindow::ModelViewOptionsMenuAboutToShow);
+
 	connect(mModelTabWidget->tabBar(), &QTabBar::tabCloseRequested, this, &lcMainWindow::ModelTabClosed);
 	connect(mModelTabWidget->tabBar(), &QTabBar::customContextMenuRequested, this, &lcMainWindow::ModelTabContextMenuRequested);
 	connect(mModelTabWidget, &QTabWidget::currentChanged, this, &lcMainWindow::ModelTabChanged);
@@ -1762,37 +1774,83 @@ void lcMainWindow::SetTargetShadingMode(lcRenderTarget Target, lcShadingMode Sha
 	UpdatePartsRendering();
 }
 
+QAction* lcMainWindow::AddMenuCommand(QMenu* Menu, const QString& Text, lcCommandId CommandId, bool Checked)
+{
+	// Menu entries run the matching command so keyboard shortcuts and menus stay in sync.
+	QAction* Action = Menu->addAction(Text, this, [this, CommandId]()
+	{
+		HandleCommand(CommandId);
+	});
+
+	Action->setCheckable(true);
+	Action->setChecked(Checked);
+	Action->setShortcut(mActions[CommandId]->shortcut());
+	Action->setShortcutContext(Qt::WidgetShortcut);
+
+	return Action;
+}
+
 void lcMainWindow::AddRenderTargetActions(QMenu* Menu, lcRenderTarget Target)
 {
-	const lcPreferences& Preferences = lcGetPreferences();
-	const lcRenderSettings RenderSettings = Preferences.GetRenderSettings(Target);
-	const bool Pieces = Target == lcRenderTarget::Pieces;
-
-	// Each entry runs the matching command so keyboard shortcuts and menus stay in sync.
-	auto AddCommand = [this](QMenu* TargetMenu, const QString& Text, lcCommandId CommandId, bool Checked)
+	struct lcRenderTargetCommands
 	{
-		QAction* Action = TargetMenu->addAction(Text, this, [this, CommandId]()
-		{
-			HandleCommand(CommandId);
-		});
-
-		Action->setCheckable(true);
-		Action->setChecked(Checked);
-		Action->setShortcut(mActions[CommandId]->shortcut());
-		Action->setShortcutContext(Qt::WidgetShortcut);
-		return Action;
+		lcCommandId SyncRendering;
+		lcCommandId Wireframe;
+		lcCommandId Flat;
+		lcCommandId DefaultLights;
+		lcCommandId EdgeLines;
+		lcCommandId ConditionalLines;
 	};
 
-	AddCommand(Menu, tr("Use Model View Settings"), Pieces ? LC_VIEW_TOGGLE_PIECES_SYNC_RENDERING : LC_VIEW_TOGGLE_PREVIEW_SYNC_RENDERING, Preferences.GetTargetRenderSettings(Target).SyncRendering);
+	lcRenderTargetCommands Commands;
+
+	switch (Target)
+	{
+	case lcRenderTarget::ModelView:
+		Commands = { LC_NUM_COMMANDS, LC_VIEW_SHADING_WIREFRAME, LC_VIEW_SHADING_FLAT, LC_VIEW_SHADING_DEFAULT_LIGHTS, LC_VIEW_TOGGLE_EDGE_LINES, LC_VIEW_TOGGLE_CONDITIONAL_LINES };
+		break;
+
+	case lcRenderTarget::Preview:
+		Commands = { LC_VIEW_TOGGLE_PREVIEW_SYNC_RENDERING, LC_VIEW_PREVIEW_SHADING_WIREFRAME, LC_VIEW_PREVIEW_SHADING_FLAT, LC_VIEW_PREVIEW_SHADING_DEFAULT_LIGHTS, LC_VIEW_TOGGLE_PREVIEW_EDGE_LINES, LC_VIEW_TOGGLE_PREVIEW_CONDITIONAL_LINES };
+		break;
+
+	case lcRenderTarget::Pieces:
+		Commands = { LC_VIEW_TOGGLE_PIECES_SYNC_RENDERING, LC_VIEW_PIECES_SHADING_WIREFRAME, LC_VIEW_PIECES_SHADING_FLAT, LC_VIEW_PIECES_SHADING_DEFAULT_LIGHTS, LC_VIEW_TOGGLE_PIECES_EDGE_LINES, LC_VIEW_TOGGLE_PIECES_CONDITIONAL_LINES };
+		break;
+	}
+
+	const lcPreferences& Preferences = lcGetPreferences();
+	const lcRenderSettings RenderSettings = Preferences.GetRenderSettings(Target);
+
+	// The model views have no settings to follow.
+	if (Target != lcRenderTarget::ModelView)
+		AddMenuCommand(Menu, tr("Use Model View Settings"), Commands.SyncRendering, Preferences.GetTargetRenderSettings(Target).SyncRendering);
 
 	QMenu* ShadingMenu = Menu->addMenu(tr("Shading"));
 	QActionGroup* ShadingGroup = new QActionGroup(ShadingMenu);
-	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Wireframe"), Pieces ? LC_VIEW_PIECES_SHADING_WIREFRAME : LC_VIEW_PREVIEW_SHADING_WIREFRAME, RenderSettings.ShadingMode == lcShadingMode::Wireframe));
-	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Flat Shading"), Pieces ? LC_VIEW_PIECES_SHADING_FLAT : LC_VIEW_PREVIEW_SHADING_FLAT, RenderSettings.ShadingMode == lcShadingMode::Flat));
-	ShadingGroup->addAction(AddCommand(ShadingMenu, tr("Default Lights"), Pieces ? LC_VIEW_PIECES_SHADING_DEFAULT_LIGHTS : LC_VIEW_PREVIEW_SHADING_DEFAULT_LIGHTS, RenderSettings.ShadingMode == lcShadingMode::DefaultLights));
+	ShadingGroup->addAction(AddMenuCommand(ShadingMenu, tr("Wireframe"), Commands.Wireframe, RenderSettings.ShadingMode == lcShadingMode::Wireframe));
+	ShadingGroup->addAction(AddMenuCommand(ShadingMenu, tr("Flat Shading"), Commands.Flat, RenderSettings.ShadingMode == lcShadingMode::Flat));
+	ShadingGroup->addAction(AddMenuCommand(ShadingMenu, tr("Default Lights"), Commands.DefaultLights, RenderSettings.ShadingMode == lcShadingMode::DefaultLights));
 
-	AddCommand(Menu, tr("Edge Lines"), Pieces ? LC_VIEW_TOGGLE_PIECES_EDGE_LINES : LC_VIEW_TOGGLE_PREVIEW_EDGE_LINES, RenderSettings.DrawEdgeLines);
-	AddCommand(Menu, tr("Conditional Lines"), Pieces ? LC_VIEW_TOGGLE_PIECES_CONDITIONAL_LINES : LC_VIEW_TOGGLE_PREVIEW_CONDITIONAL_LINES, RenderSettings.DrawConditionalLines);
+	AddMenuCommand(Menu, tr("Edge Lines"), Commands.EdgeLines, RenderSettings.DrawEdgeLines);
+	AddMenuCommand(Menu, tr("Conditional Lines"), Commands.ConditionalLines, RenderSettings.DrawConditionalLines);
+}
+
+void lcMainWindow::ModelViewOptionsMenuAboutToShow()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(sender());
+	Menu->clear();
+
+	const lcPreferences& Preferences = lcGetPreferences();
+
+	AddMenuCommand(Menu, tr("View Sphere"), LC_VIEW_TOGGLE_VIEW_SPHERE, Preferences.mViewSphereEnabled);
+	AddMenuCommand(Menu, tr("Axis Icon"), LC_VIEW_TOGGLE_AXIS_ICON, Preferences.mDrawAxes);
+	AddMenuCommand(Menu, tr("Base Grid"), LC_VIEW_TOGGLE_GRID, Preferences.mGridEnabled);
+	AddMenuCommand(Menu, tr("Fade Previous Steps"), LC_VIEW_FADE_PREVIOUS_STEPS, Preferences.mFadeSteps);
+
+	Menu->addSeparator();
+
+	AddRenderTargetActions(Menu, lcRenderTarget::ModelView);
 }
 
 void lcMainWindow::TogglePreviewViewSphere()

@@ -281,14 +281,15 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 
 	if (!OutlineSupported)
 	{
-		mOptions->Preferences.mSelectionRenderMode = lcSelectionRenderMode::Tint;
-		lcGetPreferences().mSelectionRenderMode = lcSelectionRenderMode::Tint;
-		ui->SelectionRenderMode->setToolTip(tr("Outline rendering is unavailable. Face tint and colored edges will be used."));
+		mOptions->Preferences.mHighlightRenderMode = lcHighlightRenderMode::Tint;
+		lcGetPreferences().mHighlightRenderMode = lcHighlightRenderMode::Tint;
+		ui->HighlightRenderMode->setToolTip(tr("Outline rendering is unavailable; the Tint and Edges style will be used."));
+		ui->HighlightRenderModeLabel->setToolTip(ui->HighlightRenderMode->toolTip());
 	}
 
-	ui->SelectionRenderMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mSelectionRenderMode));
-	ui->SelectionRenderMode->setEnabled(OutlineSupported);
-	ui->SelectionRenderModeLabel->setEnabled(OutlineSupported);
+	ui->HighlightRenderMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mHighlightRenderMode));
+	ui->HighlightRenderMode->setEnabled(OutlineSupported);
+	ui->HighlightRenderModeLabel->setEnabled(OutlineSupported);
 
 	auto SetButtonPixmap = [](quint32 Color, QToolButton* Button)
 	{
@@ -430,7 +431,7 @@ void lcPreferencesDialog::accept()
 	}
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
-	mOptions->Preferences.mSelectionRenderMode = static_cast<lcSelectionRenderMode>(ui->SelectionRenderMode->currentIndex());
+	mOptions->Preferences.mHighlightRenderMode = static_cast<lcHighlightRenderMode>(ui->HighlightRenderMode->currentIndex());
 
 	mOptions->StudStyle = static_cast<lcStudStyle>(ui->studStyleCombo->currentIndex());
 

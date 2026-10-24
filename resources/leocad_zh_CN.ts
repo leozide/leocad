@@ -12723,18 +12723,14 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">配置 Blender 及其 LDraw 导入和渲染插件。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">&lt;p&gt;&lt;b&gt;选区渲染&lt;/b&gt;&lt;/p&gt;&lt;p&gt;轮廓在模糊部分上绘制轮廓和微弱的选区颜色填充。面部色调使用有色面部和彩色边缘。没有轮廓支持的系统使用 Face Tint。&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;&lt;b&gt;选区渲染&lt;/b&gt;&lt;/p&gt;&lt;p&gt;轮廓在模糊部分上绘制轮廓和微弱的选区颜色填充。面部色调使用有色面部和彩色边缘。没有轮廓支持的系统使用 Face Tint。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">选择所选零件的突出显示方式。</translation>
+        <translation type="obsolete">选择所选零件的突出显示方式。</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
@@ -12774,10 +12770,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">模型视图中的平滑锯齿状边缘；更改需要重新启动 LeoCAD。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">选择渲染</translation>
+        <translation type="obsolete">选择渲染</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
@@ -13266,11 +13261,10 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">附加设置...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
         <source>Selection Rendering:</source>
         <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">选择渲染：</translation>
+        <translation type="obsolete">选择渲染：</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
@@ -14190,10 +14184,9 @@ Unsupported video cards use face tint and colored edges.</source>
         <translation type="unfinished">视图球体渲染不可用。</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="285"/>
         <source>Outline rendering is unavailable. Face tint and colored edges will be used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">轮廓渲染不可用。将使用面部色彩和彩色边缘。</translation>
+        <translation type="obsolete">轮廓渲染不可用。将使用面部色彩和彩色边缘。</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="510"/>
@@ -14263,6 +14256,33 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>确定要加载默认鼠标快捷键吗？</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
+        <source>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
+        <source>Choose how selected pieces and new pieces are highlighted in the viewport.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
+        <source>Highlight Style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
+        <source>Highlight Style:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <source>Outline rendering is unavailable; the Tint and Edges style will be used.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

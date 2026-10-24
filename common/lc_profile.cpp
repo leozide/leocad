@@ -62,7 +62,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "HighlightNewParts", 0),                                                    // LC_PROFILE_HIGHLIGHT_NEW_PARTS
 	lcProfileEntry("Settings", "HighlightNewPartsColor", LC_RGBA(255, 242, 0, 192)),                       // LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR
 	lcProfileEntry("Settings", "ShadingMode", static_cast<int>(lcShadingMode::DefaultLights)),             // LC_PROFILE_SHADING_MODE
-	lcProfileEntry("Settings", "SelectionRenderMode", static_cast<int>(lcSelectionRenderMode::Outline)),      // LC_PROFILE_SELECTION_RENDER_MODE
+	lcProfileEntry("Settings", "HighlightRenderMode", static_cast<int>(lcHighlightRenderMode::Outline)),      // LC_PROFILE_HIGHLIGHT_RENDER_MODE
 	lcProfileEntry("Settings", "BackgroundGradient", false),                                               // LC_PROFILE_BACKGROUND_GRADIENT
 	lcProfileEntry("Settings", "BackgroundColor", LC_RGB(49, 52, 55)),                                     // LC_PROFILE_BACKGROUND_COLOR
 	lcProfileEntry("Settings", "GradientColorTop", LC_RGB(54, 72, 95)),                                    // LC_PROFILE_GRADIENT_COLOR_TOP
@@ -348,10 +348,10 @@ constexpr lcProfileEnumValue<lcShadingMode> ShadingModeValues[] =
 	{ lcShadingMode::Full, "Full", 3 }
 };
 
-constexpr lcProfileEnumValue<lcSelectionRenderMode> SelectionRenderModeValues[] =
+constexpr lcProfileEnumValue<lcHighlightRenderMode> HighlightRenderModeValues[] =
 {
-	{ lcSelectionRenderMode::Outline, "Outline", 0 },
-	{ lcSelectionRenderMode::Tint, "Tint", 1 }
+	{ lcHighlightRenderMode::Outline, "Outline", 0 },
+	{ lcHighlightRenderMode::Tint, "Tint", 1 }
 };
 
 constexpr lcProfileEnumValue<lcAxisIconLocation> AxisIconLocationValues[] =
@@ -452,14 +452,14 @@ void lcSetProfileShadingMode(lcShadingMode Value)
 	lcWriteProfileEnum(LC_PROFILE_SHADING_MODE, Value, ShadingModeValues);
 }
 
-lcSelectionRenderMode lcGetProfileSelectionRenderMode()
+lcHighlightRenderMode lcGetProfileHighlightRenderMode()
 {
-	return lcReadProfileEnum(LC_PROFILE_SELECTION_RENDER_MODE, SelectionRenderModeValues);
+	return lcReadProfileEnum(LC_PROFILE_HIGHLIGHT_RENDER_MODE, HighlightRenderModeValues);
 }
 
-void lcSetProfileSelectionRenderMode(lcSelectionRenderMode Value)
+void lcSetProfileHighlightRenderMode(lcHighlightRenderMode Value)
 {
-	lcWriteProfileEnum(LC_PROFILE_SELECTION_RENDER_MODE, Value, SelectionRenderModeValues);
+	lcWriteProfileEnum(LC_PROFILE_HIGHLIGHT_RENDER_MODE, Value, HighlightRenderModeValues);
 }
 
 lcAxisIconLocation lcGetProfileAxisIconLocation()

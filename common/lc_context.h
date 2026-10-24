@@ -241,11 +241,12 @@ public:
 		mHighlightParamsDirty = true;
 	}
 
-	void SetOutlineParams(const lcVector4& PixelSizeRadiusOpacity, const lcVector4& SelectedColor, const lcVector4& FocusedColor)
+	void SetOutlineParams(const lcVector4& PixelSizeRadiusOpacity, const lcVector4& SelectedColor, const lcVector4& FocusedColor, const lcVector4& HighlightedColor)
 	{
 		mOutlineParams[0] = PixelSizeRadiusOpacity;
 		mOutlineParams[1] = SelectedColor;
 		mOutlineParams[2] = FocusedColor;
+		mOutlineParams[3] = HighlightedColor;
 		mOutlineParamsDirty = true;
 	}
 
@@ -320,7 +321,7 @@ protected:
 	lcMatrix44 mProjectionMatrix;
 	lcMatrix44 mViewProjectionMatrix;
 	lcVector4 mHighlightParams[4];
-	lcVector4 mOutlineParams[3];
+	lcVector4 mOutlineParams[4];
 	bool mColorDirty;
 	bool mTextHaloColorDirty;
 	bool mWorldMatrixDirty;

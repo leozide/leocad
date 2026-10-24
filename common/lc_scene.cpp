@@ -10,7 +10,7 @@
 
 lcScene::lcScene()
 {
-	mSelectionRenderMode = lcSelectionRenderMode::Tint;
+	mHighlightRenderMode = lcHighlightRenderMode::Tint;
 	mShadingMode = lcShadingMode::DefaultLights;
 	mMeshLODDistance = 250.0f;
 }
@@ -18,7 +18,7 @@ lcScene::lcScene()
 void lcScene::Begin(const lcMatrix44& ViewMatrix)
 {
 	mMissingAssets = false;
-	mSelectionRenderMode = lcSelectionRenderMode::Tint;
+	mHighlightRenderMode = lcHighlightRenderMode::Tint;
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
 	mRenderMeshes.clear();
@@ -164,8 +164,8 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 		lcRenderMeshState State = RenderMesh.State;
 		const bool HasTriangles = (Mesh->mFlags & (lcMeshFlag::HasDefault | lcMeshFlag::HasSolid | lcMeshFlag::HasTranslucent)) != 0;
 
-		if (mSelectionRenderMode == lcSelectionRenderMode::Outline && HasTriangles &&
-			(State == lcRenderMeshState::Selected || State == lcRenderMeshState::Focused))
+		if (mHighlightRenderMode == lcHighlightRenderMode::Outline && HasTriangles &&
+			(State == lcRenderMeshState::Selected || State == lcRenderMeshState::Focused || State == lcRenderMeshState::Highlighted))
 			State = lcRenderMeshState::Default;
 
 		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
@@ -349,7 +349,7 @@ void lcScene::DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawF
 		const lcMesh* Mesh = RenderMesh.Mesh;
 		lcRenderMeshState State = RenderMesh.State;
 
-		if (mSelectionRenderMode == lcSelectionRenderMode::Outline && (State == lcRenderMeshState::Selected || State == lcRenderMeshState::Focused))
+		if (mHighlightRenderMode == lcHighlightRenderMode::Outline && (State == lcRenderMeshState::Selected || State == lcRenderMeshState::Focused))
 			State = lcRenderMeshState::Default;
 
 		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
@@ -554,17 +554,30 @@ bool lcScene::CanReuseSceneDepth() const
 	});
 }
 
-void lcScene::DrawOutlineMask(lcContext* Context) const
+bool lcScene::HasHighlightedMeshes() const
 {
-	DrawOutlineGeometry(Context, true);
+	return std::any_of(mRenderMeshes.begin(), mRenderMeshes.end(), [](const lcRenderMesh& Mesh)
+	{
+		return Mesh.State == lcRenderMeshState::Highlighted;
+	});
+}
+
+void lcScene::DrawSelectionMask(lcContext* Context) const
+{
+	DrawOutlineGeometry(Context, lcOutlineGeometry::Selection);
+}
+
+void lcScene::DrawHighlightMask(lcContext* Context) const
+{
+	DrawOutlineGeometry(Context, lcOutlineGeometry::Highlight);
 }
 
 void lcScene::DrawOutlineOccluders(lcContext* Context) const
 {
-	DrawOutlineGeometry(Context, false);
+	DrawOutlineGeometry(Context, lcOutlineGeometry::Occluders);
 }
 
-void lcScene::DrawOutlineGeometry(lcContext* Context, bool SelectedOnly) const
+void lcScene::DrawOutlineGeometry(lcContext* Context, lcOutlineGeometry Geometry) const
 {
 	Context->SetViewMatrix(mViewMatrix);
 	Context->SetMaterial(lcMaterialType::UnlitColor);
@@ -573,16 +586,20 @@ void lcScene::DrawOutlineGeometry(lcContext* Context, bool SelectedOnly) const
 	for (const lcRenderMesh& RenderMesh : mRenderMeshes)
 	{
 		const bool Selected = RenderMesh.State == lcRenderMeshState::Selected || RenderMesh.State == lcRenderMeshState::Focused;
-		if (RenderMesh.State == lcRenderMeshState::Preview || (SelectedOnly && !Selected))
+		const bool Highlighted = RenderMesh.State == lcRenderMeshState::Highlighted;
+
+		if (RenderMesh.State == lcRenderMeshState::Preview ||
+			(Geometry == lcOutlineGeometry::Selection && !Selected) ||
+			(Geometry == lcOutlineGeometry::Highlight && !Highlighted))
 			continue;
 
-		if (!Selected && mTranslucentFade && RenderMesh.State == lcRenderMeshState::Faded)
+		if (Geometry == lcOutlineGeometry::Occluders && mTranslucentFade && RenderMesh.State == lcRenderMeshState::Faded)
 			continue;
 
 		const lcMesh* Mesh = RenderMesh.Mesh;
 		Context->BindMesh(Mesh);
 		Context->SetWorldMatrix(RenderMesh.WorldMatrix);
-		Context->SetColor(lcVector4(1.0f, RenderMesh.State == lcRenderMeshState::Focused ? 1.0f : 0.0f, 0.0f, 1.0f));
+		Context->SetColor(lcVector4(Selected ? 1.0f : 0.0f, RenderMesh.State == lcRenderMeshState::Focused ? 1.0f : 0.0f, Highlighted ? 1.0f : 0.0f, 1.0f));
 
 		const lcMeshLod& Lod = Mesh->mLods[RenderMesh.LodIndex];
 		for (int SectionIndex = 0; SectionIndex < Lod.NumSections; SectionIndex++)
@@ -592,7 +609,7 @@ void lcScene::DrawOutlineGeometry(lcContext* Context, bool SelectedOnly) const
 				continue;
 
 			const int ColorIndex = Section.ColorIndex == gDefaultColor ? RenderMesh.ColorIndex : Section.ColorIndex;
-			if (!Selected && lcIsColorTranslucent(ColorIndex))
+			if (Geometry == lcOutlineGeometry::Occluders && !Selected && lcIsColorTranslucent(ColorIndex))
 				continue;
 
 			int VertexOffset = Mesh->mVertexCacheOffset != -1 ? Mesh->mVertexCacheOffset : 0;

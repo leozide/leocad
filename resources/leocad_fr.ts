@@ -13186,18 +13186,14 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished">Configurez Blender et ses modules complémentaires d'importation et de rendu LDraw.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rendu de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Contour dessine un contour et un léger remplissage de couleur de sélection sur les parties obscurcies. Face Tint utilise des visages teintés et des bords colorés. Les systèmes sans prise en charge des contours utilisent Face Tint.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;&lt;b&gt;Rendu de sélection&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Contour dessine un contour et un léger remplissage de couleur de sélection sur les parties obscurcies. Face Tint utilise des visages teintés et des bords colorés. Les systèmes sans prise en charge des contours utilisent Face Tint.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Choisissez la façon dont les pièces sélectionnées sont mises en surbrillance.</translation>
+        <translation type="obsolete">Choisissez la façon dont les pièces sélectionnées sont mises en surbrillance.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
@@ -13237,10 +13233,9 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished">Bords irréguliers lisses dans les vues du modèle ; les modifications nécessitent le redémarrage de LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Rendu de sélection</translation>
+        <translation type="obsolete">Rendu de sélection</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
@@ -13688,11 +13683,10 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation type="unfinished">Paramètres du module complémentaire...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
         <source>Selection Rendering:</source>
         <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Rendu de sélection :</translation>
+        <translation type="obsolete">Rendu de sélection&#xa0;:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
@@ -14476,10 +14470,9 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <translation type="unfinished">Le rendu de la sphère de vue n'est pas disponible.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="285"/>
         <source>Outline rendering is unavailable. Face tint and colored edges will be used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Le rendu du contour n'est pas disponible. Une teinte faciale et des bords colorés seront utilisés.</translation>
+        <translation type="obsolete">Le rendu du contour n&apos;est pas disponible. Une teinte faciale et des bords colorés seront utilisés.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="510"/>
@@ -14554,6 +14547,33 @@ Les cartes vidéo non prises en charge utilisent une teinte de visage et des bor
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Êtes-vous sûr de vouloir charger les raccourcis souris par défaut ?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
+        <source>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
+        <source>Choose how selected pieces and new pieces are highlighted in the viewport.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
+        <source>Highlight Style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
+        <source>Highlight Style:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <source>Outline rendering is unavailable; the Tint and Edges style will be used.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

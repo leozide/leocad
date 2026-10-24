@@ -13175,18 +13175,14 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <translation type="unfinished">Konfigurieren Sie Blender und seine LDraw-Import- und Render-Add-Ons.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Auswahl-Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Umriss zeichnet einen Umriss und eine schwache, auswahlfarbene Füllung über verdeckte Teile. Gesichtstönung verwendet getönte Gesichter und farbige Kanten. Systeme ohne Konturunterstützung verwenden Face Tint.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;&lt;b&gt;Auswahl-Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Umriss zeichnet einen Umriss und eine schwache, auswahlfarbene Füllung über verdeckte Teile. Gesichtstönung verwendet getönte Gesichter und farbige Kanten. Systeme ohne Konturunterstützung verwenden Face Tint.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Wählen Sie, wie ausgewählte Teile hervorgehoben werden.</translation>
+        <translation type="obsolete">Wählen Sie, wie ausgewählte Teile hervorgehoben werden.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
@@ -13226,10 +13222,9 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <translation type="unfinished">Glatte, gezackte Kanten in Modellansichten; Änderungen erfordern einen Neustart von LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Auswahl-Rendering</translation>
+        <translation type="obsolete">Auswahl-Rendering</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
@@ -13670,11 +13665,10 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <translation type="unfinished">Add-on-Einstellungen...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
         <source>Selection Rendering:</source>
         <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Auswahl-Rendering:</translation>
+        <translation type="obsolete">Auswahl-Rendering:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
@@ -14451,10 +14445,9 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
         <translation type="unfinished">Das View-Sphere-Rendering ist nicht verfügbar.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="285"/>
         <source>Outline rendering is unavailable. Face tint and colored edges will be used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Umriss-Rendering ist nicht verfügbar. Es werden Gesichtstönung und farbige Kanten verwendet.</translation>
+        <translation type="obsolete">Umriss-Rendering ist nicht verfügbar. Es werden Gesichtstönung und farbige Kanten verwendet.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="510"/>
@@ -14529,6 +14522,33 @@ Nicht unterstützte Grafikkarten verwenden Gesichtstönung und farbige Kanten.</
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Sind sie sicher dass sie die voreingestellten Mauskürzel laden möchten?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
+        <source>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
+        <source>Choose how selected pieces and new pieces are highlighted in the viewport.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
+        <source>Highlight Style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
+        <source>Highlight Style:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <source>Outline rendering is unavailable; the Tint and Edges style will be used.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -3,7 +3,7 @@
 #define LC_IMAGE_TRANSPARENT 0x2000
 
 enum class lcShadingMode;
-enum class lcSelectionRenderMode;
+enum class lcHighlightRenderMode;
 enum class lcAxisIconLocation;
 enum class lcViewSphereLocation;
 enum class lcColorTheme;
@@ -23,7 +23,7 @@ enum LC_PROFILE_KEY
 	LC_PROFILE_HIGHLIGHT_NEW_PARTS,
 	LC_PROFILE_HIGHLIGHT_NEW_PARTS_COLOR,
 	LC_PROFILE_SHADING_MODE,
-	LC_PROFILE_SELECTION_RENDER_MODE,
+	LC_PROFILE_HIGHLIGHT_RENDER_MODE,
 	LC_PROFILE_BACKGROUND_GRADIENT,
 	LC_PROFILE_BACKGROUND_COLOR,
 	LC_PROFILE_GRADIENT_COLOR_TOP,
@@ -176,8 +176,8 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer);
 lcShadingMode lcGetProfileShadingMode();
 void lcSetProfileShadingMode(lcShadingMode Value);
 
-lcSelectionRenderMode lcGetProfileSelectionRenderMode();
-void lcSetProfileSelectionRenderMode(lcSelectionRenderMode Value);
+lcHighlightRenderMode lcGetProfileHighlightRenderMode();
+void lcSetProfileHighlightRenderMode(lcHighlightRenderMode Value);
 
 lcAxisIconLocation lcGetProfileAxisIconLocation();
 void lcSetProfileAxisIconLocation(lcAxisIconLocation Value);

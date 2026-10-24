@@ -101,6 +101,7 @@ lcContext::lcContext()
 	mOutlineParams[0] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mOutlineParams[1] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mOutlineParams[2] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
+	mOutlineParams[3] = lcVector4(0.0f, 0.0f, 0.0f, 0.0f);
 	mColorDirty = false;
 	mTextHaloColorDirty = false;
 	mWorldMatrixDirty = false;
@@ -168,7 +169,7 @@ lcResult<void> lcContext::InitializeRenderer(bool CreateRenderResources)
 	mRenderResourcesCreated = true;
 
 	if (!SupportsSelectionOutline())
-		lcGetPreferences().mSelectionRenderMode = lcSelectionRenderMode::Tint;
+		lcGetPreferences().mHighlightRenderMode = lcHighlightRenderMode::Tint;
 
 	return lcResult<void>();
 }
@@ -721,11 +722,23 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 	SetDefaultState();
 	SetViewport(0, 0, FullFramebuffer.width(), FullFramebuffer.height());
 	ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
-	Scene.DrawOutlineMask(this);
+	Scene.DrawSelectionMask(this);
+
+	if (Scene.HasHighlightedMeshes())
+	{
+		// Keep highlight coverage independent of selection, including when they overlap.
+		EnableDepthTest(false);
+		glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE);
+
+		Scene.DrawHighlightMask(this);
+
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		EnableDepthTest(true);
+	}
 
 	const bool Success = VisibleFramebuffer.bind() && glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 
-	if (Success)
+	if (Success && Scene.HasSelectedMeshes())
 	{
 		GLint OwnDepthBuffer = 0;
 
@@ -757,10 +770,12 @@ bool lcContext::GenerateOutlineMasks(const lcScene& Scene, QOpenGLFramebufferObj
 
 		SetDepthWrite(false);
 
-		Scene.DrawOutlineMask(this);
+		Scene.DrawSelectionMask(this);
 
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OwnDepthBuffer);
 	}
+	else if (Success)
+		ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, SceneFramebuffer);
 
@@ -791,8 +806,8 @@ void lcContext::DrawOutline(QOpenGLFramebufferObject& FullFramebuffer, QOpenGLFr
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	SetOutlineParams(lcVector4(1.0f / FullFramebuffer.width(), 1.0f / FullFramebuffer.height(), 2.0f * DeviceScale, 0.3f),
-		lcVector4FromColor(Preferences.mObjectSelectedColor), lcVector4FromColor(Preferences.mObjectFocusedColor));
+	SetOutlineParams(lcVector4(1.0f / FullFramebuffer.width(), 1.0f / FullFramebuffer.height(), 4.0f * DeviceScale, 0.3f),
+		lcVector4FromColor(Preferences.mObjectSelectedColor), lcVector4FromColor(Preferences.mObjectFocusedColor), lcVector4FromColor(Preferences.mHighlightNewPartsColor));
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, VisibleFramebuffer.texture());
@@ -1617,7 +1632,7 @@ void lcContext::FlushState()
 
 	if (mOutlineParamsDirty && Program.OutlineParamsLocation != -1)
 	{
-		glUniform4fv(Program.OutlineParamsLocation, 3, mOutlineParams[0].GetFloats());
+		glUniform4fv(Program.OutlineParamsLocation, 4, mOutlineParams[0].GetFloats());
 		mOutlineParamsDirty = false;
 	}
 }

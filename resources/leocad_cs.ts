@@ -12698,18 +12698,14 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Nakonfigurujte Blender a jeho doplňky pro import a vykreslování LDraw.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
         <source>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">&lt;p&gt;&lt;b&gt;Vykreslování výběru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Obrys vykreslí obrys a slabou výběrovou výplň přes zakryté části. Tónování obličeje používá tónované plochy a barevné okraje. Systémy bez podpory obrysů používají Tónování obličeje.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;&lt;b&gt;Vykreslování výběru&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Obrys vykreslí obrys a slabou výběrovou výplň přes zakryté části. Tónování obličeje používá tónované plochy a barevné okraje. Systémy bez podpory obrysů používají Tónování obličeje.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
         <source>Choose how selected pieces are highlighted.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Vyberte způsob zvýraznění vybraných dílů.</translation>
+        <translation type="obsolete">Vyberte způsob zvýraznění vybraných dílů.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="558"/>
@@ -12749,10 +12745,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Hladké zubaté okraje v pohledech modelu; změny vyžadují restartování LeoCADu.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
         <source>Selection Rendering</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Vykreslování výběru</translation>
+        <translation type="obsolete">Vykreslování výběru</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="763"/>
@@ -13216,11 +13211,10 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation type="unfinished">Nastavení doplňku...</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
         <source>Selection Rendering:</source>
         <oldsource>Selection rendering:</oldsource>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Vykreslení výběru:</translation>
+        <translation type="obsolete">Vykreslení výběru:</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="637"/>
@@ -14204,10 +14198,9 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation type="unfinished">Vykreslení koule pohledu není k dispozici.</translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="285"/>
         <source>Outline rendering is unavailable. Face tint and colored edges will be used.</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Vykreslování obrysu není k dispozici. Použije se obličejový odstín a barevné okraje.</translation>
+        <translation type="obsolete">Vykreslování obrysu není k dispozici. Použije se obličejový odstín a barevné okraje.</translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1242"/>
@@ -14272,6 +14265,33 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1458"/>
         <source>Are you sure you want to load the default mouse shortcuts?</source>
         <translation>Opravdu chcete načíst výchozí zkratky pro myš?</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="542"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="727"/>
+        <source>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="545"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="730"/>
+        <source>Choose how selected pieces and new pieces are highlighted in the viewport.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="724"/>
+        <source>Highlight Style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="548"/>
+        <source>Highlight Style:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
+        <source>Outline rendering is unavailable; the Tint and Edges style will be used.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

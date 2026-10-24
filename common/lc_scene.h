@@ -2,7 +2,7 @@
 
 #include "lc_mesh.h"
 
-enum class lcSelectionRenderMode;
+enum class lcHighlightRenderMode;
 
 enum class lcRenderMeshState : int
 {
@@ -132,23 +132,32 @@ public:
 
 	void Draw(lcContext* Context, const std::function<void()>& PreTranslucentCallback) const;
 	bool HasSelectedMeshes() const;
+	bool HasHighlightedMeshes() const;
 	bool CanReuseSceneDepth() const;
-	void DrawOutlineMask(lcContext* Context) const;
+	void DrawSelectionMask(lcContext* Context) const;
+	void DrawHighlightMask(lcContext* Context) const;
 	void DrawOutlineOccluders(lcContext* Context) const;
-	void SetSelectionRenderMode(lcSelectionRenderMode SelectionRenderMode)
+	void SetHighlightRenderMode(lcHighlightRenderMode HighlightRenderMode)
 	{
-		mSelectionRenderMode = SelectionRenderMode;
+		mHighlightRenderMode = HighlightRenderMode;
 	}
 
-	lcSelectionRenderMode GetSelectionRenderMode() const
+	lcHighlightRenderMode GetHighlightRenderMode() const
 	{
-		return mSelectionRenderMode;
+		return mHighlightRenderMode;
 	}
 
 	void DrawInterfaceObjects(lcContext* Context) const;
 
 protected:
-	void DrawOutlineGeometry(lcContext* Context, bool SelectedOnly) const;
+	enum class lcOutlineGeometry
+	{
+		Selection,
+		Highlight,
+		Occluders
+	};
+
+	void DrawOutlineGeometry(lcContext* Context, lcOutlineGeometry Geometry) const;
 	void DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTypes, bool DrawFaded, bool DrawNonFaded) const;
 	void DrawTranslucentMeshes(lcContext* Context, bool DrawLit, bool DrawFadePrepass, bool DrawFaded, bool DrawNonFaded) const;
 	void DrawDebugNormals(lcContext* Context, const lcMesh* Mesh) const;
@@ -158,7 +167,7 @@ protected:
 	lcPiece* mActiveSubmodelInstance = nullptr;
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
-	lcSelectionRenderMode mSelectionRenderMode;
+	lcHighlightRenderMode mHighlightRenderMode;
 	bool mRequireCompleteAssets = false;
 	bool mRequireGeneratedMeshes = false;
 	bool mMissingAssets = false;

@@ -1070,12 +1070,12 @@ void lcView::OnDraw()
 			mContext->SetLineWidth(Preferences.mLineWidth);
 
 			const bool OutlineEnabled = DrawInterface && !mRenderFramebuffer && mRenderImage.isNull() &&
-				ShadingMode != lcShadingMode::Wireframe && Preferences.mSelectionRenderMode == lcSelectionRenderMode::Outline &&
-				mScene->HasSelectedMeshes() && PrepareOutlineFramebuffers();
+				ShadingMode != lcShadingMode::Wireframe && Preferences.mHighlightRenderMode == lcHighlightRenderMode::Outline &&
+				(mScene->HasSelectedMeshes() || mScene->HasHighlightedMeshes()) && PrepareOutlineFramebuffers();
 			
 			bool OutlineMasksReady = false;
 
-			mScene->SetSelectionRenderMode(OutlineEnabled ? lcSelectionRenderMode::Outline : lcSelectionRenderMode::Tint);
+			mScene->SetHighlightRenderMode(OutlineEnabled ? lcHighlightRenderMode::Outline : lcHighlightRenderMode::Tint);
 			mScene->Draw(mContext, [this, OutlineEnabled, DrawInterface, &OutlineMasksReady]()
 			{
 				if (OutlineEnabled)
@@ -1090,7 +1090,7 @@ void lcView::OnDraw()
 
 			if (OutlineEnabled && !OutlineMasksReady)
 			{
-				mScene->SetSelectionRenderMode(lcSelectionRenderMode::Tint);
+				mScene->SetHighlightRenderMode(lcHighlightRenderMode::Tint);
 				
 				DrawBackground(CurrentTileRow, TotalTileRows, CurrentTileHeight);
 				

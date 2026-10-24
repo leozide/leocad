@@ -659,7 +659,7 @@ void lcPiece::DrawInterface(lcContext* Context, const lcScene& Scene) const
 		Context->SetColor(SelectedColor);
 	}
 
-	if (Scene.GetSelectionRenderMode() == lcSelectionRenderMode::Tint)
+	if (Scene.GetHighlightRenderMode() == lcHighlightRenderMode::Tint)
 	{
 		Context->SetVertexBufferPointer(LineVerts);
 		Context->SetVertexFormatPosition(3);

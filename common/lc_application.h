@@ -20,7 +20,7 @@ enum class lcColorTheme
 	System
 };
 
-enum class lcSelectionRenderMode
+enum class lcHighlightRenderMode
 {
 	Outline,
 	Tint
@@ -43,7 +43,7 @@ public:
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
-	lcSelectionRenderMode mSelectionRenderMode;
+	lcHighlightRenderMode mHighlightRenderMode;
 	bool mBackgroundGradient;
 	quint32 mBackgroundSolidColor;
 	quint32 mBackgroundGradientColorTop;

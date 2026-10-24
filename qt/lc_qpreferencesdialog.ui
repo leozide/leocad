@@ -537,18 +537,18 @@
            </widget>
           </item>
           <item row="15" column="0">
-           <widget class="QLabel" name="SelectionRenderModeLabel">
+           <widget class="QLabel" name="HighlightRenderModeLabel">
             <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</string>
+             <string>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</string>
             </property>
             <property name="toolTip">
-             <string>Choose how selected pieces are highlighted.</string>
+             <string>Choose how selected pieces and new pieces are highlighted in the viewport.</string>
             </property>
             <property name="text">
-             <string>Selection Rendering:</string>
+             <string>Highlight Style:</string>
             </property>
             <property name="buddy">
-             <cstring>SelectionRenderMode</cstring>
+             <cstring>HighlightRenderMode</cstring>
             </property>
            </widget>
           </item>
@@ -719,15 +719,15 @@
            </widget>
           </item>
           <item row="15" column="1">
-           <widget class="QComboBox" name="SelectionRenderMode">
+           <widget class="QComboBox" name="HighlightRenderMode">
             <property name="accessibleName">
-             <string>Selection Rendering</string>
+             <string>Highlight Style</string>
             </property>
             <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Selection Rendering&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Outline draws an outline and a faint selection-colored fill over obscured portions. Face Tint uses tinted faces and colored edges. Systems without outline support use Face Tint.&lt;/p&gt;</string>
+             <string>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</string>
             </property>
             <property name="toolTip">
-             <string>Choose how selected pieces are highlighted.</string>
+             <string>Choose how selected pieces and new pieces are highlighted in the viewport.</string>
             </property>
             <item>
              <property name="text">
@@ -2736,7 +2736,7 @@
   <tabstop>studStyleCombo</tabstop>
   <tabstop>HighContrastButton</tabstop>
   <tabstop>ShadingMode</tabstop>
-  <tabstop>SelectionRenderMode</tabstop>
+  <tabstop>HighlightRenderMode</tabstop>
   <tabstop>BlenderAddonSettingsButton</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>ConditionalLinesCheckBox</tabstop>

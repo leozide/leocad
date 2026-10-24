@@ -4,7 +4,7 @@
 <context>
     <name>lcBlenderPreferences</name>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3879"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3910"/>
         <source>%1 of %n files extracted.</source>
         <translation>
             <numerusform>%1 of %n file extracted.</numerusform>
@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_blenderpreferences.cpp" line="3550"/>
+        <location filename="../common/lc_blenderpreferences.cpp" line="3581"/>
         <source>Finished writing Blender parameter entries. Processed %n lines in file &apos;%1&apos;.</source>
         <translation>
             <numerusform>Finished writing Blender parameter entries. Processed %n line in file &apos;%1&apos;.</numerusform>
@@ -23,7 +23,7 @@
 <context>
     <name>lcMainWindow</name>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="2351"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2376"/>
         <source>%n objects selected</source>
         <translation>
             <numerusform>%n object selected</numerusform>
@@ -31,7 +31,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../common/lc_mainwindow.cpp" line="2751"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
         <source>Merged %n submodels.</source>
         <translation>
             <numerusform>Merged %n submodel.</numerusform>

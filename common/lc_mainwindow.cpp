@@ -83,6 +83,9 @@ void lcMainWindow::CreateWidgets()
 	CreateMenus();
 	CreateStatusBar();
 
+	// Let panels be docked next to, above or below each other on any side of the model view.
+	setDockOptions(QMainWindow::AnimatedDocks | QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
+
 	mModelTabWidget = new QTabWidget();
 	mModelTabWidget->tabBar()->installEventFilter(this);
 	mModelTabWidget->tabBar()->setMovable(true);

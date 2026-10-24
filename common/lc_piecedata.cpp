@@ -323,6 +323,7 @@ bool lcPieceData::MinIntersectDist(const lcVector3& Start, const lcVector3& End,
 			PieceRayTest.Transform = lcMatrix44Identity();
 			MinDistance = Distance;
 			PieceRayTest.Plane = Plane;
+			PieceRayTest.Normal = Plane;
 			return true;
 		}
 
@@ -338,7 +339,7 @@ bool lcPieceData::MinIntersectDist(const lcVector3& Start, const lcVector3& End,
 
 	if (Mesh)
 	{
-		if (Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane))
+		if (Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane, PieceRayTest.Normal))
 		{
 			PieceRayTest.PieceData = this;
 			PieceRayTest.Transform = lcMatrix44Identity();

@@ -167,10 +167,11 @@ void lcMesh::CreateBox()
 }
 
 template<typename IndexType>
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcVector3& HitPlane)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDistance, lcVector3& HitPlane, lcVector3& HitNormal)
 {
 	float Distance;
 	lcVector3 IntersectionPlane;
+	lcVector3 TriangleNormal;
 
 	if (!lcBoundingBoxRayIntersectDistance(mBoundingBox.Min, mBoundingBox.Max, Start, End, &Distance, nullptr, &IntersectionPlane) || (Distance >= MinDistance))
 		return false;
@@ -194,7 +195,10 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 				const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
 
 				if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
+				{
 					Hit = true;
+					TriangleNormal = lcCross(v2 - v1, v3 - v1);
+				}
 			}
 		}
 		else if (Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES)
@@ -209,23 +213,29 @@ bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, floa
 				const lcVector3& v3 = Verts[Indices[Idx + 2]].Position;
 
 				if (lcLineTriangleMinIntersection(v1, v2, v3, Start, End, &MinDistance, &Intersection))
+				{
 					Hit = true;
+					TriangleNormal = lcCross(v2 - v1, v3 - v1);
+				}
 			}
 		}
 	}
 
 	if (Hit)
+	{
 		HitPlane = IntersectionPlane;
+		HitNormal = lcNormalize(TriangleNormal);
+	}
 
 	return Hit;
 }
 
-bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane)
+bool lcMesh::MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane, lcVector3& HitNormal)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
-		return MinIntersectDist<GLushort>(Start, End, MinDist, HitPlane);
+		return MinIntersectDist<GLushort>(Start, End, MinDist, HitPlane, HitNormal);
 	else
-		return MinIntersectDist<GLuint>(Start, End, MinDist, HitPlane);
+		return MinIntersectDist<GLuint>(Start, End, MinDist, HitPlane, HitNormal);
 }
 
 template<typename IndexType>

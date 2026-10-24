@@ -388,6 +388,7 @@ void lcView::ShowContextMenu() const
 	Popup->addSeparator();
 
 	Popup->addMenu(gMainWindow->GetToolsMenu());
+	Popup->addAction(Actions[LC_VIEW_NORMAL_TO_FACE]);
 	Popup->addMenu(gMainWindow->GetViewpointMenu());
 	Popup->addMenu(gMainWindow->GetCameraMenu());
 	Popup->addMenu(gMainWindow->GetProjectionMenu());
@@ -2254,7 +2255,65 @@ void lcView::SetCursor(lcCursor CursorType)
 
 void lcView::UpdateCursor()
 {
+	// Face picking keeps a crosshair until a face is clicked or picking is canceled.
+	if (mPickingFaceNormal)
+	{
+		mWidget->setCursor(Qt::CrossCursor);
+		return;
+	}
+
 	SetCursor(GetCursor());
+}
+
+void lcView::StartFaceNormalPick()
+{
+	if (mViewType != lcViewType::View || !mWidget)
+		return;
+
+	if (mTrackButton != lcTrackButton::None)
+		StopTracking(false);
+
+	mPickingFaceNormal = true;
+	UpdateCursor();
+
+	gMainWindow->statusBar()->showMessage(tr("Click a face to view it straight on, or press Esc to cancel."));
+}
+
+void lcView::StopFaceNormalPick()
+{
+	mPickingFaceNormal = false;
+	mCursor = lcCursor::Count;
+	UpdateCursor();
+
+	gMainWindow->statusBar()->clearMessage();
+}
+
+void lcView::PickFaceNormal()
+{
+	const lcObjectRayTest ObjectRayTest = RayTest(true, false);
+
+	if (ObjectRayTest.ObjectSection.Object)
+	{
+		// The hit triangle normal is in the space of the innermost piece, so bring it to the view.
+		lcVector3 Point = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
+		lcVector3 Normal = lcNormalize(lcMul30(ObjectRayTest.PieceRayTest.Normal, ObjectRayTest.PieceRayTest.Transform));
+
+		if (lcDot(Normal, ObjectRayTest.Start - Point) < 0.0f)
+			Normal = -Normal;
+
+		if (GetActiveModel() != mModel)
+		{
+			Point = lcMul31(Point, mActiveSubmodelTransform);
+			Normal = lcNormalize(lcMul30(Normal, mActiveSubmodelTransform));
+		}
+
+		const float Distance = lcLength(mCamera->mPosition - mCamera->mTargetPosition);
+		const lcVector3 Up = fabsf(Normal.z) > 0.99f ? lcVector3(0.0f, 1.0f, 0.0f) : lcVector3(0.0f, 0.0f, 1.0f);
+
+		SetViewpoint(Point + Normal * Distance, Point, Up);
+	}
+
+	StopFaceNormalPick();
 }
 
 lcTool lcView::GetCurrentTool() const
@@ -2747,7 +2806,9 @@ void lcView::StopTracking(bool Accept)
 
 void lcView::CancelTrackingOrClearSelectionAction()
 {
-	if (mTrackButton != lcTrackButton::None)
+	if (mPickingFaceNormal)
+		StopFaceNormalPick();
+	else if (mTrackButton != lcTrackButton::None)
 		StopTracking(false);
 	else
 	{
@@ -2942,6 +3003,12 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 
 void lcView::OnLeftButtonDown()
 {
+	if (mPickingFaceNormal)
+	{
+		PickFaceNormal();
+		return;
+	}
+
 	if (mTrackButton != lcTrackButton::None)
 	{
 		StopTracking(false);

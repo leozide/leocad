@@ -101,8 +101,8 @@ public:
 	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
 
 	template<typename IndexType>
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane);
-	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane);
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane, lcVector3& HitNormal);
+	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane, lcVector3& HitNormal);
 
 	template<typename IndexType>
 	bool IntersectsPlanes(const lcVector4 (&Planes)[6]);

@@ -2455,8 +2455,20 @@ void lcMainWindow::UpdateSnap()
 	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
 
-	QString Relative = mRelativeTransform ? tr("Rel") : tr("Abs");
-	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 %4 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText(), Relative));
+	// Spell out the transform and snap settings from the toolbar, using the same names as their menus.
+	auto MenuText = [this](int CommandId)
+	{
+		return mActions[CommandId]->text().remove(QLatin1Char('&'));
+	};
+
+	const bool MoveSnapped = mMoveSnapEnabled && (mMoveXYSnapIndex || mMoveZSnapIndex);
+	const QString Move = MoveSnapped ? tr("Move: XY %1, Z %2").arg(MenuText(LC_EDIT_SNAP_MOVE_XY0 + mMoveXYSnapIndex), MenuText(LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex)) : tr("Move: Free");
+	const QString Rotate = GetAngleSnap() != 0.0f ? tr("Rotate: %1 deg.").arg(lcFormatDoubleLocalized(GetAngleSnap(), locale(), 'g', 6)) : tr("Rotate: Free");
+	const QString Axes = mRelativeTransform ? tr("Relative axes") : tr("Absolute axes");
+	const QString Pivot = GetSeparateTransform() ? tr("Rotate separately") : tr("Rotate together");
+
+	mStatusSnapLabel->setText(QString(" %1 - %2 - %3 - %4 ").arg(Move, Rotate, Axes, Pivot));
+	mStatusSnapLabel->setToolTip(tr("Movement snap, rotation snap, transform axes and rotation pivot. Change them with the last buttons of the standard toolbar."));
 }
 
 void lcMainWindow::UpdateColor()

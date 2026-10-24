@@ -343,7 +343,7 @@ void lcView::ShowTrainTrackPopup()
 	for (lcPieceData* PieceData : TrainTrackParts)
 		Parts.emplace_back(PieceData, std::string());
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->GetInsertColorIndex(), mWidget, QCursor::pos());
 	lcPieceData* PieceData = Result.has_value() ? Result.value() : nullptr;
 
 	if (PieceData)
@@ -556,7 +556,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
-			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, PieceData.Get(), MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
+			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, PieceData.Get(), MovingPiece, gMainWindow->GetInsertColorIndex(), FocusSection, AllowNewPieces, ClosestPoint);
 
 			if (!TrainTracks.empty())
 				return { TrainTracks, true };
@@ -585,7 +585,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		lcMatrix44 WorldMatrix = ObjectRayTest.PieceRayTest.Transform;
 		WorldMatrix.SetTranslation(Position);
 
-		return { { lcInsertPieceInfo{ PieceData.Get(), WorldMatrix, gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData.Get(), WorldMatrix, gMainWindow->GetInsertColorIndex() } }, false };
 	}
 
 	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
@@ -604,7 +604,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(Intersection), gMainWindow->GetInsertColorIndex() } }, false };
 	}
 
 	lcVector3 Position;
@@ -617,10 +617,10 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
 		Intersection = ActiveModel->SnapPosition(Intersection);
-		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
+		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(Intersection), gMainWindow->GetInsertColorIndex() } }, false };
 	}
 
-	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } }, false };
+	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->GetInsertColorIndex() } }, false };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const

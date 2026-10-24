@@ -306,6 +306,16 @@ public:
 		mPartsWidget->GetListModel()->SetColorIndex(ColorIndex);
 	}
 
+	bool IsColorLocked() const
+	{
+		return mPartsWidget->GetListModel()->IsColorLocked();
+	}
+
+	void ToggleColorLocked()
+	{
+		mPartsWidget->GetListModel()->ToggleColorLocked();
+	}
+
 	const std::vector<lcPartPalette>& GetPartPalettes() const
 	{
 		return mPartPalettes;

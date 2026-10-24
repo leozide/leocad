@@ -64,6 +64,7 @@ void lcPreferences::LoadDefaults()
 	mViewSphereHighlightColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
+	mInsertColorMode = static_cast<lcInsertColorMode>(qBound(0, lcGetProfileInt(LC_PROFILE_INSERT_COLOR_MODE), static_cast<int>(lcInsertColorMode::LastInsertedColor)));
 	mColorTheme = lcGetProfileColorTheme();
 	mPreviewViewSphereEnabled = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED);
 	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
@@ -130,6 +131,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
+	lcSetProfileInt(LC_PROFILE_INSERT_COLOR_MODE, static_cast<int>(mInsertColorMode));
 	lcSetProfileColorTheme(mColorTheme);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED, mPreviewViewSphereEnabled);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);

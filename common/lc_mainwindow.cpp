@@ -754,6 +754,18 @@ void lcMainWindow::CreateToolBars()
 
 	connect(mColorButton, &QToolButton::clicked, this, &lcMainWindow::ColorButtonClicked);
 
+	QToolButton* ColorOptionsButton = new QToolButton(ColorWidget);
+	ColorOptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
+	ColorOptionsButton->setToolTip(tr("Choose how inserted pieces are colored."));
+	ColorOptionsButton->setAccessibleName(tr("Color Options"));
+	ColorOptionsButton->setPopupMode(QToolButton::InstantPopup);
+	ColorOptionsButton->setAutoRaise(true);
+	ColorButtonLayout->addWidget(ColorOptionsButton);
+
+	QMenu* ColorOptionsMenu = new QMenu(ColorOptionsButton);
+	ColorOptionsButton->setMenu(ColorOptionsMenu);
+	connect(ColorOptionsMenu, &QMenu::aboutToShow, this, &lcMainWindow::ColorOptionsMenuAboutToShow);
+
 	ColorLayout->addWidget(mColorList);
 	mColorList->setAccessibleName(tr("LDraw Colors"));
 
@@ -1992,10 +2004,85 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 {
 	mColorIndex = ColorIndex;
 
-	if (mPartSelectionWidget)
-		mPartSelectionWidget->SetColorIndex(ColorIndex);
+	// Picking a color explicitly also becomes the color to insert next.
+	mLastInsertedColorIndex = ColorIndex;
 
+	UpdatePiecesColor();
 	UpdateColor();
+}
+
+int lcMainWindow::GetInsertColorIndex() const
+{
+	switch (lcGetPreferences().mInsertColorMode)
+	{
+	case lcInsertColorMode::CurrentColor:
+		break;
+
+	case lcInsertColorMode::SelectedPieceColor:
+		// Selecting a piece already made its color the current color.
+		break;
+
+	case lcInsertColorMode::LastInsertedColor:
+		if (mLastInsertedColorIndex != -1)
+			return mLastInsertedColorIndex;
+		break;
+	}
+
+	return mColorIndex;
+}
+
+void lcMainWindow::SetLastInsertedColorIndex(int ColorIndex)
+{
+	mLastInsertedColorIndex = ColorIndex;
+
+	UpdatePiecesColor();
+}
+
+void lcMainWindow::SetInsertColorMode(lcInsertColorMode InsertColorMode)
+{
+	lcGetPreferences().mInsertColorMode = InsertColorMode;
+	lcSetProfileInt(LC_PROFILE_INSERT_COLOR_MODE, static_cast<int>(InsertColorMode));
+
+	UpdatePiecesColor();
+}
+
+void lcMainWindow::ColorOptionsMenuAboutToShow()
+{
+	QMenu* Menu = qobject_cast<QMenu*>(sender());
+	Menu->clear();
+
+	// Each entry runs the matching command so keyboard shortcuts and the menu stay in sync.
+	auto AddCommand = [this](QMenu* TargetMenu, const QString& Text, lcCommandId CommandId, bool Checked)
+	{
+		QAction* Action = TargetMenu->addAction(Text, this, [this, CommandId]()
+		{
+			HandleCommand(CommandId);
+		});
+
+		Action->setCheckable(true);
+		Action->setChecked(Checked);
+		Action->setShortcut(mActions[CommandId]->shortcut());
+		Action->setShortcutContext(Qt::WidgetShortcut);
+
+		return Action;
+	};
+
+	const lcInsertColorMode InsertColorMode = lcGetPreferences().mInsertColorMode;
+
+	QMenu* InsertMenu = Menu->addMenu(tr("Insert Color"));
+	QActionGroup* InsertGroup = new QActionGroup(InsertMenu);
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Current Color"), LC_PIECE_INSERT_COLOR_CURRENT, InsertColorMode == lcInsertColorMode::CurrentColor));
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Selected Piece Color"), LC_PIECE_INSERT_COLOR_SELECTED, InsertColorMode == lcInsertColorMode::SelectedPieceColor));
+	InsertGroup->addAction(AddCommand(InsertMenu, tr("Last Inserted Piece Color"), LC_PIECE_INSERT_COLOR_LAST_INSERTED, InsertColorMode == lcInsertColorMode::LastInsertedColor));
+
+	AddCommand(Menu, tr("Lock Pieces Color"), LC_VIEW_PIECES_TOGGLE_LOCK_COLOR, mPartSelectionWidget && mPartSelectionWidget->IsColorLocked());
+}
+
+void lcMainWindow::UpdatePiecesColor()
+{
+	// The pieces list shows the color new pieces will be inserted with, unless its color is locked.
+	if (mPartSelectionWidget)
+		mPartSelectionWidget->SetColorIndex(GetInsertColorIndex());
 }
 
 void lcMainWindow::SetMoveSnapEnabled(bool Enabled)
@@ -2303,6 +2390,19 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	if (SelectionChanged)
 	{
 		mTimelineWidget->UpdateSelection();
+
+		// Selecting a piece makes its color current; picking a color afterwards overrides it.
+		if (lcGetPreferences().mInsertColorMode == lcInsertColorMode::SelectedPieceColor)
+		{
+			lcObject* SelectedPiece = (Focus && Focus->IsPiece()) ? Focus : nullptr;
+
+			for (size_t ObjectIndex = 0; !SelectedPiece && ObjectIndex < Selection.size(); ObjectIndex++)
+				if (Selection[ObjectIndex]->IsPiece())
+					SelectedPiece = Selection[ObjectIndex];
+
+			if (SelectedPiece && static_cast<lcPiece*>(SelectedPiece)->GetColorIndex() != mColorIndex)
+				SetColorIndex(static_cast<lcPiece*>(SelectedPiece)->GetColorIndex());
+		}
 
 		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
@@ -3244,6 +3344,26 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_PIECE_INSERT_COLOR_CURRENT:
+		SetInsertColorMode(lcInsertColorMode::CurrentColor);
+		break;
+
+	case LC_PIECE_INSERT_COLOR_SELECTED:
+		SetInsertColorMode(lcInsertColorMode::SelectedPieceColor);
+		break;
+
+	case LC_PIECE_INSERT_COLOR_LAST_INSERTED:
+		SetInsertColorMode(lcInsertColorMode::LastInsertedColor);
+		break;
+
+	case LC_VIEW_PIECES_TOGGLE_LOCK_COLOR:
+		if (mPartSelectionWidget)
+		{
+			mPartSelectionWidget->ToggleColorLocked();
+			UpdatePiecesColor();
+		}
 		break;
 
 	case LC_PIECE_INSERT:

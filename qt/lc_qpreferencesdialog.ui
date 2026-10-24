@@ -1097,7 +1097,7 @@
           <item row="3" column="0" colspan="3">
            <widget class="QCheckBox" name="GridHeightXZCheckBox">
             <property name="toolTip">
-             <string>Draw a vertical XZ grid behind the model with lines every plate height.</string>
+             <string>Draw a vertical grid on the XZ plane through the X axis with lines every plate height.</string>
             </property>
             <property name="text">
              <string>Draw XZ height grid</string>
@@ -1107,7 +1107,7 @@
           <item row="4" column="0" colspan="3">
            <widget class="QCheckBox" name="GridHeightYZCheckBox">
             <property name="toolTip">
-             <string>Draw a vertical YZ grid behind the model with lines every plate height.</string>
+             <string>Draw a vertical grid on the YZ plane through the Y axis with lines every plate height.</string>
             </property>
             <property name="text">
              <string>Draw YZ height grid</string>

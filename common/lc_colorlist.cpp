@@ -67,6 +67,7 @@ void lcColorList::UpdateRects()
 	for (lcColorListGroup& Group : mGroups)
 	{
 		Group.Rect = Metrics.boundingRect(rect(), Qt::TextSingleLine | Qt::AlignCenter, Group.Name);
+		Group.Rect.setHeight(qMax(Group.Rect.height(), 16) + 4);
 
 		TextHeight += Group.Rect.height();
 	}
@@ -77,7 +78,8 @@ void lcColorList::UpdateRects()
 	mRows = 0;
 
 	for (const lcColorListGroup& Group : mGroups)
-		mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
+		if (!Group.Collapsed)
+			mRows += ((int)Group.Cells.size() + mColumns - 1) / mColumns;
 
 	const float CellWidth = (float)(width() + 1) / (float)mColumns;
 	const float CellHeight = CellWidth;
@@ -97,6 +99,15 @@ void lcColorList::UpdateRects()
 
 		Group.Rect = QRect(0, (int)GroupY, width(), Group.Rect.height());
 		GroupY += Group.Rect.height();
+
+		// Collapsed groups keep their header but hide their tiles.
+		if (Group.Collapsed)
+		{
+			for (size_t ColorIdx = 0; ColorIdx < Group.Cells.size(); ColorIdx++)
+				mCells[CurCell++].Rect = QRect();
+
+			continue;
+		}
 
 		for (size_t ColorIdx = 0; ColorIdx < Group.Cells.size(); ColorIdx++)
 		{
@@ -168,6 +179,16 @@ bool lcColorList::event(QEvent* Event)
 			return true;
 		}
 
+		for (const lcColorListGroup& Group : mGroups)
+		{
+			if (!Group.Rect.contains(HelpEvent->pos()))
+				continue;
+
+			QToolTip::showText(HelpEvent->globalPos(), tr("Expand or collapse the %1 colors.").arg(Group.Name));
+
+			return true;
+		}
+
 		QToolTip::hideText();
 		Event->ignore();
 
@@ -199,6 +220,18 @@ bool lcColorList::event(QEvent* Event)
 
 void lcColorList::mousePressEvent(QMouseEvent* MouseEvent)
 {
+	for (lcColorListGroup& Group : mGroups)
+	{
+		if (!Group.Rect.contains(MouseEvent->pos()))
+			continue;
+
+		Group.Collapsed = !Group.Collapsed;
+		UpdateRects();
+		update();
+
+		return;
+	}
+
 	for (size_t CellIndex = 0; CellIndex < mCells.size(); CellIndex++)
 	{
 		if (!mCells[CellIndex].Rect.contains(MouseEvent->pos()))
@@ -335,8 +368,26 @@ void lcColorList::paintEvent(QPaintEvent* Event)
 	Painter.setFont(font());
 	Painter.setPen(palette().color(QPalette::Text));
 
+	// Group headers match the collapsible headers of the properties panel.
+	const QColor ArrowColor = palette().color(QPalette::Text);
+
 	for (const lcColorListGroup& Group : mGroups)
-		Painter.drawText(Group.Rect, Qt::TextSingleLine | Qt::AlignLeft, Group.Name);
+	{
+		const int TextWidth = Painter.fontMetrics().horizontalAdvance(Group.Name);
+		const int ArrowLeft = Group.Rect.center().x() - (TextWidth + 20) / 2;
+		const int ArrowTop = Group.Rect.center().y() - 8;
+
+		Painter.setPen(Qt::NoPen);
+		Painter.setBrush(ArrowColor);
+
+		if (Group.Collapsed)
+			Painter.drawPolygon(QPolygon({ QPoint(ArrowLeft + 6, ArrowTop + 4), QPoint(ArrowLeft + 13, ArrowTop + 8), QPoint(ArrowLeft + 6, ArrowTop + 12) }));
+		else
+			Painter.drawPolygon(QPolygon({ QPoint(ArrowLeft + 4, ArrowTop + 6), QPoint(ArrowLeft + 12, ArrowTop + 6), QPoint(ArrowLeft + 8, ArrowTop + 13) }));
+
+		Painter.setPen(ArrowColor);
+		Painter.drawText(QRect(ArrowLeft + 20, Group.Rect.top(), TextWidth + 1, Group.Rect.height()), Qt::TextSingleLine | Qt::AlignLeft | Qt::AlignVCenter, Group.Name);
+	}
 
 	Painter.setPen(palette().color(QPalette::Shadow));
 
@@ -345,6 +396,9 @@ void lcColorList::paintEvent(QPaintEvent* Event)
 		const lcColor* Color = &gColorList[mCells[CellIndex].ColorIndex];
 
 		const QRect& Rect = mCells[CellIndex].Rect;
+
+		if (Rect.isNull())
+			continue;
 
 		if (Color->Code != LC_COLOR_NOCOLOR)
 		{
@@ -357,7 +411,7 @@ void lcColorList::paintEvent(QPaintEvent* Event)
 			lcDrawNoColorRect(Painter, Rect);
 	}
 
-	if (mCurrentCell < mCells.size())
+	if (mCurrentCell < mCells.size() && !mCells[mCurrentCell].Rect.isNull())
 	{
 		const lcColor* Color = &gColorList[mCells[mCurrentCell].ColorIndex];
 		QColor EdgeColor(255 - Color->Value[0] * 255, 255 - Color->Value[1] * 255, 255 - Color->Value[2] * 255);

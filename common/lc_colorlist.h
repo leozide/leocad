@@ -11,6 +11,7 @@ struct lcColorListGroup
 	QRect Rect;
 	QString Name;
 	std::vector<size_t> Cells;
+	bool Collapsed = false;
 };
 
 class lcColorList : public QWidget

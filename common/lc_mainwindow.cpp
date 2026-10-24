@@ -808,12 +808,22 @@ void lcMainWindow::CreateToolBars()
 		const int ScrollHeight = mPropertiesWidget->sizeHint().height() + 2 * PropertiesScrollArea->frameWidth();
 		const QMargins Margins = PropertiesLayout->contentsMargins();
 
+		const int PanelHeight = ScrollHeight + PropertiesLayout->spacing() + TransformWidget->sizeHint().height() + Margins.top() + Margins.bottom();
+
 		PropertiesScrollArea->setMaximumHeight(ScrollHeight);
-		PropertiesWidget->setMaximumHeight(ScrollHeight + PropertiesLayout->spacing() + TransformWidget->sizeHint().height() + Margins.top() + Margins.bottom());
+		PropertiesWidget->setMaximumHeight(PanelHeight);
+
+		// A docked panel does not grow back on its own once its limit is raised.
+		if (mPropertiesToolBar->isFloating())
+			mPropertiesToolBar->adjustSize();
+		else if (mPropertiesToolBar->isVisible())
+			resizeDocks({ mPropertiesToolBar }, { PanelHeight + mPropertiesToolBar->height() - PropertiesWidget->height() }, Qt::Vertical);
 	};
 
-	connect(mPropertiesWidget, &lcPropertiesWidget::LayoutChanged, this, UpdatePropertiesHeight);
-	UpdatePropertiesHeight();
+	connect(mPropertiesWidget, &lcPropertiesWidget::LayoutChanged, this, [UpdatePropertiesHeight]()
+	{
+		QTimer::singleShot(0, UpdatePropertiesHeight);
+	});
 
 	connect(mTransformXEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 	connect(mTransformYEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);

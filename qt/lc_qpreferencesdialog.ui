@@ -442,11 +442,11 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <widget class="QGroupBox" name="QualityGroup">
+        <widget class="QGroupBox" name="PerformanceGroup">
          <property name="title">
-          <string>Quality</string>
+          <string>Performance</string>
          </property>
-         <layout class="QGridLayout" name="QualityLayout">
+         <layout class="QGridLayout" name="PerformanceLayout">
           <item row="0" column="0">
            <widget class="QCheckBox" name="antiAliasing">
             <property name="toolTip">
@@ -482,97 +482,7 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="3">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="StepsGroup">
-         <property name="title">
-          <string>Building Steps</string>
-         </property>
-         <layout class="QGridLayout" name="StepsLayout">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="FadeSteps">
-            <property name="toolTip">
-             <string>Tint pieces from previous building steps with the chosen fade color.</string>
-            </property>
-            <property name="text">
-             <string>Fade Previous Steps</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QToolButton" name="FadeStepsColor">
-            <property name="accessibleName">
-             <string>Previous Step Color</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose the tint used for pieces from previous steps.</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="HighlightNewParts">
-            <property name="toolTip">
-             <string>Highlight pieces introduced in the current building step.</string>
-            </property>
-            <property name="text">
-             <string>Highlight New Pieces</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QToolButton" name="HighlightNewPartsColor">
-            <property name="accessibleName">
-             <string>New Piece Highlight Color</string>
-            </property>
-            <property name="toolTip">
-             <string>Choose the highlight color for pieces in the current step.</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="StepsSpacer">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="PiecesGroup">
-         <property name="title">
-          <string>Pieces</string>
-         </property>
-         <layout class="QGridLayout" name="PiecesLayout">
-          <item row="0" column="0">
            <widget class="QCheckBox" name="MeshLOD">
             <property name="toolTip">
              <string>Use simpler meshes for distant pieces to improve display performance.</string>
@@ -582,7 +492,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QSlider" name="MeshLODSlider">
             <property name="accessibleName">
              <string>Mesh Detail Distance</string>
@@ -604,14 +514,14 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="1" column="2">
            <widget class="QLabel" name="MeshLODLabel">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_24">
             <property name="toolTip">
              <string>Choose stud geometry and the high contrast stud styles.</string>
@@ -624,7 +534,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QComboBox" name="studStyleCombo">
             <property name="accessibleName">
              <string>Stud Style</string>
@@ -674,7 +584,7 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="2" column="2">
            <widget class="QToolButton" name="HighContrastButton">
             <property name="toolTip">
              <string>Configure colors and the light/dark threshold for high contrast stud styles.</string>
@@ -684,7 +594,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_3">
             <property name="toolTip">
              <string>Choose how piece surfaces and edges are drawn in model views.</string>
@@ -697,7 +607,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QComboBox" name="ShadingMode">
             <property name="accessibleName">
              <string>Shading Mode</string>
@@ -722,7 +632,75 @@
             </item>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="StepsGroup">
+         <property name="title">
+          <string>Steps and Highlighting</string>
+         </property>
+         <layout class="QGridLayout" name="StepsLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="FadeSteps">
+            <property name="toolTip">
+             <string>Tint pieces from previous building steps with the chosen fade color.</string>
+            </property>
+            <property name="text">
+             <string>Fade Previous Steps</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="FadeStepsColor">
+            <property name="accessibleName">
+             <string>Previous Step Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the tint used for pieces from previous steps.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="HighlightNewParts">
+            <property name="toolTip">
+             <string>Highlight pieces introduced in the current building step.</string>
+            </property>
+            <property name="text">
+             <string>Highlight New Pieces</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="HighlightNewPartsColor">
+            <property name="accessibleName">
+             <string>New Piece Highlight Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the highlight color for pieces in the current step.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <widget class="QLabel" name="HighlightRenderModeLabel">
             <property name="whatsThis">
              <string>&lt;p&gt;&lt;b&gt;Highlight Style&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose how selected pieces and pieces added in the current step are highlighted in the viewport. Outline uses fading outlines in the selection, focus, or new-piece highlight color. Selected pieces also receive a faint fill over obscured portions. Tint and Edges uses tinted faces and colored edges for selection, and colored edges for new pieces.&lt;/p&gt;&lt;p&gt;New-piece highlighting requires Highlight New Pieces. Wireframe views, image exports, and systems without outline support use Tint and Edges.&lt;/p&gt;</string>
@@ -738,7 +716,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="2" column="1">
            <widget class="QComboBox" name="HighlightRenderMode">
             <property name="accessibleName">
              <string>Highlight Style</string>
@@ -762,61 +740,7 @@
            </widget>
           </item>
           <item row="0" column="3">
-           <spacer name="PiecesSpacer">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="BlenderGroup">
-         <property name="title">
-          <string>Blender</string>
-         </property>
-         <layout class="QGridLayout" name="BlenderLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_39">
-            <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
-            </property>
-            <property name="toolTip">
-             <string>Configure Blender and its LDraw import and render add-ons.</string>
-            </property>
-            <property name="buddy">
-             <cstring>BlenderAddonSettingsButton</cstring>
-            </property>
-            <property name="text">
-             <string>Blender LDraw Render:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QToolButton" name="BlenderAddonSettingsButton">
-            <property name="accessibleName">
-             <string>Blender LDraw Render</string>
-            </property>
-            <property name="whatsThis">
-             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
-            </property>
-            <property name="toolTip">
-             <string>Configure Blender and its LDraw import and render add-ons.</string>
-            </property>
-            <property name="text">
-             <string>Add-on Settings...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <spacer name="BlenderSpacer">
+           <spacer name="StepsSpacer">
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
@@ -931,6 +855,60 @@
              <string>Settings...</string>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="BlenderGroup">
+         <property name="title">
+          <string>Blender</string>
+         </property>
+         <layout class="QGridLayout" name="BlenderLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_39">
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
+            <property name="buddy">
+             <cstring>BlenderAddonSettingsButton</cstring>
+            </property>
+            <property name="text">
+             <string>Blender LDraw Render:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="BlenderAddonSettingsButton">
+            <property name="accessibleName">
+             <string>Blender LDraw Render</string>
+            </property>
+            <property name="whatsThis">
+             <string>&lt;p&gt;&lt;b&gt;Blender Add-on Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Open the separate Blender configuration dialog. Its Apply action saves its settings independently of Preferences, and choosing an executable or importer can configure Blender immediately.&lt;/p&gt;</string>
+            </property>
+            <property name="toolTip">
+             <string>Configure Blender and its LDraw import and render add-ons.</string>
+            </property>
+            <property name="text">
+             <string>Add-on Settings...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="BlenderSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -2823,22 +2801,22 @@
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
-  <tabstop>FadeSteps</tabstop>
-  <tabstop>FadeStepsColor</tabstop>
-  <tabstop>HighlightNewParts</tabstop>
-  <tabstop>HighlightNewPartsColor</tabstop>
   <tabstop>MeshLOD</tabstop>
   <tabstop>MeshLODSlider</tabstop>
   <tabstop>studStyleCombo</tabstop>
   <tabstop>HighContrastButton</tabstop>
   <tabstop>ShadingMode</tabstop>
+  <tabstop>FadeSteps</tabstop>
+  <tabstop>FadeStepsColor</tabstop>
+  <tabstop>HighlightNewParts</tabstop>
+  <tabstop>HighlightNewPartsColor</tabstop>
   <tabstop>HighlightRenderMode</tabstop>
-  <tabstop>BlenderAddonSettingsButton</tabstop>
   <tabstop>edgeLines</tabstop>
   <tabstop>ConditionalLinesCheckBox</tabstop>
   <tabstop>AutomateEdgeColor</tabstop>
   <tabstop>AutomateEdgeColorButton</tabstop>
   <tabstop>LineWidthSlider</tabstop>
+  <tabstop>BlenderAddonSettingsButton</tabstop>
   <tabstop>ViewSphereSizeCombo</tabstop>
   <tabstop>ViewSphereLocationCombo</tabstop>
   <tabstop>AxisIconCheckBox</tabstop>

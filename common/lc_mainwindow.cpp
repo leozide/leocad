@@ -2480,7 +2480,7 @@ void lcMainWindow::UpdateSnap()
 	const QString Angle = GetAngleSnap() != 0.0f ? tr("%1 deg.").arg(lcFormatDoubleLocalized(GetAngleSnap(), locale(), 'g', 6)) : tr("free");
 	const QString Pivot = GetSeparateTransform() ? tr("separately") : tr("together");
 
-	mStatusSnapLabel->setText(tr(" - Move XY: %1 Z: %2 - Axes: %3 - Rotate: %4 / %5 - ").arg(MoveXY, MoveZ, Axes, Angle, Pivot));
+	mStatusSnapLabel->setText(tr("- Move XY: %1 Z: %2 - Axes: %3 - Rotate: %4 / %5 -").arg(MoveXY, MoveZ, Axes, Angle, Pivot));
 	mStatusSnapLabel->setToolTip(tr("Movement snap, rotation snap, transform axes and rotation pivot. Change them with the last buttons of the standard toolbar."));
 }
 

@@ -35,6 +35,14 @@ const lcCommand gCommands[] =
 		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Reload Model</b></p><p>Read the current model file again from disk, replacing the model in LeoCAD. If the model has unsaved changes, LeoCAD asks before discarding them.</p>"),
 		""
 	},
+	// LC_FILE_TOGGLE_WATCH_FILE_CHANGES
+	{
+		QT_TRANSLATE_NOOP("Action", "File.ToggleWatchFileChanges"),
+		QT_TRANSLATE_NOOP("Menu", "Watch for File Changes"),
+		QT_TRANSLATE_NOOP("Status", "Toggle asking to reload the model when another application changes its file"),
+		"",
+		""
+	},
 	// LC_FILE_SAVE
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Save"),

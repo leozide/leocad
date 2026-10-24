@@ -1389,6 +1389,14 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 	Ignore = false;
 }
 
+void lcMainWindow::ToggleWatchFileChanges()
+{
+	lcGetPreferences().mWatchFileChanges = !lcGetPreferences().mWatchFileChanges;
+	lcSetProfileInt(LC_PROFILE_WATCH_FILE_CHANGES, lcGetPreferences().mWatchFileChanges);
+
+	lcGetActiveProject()->UpdateFileWatcher();
+}
+
 void lcMainWindow::ReloadProject()
 {
 	Project* CurrentProject = lcGetActiveProject();
@@ -3001,6 +3009,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_RELOAD:
 		ReloadProject();
+		break;
+
+	case LC_FILE_TOGGLE_WATCH_FILE_CHANGES:
+		ToggleWatchFileChanges();
 		break;
 
 	case LC_FILE_SAVE:

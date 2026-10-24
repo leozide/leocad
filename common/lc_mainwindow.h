@@ -227,6 +227,7 @@ public:
 	bool SaveProject(const QString& FileName);
 	bool SaveProjectIfModified();
 	void ReloadProject();
+	void ToggleWatchFileChanges();
 	void ReloadProjectFile(const QString& FileName);
 	bool SetModelFromFocus();
 	void SetModelFromSelection();

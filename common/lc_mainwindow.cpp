@@ -2007,21 +2007,7 @@ int lcMainWindow::GetInsertColorIndex() const
 		break;
 
 	case lcInsertColorMode::SelectedPieceColor:
-		if (lcModel* ActiveModel = GetActiveModel())
-		{
-			lcObject* Focus = ActiveModel->GetFocusObject();
-
-			if (Focus && Focus->IsPiece())
-				return static_cast<lcPiece*>(Focus)->GetColorIndex();
-
-			std::vector<lcObject*> Selection;
-			int Flags = 0;
-			ActiveModel->GetSelectionInformation(&Flags, Selection, &Focus);
-
-			for (lcObject* Object : Selection)
-				if (Object->IsPiece())
-					return static_cast<lcPiece*>(Object)->GetColorIndex();
-		}
+		// Selecting a piece already made its color the current color.
 		break;
 
 	case lcInsertColorMode::LastInsertedColor:
@@ -2361,8 +2347,18 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	{
 		mTimelineWidget->UpdateSelection();
 
+		// Selecting a piece makes its color current; picking a color afterwards overrides it.
 		if (lcGetPreferences().mInsertColorMode == lcInsertColorMode::SelectedPieceColor)
-			UpdatePiecesColor();
+		{
+			lcObject* SelectedPiece = (Focus && Focus->IsPiece()) ? Focus : nullptr;
+
+			for (size_t ObjectIndex = 0; !SelectedPiece && ObjectIndex < Selection.size(); ObjectIndex++)
+				if (Selection[ObjectIndex]->IsPiece())
+					SelectedPiece = Selection[ObjectIndex];
+
+			if (SelectedPiece && static_cast<lcPiece*>(SelectedPiece)->GetColorIndex() != mColorIndex)
+				SetColorIndex(static_cast<lcPiece*>(SelectedPiece)->GetColorIndex());
+		}
 
 		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);

@@ -2389,8 +2389,20 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	lcVector3 Position;
 	lcGetActiveModel()->GetFocusPosition(Position);
 
-	QString Label("X: %1 Y: %2 Z: %3");
-	Label = Label.arg(QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));
+	// Name the focused object so the coordinates are clearly its position.
+	QString Object;
+
+	if (Focus && Focus->IsPiece())
+		Object = tr("Piece");
+	else if (Focus && Focus->IsCamera())
+		Object = tr("Camera");
+	else if (Focus && Focus->IsLight())
+		Object = tr("Light");
+	else
+		Object = tr("Origin");
+
+	QString Label = tr("%1 X: %2 Y: %3 Z: %4");
+	Label = Label.arg(Object, QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));
 	mStatusPositionLabel->setText(Label);
 }
 

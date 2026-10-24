@@ -1992,10 +1992,67 @@ void lcMainWindow::SetColorIndex(int ColorIndex)
 {
 	mColorIndex = ColorIndex;
 
-	if (mPartSelectionWidget)
-		mPartSelectionWidget->SetColorIndex(ColorIndex);
+	// Picking a color explicitly also becomes the color to insert next.
+	mLastInsertedColorIndex = ColorIndex;
 
+	UpdatePiecesColor();
 	UpdateColor();
+}
+
+int lcMainWindow::GetInsertColorIndex() const
+{
+	switch (lcGetPreferences().mInsertColorMode)
+	{
+	case lcInsertColorMode::CurrentColor:
+		break;
+
+	case lcInsertColorMode::SelectedPieceColor:
+		if (lcModel* ActiveModel = GetActiveModel())
+		{
+			lcObject* Focus = ActiveModel->GetFocusObject();
+
+			if (Focus && Focus->IsPiece())
+				return static_cast<lcPiece*>(Focus)->GetColorIndex();
+
+			std::vector<lcObject*> Selection;
+			int Flags = 0;
+			ActiveModel->GetSelectionInformation(&Flags, Selection, &Focus);
+
+			for (lcObject* Object : Selection)
+				if (Object->IsPiece())
+					return static_cast<lcPiece*>(Object)->GetColorIndex();
+		}
+		break;
+
+	case lcInsertColorMode::LastInsertedColor:
+		if (mLastInsertedColorIndex != -1)
+			return mLastInsertedColorIndex;
+		break;
+	}
+
+	return mColorIndex;
+}
+
+void lcMainWindow::SetLastInsertedColorIndex(int ColorIndex)
+{
+	mLastInsertedColorIndex = ColorIndex;
+
+	UpdatePiecesColor();
+}
+
+void lcMainWindow::SetInsertColorMode(lcInsertColorMode InsertColorMode)
+{
+	lcGetPreferences().mInsertColorMode = InsertColorMode;
+	lcSetProfileInt(LC_PROFILE_INSERT_COLOR_MODE, static_cast<int>(InsertColorMode));
+
+	UpdatePiecesColor();
+}
+
+void lcMainWindow::UpdatePiecesColor()
+{
+	// The pieces list shows the color new pieces will be inserted with, unless its color is locked.
+	if (mPartSelectionWidget)
+		mPartSelectionWidget->SetColorIndex(GetInsertColorIndex());
 }
 
 void lcMainWindow::SetMoveSnapEnabled(bool Enabled)
@@ -2303,6 +2360,9 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	if (SelectionChanged)
 	{
 		mTimelineWidget->UpdateSelection();
+
+		if (lcGetPreferences().mInsertColorMode == lcInsertColorMode::SelectedPieceColor)
+			UpdatePiecesColor();
 
 		mActions[LC_EDIT_CUT]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_COPY]->setEnabled(Flags & LC_SEL_SELECTED);
@@ -3244,6 +3304,26 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_PIECE_INSERT_COLOR_CURRENT:
+		SetInsertColorMode(lcInsertColorMode::CurrentColor);
+		break;
+
+	case LC_PIECE_INSERT_COLOR_SELECTED:
+		SetInsertColorMode(lcInsertColorMode::SelectedPieceColor);
+		break;
+
+	case LC_PIECE_INSERT_COLOR_LAST_INSERTED:
+		SetInsertColorMode(lcInsertColorMode::LastInsertedColor);
+		break;
+
+	case LC_VIEW_PIECES_TOGGLE_LOCK_COLOR:
+		if (mPartSelectionWidget)
+		{
+			mPartSelectionWidget->ToggleColorLocked();
+			UpdatePiecesColor();
+		}
 		break;
 
 	case LC_PIECE_INSERT:

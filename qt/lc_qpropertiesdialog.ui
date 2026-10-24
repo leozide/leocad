@@ -3,7 +3,7 @@
  <class>lcPropertiesDialog</class>
  <widget class="QDialog" name="lcPropertiesDialog">
   <property name="whatsThis">
-   <string>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model's author, description, and comments on the Summary tab. Measurements and Pieces Used provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</string>
+   <string>&lt;p&gt;&lt;b&gt;Model Properties&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Edit the current model's author, description, and comments on the Summary tab. Measurements and Pieces provide read-only information. Choose OK to apply the metadata changes, or Cancel to discard them.&lt;/p&gt;</string>
   </property>
   <property name="geometry">
    <rect>
@@ -138,7 +138,7 @@
      </widget>
      <widget class="QWidget" name="tabParts">
       <attribute name="title">
-       <string>Pieces Used</string>
+       <string>Pieces</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
@@ -147,10 +147,10 @@
           <string>View piece quantities by color; click a column heading to sort.</string>
          </property>
          <property name="whatsThis">
-          <string>&lt;p&gt;&lt;b&gt;Pieces Used&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The piece-name column stays visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</string>
+          <string>&lt;p&gt;&lt;b&gt;Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The table counts pieces across all steps, including pieces inside submodels. The first column shows a thumbnail of each piece in its most used color, and the ID column shows its number. Color columns show quantities, and totals summarize each piece, each color, and the whole model. Click a column heading to sort. The thumbnail, ID and piece-name columns stay visible while you scroll horizontally. Counts cannot be edited here.&lt;/p&gt;</string>
          </property>
          <property name="accessibleName">
-          <string>Pieces Used</string>
+          <string>Pieces</string>
          </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
@@ -171,6 +171,56 @@
           <bool>false</bool>
          </attribute>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="ExportLayout">
+         <item>
+          <widget class="QLabel" name="PiecesCountLabel">
+           <property name="toolTip">
+            <string>Unique pieces count each piece and color combination once; total pieces count every piece in the model.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="ExportSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ExportBrickLinkButton">
+           <property name="toolTip">
+            <string>Save this model's piece list as a BrickLink wanted list.</string>
+           </property>
+           <property name="whatsThis">
+            <string>&lt;p&gt;&lt;b&gt;Export BrickLink&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Saves the pieces listed in this table as a BrickLink XML wanted list, the same format as File &amp;gt; Export &amp;gt; BrickLink. Only the model shown in this dialog and its submodels are included.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Export BrickLink...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ExportCSVButton">
+           <property name="toolTip">
+            <string>Save this model's piece list as a CSV spreadsheet.</string>
+           </property>
+           <property name="whatsThis">
+            <string>&lt;p&gt;&lt;b&gt;Export CSV&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Saves the pieces listed in this table as comma separated values with name, color, quantity, ID and color code, the same format as File &amp;gt; Export &amp;gt; CSV. Only the model shown in this dialog and its submodels are included.&lt;/p&gt;</string>
+           </property>
+           <property name="text">
+            <string>Export CSV...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -195,6 +245,8 @@
   <tabstop>DescriptionEdit</tabstop>
   <tabstop>CommentsEdit</tabstop>
   <tabstop>PartsTable</tabstop>
+  <tabstop>ExportBrickLinkButton</tabstop>
+  <tabstop>ExportCSVButton</tabstop>
  </tabstops>
  <customwidgets>
   <customwidget>

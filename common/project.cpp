@@ -2948,11 +2948,16 @@ lcResult<void> Project::ExportCSV(const QString& FileName)
 	if (SaveFileName.isEmpty())
 		return lcUnexpected(QString());
 
-	lcDiskFile CSVFile(SaveFileName);
+	return lcExportCSV(SaveFileName, PartsList);
+}
+
+lcResult<void> lcExportCSV(const QString& FileName, const lcPartsList& PartsList)
+{
+	lcDiskFile CSVFile(FileName);
 	char Line[1024];
 
 	if (!CSVFile.Open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
+		return lcUnexpected(QCoreApplication::translate("Project", "Could not open file '%1' for writing.").arg(FileName));
 
 	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
 

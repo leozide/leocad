@@ -438,6 +438,7 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_NEW]);
 	FileMenu->addAction(mActions[LC_FILE_OPEN]);
 	FileMenu->addAction(mActions[LC_FILE_MERGE]);
+	FileMenu->addAction(mActions[LC_FILE_RELOAD]);
 	FileMenu->addSeparator();
 	FileMenu->addAction(mActions[LC_FILE_SAVE]);
 	FileMenu->addAction(mActions[LC_FILE_SAVEAS]);
@@ -1383,17 +1384,48 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 		return;
 	}
 
+	ReloadProjectFile(Path);
+
+	Ignore = false;
+}
+
+void lcMainWindow::ReloadProject()
+{
+	Project* CurrentProject = lcGetActiveProject();
+
+	if (!CurrentProject)
+		return;
+
+	const QString FileName = CurrentProject->GetFileName();
+
+	if (FileName.isEmpty())
+	{
+		QMessageBox::information(this, tr("Reload"), tr("The current model has not been saved to a file yet."));
+		return;
+	}
+
+	if (CurrentProject->IsModified())
+	{
+		QString Text = tr("The model has unsaved changes. Do you want to discard them and reload '%1'?").arg(QDir::toNativeSeparators(FileName));
+
+		if (QMessageBox::question(this, tr("Reload"), Text, QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+			return;
+	}
+
+	ReloadProjectFile(FileName);
+}
+
+void lcMainWindow::ReloadProjectFile(const QString& FileName)
+{
 	std::unique_ptr<Project> NewProject = std::make_unique<Project>();
 
-	if (NewProject->Load(Path, true))
+	if (NewProject->Load(FileName, true))
 	{
 		QByteArray TabLayout = GetTabLayout();
 		gApplication->SetProject(NewProject.release());
 		RestoreTabLayout(TabLayout);
 		lcView::UpdateAllViews();
 	}
-
-	Ignore = false;
 }
 
 void lcMainWindow::Print(QPrinter* Printer)
@@ -2965,6 +2997,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_FILE_MERGE:
 		ShowMergeDialog();
+		break;
+
+	case LC_FILE_RELOAD:
+		ReloadProject();
 		break;
 
 	case LC_FILE_SAVE:

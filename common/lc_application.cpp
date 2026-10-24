@@ -64,6 +64,7 @@ void lcPreferences::LoadDefaults()
 	mViewSphereHighlightColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
+	mWatchFileChanges = lcGetProfileInt(LC_PROFILE_WATCH_FILE_CHANGES);
 	mColorTheme = lcGetProfileColorTheme();
 	mPreviewViewSphereEnabled = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED);
 	mPreviewViewSphereSize = lcGetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE);
@@ -130,6 +131,7 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
+	lcSetProfileInt(LC_PROFILE_WATCH_FILE_CHANGES, mWatchFileChanges);
 	lcSetProfileColorTheme(mColorTheme);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_ENABLED, mPreviewViewSphereEnabled);
 	lcSetProfileInt(LC_PROFILE_PREVIEW_VIEW_SPHERE_SIZE, mPreviewViewSphereSize);
@@ -1427,12 +1429,16 @@ void lcApplication::ShowPreferencesDialog()
 	EdgeColorSettingsChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
 	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColorEnabled != mPreferences.mDarkEdgeColorEnabled;
 	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
+	bool WatchFileChangesChanged = Options.Preferences.mWatchFileChanges != mPreferences.mWatchFileChanges;
 
 
 	mPreferences = Options.Preferences;
 
 	mPreferences.SaveDefaults();
 	UpdateStyle();
+
+	if (WatchFileChangesChanged && mProject)
+		mProject->UpdateFileWatcher();
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);

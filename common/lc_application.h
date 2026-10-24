@@ -82,6 +82,7 @@ public:
 	quint32 mViewSphereHighlightColor;
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
+	bool mWatchFileChanges;
 	lcColorTheme mColorTheme;
 	quint32 mObjectSelectedColor;
 	quint32 mObjectFocusedColor;

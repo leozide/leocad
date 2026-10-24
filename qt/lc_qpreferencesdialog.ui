@@ -413,6 +413,16 @@
          </property>
         </widget>
        </item>
+       <item row="12" column="0" colspan="2">
+        <widget class="QCheckBox" name="WatchFileChanges">
+         <property name="toolTip">
+          <string>Ask to reload the model when its file is changed by another application. Use File &gt; Reload to reload it manually.</string>
+         </property>
+         <property name="text">
+          <string>Watch for file changes</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabRendering">
@@ -2725,6 +2735,7 @@
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>RestoreTabLayout</tabstop>
+  <tabstop>WatchFileChanges</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>FadeSteps</tabstop>

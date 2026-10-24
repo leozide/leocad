@@ -63,8 +63,8 @@ lcPreviewDockWidget::lcPreviewDockWidget(QMainWindow* Parent)
 
 	QToolButton* OptionsButton = new QToolButton(mToolBar);
 	OptionsButton->setIcon(QIcon(":/resources/gear_in.png"));
-	OptionsButton->setToolTip(tr("Configure the piece preview and parts rendering."));
-	OptionsButton->setAccessibleName(tr("Piece Preview Options"));
+	OptionsButton->setToolTip(tr("Configure the pieces preview."));
+	OptionsButton->setAccessibleName(tr("Pieces Preview Options"));
 	OptionsButton->setPopupMode(QToolButton::InstantPopup);
 	mToolBar->addWidget(OptionsButton);
 

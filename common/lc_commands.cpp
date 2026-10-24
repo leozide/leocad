@@ -1416,7 +1416,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleSyncRendering"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Uses Model View Settings"),
-		QT_TRANSLATE_NOOP("Status", "Toggle using the model view rendering settings for the piece preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle using the model view rendering settings for the pieces preview"),
 		"",
 		""
 	},
@@ -1424,7 +1424,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.Wireframe"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Wireframe"),
-		QT_TRANSLATE_NOOP("Status", "Display the piece preview as wireframe"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview as wireframe"),
 		"",
 		""
 	},
@@ -1432,7 +1432,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.Flat"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Flat Shading"),
-		QT_TRANSLATE_NOOP("Status", "Display the piece preview without any shading or lights"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview without any shading or lights"),
 		"",
 		""
 	},
@@ -1440,7 +1440,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.Shade.DefaultLights"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Default Lights"),
-		QT_TRANSLATE_NOOP("Status", "Display the piece preview with the default lights"),
+		QT_TRANSLATE_NOOP("Status", "Display the pieces preview with the default lights"),
 		"",
 		""
 	},
@@ -1448,7 +1448,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleEdgeLines"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Edge Lines"),
-		QT_TRANSLATE_NOOP("Status", "Toggle edge lines in the piece preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle edge lines in the pieces preview"),
 		"",
 		""
 	},
@@ -1456,7 +1456,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleConditionalLines"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Conditional Lines"),
-		QT_TRANSLATE_NOOP("Status", "Toggle conditional lines in the piece preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle conditional lines in the pieces preview"),
 		"",
 		""
 	},
@@ -1512,7 +1512,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleViewSphere"),
 		QT_TRANSLATE_NOOP("Menu", "Preview View Sphere"),
-		QT_TRANSLATE_NOOP("Status", "Toggle the view sphere in the piece preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the view sphere in the pieces preview"),
 		"",
 		""
 	},
@@ -1520,7 +1520,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "View.Preview.ToggleAxisIcon"),
 		QT_TRANSLATE_NOOP("Menu", "Preview Axis Icon"),
-		QT_TRANSLATE_NOOP("Status", "Toggle the axis icon in the piece preview"),
+		QT_TRANSLATE_NOOP("Status", "Toggle the axis icon in the pieces preview"),
 		"",
 		""
 	},

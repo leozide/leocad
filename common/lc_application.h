@@ -65,7 +65,7 @@ public:
 	void LoadRenderTarget(lcRenderTarget Target);
 	void SaveRenderTarget(lcRenderTarget Target) const;
 
-	// The piece preview and the pieces list use their own settings unless they are synced with the model views.
+	// The pieces preview and the pieces list use their own settings unless they are synced with the model views.
 	lcRenderSettings GetRenderSettings(lcRenderTarget Target) const
 	{
 		if (Target != lcRenderTarget::ModelView)

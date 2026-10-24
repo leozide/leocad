@@ -73,7 +73,10 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
 	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_EDIT]);
-	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_REMOVE]);
+
+	// Removing is only offered on a step view row.
+	if (ViewStep.isValid())
+		Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_REMOVE]);
 
 	Menu->addSeparator();
 

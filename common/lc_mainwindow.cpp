@@ -404,7 +404,6 @@ void lcMainWindow::CreateMenus()
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
 	mViewpointMenu->addSeparator();
 	mViewpointMenu->addAction(mActions[LC_VIEW_STEP_VIEW_EDIT]);
-	mViewpointMenu->addAction(mActions[LC_VIEW_STEP_VIEW_REMOVE]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW]);
 
 	mProjectionMenu = new QMenu(tr("Projection"), this);

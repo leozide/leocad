@@ -2479,7 +2479,7 @@ void lcMainWindow::UpdateSnap()
 	const QString Axes = mRelativeTransform ? tr("Relative axes") : tr("Absolute axes");
 	const QString Pivot = GetSeparateTransform() ? tr("Rotate separately") : tr("Rotate together");
 
-	mStatusSnapLabel->setText(QString(" %1 - %2 - %3 - %4 ").arg(Move, Rotate, Axes, Pivot));
+	mStatusSnapLabel->setText(QString(" - %1 - %2 - %3 - %4 ").arg(Move, Rotate, Axes, Pivot));
 	mStatusSnapLabel->setToolTip(tr("Movement snap, rotation snap, transform axes and rotation pivot. Change them with the last buttons of the standard toolbar."));
 }
 

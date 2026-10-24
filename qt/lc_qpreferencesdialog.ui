@@ -1094,6 +1094,26 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="QCheckBox" name="GridHeightXZCheckBox">
+            <property name="toolTip">
+             <string>Draw a vertical XZ grid behind the model with lines every plate height.</string>
+            </property>
+            <property name="text">
+             <string>Draw XZ height grid</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="3">
+           <widget class="QCheckBox" name="GridHeightYZCheckBox">
+            <property name="toolTip">
+             <string>Draw a vertical YZ grid behind the model with lines every plate height.</string>
+            </property>
+            <property name="text">
+             <string>Draw YZ height grid</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0" colspan="3">
            <widget class="QCheckBox" name="gridStuds">
             <property name="toolTip">
@@ -2751,6 +2771,8 @@
   <tabstop>gridLines</tabstop>
   <tabstop>gridLineSpacing</tabstop>
   <tabstop>GridOriginCheckBox</tabstop>
+  <tabstop>GridHeightXZCheckBox</tabstop>
+  <tabstop>GridHeightYZCheckBox</tabstop>
   <tabstop>PreviewViewSphereSizeCombo</tabstop>
   <tabstop>PreviewViewSphereLocationCombo</tabstop>
   <tabstop>PreviewAxisIconCheckBox</tabstop>

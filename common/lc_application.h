@@ -73,6 +73,8 @@ public:
 	int mGridLineSpacing;
 	quint32 mGridLineColor;
 	bool mDrawGridOrigin;
+	bool mDrawGridHeightXZ;
+	bool mDrawGridHeightYZ;
 	bool mFixedAxes;
 	bool mViewSphereEnabled;
 	lcViewSphereLocation mViewSphereLocation;

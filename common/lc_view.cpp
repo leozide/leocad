@@ -1623,7 +1623,7 @@ void lcView::DrawGrid()
 {
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines && !Preferences.mDrawGridOrigin)
+	if (!Preferences.mDrawGridStuds && !Preferences.mDrawGridLines && !Preferences.mDrawGridOrigin && !Preferences.mDrawGridHeightXZ && !Preferences.mDrawGridHeightYZ)
 		return;
 
 	if (!Preferences.mGridEnabled)
@@ -1813,6 +1813,63 @@ void lcView::DrawGrid()
 
 		mContext->SetVertexFormat(BufferOffset, 3, 0, 0, 0, false);
 		mContext->DrawPrimitives(GL_LINES, 0, NumVerts);
+	}
+
+	if (Preferences.mDrawGridHeightXZ || Preferences.mDrawGridHeightYZ)
+	{
+		// Vertical grids behind the model with a line every plate height.
+		constexpr float PlateHeight = 8.0f;
+		const float LineSpacing = 20.0f * Spacing;
+		const float Left = MinX * LineSpacing;
+		const float Right = MaxX * LineSpacing;
+		const float Front = MinY * LineSpacing;
+		const float Back = MaxY * LineSpacing;
+		const int PlateCount = lcMax(static_cast<int>(ceilf((GridSizeValid && std::isfinite(Max[2]) ? Max[2] : 0.0f) / PlateHeight)) + 3, 9);
+		const float Top = PlateCount * PlateHeight;
+		const lcVector3 CameraPosition = mCamera->mPosition;
+
+		std::vector<lcVector3> Lines;
+
+		if (Preferences.mDrawGridHeightXZ)
+		{
+			const float Y = CameraPosition.y > (Front + Back) * 0.5f ? Front : Back;
+
+			for (int Step = MinX; Step <= MaxX; Step++)
+			{
+				Lines.emplace_back(Step * LineSpacing, Y, 0.0f);
+				Lines.emplace_back(Step * LineSpacing, Y, Top);
+			}
+
+			for (int Plate = 1; Plate <= PlateCount; Plate++)
+			{
+				Lines.emplace_back(Left, Y, Plate * PlateHeight);
+				Lines.emplace_back(Right, Y, Plate * PlateHeight);
+			}
+		}
+
+		if (Preferences.mDrawGridHeightYZ)
+		{
+			const float X = CameraPosition.x > (Left + Right) * 0.5f ? Left : Right;
+
+			for (int Step = MinY; Step <= MaxY; Step++)
+			{
+				Lines.emplace_back(X, Step * LineSpacing, 0.0f);
+				Lines.emplace_back(X, Step * LineSpacing, Top);
+			}
+
+			for (int Plate = 1; Plate <= PlateCount; Plate++)
+			{
+				Lines.emplace_back(X, Front, Plate * PlateHeight);
+				Lines.emplace_back(X, Back, Plate * PlateHeight);
+			}
+		}
+
+		mContext->SetLineWidth(1.0f);
+		mContext->SetMaterial(lcMaterialType::UnlitColor);
+		mContext->SetColor(lcVector4FromColor(Preferences.mGridLineColor));
+		mContext->SetVertexBufferPointer(Lines.data());
+		mContext->SetVertexFormat(0, 3, 0, 0, 0, false);
+		mContext->DrawPrimitives(GL_LINES, 0, static_cast<int>(Lines.size()));
 	}
 
 	if (Preferences.mDrawGridOrigin)

@@ -3246,6 +3246,18 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		ToggleFadePreviousSteps();
 		break;
 
+	case LC_VIEW_GRID_TOGGLE_HEIGHT_XZ:
+		lcGetPreferences().mDrawGridHeightXZ = !lcGetPreferences().mDrawGridHeightXZ;
+		lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_XZ, lcGetPreferences().mDrawGridHeightXZ);
+		lcView::UpdateAllViews();
+		break;
+
+	case LC_VIEW_GRID_TOGGLE_HEIGHT_YZ:
+		lcGetPreferences().mDrawGridHeightYZ = !lcGetPreferences().mDrawGridHeightYZ;
+		lcSetProfileInt(LC_PROFILE_GRID_HEIGHT_YZ, lcGetPreferences().mDrawGridHeightYZ);
+		lcView::UpdateAllViews();
+		break;
+
 	case LC_PIECE_INSERT:
 		if (ActiveModel)
 			ActiveModel->AddPiece(nullptr, LC_PIECE_SECTION_INVALID);

@@ -181,6 +181,8 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->gridLineSpacing->setValidator(new QIntValidator(1, LC_MAX_GRID_LINE_SPACING, ui->gridLineSpacing));
 	ui->gridLineSpacing->setText(lcFormatIntegerLocalized(mOptions->Preferences.mGridLineSpacing, ui->gridLineSpacing->validator()->locale()));
 	ui->GridOriginCheckBox->setChecked(mOptions->Preferences.mDrawGridOrigin);
+	ui->GridHeightXZCheckBox->setChecked(mOptions->Preferences.mDrawGridHeightXZ);
+	ui->GridHeightYZCheckBox->setChecked(mOptions->Preferences.mDrawGridHeightYZ);
 	ui->AxisIconCheckBox->setChecked(mOptions->Preferences.mDrawAxes);
 
 	ui->AxisIconLocationCombo->setCurrentIndex((int)mOptions->Preferences.mAxisIconLocation);
@@ -410,6 +412,8 @@ void lcPreferencesDialog::accept()
 	mOptions->Preferences.mDrawGridLines = ui->gridLines->isChecked();
 	mOptions->Preferences.mGridLineSpacing = GridLineSpacing;
 	mOptions->Preferences.mDrawGridOrigin = ui->GridOriginCheckBox->isChecked();
+	mOptions->Preferences.mDrawGridHeightXZ = ui->GridHeightXZCheckBox->isChecked();
+	mOptions->Preferences.mDrawGridHeightYZ = ui->GridHeightYZCheckBox->isChecked();
 
 	mOptions->Preferences.mBackgroundGradient = ui->BackgroundGradientRadio->isChecked();
 	mOptions->Preferences.mDrawAxes = ui->AxisIconCheckBox->isChecked();

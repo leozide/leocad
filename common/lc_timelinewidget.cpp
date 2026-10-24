@@ -25,6 +25,17 @@ lcTimelineWidget::lcTimelineWidget(QWidget* Parent)
 	connect(this, &QTreeWidget::currentItemChanged, this, &lcTimelineWidget::CurrentItemChanged);
 	connect(this, &QTreeWidget::itemSelectionChanged, this, &lcTimelineWidget::ItemSelectionChanged);
 	connect(this, &QWidget::customContextMenuRequested, this, &lcTimelineWidget::CustomMenuRequested);
+	connect(this, &QTreeWidget::itemDoubleClicked, this, [](QTreeWidgetItem* Item)
+	{
+		const QVariant ViewStep = Item ? Item->data(0, Qt::UserRole + 1) : QVariant();
+		lcModel* Model = gMainWindow->GetActiveModel();
+
+		if (!ViewStep.isValid() || !Model)
+			return;
+
+		Model->SetCurrentStep(ViewStep.toUInt());
+		gMainWindow->HandleCommand(LC_VIEW_STEP_VIEW_EDIT);
+	});
 }
 
 lcTimelineWidget::~lcTimelineWidget()
@@ -98,6 +109,16 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		clear();
 	}
 
+	// Step view rows are rebuilt after the piece rows.
+	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
+	{
+		QTreeWidgetItem* StepItem = topLevelItem(TopLevelItemIdx);
+
+		for (int ChildIdx = StepItem->childCount() - 1; ChildIdx >= 0; ChildIdx--)
+			if (StepItem->child(ChildIdx)->data(0, Qt::UserRole + 1).isValid())
+				delete StepItem->child(ChildIdx);
+	}
+
 	lcStep LastStep = Model->GetLastStep();
 	if (Model->HasPieces())
 		LastStep++;
@@ -127,27 +148,6 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		StepItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsDropEnabled);
 		addTopLevelItem(StepItem);
 		StepItem->setExpanded(true);
-	}
-
-	// Steps with a view rotation say so in their label.
-	const std::map<lcStep, lcStepView>& StepViews = Model->GetProperties().mStepViews;
-	const char* ModeNames[] = { "REL", "ABS", "ADD" };
-
-	for (int TopLevelItemIdx = 0; TopLevelItemIdx < topLevelItemCount(); TopLevelItemIdx++)
-	{
-		const std::map<lcStep, lcStepView>::const_iterator StepView = StepViews.find(TopLevelItemIdx + 1);
-		QString Label = tr("Step %1").arg(TopLevelItemIdx + 1);
-
-		if (StepView != StepViews.end())
-		{
-			if (StepView->second.Mode == lcStepViewMode::End)
-				Label += tr(" - view END");
-			else
-				Label += tr(" - view %1 %2 %3 %4").arg(StepView->second.Angles.x).arg(StepView->second.Angles.y).arg(StepView->second.Angles.z).arg(QLatin1String(ModeNames[static_cast<int>(StepView->second.Mode)]));
-		}
-
-		if (topLevelItem(TopLevelItemIdx)->text(0) != Label)
-			topLevelItem(TopLevelItemIdx)->setText(0, Label);
 	}
 
 	const std::vector<std::unique_ptr<lcPiece>>& Pieces = Model->GetPieces();
@@ -270,6 +270,37 @@ void lcTimelineWidget::Update(bool Clear, bool UpdateItems)
 		Step++;
 		StepItem = topLevelItem(Step - 1);
 		PieceItemIndex = 0;
+	}
+
+	// A step view is its own row closing the step, like the ROTSTEP line that ends it.
+	const std::map<lcStep, lcStepView>& StepViews = Model->GetProperties().mStepViews;
+
+	for (const std::pair<const lcStep, lcStepView>& StepView : StepViews)
+	{
+		QTreeWidgetItem* ViewStepItem = StepView.first <= static_cast<lcStep>(topLevelItemCount()) ? topLevelItem(StepView.first - 1) : nullptr;
+
+		if (!ViewStepItem)
+			continue;
+
+		const QString Modes[] = { tr("relative"), tr("absolute"), tr("added") };
+		const lcVector3& Angles = StepView.second.Angles;
+		QString Label;
+
+		if (StepView.second.Mode == lcStepViewMode::End)
+			Label = tr("View: back to default");
+		else
+			Label = tr("View: %1, %2, %3 %4").arg(Angles.x).arg(Angles.y).arg(Angles.z).arg(Modes[static_cast<int>(StepView.second.Mode)]);
+
+		QTreeWidgetItem* ViewItem = new QTreeWidgetItem(QStringList(Label));
+		ViewItem->setFlags(Qt::ItemIsEnabled);
+		ViewItem->setData(0, Qt::UserRole + 1, QVariant::fromValue<uint>(StepView.first));
+		ViewItem->setToolTip(0, tr("Step view saved as an MLCAD ROTSTEP line. Double-click to edit it."));
+
+		QFont Font = ViewItem->font(0);
+		Font.setItalic(true);
+		ViewItem->setFont(0, Font);
+
+		ViewStepItem->addChild(ViewItem);
 	}
 
 	UpdateCurrentStepItem();
@@ -638,6 +669,9 @@ void lcTimelineWidget::UpdateModel()
 		{
 			QTreeWidgetItem* PieceItem = StepItem->child(PieceItemIdx);
 			lcPiece* Piece = (lcPiece*)PieceItem->data(0, Qt::UserRole).value<uintptr_t>();
+
+			if (!Piece)
+				continue;
 
 			PieceSteps.emplace_back(std::pair<lcPiece*, lcStep>(Piece, TopLevelItemIdx + 1));
 		}

@@ -1404,6 +1404,14 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_VIEW_STEP_VIEW_REMOVE
+	{
+		QT_TRANSLATE_NOOP("Action", "View.StepView.Remove"),
+		QT_TRANSLATE_NOOP("Menu", "Remove Step View"),
+		QT_TRANSLATE_NOOP("Status", "Remove the view rotation of the current step"),
+		"",
+		""
+	},
 	// LC_VIEW_STEP_VIEW_TOGGLE_FOLLOW
 	{
 		QT_TRANSLATE_NOOP("Action", "View.StepView.ToggleFollow"),

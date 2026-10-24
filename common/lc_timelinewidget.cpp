@@ -44,6 +44,13 @@ lcTimelineWidget::~lcTimelineWidget()
 
 void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 {
+	// Right-clicking a step view row makes its step current, so the step view entries act on it.
+	QTreeWidgetItem* ClickedItem = itemAt(Pos);
+	const QVariant ViewStep = ClickedItem ? ClickedItem->data(0, Qt::UserRole + 1) : QVariant();
+
+	if (ViewStep.isValid())
+		gMainWindow->GetActiveModel()->SetCurrentStep(ViewStep.toUInt());
+
 	QMenu* Menu = new QMenu(this);
 
 	lcObject* FocusObject = gMainWindow->GetActiveModel()->GetFocusObject();
@@ -66,6 +73,7 @@ void lcTimelineWidget::CustomMenuRequested(QPoint Pos)
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_INSERT_AFTER]);
 	Menu->addAction(gMainWindow->mActions[LC_TIMELINE_DELETE]);
 	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_EDIT]);
+	Menu->addAction(gMainWindow->mActions[LC_VIEW_STEP_VIEW_REMOVE]);
 
 	Menu->addSeparator();
 

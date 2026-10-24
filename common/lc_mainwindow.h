@@ -105,8 +105,18 @@ public:
 
 	float GetAngleSnap() const
 	{
+		return mAngleSnapEnabled ? GetAngleSnapIncrement() : 0.0f;
+	}
+
+	float GetAngleSnapIncrement() const
+	{
 		const float AngleTable[] = { 0.0f, 1.0f, 5.0f, 15.0f, 22.5f, 30.0f, 45.0f, 60.0f, 90.0f, 180.0f };
-		return mAngleSnapEnabled ? AngleTable[mAngleSnapIndex] : 0.0f;
+		return mAngleSnapIndex < static_cast<int>(LC_ARRAY_COUNT(AngleTable)) ? AngleTable[mAngleSnapIndex] : mAngleSnapCustom;
+	}
+
+	float GetOrbitSnap() const
+	{
+		return mOrbitSnapEnabled ? GetAngleSnapIncrement() : 0.0f;
 	}
 
 	QString GetMoveXYSnapText() const
@@ -209,6 +219,7 @@ public:
 	void SetMoveXYSnapIndex(int Index);
 	void SetMoveZSnapIndex(int Index);
 	void SetAngleSnapIndex(int Index);
+	void SetCustomAngleSnap();
 	void SetRelativeTransform(bool RelativeTransform);
 	void SetSeparateTransform(bool SelectionTransform);
 	void SetShadingMode(lcShadingMode ShadingMode);
@@ -343,6 +354,8 @@ protected:
 	int mMoveXYSnapIndex;
 	int mMoveZSnapIndex;
 	int mAngleSnapIndex;
+	float mAngleSnapCustom = 7.5f;
+	bool mOrbitSnapEnabled = false;
 	bool mRelativeTransform = true;
 	bool mLocalTransform = false;
 	lcPieceDataRef mInsertPieceData;

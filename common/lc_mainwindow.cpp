@@ -45,6 +45,8 @@ lcMainWindow::lcMainWindow()
 	mMoveXYSnapIndex = 4;
 	mMoveZSnapIndex = 3;
 	mAngleSnapIndex = 5;
+	mAngleSnapCustom = lcGetProfileFloat(LC_PROFILE_ANGLE_SNAP_CUSTOM);
+	mOrbitSnapEnabled = lcGetProfileInt(LC_PROFILE_ORBIT_SNAP);
 	mSelectionMode = lcSelectionMode::Single;
 
 	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
@@ -316,11 +318,13 @@ void lcMainWindow::CreateActions()
 	}
 
 	QActionGroup* ActionSnapAngleGroup = new QActionGroup(this);
-	for (int ActionIdx = LC_EDIT_SNAP_ANGLE0; ActionIdx <= LC_EDIT_SNAP_ANGLE9; ActionIdx++)
+	for (int ActionIdx = LC_EDIT_SNAP_ANGLE0; ActionIdx <= LC_EDIT_SNAP_ANGLE_CUSTOM; ActionIdx++)
 	{
 		mActions[ActionIdx]->setCheckable(true);
 		ActionSnapAngleGroup->addAction(mActions[ActionIdx]);
 	}
+
+	mActions[LC_EDIT_SNAP_ORBIT_TOGGLE]->setCheckable(true);
 
 	QActionGroup* ActionTransformTypeGroup = new QActionGroup(this);
 	for (int ActionIdx = LC_EDIT_TRANSFORM_ABSOLUTE_TRANSLATION; ActionIdx <= LC_EDIT_TRANSFORM_RELATIVE_ROTATION; ActionIdx++)
@@ -631,8 +635,10 @@ void lcMainWindow::CreateToolBars()
 	QMenu* SnapAngleMenu = new QMenu(tr("Snap Angle Menu"), this);
 	SnapAngleMenu->addAction(mActions[LC_EDIT_SNAP_ANGLE_TOGGLE]);
 	SnapAngleMenu->addSeparator();
-	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE9; actionIdx++)
+	for (int actionIdx = LC_EDIT_SNAP_ANGLE0; actionIdx <= LC_EDIT_SNAP_ANGLE_CUSTOM; actionIdx++)
 		SnapAngleMenu->addAction(mActions[actionIdx]);
+	SnapAngleMenu->addSeparator();
+	SnapAngleMenu->addAction(mActions[LC_EDIT_SNAP_ORBIT_TOGGLE]);
 
 	QAction* AngleAction = new QAction(tr("Rotation Snap"), this);
 	AngleAction->setStatusTip(tr("Snap rotations to fixed intervals"));
@@ -2033,6 +2039,26 @@ void lcMainWindow::SetAngleSnapIndex(int Index)
 	UpdateSnap();
 }
 
+void lcMainWindow::SetCustomAngleSnap()
+{
+	bool Ok = false;
+	const double Angle = QInputDialog::getDouble(this, tr("Custom Rotation Snap"), tr("Snap angle in degrees:"), mAngleSnapCustom, 0.01, 360.0, 2, &Ok);
+
+	if (!Ok)
+	{
+		UpdateSnap();
+		return;
+	}
+
+	// Keep at most two decimals.
+	mAngleSnapCustom = static_cast<float>(qRound(Angle * 100.0) / 100.0);
+	lcSetProfileFloat(LC_PROFILE_ANGLE_SNAP_CUSTOM, mAngleSnapCustom);
+
+	mActions[LC_EDIT_SNAP_ANGLE_CUSTOM]->setText(tr("Custom (%1 Degrees)...").arg(lcFormatDoubleLocalized(mAngleSnapCustom, locale(), 'g', 6)));
+
+	SetAngleSnapIndex(LC_EDIT_SNAP_ANGLE_CUSTOM - LC_EDIT_SNAP_ANGLE0);
+}
+
 void lcMainWindow::SetRelativeTransform(bool RelativeTransform)
 {
 	mRelativeTransform = RelativeTransform;
@@ -2454,6 +2480,7 @@ void lcMainWindow::UpdateSnap()
 	mActions[LC_EDIT_SNAP_MOVE_XY0 + mMoveXYSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
+	mActions[LC_EDIT_SNAP_ORBIT_TOGGLE]->setChecked(mOrbitSnapEnabled);
 
 	QString Relative = mRelativeTransform ? tr("Rel") : tr("Abs");
 	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 %4 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText(), Relative));
@@ -3751,6 +3778,16 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_SNAP_ANGLE8:
 	case LC_EDIT_SNAP_ANGLE9:
 		SetAngleSnapIndex(CommandId - LC_EDIT_SNAP_ANGLE0);
+		break;
+
+	case LC_EDIT_SNAP_ANGLE_CUSTOM:
+		SetCustomAngleSnap();
+		break;
+
+	case LC_EDIT_SNAP_ORBIT_TOGGLE:
+		mOrbitSnapEnabled = !mOrbitSnapEnabled;
+		lcSetProfileInt(LC_PROFILE_ORBIT_SNAP, mOrbitSnapEnabled);
+		UpdateSnap();
 		break;
 
 	case LC_EDIT_TRANSFORM:

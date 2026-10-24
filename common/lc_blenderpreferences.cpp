@@ -377,8 +377,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mContent->setLayout(mForm);
 
 	QPalette ReadOnlyPalette = QApplication::palette();
-	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mColorTheme == lcColorTheme::Dark)
+	if (gApplication->IsDarkTheme())
 		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DARK_PALETTE_MIDLIGHT);
 	else
 		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DEFAULT_PALETTE_LIGHT);
@@ -515,7 +514,7 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	}
 	else
 	{
-		const QString TextColour = Preferences.mColorTheme == lcColorTheme::Dark ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT) : QLatin1String("blue");
+		const QString TextColour = gApplication->IsDarkTheme() ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT) : QLatin1String("blue");
 
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_PATH).isEmpty();
 		if (!BlenderConfigured)
@@ -1670,11 +1669,10 @@ void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& M
 
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 
-		const lcPreferences& Preferences = lcGetPreferences();
 		Label  = ! Message.isEmpty() ? Message : tr("%1 not configured").arg(Which);
 		Colour = Message.startsWith("Error:", Qt::CaseInsensitive)
 						? QLatin1String("red")
-						: Preferences.mColorTheme == lcColorTheme::Dark
+						: gApplication->IsDarkTheme()
 							? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT)
 							: QLatin1String("blue");
 

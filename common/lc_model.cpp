@@ -3204,7 +3204,7 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 	}
 	else
 	{
-		lcMatrix44 WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceDataBoundingBox.Min.z));
+		lcMatrix44 WorldMatrix = lcGetPreferences().mFirstPieceAtOrigin ? lcMatrix44Identity() : lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceDataBoundingBox.Min.z));
 
 		CreatePiece(PieceData, WorldMatrix, gMainWindow->mColorIndex);
 	}

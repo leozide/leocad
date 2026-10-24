@@ -1404,6 +1404,14 @@ const lcCommand gCommands[] =
 		"",
 		"Insert"
 	},
+	// LC_PIECE_TOGGLE_FIRST_AT_ORIGIN
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.ToggleFirstPieceAtOrigin"),
+		QT_TRANSLATE_NOOP("Menu", "Insert First Piece at Origin"),
+		QT_TRANSLATE_NOOP("Status", "Toggle placing the first piece of an empty model at 0, 0, 0"),
+		"",
+		""
+	},
 	// LC_PIECE_DELETE
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Delete"),

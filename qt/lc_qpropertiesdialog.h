@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_model.h"
+#include "lc_thumbnailmanager.h"
 
 struct lcPropertiesDialogOptions
 {
@@ -18,7 +19,7 @@ class lcPartsTableWidget : public QTableWidget
 {
 public:
 	explicit lcPartsTableWidget(QWidget* Parent = nullptr);
-	void FreezePartColumn();
+	void FreezePartColumns();
 	void scrollTo(const QModelIndex& Index, ScrollHint Hint = EnsureVisible) override;
 
 protected:
@@ -36,6 +37,7 @@ private:
 	void UpdateFrozenGeometry();
 	void EnsureCountVisible(const QModelIndex& Index);
 	QTableView* mFrozenColumn = nullptr;
+	int GetFrozenWidth() const;
 	int mPartColumnWidth = 0;
 	mutable QPersistentModelIndex mSelectionAnchor;
 	mutable QPersistentModelIndex mSelectionEnd;
@@ -54,6 +56,14 @@ public:
 public slots:
 	void accept() override;
 
+protected slots:
+	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);
+	void ExportBrickLink();
+	void ExportCSV();
+
 private:
+	QString GetExportFileName(const QString& Extension, const QString& Title, const QString& Filter);
+
 	Ui::lcPropertiesDialog* ui;
+	std::vector<std::pair<lcPartThumbnailId, QTableWidgetItem*>> mThumbnails;
 };

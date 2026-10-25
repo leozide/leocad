@@ -104,6 +104,7 @@ public:
 		return mKeys.empty() ? 0 : mKeys.back().Step;
 	}
 
+	const T& GetValue(lcStep Step) const;
 	void Update(lcStep Step);
 	bool ChangeKey(const T& Value, lcStep Step, bool AddKey);
 	void InsertTime(lcStep Start, lcStep Time);

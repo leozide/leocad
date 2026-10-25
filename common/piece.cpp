@@ -1054,8 +1054,9 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, Project* Project
 	//	std::vector<bool> mTrainTrackConnections;
 }
 
-void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const
+void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, lcStep Step, bool Highlight, bool Fade) const
 {
+	const lcMatrix44 ModelWorld = GetWorldMatrix(Step);
 	lcRenderMeshState RenderMeshState = lcRenderMeshState::Default;
 	bool ParentActive = false;
 
@@ -1071,7 +1072,7 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 
 		if (!ActiveSubmodelInstance)
 			RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : RenderMeshState);
-		else if (ActiveSubmodelInstance == this)
+		else if (Scene->IsActiveSubmodelInstance(this))
 			ParentActive = true;
 		else
 			RenderMeshState = lcRenderMeshState::Faded;
@@ -1086,24 +1087,29 @@ void lcPiece::AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
 	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceData->IsLoading())
-		Scene->AddMesh(Mesh, mModelWorld, mColorIndex, RenderMeshState);
+		Scene->AddMesh(Mesh, ModelWorld, mColorIndex, RenderMeshState);
 	else
-		mPieceData->AddRenderMeshes(Scene, mModelWorld, mColorIndex, RenderMeshState, ParentActive);
+	{
+		Scene->PushSubmodelInstance(this);
+		mPieceData->AddRenderMeshes(Scene, ModelWorld, mColorIndex, RenderMeshState, ParentActive);
+		Scene->PopSubmodelInstance();
+	}
 
 	if (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected)
 		Scene->AddInterfaceObject(this);
 }
 
-void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
+void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, lcStep Step, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
+	const lcMatrix44 ModelWorld = GetWorldMatrix(Step);
 	int ColorIndex = mColorIndex;
 
 	if (ColorIndex == gDefaultColor)
 		ColorIndex = DefaultColorIndex;
 
-	const lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance();
+	const bool ActiveSubmodelInstance = Scene->IsActiveSubmodelInstance(this);
 
-	if (ActiveSubmodelInstance == this)
+	if (ActiveSubmodelInstance)
 		RenderMeshState = lcRenderMeshState::Default;
 	else if (ParentActive)
 		RenderMeshState = IsFocused() ? lcRenderMeshState::Focused : (IsSelected() ? lcRenderMeshState::Selected : lcRenderMeshState::Default);
@@ -1117,9 +1123,13 @@ void lcPiece::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 	if (mSynthPending && Scene->GetRequireCompleteAssets())
 		Scene->MarkMissingAssets();
 	else if (lcMesh* Mesh = GetDisplayMesh(); Mesh && !mPieceData->IsLoading())
-		Scene->AddMesh(Mesh, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
+		Scene->AddMesh(Mesh, lcMul(ModelWorld, WorldMatrix), ColorIndex, RenderMeshState);
 	else
-		mPieceData->AddRenderMeshes(Scene, lcMul(mModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance == this);
+	{
+		Scene->PushSubmodelInstance(this);
+		mPieceData->AddRenderMeshes(Scene, lcMul(ModelWorld, WorldMatrix), ColorIndex, RenderMeshState, ActiveSubmodelInstance);
+		Scene->PopSubmodelInstance();
+	}
 
 	if (ParentActive && (RenderMeshState == lcRenderMeshState::Focused || RenderMeshState == lcRenderMeshState::Selected))
 		Scene->AddInterfaceObject(this);
@@ -1550,6 +1560,11 @@ void lcPiece::CompareBoundingBox(lcVector3& Min, lcVector3& Max) const
 lcGroup* lcPiece::GetTopGroup()
 {
 	return mGroup ? mGroup->GetTopGroup() : nullptr;
+}
+
+lcMatrix44 lcPiece::GetWorldMatrix(lcStep Step) const
+{
+	return lcMatrix44(mRotation.GetValue(Step), mPosition.GetValue(Step));
 }
 
 void lcPiece::UpdatePosition(lcStep Step)

@@ -1636,7 +1636,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 				FocusPiece = Piece.get();
 
 			const lcStep StepShow = Piece->GetStepShow();
-			Piece->AddMainModelRenderMeshes(Scene, AllowHighlight && StepShow == mCurrentStep, AllowFade && StepShow < mCurrentStep);
+			Piece->AddMainModelRenderMeshes(Scene, mCurrentStep, AllowHighlight && StepShow == mCurrentStep, AllowFade && StepShow < mCurrentStep);
 		}
 	}
 
@@ -1654,7 +1654,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 				Scene->AddInterfaceObject(Light.get());
 	}
 
-	if (Scene->GetDrawInsertPreview())
+	if (!Scene->GetActiveSubmodelInstance() && Scene->GetDrawInsertPreview())
 	{
 		for (const lcPreviewInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 			PreviewPieceInfoTransform.PieceData->AddRenderMeshes(Scene, PreviewPieceInfoTransform.Transform, PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
@@ -1663,7 +1663,8 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const
 {
-	const bool Editing = ParentActive || Scene->IsModelEditing(this);
+	const bool Editing = ParentActive || (RenderMeshState != lcRenderMeshState::Preview && Scene->IsModelInstanceOnEditingPath());
+	const lcStep Step = Editing ? mCurrentStep : LC_STEP_MAX;
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
@@ -1671,14 +1672,14 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 		if (Visible)
 		{
-			if (Piece->IsFocused())
+			if (ParentActive && Piece->IsFocused())
 				UpdateTrainTrackConnections(Piece.get(), false);
 
-			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, DefaultColorIndex, RenderMeshState, ParentActive);
+			Piece->AddSubModelRenderMeshes(Scene, WorldMatrix, Step, DefaultColorIndex, RenderMeshState, ParentActive);
 		}
 	}
 
-	if (Scene->GetDrawInsertPreview())
+	if (ParentActive && Scene->GetDrawInsertPreview())
 	{
 		for (const lcPreviewInsertPieceInfo& PreviewPieceInfoTransform : mPreviewInsertPieceInfo)
 			PreviewPieceInfoTransform.PieceData->AddRenderMeshes(Scene, lcMul(PreviewPieceInfoTransform.Transform, WorldMatrix), PreviewPieceInfoTransform.ColorIndex, lcRenderMeshState::Preview, false);
@@ -2126,6 +2127,9 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
+
+	if (ObjectBoxTest.PiecesOnly)
+		return;
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera.get() != ObjectBoxTest.ViewCamera && Camera->IsVisible())

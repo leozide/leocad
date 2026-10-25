@@ -22,6 +22,7 @@ void lcScene::Begin(const lcMatrix44& ViewMatrix)
 	mViewMatrix = ViewMatrix;
 	mActiveSubmodelInstance = nullptr;
 	mModelEditingPath.clear();
+	mModelInstancePath.clear();
 	mRenderMeshes.clear();
 	mOpaqueMeshes.clear();
 	mTranslucentMeshes.clear();

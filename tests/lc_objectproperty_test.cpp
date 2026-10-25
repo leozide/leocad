@@ -27,3 +27,26 @@ void lcTests::LastKeyFrameTracksTimeEdits()
 	Position.RemoveAllKeys();
 	QCOMPARE(Position.GetLastKeyFrame(), lcStep(0));
 }
+
+void lcTests::PropertyEvaluationDoesNotChangeCurrentValue()
+{
+	lcObjectProperty<float> Position(5.0f);
+	QCOMPARE(Position.GetValue(LC_STEP_MAX), 5.0f);
+
+	QVERIFY(Position.ChangeKey(10.0f, 2, true));
+	QVERIFY(Position.ChangeKey(30.0f, 4, true));
+	Position.Update(2);
+
+	const lcObjectProperty<float> Before = Position;
+	QCOMPARE(Position.GetValue(1), 10.0f);
+	QCOMPARE(Position.GetValue(3), 10.0f);
+	QCOMPARE(Position.GetValue(4), 30.0f);
+	QCOMPARE(Position.GetValue(LC_STEP_MAX), 30.0f);
+	QVERIFY(Position == Before);
+	QCOMPARE(static_cast<const float&>(Position), 10.0f);
+
+	Position.Update(4);
+	QCOMPARE(static_cast<const float&>(Position), 30.0f);
+	QCOMPARE(Position.GetValue(2), 10.0f);
+	QCOMPARE(static_cast<const float&>(Position), 30.0f);
+}

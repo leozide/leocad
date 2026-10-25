@@ -3,6 +3,7 @@
 #include "lc_math.h"
 
 #define LC_OBJECT_PROPERTY(T) \
+	template const T& lcObjectProperty<T>::GetValue(lcStep Step) const; \
 	template void lcObjectProperty<T>::Update(lcStep Step); \
 	template bool lcObjectProperty<T>::ChangeKey(const T& Value, lcStep Step, bool AddKey); \
 	template void lcObjectProperty<T>::InsertTime(lcStep Start, lcStep Time); \
@@ -75,10 +76,10 @@ void lcObjectPropertyLoadValue(QTextStream& Stream, lcVector2i& Value)
 }
 
 template<typename T>
-void lcObjectProperty<T>::Update(lcStep Step)
+const T& lcObjectProperty<T>::GetValue(lcStep Step) const
 {
 	if (mKeys.empty())
-		return;
+		return mValue;
 
 	const lcObjectPropertyKey<T>* PreviousKey = &mKeys[0];
 
@@ -90,7 +91,14 @@ void lcObjectProperty<T>::Update(lcStep Step)
 		PreviousKey = &Key;
 	}
 
-	mValue = PreviousKey->Value;
+	return PreviousKey->Value;
+}
+
+template<typename T>
+void lcObjectProperty<T>::Update(lcStep Step)
+{
+	if (!mKeys.empty())
+		mValue = GetValue(Step);
 }
 
 template<typename T>

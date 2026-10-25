@@ -9,6 +9,7 @@ class lcTests : public QObject
 private slots:
 	void PropertyKeysAffectEquality();
 	void LastKeyFrameTracksTimeEdits();
+	void PropertyEvaluationDoesNotChangeCurrentValue();
 	void HistoryStoresOnlyChangedObjects();
 	void HistoryCancelsPendingEdit();
 	void HistoryReplaysAndMergesEdits();

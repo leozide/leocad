@@ -9,7 +9,7 @@ class lcSelectDialog : public QDialog
 	Q_OBJECT
 
 public:
-	lcSelectDialog(QWidget* Parent, lcModel* Model);
+	lcSelectDialog(QWidget* Parent, lcModel* Model, bool PiecesOnly);
 	~lcSelectDialog();
 
 	std::vector<lcObject*> mObjects;
@@ -30,6 +30,7 @@ private slots:
 
 private:
 	Ui::lcSelectDialog* ui;
+	bool mPiecesOnly;
 
 	void AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGroup, lcModel* Model);
 };

@@ -35,16 +35,32 @@ class lcScene
 public:
 	lcScene();
 
-	void SetActiveSubmodelInstance(lcPiece* ActiveSubmodelInstance, const lcMatrix44& ActiveSubmodelTransform, const std::vector<lcModel*>& ModelEditingPath)
+	void SetModelEditingPath(const std::vector<lcPiece*>& ModelEditingPath, const lcMatrix44& ActiveSubmodelTransform)
 	{
-		mActiveSubmodelInstance = ActiveSubmodelInstance;
-		mActiveSubmodelTransform = ActiveSubmodelTransform;
 		mModelEditingPath = ModelEditingPath;
+		mActiveSubmodelInstance = ModelEditingPath.empty() ? nullptr : ModelEditingPath.back();
+		mActiveSubmodelTransform = ActiveSubmodelTransform;
 	}
 
-	bool IsModelEditing(const lcModel* Model) const
+	bool IsModelInstanceOnEditingPath() const
 	{
-		return mDrawInterface && mActiveSubmodelInstance && std::find(mModelEditingPath.begin(), mModelEditingPath.end(), Model) != mModelEditingPath.end();
+		return mDrawInterface && !mModelEditingPath.empty() && mModelInstancePath.size() <= mModelEditingPath.size()
+			&& std::equal(mModelInstancePath.begin(), mModelInstancePath.end(), mModelEditingPath.begin());
+	}
+
+	bool IsActiveSubmodelInstance(const lcPiece* Piece) const
+	{
+		return IsModelInstanceOnEditingPath() && mModelInstancePath.size() + 1 == mModelEditingPath.size() && mModelEditingPath.back() == Piece;
+	}
+
+	void PushSubmodelInstance(const lcPiece* Piece)
+	{
+		mModelInstancePath.push_back(Piece);
+	}
+
+	void PopSubmodelInstance()
+	{
+		mModelInstancePath.pop_back();
 	}
 
 	lcPiece* GetActiveSubmodelInstance() const
@@ -171,7 +187,8 @@ protected:
 	lcMatrix44 mViewMatrix;
 	lcMatrix44 mActiveSubmodelTransform;
 	lcPiece* mActiveSubmodelInstance = nullptr;
-	std::vector<lcModel*> mModelEditingPath;
+	std::vector<lcPiece*> mModelEditingPath;
+	std::vector<const lcPiece*> mModelInstancePath;
 	lcShadingMode mShadingMode;
 	bool mDrawInterface = false;
 	lcHighlightRenderMode mHighlightRenderMode;

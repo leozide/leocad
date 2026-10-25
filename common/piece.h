@@ -99,8 +99,8 @@ public:
 	lcPieceHistoryState GetHistoryState() const;
 	void SetHistoryState(const lcPieceHistoryState& State, Project* Project, lcGroup* Group);
 
-	void AddMainModelRenderMeshes(lcScene* Scene, bool Highlight, bool Fade) const;
-	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
+	void AddMainModelRenderMeshes(lcScene* Scene, lcStep Step, bool Highlight, bool Fade) const;
+	void AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMatrix, lcStep Step, int DefaultColorIndex, lcRenderMeshState RenderMeshState, bool ParentActive) const;
 	void SubModelCompareBoundingBox(const lcMatrix44& WorldMatrix, lcVector3& Min, lcVector3& Max) const;
 	void SubModelAddBoundingBoxPoints(const lcMatrix44& WorldMatrix, std::vector<lcVector3>& Points, lcGeometryBoundsMode Mode) const;
 
@@ -168,6 +168,7 @@ public:
 	bool SetPieceId(lcPieceData* PieceData);
 	bool FileLoad(lcFile& file, Project* Project);
 
+	lcMatrix44 GetWorldMatrix(lcStep Step) const;
 	void UpdatePosition(lcStep Step) override;
 	void MoveSelected(lcStep Step, bool AddKey, const lcVector3& Distance);
 	void Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix, const lcVector3& Center, const lcMatrix33& RotationFrame);

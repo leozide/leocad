@@ -1,6 +1,6 @@
 # LeoCAD tests
 
-All tests run in one Qt Test executable, `leocad_tests`. The current tests cover
+Core tests run in one Qt Test executable, `leocad_tests`. These tests cover
 object history, property-key comparisons, and the final animation key after
 step insertion, removal, and key deletion, including 8,000 deterministic
 randomized undo/redo and merge transitions.
@@ -73,3 +73,27 @@ qmake ..\..\tests\tests.pro -spec win32-msvc CONFIG+=release CONFIG-=debug CONFI
 nmake /NOLOGO
 nmake /NOLOGO check "TESTARGS=-o test-results.xml,junitxml -o -,txt"
 ```
+
+## Model instance integration test
+
+`model_instances.pro` builds a separate Qt Test executable using the application
+sources and resources, with its own entry point. It creates temporary models and
+an in-memory parts library; it requires no installed LDraw library, network
+access, or OpenGL rendering. It checks repeated and nested instances, step
+visibility, animated transforms, highlighting, clicks, box selection, shared
+edits, undo/redo, and tab switching. Camera and light checks cover exclusion
+from in-place picking, box selection, and the Select Objects dialog, while
+preserving normal selection in a model tab. Every scene build checks that rendering
+leaves editing state and cached matrices unchanged, including when caches hold
+a different step from the one being rendered.
+
+```sh
+mkdir -p build/model-instance-tests
+cd build/model-instance-tests
+qmake ../../tests/model_instances.pro
+make -j
+QT_QPA_PLATFORM=offscreen make check
+```
+
+Use the make tool and executable location provided by the selected Qt kit.
+The existing CI job runs the core target; this integration target is separate.

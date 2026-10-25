@@ -340,6 +340,22 @@ const lcCommand gCommands[] =
 		"",
 		"Ctrl+I"
 	},
+	// LC_EDIT_SELECT_ADJACENT
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectAdjacent"),
+		QT_TRANSLATE_NOOP("Menu", "Select A&djacent Pieces"),
+		QT_TRANSLATE_NOOP("Status", "Add the pieces connected directly to the selected pieces to the selection"),
+		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Select Adjacent Pieces</b></p><p>Add every visible piece that is connected directly to a selected piece, by a stud, anti stud, hole, axle or bar. Repeat to grow the selection one piece further each time. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.</p>"),
+		""
+	},
+	// LC_EDIT_SELECT_CONNECTED
+	{
+		QT_TRANSLATE_NOOP("Action", "Edit.SelectConnected"),
+		QT_TRANSLATE_NOOP("Menu", "Select &Connected Pieces"),
+		QT_TRANSLATE_NOOP("Status", "Add all pieces connected to the selected pieces to the selection"),
+		QT_TRANSLATE_NOOP("WhatsThis", "<p><b>Select Connected Pieces</b></p><p>Add every visible piece that is connected to a selected piece, directly or through other pieces, by a stud, anti stud, hole, axle or bar. Use it to pick up a whole assembly from one of its pieces. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.</p>"),
+		""
+	},
 	// LC_EDIT_SELECT_BY_NAME
 	{
 		QT_TRANSLATE_NOOP("Action", "Edit.SelectByName"),

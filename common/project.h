@@ -4,6 +4,8 @@
 #include "lc_assettypes.h"
 #include "lc_result.h"
 
+enum class lcModelSaveMode;
+
 #define LC_HTML_SINGLEPAGE    0x01
 #define LC_HTML_INDEX         0x02
 #define LC_HTML_LISTEND       0x08
@@ -148,8 +150,9 @@ public:
 	std::vector<lcPieceDataRef> GetRequiredPieceData() const;
 	std::vector<lcPiece*> GetRequiredSynthPieces() const;
 	lcResult<void> EnsureAssetsReady() const;
-	lcResult<void> ExportCurrentStep(const QString& FileName);
-	lcResult<QByteArray> SerializeModel(const lcModel* Model, bool SelectedOnly, lcStep LastStep) const;
+	lcResult<void> ExportMainModel(const QString& FileName);
+	QImage GetMainModelImage(int Width, int Height);
+	lcResult<QByteArray> SerializeModel(const lcModel* Model, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode) const;
 	// Caller owns the returned model; imported dependencies remain in this project.
 	lcResult<lcModel*> ImportClipboard(const QByteArray& FileData);
 	lcResult<void> ExportModel(const QString& FileName, lcModel* Model) const;
@@ -187,8 +190,8 @@ private:
 		bool ExplicitModel = false;
 		bool DuplicateModel = false;
 	};
-	static QByteArray SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep);
-	static QByteArray SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep);
+	static QByteArray SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode);
+	static QByteArray SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode);
 	static bool WriteRaw(QTextStream& Stream, const QByteArray& Bytes);
 	static bool SameEmbeddedData(const lcEmbeddedData& First, const lcEmbeddedData& Second);
 	static QString NormalizeEmbeddedDataName(const QString& FileName);

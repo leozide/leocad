@@ -5886,6 +5886,56 @@ File format is not recognized.</source>
         <source>Display program version number and system information</source>
         <translation>显示程序版本号和系统信息</translation>
     </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="138" />
+        <source>Render the main model using Blender</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="147" />
+        <source>Open the main model in Blender</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="74" />
+        <source>Export the main model in 3D Studio 3DS format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="82" />
+        <source>Export the main model in COLLADA DAE format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="90" />
+        <source>Export HTML building instructions for the chosen models</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="98" />
+        <source>Export the main model parts list in BrickLink XML format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="106" />
+        <source>Export the main model parts list in CSV format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="114" />
+        <source>Export the main model in POV-Ray format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="122" />
+        <source>Export the main model in Wavefront OBJ format</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="130" />
+        <source>Render the main model using POV-Ray</source>
+        <translation type="unfinished" />
+    </message>
 </context>
 <context>
     <name>ViewName</name>
@@ -15653,6 +15703,41 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../qt/lc_renderdialog.cpp" line="827"/>
         <source>Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)</source>
         <translation>支持的图像文件 (*.bmp *.png *.jpg);;BMP 文件 (*.bmp);;PNG 文件 (*.png);;JPEG 文件 (*.jpg);;所有文件 (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="89" />
+        <source>&lt;p&gt;&lt;b&gt;Blender Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the main model with the Blender LDraw add-on at its last building step. Configure Blender and its add-on through Settings, choose an output image, then select Render.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="101" />
+        <source>Render the main model with Blender.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="111" />
+        <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Export the main model at its last building step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.&lt;/p&gt;&lt;p&gt;This mode does not save a rendered image.&lt;/p&gt;</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="112" />
+        <source>&lt;p&gt;&lt;b&gt;Open in Blender&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Import the main model at its last building step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.&lt;/p&gt;</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="115" />
+        <source>Import the main model and open it in Blender.</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="81" />
+        <source>&lt;p&gt;&lt;b&gt;POV-Ray Image Render&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Render the main model using POV-Ray at its last building step. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.&lt;/p&gt;&lt;p&gt;The preview is scaled to fit the dialog. View Log shows diagnostic output when available.&lt;/p&gt;</source>
+        <translation type="unfinished" />
+    </message>
+    <message>
+        <location filename="../qt/lc_renderdialog.cpp" line="82" />
+        <source>Render the main model with POV-Ray.</source>
+        <translation type="unfinished" />
     </message>
 </context>
 <context>

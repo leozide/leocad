@@ -591,7 +591,7 @@ void lcModel::UpdatePieceData(std::vector<lcModel*>& UpdatedModels)
 	mPieceData->SetBoundingBox(Min, Max);
 }
 
-void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const
+void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode) const
 {
 	const QLatin1String LineEnding("\r\n");
 
@@ -612,6 +612,9 @@ void lcModel::SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep)
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
 		if (SelectedOnly && !Piece->IsSelected())
+			continue;
+
+		if (SaveMode == lcModelSaveMode::CompletedModel && !Piece->IsVisibleInSubModel())
 			continue;
 
 		while (Piece->GetFileLine() > CurrentLine && CurrentLine < mFileLines.size())
@@ -1461,7 +1464,7 @@ lcResult<void> lcModel::Copy()
 {
 	if (mProject)
 	{
-		const lcResult<QByteArray> File = mProject->SerializeModel(this, true, 0);
+		const lcResult<QByteArray> File = mProject->SerializeModel(this, true, 0, lcModelSaveMode::Document);
 
 		if (!File)
 			return lcUnexpected(File.error());
@@ -1472,7 +1475,7 @@ lcResult<void> lcModel::Copy()
 	{
 		QByteArray File;
 		QTextStream Stream(&File, QIODevice::WriteOnly);
-		SaveLDraw(Stream, true, 0);
+		SaveLDraw(Stream, true, 0, lcModelSaveMode::Document);
 		gApplication->ExportClipboard(File);
 	}
 

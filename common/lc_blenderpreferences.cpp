@@ -3091,7 +3091,9 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 
 	const bool CropImage = mCheckBoxList[Crop_Image]->isChecked();
 
-	lcModel* Model = lcGetActiveProject()->GetActiveModel();
+	Project* Project = lcGetActiveProject();
+	lcModel* Model = Project->GetMainModel();
+
 	if (Model)
 	{
 		struct NativeImage
@@ -3103,7 +3105,7 @@ void lcBlenderPreferences::SetModelSize(bool Update)
 		std::vector<NativeImage> Images;
 		Images.push_back(NativeImage());
 		NativeImage& Image = Images.back();
-		Image.RenderedImage = Model->GetStepImage(false, ImageWidth, ImageHeight, Model->GetCurrentStep());
+		Image.RenderedImage = Project->GetMainModelImage(ImageWidth, ImageHeight);
 
 		if (Image.RenderedImage.isNull())
 			return;

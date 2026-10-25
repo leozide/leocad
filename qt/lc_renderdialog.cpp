@@ -78,15 +78,15 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 	{
 		setWindowTitle(tr("POV-Ray Image Render"));
 
-		setWhatsThis(tr("<p><b>POV-Ray Image Render</b></p><p>Render the current model step using POV-Ray. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
-		mRenderButton->setToolTip(tr("Render the current model step with POV-Ray."));
+		setWhatsThis(tr("<p><b>POV-Ray Image Render</b></p><p>Render the main model using POV-Ray at its last building step. Choose an output image, then use Settings to set its dimensions and quality. Select Render to start.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
+		mRenderButton->setToolTip(tr("Render the main model with POV-Ray."));
 		mSettingsButton->setToolTip(tr("Set the POV-Ray image dimensions and render quality."));
 		mSettingsButton->setWhatsThis(tr("<p><b>POV-Ray Settings</b></p><p>Choose the image width and height in pixels and the rendering quality. Higher resolution and quality can increase rendering time.</p>"));
 	}
 	else
 	{
 		setWindowTitle(mDialogMode == lcRenderDialogMode::OpenInBlender ? tr("Blender LDraw Import") : tr("Blender Image Render"));
-		setWhatsThis(tr("<p><b>Blender Image Render</b></p><p>Render the current model step with the Blender LDraw add-on. Configure Blender and its add-on through Settings, choose an output image, then select Render.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
+		setWhatsThis(tr("<p><b>Blender Image Render</b></p><p>Render the main model with the Blender LDraw add-on at its last building step. Configure Blender and its add-on through Settings, choose an output image, then select Render.</p><p>The preview is scaled to fit the dialog. View Log shows diagnostic output when available.</p>"));
 		mSettingsButton->setWhatsThis(tr("<p><b>Blender Settings</b></p><p>Configure the Blender executable, LDraw import modules, library paths, and render settings. Blender and an import module must be configured before rendering or opening the model.</p>"));
 
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE).isEmpty();
@@ -98,7 +98,7 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 			lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 		}
 
-		mRenderButton->setToolTip(BlenderConfigured ? tr("Render the current model step with Blender.") : tr("Blender not configured. Use Settings to configure."));
+		mRenderButton->setToolTip(BlenderConfigured ? tr("Render the main model with Blender.") : tr("Blender not configured. Use Settings to configure."));
 		mRenderButton->setEnabled(BlenderConfigured);
 
 		mSettingsButton->setToolTip(tr("Configure Blender, its add-on, and render settings."));
@@ -108,11 +108,11 @@ lcRenderDialog::lcRenderDialog(QWidget* Parent, lcRenderDialogMode RenderDialogM
 			mSettingsButton->setToolTip(tr("Configure Blender and its LDraw import settings."));
 
 			mRenderButton->setText(tr("Open in Blender"));
-			setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Export the current model step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.</p><p>This mode does not save a rendered image.</p>"));
-			mRenderButton->setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Import the current model step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.</p>"));
+			setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Export the main model at its last building step and open it in Blender for editing. Use Settings to configure Blender and its LDraw import add-on, then select Open in Blender.</p><p>This mode does not save a rendered image.</p>"));
+			mRenderButton->setWhatsThis(tr("<p><b>Open in Blender</b></p><p>Import the main model at its last building step into Blender for editing. Configure Blender and its LDraw import add-on through Settings if this action is unavailable.</p>"));
 
 			if (BlenderConfigured)
-				mRenderButton->setToolTip(tr("Import the current model step and open it in Blender."));
+				mRenderButton->setToolTip(tr("Import the main model and open it in Blender."));
 
 			ui->outputLabel->hide();
 			ui->OutputEdit->hide();
@@ -382,10 +382,13 @@ void lcRenderDialog::RenderBlender()
 	mDataPath = DataPathList.first();
 	const QString DefaultBlendFile = QString("%1/blender/config/%2").arg(mDataPath, LC_BLENDER_ADDON_BLEND_FILE);
 
-	lcModel* Model = lcGetActiveProject()->GetActiveModel();
-	const QString ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Step_%2.ldr").arg(QFileInfo(Model->GetProperties().mFileName).baseName()).arg(Model->GetCurrentStep())).absoluteFilePath();
+	lcModel* Model = lcGetActiveProject()->GetMainModel();
+	if (!Model)
+		return;
 
-	lcResult<void> ExportResult = lcGetActiveProject()->ExportCurrentStep(ModelFileName);
+	const QString ModelFileName = QFileInfo(QDir(lcGetProfileString(LC_PROFILE_PROJECTS_PATH)), QString("%1_Blender.ldr").arg(QFileInfo(Model->GetProperties().mFileName).completeBaseName())).absoluteFilePath();
+
+	lcResult<void> ExportResult = lcGetActiveProject()->ExportMainModel(ModelFileName);
 
 	if (!ExportResult)
 	{

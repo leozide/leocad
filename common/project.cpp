@@ -11,7 +11,6 @@
 #include "lc_mainwindow.h"
 #include "lc_view.h"
 #include "lc_library.h"
-#include "lc_texture.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_application.h"
 #include "lc_profile.h"
@@ -21,6 +20,46 @@
 #include "lc_bricklink.h"
 #include "lc_string.h"
 #include "lc_colors.h"
+
+// Evaluate models at their final step for export, then restore their editing steps and active flags.
+class lcScopedModelExportState
+{
+public:
+	explicit lcScopedModelExportState(const std::vector<std::unique_ptr<lcModel>>& Models)
+	{
+		mStates.reserve(Models.size());
+
+		for (const std::unique_ptr<lcModel>& Model : Models)
+		{
+			mStates.push_back({ Model.get(), Model->GetCurrentStep(), Model->IsActive() });
+			Model->SetActive(false);
+		}
+	}
+
+	lcScopedModelExportState(const lcScopedModelExportState&) = delete;
+	lcScopedModelExportState& operator=(const lcScopedModelExportState&) = delete;
+
+	~lcScopedModelExportState()
+	{
+		for (const State& Saved : mStates)
+		{
+			if (Saved.Model->GetCurrentStep() != Saved.Step)
+				Saved.Model->SetTemporaryStep(Saved.Step);
+
+			Saved.Model->SetActive(Saved.Active);
+		}
+	}
+
+private:
+	struct State
+	{
+		lcModel* Model;
+		lcStep Step;
+		bool Active;
+	};
+
+	std::vector<State> mStates;
+};
 
 lcHTMLExportOptions::lcHTMLExportOptions(const Project* Project)
 {
@@ -537,7 +576,7 @@ void Project::ShowModelListDialog()
 				QByteArray File;
 
 				QTextStream SaveStream(&File);
-				Source->SaveLDraw(SaveStream, false, 0);
+				Source->SaveLDraw(SaveStream, false, 0, lcModelSaveMode::Document);
 				SaveStream.flush();
 
 				QBuffer Buffer(&File);
@@ -910,24 +949,24 @@ void Project::LoadLDrawDocument(const QByteArray& FileData, const Project* Refer
 
 	for (DocumentBlock& Block : mDocumentBlocks)
 		if (Block.Model)
-			Block.Baseline = SerializeModelText(Block.Model, false, 0);
+			Block.Baseline = SerializeModelText(Block.Model, false, 0, lcModelSaveMode::Document);
 }
 
 
-QByteArray Project::SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep)
+QByteArray Project::SerializeModelText(const lcModel* Model, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode)
 {
 	QByteArray Bytes;
 	QTextStream Stream(&Bytes, QIODevice::WriteOnly);
-	Model->SaveLDraw(Stream, SelectedOnly, LastStep);
+	Model->SaveLDraw(Stream, SelectedOnly, LastStep, SaveMode);
 	Stream.flush();
 
 	return Bytes;
 }
 
-QByteArray Project::SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep)
+QByteArray Project::SerializeStoredModel(const lcModel* Model, const QString& Name, const DocumentBlock* Original, bool NeedsHeader, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode)
 {
-	const QByteArray Current = SerializeModelText(Model, SelectedOnly, LastStep);
-	const bool Preserve = Original && !SelectedOnly && !LastStep && Current == Original->Baseline;
+	const QByteArray Current = SerializeModelText(Model, SelectedOnly, LastStep, SaveMode);
+	const bool Preserve = Original && SaveMode == lcModelSaveMode::Document && !SelectedOnly && !LastStep && Current == Original->Baseline;
 	QByteArray LineEnding("\r\n");
 
 	if (Original && Original->Raw.contains('\n') && !Original->Raw.contains("\r\n"))
@@ -1378,7 +1417,7 @@ bool Project::Save(QTextStream& Stream) const
 			}
 
 			const lcModel* Model = Reordered ? mModels[NextModel++].get() : Block.Model;
-			Append(SerializeStoredModel(Model, Model->GetFileName(), OriginalFor(Model), mModels.size() > 1, false, 0), true);
+			Append(SerializeStoredModel(Model, Model->GetFileName(), OriginalFor(Model), mModels.size() > 1, false, 0, lcModelSaveMode::Document), true);
 			WrittenModels.insert(Model);
 		}
 		else if (Block.Data)
@@ -1395,7 +1434,7 @@ bool Project::Save(QTextStream& Stream) const
 		if (WrittenModels.find(Model.get()) != WrittenModels.end())
 			continue;
 
-		Append(SerializeStoredModel(Model.get(), Model->GetFileName(), OriginalFor(Model.get()), MPD || !mDocumentBlocks.empty(), false, 0), true);
+		Append(SerializeStoredModel(Model.get(), Model->GetFileName(), OriginalFor(Model.get()), MPD || !mDocumentBlocks.empty(), false, 0, lcModelSaveMode::Document), true);
 	}
 
 	for (const std::shared_ptr<const lcEmbeddedData>& Data : mEmbeddedData)
@@ -1441,7 +1480,7 @@ lcResult<void> Project::ValidateMergedTextureBindings(const Project& Source, con
 		if (Model.get() == ClipboardRoot)
 			continue;
 
-		std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0));
+		std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0, lcModelSaveMode::Document));
 
 		if (const lcMesh* Mesh = Model->GetPieceData()->GetMesh())
 			for (const lcMeshLod& Lod : Mesh->mLods)
@@ -1792,26 +1831,8 @@ std::vector<lcModelPartsEntry> Project::GetModelParts()
 
 	mModels[0]->WaitForAssets();
 
-	struct lcScopedModelSteps
-	{
-		std::vector<std::pair<lcModel*, bool>> States;
-
-		~lcScopedModelSteps()
-		{
-			for (const std::pair<lcModel*, bool>& State : States)
-				State.first->SetActive(State.second);
-		}
-	};
-
 	// Export completed geometry without changing which models are being edited.
-	lcScopedModelSteps ModelSteps;
-	ModelSteps.States.reserve(mModels.size());
-
-	for (const std::unique_ptr<lcModel>& Model : mModels)
-	{
-		ModelSteps.States.emplace_back(Model.get(), Model->IsActive());
-		Model->CalculateStep(LC_STEP_MAX);
-	}
+	lcScopedModelExportState ExportState(mModels);
 
 	mModels[0]->GetModelParts(lcMatrix44Identity(), gDefaultColor, ModelParts);
 
@@ -1865,7 +1886,7 @@ lcResult<void> Project::EnsureAssetsReady() const
 	return Model ? Model->EnsureAssetsReady() : lcResult<void>();
 }
 
-lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedOnly, lcStep LastStep) const
+lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode) const
 {
 	struct ExportEntry
 	{
@@ -1900,6 +1921,9 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 			if ((FilterSelection && !Piece->IsSelected()) || (LastStep && Piece->GetStepShow() > LastStep))
 				continue;
 
+			if (SaveMode == lcModelSaveMode::CompletedModel && !Piece->IsVisibleInSubModel())
+				continue;
+
 			const lcPieceData* PieceData = Piece->mPieceData.Get();
 			const lcModel* Child = nullptr;
 
@@ -1926,7 +1950,7 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 		return lcUnexpected(Collected.error());
 
 	// A complete model export can retain the original document layout too.
-	bool WholeProject = !SelectedOnly && !LastStep && Root == GetMainModel() && Models.size() == mModels.size();
+	bool WholeProject = SaveMode == lcModelSaveMode::Document && !SelectedOnly && !LastStep && Root == GetMainModel() && Models.size() == mModels.size();
 
 	for (const ExportEntry& Entry : Models)
 		WholeProject &= Entry.Model->GetProject() == this && NormalizeEmbeddedDataName(Entry.Name) == NormalizeEmbeddedDataName(Entry.Model->GetFileName());
@@ -1957,7 +1981,7 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 			Owners.push_back(Owner);
 
 		std::set<QString>& Required = RequiredNames[Owner];
-		const std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Entry.Model, Entry.SelectedOnly, LastStep));
+		const std::vector<std::string> References = lcMeshLoader::GetTextureReferences(SerializeModelText(Entry.Model, Entry.SelectedOnly, LastStep, SaveMode));
 
 		for (const std::string& Name : References)
 		{
@@ -2011,7 +2035,7 @@ lcResult<QByteArray> Project::SerializeModel(const lcModel* Root, bool SelectedO
 					break;
 				}
 
-		Append(SerializeStoredModel(Entry.Model, Entry.Name, Original, MPD, Entry.SelectedOnly, LastStep));
+		Append(SerializeStoredModel(Entry.Model, Entry.Name, Original, MPD, Entry.SelectedOnly, LastStep, SaveMode));
 	}
 
 	for (const std::shared_ptr<const lcEmbeddedData>& Data : Assets)
@@ -2074,7 +2098,7 @@ lcResult<lcModel*> Project::ImportClipboard(const QByteArray& FileData)
 			if (Model.get() == Root)
 				continue;
 
-			for (const std::string& Name : lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0)))
+			for (const std::string& Name : lcMeshLoader::GetTextureReferences(SerializeModelText(Model.get(), false, 0, lcModelSaveMode::Document)))
 			{
 				const QString Bare = QString::fromLatin1(Name.c_str()) + QLatin1String(".png");
 				Required.insert(NormalizeEmbeddedDataName(Bare));
@@ -2108,10 +2132,18 @@ lcResult<lcModel*> Project::ImportClipboard(const QByteArray& FileData)
 	return Wrapper.release();
 }
 
-lcResult<void> Project::ExportCurrentStep(const QString& FileName)
+lcResult<void> Project::ExportMainModel(const QString& FileName)
 {
-	const lcModel* Model = lcGetActiveModel();
-	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, Model->GetCurrentStep());
+	lcModel* Model = GetMainModel();
+
+	if (!Model)
+		return lcUnexpected(tr("Nothing to export."));
+
+	Model->WaitForAssets();
+
+	lcScopedModelExportState ExportState(mModels);
+
+	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, 0, lcModelSaveMode::CompletedModel);
 
 	if (!Bytes)
 		return lcUnexpected(Bytes.error());
@@ -2122,12 +2154,27 @@ lcResult<void> Project::ExportCurrentStep(const QString& FileName)
 		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, File.errorString()));
 
 	lcSetProfileString(LC_PROFILE_PROJECTS_PATH, QFileInfo(FileName).absolutePath());
+
 	return lcResult<void>();
+}
+
+QImage Project::GetMainModelImage(int Width, int Height)
+{
+	lcModel* Model = GetMainModel();
+
+	if (!Model)
+		return QImage();
+
+	Model->WaitForAssets();
+
+	lcScopedModelExportState ExportState(mModels);
+
+	return Model->GetStepImage(false, Width, Height, Model->GetLastStep());
 }
 
 lcResult<void> Project::ExportModel(const QString& FileName, lcModel* Model) const
 {
-	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, 0);
+	const lcResult<QByteArray> Bytes = SerializeModel(Model, false, 0, lcModelSaveMode::Document);
 
 	if (!Bytes)
 		return lcUnexpected(Bytes.error());

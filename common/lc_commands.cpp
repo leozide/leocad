@@ -71,7 +71,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.3DS"),
 		QT_TRANSLATE_NOOP("Menu", "3D &Studio..."),
-		QT_TRANSLATE_NOOP("Status", "Export the current model in 3D Studio 3DS format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model in 3D Studio 3DS format"),
 		"",
 		""
 	},
@@ -79,7 +79,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.COLLADA"),
 		QT_TRANSLATE_NOOP("Menu", "&COLLADA..."),
-		QT_TRANSLATE_NOOP("Status", "Export the current model in COLLADA DAE format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model in COLLADA DAE format"),
 		"",
 		""
 	},
@@ -87,7 +87,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.HTML"),
 		QT_TRANSLATE_NOOP("Menu", "&HTML..."),
-		QT_TRANSLATE_NOOP("Status", "Create an HTML page for the current model"),
+		QT_TRANSLATE_NOOP("Status", "Export HTML building instructions for the chosen models"),
 		"",
 		""
 	},
@@ -95,7 +95,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.BrickLink"),
 		QT_TRANSLATE_NOOP("Menu", "&BrickLink..."),
-		QT_TRANSLATE_NOOP("Status", "Export a list of pieces used in BrickLink XML format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model parts list in BrickLink XML format"),
 		"",
 		""
 	},
@@ -103,7 +103,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.CSV"),
 		QT_TRANSLATE_NOOP("Menu", "&CSV..."),
-		QT_TRANSLATE_NOOP("Status", "Export a list of pieces used in comma delimited file format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model parts list in CSV format"),
 		"",
 		""
 	},
@@ -111,7 +111,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.POVRay"),
 		QT_TRANSLATE_NOOP("Menu", "&POV-Ray..."),
-		QT_TRANSLATE_NOOP("Status", "Export the current model in POV-Ray format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model in POV-Ray format"),
 		"",
 		""
 	},
@@ -119,7 +119,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Export.Wavefront"),
 		QT_TRANSLATE_NOOP("Menu", "&Wavefront..."),
-		QT_TRANSLATE_NOOP("Status", "Export the current model in Wavefront OBJ format"),
+		QT_TRANSLATE_NOOP("Status", "Export the main model in Wavefront OBJ format"),
 		"",
 		""
 	},
@@ -127,7 +127,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.POVRay"),
 		QT_TRANSLATE_NOOP("Menu", "&POV-Ray Render..."),
-		QT_TRANSLATE_NOOP("Status", "Render the current model using POV-Ray"),
+		QT_TRANSLATE_NOOP("Status", "Render the main model using POV-Ray"),
 		"",
 		""
 	},
@@ -135,7 +135,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.Blender"),
 		QT_TRANSLATE_NOOP("Menu", "&Blender Render..."),
-		QT_TRANSLATE_NOOP("Status", "Render the current model using Blender"),
+		QT_TRANSLATE_NOOP("Status", "Render the main model using Blender"),
 		"",
 		""
 	},
@@ -144,7 +144,7 @@ const lcCommand gCommands[] =
 	{
 		QT_TRANSLATE_NOOP("Action", "File.Render.OpenInBlender"),
 		QT_TRANSLATE_NOOP("Menu", "&Open in Blender..."),
-		QT_TRANSLATE_NOOP("Status", "Open the current model in Blender"),
+		QT_TRANSLATE_NOOP("Status", "Open the main model in Blender"),
 		"",
 		""
 	},

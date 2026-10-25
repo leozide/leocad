@@ -12,6 +12,12 @@ enum class lcGeometryBoundsMode
 	AvailableOnly
 };
 
+enum class lcModelSaveMode
+{
+	Document,
+	CompletedModel
+};
+
 enum class lcImageBackground
 {
 	Default,
@@ -334,7 +340,7 @@ public:
 	void RemoveFocusPieceFromGroup();
 	void ShowEditGroupsDialog();
 
-	void SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep) const;
+	void SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode) const;
 	void LoadLDraw(QIODevice& Device, Project* Project);
 	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);

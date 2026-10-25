@@ -24,6 +24,7 @@
 #include "group.h"
 #include "lc_piecedata.h"
 #include "lc_library.h"
+#include "lc_shadowlibrary.h"
 #include "lc_colors.h"
 #include "lc_previewwidget.h"
 #include "lc_modelhistory.h"
@@ -492,6 +493,8 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_ALL]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_NONE]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_INVERT]);
+	EditMenu->addAction(mActions[LC_EDIT_SELECT_ADJACENT]);
+	EditMenu->addAction(mActions[LC_EDIT_SELECT_CONNECTED]);
 	EditMenu->addAction(mActions[LC_EDIT_SELECT_BY_NAME]);
 	EditMenu->addMenu(mSelectionModeMenu);
 	EditMenu->addSeparator();
@@ -2322,6 +2325,8 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 		mActions[LC_EDIT_REPLACE_NEXT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_REPLACE_ALL]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_SELECT_INVERT]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
+		mActions[LC_EDIT_SELECT_ADJACENT]->setEnabled((Flags & LC_SEL_PIECE) && (Flags & LC_SEL_UNSELECTED) && lcShadowLibrary::IsLoaded());
+		mActions[LC_EDIT_SELECT_CONNECTED]->setEnabled((Flags & LC_SEL_PIECE) && (Flags & LC_SEL_UNSELECTED) && lcShadowLibrary::IsLoaded());
 		mActions[LC_EDIT_SELECT_BY_NAME]->setEnabled((Flags & LC_SEL_NO_PIECES) == 0);
 		mActions[LC_EDIT_SELECT_NONE]->setEnabled(Flags & LC_SEL_SELECTED);
 		mActions[LC_EDIT_SELECT_ALL]->setEnabled(Flags & LC_SEL_UNSELECTED);
@@ -3143,6 +3148,16 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 	case LC_EDIT_SELECT_INVERT:
 		if (ActiveModel)
 			ActiveModel->InvertPieceSelectionAction();
+		break;
+
+	case LC_EDIT_SELECT_ADJACENT:
+		if (ActiveModel)
+			ActiveModel->SelectConnectedPiecesAction(false);
+		break;
+
+	case LC_EDIT_SELECT_CONNECTED:
+		if (ActiveModel)
+			ActiveModel->SelectConnectedPiecesAction(true);
 		break;
 
 	case LC_EDIT_SELECT_BY_NAME:

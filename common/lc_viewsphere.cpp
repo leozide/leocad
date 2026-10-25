@@ -50,7 +50,7 @@ void lcViewSphere::UpdateSettings()
 
 lcMatrix44 lcViewSphere::GetViewMatrix() const
 {
-	lcMatrix44 ViewMatrix = mView->GetCamera()->mWorldView;
+	lcMatrix44 ViewMatrix = mView->GetWorldViewMatrix();
 	ViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 	return ViewMatrix;
 }

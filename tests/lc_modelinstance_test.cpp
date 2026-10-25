@@ -46,6 +46,9 @@ class lcModelInstanceTests : public QObject
 private slots:
 	void RepeatedInstances();
 	void InterfaceTransforms();
+
+private:
+	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
 
 void lcModelInstanceTests::RepeatedInstances()
@@ -425,7 +428,231 @@ void lcModelInstanceTests::RepeatedInstances()
 	Render({ SecondA });
 	QVERIFY(A->GetLights()[0]->IsFocused());
 	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetLights()[0].get()) != Scene.GetInterfaceObjects().end());
+	CameraContexts(Window, View, Main, A, B);
+
 }
+
+void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B)
+{
+	const auto SameMatrix = [](const lcMatrix44& First, const lcMatrix44& Second)
+	{
+		for (int Row = 0; Row < 4; Row++)
+			for (int Column = 0; Column < 4; Column++)
+				if (fabsf(First[Row][Column] - Second[Row][Column]) > 0.001f)
+					return false;
+
+		return true;
+	};
+
+	const auto CheckMenu = [&](lcCamera* Camera)
+	{
+		QVERIFY(QMetaObject::invokeMethod(Window, "CameraMenuAboutToShow", Qt::DirectConnection));
+		QVERIFY(Window->mActions[LC_VIEW_CAMERA_FIRST]->isVisible());
+		QCOMPARE(Window->mActions[LC_VIEW_CAMERA_FIRST]->text(), Camera->GetName());
+	};
+
+	View->SetTopSubmodelActive();
+
+	lcCamera* ParentCamera = Main->GetCameras()[0].get();
+	QVERIFY(ParentCamera->SetName(QStringLiteral("Parent cam\u00e9ra")));
+
+	const lcCameraHistoryState ParentBefore = ParentCamera->GetHistoryState();
+	lcPiece* AInstance = Main->GetPieces()[1].get();
+	lcPiece* BInstance = A->GetPieces()[0].get();
+
+	View->SetCameraIndex(0);
+	QCOMPARE(View->GetCamera(), ParentCamera);
+	CheckMenu(ParentCamera);
+
+	const lcMatrix44 ParentView = View->GetWorldViewMatrix();
+	Main->SetSelectionAndFocusAction({ AInstance }, AInstance, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	QCOMPARE(View->GetActiveModel(), A);
+	QVERIFY(View->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), ParentView));
+
+	lcCamera* ACamera = A->GetCameras()[0].get();
+	CheckMenu(ACamera);
+	View->SetCamera(ACamera->GetName());
+	QCOMPARE(View->GetCamera(), ACamera);
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), lcMul(lcMatrix44AffineInverse(View->GetActiveSubmodelTransform()), ACamera->mWorldView)));
+
+	View->SetCameraProjection(lcCameraProjection::Orthographic);
+	QCOMPARE(ACamera->GetProjection(), lcCameraProjection::Orthographic);
+	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+	A->UndoAction();
+	QCOMPARE(ACamera->GetProjection(), lcCameraProjection::Perspective);
+	QCOMPARE(View->GetCamera(), ACamera);
+
+	const lcCameraHistoryState ABeforeZoom = ACamera->GetHistoryState();
+	View->SetMouseModifiers(Qt::NoModifier);
+	View->OnMouseWheel(1.0f);
+	QVERIFY(!(ACamera->GetHistoryState() == ABeforeZoom));
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == ABeforeZoom);
+	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+
+	const lcMatrix44 AView = View->GetWorldViewMatrix();
+	A->SetSelectionAndFocusAction({ BInstance }, BInstance, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	QCOMPARE(View->GetActiveModel(), B);
+	QVERIFY(View->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), AView));
+
+	AInstance->SetRotation(lcMatrix33RotationZ(LC_PI / 2.0f), 1, true);
+	AInstance->UpdatePosition(1);
+	View->RestoreModelEditingContext();
+
+	lcCamera* BCamera = B->GetCameras()[0].get();
+	BCamera->SetPosition(lcVector3(-300, 200, 200), 1, true);
+	BCamera->SetTargetPosition(lcVector3(-300, 200, 0), 1, true);
+	BCamera->SetPosition(lcVector3(300, 200, 300), 2, true);
+	BCamera->SetTargetPosition(lcVector3(300, 200, 0), 2, true);
+	B->SetTemporaryStep(1);
+	CheckMenu(BCamera);
+	View->SetCameraIndex(0);
+	QCOMPARE(View->GetCamera(), BCamera);
+
+	const lcMatrix44 ExpectedView = lcMul(lcMatrix44AffineInverse(View->GetActiveSubmodelTransform()), BCamera->mWorldView);
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), ExpectedView));
+	View->SetSize(1200, 600);
+
+	const lcVector3 Target = lcMul31(BCamera->mTargetPosition, View->GetActiveSubmodelTransform());
+	const lcVector3 Projected = View->ProjectPoint(Target);
+	QVERIFY(fabsf(Projected.x - 600.0f) < 0.01f);
+	QVERIFY(fabsf(Projected.y - 300.0f) < 0.01f);
+	QVERIFY(lcLength(View->UnprojectPoint(Projected) - Target) < 0.1f);
+
+	// A new root view must copy the world pose, rather than attach a foreign camera.
+	{
+		lcView OtherView(lcViewType::View, Main);
+		QVERIFY(OtherView.GetCamera()->IsSimple());
+		QVERIFY(SameMatrix(OtherView.GetWorldViewMatrix(), View->GetWorldViewMatrix()));
+	}
+
+	B->ShowNextStep();
+	QVERIFY(!SameMatrix(View->GetWorldViewMatrix(), ExpectedView));
+	B->ShowFirstStep();
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), ExpectedView));
+
+	// Copying a camera must use its editing keys even during final-state export.
+	BCamera->UpdatePosition(LC_STEP_MAX);
+	lcCamera Copy(true);
+	View->CopyCameraPosition(&Copy);
+	QVERIFY(SameMatrix(Copy.mWorldView, ExpectedView));
+	BCamera->UpdatePosition(1);
+
+	View->SetSubmodelActive(1);
+	QCOMPARE(View->GetActiveModel(), A);
+	QVERIFY(View->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), ExpectedView));
+	CheckMenu(ACamera);
+	View->SetTopSubmodelActive();
+	QVERIFY(View->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), ExpectedView));
+	CheckMenu(ParentCamera);
+
+	Main->SetSelectionAndFocusAction({ AInstance }, AInstance, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	A->SetSelectionAndFocusAction({ BInstance }, BInstance, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	B->ShowFirstStep();
+	View->SetCameraIndex(0);
+	const lcMatrix44 BeforeDelete = View->GetWorldViewMatrix();
+
+	Window->SetCurrentModelTab(B, false);
+	lcView* BView = Window->GetActiveView();
+	BView->SetCameraIndex(0);
+	const lcMatrix44 BTabView = BView->GetWorldViewMatrix();
+	Window->SetCurrentModelTab(Main, false);
+	QCOMPARE(Window->GetActiveView(), View);
+	QCOMPARE(View->GetCamera(), BCamera);
+
+	B->EraserToolClicked(BCamera);
+	QVERIFY(B->GetCameras().empty());
+	QVERIFY(View->GetCamera()->IsSimple());
+	QVERIFY(BView->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(View->GetWorldViewMatrix(), BeforeDelete));
+	QVERIFY(SameMatrix(BView->GetWorldViewMatrix(), BTabView));
+	B->UndoAction();
+	QCOMPARE(B->GetCameras().size(), size_t(1));
+	View->SetCameraIndex(0);
+	CheckMenu(B->GetCameras()[0].get());
+
+	QTemporaryDir ExportDirectory;
+	QVERIFY(ExportDirectory.isValid());
+
+	const auto CheckLightExport = [&](lcLight* Light, const lcMatrix44& Transform)
+	{
+		const QString FileName = ExportDirectory.filePath("lights.pov");
+		QVERIFY(lcGetActiveProject()->ExportPOVRay(FileName));
+		QFile File(FileName);
+		QVERIFY(File.open(QIODevice::ReadOnly));
+		const QByteArray Contents = File.readAll();
+		const int Start = Contents.indexOf("  WriteLight(");
+		QVERIFY(Start >= 0);
+		const QString LightLine = QString::fromLatin1(Contents.mid(Start, Contents.indexOf('\n', Start) - Start));
+		QRegularExpressionMatchIterator Vectors = QRegularExpression("<([^>]+)>").globalMatch(LightLine);
+		std::vector<lcVector3> Exported;
+
+		while (Vectors.hasNext())
+		{
+			const QStringList Components = Vectors.next().captured(1).split(',');
+			QCOMPARE(Components.size(), 3);
+			Exported.emplace_back(Components[1].toFloat(), Components[0].toFloat(), Components[2].toFloat());
+		}
+
+		QCOMPARE(Exported.size(), size_t(5));
+		const lcVector3 Position = lcMul31(Light->GetPosition(), Transform);
+		const lcVector3 Direction = lcMul30(Light->GetDirection(), Transform);
+		const lcVector3 AreaX = lcMul30(lcVector3(Light->GetWorldMatrix()[0]) * Light->GetAreaSizeX(), Transform);
+		const lcVector3 AreaY = lcMul30(lcVector3(Light->GetWorldMatrix()[1]) * Light->GetAreaSizeY(), Transform);
+		QVERIFY(lcLength(Exported[0] - Position) < 0.01f);
+		QVERIFY(lcLength(Exported[1] - Position - Direction) < 0.01f);
+		QVERIFY(lcLength(Exported[3] - AreaX) < 0.01f);
+		QVERIFY(lcLength(Exported[4] - AreaY) < 0.01f);
+	};
+
+	lcLight* EditedLight = B->GetLights()[0].get();
+	EditedLight->SetRotation(lcMatrix33RotationX(0.5f), 1, false);
+	EditedLight->UpdatePosition(1);
+
+	for (lcLightType Type : { lcLightType::Point, lcLightType::Spot, lcLightType::Directional, lcLightType::Area })
+	{
+		EditedLight->SetLightType(Type);
+		CheckLightExport(EditedLight, View->GetActiveSubmodelTransform());
+	}
+
+	View->SetCameraProjection(lcCameraProjection::Orthographic);
+	const lcMatrix44 SavedView = View->GetWorldViewMatrix();
+	const QByteArray Layout = Window->GetTabLayout();
+	Window->RestoreTabLayout(Layout);
+	lcView* RestoredView = Window->GetActiveView();
+	QCOMPARE(RestoredView->GetActiveModel(), Main);
+	QVERIFY(RestoredView->GetCamera()->IsSimple());
+	QVERIFY(SameMatrix(RestoredView->GetWorldViewMatrix(), SavedView));
+	QCOMPARE(RestoredView->GetCamera()->GetProjection(), lcCameraProjection::Orthographic);
+
+	// Version 1 layouts remain readable when they contain perspective free views.
+	RestoredView->SetCameraProjection(lcCameraProjection::Perspective);
+	QByteArray LegacyLayout = Window->GetTabLayout();
+	LegacyLayout.replace(0, 4, QByteArray::fromHex("00000001"));
+	Window->RestoreTabLayout(LegacyLayout);
+	QVERIFY(SameMatrix(Window->GetActiveView()->GetWorldViewMatrix(), SavedView));
+	QCOMPARE(Window->GetActiveView()->GetCamera()->GetProjection(), lcCameraProjection::Perspective);
+
+	lcView* TabView = Window->GetActiveView();
+	TabView->SetCameraIndex(0);
+	QCOMPARE(TabView->GetCamera(), ParentCamera);
+	const QByteArray NamedLayout = Window->GetTabLayout();
+	Window->RestoreTabLayout(NamedLayout);
+	QCOMPARE(Window->GetActiveView()->GetActiveModel(), Main);
+	QCOMPARE(Window->GetActiveView()->GetCamera(), ParentCamera);
+	QVERIFY(!Window->GetActiveView()->GetCamera()->IsSimple());
+	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+	CheckLightExport(Main->GetLights()[0].get(), lcMatrix44Identity());
+}
+
 
 void lcModelInstanceTests::InterfaceTransforms()
 {

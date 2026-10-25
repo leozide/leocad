@@ -333,27 +333,8 @@ bool lcModel::IncludesModel(const lcModel* Model) const
 void lcModel::DeleteModel()
 {
 	if (gMainWindow)
-	{
-		std::vector<lcView*> Views = lcView::GetModelViews(this);
-
-		// TODO: this is only needed to avoid a dangling pointer during undo/redo if a camera is set to a view but we should find a better solution instead
-		for (lcView* View : Views)
-		{
-			lcCamera* ViewCamera = View->GetCamera();
-
-			if (!ViewCamera->IsSimple())
-			{
-				for (const std::unique_ptr<lcCamera>& Camera : mCameras)
-				{
-					if (Camera.get() == ViewCamera)
-					{
-						View->SetCamera(ViewCamera, true);
-						break;
-					}
-				}
-			}
-		}
-	}
+		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+			RemoveCameraFromViews(Camera.get());
 
 	mPieces.clear();
 	mCameras.clear();
@@ -1724,7 +1705,10 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	if (OutputCamera)
 		View.SetCamera(OutputCamera, true);
 	else if (ActiveView)
+	{
 		View.SetCamera(ActiveView->GetCamera(), true);
+		ActiveView->CopyCameraPosition(View.GetCamera());
+	}
 
 	View.SetOffscreenContext();
 	View.MakeCurrent();
@@ -3939,11 +3923,10 @@ void lcModel::InlineSelectedModels()
 
 void lcModel::RemoveCameraFromViews(lcCamera* Camera)
 {
-	std::vector<lcView*> Views = lcView::GetModelViews(this);
+	const std::vector<lcView*> Views = lcView::GetCameraViews(Camera);
 
 	for (lcView* View : Views)
-		if (Camera == View->GetCamera())
-			View->SetCamera(Camera, true);
+		View->RemoveCamera();
 }
 
 bool lcModel::RemoveSelectedObjects()
@@ -5908,15 +5891,7 @@ void lcModel::EraserToolClicked(lcObject* Object)
 
 	case lcObjectType::Camera:
 		{
-			std::vector<lcView*> Views = lcView::GetModelViews(this);
-
-			for (lcView* View : Views)
-			{
-				lcCamera* Camera = View->GetCamera();
-
-				if (Camera == Object)
-					View->SetCamera(Camera, true);
-			}
+			RemoveCameraFromViews(static_cast<lcCamera*>(Object));
 
 			for (std::vector<std::unique_ptr<lcCamera>>::iterator CameraIt = mCameras.begin(); CameraIt != mCameras.end(); CameraIt++)
 			{
@@ -5995,12 +5970,12 @@ void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 	UpdateAllViews();
 }
 
-void lcModel::UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY)
+void lcModel::UpdateOrbitTool(lcCamera* Camera, const lcMatrix44& ModelToCamera, float MouseX, float MouseY)
 {
 	lcVector3 Center;
 	GetSelectionCenter(Center);
 
-	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, Center, mCurrentStep, gMainWindow->GetAddKeys());
+	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, lcMul31(Center, ModelToCamera), mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;
 	mMouseToolDistance.y = MouseY;
 
@@ -6037,7 +6012,7 @@ void lcModel::ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVec
 	UpdateAllViews();
 }
 
-void lcModel::LookAt(lcCamera* Camera)
+void lcModel::LookAt(lcCamera* Camera, const lcMatrix44& ModelToCamera)
 {
 	lcVector3 Center;
 
@@ -6057,7 +6032,7 @@ void lcModel::LookAt(lcCamera* Camera)
 		BeginEditHistory();
 	}
 
-	Camera->Center(Center, mCurrentStep, gMainWindow->GetAddKeys());
+	Camera->Center(lcMul31(Center, ModelToCamera), mCurrentStep, gMainWindow->GetAddKeys());
 
 	gMainWindow->UpdateSelectedObjects(false);
 	UpdateAllViews();

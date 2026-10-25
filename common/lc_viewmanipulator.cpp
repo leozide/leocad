@@ -296,11 +296,10 @@ void lcViewManipulator::DestroyResources(lcContext* Context)
 
 void lcViewManipulator::DrawSelectMove(lcTrackButton TrackButton, lcTrackTool TrackTool, quint32 TrackToolSection)
 {
-	const lcCamera* Camera = mView->GetCamera();
 	lcContext* Context = mView->mContext;
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
-	Context->SetViewMatrix(Camera->mWorldView);
+	Context->SetViewMatrix(mView->GetWorldViewMatrix());
 	Context->SetProjectionMatrix(mView->GetProjectionMatrix());
 
 	Context->EnableDepthTest(false);
@@ -696,7 +695,7 @@ lcMatrix44 lcViewManipulator::GetRotationDiscWorldMatrix(const lcRotationDiscInf
 	if (!DiscInfo.CameraFacing)
 		return lcMul(lcMatrix44FromAxisAngle(lcVector3(DiscInfo.Rotation[1], DiscInfo.Rotation[2], DiscInfo.Rotation[3]), DiscInfo.Rotation[0] * LC_DTOR), WorldMatrix);
 
-	lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mView->GetWorldViewMatrix());
 	CameraWorldMatrix.SetTranslation(WorldMatrix.GetTranslation());
 	return CameraWorldMatrix;
 }
@@ -728,7 +727,7 @@ float lcViewManipulator::GetRotationDiscStartAngle(const lcRotationDiscInfo& Dis
 void lcViewManipulator::DrawTrackballHover(const lcMatrix44& WorldMatrix, float OverlayScale) const
 {
 	lcContext* Context = mView->mContext;
-	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetWorldViewMatrix());
 	Mat.SetTranslation(WorldMatrix.GetTranslation());
 
 	constexpr int SegmentCount = 32;
@@ -829,7 +828,7 @@ void lcViewManipulator::DrawCameraRotationRing(lcTrackButton TrackButton, lcTrac
 		return;
 
 	lcContext* Context = mView->mContext;
-	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetCamera()->mWorldView);
+	lcMatrix44 Mat = lcMatrix44AffineInverse(mView->GetWorldViewMatrix());
 	Mat.SetTranslation(WorldMatrix.GetTranslation());
 
 	const float HalfWidth = OverlayScale * 0.035f;
@@ -854,12 +853,11 @@ void lcViewManipulator::DrawCameraRotationRing(lcTrackButton TrackButton, lcTrac
 
 void lcViewManipulator::DrawAxisRotationRings(lcTrackButton TrackButton, lcTrackTool TrackTool, bool HasAngle, const lcMatrix44& WorldMatrix, float OverlayScale) const
 {
-	const lcCamera* Camera = mView->GetCamera();
 	lcContext* Context = mView->mContext;
-	lcVector3 ViewDir = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
+	lcVector3 ViewDir = lcNormalize(mView->GetWorldCameraDirection());
 	const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(lcMatrix33(WorldMatrix));
 	ViewDir = lcMul(ViewDir, WorldToLocalMatrix);
-	const lcVector3 FrontVector = lcNormalize(lcMul(lcNormalize(Camera->mTargetPosition - Camera->mPosition), WorldToLocalMatrix));
+	const lcVector3 FrontVector = lcNormalize(lcMul(lcNormalize(mView->GetWorldCameraDirection()), WorldToLocalMatrix));
 
 	Context->SetWorldMatrix(WorldMatrix);
 
@@ -1015,7 +1013,7 @@ void lcViewManipulator::DrawMoveDistance(lcTrackButton TrackButton, lcTrackTool 
 	const lcVector3 LineEnd = EndPosition;
 	const lcVector3 TextPosition = (LineStart + LineEnd) * 0.5f;
 	const lcVector3 Direction = lcNormalize(Distance);
-	const lcVector3 CameraFront = lcNormalize(mView->GetCamera()->mTargetPosition - mView->GetCamera()->mPosition);
+	const lcVector3 CameraFront = lcNormalize(mView->GetWorldCameraDirection());
 	lcVector3 ScreenPerpendicular = lcCross(CameraFront, Direction);
 
 	if (lcIsZero(ScreenPerpendicular))
@@ -1085,13 +1083,12 @@ void lcViewManipulator::DrawMoveDistance(lcTrackButton TrackButton, lcTrackTool 
 
 void lcViewManipulator::DrawRotate(lcTrackButton TrackButton, lcTrackTool TrackTool)
 {
-	const lcCamera* Camera = mView->GetCamera();
 	lcContext* Context = mView->mContext;
 
 	const float OverlayScale = mView->GetOverlayScale();
 
 	Context->SetMaterial(lcMaterialType::UnlitColor);
-	Context->SetViewMatrix(Camera->mWorldView);
+	Context->SetViewMatrix(mView->GetWorldViewMatrix());
 	Context->SetProjectionMatrix(mView->GetProjectionMatrix());
 	Context->SetLineWidth(1.0f);
 
@@ -1497,8 +1494,7 @@ lcTrackTool lcViewManipulator::UpdateRotate()
 
 	// Test the camera-facing ring itself, rather than its bounding sphere, so the
 	// inner gizmo does not accidentally activate this mode.
-	const lcCamera* Camera = mView->GetCamera();
-	const lcVector3 CameraAxis = lcNormalize(Camera->mTargetPosition - Camera->mPosition);
+	const lcVector3 CameraAxis = lcNormalize(mView->GetWorldCameraDirection());
 	const lcVector4 CameraPlane(CameraAxis, -lcDot(CameraAxis, OverlayCenter));
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, StartEnd[0], StartEnd[1], CameraPlane))

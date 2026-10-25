@@ -455,10 +455,10 @@ public:
 	void ColorPickerToolClicked(const lcObject* Object);
 	void UpdateZoomTool(lcCamera* Camera, float Mouse);
 	void UpdatePanTool(lcCamera* Camera, const lcVector3& Distance);
-	void UpdateOrbitTool(lcCamera* Camera, float MouseX, float MouseY);
+	void UpdateOrbitTool(lcCamera* Camera, const lcMatrix44& ModelToCamera, float MouseX, float MouseY);
 	void UpdateRollTool(lcCamera* Camera, float Mouse);
 	void ZoomRegionToolClicked(lcView* View, float AspectRatio, const lcVector3& Position, const lcVector3& TargetPosition, const lcVector3* Corners);
-	void LookAt(lcCamera* Camera);
+	void LookAt(lcCamera* Camera, const lcMatrix44& ModelToCamera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode, bool AdjustFarPlane);
 	void Zoom(lcCamera* Camera, float Amount);

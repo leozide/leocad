@@ -40,12 +40,16 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 	lcView* ActiveView = gMainWindow ? gMainWindow->GetActiveView() : nullptr;
 
-	if (ActiveView)
+	if (ActiveView && ActiveView->GetActiveModel() == mModel && !ActiveView->mActiveSubmodelInstance)
 		SetCamera(ActiveView->mCamera, false);
 	else
 	{
 		mCamera = new lcCamera(true);
-		mCamera->SetViewpoint(lcViewpoint::Home);
+
+		if (ActiveView)
+			ActiveView->CopyCameraPosition(mCamera);
+		else
+			mCamera->SetViewpoint(lcViewpoint::Home);
 	}
 }
 
@@ -75,6 +79,17 @@ std::vector<lcView*> lcView::GetModelViews(const lcModel* Model)
 
 	for (lcView* View : mViews)
 		if (View->GetModel() == Model)
+			Views.push_back(View);
+
+	return Views;
+}
+
+std::vector<lcView*> lcView::GetCameraViews(const lcCamera* Camera)
+{
+	std::vector<lcView*> Views;
+
+	for (lcView* View : mViews)
+		if (View->GetCamera() == Camera)
 			Views.push_back(View);
 
 	return Views;
@@ -172,10 +187,11 @@ void lcView::RestoreModelEditingContext()
 
 void lcView::SetSubmodelActive(size_t Depth)
 {
-	if (Depth > mSubmodelEditingPath.size())
+	if (Depth >= mSubmodelEditingPath.size())
 		return;
 
 	StopTracking(true);
+	RemoveCamera();
 
 	const std::vector<lcModel*> EditingModels = GetModelEditingPath();
 
@@ -214,6 +230,9 @@ void lcView::SetSelectedSubmodelActive()
 	if (!Piece->mPieceData->IsModel())
 		return;
 
+	StopTracking(true);
+	RemoveCamera();
+
 	// Keep ancestor models at their chosen steps so the selected instance stays in place.
 	mSubmodelEditingPath.push_back(Piece);
 	mActiveSubmodelInstance = Piece;
@@ -221,8 +240,6 @@ void lcView::SetSelectedSubmodelActive()
 	ActiveModel = mActiveSubmodelInstance->mPieceData->GetModel();
 	ActiveModel->SetTemporaryStep(ActiveModel->GetLastStep());
 	RestoreModelEditingContext();
-
-	RemoveCamera();
 
 	GetActiveModel()->UpdateInterface();
 }
@@ -243,18 +260,65 @@ void lcView::DestroyResources(lcContext* Context)
 	gGridTexture = nullptr;
 }
 
+lcMatrix44 lcView::GetCameraToWorldMatrix() const
+{
+	if (mActiveSubmodelInstance && !mCamera->IsSimple())
+		return mActiveSubmodelTransform;
+
+	return lcMatrix44Identity();
+}
+
+lcMatrix44 lcView::GetModelToCameraMatrix() const
+{
+	if (mActiveSubmodelInstance && mCamera->IsSimple())
+		return mActiveSubmodelTransform;
+
+	return lcMatrix44Identity();
+}
+
+lcMatrix44 lcView::GetWorldViewMatrix() const
+{
+	if (!mActiveSubmodelInstance || mCamera->IsSimple())
+		return mCamera->mWorldView;
+
+	return lcMul(lcMatrix44AffineInverse(mActiveSubmodelTransform), mCamera->mWorldView);
+}
+
+lcVector3 lcView::GetWorldCameraDirection() const
+{
+	return lcMul30(mCamera->mTargetPosition - mCamera->mPosition, GetCameraToWorldMatrix());
+}
+
+void lcView::CopyCameraPosition(lcCamera* Camera) const
+{
+	const lcMatrix44 CameraToWorld = GetCameraToWorldMatrix();
+	const lcModel* Model = GetActiveModel();
+	const lcStep Step = Model ? Model->GetCurrentStep() : 1;
+	const lcVector3 LocalPosition = mCamera->IsSimple() ? static_cast<const lcVector3&>(mCamera->mPosition) : mCamera->mPosition.GetValue(Step);
+	const lcVector3 LocalTarget = mCamera->IsSimple() ? static_cast<const lcVector3&>(mCamera->mTargetPosition) : mCamera->mTargetPosition.GetValue(Step);
+	const lcVector3 LocalUp = mCamera->IsSimple() ? static_cast<const lcVector3&>(mCamera->mUpVector) : mCamera->mUpVector.GetValue(Step);
+	const lcVector3 Position = lcMul31(LocalPosition, CameraToWorld);
+	const lcVector3 Target = lcMul31(LocalTarget, CameraToWorld);
+	const lcVector3 Up = lcMul30(LocalUp, CameraToWorld);
+
+	Camera->CopyPosition(mCamera);
+	Camera->RemoveKeyFrames();
+	Camera->SetViewpoint(Position, Target, Up);
+}
+
 void lcView::RemoveCamera()
 {
 	if (mCamera && mCamera->IsSimple())
 		return;
 
-	lcCamera* Camera = mCamera;
-	mCamera = new lcCamera(true);
+	lcCamera* Camera = new lcCamera(true);
 
-	if (Camera)
-		mCamera->CopyPosition(Camera);
+	if (mCamera)
+		CopyCameraPosition(Camera);
 	else
-		mCamera->SetViewpoint(lcViewpoint::Home);
+		Camera->SetViewpoint(lcViewpoint::Home);
+
+	mCamera = Camera;
 
 	Redraw();
 }
@@ -262,19 +326,19 @@ void lcView::RemoveCamera()
 lcVector3 lcView::ProjectPoint(const lcVector3& Point) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
-	return lcProjectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	return lcProjectPoint(Point, GetWorldViewMatrix(), GetProjectionMatrix(), Viewport);
 }
 
 lcVector3 lcView::UnprojectPoint(const lcVector3& Point) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
-	return lcUnprojectPoint(Point, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	return lcUnprojectPoint(Point, GetWorldViewMatrix(), GetProjectionMatrix(), Viewport);
 }
 
 void lcView::UnprojectPoints(lcVector3* Points, int NumPoints) const
 {
 	int Viewport[4] = { 0, 0, mWidth, mHeight };
-	lcUnprojectPoints(Points, NumPoints, mCamera->mWorldView, GetProjectionMatrix(), Viewport);
+	lcUnprojectPoints(Points, NumPoints, GetWorldViewMatrix(), GetProjectionMatrix(), Viewport);
 }
 
 lcMatrix44 lcView::GetProjectionMatrix() const
@@ -487,7 +551,7 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 	if (mActiveSubmodelInstance)
 		LocalToWorld = lcMul(LocalToWorld, lcMatrix33(mActiveSubmodelTransform));
 
-	const lcMatrix33 LocalToView = lcMul(LocalToWorld, lcMatrix33(mCamera->mWorldView));
+	const lcMatrix33 LocalToView = lcMul(LocalToWorld, lcMatrix33(GetWorldViewMatrix()));
 
 	// Choose distinct X/Y axes for screen right and up. Page Up/Down keep
 	// their Z direction regardless of the camera, including bottom views.
@@ -653,7 +717,7 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 	if (!ActiveModel->GetFocusPosition(Position))
 		Position = ActiveModel->GetSelectionOrModelCenter();
 
-	lcVector3 FrontVector(mCamera->mTargetPosition - mCamera->mPosition);
+	lcVector3 FrontVector = lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform));
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
@@ -1045,7 +1109,7 @@ void lcView::OnDraw()
 	mScene->SetRequireGeneratedMeshes(mRenderFramebuffer && mViewType != lcViewType::PartsList);
 	mScene->SetLODDistance(Preferences.mMeshLODDistance);
 
-	mScene->Begin(mCamera->mWorldView);
+	mScene->Begin(GetWorldViewMatrix());
 
 	mScene->SetModelEditingPath(mSubmodelEditingPath, mActiveSubmodelTransform);
 	mScene->SetDrawInterface(DrawInterface);
@@ -1467,7 +1531,7 @@ void lcView::DrawAxes() const
 		break;
 	}
 
-	lcMatrix44 WorldViewMatrix = mCamera->mWorldView;
+	lcMatrix44 WorldViewMatrix = GetWorldViewMatrix();
 	WorldViewMatrix.SetTranslation(lcVector3(0, 0, 0));
 
 	mContext->SetLineWidth(1.0f);
@@ -2056,6 +2120,12 @@ void lcView::SetDefaultCamera()
 
 void lcView::SetCamera(lcCamera* Camera, bool ForceCopy)
 {
+	if (Camera == mCamera && ForceCopy && !Camera->IsSimple())
+	{
+		RemoveCamera();
+		return;
+	}
+
 	if (Camera->IsSimple() || ForceCopy)
 	{
 		if (!mCamera || !mCamera->IsSimple())
@@ -2074,7 +2144,7 @@ void lcView::SetCamera(lcCamera* Camera, bool ForceCopy)
 
 void lcView::SetCamera(const QString& CameraName)
 {
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = mModel->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = GetActiveModel()->GetCameras();
 
 	for (size_t CameraIndex = 0; CameraIndex < Cameras.size(); CameraIndex++)
 	{
@@ -2088,7 +2158,7 @@ void lcView::SetCamera(const QString& CameraName)
 
 void lcView::SetCameraIndex(size_t CameraIndex)
 {
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = mModel->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = GetActiveModel()->GetCameras();
 
 	if (CameraIndex >= Cameras.size())
 		return;
@@ -2119,7 +2189,7 @@ void lcView::LookAt()
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
-		ActiveModel->LookAt(mCamera);
+		ActiveModel->LookAt(mCamera, GetModelToCameraMatrix());
 }
 
 void lcView::MoveCamera(const lcVector3& Direction)
@@ -2142,7 +2212,7 @@ void lcView::ZoomExtents(lcGeometryBoundsMode Mode, bool AdjustFarPlane)
 
 	if (ActiveModel)
 	{
-		const lcMatrix44 WorldMatrix = mActiveSubmodelInstance ? mActiveSubmodelTransform : lcMatrix44Identity();
+		const lcMatrix44 WorldMatrix = GetModelToCameraMatrix();
 
 		ActiveModel->ZoomExtents(mCamera, (float)mWidth / (float)mHeight, WorldMatrix, Mode, AdjustFarPlane);
 	}
@@ -2568,9 +2638,9 @@ void lcView::UpdatePan(int x, int y)
 	const lcVector3& CurrentEnd = Points[1];
 	const lcVector3& MouseDownStart = Points[2];
 	const lcVector3& MouseDownEnd = Points[3];
-	lcVector3 Center = ActiveModel->GetSelectionOrModelCenter();
+	lcVector3 Center = lcMul31(ActiveModel->GetSelectionOrModelCenter(), mActiveSubmodelTransform);
 
-	lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
+	lcVector3 PlaneNormal(-GetWorldCameraDirection());
 	lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 	lcVector3 Intersection, MoveStart;
 
@@ -2586,7 +2656,8 @@ void lcView::UpdatePan(int x, int y)
 	mPanX = x;
 	mPanY = y;
 
-	ActiveModel->UpdatePanTool(mCamera, MoveStart - Intersection);
+	const lcVector3 Distance = lcMul30(MoveStart - Intersection, lcMatrix44AffineInverse(GetCameraToWorldMatrix()));
+	ActiveModel->UpdatePanTool(mCamera, Distance);
 }
 
 void lcView::EndPanGesture(bool Accept)
@@ -2660,7 +2731,7 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 					WorldMatrix = lcMul(WorldMatrix, mActiveSubmodelTransform);
 
 				mTrackballCenter = ProjectPoint(WorldMatrix.GetTranslation());
-				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mCamera->mWorldView);
+				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(GetWorldViewMatrix());
 				const lcVector3 CameraRight = lcNormalize(lcMul30(lcVector3(1.0f, 0.0f, 0.0f), CameraWorldMatrix));
 				const lcVector3 RadiusPoint = ProjectPoint(WorldMatrix.GetTranslation() + CameraRight * (2.0f * GetOverlayScale()));
 				mTrackballRadius = lcMax(1.0f, lcLength(RadiusPoint - mTrackballCenter));
@@ -2763,16 +2834,21 @@ void lcView::StopTracking(bool Accept)
 
 			UnprojectPoints(Points, 5);
 
-			lcVector3 Center = ActiveModel->GetSelectionOrModelCenter();
+			lcVector3 Center = lcMul31(ActiveModel->GetSelectionOrModelCenter(), mActiveSubmodelTransform);
 
-			lcVector3 PlaneNormal(mCamera->mPosition - mCamera->mTargetPosition);
+			lcVector3 PlaneNormal(-GetWorldCameraDirection());
 			lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 			lcVector3 Target, Corners[2];
 
 			if (lcLineSegmentPlaneIntersection(&Target, Points[0], Points[1], Plane) && lcLineSegmentPlaneIntersection(&Corners[0], Points[2], Points[3], Plane) && lcLineSegmentPlaneIntersection(&Corners[1], Points[3], Points[4], Plane))
 			{
 				float AspectRatio = (float)mWidth / (float)mHeight;
-				ActiveModel->ZoomRegionToolClicked(this, AspectRatio, Points[0], Target, Corners);
+				const lcMatrix44 WorldToCamera = lcMatrix44AffineInverse(GetCameraToWorldMatrix());
+				const lcVector3 Position = lcMul31(Points[0], WorldToCamera);
+				Target = lcMul31(Target, WorldToCamera);
+				Corners[0] = lcMul31(Corners[0], WorldToCamera);
+				Corners[1] = lcMul31(Corners[1], WorldToCamera);
+				ActiveModel->ZoomRegionToolClicked(this, AspectRatio, Position, Target, Corners);
 			}
 		}
 		break;
@@ -3304,7 +3380,7 @@ void lcView::OnMouseMove()
 			}
 			else
 			{
-				lcVector3 PlaneNormal = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+				lcVector3 PlaneNormal = lcNormalize(GetWorldCameraDirection());
 				lcVector4 Plane(PlaneNormal, -lcDot(PlaneNormal, Center));
 				lcVector3 Intersection;
 
@@ -3370,7 +3446,7 @@ void lcView::OnMouseMove()
 			if (WorldMatrix.Determinant() < 0.0f)
 				DisplayAxis = -DisplayAxis;
 
-			const lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+			const lcVector3 CameraAxis = lcNormalize(GetWorldCameraDirection());
 			const float AxisDirection = lcDot(DisplayAxis, CameraAxis) < 0.0f ? -1.0f : 1.0f;
 			ActiveModel->UpdateRotateTool(Axis, AxisDirection * mCameraRotationAngle * LC_RTOD, mTrackButton != lcTrackButton::Left, true);
 		}
@@ -3385,7 +3461,7 @@ void lcView::OnMouseMove()
 			if (AxisLength > 0.0001f)
 			{
 				const float Angle = atan2f(AxisLength, lcClamp(lcDot(mTrackballVector, CurrentVector), -1.0f, 1.0f));
-				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(mCamera->mWorldView);
+				const lcMatrix44 CameraWorldMatrix = lcMatrix44AffineInverse(GetWorldViewMatrix());
 				lcVector3 RotationAxis = lcNormalize(lcMul30(LocalAxis, CameraWorldMatrix));
 				if (ActiveModel != mModel)
 				{
@@ -3458,7 +3534,7 @@ void lcView::OnMouseMove()
 			mCameraRotationAngle += Angle;
 			mCameraRotationLastMouseAngle = MouseAngle;
 
-			lcVector3 CameraAxis = lcNormalize(mCamera->mTargetPosition - mCamera->mPosition);
+			lcVector3 CameraAxis = lcNormalize(GetWorldCameraDirection());
 			if (ActiveModel != mModel)
 			{
 				const lcMatrix44 ActiveSubmodelInverse = lcMatrix44AffineInverse(mActiveSubmodelTransform);
@@ -3495,15 +3571,15 @@ void lcView::OnMouseMove()
 		break;
 
 	case lcTrackTool::OrbitX:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.0f);
+		ActiveModel->UpdateOrbitTool(mCamera, GetModelToCameraMatrix(), 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.0f);
 		break;
 
 	case lcTrackTool::OrbitY:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.0f, 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
+		ActiveModel->UpdateOrbitTool(mCamera, GetModelToCameraMatrix(), 0.0f, 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
 		break;
 
 	case lcTrackTool::OrbitXY:
-		ActiveModel->UpdateOrbitTool(mCamera, 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
+		ActiveModel->UpdateOrbitTool(mCamera, GetModelToCameraMatrix(), 0.1f * MouseSensitivity * (mMouseX - mMouseDownX), 0.1f * MouseSensitivity * (mMouseY - mMouseDownY));
 		break;
 
 	case lcTrackTool::Roll:
@@ -3543,5 +3619,5 @@ void lcView::OnMouseWheel(float Direction)
 	else if (mMouseModifiers & Qt::ShiftModifier)
 		Scale = 1.0f;
 
-	mModel->Zoom(mCamera, static_cast<int>(Direction * Scale));
+	Zoom(static_cast<int>(Direction * Scale));
 }

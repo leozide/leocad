@@ -102,3 +102,10 @@ The optional interface-drawing test needs a native display and OpenGL context.
 Run the executable with `LEOCAD_TEST_NATIVE_INTERFACE=1` to check camera and all
 four light types under translated and rotated in-place transforms. Without the
 environment variable, this drawing test is skipped.
+
+The camera-context checks also cover active-model camera menus, live camera
+projection and zoom undo ownership, translated/rotated camera projection,
+world-space detachment across edit depths, camera deletion in multiple views,
+and perspective/orthographic tab-layout restoration, including version 1 layouts.
+POV-Ray checks verify light positions, targets, and area axes for all four light
+types under nested instance transforms and for root-model export.

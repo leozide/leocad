@@ -238,9 +238,3 @@ protected:
 
 	Q_DECLARE_TR_FUNCTIONS(Project);
 };
-
-inline lcModel* lcGetActiveModel()
-{
-	const Project* const Project = lcGetActiveProject();
-	return Project ? Project->GetActiveModel() : nullptr;
-}

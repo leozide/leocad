@@ -140,6 +140,7 @@ public:
 		return mViewType;
 	}
 
+	// Named cameras use model coordinates; simple cameras use world coordinates.
 	lcCamera* GetCamera() const
 	{
 		return mCamera;
@@ -218,6 +219,7 @@ public:
 	}
 
 	static std::vector<lcView*> GetModelViews(const lcModel* Model);
+	static std::vector<lcView*> GetCameraViews(const lcCamera* Camera);
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();
 
@@ -276,6 +278,9 @@ public:
 	void SetCamera(lcCamera* Camera, bool ForceCopy);
 	void SetCamera(const QString& CameraName);
 	void SetCameraIndex(size_t CameraIndex);
+	void CopyCameraPosition(lcCamera* Camera) const;
+	lcMatrix44 GetWorldViewMatrix() const;
+	lcVector3 GetWorldCameraDirection() const;
 
 	void SetCameraProjection(lcCameraProjection CameraProjection);
 	void LookAt();
@@ -340,6 +345,8 @@ protected:
 	lcTrackTool GetOverrideTrackTool(Qt::MouseButton Button) const;
 	void StartTracking(lcTrackButton TrackButton);
 	void OnButtonDown(lcTrackButton TrackButton);
+	lcMatrix44 GetCameraToWorldMatrix() const;
+	lcMatrix44 GetModelToCameraMatrix() const;
 	void StartPan(int x, int y);
 	void UpdatePan(int x, int y);
 	lcVector3 GetTrackballPoint(int x, int y) const;
@@ -395,7 +402,7 @@ protected:
 
 	lcModel* mModel = nullptr;
 	lcPiece* mActiveSubmodelInstance = nullptr;
-	lcMatrix44 mActiveSubmodelTransform;
+	lcMatrix44 mActiveSubmodelTransform = lcMatrix44Identity();
 	std::vector<lcPiece*> mSubmodelEditingPath;
 
 	lcCamera* mCamera = nullptr;

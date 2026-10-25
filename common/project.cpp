@@ -3406,7 +3406,9 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	std::vector<std::array<char, LC_MAX_COLOR_NAME + 3>> ColorTable(NumColors);
 
 	const std::vector<std::unique_ptr<lcLight>>& Lights = gMainWindow->GetActiveModel()->GetLights();
-	const lcCamera* Camera = gMainWindow->GetActiveView()->GetCamera();
+	lcCamera WorldCamera(true);
+	gMainWindow->GetActiveView()->CopyCameraPosition(&WorldCamera);
+
 	auto MakeIdentifier = [](const QString& Name, const QString& Fallback)
 	{
 		QString Identifier;
@@ -3424,10 +3426,10 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 		return Identifier.isEmpty() ? Fallback : Identifier.left(48);
 	};
 
-	const QString CameraName = MakeIdentifier(QString(Camera->GetName()), QLatin1String("Camera"));
-	const lcVector3& Position = Camera->mPosition;
-	const lcVector3& Target = Camera->mTargetPosition;
-	const lcVector3& Up = Camera->mUpVector;
+	const QString CameraName = MakeIdentifier(gMainWindow->GetActiveView()->GetCamera()->GetName(), QLatin1String("Camera"));
+	const lcVector3& Position = WorldCamera.mPosition;
+	const lcVector3& Target = WorldCamera.mTargetPosition;
+	const lcVector3& Up = WorldCamera.mUpVector;
 	const lcVector3 BackgroundColor = lcVector3FromColor(lcGetPreferences().mBackgroundSolidColor);
 	const lcPOVRayOptions& POVRayOptions = mModels[0]->GetPOVRayOptions();
 	const QString TopModelName = QLatin1String("LC_") + MakeExportNameFragment(QString(mModels[0]->GetFileName()));
@@ -3526,7 +3528,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			"#ifndef (CameraLocation) #declare CameraLocation = <%g, %g, %g>; #end\n"
 			"#ifndef (CameraTarget) #declare CameraTarget = <%g, %g, %g>; #end\n"
 			"#ifndef (CameraAngle) #declare CameraAngle = %g; #end\n",
-			Up[1], Up[0], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, Camera->m_fovy);
+			Up[1], Up[0], Up[2], Position[1] / 25.0f, Position[0] / 25.0f, Position[2] / 25.0f, Target[1] / 25.0f, Target[0] / 25.0f, Target[2] / 25.0f, WorldCamera.m_fovy);
 	POVFile.WriteLine(Line);
 	snprintf(Line, sizeof(Line),
 			"#ifndef (BackgroundColor) #declare BackgroundColor = <%1g, %1g, %1g>; #end\n"
@@ -3747,11 +3749,13 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 	else
 	{
 		std::set<QString> UsedLightNames;
+		const lcMatrix44 LightToWorld = gMainWindow->GetActiveView()->GetActiveSubmodelTransform();
 
 		for (const std::unique_ptr<lcLight>& Light : Lights)
 		{
-			const lcVector3 LightPosition = Light->GetPosition();
-			const lcVector3 LightTarget = LightPosition + Light->GetDirection();
+			const lcMatrix44 LightWorldMatrix = lcMul(Light->GetWorldMatrix(), LightToWorld);
+			const lcVector3 LightPosition = LightWorldMatrix.GetTranslation();
+			const lcVector3 LightTarget = LightPosition - lcVector3(LightWorldMatrix[2]);
 			const lcVector3 LightColor = Light->GetColor();
 			const QString BaseLightName = MakeIdentifier(QString(Light->GetName()), QLatin1String("Light"));
 			QString LightName = BaseLightName;
@@ -3769,8 +3773,8 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 			SpotRadius = SpotFalloff - Light->GetSpotPenumbraAngle();
 			SpotTightness = Light->GetSpotPOVRayTightness();
 			AreaCircle = (Light->GetAreaShape() == lcLightAreaShape::Disk || Light->GetAreaShape() == lcLightAreaShape::Ellipse) ? 1 : 0;
-			AreaX = lcVector3(Light->GetWorldMatrix()[0]) * Light->GetAreaSizeX();
-			AreaY = lcVector3(Light->GetWorldMatrix()[1]) * Light->GetAreaSizeY();
+			AreaX = lcVector3(LightWorldMatrix[0]) * Light->GetAreaSizeX();
+			AreaY = lcVector3(LightWorldMatrix[1]) * Light->GetAreaSizeY();
 			AreaGrid = lcVector2i(Light->GetAreaPOVRayGridX(), Light->GetAreaPOVRayGridY());
 
 			snprintf(Line, sizeof(Line),
@@ -3784,7 +3788,7 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 					Power,
 					FadeDistance, FadePower,
 					SpotRadius, SpotFalloff, SpotTightness,
-					AreaCircle, AreaX[0], AreaX[1], AreaX[2], AreaY[0], AreaY[1], AreaY[2], AreaGrid.x, AreaGrid.y);
+					AreaCircle, AreaX[1], AreaX[0], AreaX[2], AreaY[1], AreaY[0], AreaY[2], AreaGrid.x, AreaGrid.y);
 			POVFile.WriteLine(Line);
 		}
 	}

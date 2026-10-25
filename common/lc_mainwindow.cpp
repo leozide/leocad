@@ -34,7 +34,7 @@
 #endif
 
 lcMainWindow* gMainWindow;
-#define LC_TAB_LAYOUT_VERSION 0x0001
+constexpr quint32 LC_TAB_LAYOUT_VERSION = 0x0002;
 
 lcMainWindow::lcMainWindow()
 {
@@ -1701,7 +1701,7 @@ QByteArray lcMainWindow::GetTabLayout()
 	QByteArray TabLayoutData;
 	QDataStream DataStream(&TabLayoutData, QIODevice::WriteOnly);
 
-	DataStream << (quint32)LC_TAB_LAYOUT_VERSION;
+	DataStream << LC_TAB_LAYOUT_VERSION;
 	qint32 NumTabs = mModelTabWidget->count();
 	DataStream << NumTabs;
 	DataStream << ((lcModelTabWidget*)mModelTabWidget->currentWidget())->GetModel()->GetProperties().mFileName;
@@ -1723,20 +1723,23 @@ QByteArray lcMainWindow::GetTabLayout()
 
 				const lcCamera* Camera = CurrentView->GetCamera();
 
-				if (Camera->IsSimple())
-				{
-					DataStream << (qint32)0;
-					DataStream << Camera->m_fovy;
-					DataStream << Camera->m_zNear;
-					DataStream << Camera->m_zFar;
-					DataStream << Camera->mPosition;
-					DataStream << Camera->mTargetPosition;
-					DataStream << Camera->mUpVector;
-				}
-				else
+				if (!Camera->IsSimple() && CurrentView->GetActiveModel() == CurrentView->GetModel())
 				{
 					DataStream << (qint32)1;
 					DataStream << Camera->GetName();
+				}
+				else
+				{
+					lcCamera WorldCamera(true);
+					CurrentView->CopyCameraPosition(&WorldCamera);
+
+					DataStream << (qint32)(WorldCamera.GetProjection() == lcCameraProjection::Orthographic ? 2 : 0);
+					DataStream << WorldCamera.m_fovy;
+					DataStream << WorldCamera.m_zNear;
+					DataStream << WorldCamera.m_zFar;
+					DataStream << WorldCamera.mPosition;
+					DataStream << WorldCamera.mTargetPosition;
+					DataStream << WorldCamera.mUpVector;
 				}
 			}
 			else
@@ -1768,7 +1771,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 	quint32 Version;
 	DataStream >> Version;
 
-	if (Version != LC_TAB_LAYOUT_VERSION)
+	if (Version != 0x0001 && Version != LC_TAB_LAYOUT_VERSION)
 		return;
 
 	qint32 NumTabs;
@@ -1815,7 +1818,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 				if (ParentWidget)
 					CurrentView = ((lcViewWidget*)ParentWidget)->GetView();
 
-				if (CameraType == 0)
+				if (CameraType == 0 || CameraType == 2)
 				{
 					float FoV, ZNear, ZFar;
 					lcVector3 Position, TargetPosition, UpVector;
@@ -1830,6 +1833,8 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 					if (CurrentView)
 					{
 						lcCamera* Camera = CurrentView->GetCamera();
+						Camera->SetProjection(CameraType == 2 ? lcCameraProjection::Orthographic : lcCameraProjection::Perspective);
+
 						if (!std::isnan(FoV))
 							Camera->m_fovy = FoV;
 						if (!std::isnan(ZNear))
@@ -1848,7 +1853,7 @@ void lcMainWindow::RestoreTabLayout(const QByteArray& TabLayout)
 				}
 				else
 				{
-					QByteArray CameraName;
+					QString CameraName;
 					DataStream >> CameraName;
 
 					if (CurrentView)
@@ -2531,7 +2536,7 @@ void lcMainWindow::FileMenuAboutToShow()
 
 void lcMainWindow::CameraMenuAboutToShow()
 {
-	const std::vector<std::unique_ptr<lcCamera>>& Cameras = lcGetActiveModel()->GetCameras();
+	const std::vector<std::unique_ptr<lcCamera>>& Cameras = GetActiveModel()->GetCameras();
 	lcView* ActiveView = GetActiveView();
 	const lcCamera* CurrentCamera = ActiveView ? ActiveView->GetCamera() : nullptr;
 	bool CurrentSet = false;
@@ -2603,7 +2608,7 @@ void lcMainWindow::UpdateSelectionMode()
 void lcMainWindow::UpdateModels()
 {
 	const std::vector<std::unique_ptr<lcModel>>& Models = lcGetActiveProject()->GetModels();
-	lcModel* CurrentModel = lcGetActiveModel();
+	lcModel* CurrentModel = GetCurrentTabModel();
 
 	for (size_t ActionIndex = LC_MODEL_FIRST; ActionIndex <= LC_MODEL_LAST; ActionIndex++)
 	{

@@ -31,6 +31,7 @@ enum class lcFindReplaceAction
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
 struct lcFindReplaceParams;
+struct lcConnectionCylinder;
 struct lcModelHistoryEditState;
 struct lcGroupHistoryState;
 struct lcPieceHistoryState;
@@ -415,6 +416,7 @@ public:
 	void FocusOrDeselectObjectAction(lcObject* Object, uint32_t Section, lcSelectionMode SelectionMode);
 	void SelectAllPiecesAction();
 	void InvertPieceSelectionAction();
+	void SelectConnectedPiecesAction(bool AllConnected);
 	void AddToSelectionAction(const std::vector<lcObject*>& Objects);
 	void RemoveFromSelectionAction(const std::vector<lcObject*>& Objects);
 
@@ -514,6 +516,8 @@ protected:
 	void SetSelectionAndFocus(const std::vector<lcObject*>& Objects, lcObject* FocusObject, uint32_t FocusSection, lcSelectionMode SelectionMode);
 	void SelectAllPieces();
 	void InvertPieceSelection();
+	std::vector<lcObject*> FindConnectedPieces(bool AllConnected) const;
+	static void AddPieceShapes(const lcPiece* Piece, const lcMatrix44& Transform, std::vector<std::pair<const std::vector<lcConnectionCylinder>*, lcMatrix44>>& Shapes);
 	void AddToSelection(const std::vector<lcObject*>& Objects);
 	void RemoveFromSelection(const std::vector<lcObject*>& Objects);
 	void BeginEditHistory();

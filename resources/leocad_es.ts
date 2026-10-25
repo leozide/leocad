@@ -478,6 +478,16 @@
         <translation type="unfinished">File.Render.OpenInBlender</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="345"/>
+        <source>Edit.SelectAdjacent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="353"/>
+        <source>Edit.SelectConnected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="737"/>
         <source>Edit.Tool.PointLight</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
@@ -1815,6 +1825,16 @@
         <location filename="../common/lc_commands.cpp" line="338"/>
         <source>Select &amp;Invert</source>
         <translation>&amp;Invertir selección</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="346"/>
+        <source>Select A&amp;djacent Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="354"/>
+        <source>Select &amp;Connected Pieces</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="346"/>
@@ -4816,6 +4836,16 @@ Formato de archivo no reconocido.</translation>
         <translation type="unfinished">Deseleccionar todo</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="347"/>
+        <source>Add the pieces connected directly to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="355"/>
+        <source>Add all pieces connected to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="435"/>
         <source>Toggle movement snapping</source>
         <translatorcomment>AI-generated translation draft; requires human review.</translatorcomment>
@@ -6012,6 +6042,16 @@ Formato de archivo no reconocido.</translation>
         <source>&lt;p&gt;&lt;b&gt;Redo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Reapply an edit that was reversed with Undo. Making a new edit after Undo replaces the redo history with the new sequence of edits.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">&lt;p&gt;&lt;b&gt;Rehacer&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Vuelve a aplicar una edición que se revirtió con Deshacer. Realizar una nueva edición después de Deshacer reemplaza el historial de rehacer con la nueva secuencia de ediciones.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="348"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Adjacent Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected directly to a selected piece, by a stud, anti stud, hole, axle or bar. Repeat to grow the selection one piece further each time. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="356"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Connected Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected to a selected piece, directly or through other pieces, by a stud, anti stud, hole, axle or bar. Use it to pick up a whole assembly from one of its pieces. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="732"/>

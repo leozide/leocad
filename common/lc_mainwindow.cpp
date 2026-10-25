@@ -1625,16 +1625,13 @@ void lcMainWindow::ShowSelectDialog()
 	if (!ActiveModel)
 		return;
 
-	lcView* View = GetActiveView();
-	const bool PiecesOnly = View && View->GetActiveModel() != View->GetModel();
-
-	if (ActiveModel->GetPieces().empty() && (PiecesOnly || (ActiveModel->GetCameras().empty() && ActiveModel->GetLights().empty())))
+	if (ActiveModel->GetPieces().empty() && ActiveModel->GetCameras().empty() && ActiveModel->GetLights().empty())
 	{
 		QMessageBox::information(this, tr("Select Objects"), tr("Nothing to select."));
 		return;
 	}
 
-	lcSelectDialog Dialog(this, ActiveModel, PiecesOnly);
+	lcSelectDialog Dialog(this, ActiveModel);
 
 	if (Dialog.exec() != QDialog::Accepted)
 		return;

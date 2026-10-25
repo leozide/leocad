@@ -1640,16 +1640,20 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 		}
 	}
 
-	if (Scene->GetDrawInterface() && !Scene->GetActiveSubmodelInstance())
+	if (Scene->GetDrawInterface())
 	{
-		if (FocusPiece)
+		const lcModel* InterfaceModel = this;
+
+		if (const lcPiece* ActiveSubmodelInstance = Scene->GetActiveSubmodelInstance())
+			InterfaceModel = ActiveSubmodelInstance->mPieceData->GetModel();
+		else if (FocusPiece)
 			UpdateTrainTrackConnections(FocusPiece, false);
 
-		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
+		for (const std::unique_ptr<lcCamera>& Camera : InterfaceModel->GetCameras())
 			if (Camera.get() != ViewCamera && Camera->IsVisible())
 				Scene->AddInterfaceObject(Camera.get());
 
-		for (const std::unique_ptr<lcLight>& Light : mLights)
+		for (const std::unique_ptr<lcLight>& Light : InterfaceModel->GetLights())
 			if (Light->IsVisible())
 				Scene->AddInterfaceObject(Light.get());
 	}
@@ -2127,9 +2131,6 @@ void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
-
-	if (ObjectBoxTest.PiecesOnly)
-		return;
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 		if (Camera.get() != ObjectBoxTest.ViewCamera && Camera->IsVisible())

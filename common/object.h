@@ -40,7 +40,6 @@ struct lcObjectRayTest
 struct lcObjectBoxTest
 {
 	lcCamera* ViewCamera;
-	bool PiecesOnly;
 	lcVector4 Planes[6];
 	std::vector<lcObject*> Objects;
 };

@@ -1,6 +1,7 @@
 #include "lc_global.h"
 #include "lc_application.h"
 #include "lc_colors.h"
+#include "lc_context.h"
 #include "lc_library.h"
 #include "lc_mainwindow.h"
 #include "lc_model.h"
@@ -29,12 +30,22 @@ public:
 	}
 };
 
+class lcModelInstanceTestContext : public lcContext
+{
+public:
+	const lcMatrix44& GetWorldMatrix() const
+	{
+		return mWorldMatrix;
+	}
+};
+
 class lcModelInstanceTests : public QObject
 {
 	Q_OBJECT
 
 private slots:
 	void RepeatedInstances();
+	void InterfaceTransforms();
 };
 
 void lcModelInstanceTests::RepeatedInstances()
@@ -47,6 +58,12 @@ void lcModelInstanceTests::RepeatedInstances()
 
 	const QByteArray Fixture =
 		"0 FILE main.ldr\n"
+		"0 !LEOCAD CAMERA POSITION -500 0 0\n"
+		"0 !LEOCAD CAMERA TARGET_POSITION -500 0 -100\n"
+		"0 !LEOCAD CAMERA UP_VECTOR 0 1 0\n"
+		"0 !LEOCAD CAMERA NAME Parent camera\n"
+		"0 !LEOCAD LIGHT POSITION -500 -200 0\n"
+		"0 !LEOCAD LIGHT TYPE POINT NAME Parent light\n"
 		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 a.ldr\n"
 		"1 16 1000 0 0 1 0 0 0 1 0 0 0 1 a.ldr\n"
 		"0 FILE a.ldr\n"
@@ -107,6 +124,7 @@ void lcModelInstanceTests::RepeatedInstances()
 	lcPiece* SecondA = Main->GetPieces()[1].get();
 	lcPiece* FirstB = A->GetPieces()[0].get();
 	lcPiece* Leaf = B->GetPieces()[0].get();
+	B->GetLights()[0]->SetSelected(true);
 
 	lcMainWindow* Window = new lcMainWindow();
 	Window->CreateWidgets();
@@ -188,7 +206,7 @@ void lcModelInstanceTests::RepeatedInstances()
 	QVERIFY(HasMesh(1530, 0, lcRenderMeshState::Faded));
 	QVERIFY(HasMesh(-100, 0, lcRenderMeshState::Faded));
 	QVERIFY(!HasMesh(-200, 0, lcRenderMeshState::Faded));
-	QCOMPARE(Scene.GetInterfaceObjects().size(), size_t(1));
+	QCOMPARE(Scene.GetInterfaceObjects().size(), size_t(3));
 	QCOMPARE(Scene.GetInterfaceObjects()[0], static_cast<const lcObject*>(Leaf));
 	QCOMPARE(FirstB->mModelWorld[3].x, 100.0f);
 	QCOMPARE(Leaf->mModelWorld[3].x, 10.0f);
@@ -225,17 +243,42 @@ void lcModelInstanceTests::RepeatedInstances()
 
 	lcCamera* ModelCamera = B->GetCameras()[0].get();
 	lcLight* ModelLight = B->GetLights()[0].get();
-	const std::vector<lcObject*> HiddenInterfaceObjects = { ModelCamera, ModelLight };
+	const std::vector<lcObject*> InterfaceObjects = { ModelCamera, ModelLight };
 
-	for (lcObject* Object : HiddenInterfaceObjects)
+	for (lcObject* Object : InterfaceObjects)
 	{
 		const lcVector3 WorldPosition = lcMul31(Object->GetSectionPosition(0), View->GetActiveSubmodelTransform());
 		const lcVector3 Point = View->ProjectPoint(WorldPosition);
 
 		View->SetMousePosition(qRound(Point.x), qRound(Point.y));
-		QVERIFY(!View->RayTest(false, false).ObjectSection.Object);
-		QVERIFY(View->FindObjectsInBox(Point.x - 12, Point.y - 12, Point.x + 12, Point.y + 12).empty());
+		QCOMPARE(View->RayTest(false, false).ObjectSection.Object, Object);
+		QVERIFY(!View->RayTest(true, false).ObjectSection.Object);
+
+		const std::vector<lcObject*> Objects = View->FindObjectsInBox(Point.x - 12, Point.y - 12, Point.x + 12, Point.y + 12);
+		QVERIFY(std::find(Objects.begin(), Objects.end(), Object) != Objects.end());
+		QCOMPARE(std::count(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), Object), std::ptrdiff_t(1));
 	}
+
+	FirstA->SetRotation(lcMatrix33RotationZ(LC_PI / 2.0f), 1, true);
+	FirstA->UpdatePosition(1);
+	View->RestoreModelEditingContext();
+	Render({ FirstA, FirstB });
+
+	for (lcObject* Object : InterfaceObjects)
+	{
+		const lcVector3 WorldPosition = lcMul31(Object->GetSectionPosition(0), View->GetActiveSubmodelTransform());
+		const lcVector3 Point = View->ProjectPoint(WorldPosition);
+
+		View->SetMousePosition(qRound(Point.x), qRound(Point.y));
+		QCOMPARE(View->RayTest(false, false).ObjectSection.Object, Object);
+
+		const std::vector<lcObject*> Objects = View->FindObjectsInBox(Point.x - 12, Point.y - 12, Point.x + 12, Point.y + 12);
+		QVERIFY(std::find(Objects.begin(), Objects.end(), Object) != Objects.end());
+	}
+
+	FirstA->SetRotation(lcMatrix33Identity(), 1, true);
+	FirstA->UpdatePosition(1);
+	View->RestoreModelEditingContext();
 
 	Window->SetCurrentModelTab(B, false);
 
@@ -243,7 +286,7 @@ void lcModelInstanceTests::RepeatedInstances()
 	ModelView->SetSize(1200, 600);
 	ModelView->SetCamera(&Camera, true);
 
-	for (lcObject* Object : HiddenInterfaceObjects)
+	for (lcObject* Object : InterfaceObjects)
 	{
 		const lcVector3 Point = ModelView->ProjectPoint(Object->GetSectionPosition(0));
 
@@ -258,13 +301,13 @@ void lcModelInstanceTests::RepeatedInstances()
 	ModelLight->SetSelected(true);
 	Window->SetCurrentModelTab(Main, false);
 	QCOMPARE(Window->GetActiveView(), View);
-	QVERIFY(!ModelCamera->IsSelected());
-	QVERIFY(!ModelCamera->IsFocused());
-	QVERIFY(!ModelLight->IsSelected());
+	QVERIFY(ModelCamera->IsSelected());
+	QVERIFY(ModelCamera->IsFocused());
+	QVERIFY(ModelLight->IsSelected());
 
-	const auto DialogContains = [&](bool PiecesOnly, lcObject* Object)
+	const auto DialogContains = [&](lcObject* Object)
 	{
-		lcSelectDialog Dialog(Window, B, PiecesOnly);
+		lcSelectDialog Dialog(Window, B);
 		QTreeWidget* Tree = Dialog.findChild<QTreeWidget*>();
 
 		for (QTreeWidgetItemIterator Item(Tree); *Item; ++Item)
@@ -274,11 +317,22 @@ void lcModelInstanceTests::RepeatedInstances()
 		return false;
 	};
 
-	QVERIFY(!DialogContains(true, ModelCamera));
-	QVERIFY(!DialogContains(true, ModelLight));
-	QVERIFY(DialogContains(true, Leaf));
-	QVERIFY(DialogContains(false, ModelCamera));
-	QVERIFY(DialogContains(false, ModelLight));
+	QVERIFY(DialogContains(ModelCamera));
+	QVERIFY(DialogContains(ModelLight));
+	QVERIFY(DialogContains(Leaf));
+
+	ModelCamera->SetHidden(true);
+	lcLightHistoryState HiddenLight = ModelLight->GetHistoryState();
+	HiddenLight.Hidden = true;
+	ModelLight->SetHistoryState(HiddenLight);
+	Render({ FirstA, FirstB });
+	QCOMPARE(Scene.GetInterfaceObjects().size(), size_t(1));
+	QVERIFY(!DialogContains(ModelCamera));
+	QVERIFY(!DialogContains(ModelLight));
+	ModelCamera->SetHidden(false);
+	HiddenLight.Hidden = false;
+	ModelLight->SetHistoryState(HiddenLight);
+	B->SetSelectionAndFocusAction({ Leaf }, Leaf, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
 	// Edits at the same step also appear immediately in every rendered instance.
 	if (!Window->GetAddKeys())
@@ -348,6 +402,83 @@ void lcModelInstanceTests::RepeatedInstances()
 	QVERIFY(HasMesh(900, 0, lcRenderMeshState::Default));
 	QVERIFY(HasMesh(1130, 0, lcRenderMeshState::Default));
 
+	A->InsertCameraToolClicked(lcVector3(200, 200, 100));
+	Render({ SecondA });
+	QCOMPARE(A->GetCameras().size(), size_t(1));
+	QCOMPARE(A->GetFocusObject(), static_cast<lcObject*>(A->GetCameras()[0].get()));
+	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetCameras()[0].get()) != Scene.GetInterfaceObjects().end());
+	A->UndoAction();
+	QVERIFY(A->GetCameras().empty());
+	A->RedoAction();
+	Render({ SecondA });
+	QVERIFY(A->GetCameras()[0]->IsFocused());
+	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetCameras()[0].get()) != Scene.GetInterfaceObjects().end());
+
+	A->InsertLightToolClicked(lcVector3(200, -200, 100), lcLightType::Point);
+	Render({ SecondA });
+	QCOMPARE(A->GetLights().size(), size_t(1));
+	QVERIFY(A->GetLights()[0]->IsFocused());
+	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetLights()[0].get()) != Scene.GetInterfaceObjects().end());
+	A->UndoAction();
+	QVERIFY(A->GetLights().empty());
+	A->RedoAction();
+	Render({ SecondA });
+	QVERIFY(A->GetLights()[0]->IsFocused());
+	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetLights()[0].get()) != Scene.GetInterfaceObjects().end());
+}
+
+void lcModelInstanceTests::InterfaceTransforms()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test interface drawing.");
+
+	const lcResult<void> Renderer = lcContext::InitializeRenderer(true);
+	QVERIFY(Renderer.has_value());
+
+	lcModelInstanceTestContext Context;
+	Context.SetOffscreenContext();
+	Context.MakeCurrent();
+	Context.SetDefaultState();
+
+	QOpenGLFramebufferObject Framebuffer(64, 64, QOpenGLFramebufferObject::CombinedDepthStencil);
+	QVERIFY(Framebuffer.isValid());
+	QVERIFY(Framebuffer.bind());
+	Context.SetViewport(0, 0, 64, 64);
+
+	lcPiece Instance(nullptr);
+	lcScene Scene;
+	Scene.Begin(lcMatrix44Identity());
+	Scene.SetDrawInterface(true);
+
+	const lcMatrix44 ParentTransform = lcMul(lcMatrix44RotationZ(LC_PI / 2.0f), lcMatrix44Translation(lcVector3(400, -200, 50)));
+	Scene.SetModelEditingPath({ &Instance }, ParentTransform);
+
+	lcCamera Camera(false, lcVector3(20, 30, 40), lcVector3(50, 60, 0));
+	Camera.SetSelected(true);
+	Camera.DrawInterface(&Context, Scene);
+
+	lcMatrix44 CameraMatrix = lcMatrix44AffineInverse(Camera.mWorldView);
+	CameraMatrix.SetTranslation(Camera.GetSectionPosition(LC_CAMERA_SECTION_POSITION));
+	QVERIFY(Context.GetWorldMatrix() == lcMul(CameraMatrix, ParentTransform));
+
+	for (lcLightType Type : { lcLightType::Point, lcLightType::Spot, lcLightType::Directional, lcLightType::Area })
+	{
+		lcLight Light(lcVector3(20, 30, 40), Type);
+		Light.SetSelected(true);
+		Light.DrawInterface(&Context, Scene);
+		QVERIFY(Context.GetWorldMatrix() == lcMul(Light.GetWorldMatrix(), ParentTransform));
+	}
+
+	Scene.SetModelEditingPath({}, lcMatrix44Identity());
+	Camera.DrawInterface(&Context, Scene);
+	QVERIFY(Context.GetWorldMatrix() == CameraMatrix);
+
+	lcLight Light(lcVector3(20, 30, 40), lcLightType::Point);
+	Light.DrawInterface(&Context, Scene);
+	QVERIFY(Context.GetWorldMatrix() == Light.GetWorldMatrix());
+
+	Scene.End();
+	QVERIFY(Framebuffer.release());
 }
 
 int main(int argc, char** argv)

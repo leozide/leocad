@@ -81,9 +81,9 @@ sources and resources, with its own entry point. It creates temporary models and
 an in-memory parts library; it requires no installed LDraw library, network
 access, or OpenGL rendering. It checks repeated and nested instances, step
 visibility, animated transforms, highlighting, clicks, box selection, shared
-edits, undo/redo, and tab switching. Camera and light checks cover exclusion
-from in-place picking, box selection, and the Select Objects dialog, while
-preserving normal selection in a model tab. Every scene build checks that rendering
+edits, undo/redo, and tab switching. Camera and light checks cover visibility,
+in-place picking, box selection, the Select Objects dialog, selection
+preservation, creation, and undo/redo. Every scene build checks that rendering
 leaves editing state and cached matrices unchanged, including when caches hold
 a different step from the one being rendered.
 
@@ -97,3 +97,8 @@ QT_QPA_PLATFORM=offscreen make check
 
 Use the make tool and executable location provided by the selected Qt kit.
 The existing CI job runs the core target; this integration target is separate.
+
+The optional interface-drawing test needs a native display and OpenGL context.
+Run the executable with `LEOCAD_TEST_NATIVE_INTERFACE=1` to check camera and all
+four light types under translated and rotated in-place transforms. Without the
+environment variable, this drawing test is skipped.

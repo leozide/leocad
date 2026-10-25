@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "lc_application.h"
 #include "lc_context.h"
+#include "lc_scene.h"
 
 #define LC_CAMERA_POSITION_EDGE 7.5f
 #define LC_CAMERA_TARGET_EDGE 7.5f
@@ -516,14 +517,13 @@ void lcCamera::CopySettings(const lcCamera* Camera)
 
 void lcCamera::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
-	Q_UNUSED(Scene);
 	Context->SetMaterial(lcMaterialType::UnlitColor);
 
 	lcMatrix44 ViewWorldMatrix = lcMatrix44AffineInverse(mWorldView);
 	ViewWorldMatrix.SetTranslation(lcVector3(0, 0, 0));
 
 	const lcMatrix44 CameraViewMatrix = lcMul(ViewWorldMatrix, lcMatrix44Translation(mPosition));
-	Context->SetWorldMatrix(CameraViewMatrix);
+	Context->SetWorldMatrix(Scene.ApplyActiveSubmodelTransform(CameraViewMatrix));
 
 	float Verts[(12 + 8 + 8 + 3 + 4) * 3];
 	float* CurVert = Verts;

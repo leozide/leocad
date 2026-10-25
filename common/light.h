@@ -340,7 +340,7 @@ protected:
 	void DrawDirectionalLight(lcContext* Context) const;
 	void DrawAreaLight(lcContext* Context) const;
 
-	void SetupLightMatrix(lcContext* Context) const;
+	void SetupLightMatrix(lcContext* Context, const lcScene& Scene) const;
 	void DrawSphere(lcContext* Context, const lcVector3& Center, float Radius) const;
 	void DrawCylinder(lcContext* Context, float Radius, float Height) const;
 	void DrawTarget(lcContext* Context) const;

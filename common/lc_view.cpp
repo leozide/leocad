@@ -168,17 +168,6 @@ void lcView::RestoreModelEditingContext()
 		mActiveSubmodelTransform = lcMul(Piece->mModelWorld, mActiveSubmodelTransform);
 		Piece->mPieceData->GetModel()->SetActive(true);
 	}
-
-	if (!mSubmodelEditingPath.empty())
-	{
-		lcModel* ActiveModel = GetActiveModel();
-
-		for (const std::unique_ptr<lcCamera>& Camera : ActiveModel->GetCameras())
-			Camera->SetSelected(false);
-
-		for (const std::unique_ptr<lcLight>& Light : ActiveModel->GetLights())
-			Light->SetSelected(false);
-	}
 }
 
 void lcView::SetSubmodelActive(size_t Depth)
@@ -727,7 +716,7 @@ lcObjectRayTest lcView::RayTest(bool PiecesOnly, bool IgnoreSelected) const
 
 	lcObjectRayTest ObjectRayTest;
 
-	ObjectRayTest.PiecesOnly = PiecesOnly || mActiveSubmodelInstance != nullptr;
+	ObjectRayTest.PiecesOnly = PiecesOnly;
 	ObjectRayTest.IgnoreSelected = IgnoreSelected;
 	ObjectRayTest.ViewCamera = mCamera;
 	ObjectRayTest.Start = StartEnd[0];
@@ -811,7 +800,6 @@ std::vector<lcObject*> lcView::FindObjectsInBox(float x1, float y1, float x2, fl
 
 	lcObjectBoxTest ObjectBoxTest;
 	ObjectBoxTest.ViewCamera = mCamera;
-	ObjectBoxTest.PiecesOnly = mActiveSubmodelInstance != nullptr;
 	ObjectBoxTest.Planes[0] = lcVector4(PlaneNormals[0], -lcDot(PlaneNormals[0], Corners[0]));
 	ObjectBoxTest.Planes[1] = lcVector4(PlaneNormals[1], -lcDot(PlaneNormals[1], Corners[5]));
 	ObjectBoxTest.Planes[2] = lcVector4(PlaneNormals[2], -lcDot(PlaneNormals[2], Corners[0]));

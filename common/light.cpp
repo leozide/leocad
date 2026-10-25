@@ -6,6 +6,7 @@
 #include "light.h"
 #include "lc_application.h"
 #include "lc_context.h"
+#include "lc_scene.h"
 
 #define LC_LIGHT_SPHERE_RADIUS 5.0f
 #define LC_LIGHT_TARGET_RADIUS 2.5f
@@ -719,8 +720,8 @@ void lcLight::UpdatePosition(lcStep Step)
 
 void lcLight::DrawInterface(lcContext* Context, const lcScene& Scene) const
 {
-	Q_UNUSED(Scene);
 	Context->SetMaterial(lcMaterialType::UnlitColor);
+	SetupLightMatrix(Context, Scene);
 
 	switch (mLightType)
 	{
@@ -747,15 +748,11 @@ void lcLight::DrawInterface(lcContext* Context, const lcScene& Scene) const
 
 void lcLight::DrawPointLight(lcContext* Context) const
 {
-	SetupLightMatrix(Context);
-
 	DrawSphere(Context, lcVector3(0.0f, 0.0f, 0.0f), LC_LIGHT_SPHERE_RADIUS);
 }
 
 void lcLight::DrawSpotLight(lcContext* Context) const
 {
-	SetupLightMatrix(Context);
-
 	constexpr int ConeEdges = 8;
 	float Verts[(ConeEdges + 1) * 3];
 	float* CurVert = Verts;
@@ -796,8 +793,6 @@ void lcLight::DrawSpotLight(lcContext* Context) const
 
 void lcLight::DrawDirectionalLight(lcContext* Context) const
 {
-	SetupLightMatrix(Context);
-
 	DrawCylinder(Context, LC_LIGHT_DIRECTIONAL_RADIUS, LC_LIGHT_DIRECTIONAL_HEIGHT);
 
 	if (IsSelected())
@@ -806,8 +801,6 @@ void lcLight::DrawDirectionalLight(lcContext* Context) const
 
 void lcLight::DrawAreaLight(lcContext* Context) const
 {
-	SetupLightMatrix(Context);
-
 	if (mAreaShape == lcLightAreaShape::Square || mAreaShape == lcLightAreaShape::Rectangle)
 	{
 		float Verts[4 * 3];
@@ -880,9 +873,9 @@ void lcLight::DrawAreaLight(lcContext* Context) const
 		DrawTarget(Context);
 }
 
-void lcLight::SetupLightMatrix(lcContext* Context) const
+void lcLight::SetupLightMatrix(lcContext* Context, const lcScene& Scene) const
 {
-	Context->SetWorldMatrix(mWorldMatrix);
+	Context->SetWorldMatrix(Scene.ApplyActiveSubmodelTransform(mWorldMatrix));
 
 	const lcPreferences& Preferences = lcGetPreferences();
 	const float LineWidth = Preferences.mLineWidth;

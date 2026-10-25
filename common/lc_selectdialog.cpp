@@ -8,8 +8,8 @@
 #include "light.h"
 #include "group.h"
 
-lcSelectDialog::lcSelectDialog(QWidget* Parent, lcModel* Model, bool PiecesOnly)
-	: QDialog(Parent), ui(new Ui::lcSelectDialog), mPiecesOnly(PiecesOnly)
+lcSelectDialog::lcSelectDialog(QWidget* Parent, lcModel* Model)
+	: QDialog(Parent), ui(new Ui::lcSelectDialog)
 {
 	ui->setupUi(this);
 	lcSetupDialogHelp(this, ui->buttonBox);
@@ -200,7 +200,7 @@ void lcSelectDialog::AddChildren(QTreeWidgetItem* ParentItem, lcGroup* ParentGro
 		PieceItem->setCheckState(0, Piece->IsSelected() ? Qt::Checked : Qt::Unchecked);
 	}
 
-	if (!ParentGroup && !mPiecesOnly)
+	if (!ParentGroup)
 	{
 		const std::vector<std::unique_ptr<lcCamera>>& Cameras = Model->GetCameras();
 

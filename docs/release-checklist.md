@@ -72,5 +72,7 @@
    - Follow the [WinGet authoring instructions](https://github.com/microsoft/winget-pkgs/blob/master/doc/Authoring.md), validate the manifest, and submit a pull request.
 
 16. Update Snapcraft on Linux:
+   - Update `snapcraft.yaml` for the release: set `version` to `YY.MM` and pin the `leocad` source archive to the new `vYY.MM` tag instead of `master`.
+   - Verify that `parse-info` matches the AppStream metadata filename installed by `leocad.pro` at that tag.
    - Run `snapcraft --use-lxd`.
    - Upload the resulting snap with `snapcraft upload --release=stable mysnap_latest_amd64.snap`.

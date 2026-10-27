@@ -94,6 +94,8 @@ system($$QMAKE_LRELEASE -silent $$TSFILES)
 
 unix:!macx {
 	TARGET = leocad
+} else:macx:!isEmpty(NO_BUNDLE) {
+	TARGET = leocad
 } else {
 	TARGET = LeoCAD
 }
@@ -109,7 +111,11 @@ MOC_DIR = $$DESTDIR/.moc
 RCC_DIR = $$DESTDIR/.qrc
 UI_DIR = $$DESTDIR/.ui
 
-unix:!macx {
+PREFIX_INSTALL =
+unix:!macx:PREFIX_INSTALL = yes
+macx:!isEmpty(NO_BUNDLE):PREFIX_INSTALL = yes
+
+!isEmpty(PREFIX_INSTALL) {
 	isEmpty(INSTALL_PREFIX):INSTALL_PREFIX = /usr
 	isEmpty(BIN_DIR):BIN_DIR = $$INSTALL_PREFIX/bin
 	isEmpty(DOCS_DIR):DOCS_DIR = $$INSTALL_PREFIX/share/doc/leocad
@@ -146,24 +152,41 @@ unix:!macx {
 	!isEmpty(DISABLE_UPDATE_CHECK) {
 		DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK
 	}
+}
 
+unix {
 	!isEmpty(LDRAW_LIBRARY_PATH) {
 		DEFINES += LC_LDRAW_LIBRARY_PATH=\\\"$$LDRAW_LIBRARY_PATH\\\"
 	}
 }
 
-macx {
+macx:!isEmpty(NO_BUNDLE) {
+	# Build a plain executable installed into a prefix instead of an application bundle.
+	CONFIG -= app_bundle
+}
+
+macx:isEmpty(NO_BUNDLE) {
 	ICON = resources/leocad.icns
 	QMAKE_INFO_PLIST = qt/Info.plist
 
 	document_icon.files += $$_PRO_FILE_PWD_/resources/leocad_document.icns
 	document_icon.path = Contents/Resources
-	library.files += $$_PRO_FILE_PWD_/library.bin
-	library.path = Contents/Resources
-	povray.files += $$_PRO_FILE_PWD_/povray
-	povray.path = Contents/MacOS
+	QMAKE_BUNDLE_DATA += document_icon
 
-	QMAKE_BUNDLE_DATA += document_icon library povray
+	exists($$_PRO_FILE_PWD_/library.bin) {
+		library.files += $$_PRO_FILE_PWD_/library.bin
+		library.path = Contents/Resources
+		QMAKE_BUNDLE_DATA += library
+	}
+
+	exists($$_PRO_FILE_PWD_/povray) {
+		povray.files += $$_PRO_FILE_PWD_/povray
+		povray.path = Contents/MacOS
+		QMAKE_BUNDLE_DATA += povray
+	}
+}
+
+macx {
 	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 

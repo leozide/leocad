@@ -1417,7 +1417,9 @@ bool Project::Save(QTextStream& Stream) const
 			}
 
 			const lcModel* Model = Reordered ? mModels[NextModel++].get() : Block.Model;
-			Append(SerializeStoredModel(Model, Model->GetFileName(), OriginalFor(Model), mModels.size() > 1, false, 0, lcModelSaveMode::Document), true);
+			// Without geometry, an implicit model before !DATA is read as a preamble.
+			const bool NeedsHeader = mModels.size() > 1 || (!mEmbeddedData.empty() && Model->GetPieces().empty() && !Model->HasDirectGeometry());
+			Append(SerializeStoredModel(Model, Model->GetFileName(), OriginalFor(Model), NeedsHeader, false, 0, lcModelSaveMode::Document), true);
 			WrittenModels.insert(Model);
 		}
 		else if (Block.Data)

@@ -44,12 +44,55 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
 
 private:
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+
+	const QByteArray DataBlock = "0 !DATA unused.bin\n0 !: YQ==\n";
+	const QByteArray Fixture =
+		"0 Ordinary model\n"
+		"0 !LEOCAD CAMERA POSITION -500 0 0\n"
+		"0 !LEOCAD CAMERA TARGET_POSITION -500 0 -100\n"
+		"0 !LEOCAD CAMERA UP_VECTOR 0 1 0\n"
+		"0 !LEOCAD CAMERA NAME Saved camera\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 missing.dat\n" + DataBlock;
+	QFile File(Directory.filePath("implicit.ldr"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	QCOMPARE(File.write(Fixture), qint64(Fixture.size()));
+	File.close();
+
+	Project Document(true);
+	QVERIFY(Document.Load(File.fileName(), false));
+	QVERIFY(Document.Save(File.fileName()).has_value());
+	QVERIFY(File.open(QIODevice::ReadOnly));
+	QCOMPARE(File.readAll(), Fixture);
+	File.close();
+
+	lcModel* Model = Document.GetMainModel();
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	QCOMPARE(Model->GetCameras().size(), size_t(1));
+	Model->GetPieces().front()->SetSelected(true);
+	Model->DeleteSelectedObjects();
+	QVERIFY(Model->GetPieces().empty());
+	QVERIFY(Document.Save(File.fileName()).has_value());
+
+	Project Reloaded(true);
+	QVERIFY(Reloaded.Load(File.fileName(), false));
+	QCOMPARE(Reloaded.GetModels().size(), size_t(1));
+	QVERIFY(Reloaded.GetMainModel()->GetPieces().empty());
+	QCOMPARE(Reloaded.GetMainModel()->GetCameras().size(), size_t(1));
+	QCOMPARE(Reloaded.GetEmbeddedData().size(), size_t(1));
+	QCOMPARE(Reloaded.GetEmbeddedData().front()->RawBlock, DataBlock);
+}
 
 void lcModelInstanceTests::RepeatedInstances()
 {

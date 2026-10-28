@@ -17,7 +17,7 @@
 
 static const char* gLanguageLocales[] =
 {
-	"", "cs_CZ", "de_DE", "en_US", "fr_FR", "pt_PT", "es_ES", "zh_CN"
+	"", "cs_CZ", "de_DE", "en_US", "fr_FR", "pt_PT", "es_ES", "ru_RU", "uk_UA", "zh_CN"
 };
 
 lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOptions* Options)
@@ -40,6 +40,8 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->Language->addItem("Fran\u00e7ais");
 	ui->Language->addItem("Portugu\u00eas");
 	ui->Language->addItem("Espa\u00f1ol");
+	ui->Language->addItem("\u0420\u0443\u0441\u0441\u043a\u0438\u0439");
+	ui->Language->addItem("\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430");
 	ui->Language->addItem("\u7b80\u4f53\u4e2d\u6587");
 
 	connect(ui->partsLibraryBrowse, &QPushButton::clicked, this, &lcPreferencesDialog::PartsLibraryBrowseClicked);

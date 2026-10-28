@@ -10132,7 +10132,7 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2434"/>
         <source> M: %1 %2 R: %3 %4 </source>
-        <translation type="unfinished"> M : %1 %2 R : %3  {1 %2 ?} {3 %4 ?}</translation>
+        <translation type="unfinished"> M : %1 %2 R : %3 %4 </translation>
     </message>
     <message>
         <location filename="../common/lc_mainwindow.cpp" line="2716"/>

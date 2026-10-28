@@ -3200,10 +3200,17 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 	const int Color_Scheme = ImportMM ? int(LBL_COLOUR_SCHEME_MM) : int(LBL_COLOUR_SCHEME);
 	BlenderSettings* Settings = ImportMM ? mBlenderSettingsMM : mBlenderSettings;
 
-	if (ComboBox->itemText(Index) == "custom" && mBlenderPaths[PATH_LDCONFIG].value.isEmpty() && lcGetProfileString(LC_PROFILE_COLOR_CONFIG).isEmpty())
+	const QString SelectedScheme = ComboBox->itemData(Index).toString();
+
+	if (SelectedScheme == "custom" && mBlenderPaths[PATH_LDCONFIG].value.isEmpty() && lcGetProfileString(LC_PROFILE_COLOR_CONFIG).isEmpty())
 	{
 		BlenderSettings const* defaultSettings = ImportMM ? mDefaultSettingsMM : mDefaultSettings;
 		Settings[Color_Scheme].value = defaultSettings[Color_Scheme].value;
+		{
+			QSignalBlocker Blocker(ComboBox);
+			ComboBox->setCurrentIndex(ComboBox->findData(Settings[Color_Scheme].value));
+		}
+		emit SettingChangedSig(SettingsModified(false));
 
 		const QString& Title = tr("Set LDraw Color Scheme");
 		const QString& Header = "<b>" + tr ("Color scheme 'custom' cannot be enabled. Custom LDConfig file not found.") + "</b>";
@@ -3212,7 +3219,7 @@ void lcBlenderPreferences::ValidateColourScheme(int Index)
 	}
 	else
 	{
-		bool Change = Settings[Color_Scheme].value != ComboBox->itemText(Index);
+		bool Change = Settings[Color_Scheme].value != SelectedScheme;
 		Change |= SettingsModified(false);
 		emit SettingChangedSig(Change);
 	}

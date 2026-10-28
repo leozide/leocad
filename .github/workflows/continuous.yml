@@ -20,6 +20,10 @@ jobs:
       with:
         version: '5.15.*'
         cache: 'true'
+    - name: Install software OpenGL and virtual display
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb xauth libgl1-mesa-dri libglx-mesa0 mesa-utils
     - name: Get number of CPU cores
       uses: SimenB/github-actions-cpu-cores@v3
       id: cpu-cores
@@ -38,12 +42,31 @@ jobs:
     - name: Run tests
       working-directory: build/tests
       run: make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
+    - name: Generate integration test Makefile
+      run: |
+        mkdir -p build/model-instance-tests
+        cd build/model-instance-tests
+        qmake ../../tests/model_instances.pro CONFIG+=release CONFIG-=debug
+    - name: Build integration tests
+      working-directory: build/model-instance-tests
+      run: make -j ${{ steps.cpu-cores.outputs.count }}
+    - name: Run integration tests with OpenGL
+      working-directory: build/model-instance-tests
+      env:
+        QT_QPA_PLATFORM: xcb
+        LIBGL_ALWAYS_SOFTWARE: 'true'
+        LEOCAD_TEST_NATIVE_INTERFACE: '1'
+      run: |
+        xvfb-run -a -s "-screen 0 1280x1024x24" glxinfo -B
+        xvfb-run -a -s "-screen 0 1280x1024x24" make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
-        path: build/tests/test-results.xml
+        path: |
+          build/tests/test-results.xml
+          build/model-instance-tests/**/test-results.xml
         if-no-files-found: ignore
 
   build-macos:
@@ -98,12 +121,27 @@ jobs:
     - name: Run tests
       working-directory: build/tests
       run: make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
+    - name: Generate integration test Makefile
+      run: |
+        mkdir -p build/model-instance-tests
+        cd build/model-instance-tests
+        qmake -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib ../../tests/model_instances.pro CONFIG+=release CONFIG-=debug
+    - name: Build integration tests
+      working-directory: build/model-instance-tests
+      run: make -j ${{ steps.cpu-cores.outputs.count }}
+    - name: Run integration tests
+      working-directory: build/model-instance-tests
+      env:
+        QT_QPA_PLATFORM: offscreen
+      run: make check TESTARGS="-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
-        path: build/tests/test-results.xml
+        path: |
+          build/tests/test-results.xml
+          build/model-instance-tests/**/test-results.xml
         if-no-files-found: ignore
 
   build-windows:
@@ -139,10 +177,25 @@ jobs:
     - name: Run tests
       working-directory: build/tests
       run: nmake /NOLOGO check "TESTARGS=-o test-results.xml,junitxml -o -,txt"
+    - name: Generate integration test Makefile
+      run: |
+        mkdir build\model-instance-tests
+        cd build\model-instance-tests
+        qmake ..\..\tests\model_instances.pro -spec win32-msvc CONFIG+=release CONFIG-=debug CONFIG-=debug_and_release
+    - name: Build integration tests
+      working-directory: build/model-instance-tests
+      run: nmake /NOLOGO
+    - name: Run integration tests
+      working-directory: build/model-instance-tests
+      env:
+        QT_QPA_PLATFORM: offscreen
+      run: nmake /NOLOGO check "TESTARGS=-o test-results.xml,junitxml -o -,txt"
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v7
       with:
         name: test-results-${{ runner.os }}
-        path: build/tests/test-results.xml
+        path: |
+          build/tests/test-results.xml
+          build/model-instance-tests/**/test-results.xml
         if-no-files-found: ignore

@@ -96,7 +96,17 @@ QT_QPA_PLATFORM=offscreen make check
 ```
 
 Use the make tool and executable location provided by the selected Qt kit.
-The existing CI job runs the core target; this integration target is separate.
+GitHub CI builds and runs both targets on Linux, macOS, and Windows. Integration
+JUnit reports are included in each platform's test-results artifact. Because
+this target inherits the application's output directory, `make check` runs it
+from `build/release` within the integration build directory, and its report is
+written there.
+
+The Linux job installs Mesa and Xvfb, uses Qt's `xcb` platform with
+`LIBGL_ALWAYS_SOFTWARE=true`, and sets `LEOCAD_TEST_NATIVE_INTERFACE=1` to include
+the OpenGL interface-drawing test. It logs `glxinfo -B` before running the suite
+under `xvfb-run`. macOS and Windows use `QT_QPA_PLATFORM=offscreen` and skip the
+optional native OpenGL test.
 
 The optional interface-drawing test needs a native display and OpenGL context.
 Run the executable with `LEOCAD_TEST_NATIVE_INTERFACE=1` to check camera and all

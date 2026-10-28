@@ -713,6 +713,8 @@ void lcBlenderPreferences::InitPathsAndSettings()
 					LineEdit->setValidator(new QDoubleValidator(0.01,10.0,2));
 				else if (LblIdx == LBL_RENDER_PERCENTAGE || LblIdx == LBL_CAMERA_BORDER_PERCENT)
 					LineEdit->setValidator(new QIntValidator(1,1000));
+				else if (LblIdx == LBL_GAPS_SIZE)
+					LineEdit->setValidator(new QDoubleValidator(0.0,100.0,6));
 				else
 					LineEdit->setValidator(new QDoubleValidator(0.01,100.0,2));
 				SetNumericText(LineEdit, mBlenderSettings[LblIdx].value);
@@ -865,7 +867,9 @@ void lcBlenderPreferences::InitPathsAndSettingsMM()
 					LineEdit->setValidator(new QIntValidator(1,1000));
 				else if (LblIdx == LBL_GAP_SCALE || LblIdx == LBL_MERGE_DISTANCE)
 					LineEdit->setValidator(new QDoubleValidator(0.001,100.0,3));
-				else if (LblIdx == LBL_BEVEL_WEIGHT || LblIdx == LBL_BEVEL_WIDTH_MM)
+				else if (LblIdx == LBL_BEVEL_WEIGHT)
+					LineEdit->setValidator(new QDoubleValidator(0.0,10.0,6));
+				else if (LblIdx == LBL_BEVEL_WIDTH_MM)
 					LineEdit->setValidator(new QDoubleValidator(0.0,10.0,1));
 				else
 					LineEdit->setValidator(new QIntValidator(1, LC_RENDER_IMAGE_MAX_SIZE));
@@ -1762,8 +1766,12 @@ void lcBlenderPreferences::SetNumericText(QLineEdit* Edit, const QString& Value)
 
 	if (qobject_cast<const QIntValidator*>(Validator))
 	{
-		const int Number = Value.toInt(&Ok);
-		Text = Locale.toString(Number);
+		const double Number = Value.toDouble(&Ok);
+
+		if (Ok && std::isfinite(Number) && Number >= std::numeric_limits<int>::min() && Number <= std::numeric_limits<int>::max() && std::trunc(Number) == Number)
+			Text = Locale.toString(static_cast<int>(Number));
+		else
+			Ok = false;
 	}
 	else
 	{

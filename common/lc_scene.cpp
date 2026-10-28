@@ -164,11 +164,23 @@ void lcScene::DrawOpaqueMeshes(lcContext* Context, bool DrawLit, int PrimitiveTy
 		const lcMesh* Mesh = RenderMesh.Mesh;
 		const int LodIndex = RenderMesh.LodIndex;
 		lcRenderMeshState State = RenderMesh.State;
-		const bool HasTriangles = (Mesh->mFlags & (lcMeshFlag::HasDefault | lcMeshFlag::HasSolid | lcMeshFlag::HasTranslucent)) != 0;
 
-		if (mHighlightRenderMode == lcHighlightRenderMode::Outline && HasTriangles &&
+		if (mHighlightRenderMode == lcHighlightRenderMode::Outline &&
 			(State == lcRenderMeshState::Selected || State == lcRenderMeshState::Focused || State == lcRenderMeshState::Highlighted))
-			State = lcRenderMeshState::Default;
+		{
+			const lcMeshLod& Lod = Mesh->mLods[LodIndex];
+
+			for (int SectionIndex = 0; SectionIndex < Lod.NumSections; SectionIndex++)
+			{
+				const lcMeshSection& Section = Lod.Sections[SectionIndex];
+
+				if (Section.DrawCount > 0 && (Section.PrimitiveType & (LC_MESH_TRIANGLES | LC_MESH_TEXTURED_TRIANGLES)))
+				{
+					State = lcRenderMeshState::Default;
+					break;
+				}
+			}
+		}
 
 		if (!DrawFaded && RenderMesh.State == lcRenderMeshState::Faded)
 			continue;

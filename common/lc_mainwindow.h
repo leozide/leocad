@@ -204,6 +204,11 @@ public:
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
 	void SetColorIndex(int ColorIndex);
+	int GetInsertColorIndex() const;
+	void SetLastInsertedColorIndex(int ColorIndex);
+	void SetInsertColorMode(lcInsertColorMode InsertColorMode);
+	void UpdatePiecesColor();
+	void ColorOptionsMenuAboutToShow();
 	void SetMoveSnapEnabled(bool Enabled);
 	void SetAngleSnapEnabled(bool Enabled);
 	void SetMoveXYSnapIndex(int Index);
@@ -261,6 +266,7 @@ public:
 	bool eventFilter(QObject* Object, QEvent* Event) override;
 
 	int mColorIndex;
+	int mLastInsertedColorIndex = -1;
 	QAction* mActions[LC_NUM_COMMANDS] = {};
 
 public slots:

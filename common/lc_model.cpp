@@ -3188,7 +3188,7 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 			if (!Last->IsFocused())
 				UpdateTrainTrackConnections(Last, false);
 
-			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, PieceData, nullptr, gMainWindow->mColorIndex, Section, true, std::nullopt);
+			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, PieceData, nullptr, gMainWindow->GetInsertColorIndex(), Section, true, std::nullopt);
 
 			for (const lcInsertPieceInfo& TrainTrack : TrainTracks)
 				CreatePiece(TrainTrack.PieceData, TrainTrack.Transform, TrainTrack.ColorIndex);
@@ -3203,14 +3203,14 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 			lcMatrix44 WorldMatrix = Last->mModelWorld;
 			WorldMatrix.SetTranslation(lcMul31(Dist, Last->mModelWorld));
 
-			CreatePiece(PieceData, WorldMatrix, gMainWindow->mColorIndex);
+			CreatePiece(PieceData, WorldMatrix, gMainWindow->GetInsertColorIndex());
 		}
 	}
 	else
 	{
 		lcMatrix44 WorldMatrix = lcMatrix44Translation(lcVector3(0.0f, 0.0f, -PieceDataBoundingBox.Min.z));
 
-		CreatePiece(PieceData, WorldMatrix, gMainWindow->mColorIndex);
+		CreatePiece(PieceData, WorldMatrix, gMainWindow->GetInsertColorIndex());
 	}
 
 	if (!Piece)
@@ -3221,6 +3221,8 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 	}
 
 	EndEditHistory();
+
+	gMainWindow->SetLastInsertedColorIndex(Piece->GetColorIndex());
 
 	SetSelectionAndFocus(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
@@ -5669,6 +5671,8 @@ bool lcModel::InsertPieceToolClicked()
 	SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>());
 
 	EndEditHistory();
+
+	gMainWindow->SetLastInsertedColorIndex(Piece->GetColorIndex());
 
 	SetSelectionAndFocus(std::vector<lcObject*>(), Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 

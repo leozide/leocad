@@ -1396,6 +1396,38 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_PIECE_INSERT_COLOR_CURRENT
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.InsertColor.Current"),
+		QT_TRANSLATE_NOOP("Menu", "Insert with Current Color"),
+		QT_TRANSLATE_NOOP("Status", "Insert new pieces with the current color"),
+		"",
+		""
+	},
+	// LC_PIECE_INSERT_COLOR_SELECTED
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.InsertColor.Selected"),
+		QT_TRANSLATE_NOOP("Menu", "Insert with Selected Piece Color"),
+		QT_TRANSLATE_NOOP("Status", "Insert new pieces with the color of the selected piece"),
+		"",
+		""
+	},
+	// LC_PIECE_INSERT_COLOR_LAST_INSERTED
+	{
+		QT_TRANSLATE_NOOP("Action", "Piece.InsertColor.LastInserted"),
+		QT_TRANSLATE_NOOP("Menu", "Insert with Last Inserted Color"),
+		QT_TRANSLATE_NOOP("Status", "Insert new pieces with the color of the last inserted piece"),
+		"",
+		""
+	},
+	// LC_VIEW_PIECES_TOGGLE_LOCK_COLOR
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Pieces.ToggleLockColor"),
+		QT_TRANSLATE_NOOP("Menu", "Lock Pieces Color"),
+		QT_TRANSLATE_NOOP("Status", "Toggle keeping the pieces list in a fixed color instead of following the insert color"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

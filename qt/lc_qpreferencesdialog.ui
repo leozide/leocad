@@ -413,6 +413,44 @@
          </property>
         </widget>
        </item>
+       <item row="14" column="0">
+        <widget class="QLabel" name="InsertColorModeLabel">
+         <property name="toolTip">
+          <string>Choose the color given to newly inserted pieces: the current color, the color of the selected piece, or the color of the last inserted piece.</string>
+         </property>
+         <property name="text">
+          <string>Insert Color:</string>
+         </property>
+         <property name="buddy">
+          <cstring>InsertColorMode</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="14" column="1">
+        <widget class="QComboBox" name="InsertColorMode">
+         <property name="accessibleName">
+          <string>Insert Color</string>
+         </property>
+         <property name="toolTip">
+          <string>Choose the color given to newly inserted pieces: the current color, the color of the selected piece, or the color of the last inserted piece.</string>
+         </property>
+          <item>
+           <property name="text">
+            <string>Current color</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Selected piece color</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Last inserted piece color</string>
+           </property>
+          </item>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabRendering">
@@ -2725,6 +2763,7 @@
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>RestoreTabLayout</tabstop>
+  <tabstop>InsertColorMode</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>FadeSteps</tabstop>

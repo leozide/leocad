@@ -124,7 +124,7 @@ void lcPartSelectionListModel::ToggleColorLocked()
 
 	mColorLocked = !mColorLocked;
 
-	SetColorIndex(gMainWindow->mColorIndex);
+	SetColorIndex(gMainWindow->GetInsertColorIndex());
 	if (mColorLocked)
 	{
 		lcSetProfileUInt(LC_PROFILE_PARTS_LIST_COLOR, lcGetColorCode(mColorIndex));

@@ -26,6 +26,13 @@ enum class lcHighlightRenderMode
 	Tint
 };
 
+enum class lcInsertColorMode
+{
+	CurrentColor,
+	SelectedPieceColor,
+	LastInsertedColor
+};
+
 enum class lcAxisIconLocation
 {
 	TopLeft,
@@ -82,6 +89,7 @@ public:
 	quint32 mViewSphereHighlightColor;
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
+	lcInsertColorMode mInsertColorMode;
 	lcColorTheme mColorTheme;
 	quint32 mObjectSelectedColor;
 	quint32 mObjectFocusedColor;

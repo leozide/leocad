@@ -2400,8 +2400,20 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 	if (ActiveModel)
 		ActiveModel->GetFocusPosition(Position);
 
-	QString Label("X: %1 Y: %2 Z: %3");
-	Label = Label.arg(QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));
+	// Name the focused object so the coordinates are clearly its position.
+	QString Object;
+
+	if (Focus && Focus->IsPiece())
+		Object = tr("Piece");
+	else if (Focus && Focus->IsCamera())
+		Object = tr("Camera");
+	else if (Focus && Focus->IsLight())
+		Object = tr("Light");
+	else
+		Object = tr("Origin");
+
+	QString Label = tr("%1 X: %2 Y: %3 Z: %4");
+	Label = Label.arg(Object, QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));
 	mStatusPositionLabel->setText(Label);
 }
 
@@ -2470,8 +2482,21 @@ void lcMainWindow::UpdateSnap()
 	mActions[LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex]->setChecked(true);
 	mActions[LC_EDIT_SNAP_ANGLE0 + mAngleSnapIndex]->setChecked(true);
 
-	QString Relative = mRelativeTransform ? tr("Rel") : tr("Abs");
-	mStatusSnapLabel->setText(QString(tr(" M: %1 %2 R: %3 %4 ")).arg(GetMoveXYSnapText(), GetMoveZSnapText(), GetAngleSnapText(), Relative));
+	// Spell out the transform and snap settings from the toolbar, using the same names as their menus.
+	auto MenuText = [this](int CommandId)
+	{
+		return mActions[CommandId]->text().remove(QLatin1Char('&'));
+	};
+
+	const bool MoveSnapped = mMoveSnapEnabled && (mMoveXYSnapIndex || mMoveZSnapIndex);
+	const QString MoveXY = MoveSnapped ? MenuText(LC_EDIT_SNAP_MOVE_XY0 + mMoveXYSnapIndex) : tr("free");
+	const QString MoveZ = MoveSnapped ? MenuText(LC_EDIT_SNAP_MOVE_Z0 + mMoveZSnapIndex) : tr("free");
+	const QString Axes = mRelativeTransform ? tr("relative") : tr("absolute");
+	const QString Angle = GetAngleSnap() != 0.0f ? tr("%1 deg.").arg(lcFormatDoubleLocalized(GetAngleSnap(), locale(), 'g', 6)) : tr("free");
+	const QString Pivot = GetSeparateTransform() ? tr("separately") : tr("together");
+
+	mStatusSnapLabel->setText(tr("- Move XY: %1 Z: %2 - Axes: %3 - Rotate: %4 / %5 -").arg(MoveXY, MoveZ, Axes, Angle, Pivot));
+	mStatusSnapLabel->setToolTip(tr("Movement snap, rotation snap, transform axes and rotation pivot. Change them with the last buttons of the standard toolbar."));
 }
 
 void lcMainWindow::UpdateColor()

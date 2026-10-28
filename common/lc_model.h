@@ -292,6 +292,10 @@ public:
 	{
 		return mCurrentStep;
 	}
+	lcStep GetEvaluatedStep() const
+	{
+		return mEvaluatedStep;
+	}
 
 	void SetActive(bool Active);
 	void CalculateStep(lcStep Step);
@@ -546,6 +550,8 @@ protected:
 	bool mIsPreview;
 	bool mActive;
 	lcStep mCurrentStep;
+	// The step currently reflected by the cached piece, camera, and light transforms.
+	lcStep mEvaluatedStep = 1;
 	lcVector3 mMouseToolDistance;
 	lcVector3 mMouseToolMoveStartPosition;
 	lcVector3 mMouseToolMoveEndPosition;

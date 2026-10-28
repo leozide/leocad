@@ -47,6 +47,8 @@ private slots:
 	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
+	void CompletedExportEvaluatesExternalModels();
+	void TexturedDirectGeometry3DS();
 
 private:
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
@@ -92,6 +94,131 @@ void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 	QCOMPARE(Reloaded.GetMainModel()->GetCameras().size(), size_t(1));
 	QCOMPARE(Reloaded.GetEmbeddedData().size(), size_t(1));
 	QCOMPARE(Reloaded.GetEmbeddedData().front()->RawBlock, DataBlock);
+}
+
+void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+
+	QFile MainFile(Directory.filePath("main.ldr"));
+	QVERIFY(MainFile.open(QIODevice::WriteOnly));
+	MainFile.write("0 Host\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 child.ldr\n");
+	MainFile.close();
+
+	QFile ChildFile(Directory.filePath("child.ldr"));
+	QVERIFY(ChildFile.open(QIODevice::WriteOnly));
+	ChildFile.write("0 Child\n0 !LEOCAD PIECE POSITION_KEY 1 0 0 0\n0 !LEOCAD PIECE POSITION_KEY 2 100 0 0\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 missing.dat\n");
+	ChildFile.close();
+
+	Project Host;
+	QVERIFY(Host.Load(MainFile.fileName(), false));
+	lcModel* External = Host.GetMainModel()->GetPieces()[0]->mPieceData->GetProject()->GetMainModel();
+	QCOMPARE(External->GetCurrentStep(), lcStep(1));
+	QCOMPARE(External->GetLastStep(), lcStep(2));
+	QCOMPARE(External->GetEvaluatedStep(), lcStep(1));
+	lcLoadDefaultColors(lcStudStyle::Plain);
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	External->GetPieces()[0]->mPieceData->SetMesh(Mesh);
+	External->GetPieces()[0]->mPieceData->mState = lcAssetState::Loaded;
+
+	const QString ExportName = Directory.filePath("completed.ldr");
+	QVERIFY(Host.ExportMainModel(ExportName));
+
+	QFile ExportFile(ExportName);
+	QVERIFY(ExportFile.open(QIODevice::ReadOnly));
+	QVERIFY(ExportFile.readAll().contains("1 16 100 0 0 1 0 0 0 1 0 0 0 1 missing.dat"));
+	QCOMPARE(External->GetCurrentStep(), lcStep(1));
+	QCOMPARE(External->GetEvaluatedStep(), lcStep(1));
+	QCOMPARE(External->GetPieces()[0]->mModelWorld.GetTranslation().x, 0.0f);
+
+	const QString OBJName = Directory.filePath("completed.obj");
+	QVERIFY(Host.ExportWavefront(OBJName));
+	QFile OBJFile(OBJName);
+	QVERIFY(OBJFile.open(QIODevice::ReadOnly));
+	QVERIFY(OBJFile.readAll().contains("v 90.00 "));
+	QCOMPARE(External->GetEvaluatedStep(), lcStep(1));
+}
+
+void lcModelInstanceTests::TexturedDirectGeometry3DS()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+
+	QFile MainFile(Directory.filePath("main.ldr"));
+	QVERIFY(MainFile.open(QIODevice::WriteOnly));
+	MainFile.write("0 Direct\n3 16 0 0 0 1 0 0 0 1 0\n");
+	MainFile.close();
+
+	Project Host;
+	QVERIFY(Host.Load(MainFile.fileName(), false));
+	lcLoadDefaultColors(lcStudStyle::Plain);
+	lcModel* Main = Host.GetMainModel();
+	QVERIFY(Main->HasDirectGeometry());
+	Main->WaitForAssets();
+	QVERIFY(Main->GetPieceData()->GetMesh());
+
+	lcMesh* Mesh = new lcMesh;
+	quint16 Sections[LC_NUM_MESH_LODS] = { 2, 0 };
+	Mesh->Create(Sections, 3, 3, 0, 6);
+
+	lcVertex* Verts = static_cast<lcVertex*>(Mesh->mVertexData);
+	Verts[0].Position = lcVector3(0, 0, 0);
+	Verts[1].Position = lcVector3(1, 0, 0);
+	Verts[2].Position = lcVector3(0, 1, 0);
+
+	lcVertexTextured* TexturedVerts = reinterpret_cast<lcVertexTextured*>(Verts + 3);
+	TexturedVerts[0].Position = lcVector3(0, 0, 1);
+	TexturedVerts[1].Position = lcVector3(1, 0, 1);
+	TexturedVerts[2].Position = lcVector3(0, 1, 1);
+
+	quint16* Indices = static_cast<quint16*>(Mesh->mIndexData);
+	for (int Index = 0; Index < 6; Index++)
+		Indices[Index] = Index % 3;
+
+	for (int Section = 0; Section < 2; Section++)
+	{
+		lcMeshSection& MeshSection = Mesh->mLods[LC_MESH_LOD_HIGH].Sections[Section];
+		MeshSection.ColorIndex = gDefaultColor;
+		MeshSection.DrawOffset = Section * 3 * sizeof(quint16);
+		MeshSection.DrawCount = 3;
+		MeshSection.PrimitiveType = Section ? LC_MESH_TEXTURED_TRIANGLES : LC_MESH_TRIANGLES;
+	}
+
+	Main->GetPieceData()->SetMesh(Mesh);
+	Main->GetPieceData()->mState = lcAssetState::Loaded;
+
+	const QString ExportName = Directory.filePath("direct.3ds");
+	QVERIFY(Host.Export3DStudio(ExportName));
+
+	QFile ExportFile(ExportName);
+	QVERIFY(ExportFile.open(QIODevice::ReadOnly));
+	const QByteArray Bytes = ExportFile.readAll();
+	const auto ReadU16 = [&Bytes](qsizetype Offset)
+	{
+		return quint16(quint8(Bytes.at(Offset)) | (quint16(quint8(Bytes.at(Offset + 1))) << 8));
+	};
+	const auto ReadU32 = [&ReadU16](qsizetype Offset)
+	{
+		return quint32(ReadU16(Offset)) | (quint32(ReadU16(Offset + 2)) << 16);
+	};
+
+	const qsizetype PointChunk = Bytes.indexOf(QByteArray::fromHex("1041"));
+	QVERIFY(PointChunk >= 0);
+	QVERIFY(Bytes.size() >= PointChunk + 8);
+	QCOMPARE(ReadU32(PointChunk + 2), quint32(8 + 12 * 6));
+	QCOMPARE(ReadU16(PointChunk + 6), quint16(6));
+
+	const qsizetype FaceChunk = Bytes.indexOf(QByteArray::fromHex("2041"), PointChunk + ReadU32(PointChunk + 2));
+	QVERIFY(FaceChunk >= 0);
+	QVERIFY(Bytes.size() >= FaceChunk + 24);
+	QCOMPARE(ReadU16(FaceChunk + 6), quint16(2));
+	for (int Index = 0; Index < 3; Index++)
+	{
+		QCOMPARE(ReadU16(FaceChunk + 8 + Index * 2), quint16(Index));
+		QCOMPARE(ReadU16(FaceChunk + 16 + Index * 2), quint16(Index + 3));
+	}
 }
 
 void lcModelInstanceTests::RepeatedInstances()

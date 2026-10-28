@@ -2593,6 +2593,8 @@ void lcModel::CalculateStep(lcStep Step)
 
 	for (const std::unique_ptr<lcLight>& Light : mLights)
 		Light->UpdatePosition(Step);
+
+	mEvaluatedStep = Step;
 }
 
 void lcModel::SetCurrentStep(lcStep Step)

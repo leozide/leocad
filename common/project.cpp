@@ -21,17 +21,40 @@
 #include "lc_string.h"
 #include "lc_colors.h"
 
-// Evaluate models at their final step for export, then restore their editing steps and active flags.
+// Evaluate project and referenced models at their final step, then restore their editing and evaluated states.
 class lcScopedModelExportState
 {
 public:
 	explicit lcScopedModelExportState(const std::vector<std::unique_ptr<lcModel>>& Models)
 	{
-		mStates.reserve(Models.size());
+		std::vector<lcModel*> ReferencedModels;
+		std::set<lcModel*> Visited;
+		const std::function<void(lcModel*)> Collect = [&ReferencedModels, &Visited, &Collect](lcModel* Model)
+		{
+			if (!Model || !Visited.insert(Model).second)
+				return;
+
+			ReferencedModels.push_back(Model);
+
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+			{
+				lcPieceData* PieceData = Piece->mPieceData.Get();
+
+				if (PieceData->IsModel())
+					Collect(PieceData->GetModel());
+				else if (PieceData->IsProject())
+					Collect(PieceData->GetProject()->GetMainModel());
+			}
+		};
 
 		for (const std::unique_ptr<lcModel>& Model : Models)
+			Collect(Model.get());
+
+		mStates.reserve(ReferencedModels.size());
+
+		for (lcModel* Model : ReferencedModels)
 		{
-			mStates.push_back({ Model.get(), Model->GetCurrentStep(), Model->IsActive() });
+			mStates.push_back({ Model, Model->GetCurrentStep(), Model->GetEvaluatedStep(), Model->IsActive() });
 			Model->SetActive(false);
 		}
 	}
@@ -47,6 +70,7 @@ public:
 				Saved.Model->SetTemporaryStep(Saved.Step);
 
 			Saved.Model->SetActive(Saved.Active);
+			Saved.Model->CalculateStep(Saved.EvaluatedStep);
 		}
 	}
 
@@ -55,6 +79,7 @@ private:
 	{
 		lcModel* Model;
 		lcStep Step;
+		lcStep EvaluatedStep;
 		bool Active;
 	};
 
@@ -2547,8 +2572,9 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
 	{
 		lcMesh* Mesh = !ModelPart.Mesh ? ModelPart.PieceData->GetMesh() : ModelPart.Mesh;
+		const int NumVertices = Mesh ? Mesh->mNumVertices + Mesh->mNumTexturedVertices : 0;
 
-		if (!Mesh || Mesh->mIndexType == GL_UNSIGNED_INT)
+		if (!Mesh || Mesh->mIndexType == GL_UNSIGNED_INT || NumVertices > std::numeric_limits<quint16>::max())
 			continue;
 
 		long NamedObjectStart = File.GetPosition();
@@ -2565,16 +2591,25 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 		File.WriteU32(0);
 
 		File.WriteU16(0x4110); // CHK_POINT_ARRAY
-		File.WriteU32(8 + 12 * Mesh->mNumVertices);
+		File.WriteU32(8 + 12 * NumVertices);
 
-		File.WriteU16(Mesh->mNumVertices);
+		File.WriteU16(NumVertices);
 
-		lcVertex* Verts = (lcVertex*)Mesh->mVertexData;
+		const lcVertex* Verts = Mesh->GetVertexData();
+		const lcVertexTextured* TexturedVerts = Mesh->GetTexturedVertexData();
 		const lcMatrix44& ModelWorld = ModelPart.WorldMatrix;
 
 		for (int VertexIdx = 0; VertexIdx < Mesh->mNumVertices; VertexIdx++)
 		{
 			lcVector3 Pos = lcMul31(Verts[VertexIdx].Position, ModelWorld);
+			File.WriteFloat(Pos[0]);
+			File.WriteFloat(Pos[1]);
+			File.WriteFloat(Pos[2]);
+		}
+
+		for (int VertexIdx = 0; VertexIdx < Mesh->mNumTexturedVertices; VertexIdx++)
+		{
+			lcVector3 Pos = lcMul31(TexturedVerts[VertexIdx].Position, ModelWorld);
 			File.WriteFloat(Pos[0]);
 			File.WriteFloat(Pos[1]);
 			File.WriteFloat(Pos[2]);
@@ -2620,12 +2655,13 @@ lcResult<void> Project::Export3DStudio(const QString& FileName)
 				continue;
 
 			quint16* Indices = (quint16*)Mesh->mIndexData + Section->DrawOffset / sizeof(quint16);
+			const quint16 VertexOffset = Section->PrimitiveType == LC_MESH_TEXTURED_TRIANGLES ? Mesh->mNumVertices : 0;
 
 			for (int IndexIdx = 0; IndexIdx < Section->DrawCount; IndexIdx += 3)
 			{
-				File.WriteU16(Indices[IndexIdx + 0]);
-				File.WriteU16(Indices[IndexIdx + 1]);
-				File.WriteU16(Indices[IndexIdx + 2]);
+				File.WriteU16(Indices[IndexIdx + 0] + VertexOffset);
+				File.WriteU16(Indices[IndexIdx + 1] + VertexOffset);
+				File.WriteU16(Indices[IndexIdx + 2] + VertexOffset);
 				File.WriteU16(7);
 			}
 		}

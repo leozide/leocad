@@ -168,6 +168,7 @@ private:
 	// Publish pieces and generated meshes after their texture dependencies settle.
 	void FinishPiecesWithSettledTextures();
 	void FinishSynthsWithSettledTextures();
+	bool RetryPieceWithTextureFallback(const std::shared_ptr<PieceRequest>& RequestedPiece);
 	void CompletePieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece);
 	void CompleteSynthRequest(const std::shared_ptr<SynthRequest>& RequestedSynth);
 

@@ -1656,7 +1656,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		return Result;
 	}
 
-	if (!Source.InlineModel && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
+	if (Source.UnavailableTextures.empty() && !Source.InlineModel && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
 	{
 		lcMemFile CacheData;
 
@@ -1681,6 +1681,8 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 
 	lcLibraryMeshData MeshData;
 	lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
+
+	MeshLoader.SetUnavailableTextures(Source.UnavailableTextures);
 
 	if (Source.InlineModel)
 	{

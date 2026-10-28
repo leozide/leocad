@@ -308,8 +308,23 @@ a separate cooperative cancellation token.
 
 A part becomes `Loaded` after its private mesh is committed and all declared
 textures are ready. Valid empty geometry may also settle successfully. A missing
-include or declared texture is a failure, even if some geometry was built.
+include is a failure, even if some geometry was built.
 Texture names remain in mesh sections and cache data when lookup fails.
+
+When a declared texture is missing, fails decoding, or exhausts upload retries,
+the loader logs the failure and queues a source rebuild with that normalized
+texture name marked unavailable. The parser selects each affected TEXMAP block's
+FALLBACK branch with ordinary materials; available mappings keep their textured
+branch. An affected active block without FALLBACK remains a failure. Nested maps
+in skipped branches do not participate. Includes inherit branch selection, while
+TEXMAP declarations remain file-local and NEXT is consumed once.
+
+Fallback rebuilds bypass persistent mesh caches and privately reparse textured
+primitives, preserving the shared preferred-branch primitive data. Fallback
+meshes are not written to the persistent cache because texture availability can
+change independently of geometry. Each retry must add a newly unavailable name;
+cancellation never starts a fallback rebuild. Synth meshes have no LDraw fallback
+source and retain their existing texture failure behavior.
 
 A texture is ready only when `IsReady()` reports `Loaded` with a nonzero GL
 texture. CPU pixels, `HasImageData()`, and `!NeedsUpload()` do not establish

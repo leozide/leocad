@@ -112,3 +112,8 @@ types under nested instance transforms and for root-model export.
 
 Mesh checks reject section-count overflow and malformed cached draw ranges,
 primitive counts, and vertex indices with both 16-bit and 32-bit index buffers.
+
+TEXMAP checks cover preferred/fallback branch selection, nested scopes, NEXT,
+missing and corrupt textures, exhausted upload retries, and cached primitive
+includes while preserving the shared textured geometry. Include checks also
+reject cycles through nested TEXMAP blocks and allow repeated sibling includes.

@@ -46,6 +46,9 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void TexmapFallbackBranches();
+	void TexmapFallbackLoading();
+	void TexmapFallbackIncludes();
 	void MeshCacheValidation_data();
 	void MeshCacheValidation();
 	void MeshSectionCountOverflow();
@@ -58,6 +61,196 @@ private slots:
 private:
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+void lcModelInstanceTests::TexmapFallbackBranches()
+{
+	const QByteArray Start = "0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n";
+	const QByteArray Triangle = "3 16 0 0 0 1 0 0 0 1 0\n";
+	const QByteArray Fallback = "0 !TEXMAP FALLBACK\n3 4 20 0 0 21 0 0 20 1 0\n";
+	const QByteArray End = "0 !TEXMAP END\n";
+
+	const auto Build = [](const QByteArray& Text, const std::set<std::string>& Unavailable, bool Expected, bool Textured, float Maximum)
+	{
+		lcMemFile File;
+
+		File.WriteBuffer(Text.constData(), Text.size());
+		File.Seek(0, SEEK_SET);
+
+		lcLibraryMeshData Data;
+		lcMeshLoader Loader(Data, nullptr, lcMeshLoaderFlag::RequireAllIncludes);
+
+		Loader.SetUnavailableTextures(Unavailable);
+
+		QCOMPARE(Loader.LoadMesh(File, LC_MESHDATA_SHARED), Expected);
+
+		if (!Expected)
+		{
+			QVERIFY(!Loader.GetError().isEmpty());
+
+			return;
+		}
+
+		std::unique_ptr<lcMesh> Mesh(Data.CreateMesh(nullptr));
+
+		QVERIFY(Mesh);
+		QCOMPARE(Data.mHasTextures, Textured);
+		QCOMPARE(Mesh->mBoundingBox.Max.x, Maximum);
+	};
+
+	Build(Start + Triangle + Fallback + End, {}, true, true, 1);
+	Build(Start + Triangle + Fallback + End, { "MISSING" }, true, false, 21);
+	Build(Start + Triangle + End, { "MISSING" }, false, false, 0);
+
+	// An inactive outer branch must suppress nested maps and their diagnostics.
+	const QByteArray Nested = "0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 nested.png\n";
+
+	Build(Start + Nested + Triangle + End + Fallback + End, { "MISSING", "NESTED" }, true, false, 21);
+	Build(Start + Triangle + "0 !TEXMAP FALLBACK\n" + Nested + Triangle + End + End, { "NESTED" }, true, true, 1);
+
+	// Available mappings remain textured beside a selected fallback.
+	Build(Start + Triangle + Fallback + End + Nested + Triangle + End, { "MISSING" }, true, true, 21);
+	Build("0 !TEXMAP NEXT PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n" + Triangle + Triangle, {}, true, true, 1);
+	Build("0 !TEXMAP NEXT PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n" + Triangle, { "MISSING" }, false, false, 0);
+}
+
+void lcModelInstanceTests::TexmapFallbackLoading()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+
+	const QByteArray Start = "0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n";
+	const QByteArray Triangle = "3 16 0 0 0 1 0 0 0 1 0\n";
+	const QByteArray Fallback = "0 !TEXMAP FALLBACK\n3 4 20 0 0 21 0 0 20 1 0\n";
+
+	for (int Case = 0; Case < 4; Case++)
+	{
+		if (Case == 1)
+		{
+			QFile Texture(Directory.filePath("missing.png"));
+
+			QVERIFY(Texture.open(QIODevice::WriteOnly));
+			QVERIFY(Texture.write("invalid image") > 0);
+		}
+
+		if (Case == 3)
+		{
+			QImage Image(4, 4, QImage::Format_RGB888);
+
+			Image.fill(Qt::red);
+			QVERIFY(Image.save(Directory.filePath("missing.png")));
+		}
+
+		QFile File(Directory.filePath(QString("case%1.ldr").arg(Case)));
+
+		QVERIFY(File.open(QIODevice::WriteOnly));
+
+		const QByteArray Text = "0 Fallback test\n" + Start + Triangle + (Case == 2 ? QByteArray() : Fallback) + "0 !TEXMAP END\n";
+
+		QCOMPARE(File.write(Text), qint64(Text.size()));
+		File.close();
+
+		Project Document;
+
+		QVERIFY(Document.Load(File.fileName(), false));
+
+		lcModel* Model = Document.GetMainModel();
+
+		Model->WaitForAssets();
+
+		lcMesh* Mesh = Model->GetPieceData()->GetMesh();
+
+		if (Case == 2)
+		{
+			QVERIFY(!Mesh);
+			QCOMPARE(Model->GetPieceData()->mState, lcAssetState::Failed);
+		}
+		else
+		{
+			QVERIFY(Mesh);
+			QCOMPARE(Mesh->mNumTexturedVertices, 0);
+			QCOMPARE(Mesh->mBoundingBox.Max.x, 21.0f);
+		}
+	}
+}
+
+void lcModelInstanceTests::TexmapFallbackIncludes()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+
+		~ScopedLibrary()
+		{
+			Library.reset();
+
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	const auto Write = [&](const char* Name, const QByteArray& Text)
+	{
+		QFile File(Directory.filePath(QString::fromLatin1(Name)));
+
+		return File.open(QIODevice::WriteOnly) && File.write(Text) == Text.size();
+	};
+
+	QVERIFY(Write("parts/test.dat", "0 Test\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 mapped.dat\n"));
+	QVERIFY(Write("p/mapped.dat",
+		"0 Mapped primitive\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n"
+		"3 16 0 0 0 1 0 0 0 1 0\n"
+		"0 !TEXMAP FALLBACK\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 fallback.dat\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 fallback.dat\n"
+		"0 !TEXMAP END\n"));
+	QVERIFY(Write("p/fallback.dat", "0 Fallback primitive\n0 !TEXMAP END\n3 4 20 0 0 21 0 0 20 1 0\n"));
+
+	QVERIFY(Write("parts/cycle.dat", "0 Cycle test\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 loop.dat\n"));
+	QVERIFY(Write("p/loop.dat",
+		"0 Loop primitive\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n"
+		"3 16 0 0 0 1 0 0 0 1 0\n"
+		"0 !TEXMAP FALLBACK\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 available.png\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 loop.dat\n"
+		"0 !TEXMAP END\n"
+		"0 !TEXMAP END\n"));
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+
+	QVERIFY(Library->Load(Directory.path(), false, false));
+
+	lcPieceDataRef Piece = Library->AcquirePieceData("test.dat", nullptr, false, false);
+
+	QVERIFY(Piece);
+	QVERIFY(Library->EnsurePieceDataAssetsReady(Piece));
+	QVERIFY(Piece->GetMesh());
+	QCOMPARE(Piece->GetMesh()->mNumTexturedVertices, 0);
+	QCOMPARE(Piece->GetMesh()->mBoundingBox.Max.x, 21.0f);
+
+	// The shared primitive cache must still hold its original textured branch.
+	lcLibraryPrimitive* Primitive = Library->FindPrimitive("MAPPED.DAT");
+
+	QVERIFY(Primitive);
+	QVERIFY(Primitive->mMeshData.mHasTextures);
+
+	lcPieceDataRef Cycle = Library->AcquirePieceData("cycle.dat", nullptr, false, false);
+
+	QVERIFY(Cycle);
+	QVERIFY(!Library->EnsurePieceDataAssetsReady(Cycle));
+	QVERIFY(Library->GetPieceDataLoadError(Cycle.Get()).contains("Circular include"));
+
+	Cycle.Reset();
+	Piece.Reset();
+}
 
 void lcModelInstanceTests::MeshCacheValidation_data()
 {

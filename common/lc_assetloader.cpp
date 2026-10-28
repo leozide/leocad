@@ -355,7 +355,7 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 
 		RequestedPiece->StagedMesh->FinalizeSections();
 
-		RequestedPiece->SaveCache = !Completed.PieceResult.FromCache;
+		RequestedPiece->SaveCache = !Completed.PieceResult.FromCache && RequestedPiece->Source.UnavailableTextures.empty();
 	}
 
 	// A private mesh cannot be published until all its declared textures settle.
@@ -598,8 +598,43 @@ void lcAssetLoader::FinishSynthsWithSettledTextures()
 	}
 }
 
+bool lcAssetLoader::RetryPieceWithTextureFallback(const std::shared_ptr<PieceRequest>& RequestedPiece)
+{
+	if (mStopping || mLibrary->ShouldCancelLoading() || RequestedPiece->Error.isEmpty() || !RequestedPiece->StagedMesh)
+		return false;
+
+	bool Retry = false;
+
+	for (const lcMeshLod& Lod : RequestedPiece->StagedMesh->mLods)
+		for (int Index = 0; Index < Lod.NumSections; Index++)
+		{
+			const lcMeshSection& Section = Lod.Sections[Index];
+
+			if (!Section.TextureName.isEmpty() && (!Section.Texture || Section.Texture->mState == lcAssetState::Failed))
+				Retry |= RequestedPiece->Source.UnavailableTextures.insert(Section.TextureName.toLatin1().constData()).second;
+		}
+
+	if (!Retry)
+		return false;
+
+	qWarning().noquote() << tr("Retrying '%1' with TEXMAP fallback: %2").arg(RequestedPiece->Source.FileName, RequestedPiece->Error);
+
+	RequestedPiece->StagedMesh.reset();
+	RequestedPiece->Error.clear();
+	RequestedPiece->SaveCache = false;
+	RequestedPiece->State = RequestState::Queued;
+
+	CancelUnusedTextureRequests();
+	DispatchJobs();
+
+	return true;
+}
+
 void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& RequestedPiece)
 {
+	if (RetryPieceWithTextureFallback(RequestedPiece))
+		return;
+
 	Q_ASSERT(QThread::currentThread() == thread());
 
 	lcPieceData* PieceData = RequestedPiece->PieceData.Get();

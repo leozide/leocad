@@ -1354,6 +1354,27 @@ bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSiz
 	return true;
 }
 
+bool lcMeshLoader::IsTextureBranchActive() const
+{
+	for (const lcMeshLoaderTextureMap& Map : mTextureStack)
+		if (!Map.Active || Map.InFallback != (mUnavailableTextures.count(Map.Name) != 0))
+			return false;
+
+	return true;
+}
+
+bool lcMeshLoader::FinishTextureMap(const lcMeshLoaderTextureMap& Map)
+{
+	if (Map.Active && mUnavailableTextures.count(Map.Name) && !Map.HasFallback)
+	{
+		mError = tr("Texture '%1' is unavailable and has no fallback geometry.").arg(QString::fromLatin1(Map.Name));
+
+		return false;
+	}
+
+	return true;
+}
+
 bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType)
 {
 	char Buffer[1024];
@@ -1441,10 +1462,12 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 7;
 
-						mTextureStack.emplace_back();
-						lcMeshLoaderTextureMap& Map = mTextureStack.back();
+						const bool Active = IsTextureBranchActive();
+						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
+
 						Map.Type = lcMeshLoaderMaterialType::Planar;
 						Map.Next = Next;
+						Map.Active = Active;
 
 						lcVector3 (&Points)[3] = Map.Points;
 
@@ -1465,10 +1488,12 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 12;
 
-						mTextureStack.emplace_back();
-						lcMeshLoaderTextureMap& Map = mTextureStack.back();
+						const bool Active = IsTextureBranchActive();
+						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
+
 						Map.Type = lcMeshLoaderMaterialType::Cylindrical;
 						Map.Next = Next;
+						Map.Active = Active;
 
 						lcVector3 (&Points)[3] = Map.Points;
 						float& Angle = Map.Angles[0];
@@ -1490,10 +1515,12 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					{
 						Token += 10;
 
-						mTextureStack.emplace_back();
-						lcMeshLoaderTextureMap& Map = mTextureStack.back();
+						const bool Active = IsTextureBranchActive();
+						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
+
 						Map.Type = lcMeshLoaderMaterialType::Spherical;
 						Map.Next = Next;
+						Map.Active = Active;
 
 						lcVector3(&Points)[3] = Map.Points;
 						float& Angle1 = Map.Angles[0];
@@ -1516,12 +1543,20 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				else if (!strcmp(Token, "FALLBACK"))
 				{
 					if (mTextureStack.size() > TextureStackStart)
-						mTextureStack.back().Fallback = true;
+					{
+						mTextureStack.back().InFallback = true;
+						mTextureStack.back().HasFallback = true;
+					}
 				}
 				else if (!strcmp(Token, "END"))
 				{
 					if (mTextureStack.size() > TextureStackStart)
+					{
+						if (!FinishTextureMap(mTextureStack.back()))
+							return false;
+
 						mTextureStack.pop_back();
+					}
 				}
 
 				continue;
@@ -1571,13 +1606,16 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			continue;
 
 		quint32 ColorCode = static_cast<quint32>(ParsedColorCode);
+
 		if (ColorCode == 0)
 		{
 			int ParsedHexColorCode;
+
 			if (sscanf(Line, "%d %i", &LineType, &ParsedHexColorCode) != 2)
 				continue;
 
 			const quint32 ColorCodeHex = static_cast<quint32>(ParsedHexColorCode);
+
 			if (ColorCode != ColorCodeHex)
 				ColorCode = ColorCodeHex | LC_COLOR_DIRECT;
 		}
@@ -1585,30 +1623,29 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 		if (ColorCode == 16)
 			ColorCode = CurrentColorCode;
 
+		const bool ConsumeNext = mTextureStack.size() > TextureStackStart && mTextureStack.back().Next;
+
+		if (!IsTextureBranchActive())
+		{
+			if (ConsumeNext)
+			{
+				if (!FinishTextureMap(mTextureStack.back()))
+					return false;
+
+				mTextureStack.pop_back();
+			}
+
+			InvertNext = false;
+			continue;
+		}
+
 		lcMeshLoaderTextureMap* TextureMap = nullptr;
 
-		if (!mTextureStack.empty())
-		{
+		if (!mTextureStack.empty() && !mTextureStack.back().InFallback)
 			TextureMap = &mTextureStack.back();
-
-			// TODO: think about a way to handle the texture fallback
-//			if (TextureMap->Texture)
-			{
-				if (TextureMap->Fallback)
-					continue;
-			}
-//			else
-//			{
-//				if (!TextureMap->Fallback)
-//					continue;
-//
-//				TextureMap = nullptr;
-//			}
-		}
 
 		int Dummy;
 		lcVector3 Points[4];
-		const bool ConsumeNext = mTextureStack.size() > TextureStackStart && mTextureStack.back().Next;
 
 		switch (LineType)
 		{
@@ -1632,6 +1669,26 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					*Ch = '/';
 			}
 
+			const std::string IncludeName = QDir::cleanPath(QString::fromLatin1(FileName)).toStdString();
+
+			if (!mActiveFiles.insert(IncludeName).second)
+			{
+				mError = tr("Circular include '%1'.").arg(QString::fromLatin1(OriginalFileName));
+
+				return false;
+			}
+
+			struct IncludeGuard
+			{
+				std::unordered_set<std::string>& ActiveFiles;
+				const std::string& Name;
+
+				~IncludeGuard()
+				{
+					ActiveFiles.erase(Name);
+				}
+			} RemoveInclude{ mActiveFiles, IncludeName };
+
 			lcLibraryPrimitive* Primitive = !TextureMap ? Library->FindPrimitive(FileName) : nullptr;
 			lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 			IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
@@ -1649,14 +1706,60 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					return false;
 				}
 
+				lcLibraryMeshData FallbackData;
+				const lcLibraryMeshData* PrimitiveData = &Primitive->mMeshData;
+
+				if (!mUnavailableTextures.empty() && PrimitiveData->mHasTextures && !Primitive->mSubFile)
+				{
+					// Shared primitive data contains only the preferred branch. Reparse
+					// privately so this request cannot change other consumers' geometry.
+					lcMeshLoader Loader(FallbackData, mCurrentProject, mFlags);
+
+					Loader.mActiveFiles = mActiveFiles;
+					Loader.SetUnavailableTextures(mUnavailableTextures);
+					Loader.SetCancellationFlag(mCancelled);
+
+					lcLibraryPrimitive* LowPrimitive = nullptr;
+
+					if (!PrimitiveData->mData[LC_MESHDATA_LOW].IsEmpty())
+					{
+						const std::string LowName = std::string("8/") + Primitive->mName;
+
+						LowPrimitive = Library->FindPrimitive(LowName.c_str());
+					}
+
+					const lcResult<std::unique_ptr<lcFile>> PrimitiveFile = Library->OpenPrimitiveFile(Primitive);
+
+					if (!PrimitiveFile || !Loader.LoadMesh(*PrimitiveFile.value(), LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
+					{
+						mError = PrimitiveFile ? Loader.GetError() : PrimitiveFile.error();
+
+						return false;
+					}
+
+					if (LowPrimitive)
+					{
+						const lcResult<std::unique_ptr<lcFile>> LowFile = Library->OpenPrimitiveFile(LowPrimitive);
+
+						if (!LowFile || !Loader.LoadMesh(*LowFile.value(), LC_MESHDATA_LOW))
+						{
+							mError = LowFile ? Loader.GetError() : LowFile.error();
+
+							return false;
+						}
+					}
+
+					PrimitiveData = &FallbackData;
+				}
+
 				if (Primitive->mStud)
-					mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
+					mMeshData.AddMeshDataNoDuplicateCheck(*PrimitiveData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 				else if (!Primitive->mSubFile)
 				{
 					if (Optimize)
-						mMeshData.AddMeshData(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
+						mMeshData.AddMeshData(*PrimitiveData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 					else
-						mMeshData.AddMeshDataNoDuplicateCheck(Primitive->mMeshData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
+						mMeshData.AddMeshDataNoDuplicateCheck(*PrimitiveData, IncludeTransform, ColorCode, Mirror ^ InvertNext, InvertNext, TextureMap, MeshDataType);
 				}
 				else
 				{
@@ -1753,10 +1856,19 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 		}
 
 		if (ConsumeNext)
+		{
+			if (!FinishTextureMap(mTextureStack.back()))
+				return false;
+
 			mTextureStack.pop_back();
+		}
 
 		InvertNext = false;
 	}
+
+	for (size_t Index = TextureStackStart; Index < mTextureStack.size(); Index++)
+		if (!FinishTextureMap(mTextureStack[Index]))
+			return false;
 
 	mTextureStack.resize(TextureStackStart);
 

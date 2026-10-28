@@ -77,7 +77,9 @@ struct lcMeshLoaderFinalSection
 
 struct lcMeshLoaderTextureMap : public lcMeshLoaderTextureParams
 {
-	bool Fallback = false;
+	bool InFallback = false;
+	bool Active = true; // The enclosing branch was selected when this map started.
+	bool HasFallback = false;
 	bool Next = false;
 };
 
@@ -216,9 +218,27 @@ public:
 
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
 	static std::vector<std::string> GetTextureReferences(const QByteArray& FileData);
-	const QString& GetError() const { return mError; }
-	void SetCancellationFlag(const std::atomic_bool* Cancelled) { mCancelled = Cancelled; }
-	bool SearchProjectFolder() const { return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder); }
+
+	const QString& GetError() const
+	{
+		return mError;
+	}
+
+	// Names use the same normalized spelling as TEXMAP materials, without .PNG.
+	void SetUnavailableTextures(const std::set<std::string>& Names)
+	{
+		mUnavailableTextures = Names;
+	}
+
+	void SetCancellationFlag(const std::atomic_bool* Cancelled)
+	{
+		mCancelled = Cancelled;
+	}
+
+	bool SearchProjectFolder() const
+	{
+		return mFlags.testFlag(lcMeshLoaderFlag::SearchProjectFolder);
+	}
 
 	Project* mCurrentProject;
 
@@ -226,6 +246,11 @@ protected:
 	static bool ParseTextureName(const char* Text, char* Name, size_t NameSize, const char** EndOfName);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
 
+	bool IsTextureBranchActive() const;
+	bool FinishTextureMap(const lcMeshLoaderTextureMap& Map);
+
+	std::set<std::string> mUnavailableTextures;
+	std::unordered_set<std::string> mActiveFiles;
 	std::vector<lcMeshLoaderTextureMap> mTextureStack;
 
 	lcLibraryMeshData& mMeshData;

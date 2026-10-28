@@ -160,6 +160,7 @@ struct lcPieceSourceSnapshot
 	std::vector<QString> TextureSearchDirectories;
 	std::map<QString, std::shared_ptr<const lcEmbeddedData>> EmbeddedData;
 	QStringList InlineMeshLines;
+	std::set<std::string> UnavailableTextures;
 	bool InlineModel = false;
 	lcZipFileType ZipFileType;
 	int ZipFileIndex = -1;

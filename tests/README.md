@@ -109,3 +109,6 @@ world-space detachment across edit depths, camera deletion in multiple views,
 and perspective/orthographic tab-layout restoration, including version 1 layouts.
 POV-Ray checks verify light positions, targets, and area axes for all four light
 types under nested instance transforms and for root-model export.
+
+Mesh checks reject section-count overflow and malformed cached draw ranges,
+primitive counts, and vertex indices with both 16-bit and 32-bit index buffers.

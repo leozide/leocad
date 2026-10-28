@@ -476,6 +476,33 @@ bool lcMesh::FileLoad(lcMemFile& File)
 				File.ReadU32(&DrawCount, 1) != 1 || File.ReadU16(&PrimtiveType, 1) != 1)
 				return false;
 
+			if (DrawOffset > static_cast<quint32>(std::numeric_limits<int>::max()) ||
+				DrawCount > static_cast<quint32>(std::numeric_limits<int>::max()))
+				return false;
+
+			switch (PrimtiveType)
+			{
+			case LC_MESH_LINES:
+			case LC_MESH_TRIANGLES:
+			case LC_MESH_TEXTURED_TRIANGLES:
+			{
+				const quint32 PrimitiveSize = PrimtiveType == LC_MESH_LINES ? 2 : 3;
+
+				if (DrawOffset % IndexElementSize || DrawCount % PrimitiveSize ||
+					static_cast<quint64>(DrawOffset) + static_cast<quint64>(DrawCount) * IndexElementSize > IndexDataSize)
+					return false;
+				break;
+			}
+
+			case LC_MESH_CONDITIONAL_LINES:
+				if (DrawCount % 2 || static_cast<quint64>(DrawOffset) + DrawCount > ConditionalVertexCount)
+					return false;
+				break;
+
+			default:
+				return false;
+			}
+
 			Section.ColorIndex = static_cast<int>(ColorCode);
 			Section.DrawOffset = DrawOffset;
 			Section.DrawCount = DrawCount;
@@ -519,6 +546,31 @@ bool lcMesh::FileLoad(lcMemFile& File)
 		if (File.ReadU32((quint32*)mIndexData, mIndexDataSize / 4) != static_cast<size_t>(mIndexDataSize / 4))
 			return false;
 	}
+
+	for (const lcMeshLod& Lod : mLods)
+		for (int SectionIdx = 0; SectionIdx < Lod.NumSections; SectionIdx++)
+		{
+			const lcMeshSection& Section = Lod.Sections[SectionIdx];
+
+			if (Section.PrimitiveType == LC_MESH_CONDITIONAL_LINES)
+				continue;
+
+			const quint32 SectionVertexCount = Section.PrimitiveType == LC_MESH_TEXTURED_TRIANGLES ? TexturedVertexCount : VertexCount;
+			const size_t FirstIndex = Section.DrawOffset / IndexElementSize;
+
+			for (int Index = 0; Index < Section.DrawCount; Index++)
+			{
+				quint32 VertexIndex;
+
+				if (mIndexType == GL_UNSIGNED_SHORT)
+					VertexIndex = static_cast<const quint16*>(mIndexData)[FirstIndex + Index];
+				else
+					VertexIndex = static_cast<const quint32*>(mIndexData)[FirstIndex + Index];
+
+				if (VertexIndex >= SectionVertexCount)
+					return false;
+			}
+		}
 
 	return true;
 }

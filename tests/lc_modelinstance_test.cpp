@@ -6,6 +6,8 @@
 #include "lc_mainwindow.h"
 #include "lc_model.h"
 #include "lc_modelhistory.h"
+#include "lc_meshloader.h"
+#include "lc_file.h"
 #include "lc_piecedata.h"
 #include "lc_scene.h"
 #include "lc_selectdialog.h"
@@ -44,6 +46,9 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void MeshCacheValidation_data();
+	void MeshCacheValidation();
+	void MeshSectionCountOverflow();
 	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
@@ -53,6 +58,115 @@ private slots:
 private:
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+void lcModelInstanceTests::MeshCacheValidation_data()
+{
+	QTest::addColumn<bool>("WideIndices");
+	QTest::addColumn<quint16>("Primitive");
+	QTest::addColumn<quint32>("Offset");
+	QTest::addColumn<quint32>("Count");
+	QTest::addColumn<quint32>("VertexIndex");
+	QTest::addColumn<bool>("Accepted");
+
+	for (bool Wide : { false, true })
+	{
+		const QByteArray Prefix = Wide ? "wide-" : "short-";
+		const quint32 ElementSize = Wide ? 4 : 2;
+		const auto Row = [&](const char* Name, quint16 Primitive, quint32 Offset, quint32 Count, quint32 VertexIndex, bool Accepted)
+		{
+			QTest::newRow((Prefix + Name).constData()) << Wide << Primitive << Offset << Count << VertexIndex << Accepted;
+		};
+
+		Row("triangles", LC_MESH_TRIANGLES, 3 * ElementSize, 3, 2, true);
+		Row("lines", LC_MESH_LINES, 0, 6, 2, true);
+		Row("textured", LC_MESH_TEXTURED_TRIANGLES, 0, 6, 2, true);
+		Row("conditional", LC_MESH_CONDITIONAL_LINES, 0, 2, 0, true);
+		Row("empty", LC_MESH_TRIANGLES, 6 * ElementSize, 0, 0, true);
+		Row("offset", LC_MESH_TRIANGLES, 1000, 3, 0, false);
+		Row("alignment", LC_MESH_TRIANGLES, 1, 3, 0, false);
+		Row("count", LC_MESH_TRIANGLES, 0, 999, 0, false);
+		Row("triangle-count", LC_MESH_TRIANGLES, 0, 2, 0, false);
+		Row("line-count", LC_MESH_LINES, 0, 3, 0, false);
+		Row("vertex", LC_MESH_TRIANGLES, 0, 3, Wide ? 65536 : 3, false);
+		Row("textured-vertex", LC_MESH_TEXTURED_TRIANGLES, 0, 3, 3, false);
+		Row("conditional-offset", LC_MESH_CONDITIONAL_LINES, 2, 2, 0, false);
+		Row("conditional-count", LC_MESH_CONDITIONAL_LINES, 0, 1, 0, false);
+		Row("primitive", 3, 0, 0, 0, false);
+		Row("signed-offset", LC_MESH_TRIANGLES, 0xffffffff, 0, 0, false);
+		Row("signed-count", LC_MESH_TRIANGLES, 0, 0xffffffff, 0, false);
+	}
+}
+
+void lcModelInstanceTests::MeshCacheValidation()
+{
+	QFETCH(bool, WideIndices);
+	QFETCH(quint16, Primitive);
+	QFETCH(quint32, Offset);
+	QFETCH(quint32, Count);
+	QFETCH(quint32, VertexIndex);
+	QFETCH(bool, Accepted);
+
+	lcMemFile File;
+	File.WriteU32(LC_FOURCC('M', 'E', 'S', 'H'));
+	File.WriteU32(0x0123);
+	File.WriteU32(0);
+	for (int Index = 0; Index < 7; Index++)
+		File.WriteFloat(0);
+
+	const quint32 VertexCount = WideIndices ? 65536 : 3;
+	File.WriteU32(VertexCount);
+	File.WriteU32(3);
+	File.WriteU32(2);
+	File.WriteU32(6);
+	File.WriteU16(LC_NUM_MESH_LODS);
+	File.WriteU16(1);
+	File.WriteU16(0);
+	File.WriteU32(16);
+	File.WriteU32(Offset);
+	File.WriteU32(Count);
+	File.WriteU16(Primitive);
+	for (int Index = 0; Index < 7; Index++)
+		File.WriteFloat(0);
+	File.WriteU16(0);
+
+	const QByteArray Vertices(VertexCount * sizeof(lcVertex) + 3 * sizeof(lcVertexTextured) + 2 * sizeof(lcVertexConditional), 0);
+	File.WriteBuffer(Vertices.constData(), Vertices.size());
+	for (int Index = 0; Index < 6; Index++)
+	{
+		if (WideIndices)
+			File.WriteU32(VertexIndex);
+		else
+			File.WriteU16(VertexIndex);
+	}
+	File.Seek(0, SEEK_SET);
+
+	lcMesh Mesh;
+	QCOMPARE(Mesh.FileLoad(File), Accepted);
+}
+
+void lcModelInstanceTests::MeshSectionCountOverflow()
+{
+	lcLibraryMeshData Data;
+	Data.mData[LC_MESHDATA_HIGH].mVertices.resize(2);
+	for (lcMeshLoaderVertex& Vertex : Data.mData[LC_MESHDATA_HIGH].mVertices)
+	{
+		Vertex.Position = lcVector3(0, 0, 0);
+		Vertex.Normal = lcVector3(0, 0, 1);
+		Vertex.NormalWeight = 1;
+	}
+
+	std::vector<lcMeshLoaderMaterial> Materials(65536);
+	for (size_t Index = 0; Index < Materials.size(); Index++)
+	{
+		Materials[Index].Color = static_cast<quint32>(Index);
+		std::unique_ptr<lcMeshLoaderSection> Section(new lcMeshLoaderSection(LC_MESH_LINES, &Materials[Index]));
+		Section->mIndices = { 0, 1 };
+		Data.mData[LC_MESHDATA_HIGH].mSections.push_back(std::move(Section));
+	}
+
+	std::unique_ptr<lcMesh> Mesh(Data.CreateMesh(nullptr));
+	QVERIFY(!Mesh);
+}
 
 void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 {

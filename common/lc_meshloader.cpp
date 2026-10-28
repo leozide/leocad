@@ -830,6 +830,12 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::atomic_bool* Cancelled)
 			AddFinalSection(Section.get(), FinalSections[LodIdx]);
 		}
 
+		if (FinalSections[LodIdx].size() > std::numeric_limits<quint16>::max())
+		{
+			delete Mesh;
+			return nullptr;
+		}
+
 		NumSections[LodIdx] = static_cast<quint16>(FinalSections[LodIdx].size());
 	}
 

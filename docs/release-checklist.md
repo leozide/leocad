@@ -31,8 +31,8 @@
    - `qt/Info.plist`
    - `snapcraft.yaml`
    - `leocad.spec`
-   - `tools/setup/leocad.appdata.xml`
-   - In `tools/setup/leocad.appdata.xml`, add the new release entry; do not replace the existing release history.
+   - `tools/setup/org.leocad.LeoCAD.appdata.xml`
+   - In `tools/setup/org.leocad.LeoCAD.appdata.xml`, add the new release entry; do not replace the existing release history.
 
 7. Update translations
 

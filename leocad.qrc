@@ -133,6 +133,7 @@
         <file>resources/leocad_ru.qm</file>
         <file>resources/leocad_uk.qm</file>
         <file>resources/leocad_zh_CN.qm</file>
+        <file>resources/leocad_zh_TW.qm</file>
         <file>resources/shaders/fakelit_color_ps.glsl</file>
         <file>resources/shaders/fakelit_color_vs.glsl</file>
         <file>resources/shaders/fakelit_texture_decal_ps.glsl</file>

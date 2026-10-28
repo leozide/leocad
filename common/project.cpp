@@ -703,7 +703,7 @@ void Project::UpdateFileWatcher()
 {
 	QStringList Files;
 	QStringList Directories;
-	const bool Active = !mIsPreview && this == lcGetActiveProject() && !mFileName.isEmpty();
+	const bool Active = !mIsPreview && this == lcGetActiveProject() && !mFileName.isEmpty() && lcGetPreferences().mWatchFileChanges;
 	const bool WasWatching = !mFileWatcher.files().isEmpty() || !mFileWatcher.directories().isEmpty();
 
 	if (Active)

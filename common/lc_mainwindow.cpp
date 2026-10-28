@@ -475,6 +475,8 @@ void lcMainWindow::CreateMenus()
 	FileMenu->addAction(mActions[LC_FILE_EXIT]);
 
 	QMenu* EditMenu = menuBar()->addMenu(tr("&Edit"));
+	EditMenu->addAction(mActions[LC_VIEW_PREFERENCES]);
+	EditMenu->addSeparator();
 	EditMenu->addAction(mActions[LC_EDIT_UNDO]);
 	EditMenu->addAction(mActions[LC_EDIT_REDO]);
 	EditMenu->addSeparator();
@@ -499,8 +501,6 @@ void lcMainWindow::CreateMenus()
 	EditMenu->addMenu(mToolsMenu);
 
 	QMenu* ViewMenu = menuBar()->addMenu(tr("&View"));
-	ViewMenu->addAction(mActions[LC_VIEW_PREFERENCES]);
-	ViewMenu->addSeparator();
 	ViewMenu->addAction(mActions[LC_VIEW_ZOOM_EXTENTS]);
 	ViewMenu->addAction(mActions[LC_VIEW_LOOK_AT]);
 	ViewMenu->addMenu(mViewpointMenu);

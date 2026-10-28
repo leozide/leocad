@@ -168,9 +168,6 @@ lcResult<void> lcContext::InitializeRenderer(bool CreateRenderResources)
 
 	mRenderResourcesCreated = true;
 
-	if (!SupportsSelectionOutline())
-		lcGetPreferences().mHighlightRenderMode = lcHighlightRenderMode::Tint;
-
 	return lcResult<void>();
 }
 

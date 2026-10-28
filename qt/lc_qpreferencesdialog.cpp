@@ -281,13 +281,12 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 
 	if (!OutlineSupported)
 	{
-		mOptions->Preferences.mHighlightRenderMode = lcHighlightRenderMode::Tint;
-		lcGetPreferences().mHighlightRenderMode = lcHighlightRenderMode::Tint;
-		ui->HighlightRenderMode->setToolTip(tr("Outline rendering is unavailable; the Tint and Edges style will be used."));
+		ui->HighlightRenderMode->setToolTip(tr("Outline rendering is unavailable, so Tint and Edges is used while your saved highlight style is kept."));
 		ui->HighlightRenderModeLabel->setToolTip(ui->HighlightRenderMode->toolTip());
 	}
 
-	ui->HighlightRenderMode->setCurrentIndex(static_cast<int>(mOptions->Preferences.mHighlightRenderMode));
+	const lcHighlightRenderMode DisplayHighlightRenderMode = OutlineSupported ? mOptions->Preferences.mHighlightRenderMode : lcHighlightRenderMode::Tint;
+	ui->HighlightRenderMode->setCurrentIndex(static_cast<int>(DisplayHighlightRenderMode));
 	ui->HighlightRenderMode->setEnabled(OutlineSupported);
 	ui->HighlightRenderModeLabel->setEnabled(OutlineSupported);
 
@@ -431,7 +430,9 @@ void lcPreferencesDialog::accept()
 	}
 
 	mOptions->Preferences.mShadingMode = (lcShadingMode)ui->ShadingMode->currentIndex();
-	mOptions->Preferences.mHighlightRenderMode = static_cast<lcHighlightRenderMode>(ui->HighlightRenderMode->currentIndex());
+
+	if (ui->HighlightRenderMode->isEnabled())
+		mOptions->Preferences.mHighlightRenderMode = static_cast<lcHighlightRenderMode>(ui->HighlightRenderMode->currentIndex());
 
 	mOptions->StudStyle = static_cast<lcStudStyle>(ui->studStyleCombo->currentIndex());
 

@@ -14339,8 +14339,8 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qt/lc_qpreferencesdialog.cpp" line="286"/>
-        <source>Outline rendering is unavailable; the Tint and Edges style will be used.</source>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="284"/>
+        <source>Outline rendering is unavailable, so Tint and Edges is used while your saved highlight style is kept.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

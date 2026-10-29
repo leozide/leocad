@@ -99,6 +99,11 @@ and directory sources. Unofficial-only parts remain available. Cached descriptio
 and geometry from the older archive override policy are invalidated by the library
 cache version change.
 
+Within each library source, `parts/s/` entries take precedence over `p/s/` entries
+with the same include name. Directory discovery and ZIP discovery use this same
+rule regardless of archive entry order, matching loose-file lookup's `parts/`
+before `p/` search. Official sources still take precedence over unofficial sources.
+
 Scoped references remain bound to the library facade. After a manager release,
 the library invokes loader cancellation only for a live identity with one remaining
 reference, after the manager has released its registry lock.

@@ -23,7 +23,7 @@
 #include "lc_string.h"
 
 // Cache payloads use Qt compression with checksum validation.
-constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0114;
+constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0115;
 constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
 
 enum class lcLibrarySourceType
@@ -759,6 +759,12 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 		else if (!strncmp(Name, "P/", 2))
 		{
 			Name += 2;
+
+			// Match directory discovery and loose-file lookup: parts/s/ wins over p/s/.
+			const auto Existing = Source->Primitives.find(Name);
+
+			if (Existing != Source->Primitives.end() && Existing->second->mSubFile)
+				continue;
 
 			lcFileSource PrimitiveSource;
 			PrimitiveSource.ArchiveType = static_cast<int>(ZipFileType);

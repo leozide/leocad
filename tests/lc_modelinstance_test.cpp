@@ -46,6 +46,7 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void ArchiveSubpartPrecedence();
 	void TexmapFallbackBranches();
 	void TexmapFallbackLoading();
 	void TexmapFallbackIncludes();
@@ -61,6 +62,92 @@ private slots:
 private:
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+void lcModelInstanceTests::ArchiveSubpartPrecedence()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	const QByteArray Data = "0 Fixture\n3 16 0 0 0 1 0 0 0 1 0\n";
+	quint32 Crc = 0xffffffff;
+
+	for (unsigned char Byte : Data)
+	{
+		Crc ^= Byte;
+
+		for (int Bit = 0; Bit < 8; Bit++)
+			Crc = (Crc >> 1) ^ (0xedb88320u & (0u - (Crc & 1u)));
+	}
+
+	Crc ^= 0xffffffff;
+
+	for (bool SubpartFirst : { false, true })
+	{
+		std::vector<QByteArray> Names = { "ldraw/parts/root.dat", "ldraw/p/s/test.dat", "ldraw/parts/s/test.dat" };
+
+		if (SubpartFirst)
+			std::swap(Names[1], Names[2]);
+
+		// A small stored ZIP fixture lets the test control central-directory order.
+		QByteArray Zip;
+		QDataStream Stream(&Zip, QIODevice::WriteOnly);
+		Stream.setByteOrder(QDataStream::LittleEndian);
+		std::vector<quint32> Offsets;
+
+		for (const QByteArray& Name : Names)
+		{
+			Offsets.push_back(static_cast<quint32>(Zip.size()));
+			Stream << quint32(0x04034b50) << quint16(20) << quint16(0) << quint16(0) << quint32(0)
+				<< Crc << quint32(Data.size()) << quint32(Data.size()) << quint16(Name.size()) << quint16(0);
+			QCOMPARE(Stream.writeRawData(Name.constData(), Name.size()), qint64(Name.size()));
+			QCOMPARE(Stream.writeRawData(Data.constData(), Data.size()), qint64(Data.size()));
+		}
+
+		const quint32 CentralOffset = static_cast<quint32>(Zip.size());
+
+		for (size_t Index = 0; Index < Names.size(); Index++)
+		{
+			const QByteArray& Name = Names[Index];
+			Stream << quint32(0x02014b50) << quint16(20) << quint16(20) << quint16(0) << quint16(0) << quint32(0)
+				<< Crc << quint32(Data.size()) << quint32(Data.size()) << quint16(Name.size()) << quint16(0)
+				<< quint16(0) << quint16(0) << quint16(0) << quint32(0) << Offsets[Index];
+			QCOMPARE(Stream.writeRawData(Name.constData(), Name.size()), qint64(Name.size()));
+		}
+
+		const quint32 CentralSize = static_cast<quint32>(Zip.size()) - CentralOffset;
+		Stream << quint32(0x06054b50) << quint16(0) << quint16(0) << quint16(Names.size())
+			<< quint16(Names.size()) << CentralSize << CentralOffset << quint16(0);
+		QCOMPARE(Stream.status(), QDataStream::Ok);
+
+		const QString Path = Directory.filePath(SubpartFirst ? "subpart-first.zip" : "primitive-first.zip");
+		QFile File(Path);
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Zip), qint64(Zip.size()));
+		File.close();
+
+		for (int Pass = 0; Pass < 2; Pass++)
+		{
+			QVERIFY(Scope.Library->Load(Path, false, false));
+			lcLibraryPrimitive* Primitive = Scope.Library->FindPrimitive("S/TEST.DAT");
+			QVERIFY(Primitive);
+			QVERIFY(Primitive->mSubFile);
+			const lcResult<lcOpenedLibraryFile> Include = Scope.Library->OpenPieceDataFile("S/TEST.DAT");
+			QVERIFY(Include);
+			QVERIFY(Include.value().Source == Primitive->mSource);
+		}
+	}
+}
 
 void lcModelInstanceTests::TexmapFallbackBranches()
 {

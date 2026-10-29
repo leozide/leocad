@@ -739,6 +739,26 @@ void lcModelInstanceTests::RepeatedInstances()
 	lcView* View = Window->GetActiveView();
 	lcModelInstanceTestScene Scene;
 
+	{
+		lcCamera* Camera = Main->GetCameras()[0].get();
+		const lcCameraHistoryState Before = Camera->GetHistoryState();
+
+		// Opposite camera moves should remove the merged edit when it returns to
+		// the saved state, while an ordinary move must remain undoable.
+		Main->SetSaved();
+		Main->MoveCamera(Camera, lcVector3(1.0f, 0.0f, 0.0f));
+		QVERIFY(Main->IsModified());
+		QVERIFY(!(Camera->GetHistoryState() == Before));
+		Main->UndoAction();
+		QVERIFY(!Main->IsModified());
+		QVERIFY(Camera->GetHistoryState() == Before);
+		Main->RedoAction();
+		QVERIFY(Main->IsModified());
+		Main->MoveCamera(Camera, lcVector3(-1.0f, 0.0f, 0.0f));
+		QVERIFY(Camera->GetHistoryState() == Before);
+		QVERIFY(!Main->IsModified());
+	}
+
 	const auto Render = [&](const std::vector<lcPiece*>& EditingPath)
 	{
 		struct ModelState

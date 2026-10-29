@@ -6075,6 +6075,8 @@ void lcModel::MoveCamera(lcCamera* Camera, const lcVector3& Direction)
 	{
 		EndEditHistory();
 		EndHistorySequence(tr("Move"));
+
+		RemoveFirstUndoIfUnchanged();
 	}
 }
 

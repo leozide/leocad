@@ -1606,6 +1606,52 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 	View->RestoreModelEditingContext();
 
 	lcCamera* BCamera = B->GetCameras()[0].get();
+	// Orbit an off-center nested model through its translated/rotated instance.
+	// With no selection the pivot is the visible geometry center; selecting a
+	// piece must still use that piece's pivot in either camera coordinate frame.
+	{
+		std::vector<std::pair<lcObject*, bool>> Selection;
+		for (const std::unique_ptr<lcPiece>& Piece : B->GetPieces())
+			Selection.emplace_back(Piece.get(), Piece->IsSelected());
+		for (const std::unique_ptr<lcCamera>& Camera : B->GetCameras())
+			Selection.emplace_back(Camera.get(), Camera->IsSelected());
+		for (const std::unique_ptr<lcLight>& Light : B->GetLights())
+			Selection.emplace_back(Light.get(), Light->IsSelected());
+
+		const lcCameraHistoryState Before = BCamera->GetHistoryState();
+		for (bool Simple : { true, false })
+			for (bool Selected : { false, true })
+			{
+				for (const std::pair<lcObject*, bool>& Entry : Selection)
+					Entry.first->SetSelected(false);
+				B->GetPieces()[0]->SetSelected(Selected);
+
+				lcVector3 Min, Max;
+				QVERIFY(B->GetVisiblePiecesBoundingBox(Min, Max));
+				lcVector3 Center = (Min + Max) / 2.0f;
+				if (Selected)
+					Center = B->GetPieces()[0]->GetSectionPosition(LC_PIECE_SECTION_POSITION);
+				QVERIFY(lcLength(Center) > 1.0f);
+
+				View->SetCamera(BCamera, Simple);
+				lcCamera* Camera = View->GetCamera();
+				const lcMatrix44 ModelToCamera = Simple ? View->GetActiveSubmodelTransform() : lcMatrix44Identity();
+				const lcVector3 Pivot = lcMul31(Center, ModelToCamera);
+				const lcVector3 Position = Pivot + lcVector3(200, -300, 400);
+				Camera->SetViewpoint(Position, Pivot, lcVector3(0, 0, 1));
+				B->BeginMouseTool(lcTool::RotateView, View);
+				B->UpdateOrbitTool(Camera, ModelToCamera, 0.3f, -0.2f);
+				QVERIFY(lcLength(Camera->mTargetPosition - Pivot) < 0.001f);
+				QVERIFY(lcLength(Camera->mPosition - Position) > 1.0f);
+				QVERIFY(fabsf(lcLength(Camera->mPosition - Pivot) - lcLength(Position - Pivot)) < 0.001f);
+				B->EndMouseTool(lcTool::RotateView, View, false);
+			}
+
+		BCamera->SetHistoryState(Before);
+		for (const std::pair<lcObject*, bool>& Entry : Selection)
+			Entry.first->SetSelected(Entry.second);
+	}
+
 	BCamera->SetPosition(lcVector3(-300, 200, 200), 1, true);
 	BCamera->SetTargetPosition(lcVector3(-300, 200, 0), 1, true);
 	BCamera->SetPosition(lcVector3(300, 200, 300), 2, true);

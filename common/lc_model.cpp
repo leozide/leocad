@@ -5998,8 +5998,7 @@ void lcModel::UpdatePanTool(lcCamera* Camera, const lcVector3& Distance)
 
 void lcModel::UpdateOrbitTool(lcCamera* Camera, const lcMatrix44& ModelToCamera, float MouseX, float MouseY)
 {
-	lcVector3 Center;
-	GetSelectionCenter(Center);
+	const lcVector3 Center = GetSelectionOrModelCenter();
 
 	Camera->Orbit(MouseX - mMouseToolDistance.x, MouseY - mMouseToolDistance.y, lcMul31(Center, ModelToCamera), mCurrentStep, gMainWindow->GetAddKeys());
 	mMouseToolDistance.x = MouseX;

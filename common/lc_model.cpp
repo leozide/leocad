@@ -5539,13 +5539,20 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 			break;
 
 		case lcTool::Pan:
-		case lcTool::Zoom:
 		case lcTool::RotateView:
 		case lcTool::Roll:
 			if (!View->GetCamera()->IsSimple())
 			{
 				BeginHistorySequence();
 				BeginEditHistory();
+			}
+			break;
+
+		case lcTool::Zoom:
+			if (!View->GetCamera()->IsSimple())
+			{
+				BeginHistorySequence();
+				BeginMergeableEditHistory(lcModelHistoryEditMerge::DragZoom, lcObjectPropertyId::Count);
 			}
 			break;
 
@@ -5625,6 +5632,8 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		{
 			EndEditHistory();
 			EndHistorySequence(tr("Zoom"));
+
+			RemoveFirstUndoIfUnchanged();
 		}
 		break;
 
@@ -6122,12 +6131,12 @@ void lcModel::ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& Worl
 	}
 }
 
-void lcModel::Zoom(lcCamera* Camera, float Amount)
+void lcModel::Zoom(lcCamera* Camera, float Amount, lcModelHistoryEditMerge ModelHistoryEditMerge)
 {
 	if (!Camera->IsSimple())
 	{
 		BeginHistorySequence();
-		BeginMergeableEditHistory(lcModelHistoryEditMerge::KeyboardZoom, lcObjectPropertyId::Count);
+		BeginMergeableEditHistory(ModelHistoryEditMerge, lcObjectPropertyId::Count);
 	}
 
 	Camera->Zoom(Amount, mCurrentStep, gMainWindow->GetAddKeys());

@@ -3484,12 +3484,12 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_ZOOM_IN:
 		if (ActiveView)
-			ActiveView->Zoom(10.0f);
+			ActiveView->Zoom(10.0f, lcModelHistoryEditMerge::KeyboardZoom);
 		break;
 
 	case LC_VIEW_ZOOM_OUT:
 		if (ActiveView)
-			ActiveView->Zoom(-10.0f);
+			ActiveView->Zoom(-10.0f, lcModelHistoryEditMerge::KeyboardZoom);
 		break;
 
 	case LC_VIEW_ZOOM_EXTENTS:

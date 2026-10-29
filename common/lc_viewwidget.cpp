@@ -7,6 +7,7 @@
 #include "lc_mainwindow.h"
 #include "lc_context.h"
 #include "lc_view.h"
+#include "lc_modelhistory.h"
 #include "lc_texture.h"
 #include "lc_mesh.h"
 #include "lc_profile.h"
@@ -107,6 +108,9 @@ lcView* lcViewWidget::GetView() const
 
 void lcViewWidget::SetView(lcView* View)
 {
+	EndPanGesture();
+	EndRollGesture();
+
 	if (context())
 		makeCurrent();
 
@@ -292,26 +296,78 @@ void lcViewWidget::paintGL()
 
 bool lcViewWidget::event(QEvent* Event)
 {
+	if (Event->type() == QEvent::ShortcutOverride)
+	{
+		EndPanGesture();
+		EndRollGesture();
+	}
+
 	if (Event->type() == QEvent::NativeGesture)
 	{
 		QNativeGestureEvent* GestureEvent = static_cast<QNativeGestureEvent*>(Event);
 
 		switch (GestureEvent->gestureType())
 		{
+		case Qt::BeginNativeGesture:
+		case Qt::EndNativeGesture:
+			EndRollGesture();
+			break;
+
 		case Qt::ZoomNativeGesture:
-			mView->Zoom(GestureEvent->value() * 100.0f);
+			EndPanGesture();
+			EndRollGesture();
+			mView->Zoom(GestureEvent->value() * 100.0f, lcModelHistoryEditMerge::PinchZoom);
 			break;
 
 		case Qt::SmartZoomNativeGesture:
+			EndPanGesture();
+			EndRollGesture();
 			mView->ZoomExtents(lcGeometryBoundsMode::IncludeFallback, false);
 			break;
 
-		default:
+		case Qt::RotateNativeGesture:
+			EndPanGesture();
+			if (!mRollGestureActive)
+			{
+				if (mView->IsTracking() || !mView->GetActiveModel())
+					return QOpenGLWidget::event(Event);
+
+				mView->StartRollGesture();
+				mRollGestureAngle = 0.0f;
+				mRollGestureActive = true;
+			}
+
+			mRollGestureAngle += GestureEvent->value();
+			mView->UpdateRollGesture(mRollGestureAngle);
 			break;
+
+		default:
+			return QOpenGLWidget::event(Event);
 		}
+
+		Event->accept();
+		return true;
 	}
 
 	return QOpenGLWidget::event(Event);
+}
+
+void lcViewWidget::EndRollGesture()
+{
+	if (!mRollGestureActive)
+		return;
+
+	mView->EndRollGesture(true);
+	mRollGestureActive = false;
+}
+
+void lcViewWidget::EndPanGesture()
+{
+	if (!mPanGestureActive)
+		return;
+
+	mView->EndPanGesture(true);
+	mPanGestureActive = false;
 }
 
 void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
@@ -324,6 +380,9 @@ void lcViewWidget::focusInEvent(QFocusEvent* FocusEvent)
 
 void lcViewWidget::focusOutEvent(QFocusEvent* FocusEvent)
 {
+	EndPanGesture();
+	EndRollGesture();
+
 	if (mView)
 		mView->SetFocus(false);
 
@@ -354,6 +413,9 @@ void lcViewWidget::keyReleaseEvent(QKeyEvent* KeyEvent)
 
 void lcViewWidget::mousePressEvent(QMouseEvent* MouseEvent)
 {
+	EndPanGesture();
+	EndRollGesture();
+
 	float DeviceScale = GetDeviceScale();
 
 	mView->SetMousePosition(MouseEvent->x() * DeviceScale, mView->GetHeight() - MouseEvent->y() * DeviceScale - 1);
@@ -458,7 +520,13 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 			break;
 
 		case Qt::ScrollBegin:
-			mView->StartPanGesture();
+			EndPanGesture();
+			EndRollGesture();
+			if (!mView->IsTracking() && mView->GetActiveModel())
+			{
+				mView->StartPanGesture();
+				mPanGestureActive = true;
+			}
 			WheelEvent->accept();
 			return;
 
@@ -466,12 +534,16 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
 		case Qt::ScrollMomentum:
 #endif
-			mView->UpdatePanGesture(WheelEvent->pixelDelta().x(), -WheelEvent->pixelDelta().y());
+			if (mPanGestureActive)
+			{
+				const QPoint Delta = WheelEvent->pixelDelta() * GetDeviceScale();
+				mView->UpdatePanGesture(Delta.x(), -Delta.y());
+			}
 			WheelEvent->accept();
 			return;
 
 		case Qt::ScrollEnd:
-			mView->EndPanGesture(true);
+			EndPanGesture();
 			WheelEvent->accept();
 			return;
 		}
@@ -482,6 +554,9 @@ void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 		WheelEvent->ignore();
 		return;
 	}
+
+	EndPanGesture();
+	EndRollGesture();
 
 	float DeviceScale = GetDeviceScale();
 

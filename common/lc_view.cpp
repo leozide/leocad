@@ -3,6 +3,7 @@
 #include "lc_viewwidget.h"
 #include <stdlib.h>
 #include "lc_mainwindow.h"
+#include "lc_modelhistory.h"
 #include "light.h"
 #include "camera.h"
 #include "texfont.h"
@@ -2226,11 +2227,11 @@ void lcView::MoveCamera(const lcVector3& Direction)
 		ActiveModel->MoveCamera(mCamera, Direction);
 }
 
-void lcView::Zoom(float Amount)
+void lcView::Zoom(float Amount, lcModelHistoryEditMerge ModelHistoryEditMerge)
 {
 	lcModel* ActiveModel = GetActiveModel();
 	if (ActiveModel)
-		ActiveModel->Zoom(mCamera, Amount);
+		ActiveModel->Zoom(mCamera, Amount, ModelHistoryEditMerge);
 }
 
 void lcView::ZoomExtents(lcGeometryBoundsMode Mode, bool AdjustFarPlane)
@@ -2692,6 +2693,21 @@ void lcView::EndPanGesture(bool Accept)
 	lcModel* ActiveModel = GetActiveModel();
 
 	ActiveModel->EndMouseTool(lcTool::Pan, this, Accept);
+}
+
+void lcView::StartRollGesture()
+{
+	GetActiveModel()->BeginMouseTool(lcTool::Roll, this);
+}
+
+void lcView::UpdateRollGesture(float Angle)
+{
+	GetActiveModel()->UpdateRollTool(mCamera, Angle * LC_DTOR);
+}
+
+void lcView::EndRollGesture(bool Accept)
+{
+	GetActiveModel()->EndMouseTool(lcTool::Roll, this, Accept);
 }
 
 lcVector3 lcView::GetTrackballPoint(int x, int y) const
@@ -3646,5 +3662,5 @@ void lcView::OnMouseWheel(float Direction)
 	else if (mMouseModifiers & Qt::ShiftModifier)
 		Scale = 1.0f;
 
-	Zoom(static_cast<int>(Direction * Scale));
+	Zoom(static_cast<int>(Direction * Scale), lcModelHistoryEditMerge::WheelZoom);
 }

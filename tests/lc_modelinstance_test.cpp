@@ -12,6 +12,7 @@
 #include "lc_scene.h"
 #include "lc_selectdialog.h"
 #include "lc_view.h"
+#include "lc_viewwidget.h"
 #include "camera.h"
 #include "light.h"
 #include "piece.h"
@@ -811,6 +812,44 @@ void lcModelInstanceTests::RepeatedInstances()
 		QVERIFY(!Main->IsModified());
 	}
 
+	{
+		lcView ZoomView(lcViewType::View, Main);
+		ZoomView.SetCameraIndex(0);
+		lcCamera* Camera = ZoomView.GetCamera();
+		const lcCameraHistoryState Before = Camera->GetHistoryState();
+		const bool AddKeys = Window->GetAddKeys();
+		Window->SetAddKeys(false);
+		Main->SetSaved();
+		const QString UndoText = Window->mActions[LC_EDIT_UNDO]->text();
+		const bool UndoEnabled = Window->mActions[LC_EDIT_UNDO]->isEnabled();
+
+		Main->BeginMouseTool(lcTool::Zoom, &ZoomView);
+		Main->UpdateZoomTool(Camera, 10.0f);
+		Main->EndMouseTool(lcTool::Zoom, &ZoomView, true);
+		QVERIFY(Main->IsModified());
+		QVERIFY(!(Camera->GetHistoryState() == Before));
+		Main->UndoAction();
+		QVERIFY(Camera->GetHistoryState() == Before);
+		QVERIFY(!Main->IsModified());
+		Main->RedoAction();
+		QVERIFY(Main->IsModified());
+
+		Main->BeginMouseTool(lcTool::Zoom, &ZoomView);
+		Main->UpdateZoomTool(Camera, -10.0f);
+		Main->EndMouseTool(lcTool::Zoom, &ZoomView, true);
+		QVERIFY(Camera->GetHistoryState() == Before);
+		QVERIFY(!Main->IsModified());
+		QCOMPARE(Window->mActions[LC_EDIT_UNDO]->text(), UndoText);
+		QCOMPARE(Window->mActions[LC_EDIT_UNDO]->isEnabled(), UndoEnabled);
+
+		Main->BeginMouseTool(lcTool::Zoom, &ZoomView);
+		Main->UpdateZoomTool(Camera, 5.0f);
+		Main->EndMouseTool(lcTool::Zoom, &ZoomView, false);
+		QVERIFY(Camera->GetHistoryState() == Before);
+		QVERIFY(!Main->IsModified());
+		Window->SetAddKeys(AddKeys);
+	}
+
 	const auto Render = [&](const std::vector<lcPiece*>& EditingPath)
 	{
 		struct ModelState
@@ -1322,6 +1361,238 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 	A->UndoAction();
 	QVERIFY(ACamera->GetHistoryState() == ABeforeZoom);
 	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+
+	const auto SendGesture = [&](Qt::NativeGestureType Type, qreal Value)
+	{
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 2, 0))
+		QNativeGestureEvent Event(Type, QPointingDevice::primaryPointingDevice(), 2, QPointF(), QPointF(), QPointF(), Value, QPointF());
+#elif (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+		QNativeGestureEvent Event(Type, QPointingDevice::primaryPointingDevice(), QPointF(), QPointF(), QPointF(), Value, 0, 0);
+#else
+		QNativeGestureEvent Event(Type, QPointF(), QPointF(), QPointF(), Value, 0, 0);
+#endif
+		Event.setAccepted(false);
+		QVERIFY(QApplication::sendEvent(View->GetWidget(), &Event));
+		QVERIFY(Event.isAccepted());
+	};
+
+	const auto ApplyZoom = [&](lcModelHistoryEditMerge Source)
+	{
+		switch (Source)
+		{
+		case lcModelHistoryEditMerge::KeyboardZoom:
+			Window->mActions[LC_VIEW_ZOOM_IN]->trigger();
+			break;
+
+		case lcModelHistoryEditMerge::WheelZoom:
+		{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+			QWheelEvent Event(QPointF(100, 100), QPointF(100, 100), QPoint(), QPoint(0, 120), Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
+#else
+			QWheelEvent Event(QPointF(100, 100), QPointF(100, 100), QPoint(), QPoint(0, 120), 120, Qt::Vertical, Qt::NoButton, Qt::NoModifier);
+#endif
+			QApplication::sendEvent(View->GetWidget(), &Event);
+			break;
+		}
+
+		case lcModelHistoryEditMerge::PinchZoom:
+			SendGesture(Qt::BeginNativeGesture, 0);
+			SendGesture(Qt::ZoomNativeGesture, 0.1);
+			SendGesture(Qt::EndNativeGesture, 0);
+			break;
+
+		case lcModelHistoryEditMerge::DragZoom:
+			A->BeginMouseTool(lcTool::Zoom, View);
+			A->UpdateZoomTool(ACamera, 5.0f);
+			A->UpdateZoomTool(ACamera, 10.0f);
+			A->EndMouseTool(lcTool::Zoom, View, true);
+			break;
+
+		default:
+			QFAIL("Unexpected zoom source");
+		}
+	};
+
+	const lcModelHistoryEditMerge ZoomSources[] = { lcModelHistoryEditMerge::KeyboardZoom, lcModelHistoryEditMerge::WheelZoom,
+		lcModelHistoryEditMerge::PinchZoom, lcModelHistoryEditMerge::DragZoom };
+
+	// Repeat each action, then switch sources in both directions. Undo must keep
+	// each run of one source together without absorbing a different source.
+	for (lcModelHistoryEditMerge First : ZoomSources)
+		for (lcModelHistoryEditMerge Second : ZoomSources)
+		{
+			const lcCameraHistoryState Before = ACamera->GetHistoryState();
+			ApplyZoom(First);
+			ApplyZoom(First);
+			const lcCameraHistoryState AfterFirst = ACamera->GetHistoryState();
+			QVERIFY(!(AfterFirst == Before));
+			ApplyZoom(Second);
+			ApplyZoom(Second);
+			const lcCameraHistoryState AfterSecond = ACamera->GetHistoryState();
+			QVERIFY(!(AfterSecond == AfterFirst));
+			A->UndoAction();
+			if (First != Second)
+			{
+				QVERIFY(ACamera->GetHistoryState() == AfterFirst);
+				A->UndoAction();
+			}
+			QVERIFY(ACamera->GetHistoryState() == Before);
+			A->RedoAction();
+			if (First != Second)
+			{
+				QVERIFY(ACamera->GetHistoryState() == AfterFirst);
+				A->RedoAction();
+			}
+			QVERIFY(ACamera->GetHistoryState() == AfterSecond);
+			A->UndoAction();
+			if (First != Second)
+				A->UndoAction();
+			QVERIFY(ACamera->GetHistoryState() == Before);
+			QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+		}
+
+	// Keyboard and wheel input must finish a roll before starting another edit.
+	for (lcModelHistoryEditMerge Source : { lcModelHistoryEditMerge::KeyboardZoom, lcModelHistoryEditMerge::WheelZoom })
+	{
+		const lcCameraHistoryState Before = ACamera->GetHistoryState();
+		SendGesture(Qt::BeginNativeGesture, 0);
+		SendGesture(Qt::RotateNativeGesture, 8);
+		const lcCameraHistoryState Rolled = ACamera->GetHistoryState();
+		QVERIFY(!(Rolled == Before));
+		if (Source == lcModelHistoryEditMerge::KeyboardZoom)
+		{
+			QKeyEvent Shortcut(QEvent::ShortcutOverride, Qt::Key_Plus, Qt::ControlModifier);
+			QApplication::sendEvent(View->GetWidget(), &Shortcut);
+		}
+		ApplyZoom(Source);
+		ApplyZoom(Source);
+		const lcCameraHistoryState Zoomed = ACamera->GetHistoryState();
+		QVERIFY(!(Zoomed == Rolled));
+		SendGesture(Qt::EndNativeGesture, 0);
+		A->UndoAction();
+		QVERIFY(ACamera->GetHistoryState() == Rolled);
+		A->UndoAction();
+		QVERIFY(ACamera->GetHistoryState() == Before);
+		A->RedoAction();
+		QVERIFY(ACamera->GetHistoryState() == Rolled);
+		A->RedoAction();
+		QVERIFY(ACamera->GetHistoryState() == Zoomed);
+		A->UndoAction();
+		A->UndoAction();
+		QVERIFY(ACamera->GetHistoryState() == Before);
+		QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+	}
+
+	const lcCameraHistoryState BeforeRoll = ACamera->GetHistoryState();
+	lcCamera ExpectedRoll(false);
+	ExpectedRoll.SetHistoryState(BeforeRoll);
+	ExpectedRoll.Roll(15.0f * LC_DTOR, A->GetCurrentStep(), Window->GetAddKeys());
+
+	SendGesture(Qt::BeginNativeGesture, 0);
+	SendGesture(Qt::RotateNativeGesture, 10);
+	SendGesture(Qt::RotateNativeGesture, 5);
+	SendGesture(Qt::EndNativeGesture, 0);
+	QVERIFY(SameMatrix(ACamera->mWorldView, ExpectedRoll.mWorldView));
+	const lcCameraHistoryState AfterRoll = ACamera->GetHistoryState();
+	QVERIFY(!(AfterRoll == BeforeRoll));
+	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == BeforeRoll);
+	A->RedoAction();
+	QVERIFY(ACamera->GetHistoryState() == AfterRoll);
+
+	// A new gesture must start from zero and create a separate undo entry.
+	SendGesture(Qt::BeginNativeGesture, 0);
+	SendGesture(Qt::RotateNativeGesture, -5);
+	SendGesture(Qt::EndNativeGesture, 0);
+	ExpectedRoll.Roll(-5.0f * LC_DTOR, A->GetCurrentStep(), Window->GetAddKeys());
+	QVERIFY(SameMatrix(ACamera->mWorldView, ExpectedRoll.mWorldView));
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == AfterRoll);
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == BeforeRoll);
+
+	// Losing focus must close the edit even if the native end event is lost.
+	SendGesture(Qt::BeginNativeGesture, 0);
+	SendGesture(Qt::RotateNativeGesture, 8);
+	QFocusEvent FocusOut(QEvent::FocusOut);
+	QApplication::sendEvent(View->GetWidget(), &FocusOut);
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == BeforeRoll);
+	SendGesture(Qt::EndNativeGesture, 0);
+
+	View->SetCamera(ACamera, true);
+	QVERIFY(View->GetCamera()->IsSimple());
+	const lcCameraHistoryState SimpleBefore = View->GetCamera()->GetHistoryState();
+	SendGesture(Qt::BeginNativeGesture, 0);
+	SendGesture(Qt::RotateNativeGesture, 12);
+	SendGesture(Qt::EndNativeGesture, 0);
+	QVERIFY(!(View->GetCamera()->GetHistoryState() == SimpleBefore));
+	QVERIFY(ACamera->GetHistoryState() == BeforeRoll);
+	View->SetCamera(ACamera, false);
+
+	const auto SendPanWheel = [&](Qt::ScrollPhase Phase, const QPoint& Delta)
+	{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+		QWheelEvent Event(QPointF(100, 100), QPointF(100, 100), Delta, QPoint(), Qt::NoButton, Qt::NoModifier, Phase, false, Qt::MouseEventSynthesizedBySystem);
+#else
+		QWheelEvent Event(QPointF(100, 100), QPointF(100, 100), Delta, QPoint(), 0, Qt::Vertical, Qt::NoButton, Qt::NoModifier, Phase, Qt::MouseEventSynthesizedBySystem);
+#endif
+		Event.setAccepted(false);
+		QApplication::sendEvent(View->GetWidget(), &Event);
+		QVERIFY(Event.isAccepted());
+	};
+
+	const lcCameraHistoryState BeforePan = ACamera->GetHistoryState();
+	const QPoint PanDelta(15, 10);
+	const QPoint ScaledPanDelta = PanDelta * View->GetWidget()->GetDeviceScale();
+	View->StartPanGesture();
+	View->UpdatePanGesture(ScaledPanDelta.x(), -ScaledPanDelta.y());
+	View->EndPanGesture(true);
+	const lcCameraHistoryState ExpectedPan = ACamera->GetHistoryState();
+	QVERIFY(!(ExpectedPan == BeforePan));
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == BeforePan);
+
+	SendPanWheel(Qt::ScrollBegin, QPoint());
+	SendPanWheel(Qt::ScrollUpdate, PanDelta);
+	SendPanWheel(Qt::ScrollEnd, QPoint());
+	QVERIFY(ACamera->GetHistoryState() == ExpectedPan);
+	A->UndoAction();
+	QVERIFY(ACamera->GetHistoryState() == BeforePan);
+
+	for (bool LoseFocus : { false, true })
+		for (Qt::NativeGestureType Type : { Qt::ZoomNativeGesture, Qt::SmartZoomNativeGesture, Qt::RotateNativeGesture })
+		{
+			SendPanWheel(Qt::ScrollBegin, QPoint());
+			SendPanWheel(Qt::ScrollUpdate, PanDelta);
+			QVERIFY(ACamera->GetHistoryState() == ExpectedPan);
+
+			if (LoseFocus)
+			{
+				QFocusEvent PanFocusOut(QEvent::FocusOut);
+				QApplication::sendEvent(View->GetWidget(), &PanFocusOut);
+			}
+
+			SendGesture(Type, 0.1);
+			SendGesture(Qt::EndNativeGesture, 0);
+			const lcCameraHistoryState AfterInterrupt = ACamera->GetHistoryState();
+			QVERIFY(!(AfterInterrupt == ExpectedPan));
+
+			// Late momentum and end events must not move the camera or close another edit.
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+			SendPanWheel(Qt::ScrollMomentum, PanDelta);
+#else
+			SendPanWheel(Qt::ScrollUpdate, PanDelta);
+#endif
+			SendPanWheel(Qt::ScrollEnd, QPoint());
+			QVERIFY(ACamera->GetHistoryState() == AfterInterrupt);
+			A->UndoAction();
+			QVERIFY(ACamera->GetHistoryState() == ExpectedPan);
+			A->UndoAction();
+			QVERIFY(ACamera->GetHistoryState() == BeforePan);
+			QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
+		}
 
 	const lcMatrix44 AView = View->GetWorldViewMatrix();
 	A->SetSelectionAndFocusAction({ BInstance }, BInstance, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);

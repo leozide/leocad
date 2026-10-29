@@ -50,6 +50,8 @@ protected:
 
 	void UpdateOverlayGeometry();
 	void UpdateModelEditingLabel();
+	void EndRollGesture();
+	void EndPanGesture();
 
 	std::unique_ptr<lcView> mView;
 	QWidget* mOverlay = nullptr;
@@ -61,4 +63,7 @@ protected:
 	QStringList mModelEditingNames;
 	QSize mPreferredSize;
 	int mWheelAccumulator = 0;
+	float mRollGestureAngle = 0.0f;
+	bool mRollGestureActive = false;
+	bool mPanGestureActive = false;
 };

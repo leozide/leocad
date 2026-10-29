@@ -8,6 +8,7 @@
 
 struct lcInsertPieceInfo;
 enum class lcCameraProjection;
+enum class lcModelHistoryEditMerge;
 
 enum class lcDragState
 {
@@ -267,6 +268,9 @@ public:
 	void StartPanGesture();
 	void UpdatePanGesture(int dx, int dy);
 	void EndPanGesture(bool Accept);
+	void StartRollGesture();
+	void UpdateRollGesture(float Angle);
+	void EndRollGesture(bool Accept);
 	void StartOrbitTracking();
 	void StopTracking(bool Accept);
 	void CancelTrackingOrClearSelectionAction();
@@ -286,7 +290,7 @@ public:
 	void SetCameraProjection(lcCameraProjection CameraProjection);
 	void LookAt();
 	void MoveCamera(const lcVector3& Direction);
-	void Zoom(float Amount);
+	void Zoom(float Amount, lcModelHistoryEditMerge ModelHistoryEditMerge);
 	void ZoomExtents(lcGeometryBoundsMode Mode, bool AdjustFarPlane);
 	void ZoomExtentsAtStep(lcStep Step, lcGeometryBoundsMode Mode, bool AdjustFarPlane);
 

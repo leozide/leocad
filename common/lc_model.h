@@ -465,7 +465,7 @@ public:
 	void LookAt(lcCamera* Camera, const lcMatrix44& ModelToCamera);
 	void MoveCamera(lcCamera* Camera, const lcVector3& Direction);
 	void ZoomExtents(lcCamera* Camera, float Aspect, const lcMatrix44& WorldMatrix, lcGeometryBoundsMode Mode, bool AdjustFarPlane);
-	void Zoom(lcCamera* Camera, float Amount);
+	void Zoom(lcCamera* Camera, float Amount, lcModelHistoryEditMerge ModelHistoryEditMerge);
 
 	void MoveSelectedObjects(const lcVector3& Distance, lcModelTransformFlags Flags, lcModelHistoryEditMerge ModelHistoryEditMerge)
 	{

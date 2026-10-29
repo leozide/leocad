@@ -239,6 +239,7 @@ public:
 	void ToggleFullScreen();
 
 	void UpdateSelectedObjects(bool SelectionChanged);
+	void UpdateStatusBarPosition();
 	void UpdateTimeline(bool Clear, bool UpdateItems);
 	void UpdatePaste(bool Enabled);
 	void UpdateCurrentStep();

@@ -3462,6 +3462,9 @@ void lcModel::SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& Preview
 	Library->WaitForPieceData(RequiredPieceData);
 	mPreviewInsertPieceInfo = std::move(PreviewPieces);
 
+	if (gMainWindow && gMainWindow->GetActiveModel() == this)
+		gMainWindow->UpdateStatusBarPosition();
+
 	UpdateAllViews();
 }
 

@@ -2395,10 +2395,23 @@ void lcMainWindow::UpdateSelectedObjects(bool SelectionChanged)
 
 	mStatusBarLabel->setText(Message);
 
+	UpdateStatusBarPosition();
+}
+
+void lcMainWindow::UpdateStatusBarPosition()
+{
 	lcVector3 Position(0.0f, 0.0f, 0.0f);
+	lcModel* ActiveModel = GetActiveModel();
 
 	if (ActiveModel)
-		ActiveModel->GetFocusPosition(Position);
+	{
+		const std::vector<lcPreviewInsertPieceInfo>& PreviewPieces = ActiveModel->GetPreviewInsertPieceInfo();
+
+		if (!PreviewPieces.empty())
+			Position = PreviewPieces.back().Transform.GetTranslation();
+		else
+			ActiveModel->GetFocusPosition(Position);
+	}
 
 	QString Label("X: %1 Y: %2 Z: %3");
 	Label = Label.arg(QLocale::system().toString(Position[0], 'f', 2), QLocale::system().toString(Position[1], 'f', 2), QLocale::system().toString(Position[2], 'f', 2));

@@ -740,6 +740,58 @@ void lcModelInstanceTests::RepeatedInstances()
 	lcModelInstanceTestScene Scene;
 
 	{
+		QLabel* PositionLabel = nullptr;
+
+		for (QLabel* Label : Window->statusBar()->findChildren<QLabel*>())
+			if (Label->text().startsWith("X: "))
+				PositionLabel = Label;
+
+		QVERIFY(PositionLabel);
+
+		const auto PositionText = [](const lcVector3& Position)
+		{
+			return QString("X: %1 Y: %2 Z: %3").arg(QLocale::system().toString(Position.x, 'f', 2),
+				QLocale::system().toString(Position.y, 'f', 2), QLocale::system().toString(Position.z, 'f', 2));
+		};
+
+		Main->SetSelectionAndFocusAction({ SecondA }, SecondA, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+		const QString FocusText = PositionLabel->text();
+		const size_t PieceCount = Main->GetPieces().size();
+		const lcVector3 PreviewPosition(123.0f, -45.0f, 67.0f);
+		const lcMatrix44 PreviewTransform(lcMatrix33Identity(), PreviewPosition);
+
+		View->BeginDrag(lcDragState::Piece);
+		Main->SetPreviewInsertPieceInfo({ { Leaf->mPieceData.Get(), PreviewTransform, Leaf->GetColorIndex() } });
+		QCOMPARE(PositionLabel->text(), PositionText(PreviewPosition));
+		QCOMPARE(Main->GetPieces().size(), PieceCount);
+		QCOMPARE(Main->GetFocusObject(), static_cast<lcObject*>(SecondA));
+		Window->UpdateSelectedObjects(false);
+		QCOMPARE(PositionLabel->text(), PositionText(PreviewPosition));
+
+		const lcVector3 MovedPosition(-20.0f, 30.0f, 40.0f);
+		Main->SetPreviewInsertPieceInfo({ { Leaf->mPieceData.Get(), lcMatrix44(lcMatrix33Identity(), MovedPosition), Leaf->GetColorIndex() } });
+		QCOMPARE(PositionLabel->text(), PositionText(MovedPosition));
+		View->EndDrag(false);
+		QCOMPARE(PositionLabel->text(), FocusText);
+		QCOMPARE(Main->GetPieces().size(), PieceCount);
+
+		View->BeginDrag(lcDragState::Piece);
+		Main->SetPreviewInsertPieceInfo({ { Leaf->mPieceData.Get(), PreviewTransform, Leaf->GetColorIndex() } });
+		View->EndDrag(true);
+		QCOMPARE(Main->GetPieces().size(), PieceCount + 1);
+		QCOMPARE(PositionLabel->text(), PositionText(PreviewPosition));
+		Main->UndoAction();
+		QCOMPARE(PositionLabel->text(), FocusText);
+
+		Main->ClearSelectionAction();
+		View->BeginDrag(lcDragState::Piece);
+		Main->SetPreviewInsertPieceInfo({ { Leaf->mPieceData.Get(), PreviewTransform, Leaf->GetColorIndex() } });
+		QCOMPARE(PositionLabel->text(), PositionText(PreviewPosition));
+		View->EndDrag(false);
+		QCOMPARE(PositionLabel->text(), PositionText(lcVector3(0.0f, 0.0f, 0.0f)));
+	}
+
+	{
 		lcCamera* Camera = Main->GetCameras()[0].get();
 		const lcCameraHistoryState Before = Camera->GetHistoryState();
 

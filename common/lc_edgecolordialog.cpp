@@ -269,10 +269,9 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 	{
 		if (lcGetPreferences().mAutomateEdgeColor)
 		{
-			QMessageBox msgBox;
-			msgBox.setWindowTitle(tr("Select Black Edge Color"));
-			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Black pieces edge color will not be accessible.<br>Do you want to continue?"));
-			if (msgBox.exec() != QMessageBox::Accepted)
+			if (QMessageBox::question(this, tr("Select Black Edge Color"),
+				tr("Automate edge color appears to be enabled.<br>Black pieces edge color will not be accessible.<br>Do you want to continue?"),
+				QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
 				return;
 		}
 		Title = tr("Select Black Edge Color");
@@ -282,10 +281,9 @@ void lcAutomateEdgeColorDialog::ColorButtonClicked()
 	{
 		if (lcGetPreferences().mAutomateEdgeColor)
 		{
-			QMessageBox msgBox;
-			msgBox.setWindowTitle(tr("Select Dark Edge Color"));
-			msgBox.setText(tr("Automate edge color appears to be enabled.<br>Dark pieces edge color will not be accessible.<br>Do you want to continue?"));
-			if (msgBox.exec() != QMessageBox::Accepted)
+			if (QMessageBox::question(this, tr("Select Dark Edge Color"),
+				tr("Automate edge color appears to be enabled.<br>Dark pieces edge color will not be accessible.<br>Do you want to continue?"),
+				QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
 				return;
 		}
 		Title = tr("Select Dark Edge Color");

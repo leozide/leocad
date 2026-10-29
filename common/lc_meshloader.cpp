@@ -1783,10 +1783,10 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				}
 				else
 				{
-					const lcResult<lcOpenedLibraryFile> IncludeFile = Library->OpenPrimitiveFile(Primitive);
+					const lcResult<lcOpenedLibraryFile> PrimitiveFile = Library->OpenPrimitiveFile(Primitive);
 
-					if (IncludeFile)
-						IncludeLoaded = ReadMeshData(*IncludeFile.value().File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
+					if (PrimitiveFile)
+						IncludeLoaded = ReadMeshData(*PrimitiveFile.value().File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
 					else
 						IncludeLoaded = !mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes);
 				}

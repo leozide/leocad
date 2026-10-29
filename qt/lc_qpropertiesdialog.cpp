@@ -219,16 +219,24 @@ public:
 
 	bool operator<(const QTableWidgetItem& Other) const override
 	{
+		const lcPartsTableWidgetItem& OtherItem = static_cast<const lcPartsTableWidgetItem&>(Other);
+
+		if (mLast != OtherItem.mLast)
+		{
+			const QTableWidget* Table = tableWidget();
+			const bool Descending = Table && Table->horizontalHeader()->sortIndicatorOrder() == Qt::DescendingOrder;
+
+			return mLast == Descending;
+		}
+
 		if (mLast)
 			return false;
-
-		if (((const lcPartsTableWidgetItem&)Other).mLast)
-			return true;
 
 		if (column() > 0)
 		{
 			int Count = data(Qt::UserRole).toInt();
 			int OtherCount = Other.data(Qt::UserRole).toInt();
+
 			return Count < OtherCount;
 		}
 

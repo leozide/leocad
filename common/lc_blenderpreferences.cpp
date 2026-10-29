@@ -2699,9 +2699,9 @@ void lcBlenderPreferences::LoadSettings()
 			if (!Value.isEmpty())
 			{
 				if (LblIdx == LBL_USE_ARCHIVE_LIBRARY_MM && Value == "False")
-					mDefaultSettingsMM[LblIdx].value = QString::number(UseArchiveLibrary);
+					mBlenderSettingsMM[LblIdx].value = QString::number(UseArchiveLibrary);
 				else
-					mDefaultSettingsMM[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
+					mBlenderSettingsMM[LblIdx].value = Value == "True" ? "1" : Value == "False" ? "0" : Value;
 			}
 			if (LblIdx == LBL_RENDER_PERCENTAGE_MM || LblIdx == LBL_RESOLUTION_WIDTH || LblIdx == LBL_RESOLUTION_HEIGHT)
 			{

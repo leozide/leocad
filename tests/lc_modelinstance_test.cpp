@@ -60,6 +60,7 @@ private slots:
 	void TexturedDirectGeometry3DS();
 
 private:
+	void SeparateRotations(lcMainWindow* Window, lcModel* Model);
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
 
@@ -1104,6 +1105,90 @@ void lcModelInstanceTests::RepeatedInstances()
 	Window->SetCurrentModelTab(Main, false);
 	QCOMPARE(Window->GetActiveView()->GetActiveModel(), A);
 
+	SeparateRotations(Window, Main);
+
+}
+
+void lcModelInstanceTests::SeparateRotations(lcMainWindow* Window, lcModel* Model)
+{
+	Window->GetActiveView()->SetTopSubmodelActive();
+	const bool Separate = Window->GetSeparateTransform();
+	const bool Relative = Window->GetRelativeTransform();
+	lcCamera* Camera = Model->GetCameras()[0].get();
+	lcLight* Light = Model->GetLights()[0].get();
+	Camera->SetPosition(lcVector3(-500, 200, 100), 1, false);
+	Camera->SetTargetPosition(lcVector3(-400, 0, 0), 1, false);
+	Camera->UpdatePosition(Model->GetCurrentStep());
+
+	const auto CompareTransform = [](const lcMatrix44& First, const lcMatrix44& Second, int Rows)
+	{
+		for (int Row = 0; Row < Rows; Row++)
+			for (int Column = 0; Column < 4; Column++)
+				QVERIFY(fabsf(First[Row][Column] - Second[Row][Column]) < 0.001f);
+	};
+
+	const auto CheckRotation = [&](lcObject* Object)
+	{
+		Model->SetSelectionAndFocusAction({ Object }, Object, 0, lcSelectionMode::Single);
+		const auto GetTransform = [&]()
+		{
+			return Object->IsCamera() ? Camera->mWorldView : Light->GetWorldMatrix();
+		};
+
+		for (bool RelativeRotation : { false, true })
+		{
+			const lcMatrix44 Before = GetTransform();
+			lcModelTransformFlags Flags = lcModelTransformFlag::Checkpoint;
+			if (RelativeRotation)
+				Flags |= lcModelTransformFlag::Relative;
+
+			Window->SetRelativeTransform(RelativeRotation);
+			if (Object->IsCamera())
+			{
+				const lcMatrix33 ExpectedFrame = RelativeRotation ? lcMatrix33AffineInverse(lcMatrix33(Before)) : lcMatrix33Identity();
+				QVERIFY(lcMatrix33Similar(Model->GetRelativeRotation(), ExpectedFrame));
+			}
+
+			Window->SetSeparateTransform(false);
+			Model->RotateSelectedObjects(lcVector3(15, 25, 35), Flags, lcModelHistoryEditMerge::None);
+			const lcMatrix44 Expected = GetTransform();
+			Model->UndoAction();
+			CompareTransform(GetTransform(), Before, 4);
+
+			Window->SetSeparateTransform(true);
+			Model->RotateSelectedObjects(lcVector3(15, 25, 35), Flags, lcModelHistoryEditMerge::None);
+			CompareTransform(GetTransform(), Expected, 3);
+
+			// Local rotations must compose without discarding the original orientation.
+			const lcMatrix44 Rotated = GetTransform();
+			const lcMatrix33 Rotation = lcMul(lcMatrix33RotationZ(35 * LC_DTOR), lcMul(lcMatrix33RotationY(25 * LC_DTOR), lcMatrix33RotationX(15 * LC_DTOR)));
+			if (RelativeRotation)
+			{
+				const lcMatrix33 BeforeOrientation = Object->IsCamera() ? lcMatrix33AffineInverse(lcMatrix33(Before)) : lcMatrix33(Before);
+				const lcMatrix33 AfterOrientation = Object->IsCamera() ? lcMatrix33AffineInverse(lcMatrix33(Rotated)) : lcMatrix33(Rotated);
+				QVERIFY(lcMatrix33Similar(AfterOrientation, lcMul(Rotation, BeforeOrientation)));
+			}
+
+			Model->RotateSelectedObjects(lcMatrix33AffineInverse(Rotation), Flags, lcModelHistoryEditMerge::None);
+			CompareTransform(GetTransform(), Before, 4);
+			Model->UndoAction();
+			CompareTransform(GetTransform(), Rotated, 4);
+			Model->UndoAction();
+			CompareTransform(GetTransform(), Before, 4);
+		}
+	};
+
+	CheckRotation(Camera);
+	for (lcLightType Type : { lcLightType::Spot, lcLightType::Directional, lcLightType::Area })
+	{
+		Light->SetLightType(Type);
+		Light->SetRotation(lcMul(lcMatrix33RotationX(0.4f), lcMatrix33RotationZ(0.7f)), 1, false);
+		Light->UpdatePosition(Model->GetCurrentStep());
+		CheckRotation(Light);
+	}
+
+	Window->SetSeparateTransform(Separate);
+	Window->SetRelativeTransform(Relative);
 }
 
 void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B)

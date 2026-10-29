@@ -453,7 +453,7 @@ void lcCamera::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix
 	if (GetFocusSection() != LC_CAMERA_SECTION_POSITION && GetFocusSection() != LC_CAMERA_SECTION_INVALID)
 		return;
 
-	const lcMatrix33 LocalToWorldMatrix = lcMatrix33(mWorldView);
+	const lcMatrix33 LocalToWorldMatrix = lcMatrix33AffineInverse(lcMatrix33(mWorldView));
 
 	const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
 	lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);

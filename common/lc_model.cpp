@@ -3130,6 +3130,9 @@ lcMatrix33 lcModel::GetRelativeRotation() const
 			if (Focus->IsPiece())
 				return ((lcPiece*)Focus)->GetRelativeRotation();
 
+			if (Focus->IsCamera())
+				return ((lcCamera*)Focus)->GetRelativeRotation();
+
 			if (Focus->IsLight())
 				return ((lcLight*)Focus)->GetRelativeRotation();
 		}
@@ -4229,7 +4232,7 @@ void lcModel::RotateSelectedObjects(const lcMatrix33& InputRotationMatrix, lcMod
 						RelativeRotationMatrix = RotationMatrix;
 					}
 
-					Camera->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Camera->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RelativeRotationMatrix, Center, WorldToFocusMatrix);
 					Camera->UpdatePosition(mCurrentStep);
 					Rotated = true;
 				}
@@ -4253,7 +4256,7 @@ void lcModel::RotateSelectedObjects(const lcMatrix33& InputRotationMatrix, lcMod
 						RelativeRotationMatrix = RotationMatrix;
 					}
 
-					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RelativeRotationMatrix, Center, WorldToFocusMatrix);
 					Light->UpdatePosition(mCurrentStep);
 					Rotated = true;
 				}
@@ -4686,7 +4689,7 @@ bool lcModel::GetMoveRotateTransform(lcVector3& Center, lcMatrix33& RelativeRota
 		if (Camera->IsFocused() && Relative)
 		{
 			Center = Camera->GetSectionPosition(Camera->GetFocusSection());
-//			RelativeRotation = Piece->GetRelativeRotation();
+			RelativeRotation = Camera->GetRelativeRotation();
 			return true;
 		}
 

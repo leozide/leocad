@@ -119,7 +119,7 @@ public:
 		const quint32 Section = GetFocusSection();
 
 		if (Section == LC_CAMERA_SECTION_POSITION)
-			return lcMatrix33(mWorldView);
+			return lcMatrix33AffineInverse(lcMatrix33(mWorldView));
 		else
 			return lcMatrix33Identity();
 	}

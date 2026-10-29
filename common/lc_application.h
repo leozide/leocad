@@ -180,11 +180,6 @@ class lcApplication : public QApplication
 	Q_OBJECT
 
 public:
-	bool IsDarkTheme() const;
-	bool IsSystemPaletteDark() const
-	{
-		return mDefaultPalette.color(QPalette::Window).lightness() < 128;
-	}
 	lcApplication(int& Argc, char** Argv);
 	~lcApplication();
 
@@ -198,6 +193,7 @@ public:
 	lcStartupMode Initialize(const QList<QPair<QString, bool>>& LibraryPaths);
 	void Shutdown();
 	void ShowPreferencesDialog();
+	void ResetInterfaceColors(lcPreferences& Preferences, lcColorTheme ColorTheme);
 	void SaveTabLayout() const;
 
 	bool LoadPartsLibrary(const QList<QPair<QString, bool>>& LibraryPaths, bool OnlyUsePaths, lcStudStyle StudStyle, bool StudCylinderColorEnabled);
@@ -214,11 +210,11 @@ signals:
 	void RendererInitialized();
 
 protected:
+	void RestoreSystemStyle();
 	void UpdateStyle();
 	QString GetTabLayoutKey() const;
 
 	QString mDefaultStyle;
-	QPalette mDefaultPalette;
 	bool mCustomStyleApplied = false;
 };
 

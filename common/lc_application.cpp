@@ -156,7 +156,7 @@ void lcPreferences::SaveDefaults()
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 {
-	const bool SystemDark = ColorTheme == lcColorTheme::System && gApplication && gApplication->IsSystemPaletteDark();
+	const bool SystemDark = (ColorTheme == lcColorTheme::System) && (QApplication::palette().color(QPalette::Window).lightness() < 128);
 
 	if (ColorTheme == lcColorTheme::Dark || SystemDark)
 	{
@@ -197,7 +197,6 @@ lcApplication::lcApplication(int& Argc, char** Argv)
 
 	gApplication = this;
 	mDefaultStyle = style()->objectName();
-	mDefaultPalette = QApplication::palette();
 
 	lcProfileInit();
 
@@ -207,6 +206,38 @@ lcApplication::lcApplication(int& Argc, char** Argv)
 lcApplication::~lcApplication()
 {
 	gApplication = nullptr;
+}
+
+void lcApplication::ResetInterfaceColors(lcPreferences& Preferences, lcColorTheme ColorTheme)
+{
+	const bool RestoreDarkTheme = ColorTheme == lcColorTheme::System && mCustomStyleApplied;
+
+	if (RestoreDarkTheme)
+		RestoreSystemStyle();
+
+	Preferences.SetInterfaceColors(ColorTheme);
+
+	if (RestoreDarkTheme)
+		UpdateStyle();
+}
+
+void lcApplication::RestoreSystemStyle()
+{
+	qApp->setStyleSheet(QString());
+	QApplication::setStyle(mDefaultStyle);
+
+	// Clear our explicit color overrides so Qt resolves the current desktop palette.
+	QPalette SystemPalette;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	SystemPalette.setResolveMask(0);
+#else
+	SystemPalette.resolve(0);
+#endif
+
+	QApplication::setPalette(SystemPalette);
+
+	mCustomStyleApplied = false;
 }
 
 void lcApplication::UpdateStyle()
@@ -257,21 +288,8 @@ void lcApplication::UpdateStyle()
 	}
 	else if (mCustomStyleApplied)
 	{
-		// Restore the desktop style and colors exactly as the system provided them.
-		QApplication::setStyle(mDefaultStyle);
-		QApplication::setPalette(mDefaultPalette);
-		qApp->setStyleSheet(QString());
-
-		mCustomStyleApplied = false;
+		RestoreSystemStyle();
 	}
-}
-
-bool lcApplication::IsDarkTheme() const
-{
-	if (mPreferences.mColorTheme == lcColorTheme::Dark)
-		return true;
-
-	return IsSystemPaletteDark();
 }
 
 void lcApplication::SaveTabLayout() const

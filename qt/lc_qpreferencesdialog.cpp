@@ -529,7 +529,7 @@ void lcPreferencesDialog::ColorThemeCurrentIndexChanged(int Index)
 	Q_UNUSED(Index);
 
 	if (QMessageBox::question(this, tr("Reset Colors"), tr("Would you like to also reset the interface colors to match the color theme?")) == QMessageBox::Yes)
-		mOptions->Preferences.SetInterfaceColors(static_cast<lcColorTheme>(ui->ColorTheme->currentIndex()));
+		gApplication->ResetInterfaceColors(mOptions->Preferences, static_cast<lcColorTheme>(ui->ColorTheme->currentIndex()));
 }
 
 void lcPreferencesDialog::ColorButtonClicked()

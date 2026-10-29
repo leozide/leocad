@@ -156,7 +156,9 @@ void lcPreferences::SaveDefaults()
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
 {
-	if (ColorTheme == lcColorTheme::Dark)
+	const bool SystemDark = (ColorTheme == lcColorTheme::System) && (QApplication::palette().color(QPalette::Window).lightness() < 128);
+
+	if (ColorTheme == lcColorTheme::Dark || SystemDark)
 	{
 		mTextColor = LC_RGBA(214, 220, 227, 255);
 		mTextHaloColor = LC_RGBA(17, 19, 24, 160);
@@ -206,6 +208,38 @@ lcApplication::~lcApplication()
 	gApplication = nullptr;
 }
 
+void lcApplication::ResetInterfaceColors(lcPreferences& Preferences, lcColorTheme ColorTheme)
+{
+	const bool RestoreDarkTheme = ColorTheme == lcColorTheme::System && mCustomStyleApplied;
+
+	if (RestoreDarkTheme)
+		RestoreSystemStyle();
+
+	Preferences.SetInterfaceColors(ColorTheme);
+
+	if (RestoreDarkTheme)
+		UpdateStyle();
+}
+
+void lcApplication::RestoreSystemStyle()
+{
+	qApp->setStyleSheet(QString());
+	QApplication::setStyle(mDefaultStyle);
+
+	// Clear our explicit color overrides so Qt resolves the current desktop palette.
+	QPalette SystemPalette;
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+	SystemPalette.setResolveMask(0);
+#else
+	SystemPalette.resolve(0);
+#endif
+
+	QApplication::setPalette(SystemPalette);
+
+	mCustomStyleApplied = false;
+}
+
 void lcApplication::UpdateStyle()
 {
 	if (mPreferences.mColorTheme == lcColorTheme::Dark)
@@ -242,6 +276,7 @@ void lcApplication::UpdateStyle()
 		Palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128));
 
 		QApplication::setPalette(Palette);
+		mCustomStyleApplied = true;
 
 		QFile StylesheetFile(QLatin1String(":/stylesheet/stylesheet.qss"));
 
@@ -251,11 +286,9 @@ void lcApplication::UpdateStyle()
 			qApp->setStyleSheet(Stylesheet);
 		}
 	}
-	else
+	else if (mCustomStyleApplied)
 	{
-		QApplication::setStyle(mDefaultStyle);
-		QApplication::setPalette(qApp->style()->standardPalette());
-		qApp->setStyleSheet(QString());
+		RestoreSystemStyle();
 	}
 }
 

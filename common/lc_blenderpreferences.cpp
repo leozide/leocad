@@ -38,11 +38,6 @@ const QLatin1String LineEnding("\r\n");
 #define LC_BLENDER_ADDON_URL               LC_BLENDER_ADDON_STR "releases/latest/download/" LC_BLENDER_ADDON_FILE
 #define LC_BLENDER_ADDON_SHA_HASH_URL      LC_BLENDER_ADDON_URL ".sha256"
 
-#define LC_THEME_DARK_PALETTE_MIDLIGHT     QColor( 62,  62,  62, 255)
-#define LC_THEME_DEFAULT_PALETTE_LIGHT     QColor(174, 173, 172, 255)
-#define LC_THEME_DARK_DECORATE_QUOTED_TEXT "#81D4FA" // 129, 212, 250, 255
-#define LC_DISABLED_TEXT                   QColor(128, 128, 128, 255)
-
 #define LC_RENDER_IMAGE_MAX_SIZE           32768 // pixels
 
 static constexpr char WhatsThisDescription[] = QT_TRANSLATE_NOOP("QObject",
@@ -377,12 +372,8 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 	mContent->setLayout(mForm);
 
 	QPalette ReadOnlyPalette = QApplication::palette();
-	const lcPreferences& Preferences = lcGetPreferences();
-	if (Preferences.mColorTheme == lcColorTheme::Dark)
-		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DARK_PALETTE_MIDLIGHT);
-	else
-		ReadOnlyPalette.setColor(QPalette::Base, LC_THEME_DEFAULT_PALETTE_LIGHT);
-	ReadOnlyPalette.setColor(QPalette::Text, LC_DISABLED_TEXT);
+	for (QPalette::ColorGroup Group : { QPalette::Active, QPalette::Inactive, QPalette::Disabled })
+		ReadOnlyPalette.setBrush(Group, QPalette::Base, ReadOnlyPalette.brush(Group, QPalette::AlternateBase));
 
 	QGroupBox* BlenderExeBox = new QGroupBox(tr("Blender Executable"),mContent);
 	mForm->addRow(BlenderExeBox);
@@ -505,23 +496,19 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 		mImportMMActBox->setChecked(lcGetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE) == QLatin1String("MM"));
 	}
 
-	QString VersionTextColour = QApplication::palette().text().color().name(),AddonTextColour;
+	const QString TextColour = QApplication::palette().text().color().name();
 	QString VersionText = tr("Blender"), AddonText = tr("Blender Add-on");
 	if (mConfigured)
 	{
-		AddonTextColour = VersionTextColour;
 		mBlenderVersionEdit->setText(mBlenderVersion);
 		mBlenderVersionEdit->setVisible(true);
 	}
 	else
 	{
-		const QString TextColour = Preferences.mColorTheme == lcColorTheme::Dark ? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT) : QLatin1String("blue");
-
 		bool BlenderConfigured = !lcGetProfileString(LC_PROFILE_BLENDER_PATH).isEmpty();
 		if (!BlenderConfigured)
 		{
 			VersionText = tr("Blender not configured.");
-			VersionTextColour = TextColour;
 		}
 		else
 			mBlenderVersionEdit->setText(mBlenderVersion);
@@ -535,13 +522,12 @@ lcBlenderPreferences::lcBlenderPreferences(int Width, int Height, double Scale, 
 				AddonText = tr("Add-on not configured - Update.");
 			else
 				AddonText = tr("Add-on not configured.");
-			AddonTextColour = TextColour;
 		}
 	}
 
 	mAddonVersionEdit->setVisible(!mAddonVersion.isEmpty());
-	mBlenderVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(VersionTextColour));
-	mAddonVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(AddonTextColour));
+	mBlenderVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(TextColour));
+	mAddonVersionLabel->setStyleSheet(QString("QLabel { color : %1; }").arg(TextColour));
 	mBlenderVersionLabel->setText(VersionText);
 	mAddonVersionLabel->setText(AddonText);
 
@@ -1674,13 +1660,10 @@ void lcBlenderPreferences::StatusUpdate(bool Addon, bool Error, const QString& M
 
 		lcSetProfileString(LC_PROFILE_BLENDER_IMPORT_MODULE, QString());
 
-		const lcPreferences& Preferences = lcGetPreferences();
 		Label  = ! Message.isEmpty() ? Message : tr("%1 not configured").arg(Which);
 		Colour = Message.startsWith("Error:", Qt::CaseInsensitive)
 						? QLatin1String("red")
-						: Preferences.mColorTheme == lcColorTheme::Dark
-							? QLatin1String(LC_THEME_DARK_DECORATE_QUOTED_TEXT)
-							: QLatin1String("blue");
+						: QApplication::palette().text().color().name();
 
 		mDialogCancelled = true;
 	}

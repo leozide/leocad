@@ -296,7 +296,8 @@ void lcMinifigDialog::TemplateSaveButtonClicked()
 
 	for (int ItemIndex = 0; ItemIndex < LC_MFW_NUMITEMS; ItemIndex++)
 	{
-		Template.Parts[ItemIndex] = mMinifigWizard->mSettings[ItemIndex][mMinifigWizard->GetSelectionIndex(ItemIndex)].PieceData->mFileName;
+		const lcPieceData* PieceData = mMinifigWizard->mMinifig.PieceData[ItemIndex].Get();
+		Template.Parts[ItemIndex] = PieceData ? QString::fromLatin1(PieceData->mFileName) : QString();
 		Template.ColorCodes[ItemIndex] = mColorPickers[ItemIndex]->GetCurrentColorCode();
 		QDoubleSpinBox* AngleSpinBox = mSpinBoxes[ItemIndex];
 		Template.Angles[ItemIndex] = AngleSpinBox ? AngleSpinBox->value() : 0.0f;

@@ -257,6 +257,7 @@ protected slots:
 	void DoubleClicked(const QModelIndex& Index);
 
 protected:
+	bool event(QEvent* Event) override;
 	void SetIconSize(int Size);
 	void UpdateIconSize();
 	void UpdateItemGeometry();

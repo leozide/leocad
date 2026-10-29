@@ -829,6 +829,27 @@ void lcPartSelectionListView::SetIconSize(int Size)
 	UpdateIconSize();
 }
 
+bool lcPartSelectionListView::event(QEvent* Event)
+{
+	const bool Result = QListView::event(Event);
+
+	switch (Event->type())
+	{
+	case QEvent::ScreenChangeInternal:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+	case QEvent::DevicePixelRatioChange:
+#endif
+		if (mListModel)
+			UpdateIconSize();
+		break;
+
+	default:
+		break;
+	}
+
+	return Result;
+}
+
 void lcPartSelectionListView::UpdateIconSize()
 {
 	const int Size = gSupportsFramebufferObject ? mRequestedIconSize : NoIconSize;

@@ -23,6 +23,7 @@
 #include "lc_qutils.h"
 #include "lc_lxf.h"
 #include "lc_previewwidget.h"
+#include "lc_thumbnailmanager.h"
 #include "lc_string.h"
 #include <locale.h>
 
@@ -417,6 +418,14 @@ void lcModel::RefreshPreview() const
 {
 	if (mIsPreview || !mProject)
 		return;
+
+	std::vector<lcPieceData*> ChangedPieces;
+
+	for (const std::unique_ptr<lcModel>& Model : mProject->GetModels())
+		if (Model->IncludesModel(this))
+			ChangedPieces.push_back(Model->GetPieceData());
+
+	lcGetPiecesLibrary()->GetThumbnailManager()->RefreshPieces(ChangedPieces);
 
 	if (gMainWindow && gMainWindow->GetPreviewWidget())
 		gMainWindow->GetPreviewWidget()->RefreshModel(this);

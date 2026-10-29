@@ -805,6 +805,25 @@ void lcMainWindow::CreateToolBars()
 
 	PropertiesLayout->addWidget(TransformWidget);
 
+	// The panel is always exactly as tall as the rows it shows, so nothing is cut off or scrolled.
+	PropertiesScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+	auto UpdatePropertiesHeight = [this, PropertiesWidget, PropertiesLayout, PropertiesScrollArea, TransformWidget]()
+	{
+		const int Margin = 6;
+		const int ScrollHeight = mPropertiesWidget->sizeHint().height() + 2 * PropertiesScrollArea->frameWidth() + Margin;
+		const QMargins Margins = PropertiesLayout->contentsMargins();
+		const int PanelHeight = ScrollHeight + PropertiesLayout->spacing() + TransformWidget->sizeHint().height() + Margins.top() + Margins.bottom();
+
+		PropertiesScrollArea->setFixedHeight(ScrollHeight);
+		PropertiesWidget->setFixedHeight(PanelHeight);
+	};
+
+	connect(mPropertiesWidget, &lcPropertiesWidget::LayoutChanged, this, [UpdatePropertiesHeight]()
+	{
+		QTimer::singleShot(0, UpdatePropertiesHeight);
+	});
+
 	connect(mTransformXEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 	connect(mTransformYEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);
 	connect(mTransformZEdit, &QLineEdit::returnPressed, mActions[LC_EDIT_TRANSFORM], &QAction::trigger);

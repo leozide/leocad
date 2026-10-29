@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_view.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
 #include <string.h>
@@ -63,6 +64,8 @@ lcPiece::lcPiece(const lcPiece& Other)
 
 lcPiece::~lcPiece()
 {
+	lcView::RemoveSubmodelInstanceFromEditingPaths(this);
+
 	lcGetPiecesLibrary()->CancelSynthMesh(this);
 
 	if (mPieceData)
@@ -79,6 +82,9 @@ void lcPiece::SetPieceData(lcPieceDataRef PieceDataRef, const QString& ID, bool 
 {
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	const bool DataChanged = mPieceData != PieceDataRef;
+
+	if (DataChanged)
+		lcView::RemoveSubmodelInstanceFromEditingPaths(this);
 
 	if (DataChanged || UpdateSynthInfo)
 		Library->CancelSynthMesh(this);

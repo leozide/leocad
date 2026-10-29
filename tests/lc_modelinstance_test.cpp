@@ -1032,6 +1032,78 @@ void lcModelInstanceTests::RepeatedInstances()
 	QVERIFY(std::find(Scene.GetInterfaceObjects().begin(), Scene.GetInterfaceObjects().end(), A->GetLights()[0].get()) != Scene.GetInterfaceObjects().end());
 	CameraContexts(Window, View, Main, A, B);
 
+	// Force the insertion fallback beyond the clipping segment in a translated instance.
+	View = Window->GetActiveView();
+	View->SetTopSubmodelActive();
+	Main->SetSelectionAndFocusAction({ SecondA }, SecondA, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	for (const std::unique_ptr<lcPiece>& Piece : A->GetPieces())
+	{
+		Piece->SetSelected(false);
+		Piece->SetHidden(true);
+	}
+
+	lcCamera FallbackCamera(true);
+	FallbackCamera.SetViewpoint(lcVector3(1000, 0, 10000), lcVector3(1000, 0, 9000), lcVector3(0, 1, 0));
+	FallbackCamera.m_zNear = 1;
+	FallbackCamera.m_zFar = 10;
+	View->SetCamera(&FallbackCamera, true);
+	View->SetSize(1200, 600);
+	View->SetMousePosition(600, 300);
+	const lcVector3 WorldFallback = View->UnprojectPoint(lcVector3(600, 300, 0.9f));
+	const lcVector3 LocalFallback = lcMul31(WorldFallback, lcMatrix44AffineInverse(View->GetActiveSubmodelTransform()));
+	const std::pair<std::vector<lcInsertPieceInfo>, bool> Insert = View->GetMouseInsertPieceInfo(false, true, Leaf->mPieceData, nullptr);
+	QCOMPARE(Insert.first.size(), size_t(1));
+	QVERIFY(lcLength(Insert.first[0].Transform.GetTranslation() - LocalFallback) < 0.01f);
+
+	for (const std::unique_ptr<lcPiece>& Piece : A->GetPieces())
+		Piece->SetHidden(false);
+
+	// A hidden view must leave a deleted edit instance before any project redraw.
+	A->SetSelectionAndFocusAction({ FirstB }, FirstB, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	View->SetCameraIndex(0);
+	lcCamera BeforeDelete(true);
+	View->CopyCameraPosition(&BeforeDelete);
+	Window->SetCurrentModelTab(A, false);
+	A->EraserToolClicked(FirstB);
+	QCOMPARE(View->GetActiveModel(), A);
+	QCOMPARE(View->GetModelEditingPath().size(), size_t(2));
+	QVERIFY(View->GetCamera()->IsSimple());
+	for (int Row = 0; Row < 4; Row++)
+		for (int Column = 0; Column < 4; Column++)
+			QVERIFY(fabsf(View->GetWorldViewMatrix()[Row][Column] - BeforeDelete.mWorldView[Row][Column]) < 0.001f);
+
+	A->UndoAction();
+	Window->SetCurrentModelTab(Main, false);
+	FirstB = A->GetPieces()[0].get();
+	FirstB->SetFocused(LC_PIECE_SECTION_POSITION, true);
+	View->SetSelectedSubmodelActive();
+	Window->SetCurrentModelTab(A, false);
+	A->RedoAction();
+	QCOMPARE(View->GetActiveModel(), A);
+	Window->SetCurrentModelTab(Main, false);
+	QCOMPARE(Window->GetActiveView()->GetActiveModel(), A);
+
+	A->UndoAction();
+	FirstB = A->GetPieces()[0].get();
+	A->SetSelectionAndFocusAction({ FirstB }, FirstB, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	Window->SetCurrentModelTab(A, false);
+	A->DeleteSelectedObjects();
+	QCOMPARE(View->GetActiveModel(), A);
+
+	A->UndoAction();
+	Window->SetCurrentModelTab(Main, false);
+	FirstB = A->GetPieces()[0].get();
+	A->SetSelectionAndFocusAction({ FirstB }, FirstB, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	View->SetSelectedSubmodelActive();
+	Window->SetCurrentModelTab(A, false);
+	FirstB->SetPieceData(Leaf->mPieceData, QString(), false, true);
+	QCOMPARE(View->GetActiveModel(), A);
+	Window->SetCurrentModelTab(Main, false);
+	QCOMPARE(Window->GetActiveView()->GetActiveModel(), A);
+
 }
 
 void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B)

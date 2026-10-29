@@ -84,6 +84,31 @@ std::vector<lcView*> lcView::GetModelViews(const lcModel* Model)
 	return Views;
 }
 
+void lcView::RemoveSubmodelInstanceFromEditingPaths(const lcPiece* Piece)
+{
+	for (lcView* View : mViews)
+	{
+		const auto Instance = std::find(View->mSubmodelEditingPath.begin(), View->mSubmodelEditingPath.end(), Piece);
+
+		if (Instance == View->mSubmodelEditingPath.end())
+			continue;
+
+		// Detach while the old model and its camera still exist, preserving the world pose.
+		View->RemoveCamera();
+		View->mSubmodelEditingPath.erase(Instance, View->mSubmodelEditingPath.end());
+		View->mActiveSubmodelInstance = nullptr;
+		View->mActiveSubmodelTransform = lcMatrix44Identity();
+
+		for (lcPiece* Ancestor : View->mSubmodelEditingPath)
+		{
+			View->mActiveSubmodelInstance = Ancestor;
+			View->mActiveSubmodelTransform = lcMul(Ancestor->mModelWorld, View->mActiveSubmodelTransform);
+		}
+
+		View->Redraw();
+	}
+}
+
 std::vector<lcView*> lcView::GetCameraViews(const lcCamera* Camera)
 {
 	std::vector<lcView*> Views;
@@ -725,7 +750,9 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
-	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f))), gMainWindow->mColorIndex } }, false };
+	const lcVector3 FallbackPosition = lcMul31(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)), lcMatrix44AffineInverse(mActiveSubmodelTransform));
+
+	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Translation(FallbackPosition), gMainWindow->mColorIndex } }, false };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const

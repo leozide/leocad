@@ -219,6 +219,7 @@ public:
 	}
 
 	static std::vector<lcView*> GetModelViews(const lcModel* Model);
+	static void RemoveSubmodelInstanceFromEditingPaths(const lcPiece* Piece);
 	static std::vector<lcView*> GetCameraViews(const lcCamera* Camera);
 	static void UpdateProjectViews(const Project* Project);
 	static void UpdateAllViews();

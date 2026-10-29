@@ -8,13 +8,13 @@
 #include "lc_model.h"
 #include "lc_qutils.h"
 
-#ifndef LC_DISABLE_RENDER_DIALOG
+#if !LC_DISABLE_RENDER_DIALOG
 
 #define LC_POVRAY_PREVIEW_WIDTH 768
 #define LC_POVRAY_PREVIEW_HEIGHT 432
-#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+#if !LC_ENABLE_SYSTEM_POVRAY
 #define LC_POVRAY_MEMORY_MAPPED_FILE 1
-#endif
+#endif // !LC_ENABLE_SYSTEM_POVRAY
 
 void lcRenderPreviewWidget::resizeEvent(QResizeEvent* Event)
 {
@@ -292,19 +292,15 @@ void lcRenderDialog::RenderPOVRay()
 
 	QString POVRayPath;
 
-#ifdef Q_OS_WIN
-	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povconsole32-sse2.exe"));
-#endif
-
-#ifdef Q_OS_LINUX
+#if LC_ENABLE_SYSTEM_POVRAY
 	POVRayPath = lcGetProfileString(LC_PROFILE_POVRAY_PATH);
 	Arguments.append("+FN");
 	Arguments.append("-D");
-#endif
-
-#ifdef Q_OS_MACOS
+#elif defined(Q_OS_WIN)
+	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povconsole32-sse2.exe"));
+#elif defined(Q_OS_MACOS)
 	POVRayPath = QDir::cleanPath(QCoreApplication::applicationDirPath() + QLatin1String("/povray"));
-#endif
+#endif // LC_ENABLE_SYSTEM_POVRAY
 
 	const QString POVRayDir = QFileInfo(POVRayPath).absolutePath();
 	const QString IncludePath = QDir::cleanPath(POVRayDir + "/include");
@@ -336,9 +332,9 @@ void lcRenderDialog::RenderPOVRay()
 	}
 
 	lcRenderProcess* Process = new lcRenderProcess(this);
-#ifdef Q_OS_LINUX
+#if LC_ENABLE_SYSTEM_POVRAY
 	connect(Process, &QProcess::readyReadStandardError, this, [this]() { bool Error; ReadStdErr(Error); });
-#endif
+#endif // LC_ENABLE_SYSTEM_POVRAY
 	QStringList POVEnv = QProcess::systemEnvironment();
 	POVEnv.prepend("POV_IGNORE_SYSCONF_MSG=1");
 	Process->setEnvironment(POVEnv);
@@ -755,10 +751,10 @@ void lcRenderDialog::Update()
 
 	if (ProcessFinished)
 	{
-#ifdef Q_OS_LINUX
+#if LC_ENABLE_SYSTEM_POVRAY
 		QByteArray Output = mProcess->readAllStandardOutput();
 		mImage = QImage::fromData(Output);
-#endif
+#endif // LC_ENABLE_SYSTEM_POVRAY
 
 		ShowResult();
 		CloseProcess();
@@ -998,4 +994,4 @@ lcRenderProcess::~lcRenderProcess()
 	}
 }
 
-#endif // LC_DISABLE_RENDER_DIALOG
+#endif // !LC_DISABLE_RENDER_DIALOG

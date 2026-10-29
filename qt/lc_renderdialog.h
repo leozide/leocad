@@ -14,7 +14,7 @@ enum class lcRenderDialogMode
 	OpenInBlender
 };
 
-#ifndef LC_DISABLE_RENDER_DIALOG
+#if !LC_DISABLE_RENDER_DIALOG
 
 namespace Ui {
 class lcRenderDialog;
@@ -127,4 +127,4 @@ public:
 	}
 };
 
-#endif // LC_DISABLE_RENDER_DIALOG
+#endif // !LC_DISABLE_RENDER_DIALOG

@@ -12,7 +12,7 @@
 #include "lc_qutils.h"
 #include "project.h"
 
-#ifndef LC_DISABLE_BLENDER
+#if !LC_DISABLE_BLENDER
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 using Qt::SkipEmptyParts;

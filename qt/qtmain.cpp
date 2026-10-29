@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 	{
 #if !LC_DISABLE_UPDATE_CHECK
 		lcDoInitialUpdateCheck();
-#endif
+#endif // !LC_DISABLE_UPDATE_CHECK
 
 		ExecReturn = Application.exec();
 	}

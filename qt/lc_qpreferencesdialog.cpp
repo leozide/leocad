@@ -26,13 +26,13 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->setupUi(this);
 	lcSetupDialogHelp(this, ui->buttonBox);
 
-#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+#if !LC_ENABLE_SYSTEM_POVRAY
 	ui->povrayLabel->hide();
 	ui->povrayExecutable->hide();
 	ui->povrayExecutableBrowse->hide();
 	delete ui->povrayLabel;
 	delete ui->povrayLayout;
-#endif
+#endif // !LC_ENABLE_SYSTEM_POVRAY
 
 	ui->Language->addItem("\u010cesky");
 	ui->Language->addItem("Deutsch");
@@ -477,7 +477,7 @@ void lcPreferencesDialog::PartsArchiveBrowseClicked()
 
 void lcPreferencesDialog::BlenderAddonSettingsButtonClicked()
 {
-#ifndef LC_DISABLE_BLENDER
+#if !LC_DISABLE_BLENDER
 	int Width = 1280;
 	int Height = 720;
 	double Scale = 1.0f;
@@ -487,7 +487,7 @@ void lcPreferencesDialog::BlenderAddonSettingsButtonClicked()
 		Height,
 		Scale,
 		this);
-#endif // !LC_BLENDER_DISABLED
+#endif // !LC_DISABLE_BLENDER
 }
 
 void lcPreferencesDialog::ColorConfigBrowseButtonClicked()

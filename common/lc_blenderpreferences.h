@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef LC_DISABLE_BLENDER
+#if !LC_DISABLE_BLENDER
 
 #define LC_UNIX_SHELL                  "/bin/sh"
 #define LC_WINDOWS_SHELL               "cmd.exe"

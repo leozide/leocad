@@ -31,7 +31,7 @@
 
 #if LC_ENABLE_GAMEPAD
 #include <QtGamepad/QGamepad>
-#endif
+#endif // LC_ENABLE_GAMEPAD
 
 lcMainWindow* gMainWindow;
 constexpr quint32 LC_TAB_LAYOUT_VERSION = 0x0002;
@@ -457,12 +457,12 @@ void lcMainWindow::CreateMenus()
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_POVRAY]);
 	ExportMenu->addAction(mActions[LC_FILE_EXPORT_WAVEFRONT]);
 	FileMenu->addSeparator();
-#ifndef LC_DISABLE_RENDER_DIALOG
+#if !LC_DISABLE_RENDER_DIALOG
 	QMenu* RenderMenu = FileMenu->addMenu(tr("&Render"));
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_POVRAY]);
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_BLENDER]);
 	RenderMenu->addAction(mActions[LC_FILE_RENDER_OPEN_IN_BLENDER]);
-#endif
+#endif // !LC_DISABLE_RENDER_DIALOG
 	FileMenu->addAction(mActions[LC_FILE_INSTRUCTIONS]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT]);
 	FileMenu->addAction(mActions[LC_FILE_PRINT_PREVIEW]);
@@ -576,7 +576,7 @@ void lcMainWindow::CreateMenus()
 	HelpMenu->addAction(mActions[LC_HELP_BUG_REPORT]);
 #if !LC_DISABLE_UPDATE_CHECK
 	HelpMenu->addAction(mActions[LC_HELP_UPDATES]);
-#endif
+#endif // !LC_DISABLE_UPDATE_CHECK
 #ifndef Q_OS_MACOS
 	HelpMenu->addSeparator();
 #endif
@@ -1258,7 +1258,7 @@ void lcMainWindow::UpdateGamepads()
 
 	if (fabsf(Distance.LengthSquared()) > 0.01f)
 		ActiveView->MoveCamera(Distance);
-#endif
+#endif // LC_ENABLE_GAMEPAD
 }
 
 void lcMainWindow::ModelTabContextMenuRequested(const QPoint& Point)
@@ -1562,10 +1562,10 @@ void lcMainWindow::ShowExportPOVRayDialog()
 
 void lcMainWindow::ShowRenderDialog(lcRenderDialogMode RenderDialogMode)
 {
-#ifndef LC_DISABLE_RENDER_DIALOG
+#if !LC_DISABLE_RENDER_DIALOG
 	lcRenderDialog Dialog(this, RenderDialogMode);
 	Dialog.exec();
-#endif
+#endif // !LC_DISABLE_RENDER_DIALOG
 }
 
 void lcMainWindow::ShowInstructionsDialog()

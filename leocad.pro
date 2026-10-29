@@ -19,7 +19,7 @@ greaterThan(QT_MAJOR_VERSION, 5) {
 
 qtHaveModule(gamepad) {
 	QT += gamepad
-	DEFINES += LC_ENABLE_GAMEPAD
+	DEFINES += LC_ENABLE_GAMEPAD=1
 }
 
 INCLUDEPATH += qt common
@@ -38,6 +38,7 @@ win32 {
 
 	LIBS += -lwininet
 }
+
 win32-msvc* {
 	QMAKE_CXXFLAGS_WARN_ON += /W4 -wd4100
 	QMAKE_CXXFLAGS *= /MP
@@ -53,6 +54,14 @@ win32-msvc* {
 	LIBS += -lz
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wshadow
 	QMAKE_CXXFLAGS += -Werror=unused-result
+}
+
+!isEmpty(DISABLE_UPDATE_CHECK) {
+	DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK
+}
+
+!isEmpty(LDRAW_LIBRARY_PATH) {
+	DEFINES += LC_LDRAW_LIBRARY_PATH=\\\"$$LDRAW_LIBRARY_PATH\\\"
 }
 
 isEmpty(QMAKE_LRELEASE) {
@@ -92,8 +101,10 @@ QMAKE_EXTRA_COMPILERS += lrelease
 
 system($$QMAKE_LRELEASE -silent $$TSFILES)
 
-unix:!macx {
+unix:if(!macx|!isEmpty(DISABLE_MACOS_BUNDLE)) {
 	TARGET = leocad
+	COPY_INSTALL_FILES = yes
+	DEFINES += LC_ENABLE_SYSTEM_POVRAY=1
 } else {
 	TARGET = LeoCAD
 }
@@ -109,7 +120,36 @@ MOC_DIR = $$DESTDIR/.moc
 RCC_DIR = $$DESTDIR/.qrc
 UI_DIR = $$DESTDIR/.ui
 
-unix:!macx {
+macx {
+	ICON = resources/leocad.icns
+	QMAKE_INFO_PLIST = qt/Info.plist
+
+	document_icon.files += $$_PRO_FILE_PWD_/resources/leocad_document.icns
+	document_icon.path = Contents/Resources
+	QMAKE_BUNDLE_DATA += document_icon
+
+	CI = $$(CI)
+
+	!isEmpty(CI)|exists($$_PRO_FILE_PWD_/library.bin) {
+		library.files += $$_PRO_FILE_PWD_/library.bin
+		library.path = Contents/Resources
+		QMAKE_BUNDLE_DATA += library
+	}
+
+	!isEmpty(CI)|exists($$_PRO_FILE_PWD_/povray) {
+		povray.files += $$_PRO_FILE_PWD_/povray
+		povray.path = Contents/MacOS
+		QMAKE_BUNDLE_DATA += povray
+	}
+
+	DEFINES += LC_DISABLE_UPDATE_CHECK=1
+
+	!isEmpty(DISABLE_MACOS_BUNDLE) {
+		CONFIG -= app_bundle
+	}
+}
+
+!isEmpty(COPY_INSTALL_FILES) {
 	isEmpty(INSTALL_PREFIX):INSTALL_PREFIX = /usr
 	isEmpty(BIN_DIR):BIN_DIR = $$INSTALL_PREFIX/bin
 	isEmpty(DOCS_DIR):DOCS_DIR = $$INSTALL_PREFIX/share/doc/leocad
@@ -142,29 +182,6 @@ unix:!macx {
 	appdata.files = tools/setup/org.leocad.LeoCAD.appdata.xml
 
 	INSTALLS += target docs man desktop icons mime appdata
-
-	!isEmpty(DISABLE_UPDATE_CHECK) {
-		DEFINES += LC_DISABLE_UPDATE_CHECK=$$DISABLE_UPDATE_CHECK
-	}
-
-	!isEmpty(LDRAW_LIBRARY_PATH) {
-		DEFINES += LC_LDRAW_LIBRARY_PATH=\\\"$$LDRAW_LIBRARY_PATH\\\"
-	}
-}
-
-macx {
-	ICON = resources/leocad.icns
-	QMAKE_INFO_PLIST = qt/Info.plist
-
-	document_icon.files += $$_PRO_FILE_PWD_/resources/leocad_document.icns
-	document_icon.path = Contents/Resources
-	library.files += $$_PRO_FILE_PWD_/library.bin
-	library.path = Contents/Resources
-	povray.files += $$_PRO_FILE_PWD_/povray
-	povray.path = Contents/MacOS
-
-	QMAKE_BUNDLE_DATA += document_icon library povray
-	DEFINES += LC_DISABLE_UPDATE_CHECK=1
 }
 
 ios {

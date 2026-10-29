@@ -9,6 +9,12 @@ struct lcTrainTrackConnectionType;
 class lcZipFile;
 struct lcLibrarySource;
 
+struct lcOpenedLibraryFile
+{
+	std::unique_ptr<lcFile> File;
+	lcFileSource Source;
+};
+
 enum class lcStudStyle
 {
 	Plain,
@@ -52,13 +58,7 @@ enum class lcPrimitiveState
 class lcLibraryPrimitive
 {
 public:
-	explicit lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile);
-
-	void SetZipFile(lcZipFileType ZipFileType, quint32 ZipFileIndex)
-	{
-		mZipFileType = ZipFileType;
-		mZipFileIndex = ZipFileIndex;
-	}
+	explicit lcLibraryPrimitive(lcFileSource Source, const char* Name, bool Stud, bool StudStyle, bool SubFile);
 
 	void Unload()
 	{
@@ -67,10 +67,8 @@ public:
 		mLoadError.clear();
 	}
 
-	QString mFileName;
+	lcFileSource mSource;
 	char mName[LC_MAXNAME];
-	lcZipFileType mZipFileType;
-	quint32 mZipFileIndex;
 	lcPrimitiveState mState;
 	bool mStud;
 	bool mStudStyle;
@@ -226,8 +224,8 @@ public:
 
 	// Opens an owned include on the reading thread, positioned at zero, or returns an error.
 	// Piece lookup preserves official-first search order; callers decide whether missing includes are fatal.
-	lcResult<std::unique_ptr<lcFile>> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive);
-	lcResult<std::unique_ptr<lcFile>> OpenPieceDataFile(const char* PieceName);
+	lcResult<lcOpenedLibraryFile> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive);
+	lcResult<lcOpenedLibraryFile> OpenPieceDataFile(const char* PieceName);
 
 	// Worker builds poll this shutdown flag without consulting live UI state.
 	bool ShouldCancelLoading() const

@@ -250,7 +250,7 @@ protected:
 	bool FinishTextureMap(const lcMeshLoaderTextureMap& Map);
 
 	std::set<std::string> mUnavailableTextures;
-	std::unordered_set<std::string> mActiveFiles;
+	std::vector<lcFileSource> mActiveSources;
 	std::vector<lcMeshLoaderTextureMap> mTextureStack;
 
 	lcLibraryMeshData& mMeshData;

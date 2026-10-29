@@ -45,13 +45,15 @@ struct lcLibrarySource
 	std::map<std::string, std::unique_ptr<lcLibraryPrimitive>> Primitives;
 };
 
-lcLibraryPrimitive::lcLibraryPrimitive(QString&& FileName, const char* Name, lcZipFileType ZipFileType, quint32 ZipFileIndex, bool Stud, bool StudStyle, bool SubFile)
-	: mFileName(std::move(FileName))
+lcLibraryPrimitive::lcLibraryPrimitive(lcFileSource Source, const char* Name, bool Stud, bool StudStyle, bool SubFile)
+	: mSource(std::move(Source))
 {
+	Q_ASSERT(!mSource.EmbeddedData);
+	Q_ASSERT(mSource.FilePath.isEmpty() || (mSource.ArchiveType == -1 && mSource.ArchiveIndex == -1));
+	Q_ASSERT(!mSource.FilePath.isEmpty() || (mSource.ArchiveType >= 0 && mSource.ArchiveType < static_cast<int>(lcZipFileType::Count) && mSource.ArchiveIndex >= 0));
+
 	lcstrcpy(mName, Name);
 
-	mZipFileType = ZipFileType;
-	mZipFileIndex = ZipFileIndex;
 	mState = lcPrimitiveState::NotLoaded;
 	mStud = Stud;
 	mStudStyle = StudStyle;
@@ -746,13 +748,23 @@ bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType Zi
 				PieceData->SetZipFile(ZipFileType, FileIdx);
 			}
 			else
-				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, false, false, true);
+			{
+				lcFileSource PrimitiveSource;
+				PrimitiveSource.ArchiveType = static_cast<int>(ZipFileType);
+				PrimitiveSource.ArchiveIndex = FileIdx;
+
+				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(PrimitiveSource), FileInfo.file_name + (Name - NormalizedName.c_str()), false, false, true);
+			}
 		}
 		else if (!strncmp(Name, "P/", 2))
 		{
 			Name += 2;
 
-			Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(QString(), FileInfo.file_name + (Name - NormalizedName.c_str()), ZipFileType, FileIdx, IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
+			lcFileSource PrimitiveSource;
+			PrimitiveSource.ArchiveType = static_cast<int>(ZipFileType);
+			PrimitiveSource.ArchiveIndex = FileIdx;
+
+			Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(PrimitiveSource), FileInfo.file_name + (Name - NormalizedName.c_str()), IsStudPrimitive(Name), IsStudStylePrimitive(Name), false);
 		}
 	}
 
@@ -871,10 +883,16 @@ bool lcPiecesLibrary::OpenDirectory(const QDir& LibraryDir, bool ShowProgress)
 				if (BaseFolderIdx > 0 && FindPrimitive(Name.c_str()))
 					continue;
 
+				lcFileSource PrimitiveSource;
+				PrimitiveSource.FilePath = QFileInfo(FileName).canonicalFilePath();
+
+				if (PrimitiveSource.FilePath.isEmpty())
+					continue;
+
 				if (BaseFolderIdx == static_cast<int>(lcLibraryFolderType::Unofficial))
 					mHasUnofficial = true;
 
-				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(FileName), RelativeName, lcZipFileType::Count, 0, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
+				Source->Primitives[Name] = std::make_unique<lcLibraryPrimitive>(std::move(PrimitiveSource), RelativeName, !SubFile && IsStudPrimitive(Name.c_str()), IsStudStylePrimitive(Name.c_str()), SubFile);
 			}
 		}
 
@@ -1787,22 +1805,17 @@ void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Sourc
 	WriteCacheFile(Source.CachePath, MeshData, CacheType::Archive);
 }
 
-lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)
+lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)
 {
-	lcFileSource Source;
+	lcResult<std::unique_ptr<lcFile>> File = OpenFile(Primitive->mSource);
 
-	if (Primitive->mZipFileType != lcZipFileType::Count)
-	{
-		Source.ArchiveType = static_cast<int>(Primitive->mZipFileType);
-		Source.ArchiveIndex = Primitive->mZipFileIndex;
-	}
-	else
-		Source.FilePath = Primitive->mFileName;
+	if (!File)
+		return lcUnexpected(File.error());
 
-	return OpenFile(Source);
+	return lcOpenedLibraryFile{ std::move(File.value()), Primitive->mSource };
 }
 
-lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char* PieceName)
+lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPieceDataFile(const char* PieceName)
 {
 	const std::optional<lcPieceManager::FileInfo> FileInfo = mPieceManager->GetPieceDataFileInfo(PieceName);
 
@@ -1813,7 +1826,12 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 			lcFileSource Source;
 			Source.ArchiveType = static_cast<int>(FileInfo->ZipFileType);
 			Source.ArchiveIndex = FileInfo->ZipFileIndex;
-			return OpenFile(Source);
+			lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source);
+
+			if (!File)
+				return lcUnexpected(File.error());
+
+			return lcOpenedLibraryFile{ std::move(File.value()), Source };
 		}
 
 		if (!FileInfo)
@@ -1841,7 +1859,7 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 					Source.ArchiveIndex = *FileIndex;
 
 					if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
-						return File;
+						return lcOpenedLibraryFile{ std::move(File.value()), Source };
 				}
 			}
 
@@ -1870,7 +1888,10 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 		Source.FilePath = mLibraryDir.absoluteFilePath(FileName);
 
 		if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
-			return File;
+		{
+			Source.FilePath = QFileInfo(Source.FilePath).canonicalFilePath();
+			return lcOpenedLibraryFile{ std::move(File.value()), Source };
+		}
 
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
 		if (!FileInfo)
@@ -1878,7 +1899,10 @@ lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenPieceDataFile(const char*
 			Source.FilePath = mLibraryDir.absoluteFilePath(FileName.toLower());
 
 			if (lcResult<std::unique_ptr<lcFile>> File = OpenFile(Source))
-				return File;
+			{
+				Source.FilePath = QFileInfo(Source.FilePath).canonicalFilePath();
+				return lcOpenedLibraryFile{ std::move(File.value()), Source };
+			}
 		}
 #endif
 	}
@@ -2249,22 +2273,22 @@ lcResult<void> lcPiecesLibrary::LoadPrimitiveData(lcLibraryPrimitive* Primitive)
 		}
 	}
 
-	const lcResult<std::unique_ptr<lcFile>> File = OpenPrimitiveFile(Primitive);
+	const lcResult<lcOpenedLibraryFile> File = OpenPrimitiveFile(Primitive);
 
 	if (!File)
 		return LoadFailed(File.error());
 
-	if (!MeshLoader.LoadMesh(*File.value(), LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
+	if (!MeshLoader.LoadMesh(*File.value().File, LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
 		return LoadFailed(MeshLoader.GetError());
 
 	if (LowPrimitive)
 	{
-		const lcResult<std::unique_ptr<lcFile>> LowFile = OpenPrimitiveFile(LowPrimitive);
+		const lcResult<lcOpenedLibraryFile> LowFile = OpenPrimitiveFile(LowPrimitive);
 
 		if (!LowFile)
 			return LoadFailed(LowFile.error());
 
-		if (!MeshLoader.LoadMesh(*LowFile.value(), LC_MESHDATA_LOW))
+		if (!MeshLoader.LoadMesh(*LowFile.value().File, LC_MESHDATA_LOW))
 			return LoadFailed(MeshLoader.GetError());
 	}
 

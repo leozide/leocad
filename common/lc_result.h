@@ -73,6 +73,15 @@ public:
 	}
 
 	template <typename U = T, typename = std::enable_if_t<!std::is_void_v<U> && std::is_same_v<U, T>>>
+	constexpr U& value()
+	{
+		if (!has_value())
+			throw std::logic_error("bad lcResult access");
+
+		return std::get<0>(mStorage);
+	}
+
+	template <typename U = T, typename = std::enable_if_t<!std::is_void_v<U> && std::is_same_v<U, T>>>
 	constexpr const U& value() const
 	{
 		if (!has_value())

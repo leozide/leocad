@@ -1669,27 +1669,47 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					*Ch = '/';
 			}
 
-			const std::string IncludeName = QDir::cleanPath(QString::fromLatin1(FileName)).toStdString();
+			lcLibraryPrimitive* Primitive = !TextureMap ? Library->FindPrimitive(FileName) : nullptr;
+			lcFileSource IncludeSource;
+			std::optional<lcResult<lcOpenedLibraryFile>> IncludeFile;
 
-			if (!mActiveFiles.insert(IncludeName).second)
+			if (Primitive)
+				IncludeSource = Primitive->mSource;
+			else
+			{
+				IncludeFile.emplace(Library->OpenPieceDataFile(FileName));
+
+				if (!*IncludeFile)
+				{
+					if (!mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes))
+						break;
+
+					mError = IncludeFile->error();
+					return false;
+				}
+
+				IncludeSource = IncludeFile->value().Source;
+			}
+
+			if (std::find(mActiveSources.begin(), mActiveSources.end(), IncludeSource) != mActiveSources.end())
 			{
 				mError = tr("Circular include '%1'.").arg(QString::fromLatin1(OriginalFileName));
 
 				return false;
 			}
 
+			mActiveSources.push_back(IncludeSource);
+
 			struct IncludeGuard
 			{
-				std::unordered_set<std::string>& ActiveFiles;
-				const std::string& Name;
+				std::vector<lcFileSource>& Sources;
 
 				~IncludeGuard()
 				{
-					ActiveFiles.erase(Name);
+					Sources.pop_back();
 				}
-			} RemoveInclude{ mActiveFiles, IncludeName };
+			} RemoveInclude{ mActiveSources };
 
-			lcLibraryPrimitive* Primitive = !TextureMap ? Library->FindPrimitive(FileName) : nullptr;
 			lcMatrix44 IncludeTransform(lcVector4(fm[3], fm[6], fm[9], 0.0f), lcVector4(fm[4], fm[7], fm[10], 0.0f), lcVector4(fm[5], fm[8], fm[11], 0.0f), lcVector4(fm[0], fm[1], fm[2], 1.0f));
 			IncludeTransform = lcMul(IncludeTransform, CurrentTransform);
 			bool Mirror = IncludeTransform.Determinant() < 0.0f;
@@ -1715,7 +1735,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 					// privately so this request cannot change other consumers' geometry.
 					lcMeshLoader Loader(FallbackData, mCurrentProject, mFlags);
 
-					Loader.mActiveFiles = mActiveFiles;
+					Loader.mActiveSources = mActiveSources;
 					Loader.SetUnavailableTextures(mUnavailableTextures);
 					Loader.SetCancellationFlag(mCancelled);
 
@@ -1728,9 +1748,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 						LowPrimitive = Library->FindPrimitive(LowName.c_str());
 					}
 
-					const lcResult<std::unique_ptr<lcFile>> PrimitiveFile = Library->OpenPrimitiveFile(Primitive);
+					const lcResult<lcOpenedLibraryFile> PrimitiveFile = Library->OpenPrimitiveFile(Primitive);
 
-					if (!PrimitiveFile || !Loader.LoadMesh(*PrimitiveFile.value(), LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
+					if (!PrimitiveFile || !Loader.LoadMesh(*PrimitiveFile.value().File, LowPrimitive ? LC_MESHDATA_HIGH : LC_MESHDATA_SHARED))
 					{
 						mError = PrimitiveFile ? Loader.GetError() : PrimitiveFile.error();
 
@@ -1739,9 +1759,9 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 					if (LowPrimitive)
 					{
-						const lcResult<std::unique_ptr<lcFile>> LowFile = Library->OpenPrimitiveFile(LowPrimitive);
+						const lcResult<lcOpenedLibraryFile> LowFile = Library->OpenPrimitiveFile(LowPrimitive);
 
-						if (!LowFile || !Loader.LoadMesh(*LowFile.value(), LC_MESHDATA_LOW))
+						if (!LowFile || !Loader.LoadMesh(*LowFile.value().File, LC_MESHDATA_LOW))
 						{
 							mError = LowFile ? Loader.GetError() : LowFile.error();
 
@@ -1763,10 +1783,10 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				}
 				else
 				{
-					const lcResult<std::unique_ptr<lcFile>> IncludeFile = Library->OpenPrimitiveFile(Primitive);
+					const lcResult<lcOpenedLibraryFile> IncludeFile = Library->OpenPrimitiveFile(Primitive);
 
 					if (IncludeFile)
-						IncludeLoaded = ReadMeshData(*IncludeFile.value(), IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
+						IncludeLoaded = ReadMeshData(*IncludeFile.value().File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
 					else
 						IncludeLoaded = !mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes);
 				}
@@ -1775,12 +1795,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 			}
 			else
 			{
-				const lcResult<std::unique_ptr<lcFile>> IncludeFile = Library->OpenPieceDataFile(FileName);
-
-				if (IncludeFile)
-					IncludeLoaded = ReadMeshData(*IncludeFile.value(), IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
-				else
-					IncludeLoaded = !mFlags.testFlag(lcMeshLoaderFlag::RequireAllIncludes);
+				IncludeLoaded = ReadMeshData(*IncludeFile->value().File, IncludeTransform, ColorCode, Mirror ^ InvertNext, MeshDataType);
 			}
 
 			if (!IncludeLoaded)

@@ -224,6 +224,22 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 		"0 !TEXMAP END\n"
 		"0 !TEXMAP END\n"));
 
+	// A primitive and a part may share a name. TEXMAP file lookup selects the part.
+	QVERIFY(Write("parts/same.dat", "0 Same-name part\n3 16 0 0 0 1 0 0 0 1 0\n"));
+	QVERIFY(Write("p/same.dat",
+		"0 Same-name primitive\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 available.png\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 same.dat\n"
+		"0 !TEXMAP END\n"));
+	QVERIFY(Write("parts/collision.dat",
+		"0 Source folder collision\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 other.png\n"
+		"3 16 0 0 0 1 0 0 0 1 0\n"
+		"0 !TEXMAP FALLBACK\n"
+		"3 16 0 0 0 1 0 0 0 1 0\n"
+		"0 !TEXMAP END\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 same.dat\n"));
+
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 
 	QVERIFY(Library->Load(Directory.path(), false, false));
@@ -247,6 +263,28 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 	QVERIFY(Cycle);
 	QVERIFY(!Library->EnsurePieceDataAssetsReady(Cycle));
 	QVERIFY(Library->GetPieceDataLoadError(Cycle.Get()).contains("Circular include"));
+
+	lcLibraryPrimitive* SamePrimitive = Library->FindPrimitive("SAME.DAT");
+	QVERIFY(SamePrimitive);
+	const lcResult<lcOpenedLibraryFile> PrimitiveFile = Library->OpenPrimitiveFile(SamePrimitive);
+	QVERIFY(PrimitiveFile);
+	QVERIFY(PrimitiveFile.value().Source == SamePrimitive->mSource);
+	QCOMPARE(PrimitiveFile.value().Source.FilePath, QFileInfo(Directory.filePath("p/same.dat")).canonicalFilePath());
+	const lcResult<lcOpenedLibraryFile> SameFile = Library->OpenPieceDataFile("SAME.DAT");
+	QVERIFY(SameFile);
+	QVERIFY(SameFile.value().Source != PrimitiveFile.value().Source);
+	QCOMPARE(SameFile.value().Source.FilePath, QFileInfo(Directory.filePath("parts/same.dat")).canonicalFilePath());
+	const lcResult<lcOpenedLibraryFile> AliasFile = Library->OpenPieceDataFile("../parts/same.dat");
+	QVERIFY(AliasFile);
+	QVERIFY(AliasFile.value().Source == SameFile.value().Source);
+	const lcResult<lcOpenedLibraryFile> CollisionFile = Library->OpenPieceDataFile("COLLISION.DAT");
+	QVERIFY(CollisionFile);
+	lcLibraryMeshData CollisionData;
+	lcMeshLoader CollisionLoader(CollisionData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
+	CollisionLoader.SetUnavailableTextures({ "OTHER" });
+	QVERIFY(CollisionLoader.LoadMesh(*CollisionFile.value().File, LC_MESHDATA_SHARED));
+	QVERIFY(CollisionLoader.GetError().isEmpty());
+	QVERIFY(!CollisionData.IsEmpty());
 
 	Cycle.Reset();
 	Piece.Reset();

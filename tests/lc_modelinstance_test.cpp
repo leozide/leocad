@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_application.h"
+#include "lc_commandline.h"
 #include "lc_colors.h"
 #include "lc_context.h"
 #include "lc_findreplacewidget.h"
@@ -7,6 +8,7 @@
 #include "lc_mainwindow.h"
 #include "lc_partselectionwidget.h"
 #include "lc_partselectionpopup.h"
+#include "lc_profile.h"
 #include "lc_model.h"
 #include "lc_modelhistory.h"
 #include "lc_meshloader.h"
@@ -62,6 +64,11 @@ private slots:
 	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
+	void CommandLineOptions();
+	void CommandLineParsing_data();
+	void CommandLineParsing();
+	void CommandLineColorValidation_data();
+	void CommandLineColorValidation();
 	void TranslucentThumbnails_data();
 	void TranslucentThumbnails();
 	void TextureDecalAlpha();
@@ -2544,6 +2551,175 @@ void lcModelInstanceTests::TextureMipmaps()
 			Context.ClearTexture2D();
 		}
 	Context.ClearResources();
+}
+
+void lcModelInstanceTests::CommandLineOptions()
+{
+	const lcCommandLineOptions Empty(QStringList{});
+	QVERIFY(Empty.ParseOK);
+	QVERIFY(!Empty.Exit);
+	QVERIFY(!Empty.SaveImage);
+
+	const lcCommandLineOptions Help({ "leocad", "--help" });
+	QVERIFY(Help.ParseOK);
+	QVERIFY(Help.Exit);
+	QVERIFY(Help.StdOut.contains("--image"));
+
+	QTemporaryFile Model;
+	QVERIFY(Model.open());
+	const lcCommandLineOptions Image({ "leocad", Model.fileName(), "-i", "out.png",
+		"--width", "123", "--height", "456", "--aa-samples", "4", "--stud-style", "3", "--viewpoint", "front" });
+	QVERIFY(Image.ParseOK);
+	QVERIFY(Image.SaveImage);
+	QCOMPARE(Image.ImageWidth, 123);
+	QCOMPARE(Image.ImageHeight, 456);
+	QCOMPARE(Image.AASamples, 4);
+	QCOMPARE(int(Image.StudStyle), 3);
+	QCOMPARE(Image.Viewpoint, lcViewpoint::Front);
+}
+
+void lcModelInstanceTests::CommandLineParsing_data()
+{
+	QTest::addColumn<QStringList>("Arguments");
+	QTest::addColumn<bool>("Valid");
+	QTest::addColumn<QString>("Message");
+	QTest::newRow("image-range") << QStringList{ "-w", "64", "-h", "32", "--from", "1", "--to", "2" } << true << QString();
+	QTest::newRow("negative-camera-angles") << QStringList{ "--camera-angles", "-30", "45", "--orthographic" } << true << QString();
+	QTest::newRow("fade-color") << QStringList{ "--fade-steps-color", "#80112233" } << true << QString();
+	QTest::newRow("optional-export-name") << QStringList{ "--export-wavefront", "--width", "160" } << true << QString();
+	QTest::newRow("camera-precedence") << QStringList{ "--camera", "Camera", "--viewpoint", "front" } << true << QString("--viewpoint is ignored when --camera is set.");
+	QTest::newRow("missing-integer") << QStringList{ "--width" } << false << QString("Not enough parameters for the '--width' option.");
+	QTest::newRow("invalid-integer") << QStringList{ "--width", "0" } << false << QString("Invalid parameter value");
+	QTest::newRow("invalid-step") << QStringList{ "--from", "0" } << false << QString("Invalid parameter value");
+	QTest::newRow("invalid-float") << QStringList{ "--line-width", "bad" } << false << QString("Invalid parameter value");
+	QTest::newRow("missing-array") << QStringList{ "--camera-angles", "30" } << false << QString("Not enough parameters");
+	QTest::newRow("invalid-camera") << QStringList{ "--camera-position", "0", "0", "0", "0", "0", "0", "0", "1", "0" } << false << QString("camera position is too close");
+	QTest::newRow("invalid-clipping") << QStringList{ "--zplanes", "2", "1" } << false << QString("1 <= <near> < <far>");
+	QTest::newRow("invalid-color") << QStringList{ "--highlight-color", "not-a-color" } << false << QString("Invalid parameter value");
+	QTest::newRow("invalid-shading") << QStringList{ "--shading", "unknown" } << false << QString("Invalid parameter value");
+	QTest::newRow("invalid-samples") << QStringList{ "--aa-samples", "3" } << false << QString("Invalid parameter value");
+	QTest::newRow("unknown-option") << QStringList{ "--unknown" } << false << QString("Unknown option");
+}
+
+void lcModelInstanceTests::CommandLineParsing()
+{
+	QFETCH(QStringList, Arguments);
+	QFETCH(bool, Valid);
+	QFETCH(QString, Message);
+	QTemporaryFile Model;
+	QVERIFY(Model.open());
+	Arguments.prepend(Model.fileName());
+	Arguments.prepend("leocad");
+	const lcCommandLineOptions Options(Arguments);
+	QCOMPARE(Options.ParseOK, Valid);
+	if (!Message.isEmpty())
+		QVERIFY(Options.StdErr.contains(Message));
+	if (Options.SaveWavefront)
+	{
+		QVERIFY(Options.SaveWavefrontName.isEmpty());
+		QCOMPARE(Options.ImageWidth, 160);
+	}
+	if (Options.SetFadeStepsColor)
+		QCOMPARE(Options.FadeStepsColor, LC_RGBA(0x11, 0x22, 0x33, 0x80));
+}
+
+void lcModelInstanceTests::CommandLineColorValidation_data()
+{
+	QTest::addColumn<bool>("Automatic");
+	QTest::addColumn<int>("SavedStyle");
+	QTest::addColumn<bool>("OverridesEnabled");
+	QTest::addColumn<QStringList>("Arguments");
+	QTest::addColumn<int>("Warnings");
+	QTest::addColumn<QString>("Message");
+	const QString RequiresAuto = "requires automatic edge colors";
+	const QString RequiresStyle = "requires a high contrast stud style";
+	const QString Precedence = "Automatic edge colors take precedence";
+	const auto Row = [](const char* Name, bool Automatic, int SavedStyle, bool Enabled, const QStringList& Arguments, int Warnings, const QString& Message)
+	{
+		QTest::newRow(Name) << Automatic << SavedStyle << Enabled << Arguments << Warnings << Message;
+	};
+	Row("inherited-combination-no-warning", true, 6, true, {}, 0, {});
+	Row("contrast-default-inactive", false, 0, true, { "--color-contrast", "0.5" }, 1, RequiresAuto);
+	Row("contrast-changed-inactive", false, 0, true, { "--color-contrast", "0.8" }, 1, RequiresAuto);
+	Row("contrast-inherited-auto", true, 0, true, { "--color-contrast", "0.5" }, 0, {});
+	Row("contrast-cli-auto", false, 0, true, { "--color-contrast", "0.5", "--automate-edge-color" }, 0, {});
+	Row("contrast-high-contrast-only", false, 6, true, { "--color-contrast", "0.5" }, 1, RequiresAuto);
+	Row("threshold-cli-high-contrast", false, 0, true, { "--stud-style", "6", "--light-dark-value", "0.8" }, 0, {});
+	Row("threshold-inherited-high-contrast", false, 6, true, { "--light-dark-value", "0.5" }, 0, {});
+	Row("threshold-overridden-style", false, 6, true, { "--stud-style", "0", "--light-dark-value", "0.5" }, 1, "requires automatic edge colors or a high contrast stud style");
+	Row("threshold-auto", true, 0, true, { "--light-dark-value", "0.5" }, 0, {});
+	Row("threshold-neither-mode", false, 0, true, { "--light-dark-value", "0.5" }, 1, "requires automatic edge colors or a high contrast stud style");
+	Row("saved-style-does-not-suppress-warning", false, 6, true, { "--stud-style", "0", "--edge-color", "#123456" }, 1, RequiresStyle);
+	Row("edge-cli-high-contrast", false, 0, true, { "--stud-style", "6", "--edge-color", "#123456" }, 0, {});
+	Row("manual-edge-under-auto", true, 6, true, { "--edge-color", "#123456" }, 1, Precedence);
+	Row("manual-edge-cli-auto", false, 6, true, { "--edge-color", "#123456", "--automate-edge-color" }, 1, Precedence);
+	Row("cylinder-under-auto", true, 6, true, { "--stud-cylinder-color", "#010203" }, 0, {});
+	Row("disable-cylinder-under-auto", true, 6, true, { "--disable-stud-cylinder-color" }, 0, {});
+	Row("same-cylinder-color-inactive", false, 0, true, { "--stud-cylinder-color", "#1B2A34" }, 1, RequiresStyle);
+	Row("already-disabled-cylinder-inactive", false, 0, false, { "--disable-stud-cylinder-color" }, 1, RequiresStyle);
+	Row("same-edge-color-inactive", false, 0, true, { "--edge-color", "#000000" }, 1, RequiresStyle);
+	Row("already-disabled-edge-inactive", false, 0, false, { "--disable-edge-color" }, 1, RequiresStyle);
+	Row("already-disabled-black-inactive", false, 0, false, { "--disable-black-edge-color" }, 1, RequiresStyle);
+	Row("already-disabled-dark-inactive", false, 0, false, { "--disable-dark-edge-color" }, 1, RequiresStyle);
+	Row("black-under-auto", true, 6, true, { "--black-edge-color", "#FFFFFF" }, 1, Precedence);
+	Row("dark-under-auto", true, 6, true, { "--dark-edge-color", "#1B2A34" }, 1, Precedence);
+	Row("only-edge-warning-with-cylinder", true, 6, true, { "--stud-cylinder-color", "#010203", "--edge-color", "#000000" }, 1, "'--edge-color'");
+	Row("repeated-edge-warning-once", false, 0, true, { "--edge-color", "#000000", "--edge-color", "#123456" }, 1, RequiresStyle);
+	Row("alias-preserved", false, 0, true, { "-ec", "#000000" }, 1, "'-ec'");
+}
+
+void lcModelInstanceTests::CommandLineColorValidation()
+{
+	QFETCH(bool, Automatic);
+	QFETCH(int, SavedStyle);
+	QFETCH(bool, OverridesEnabled);
+	QFETCH(QStringList, Arguments);
+	QFETCH(int, Warnings);
+	QFETCH(QString, Message);
+	struct ScopedProfile
+	{
+		std::map<QString, QVariant> Values;
+		ScopedProfile()
+		{
+			QSettings Settings;
+			const QStringList Keys = { "StudStyle", "AutomateEdgeColor", "PartEdgeContrast", "PartColorValueLDIndex",
+				"StudCylinderColorEnabled", "StudCylinderColor", "PartEdgeColorEnabled", "PartEdgeColor",
+				"BlackEdgeColorEnabled", "BlackEdgeColor", "DarkEdgeColorEnabled", "DarkEdgeColor" };
+			for (const QString& Key : Keys)
+				Values.emplace("Settings/" + Key, Settings.value("Settings/" + Key));
+		}
+		~ScopedProfile()
+		{
+			QSettings Settings;
+			for (const auto& [Key, Value] : Values)
+			{
+				if (Value.isValid())
+					Settings.setValue(Key, Value);
+				else
+					Settings.remove(Key);
+			}
+		}
+	} Profile;
+	lcSetProfileStudStyle(static_cast<lcStudStyle>(SavedStyle));
+	lcSetProfileInt(LC_PROFILE_AUTOMATE_EDGE_COLOR, Automatic);
+	lcSetProfileFloat(LC_PROFILE_PART_EDGE_CONTRAST, 0.5f);
+	lcSetProfileFloat(LC_PROFILE_PART_COLOR_VALUE_LD_INDEX, 0.5f);
+	lcSetProfileInt(LC_PROFILE_STUD_CYLINDER_COLOR_ENABLED, OverridesEnabled);
+	lcSetProfileInt(LC_PROFILE_PART_EDGE_COLOR_ENABLED, OverridesEnabled);
+	lcSetProfileInt(LC_PROFILE_BLACK_EDGE_COLOR_ENABLED, OverridesEnabled);
+	lcSetProfileInt(LC_PROFILE_DARK_EDGE_COLOR_ENABLED, OverridesEnabled);
+	lcSetProfileUInt(LC_PROFILE_STUD_CYLINDER_COLOR, LC_RGBA(27, 42, 52, 255));
+	lcSetProfileUInt(LC_PROFILE_PART_EDGE_COLOR, LC_RGBA(0, 0, 0, 255));
+	lcSetProfileUInt(LC_PROFILE_BLACK_EDGE_COLOR, LC_RGBA(255, 255, 255, 255));
+	lcSetProfileUInt(LC_PROFILE_DARK_EDGE_COLOR, LC_RGBA(27, 42, 52, 255));
+	Arguments.prepend("leocad");
+	const lcCommandLineOptions Options(Arguments);
+	QVERIFY(Options.ParseOK);
+	QCOMPARE(Options.StdErr.count(QLatin1Char('\n')), Warnings);
+	if (!Message.isEmpty())
+		QVERIFY2(Options.StdErr.contains(Message), qPrintable(Options.StdErr));
+	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
+		QVERIFY(!Options.StdErr.contains("stud-cylinder-color"));
 }
 
 void lcModelInstanceTests::InterfaceTransforms()

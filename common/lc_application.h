@@ -109,65 +109,6 @@ public:
 	bool  mAutomateEdgeColor;
 };
 
-struct lcCommandLineOptions
-{
-	bool ParseOK = true;
-	bool Exit = false;
-	bool SaveImage = false;
-	bool SaveWavefront = false;
-	bool Save3DS = false;
-	bool SaveCOLLADA = false;
-	bool SaveCSV = false;
-	bool SaveHTML = false;
-	bool SetCameraAngles = false;
-	bool SetCameraPosition = false;
-	bool Orthographic = false;
-	bool SetFoV = false;
-	bool SetZPlanes = false;
-	bool SetFadeStepsColor = false;
-	bool SetHighlightColor = false;
-	bool FadeSteps = false;
-	bool ImageHighlight = false;
-	bool AutomateEdgeColor = false;
-	int ImageWidth;
-	int ImageHeight;
-	int AASamples;
-	lcShadingMode ShadingMode;
-	float LineWidth;
-	lcStudStyle StudStyle;
-	lcStep ImageStart;
-	lcStep ImageEnd;
-	lcVector3 CameraPosition[3];
-	lcVector2 CameraLatLon;
-	float FoV;
-	float PartEdgeContrast;
-	float PartColorValueLDIndex;
-	lcVector2 ZPlanes;
-	lcViewpoint Viewpoint;
-	bool StudCylinderColorEnabled;
-	quint32 StudCylinderColor;
-	bool PartEdgeColorEnabled;
-	quint32 PartEdgeColor;
-	bool BlackEdgeColorEnabled;
-	quint32 BlackEdgeColor;
-	bool DarkEdgeColorEnabled;
-	quint32 DarkEdgeColor;
-	quint32 FadeStepsColor;
-	quint32	HighlightColor;
-	QString ImageName;
-	QString ModelName;
-	QString CameraName;
-	QString ProjectName;
-	QString SaveWavefrontName;
-	QString Save3DSName;
-	QString SaveCOLLADAName;
-	QString SaveCSVName;
-	QString SaveHTMLName;
-	QList<QPair<QString, bool>> LibraryPaths;
-	QString StdOut;
-	QString StdErr;
-};
-
 enum class lcStartupMode
 {
 	ShowWindow,
@@ -189,7 +130,6 @@ public:
 	lcApplication& operator=(lcApplication&&) = delete;
 
 	void SetProject(Project* Project);
-	static lcCommandLineOptions ParseCommandLineOptions();
 	lcStartupMode Initialize(const QList<QPair<QString, bool>>& LibraryPaths);
 	void Shutdown();
 	void ShowPreferencesDialog();

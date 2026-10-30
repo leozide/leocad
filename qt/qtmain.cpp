@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_application.h"
+#include "lc_commandline.h"
 #include "lc_updatedialog.h"
 #include "lc_profile.h"
 #include "lc_piecedata.h"
@@ -126,7 +127,7 @@ static void lcRegisterShellFileTypes()
 static void lcInitializeSurfaceFormat(int argc, char* argv[])
 {
 	QCoreApplication Application(argc, argv);
-	const lcCommandLineOptions Options = lcApplication::ParseCommandLineOptions();
+	const lcCommandLineOptions Options(QCoreApplication::arguments());
 
 	if (Options.ParseOK && Options.AASamples > 1)
 	{

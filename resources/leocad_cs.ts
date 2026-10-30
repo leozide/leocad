@@ -777,6 +777,16 @@
         <translation type="unfinished">File.Render.OpenInBlender</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="345"/>
+        <source>Edit.SelectAdjacent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="353"/>
+        <source>Edit.SelectConnected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="737"/>
         <source>Edit.Tool.PointLight</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
@@ -2340,6 +2350,16 @@
         <source>Replace All</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nahradit vše</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="346"/>
+        <source>Select A&amp;djacent Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="354"/>
+        <source>Select &amp;Connected Pieces</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="394"/>
@@ -5077,6 +5097,16 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">Zrušit celý výběr</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="347"/>
+        <source>Add the pieces connected directly to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="355"/>
+        <source>Add all pieces connected to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="395"/>
         <source>Move and rotate objects in absolute coordinates</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -6121,6 +6151,16 @@ Formát souboru není rozpoznán.</translation>
         <translation type="unfinished">&lt;p&gt;&lt;b&gt;Opakovat&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Znovu použijte úpravu, která byla zrušena pomocí Zpět. Provedení nové úpravy po zpět nahradí historii opakování novou sekvencí úprav.&lt;/p&gt;</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="348"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Adjacent Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected directly to a selected piece, by a stud, anti stud, hole, axle or bar. Repeat to grow the selection one piece further each time. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="356"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Connected Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected to a selected piece, directly or through other pieces, by a stud, anti stud, hole, axle or bar. Use it to pick up a whole assembly from one of its pieces. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="732"/>
         <source>&lt;p&gt;&lt;b&gt;Insert Piece Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece in the Pieces dock and a color in Colors, then use this tool in the model view to place the piece. Movement snapping controls placement increments. Use the preview to check placement before inserting the piece.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -6765,6 +6805,12 @@ GL_EXT_texture_filter_anisotropic rozšíření: %5
         <translation type="unfinished">  -html, --export-html &lt;folder&gt;: Vytvořte HTML stránku pro model.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -6874,10 +6920,26 @@ Please visit https://www.leocad.org for information on how to download and insta
 Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese https://www.leocad.org.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="1447"/>
         <source>Preferences</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">Předvolby</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Load Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>LeoCAD</source>
@@ -12184,6 +12246,27 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>Knihovna &amp;LGEO:</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="406"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <source>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>S&amp;hadow Library:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
+        <source>Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="431"/>
+        <source>Choose the LDCad shadow library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="423"/>
         <source>Rendering</source>
         <translation>Vykreslování</translation>
@@ -13970,6 +14053,11 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>Otevřete složku LGEO</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="533"/>
+        <source>Select Shadow Library Folder</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>

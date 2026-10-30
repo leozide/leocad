@@ -400,6 +400,43 @@
             </item>
            </layout>
           </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="ShadowLibraryLabel">
+            <property name="toolTip">
+             <string>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</string>
+            </property>
+            <property name="text">
+             <string>S&amp;hadow Library:</string>
+            </property>
+            <property name="buddy">
+             <cstring>ShadowLibraryEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <layout class="QHBoxLayout" name="ShadowLibraryLayout">
+            <item>
+             <widget class="QLineEdit" name="ShadowLibraryEdit">
+              <property name="accessibleName">
+               <string>Shadow Library</string>
+              </property>
+              <property name="toolTip">
+               <string>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="ShadowLibraryBrowseButton">
+              <property name="toolTip">
+               <string>Choose the LDCad shadow library folder.</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -2718,6 +2755,8 @@
   <tabstop>povrayExecutableBrowse</tabstop>
   <tabstop>lgeoPath</tabstop>
   <tabstop>lgeoPathBrowse</tabstop>
+  <tabstop>ShadowLibraryEdit</tabstop>
+  <tabstop>ShadowLibraryBrowseButton</tabstop>
   <tabstop>ColorTheme</tabstop>
   <tabstop>Language</tabstop>
   <tabstop>checkForUpdates</tabstop>

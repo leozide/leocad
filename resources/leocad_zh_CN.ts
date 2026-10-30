@@ -474,6 +474,16 @@
         <translation type="unfinished">File.Render.OpenInBlender</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="345"/>
+        <source>Edit.SelectAdjacent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="353"/>
+        <source>Edit.SelectConnected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="737"/>
         <source>Edit.Tool.PointLight</source>
         <translatorcomment>Technical identifier or nonlinguistic text; intentionally retained unchanged.</translatorcomment>
@@ -1860,6 +1870,16 @@
         <location filename="../common/lc_commands.cpp" line="338"/>
         <source>Select &amp;Invert</source>
         <translation>反选</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="346"/>
+        <source>Select A&amp;djacent Pieces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="354"/>
+        <source>Select &amp;Connected Pieces</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../common/lc_commands.cpp" line="346"/>
@@ -5012,6 +5032,16 @@ File format is not recognized.</source>
         <translation type="unfinished">取消全部选择</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="347"/>
+        <source>Add the pieces connected directly to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="355"/>
+        <source>Add all pieces connected to the selected pieces to the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="355"/>
         <source>Select one piece at a time</source>
         <translation>每次选择一个零件</translation>
@@ -6003,6 +6033,16 @@ File format is not recognized.</source>
         <translation type="unfinished">&lt;p&gt;&lt;b&gt;重做&lt;/b&gt;&lt;/p&gt;&lt;p&gt;重新应用通过撤消撤销的编辑。撤消后进行新编辑会用新的编辑序列替换重做历史记录。&lt;/p&gt;</translation>
     </message>
     <message>
+        <location filename="../common/lc_commands.cpp" line="348"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Adjacent Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected directly to a selected piece, by a stud, anti stud, hole, axle or bar. Repeat to grow the selection one piece further each time. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_commands.cpp" line="356"/>
+        <source>&lt;p&gt;&lt;b&gt;Select Connected Pieces&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Add every visible piece that is connected to a selected piece, directly or through other pieces, by a stud, anti stud, hole, axle or bar. Use it to pick up a whole assembly from one of its pieces. Connections come from the LDCad shadow library set in Preferences; pieces it has no data for are never connected.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_commands.cpp" line="732"/>
         <source>&lt;p&gt;&lt;b&gt;Insert Piece Tool&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Choose a piece in the Pieces dock and a color in Colors, then use this tool in the model view to place the piece. Movement snapping controls placement increments. Use the preview to check placement before inserting the piece.&lt;/p&gt;</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
@@ -6693,6 +6733,12 @@ Anisotropic: %5
         <translation type="unfinished">  -html, --export-html &lt;folder&gt;：为模型创建 HTML 页面.</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="828"/>
+        <source>  --shadow-library &lt;path&gt;: Set the LDCad Shadow Library location to path.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="822"/>
         <source>  -v, --version: Output version information and exit.
 </source>
@@ -6805,10 +6851,26 @@ Anisotropic: %5
         <translation type="unfinished">初始化渲染器</translation>
     </message>
     <message>
+        <location filename="../common/lc_application.cpp" line="1021"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../common/lc_application.cpp" line="1447"/>
         <source>Preferences</source>
         <translatorcomment>Draft reused from an existing translation of this source text; requires review in this context.</translatorcomment>
         <translation type="unfinished">选项</translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Load Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_application.cpp" line="1468"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>LeoCAD</source>
@@ -12433,6 +12495,27 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>LGEO 库:</translation>
     </message>
     <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="406"/>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="424"/>
+        <source>Set the LDCad shadow library folder used to find connections between pieces, or leave empty to use none.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="409"/>
+        <source>S&amp;hadow Library:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="421"/>
+        <source>Shadow Library</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.ui" line="431"/>
+        <source>Choose the LDCad shadow library folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../qt/lc_qpreferencesdialog.ui" line="412"/>
         <source>Restore tab layout</source>
         <translation>恢复标签页布局</translation>
@@ -13975,6 +14058,11 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="518"/>
         <source>Open LGEO Folder</source>
         <translation>打开 LGEO 文件夹</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="533"/>
+        <source>Select Shadow Library Folder</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="528"/>

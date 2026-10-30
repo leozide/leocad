@@ -163,6 +163,7 @@ struct lcCommandLineOptions
 	QString SaveCOLLADAName;
 	QString SaveCSVName;
 	QString SaveHTMLName;
+	QString ShadowLibraryPath;
 	QList<QPair<QString, bool>> LibraryPaths;
 	QString StdOut;
 	QString StdErr;

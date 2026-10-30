@@ -9,6 +9,7 @@
 #include "lc_mainwindow.h"
 #include "lc_profile.h"
 #include "lc_library.h"
+#include "lc_shadowlibrary.h"
 #include "lc_scene.h"
 #include "lc_traintrack.h"
 #include "lc_file.h"
@@ -5115,6 +5116,109 @@ void lcModel::InvertPieceSelectionAction()
 	BeginHistorySequence();
 	InvertPieceSelection();
 	EndHistorySequence(tr("Selection"));
+}
+
+void lcModel::SelectConnectedPiecesAction(bool AllConnected)
+{
+	const std::vector<lcObject*> Connected = FindConnectedPieces(AllConnected);
+
+	if (!Connected.empty())
+		AddToSelectionAction(Connected);
+}
+
+// The visible pieces connected to the selected ones: only directly, or else also through other
+// pieces, found breadth first.
+std::vector<lcObject*> lcModel::FindConnectedPieces(bool AllConnected) const
+{
+	struct lcConnectedPiece
+	{
+		lcPiece* Piece;
+		lcBoundingBox Box;
+		std::vector<std::pair<const std::vector<lcConnectionCylinder>*, lcMatrix44>> Shapes;
+		bool Reached;
+	};
+
+	std::vector<lcConnectedPiece> Pieces;
+	std::vector<size_t> Queue;
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (!Piece->IsSelected() && !Piece->IsVisible(mCurrentStep))
+			continue;
+
+		std::vector<std::pair<const std::vector<lcConnectionCylinder>*, lcMatrix44>> Shapes;
+
+		AddPieceShapes(Piece.get(), lcMatrix44Identity(), Shapes);
+
+		if (Shapes.empty())
+			continue;
+
+		lcBoundingBox Box = { lcVector3(FLT_MAX, FLT_MAX, FLT_MAX), lcVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX) };
+
+		for (const auto& [Cylinders, Transform] : Shapes)
+			lcConnectivity::AddToBoundingBox(*Cylinders, Transform, Box);
+
+		Pieces.push_back({ Piece.get(), Box, std::move(Shapes), Piece->IsSelected() });
+
+		if (Pieces.back().Reached)
+			Queue.push_back(Pieces.size() - 1);
+	}
+
+	// Only pieces whose connection shapes are near each other need them compared.
+	const auto BoxesMeet = [](const lcBoundingBox& a, const lcBoundingBox& b)
+	{
+		const float Margin = 1.0f;
+
+		for (int Axis = 0; Axis < 3; Axis++)
+			if (a.Min[Axis] > b.Max[Axis] + Margin || b.Min[Axis] > a.Max[Axis] + Margin)
+				return false;
+
+		return true;
+	};
+
+	std::vector<lcObject*> Found;
+
+	for (size_t QueueIndex = 0; QueueIndex < Queue.size(); QueueIndex++)
+	{
+		const lcConnectedPiece& From = Pieces[Queue[QueueIndex]];
+
+		for (size_t PieceIndex = 0; PieceIndex < Pieces.size(); PieceIndex++)
+		{
+			lcConnectedPiece& To = Pieces[PieceIndex];
+
+			if (To.Reached || !BoxesMeet(From.Box, To.Box) || !lcConnectivity::AreConnected(From.Shapes, To.Shapes))
+				continue;
+
+			To.Reached = true;
+			Found.push_back(To.Piece);
+
+			if (AllConnected)
+				Queue.push_back(PieceIndex);
+		}
+	}
+
+	return Found;
+}
+
+// The connection shapes of a piece's library parts at their place in the model; a submodel by its
+// visible parts. Parts without shapes are left out.
+void lcModel::AddPieceShapes(const lcPiece* Piece, const lcMatrix44& Transform, std::vector<std::pair<const std::vector<lcConnectionCylinder>*, lcMatrix44>>& Shapes)
+{
+	const lcMatrix44 World = lcMul(Piece->mModelWorld, Transform);
+
+	if (!Piece->mPieceData->IsModel())
+	{
+		const std::vector<lcConnectionCylinder>& Cylinders = lcShadowLibrary::GetCylinders(Piece->mPieceData->mFileName);
+
+		if (!Cylinders.empty())
+			Shapes.emplace_back(&Cylinders, World);
+
+		return;
+	}
+
+	for (const std::unique_ptr<lcPiece>& SubModelPiece : Piece->mPieceData->GetModel()->GetPieces())
+		if (SubModelPiece->IsVisibleInSubModel())
+			AddPieceShapes(SubModelPiece.get(), World, Shapes);
 }
 
 void lcModel::AddToSelectionAction(const std::vector<lcObject*>& Objects)

@@ -3,7 +3,8 @@
 Core tests run in one Qt Test executable, `leocad_tests`. These tests cover
 object history, property-key comparisons, and the final animation key after
 step insertion, removal, and key deletion, including 8,000 deterministic
-randomized undo/redo and merge transitions.
+randomized undo/redo and merge transitions, and how the connection shapes of
+the LDCad shadow library are read and fit together, on made-up parts.
 
 The executable creates a `QCoreApplication`; it does not open windows or require
 an OpenGL context, the parts library, or network access. It uses the same Qt

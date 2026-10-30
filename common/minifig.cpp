@@ -199,7 +199,7 @@ void MinifigWizard::LoadTemplate(const QString& TemplateName)
 		mMinifig.Angles[PartIndex] = Template.Angles[PartIndex];
 		mMinifig.Matrices[PartIndex] = lcMatrix44Identity();
 
-		mMinifig.PieceData[PartIndex] = Library->AcquirePieceData(Template.Parts[PartIndex].toLatin1(), nullptr, false, false);
+		mMinifig.PieceData[PartIndex] = Library->AcquirePieceData(Template.Parts[PartIndex].toLatin1(), nullptr, lcAcquirePieceDataFlag::None);
 
 		if (mMinifig.PieceData[PartIndex])
 			Library->RequestPieceDataLoad(mMinifig.PieceData[PartIndex].Get(), lcLoadPriority::Normal);

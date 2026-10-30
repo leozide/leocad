@@ -155,9 +155,9 @@ bool lcImportLXFMLFile(const QString& FileData, Project* Project, std::vector<lc
 				const auto BrickIt = BrickTable.find(LegoID.toInt());
 
 				if (BrickIt != BrickTable.end())
-					PieceData = lcGetPiecesLibrary()->AcquirePieceData(BrickIt->second.c_str(), Project, true, false);
+					PieceData = lcGetPiecesLibrary()->AcquirePieceData(BrickIt->second.c_str(), Project, lcAcquirePieceDataFlag::CreateMissing);
 				else
-					PieceData = lcGetPiecesLibrary()->AcquirePieceData(LegoID.toLatin1() + ".dat", Project, true, false);
+					PieceData = lcGetPiecesLibrary()->AcquirePieceData(LegoID.toLatin1() + ".dat", Project, lcAcquirePieceDataFlag::CreateMissing);
 
 				const auto ColorIt = MaterialTable.find(Material);
 				int ColorCode = 16;

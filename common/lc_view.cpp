@@ -469,8 +469,8 @@ void lcView::ShowTrainTrackPopup()
 	for (lcPieceData* PieceData : TrainTrackParts)
 		Parts.emplace_back(PieceData, std::string());
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
-	lcPieceData* PieceData = Result.has_value() ? Result.value() : nullptr;
+	std::optional<lcPieceDataRef> Result = lcShowPartSelectionPopup(nullptr, Parts, gMainWindow->mColorIndex, mWidget, QCursor::pos());
+	lcPieceData* PieceData = Result.has_value() ? Result.value().Get() : nullptr;
 
 	if (PieceData)
 	{

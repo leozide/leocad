@@ -15,6 +15,17 @@ struct lcOpenedLibraryFile
 	lcFileSource Source;
 };
 
+enum class lcAcquirePieceDataFlag
+{
+	None = 0, // Look up existing project or library data only.
+	CreateMissing = 1 << 0, // Create a failed placeholder when the name cannot be resolved.
+	SearchProjectFolder = 1 << 1, // Also try loading from the current project's folder.
+	ProjectFileOnly = 1 << 2 // Require an external file; implies folder search and cannot combine with CreateMissing.
+};
+
+Q_DECLARE_FLAGS(lcAcquirePieceDataFlags, lcAcquirePieceDataFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(lcAcquirePieceDataFlags)
+
 enum class lcStudStyle
 {
 	Plain,
@@ -130,7 +141,8 @@ public:
 	lcPieceData* FindPieceData(const char* PieceName, Project* Project);
 
 	// Resolves or creates an identity and returns one scoped reference; does not ensure readiness.
-	lcPieceDataRef AcquirePieceData(const char* PieceName, Project* Project, bool CreateMissing, bool SearchProjectFolder);
+	// ProjectFileOnly rejects names already resolving to embedded models or library parts.
+	lcPieceDataRef AcquirePieceData(const char* PieceName, Project* Project, lcAcquirePieceDataFlags Flags);
 
 	// Creates or reuses a local identity and returns one scoped reference for the model.
 	// Reused data is invalidated before returning.

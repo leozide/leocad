@@ -194,17 +194,64 @@ lcPieceData* lcPiecesLibrary::FindPieceData(const char* PieceName, Project* Curr
 	return mPieceManager->FindPieceData(Name, CurrentProject);
 }
 
-lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project* CurrentProject, bool CreateMissing, bool SearchProjectFolder)
+lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project* CurrentProject, lcAcquirePieceDataFlags Flags)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
+	const bool ProjectFileOnly = Flags.testFlag(lcAcquirePieceDataFlag::ProjectFileOnly);
+
+	Q_ASSERT(!ProjectFileOnly || !Flags.testFlag(lcAcquirePieceDataFlag::CreateMissing));
+
 	QString ProjectPath;
 	QString LoadError;
+	lcPieceDataRef MissingPieceData;
 
 	if (lcPieceData* PieceData = FindPieceData(PieceName, CurrentProject))
-		return lcPieceDataRef(PieceData, this);
+	{
+		// A bare filename must resolve to the same asset when the document is reopened.
+		// Do not offer disk files shadowed by embedded models or library parts.
+		if (!ProjectFileOnly)
+			return lcPieceDataRef(PieceData, this);
 
-	if (CurrentProject && SearchProjectFolder && !CurrentProject->GetFileName().isEmpty())
+		if (PieceData->IsProject())
+		{
+			const std::vector<const Project*> Dependencies = PieceData->GetProject()->GetDependencies();
+			const bool Changed = std::any_of(Dependencies.begin(), Dependencies.end(), [](const Project* Dependency)
+			{
+				if (Dependency->HasFileChangedOnDisk())
+					return true;
+
+				const QDir Directory(QFileInfo(Dependency->GetFileName()).absolutePath());
+
+				for (const std::unique_ptr<lcModel>& Model : Dependency->GetModels())
+					for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+					{
+						const lcPieceData* Data = Piece->mPieceData.Get();
+
+						if (Data && !Data->IsLibraryPiece() && !Data->IsModel() && !Data->IsProject() &&
+							QFileInfo(Directory.filePath(Piece->GetID())).isFile())
+							return true;
+					}
+
+				return false;
+			});
+
+			if (!Changed)
+			{
+				if (CurrentProject && PieceData->GetProject()->ReferencesFile(CurrentProject->GetFileName()))
+					return lcPieceDataRef();
+
+				return lcPieceDataRef(PieceData, this);
+			}
+		}
+		else if (PieceData->IsLibraryPiece() || PieceData->IsModel() || PieceData->mState != lcAssetState::Failed)
+			return lcPieceDataRef();
+
+		// Keep placements bound to the same identity when recovering or reloading a file.
+		MissingPieceData = lcPieceDataRef(PieceData, this);
+	}
+
+	if (CurrentProject && (Flags.testFlag(lcAcquirePieceDataFlag::SearchProjectFolder) || ProjectFileOnly) && !CurrentProject->GetFileName().isEmpty())
 		ProjectPath = QFileInfo(CurrentProject->GetFileName()).absolutePath();
 
 	if (!ProjectPath.isEmpty())
@@ -217,9 +264,21 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 
 			if (ExternalProject)
 			{
-				lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
+				if (ProjectFileOnly && ExternalProject.value()->ReferencesFile(CurrentProject->GetFileName()))
+				{
+					delete ExternalProject.value();
+					return lcPieceDataRef();
+				}
+
+				lcPieceData* PieceData = MissingPieceData ? MissingPieceData.Get() : mPieceManager->CreatePieceData(PieceName, CurrentProject);
+
+				if (MissingPieceData)
+					InvalidatePieceDataLoad(PieceData);
 
 				PieceData->CreateProject(ExternalProject.value(), PieceName);
+
+				if (MissingPieceData)
+					NotifyAssetStatusChanged();
 
 				return lcPieceDataRef(PieceData, this);
 			}
@@ -228,7 +287,7 @@ lcPieceDataRef lcPiecesLibrary::AcquirePieceData(const char* PieceName, Project*
 		}
 	}
 
-	if (CreateMissing)
+	if (Flags.testFlag(lcAcquirePieceDataFlag::CreateMissing))
 	{
 		lcPieceData* PieceData = mPieceManager->CreatePieceData(PieceName, CurrentProject);
 

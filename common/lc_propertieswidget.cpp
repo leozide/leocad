@@ -1126,12 +1126,12 @@ void lcPropertiesWidget::PieceIdButtonClicked()
 
 	int ColorIndex = Partial ? gDefaultColor : Value.toInt();
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(PieceData, std::vector<std::pair<lcPieceData*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
+	std::optional<lcPieceDataRef> Result = lcShowPartSelectionPopup(PieceData, std::vector<std::pair<lcPieceData*, std::string>>(), ColorIndex, PieceIdButton, PieceIdButton->mapToGlobal(PieceIdButton->rect().bottomLeft()));
 
 	if (Result.has_value())
 	{
 		lcModel* Model = gMainWindow->GetActiveModel();
-		PieceData = Result.value();
+		PieceData = Result.value().Get();
 
 		if (!Model || !PieceData)
 			return;

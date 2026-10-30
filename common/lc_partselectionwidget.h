@@ -14,6 +14,7 @@ enum class lcPartCategoryType
 	Palette,
 	Category,
 	Custom,
+	Files,
 	Count
 };
 
@@ -150,6 +151,7 @@ public:
 	void ToggleListMode();
 	void SetCategory(int CategoryIndex);
 	void SetModelsCategory();
+	void SetFilesCategory();
 	void SetPaletteCategory(int SetIndex);
 	void SetCurrentModelCategory();
 	void SetCustomParts(const std::vector<std::pair<lcPieceData*, std::string>>& Parts, int ColorIndex);
@@ -172,6 +174,7 @@ protected:
 
 	lcPartSelectionListView* mListView;
 	std::vector<lcPartSelectionListModelEntry> mParts;
+	std::vector<lcPieceDataRef> mFileParts;
 	lcPartFilterType mPartFilterType;
 	int mIconSize;
 	float mDeviceScale = 1.0f;
@@ -282,7 +285,7 @@ public:
 
 	void UpdateThumbnails();
 	void SetDefaultPart();
-	void UpdateModels();
+	void UpdateProjectCategories();
 	void UpdateInUseCategory();
 	void UpdateCategories();
 	void LoadState(QSettings& Settings);
@@ -354,6 +357,7 @@ protected slots:
 protected:
 	void LoadPartPalettes();
 	void SavePartPalettes();
+	void UpdateFileWatcher();
 
 	void resizeEvent(QResizeEvent* Event) override;
 	bool event(QEvent* Event) override;
@@ -368,5 +372,6 @@ protected:
 	QSplitter* mSplitter = nullptr;
 	QTreeWidgetItem* mAllPartsCategoryItem = nullptr;
 	std::vector<lcPartPalette> mPartPalettes;
+	QFileSystemWatcher mFileWatcher;
 	bool mIsPopup = false;
 };

@@ -105,7 +105,7 @@ void lcPartSelectionPopup::UpdateHeightLimit()
 
 void lcPartSelectionPopup::Accept()
 {
-	mPickedPiece = mPartSelectionWidget->GetCurrentPart();
+	mPickedPiece = lcPieceDataRef(mPartSelectionWidget->GetCurrentPart());
 	mAccepted = true;
 
 	Close();
@@ -148,7 +148,7 @@ void lcPartSelectionPopup::Close()
 		Menu->close();
 }
 
-std::optional<lcPieceData*> lcShowPartSelectionPopup(lcPieceData* InitialPart, const std::vector<std::pair<lcPieceData*, std::string>>& CustomParts, int ColorIndex, QWidget* Parent, QPoint Position)
+std::optional<lcPieceDataRef> lcShowPartSelectionPopup(lcPieceData* InitialPart, const std::vector<std::pair<lcPieceData*, std::string>>& CustomParts, int ColorIndex, QWidget* Parent, QPoint Position)
 {
 	std::unique_ptr<QMenu> Menu(new QMenu(Parent));
 	QWidgetAction* Action = new QWidgetAction(Menu.get());

@@ -149,7 +149,7 @@ Project::Project(bool IsPreview)
 		{
 			const QString Path = mFileName;
 
-			if (HasFileChanged(Path) && gMainWindow)
+			if (CheckForFileChanges(Path) && gMainWindow)
 				gMainWindow->ProjectFileChanged(Path);
 		});
 	}
@@ -655,6 +655,43 @@ void Project::ShowModelListDialog()
 		Model->RefreshPreview();
 }
 
+std::vector<const Project*> Project::GetDependencies() const
+{
+	std::vector<const Project*> Projects{ this };
+	std::unordered_set<const Project*> Visited{ this };
+
+	for (size_t ProjectIndex = 0; ProjectIndex < Projects.size(); ProjectIndex++)
+	{
+		const Project* Current = Projects[ProjectIndex];
+
+		for (const std::unique_ptr<lcModel>& Model : Current->GetModels())
+			for (const std::unique_ptr<lcPiece>& Piece : Model->GetPieces())
+				if (Piece->mPieceData && Piece->mPieceData->IsProject())
+				{
+					const Project* Dependency = Piece->mPieceData->GetProject();
+
+					if (Visited.insert(Dependency).second)
+						Projects.push_back(Dependency);
+				}
+	}
+
+	return Projects;
+}
+
+bool Project::ReferencesFile(const QString& FileName) const
+{
+	const QString TargetPath = QFileInfo(FileName).canonicalFilePath();
+
+	if (TargetPath.isEmpty())
+		return false;
+
+	for (const Project* Current : GetDependencies())
+		if (QFileInfo(Current->GetFileName()).canonicalFilePath() == TargetPath)
+			return true;
+
+	return false;
+}
+
 Project::FileState Project::ReadFileState(const QString& FileName)
 {
 	FileState State;
@@ -673,7 +710,14 @@ Project::FileState Project::ReadFileState(const QString& FileName)
 	return State;
 }
 
-bool Project::HasFileChanged(const QString& Path)
+bool Project::HasFileChangedOnDisk() const
+{
+	const FileState State = ReadFileState(mFileName);
+
+	return State.Hash != mFileHash || State.Exists != mFileExists || State.Readable != mFileReadable;
+}
+
+bool Project::CheckForFileChanges(const QString& Path)
 {
 	if (mIsPreview || this != lcGetActiveProject() || Path.isEmpty() || Path != mFileName)
 		return false;
@@ -1164,13 +1208,10 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
-	if (!mIsPreview)
-	{
-		mFileHash = QCryptographicHash::hash(FileData, QCryptographicHash::Sha256);
-		mFileExists = true;
-		mFileReadable = true;
-		mFileReadAttempts = 0;
-	}
+	mFileHash = QCryptographicHash::hash(FileData, QCryptographicHash::Sha256);
+	mFileExists = true;
+	mFileReadable = true;
+	mFileReadAttempts = 0;
 
 	bool LoadDAT;
 

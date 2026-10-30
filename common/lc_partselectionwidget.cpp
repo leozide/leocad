@@ -216,6 +216,52 @@ void lcPartSelectionListModel::SetModelsCategory()
 	SetFilter(mFilterString);
 }
 
+void lcPartSelectionListModel::SetFilesCategory()
+{
+	beginResetModel();
+
+	ReleaseThumbnails();
+	mParts.clear();
+	mFileParts.clear();
+
+	Project* CurrentProject = lcGetActiveProject();
+	const QFileInfo ProjectFile(CurrentProject->GetFileName());
+
+	if (!CurrentProject->GetFileName().isEmpty())
+	{
+		const QFileInfoList Files = ProjectFile.dir().entryInfoList(QDir::Files | QDir::Readable, QDir::Name | QDir::IgnoreCase);
+
+		for (const QFileInfo& File : Files)
+		{
+			const QString Extension = File.suffix().toLower();
+
+			if (Extension != QLatin1String("ldr") && Extension != QLatin1String("mpd") && Extension != QLatin1String("dat"))
+				continue;
+
+			if (File.canonicalFilePath() == ProjectFile.canonicalFilePath())
+				continue;
+
+			const QByteArray PieceName = File.fileName().toLatin1();
+			lcPieceDataRef PieceData = lcGetPiecesLibrary()->AcquirePieceData(PieceName.constData(), CurrentProject, lcAcquirePieceDataFlag::ProjectFileOnly);
+
+			if (!PieceData)
+				continue;
+
+			if (QFileInfo(PieceData->GetProject()->GetFileName()).canonicalFilePath() != File.canonicalFilePath())
+				continue;
+
+			lcPartSelectionListModelEntry& Entry = mParts.emplace_back();
+			Entry.PieceData = PieceData.Get();
+			Entry.Description = File.fileName().toStdString();
+			mFileParts.emplace_back(std::move(PieceData));
+		}
+	}
+
+	endResetModel();
+
+	SetFilter(mFilterString);
+}
+
 void lcPartSelectionListModel::SetPaletteCategory(int SetIndex)
 {
 	beginResetModel();
@@ -665,6 +711,9 @@ void lcPartSelectionListView::SetCategory(lcPartCategoryType Type, int Index)
 	case lcPartCategoryType::Submodels:
 		mListModel->SetModelsCategory();
 		break;
+	case lcPartCategoryType::Files:
+		mListModel->SetFilesCategory();
+		break;
 	case lcPartCategoryType::Palette:
 		mListModel->SetPaletteCategory(Index);
 		break;
@@ -987,6 +1036,8 @@ QSize lcPartSelectionListView::GetPreferredSize(int MaximumWidth) const
 lcPartSelectionWidget::lcPartSelectionWidget(bool IsPopup, QWidget* Parent)
 	: QWidget(Parent), mIsPopup(IsPopup)
 {
+	connect(&mFileWatcher, &QFileSystemWatcher::directoryChanged, this, &lcPartSelectionWidget::UpdateProjectCategories);
+
 	mSplitter = new QSplitter(this);
 	mSplitter->setOrientation(Qt::Vertical);
 	mSplitter->setChildrenCollapsible(false);
@@ -1281,6 +1332,7 @@ void lcPartSelectionWidget::CategoryChanged(QTreeWidgetItem* Current, QTreeWidge
 	int Type = Current->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt();
 	int Index = Current->data(0, static_cast<int>(lcPartCategoryRole::Index)).toInt();
 
+	UpdateFileWatcher();
 	mPartsWidget->SetCategory(static_cast<lcPartCategoryType>(Type), Index);
 }
 
@@ -1586,6 +1638,14 @@ void lcPartSelectionWidget::UpdateCategories()
 	if (CurrentType == lcPartCategoryType::Submodels && CurrentIndex == 0)
 		CurrentItem = SubmodelsCategoryItem;
 
+	QTreeWidgetItem* FilesCategoryItem = new QTreeWidgetItem(mCategoriesWidget, QStringList(tr("Files")));
+	FilesCategoryItem->setData(0, static_cast<int>(lcPartCategoryRole::Type), static_cast<int>(lcPartCategoryType::Files));
+	FilesCategoryItem->setToolTip(0, tr("Insert a model file from the current project's folder."));
+	FilesCategoryItem->setWhatsThis(0, tr("<p><b>Files</b></p><p>Shows model files in the saved project's folder. Select or drag a file to insert an external reference. The current project is excluded. Save a new project to choose its folder.</p>"));
+
+	if (CurrentType == lcPartCategoryType::Files && CurrentIndex == 0)
+		CurrentItem = FilesCategoryItem;
+
 	for (int PaletteIdx = 0; PaletteIdx < static_cast<int>(mPartPalettes.size()); PaletteIdx++)
 	{
 		const lcPartPalette& Set = mPartPalettes[PaletteIdx];
@@ -1611,10 +1671,37 @@ void lcPartSelectionWidget::UpdateCategories()
 		mCategoriesWidget->setCurrentItem(CurrentItem);
 }
 
-void lcPartSelectionWidget::UpdateModels()
+void lcPartSelectionWidget::UpdateProjectCategories()
 {
+	UpdateFileWatcher();
+
 	QTreeWidgetItem* CurrentItem = mCategoriesWidget->currentItem();
 
-	if (CurrentItem && CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Type)) == static_cast<int>(lcPartCategoryType::Submodels))
-		mPartsWidget->SetCategory(lcPartCategoryType::Submodels, 0);
+	if (CurrentItem)
+	{
+		const lcPartCategoryType Type = static_cast<lcPartCategoryType>(CurrentItem->data(0, static_cast<int>(lcPartCategoryRole::Type)).toInt());
+
+		if (Type == lcPartCategoryType::Submodels || Type == lcPartCategoryType::Files)
+			mPartsWidget->SetCategory(Type, 0);
+	}
+}
+
+void lcPartSelectionWidget::UpdateFileWatcher()
+{
+	const QString FileName = lcGetActiveProject()->GetFileName();
+	QStringList Directories;
+
+	if (!FileName.isEmpty())
+		Directories.append(QFileInfo(FileName).absolutePath());
+
+	const QStringList Watched = mFileWatcher.directories();
+
+	if (Watched == Directories)
+		return;
+
+	if (!Watched.isEmpty())
+		mFileWatcher.removePaths(Watched);
+
+	if (!Directories.isEmpty())
+		mFileWatcher.addPaths(Directories);
 }

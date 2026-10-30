@@ -12227,6 +12227,18 @@ Bitte lesen sie unter https://www.leocad.org nach wie man eine Bibliothek herunt
         <source>Submodels</source>
         <translation>Untermodelle</translation>
     </message>
+    <message>
+        <source>Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Insert a model file from the current project's folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;&lt;b&gt;Files&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows model files in the saved project's folder. Select or drag a file to insert an external reference. The current project is excluded. Save a new project to choose its folder.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>lcPiecesLibrary</name>

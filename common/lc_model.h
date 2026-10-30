@@ -507,6 +507,7 @@ protected:
 	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, lcImageBackground Background);
 
 	void DeleteModel();
+	lcPieceDataRef AcquireInsertPieceData(lcPieceData* PieceData) const;
 
 	std::unordered_map<uint32_t, lcGroup*> RestoreGroups(const lcObjectHistory<lcGroupHistoryState>& History);
 	void RestorePieces(const lcObjectHistory<lcPieceHistoryState>& History, const std::unordered_map<uint32_t, lcGroup*>& GroupsById);

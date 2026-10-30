@@ -192,12 +192,12 @@ void lcFindReplaceWidget::ReplaceButtonClicked()
 {
 	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(Params.ReplacePieceData.Get(), std::vector<std::pair<lcPieceData*, std::string>>(),
+	std::optional<lcPieceDataRef> Result = lcShowPartSelectionPopup(Params.ReplacePieceData.Get(), std::vector<std::pair<lcPieceData*, std::string>>(),
                 gDefaultColor, mReplacePartButton, mReplacePartButton->mapToGlobal(mReplacePartButton->rect().bottomLeft()));
 
 	if (!Result.has_value())
 		return;
 
-	Params.ReplacePieceData = lcPieceDataRef(Result.value());
+	Params.ReplacePieceData = Result.value();
 	mReplacePartButton->setText(Result.value()->m_strDescription);
 }

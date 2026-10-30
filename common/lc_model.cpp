@@ -1005,7 +1005,7 @@ void lcModel::LoadLDraw(QIODevice& Device, Project* Project)
 				if (!CurrentGroups.empty())
 					Piece->SetGroup(CurrentGroups[CurrentGroups.size() - 1]);
 
-				lcPieceDataRef PieceData = Library->AcquirePieceData(PartId.toLatin1().constData(), Project, true, true);
+				lcPieceDataRef PieceData = Library->AcquirePieceData(PartId.toLatin1().constData(), Project, lcAcquirePieceDataFlag::CreateMissing | lcAcquirePieceDataFlag::SearchProjectFolder);
 
 				const float* Matrix = IncludeTransform.GetFloats();
 				const lcMatrix44 Transform(lcVector4(Matrix[0], Matrix[2], -Matrix[1], 0.0f), lcVector4(Matrix[8], Matrix[10], -Matrix[9], 0.0f),
@@ -1127,7 +1127,7 @@ bool lcModel::LoadBinary(lcFile* file)
 			lcMatrix44 WorldMatrix = lcMul(lcMatrix44RotationZ(rot[2] * LC_DTOR), lcMul(lcMatrix44RotationY(rot[1] * LC_DTOR), lcMatrix44RotationX(rot[0] * LC_DTOR)));
 			WorldMatrix.SetTranslation(pos);
 
-			lcPiece* pPiece = new lcPiece(Library->AcquirePieceData(name, mProject, true, false));
+			lcPiece* pPiece = new lcPiece(Library->AcquirePieceData(name, mProject, lcAcquirePieceDataFlag::CreateMissing));
 
 			pPiece->Initialize(WorldMatrix, step);
 			pPiece->SetColorCode(lcGetColorCodeFromOriginalColor(color));
@@ -1324,7 +1324,7 @@ bool lcModel::LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory)
 
 	for (const lcSetInventoryItem& SetInventoryItem : SetInventory)
 	{
-		const lcPieceDataRef PieceData = Library->AcquirePieceData(SetInventoryItem.PartID + ".dat", mProject, true, false);
+		const lcPieceDataRef PieceData = Library->AcquirePieceData(SetInventoryItem.PartID + ".dat", mProject, lcAcquirePieceDataFlag::CreateMissing);
 		int Quantity = SetInventoryItem.Quantity;
 
 		while (Quantity--)
@@ -3149,7 +3149,12 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 	if (!PieceData)
 		return nullptr;
 
-	const lcPieceDataRef PieceDataRef(PieceData);
+	const lcPieceDataRef PieceDataRef = AcquireInsertPieceData(PieceData);
+
+	if (!PieceDataRef)
+		return nullptr;
+
+	PieceData = PieceDataRef.Get();
 
 	lcPiece* Last = mPieces.empty() ? nullptr : mPieces.back().get();
 
@@ -5671,10 +5676,34 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 	}
 }
 
+lcPieceDataRef lcModel::AcquireInsertPieceData(lcPieceData* PieceData) const
+{
+	if (!PieceData || !PieceData->IsProject())
+		return lcPieceDataRef(PieceData);
+
+	const QByteArray PieceName(PieceData->mFileName);
+
+	return lcGetPiecesLibrary()->AcquirePieceData(PieceName.constData(), mProject, lcAcquirePieceDataFlag::ProjectFileOnly);
+}
+
 bool lcModel::InsertPieceToolClicked()
 {
 	if (mPreviewInsertPieceInfo.empty())
 		return false;
+
+	// A preview may outlive an in-place edit to its file or one of its dependencies.
+	for (lcPreviewInsertPieceInfo& InsertPieceInfo : mPreviewInsertPieceInfo)
+	{
+		lcPieceDataRef PieceData = AcquireInsertPieceData(InsertPieceInfo.PieceData.Get());
+
+		if (!PieceData)
+		{
+			SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>());
+			return false;
+		}
+
+		InsertPieceInfo.PieceData = std::move(PieceData);
+	}
 
 	BeginHistorySequence();
 	BeginEditHistory();

@@ -126,6 +126,11 @@ public:
 
 	QString GetImageFileName(bool AllowCurrentFolder) const;
 	void UpdateFileWatcher();
+	bool HasFileChangedOnDisk() const;
+
+	// Includes this project and every transitively referenced external project, once.
+	std::vector<const Project*> GetDependencies() const;
+	bool ReferencesFile(const QString& FileName) const;
 
 	lcInstructions* GetInstructions();
 
@@ -200,7 +205,7 @@ private:
 	lcResult<void> ValidateMergedTextureBindings(const Project& Source, const std::map<QString, std::shared_ptr<const lcEmbeddedData>>& MergedData, const lcModel* ClipboardRoot) const;
 	lcResult<void> MergeInternal(const std::vector<Project*>& Sources, const lcModel* ClipboardRoot);
 	static FileState ReadFileState(const QString& FileName);
-	bool HasFileChanged(const QString& Path);
+	bool CheckForFileChanges(const QString& Path);
 	static QString MakeExportNameFragment(const QString& Name);
 	static QString MakeUniqueExportIdentifier(const QString& BaseName, std::set<QString>& UsedNames, const QString& ReservedSuffix);
 

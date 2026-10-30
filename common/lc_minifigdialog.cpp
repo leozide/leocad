@@ -405,12 +405,12 @@ void lcMinifigDialog::PieceButtonClicked()
 
 	int ColorIndex = mMinifigWizard->mMinifig.ColorIndices[ItemIndex];
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(CurrentPieceData, Parts, ColorIndex, PieceButton, Position);
+	std::optional<lcPieceDataRef> Result = lcShowPartSelectionPopup(CurrentPieceData, Parts, ColorIndex, PieceButton, Position);
 
 	if (!Result.has_value())
 		return;
 
-	lcPieceData* NewPiece = Result.value();
+	lcPieceData* NewPiece = Result.value().Get();
 
 	SetCurrentTemplateModified();
 	UpdateTemplateCombo();

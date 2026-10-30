@@ -5,6 +5,8 @@
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
 #include "lc_mainwindow.h"
+#include "lc_partselectionwidget.h"
+#include "lc_partselectionpopup.h"
 #include "lc_model.h"
 #include "lc_modelhistory.h"
 #include "lc_meshloader.h"
@@ -59,6 +61,10 @@ private slots:
 	void RepeatedInstances();
 	void InterfaceTransforms();
 	void CompletedExportEvaluatesExternalModels();
+	void ProjectFilesCategory();
+	void ProjectFilesRecoveryAndCycles();
+	void ProjectFilePopupOwnership();
+	void ProjectFileInsertionValidation();
 	void FindReplaceViewIsolation();
 	void TexturedDirectGeometry3DS();
 
@@ -335,7 +341,7 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 
 	QVERIFY(Library->Load(Directory.path(), false, false));
 
-	lcPieceDataRef Piece = Library->AcquirePieceData("test.dat", nullptr, false, false);
+	lcPieceDataRef Piece = Library->AcquirePieceData("test.dat", nullptr, lcAcquirePieceDataFlag::None);
 
 	QVERIFY(Piece);
 	QVERIFY(Library->EnsurePieceDataAssetsReady(Piece));
@@ -349,7 +355,7 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 	QVERIFY(Primitive);
 	QVERIFY(Primitive->mMeshData.mHasTextures);
 
-	lcPieceDataRef Cycle = Library->AcquirePieceData("cycle.dat", nullptr, false, false);
+	lcPieceDataRef Cycle = Library->AcquirePieceData("cycle.dat", nullptr, lcAcquirePieceDataFlag::None);
 
 	QVERIFY(Cycle);
 	QVERIFY(!Library->EnsurePieceDataAssetsReady(Cycle));
@@ -532,6 +538,324 @@ void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 	QCOMPARE(Reloaded.GetEmbeddedData().front()->RawBlock, DataBlock);
 }
 
+void lcModelInstanceTests::ProjectFilesCategory()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+
+	const auto WriteFile = [&Directory](const QString& Name, const QByteArray& Data)
+	{
+		QFile File(Directory.filePath(Name));
+		return File.open(QIODevice::WriteOnly) && File.write(Data) == Data.size();
+	};
+
+	QVERIFY(WriteFile("host.mpd", "0 FILE host.ldr\n0 Host\n0 FILE embedded.ldr\n0 Embedded child\n"));
+	QVERIFY(WriteFile("child.ldr", "0 External child\n3 16 0 0 0 10 0 0 0 10 0\n"));
+	QVERIFY(WriteFile("embedded.ldr", "0 Shadowed external child\n3 16 0 0 0 10 0 0 0 10 0\n"));
+	QVERIFY(WriteFile("part.DAT", "0 Local part\n3 16 0 0 0 20 0 0 0 20 0\n"));
+	QVERIFY(WriteFile("notes.txt", "Not a model"));
+	QVERIFY(QDir(Directory.path()).mkdir("nested"));
+	QVERIFY(WriteFile("nested/hidden.ldr", "0 Nested model\n"));
+#ifdef Q_OS_UNIX
+	QVERIFY(QFile::link(Directory.filePath("host.mpd"), Directory.filePath("alias.mpd")));
+#endif
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+
+	lcMainWindow Window;
+	lcPartSelectionWidget Widget(false, nullptr);
+	Widget.SetCategory(lcPartCategoryType::Files, 0);
+	lcPartSelectionListModel* List = Widget.findChild<lcPartSelectionListModel*>();
+	QVERIFY(List);
+	QCOMPARE(List->rowCount(), 0);
+
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QVERIFY(!Library->AcquirePieceData("child.ldr", &Scope.Current, lcAcquirePieceDataFlag::None));
+	Widget.UpdateProjectCategories();
+	QCOMPARE(List->rowCount(), 2);
+	QCOMPARE(List->data(List->index(0, 0), Qt::DisplayRole).toString(), QString("child.ldr"));
+	QVERIFY(List->GetPieceData(0)->IsProject());
+	QCOMPARE(QFileInfo(List->GetPieceData(0)->GetProject()->GetFileName()).canonicalFilePath(),
+		QFileInfo(Directory.filePath("child.ldr")).canonicalFilePath());
+	QVERIFY(List->GetPieceData(0) != Scope.Current.GetModels()[1]->GetPieceData());
+
+	// Case-sensitive filesystems can contain distinct files sharing one registry key.
+	if (!QFileInfo(Directory.filePath("CHILD.ldr")).exists())
+	{
+		QVERIFY(WriteFile("CHILD.ldr", "0 Different child\n3 16 0 0 0 30 0 0 0 30 0\n"));
+		Widget.UpdateProjectCategories();
+		QCOMPARE(List->rowCount(), 2);
+
+		for (int Row = 0; Row < List->rowCount(); Row++)
+		{
+			const QString FileName = List->data(List->index(Row, 0), Qt::DisplayRole).toString();
+			QCOMPARE(QFileInfo(List->GetPieceData(Row)->GetProject()->GetFileName()).canonicalFilePath(),
+				QFileInfo(Directory.filePath(FileName)).canonicalFilePath());
+		}
+
+		QVERIFY(QFile::remove(Directory.filePath("CHILD.ldr")));
+		Widget.UpdateProjectCategories();
+	}
+
+	QTreeWidget* Categories = Widget.findChild<QTreeWidget*>();
+	QVERIFY(Categories);
+	QCOMPARE(Categories->topLevelItem(2)->text(0), QString("Submodels"));
+	QCOMPARE(Categories->topLevelItem(3)->text(0), QString("Files"));
+
+	// References selected from Files keep their relative disk identity on save/reload.
+	std::unique_ptr<lcPiece> Piece = std::make_unique<lcPiece>(lcPieceDataRef(List->GetPieceData(0)));
+	Piece->Initialize(lcMatrix44Identity(), 1);
+	Scope.Current.GetMainModel()->AddPiece(std::move(Piece), 0);
+	QCOMPARE(Scope.Current.GetMainModel()->GetPieces()[0]->GetID(), QString("child.ldr"));
+	QVERIFY(Scope.Current.Save(Directory.filePath("host.mpd")));
+	QFile SavedFile(Directory.filePath("host.mpd"));
+	QVERIFY(SavedFile.open(QIODevice::ReadOnly));
+	const QByteArray SavedData = SavedFile.readAll();
+	QVERIFY(SavedData.contains(" child.ldr"));
+	QVERIFY(!SavedData.contains("./"));
+	Project Reloaded;
+	QVERIFY(Reloaded.Load(Directory.filePath("host.mpd"), false));
+	QCOMPARE(Reloaded.GetMainModel()->GetPieces().size(), size_t(1));
+	QVERIFY(Reloaded.GetMainModel()->GetPieces()[0]->mPieceData->IsProject());
+	QCOMPARE(Reloaded.GetMainModel()->GetPieces()[0]->GetID(), QString("child.ldr"));
+
+	QVERIFY(WriteFile("new.mpd", "0 New file\n3 16 0 0 0 30 0 0 0 30 0\n"));
+	QTRY_COMPARE(List->rowCount(), 3);
+	QVERIFY(QFile::remove(Directory.filePath("new.mpd")));
+	QTRY_COMPARE(List->rowCount(), 2);
+
+	QTemporaryDir OtherDirectory;
+	QVERIFY(OtherDirectory.isValid());
+	QVERIFY(Scope.Current.Save(OtherDirectory.filePath("host.mpd")));
+	Widget.UpdateProjectCategories();
+	QCOMPARE(List->rowCount(), 0);
+}
+
+void lcModelInstanceTests::ProjectFilesRecoveryAndCycles()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkdir("nested"));
+
+	const auto WriteFile = [&Directory](const QString& Name, const QByteArray& Data)
+	{
+		QFile File(Directory.filePath(Name));
+		return File.open(QIODevice::WriteOnly) && File.write(Data) == Data.size();
+	};
+
+	QVERIFY(WriteFile("host.mpd", "0 FILE host.ldr\n0 Host\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 recovered.ldr\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 blocked.ldr\n"));
+	QVERIFY(WriteFile("direct.ldr", "0 Direct cycle\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 host.mpd\n"));
+	QVERIFY(WriteFile("indirect.mpd", "0 FILE root.ldr\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 branch.ldr\n0 FILE branch.ldr\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 nested/intermediate.ldr\n"));
+	QVERIFY(WriteFile("nested/intermediate.ldr", "0 Intermediate\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 ../host.mpd\n"));
+	QVERIFY(WriteFile("safe.ldr", "0 Safe\n3 16 0 0 0 10 0 0 0 10 0\n"));
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	lcPieceData* Missing = Scope.Current.GetMainModel()->GetPieces()[0]->mPieceData.Get();
+	lcPieceData* Blocked = Scope.Current.GetMainModel()->GetPieces()[1]->mPieceData.Get();
+	QCOMPARE(Missing->mState, lcAssetState::Failed);
+	QCOMPARE(Blocked->mState, lcAssetState::Failed);
+
+	// The cycle check must also apply to identities already loaded in the project.
+	lcPieceDataRef Cached = Library->AcquirePieceData("direct.ldr", &Scope.Current, lcAcquirePieceDataFlag::SearchProjectFolder);
+	QVERIFY(Cached && Cached->IsProject());
+	QVERIFY(!Library->AcquirePieceData("direct.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly));
+	QVERIFY(!Library->AcquirePieceData("indirect.mpd", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly));
+
+	lcMainWindow Window;
+	lcPartSelectionWidget Widget(false, nullptr);
+	Widget.SetCategory(lcPartCategoryType::Files, 0);
+	lcPartSelectionListModel* List = Widget.findChild<lcPartSelectionListModel*>();
+	QVERIFY(List);
+	QCOMPARE(List->rowCount(), 1);
+	QCOMPARE(QString::fromLatin1(List->GetPieceData(0)->mFileName), QString("safe.ldr"));
+
+	QVERIFY(WriteFile("recovered.ldr", "0 Recovered\n3 16 0 0 0 20 0 0 0 20 0\n"));
+	QVERIFY(WriteFile("blocked.ldr", "0 Blocked cycle\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 host.mpd\n"));
+	QTRY_COMPARE(List->rowCount(), 2);
+	QVERIFY(Missing->IsProject());
+	QCOMPARE(Scope.Current.GetMainModel()->GetPieces()[0]->mPieceData.Get(), Missing);
+	QCOMPARE(List->GetPieceData(0), Missing);
+	QCOMPARE(Missing->mState, lcAssetState::Loaded);
+	QVERIFY(!Blocked->IsProject());
+	QCOMPARE(Blocked->mState, lcAssetState::Failed);
+
+	// Retained identities must reload changed root files before checking dependencies.
+	lcPieceDataRef Safe = Library->AcquirePieceData("safe.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly);
+	QVERIFY(Safe);
+	const Project* OriginalProject = Safe->GetProject();
+	QVERIFY(WriteFile("safe.ldr", "0 Changed safe file\n3 16 0 0 0 30 0 0 0 30 0\n"));
+	lcPieceDataRef Updated = Library->AcquirePieceData("safe.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly);
+	QCOMPARE(Updated, Safe);
+	QVERIFY(Updated->GetProject() != OriginalProject);
+	QVERIFY(!Updated->GetProject()->HasFileChangedOnDisk());
+	QVERIFY(WriteFile("safe.ldr", "0 Changed to cycle\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 host.mpd\n"));
+	QVERIFY(!Library->AcquirePieceData("safe.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly));
+
+	// An unchanged root can acquire a cycle through a changed external dependency.
+	QVERIFY(WriteFile("reload.ldr", "0 Reload\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 nested/leaf.ldr\n"));
+	QVERIFY(WriteFile("nested/leaf.ldr", "0 Leaf\n3 16 0 0 0 10 0 0 0 10 0\n"));
+	lcPieceDataRef Root = Library->AcquirePieceData("reload.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly);
+	QVERIFY(Root);
+	QVERIFY(WriteFile("nested/leaf.ldr", "0 Changed leaf\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 ../host.mpd\n"));
+	QVERIFY(!Library->AcquirePieceData("reload.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly));
+
+	// Dependencies that were missing at load time must be revalidated when they appear.
+	QVERIFY(WriteFile("missing-root.ldr", "0 Missing dependency\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 nested/new-leaf.ldr\n"));
+	lcPieceDataRef MissingRoot = Library->AcquirePieceData("missing-root.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly);
+	QVERIFY(MissingRoot);
+	QVERIFY(WriteFile("nested/new-leaf.ldr", "0 New cycle\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 ../host.mpd\n"));
+	QVERIFY(!Library->AcquirePieceData("missing-root.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly));
+}
+
+void lcModelInstanceTests::ProjectFilePopupOwnership()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile HostFile(Directory.filePath("host.ldr"));
+	QVERIFY(HostFile.open(QIODevice::WriteOnly));
+	HostFile.write("0 Host\n");
+	HostFile.close();
+	QFile ChildFile(Directory.filePath("child.ldr"));
+	QVERIFY(ChildFile.open(QIODevice::WriteOnly));
+	ChildFile.write("0 Child\n3 16 0 0 0 10 0 0 0 10 0\n");
+	ChildFile.close();
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	QVERIFY(Scope.Current.Load(HostFile.fileName(), false));
+	lcMainWindow Window;
+	bool Picked = false;
+	QTimer::singleShot(0, [&Picked]()
+	{
+		QMenu* Menu = qobject_cast<QMenu*>(QApplication::activePopupWidget());
+		QVERIFY(Menu);
+		lcPartSelectionPopup* Popup = Menu->findChild<lcPartSelectionPopup*>();
+		QVERIFY(Popup);
+		lcPartSelectionWidget* Picker = Popup->GetPartSelectionWidget();
+		Picker->SetCategory(lcPartCategoryType::Files, 0);
+		lcPartSelectionListModel* List = Picker->findChild<lcPartSelectionListModel*>();
+		QCOMPARE(List->rowCount(), 1);
+		Picker->SetCurrentPart(List->GetPieceData(0));
+		Picked = QMetaObject::invokeMethod(Popup, "Accept", Qt::DirectConnection);
+	});
+
+	std::optional<lcPieceDataRef> Result = lcShowPartSelectionPopup(nullptr, {}, gDefaultColor, &Window, QPoint(0, 0));
+	QVERIFY(Picked);
+	QVERIFY(Result && Result.value());
+	QVERIFY(Result.value()->IsProject());
+	QCOMPARE(lcGetPiecesLibrary()->FindPieceData("child.ldr", &Scope.Current), Result.value().Get());
+	QCOMPARE(Result.value()->GetProject()->GetFileName(), ChildFile.fileName());
+
+	// Find/Replace keeps ownership after the popup result itself is released.
+	lcFindReplaceParams Params;
+	Params.ReplacePieceData = Result.value();
+	Result.reset();
+	QVERIFY(Params.ReplacePieceData->IsProject());
+	QCOMPARE(lcGetPiecesLibrary()->FindPieceData("child.ldr", &Scope.Current), Params.ReplacePieceData.Get());
+}
+
+void lcModelInstanceTests::ProjectFileInsertionValidation()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkdir("nested"));
+	const auto WriteFile = [&Directory](const QString& Name, const QByteArray& Data)
+	{
+		QFile File(Directory.filePath(Name));
+		return File.open(QIODevice::WriteOnly) && File.write(Data) == Data.size();
+	};
+	QVERIFY(WriteFile("host.mpd", "0 FILE host.ldr\n0 Host\n"));
+	QVERIFY(WriteFile("child.ldr", "0 Child\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 nested/leaf.ldr\n"));
+	QVERIFY(WriteFile("nested/leaf.ldr", "0 Leaf\n3 16 0 0 0 10 0 0 0 10 0\n"));
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	lcModel* Model = Scope.Current.GetMainModel();
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcPieceDataRef Data = lcGetPiecesLibrary()->AcquirePieceData("child.ldr", &Scope.Current, lcAcquirePieceDataFlag::ProjectFileOnly);
+	QVERIFY(Data);
+	const Project* Original = Data->GetProject();
+
+	Model->SetPreviewInsertPieceInfo({ { Data.Get(), lcMatrix44Identity(), gDefaultColor } });
+	QVERIFY(WriteFile("nested/leaf.ldr", "0 Updated leaf\n3 16 0 0 0 20 0 0 0 20 0\n"));
+	QVERIFY(Model->InsertPieceToolClicked());
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	QCOMPARE(Model->GetPieces()[0]->mPieceData, Data);
+	QVERIFY(Data->GetProject() != Original);
+
+	// Edit the dependency after creating the preview, without refreshing the category.
+	Model->SetPreviewInsertPieceInfo({ { Data.Get(), lcMatrix44Identity(), gDefaultColor } });
+	QVERIFY(WriteFile("nested/leaf.ldr", "0 Cycle\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 ../host.mpd\n"));
+	QVERIFY(!Model->InsertPieceToolClicked());
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	QVERIFY(Model->GetPreviewInsertPieceInfo().empty());
+	QVERIFY(!Model->AddPiece(Data.Get(), LC_PIECE_SECTION_INVALID));
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+
+	// Keyboard insertion also reloads valid edits, and rejects a deleted file.
+	QVERIFY(WriteFile("child.ldr", "0 Changed child\n3 16 0 0 0 30 0 0 0 30 0\n"));
+	QVERIFY(Model->AddPiece(Data.Get(), LC_PIECE_SECTION_INVALID));
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	Model->SetPreviewInsertPieceInfo({ { Data.Get(), lcMatrix44Identity(), gDefaultColor } });
+	QVERIFY(QFile::remove(Directory.filePath("child.ldr")));
+	QVERIFY(!Model->InsertPieceToolClicked());
+	QVERIFY(!Model->AddPiece(Data.Get(), LC_PIECE_SECTION_INVALID));
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+}
+
 void lcModelInstanceTests::FindReplaceViewIsolation()
 {
 	QTemporaryDir Directory;
@@ -636,7 +960,7 @@ void lcModelInstanceTests::FindReplaceViewIsolation()
 	{
 		lcView Temporary(lcViewType::PartsList, Model);
 		Temporary.GetFindReplaceParams().ReplacePieceData = lcGetPiecesLibrary()->AcquirePieceData(
-			"find-view-temporary.dat", &Scope.Current, true, false);
+			"find-view-temporary.dat", &Scope.Current, lcAcquirePieceDataFlag::CreateMissing);
 		QVERIFY(lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
 	}
 	QVERIFY(!lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));

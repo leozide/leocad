@@ -2662,7 +2662,7 @@ void lcMainWindow::UpdateModels()
 			delete TabWidget;
 	}
 
-	mPartSelectionWidget->UpdateModels();
+	mPartSelectionWidget->UpdateProjectCategories();
 
 	if (mInsertPieceData && mInsertPieceData->IsModel())
 		if (!HasModel(mInsertPieceData->GetModel()))
@@ -2887,6 +2887,7 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 	}
 
 	AddRecentFile(SaveFileName);
+	mPartSelectionWidget->UpdateProjectCategories();
 	UpdateTitle();
 
 	return true;

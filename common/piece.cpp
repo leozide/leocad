@@ -350,7 +350,7 @@ bool lcPiece::FileLoad(lcFile& file, Project* Project)
 		file.ReadBuffer(name, LC_PIECE_NAME_LEN);
 	lcstrcat(name, ".dat");
 
-	SetPieceData(lcGetPiecesLibrary()->AcquirePieceData(name, Project, true, false), QString(), true, true);
+	SetPieceData(lcGetPiecesLibrary()->AcquirePieceData(name, Project, lcAcquirePieceDataFlag::CreateMissing), QString(), true, true);
 
 	// 11 (0.77)
 	if (version < 11)
@@ -1043,7 +1043,7 @@ void lcPiece::SetHistoryState(const lcPieceHistoryState& State, Project* Project
 	mPosition = State.Position;
 	mRotation = State.Rotation;
 
-	lcPieceDataRef RestoredData = lcGetPiecesLibrary()->AcquirePieceData(mID.toLatin1(), Project, true, true);
+	lcPieceDataRef RestoredData = lcGetPiecesLibrary()->AcquirePieceData(mID.toLatin1(), Project, lcAcquirePieceDataFlag::CreateMissing | lcAcquirePieceDataFlag::SearchProjectFolder);
 
 	if (mPieceData != RestoredData)
 	{

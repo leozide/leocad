@@ -6,6 +6,7 @@
 #include "lc_view.h"
 #include "lc_glextensions.h"
 #include "lc_viewwidget.h"
+#include "lc_context.h"
 
 lcAboutDialog::lcAboutDialog(QWidget* Parent)
 	: QDialog(Parent), ui(new Ui::lcAboutDialog)
@@ -20,11 +21,23 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 #endif
 
 	lcViewWidget* Widget = gMainWindow->GetActiveView()->GetWidget();
+	lcScopedGLContextState ContextState;
+	Widget->makeCurrent();
+
 	QOpenGLContext* Context = Widget->context();
 	QOpenGLFunctions* Functions = Context->functions();
-	QSurfaceFormat Format = Context->format();
 
-	int ColorDepth = Format.redBufferSize() + Format.greenBufferSize() + Format.blueBufferSize() + Format.alphaBufferSize();
+	// QOpenGLWidget renders into a framebuffer whose format can differ from the window surface.
+	GLint RedBits = 0, GreenBits = 0, BlueBits = 0, AlphaBits = 0, DepthBits = 0, StencilBits = 0;
+	
+	Functions->glGetIntegerv(GL_RED_BITS, &RedBits);
+	Functions->glGetIntegerv(GL_GREEN_BITS, &GreenBits);
+	Functions->glGetIntegerv(GL_BLUE_BITS, &BlueBits);
+	Functions->glGetIntegerv(GL_ALPHA_BITS, &AlphaBits);
+	Functions->glGetIntegerv(GL_DEPTH_BITS, &DepthBits);
+	Functions->glGetIntegerv(GL_STENCIL_BITS, &StencilBits);
+	
+	const int ColorBits = RedBits + GreenBits + BlueBits + AlphaBits;
 
 	const QString QtVersionFormat = tr("Qt Version %1 (compiled with %2)\n\n");
 	const QString QtVersion = QtVersionFormat.arg(qVersion(), QT_VERSION_STR);
@@ -36,7 +49,7 @@ lcAboutDialog::lcAboutDialog(QWidget* Parent)
 	const QString Vendor(reinterpret_cast<const char*>(Functions->glGetString(GL_VENDOR)));
 	const QString Version = VersionFormat.arg(GLVersion, ShaderVersion, Renderer, Vendor);
 	const QString BuffersFormat = tr("Color Buffer: %1 bits\nDepth Buffer: %2 bits\nStencil Buffer: %3 bits\n\n");
-	const QString Buffers = BuffersFormat.arg(QString::number(ColorDepth), QString::number(Format.depthBufferSize()), QString::number(Format.stencilBufferSize()));
+	const QString Buffers = BuffersFormat.arg(QString::number(ColorBits), QString::number(DepthBits), QString::number(StencilBits));
 
 	const QString ExtensionsFormat = tr("Buffers: %1\nFramebuffers: %2\nBlendFuncSeparate: %3\nAnisotropic: %4\n");
 	const QString VertexBuffers = gSupportsVertexBufferObject ? tr("Supported") : tr("Not supported");

@@ -5356,12 +5356,14 @@ void lcModel::UnhideAllPieces()
 	gMainWindow->UpdateSelectedObjects(true);
 }
 
-void lcModel::FindReplacePiece(bool SearchForward, bool FindAll, bool Replace)
+void lcModel::FindReplacePiece(const lcFindReplaceParams& Params, lcFindReplaceAction Action)
 {
 	if (mPieces.empty())
 		return;
 
-	const lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	const bool SearchForward = Action != lcFindReplaceAction::FindPrevious;
+	const bool FindAll = Action == lcFindReplaceAction::FindAll || Action == lcFindReplaceAction::ReplaceAll;
+	const bool Replace = Action == lcFindReplaceAction::ReplaceNext || Action == lcFindReplaceAction::ReplaceAll;
 
 	const bool ReplacePieceData = Replace && Params.ReplacePieceData;
 	const bool ReplaceColor = Replace && lcGetColorCode(Params.ReplaceColorIndex) != LC_COLOR_NOCOLOR;

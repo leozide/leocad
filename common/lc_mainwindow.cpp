@@ -3114,18 +3114,18 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_FIND_NEXT:
-		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, false, false);
+		if (ActiveModel && ActiveView)
+			ActiveModel->FindReplacePiece(ActiveView->GetFindReplaceParams(), lcFindReplaceAction::FindNext);
 		break;
 
 	case LC_EDIT_FIND_PREVIOUS:
-		if (ActiveModel)
-			ActiveModel->FindReplacePiece(false, false, false);
+		if (ActiveModel && ActiveView)
+			ActiveModel->FindReplacePiece(ActiveView->GetFindReplaceParams(), lcFindReplaceAction::FindPrevious);
 		break;
 
 	case LC_EDIT_FIND_ALL:
-		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, true, false);
+		if (ActiveModel && ActiveView)
+			ActiveModel->FindReplacePiece(ActiveView->GetFindReplaceParams(), lcFindReplaceAction::FindAll);
 		break;
 
 	case LC_EDIT_REPLACE:
@@ -3134,13 +3134,13 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 		break;
 
 	case LC_EDIT_REPLACE_ALL:
-		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, true, true);
+		if (ActiveModel && ActiveView)
+			ActiveModel->FindReplacePiece(ActiveView->GetFindReplaceParams(), lcFindReplaceAction::ReplaceAll);
 		break;
 
 	case LC_EDIT_REPLACE_NEXT:
-		if (ActiveModel)
-			ActiveModel->FindReplacePiece(true, false, true);
+		if (ActiveModel && ActiveView)
+			ActiveModel->FindReplacePiece(ActiveView->GetFindReplaceParams(), lcFindReplaceAction::ReplaceNext);
 		break;
 
 	case LC_EDIT_SELECT_ALL:

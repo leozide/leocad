@@ -109,7 +109,7 @@ struct lcFindReplaceParams
 	lcPieceData* FindPieceData = nullptr;
 	QString FindString;
 	int FindColorIndex = 0;
-	lcPieceData* ReplacePieceData = nullptr;
+	lcPieceDataRef ReplacePieceData;
 	int ReplaceColorIndex = 0;
 };
 
@@ -126,7 +126,7 @@ public:
 	lcView& operator=(const lcView&) = delete;
 	lcView& operator=(lcView&&) = delete;
 
-	static lcFindReplaceParams& GetFindReplaceParams()
+	lcFindReplaceParams& GetFindReplaceParams()
 	{
 		return mFindReplaceParams;
 	}
@@ -415,8 +415,8 @@ protected:
 	lcVertexBuffer mGridBuffer;
 	int mGridSettings[7];
 
-	static QPointer<lcFindReplaceWidget> mFindWidget;
-	static lcFindReplaceParams mFindReplaceParams;
+	QPointer<lcFindReplaceWidget> mFindWidget;
+	lcFindReplaceParams mFindReplaceParams;
 
 	static lcView* mLastFocusedView;
 	static std::vector<lcView*> mViews;

@@ -9,9 +9,11 @@
 #include "lc_view.h"
 #include "lc_qutils.h"
 
-lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool Replace)
-	: QWidget(Parent)
+lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcView* View, bool Replace)
+	: QWidget(Parent), mView(View)
 {
+	connect(qApp, &QApplication::focusChanged, this, &lcFindReplaceWidget::FocusChanged);
+
 	setAutoFillBackground(true);
 	QPalette Palette = palette();
 	Palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Button));
@@ -34,16 +36,16 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	QToolButton* FindNextButton = new QToolButton(this);
 	FindNextButton->setAutoRaise(true);
-	FindNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_NEXT]);
+	FindNextButton->setDefaultAction(CreateAction(gMainWindow->mActions[LC_EDIT_FIND_NEXT], lcFindReplaceAction::FindNext));
 	Layout->addWidget(FindNextButton, 0, 3);
 
 	QToolButton* FindAllButton = new QToolButton(this);
 	FindAllButton->setAutoRaise(true);
-	FindAllButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_FIND_ALL]);
+	FindAllButton->setDefaultAction(CreateAction(gMainWindow->mActions[LC_EDIT_FIND_ALL], lcFindReplaceAction::FindAll));
 	Layout->addWidget(FindAllButton, 0, 4);
 
 	connect(FindColorPicker, &lcColorPicker::ColorChanged, this, &lcFindReplaceWidget::FindColorIndexChanged);
-	connect(mFindPartComboBox->lineEdit(), &QLineEdit::returnPressed, gMainWindow->mActions[LC_EDIT_FIND_NEXT], &QAction::trigger);
+	connect(mFindPartComboBox->lineEdit(), &QLineEdit::returnPressed, FindNextButton->defaultAction(), &QAction::trigger);
 	connect(mFindPartComboBox->lineEdit(), &QLineEdit::textEdited, this, &lcFindReplaceWidget::FindTextEdited);
 	connect(mFindPartComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &lcFindReplaceWidget::FindActivated);
 
@@ -75,12 +77,12 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 		QToolButton* ReplaceNextButton = new QToolButton(this);
 		ReplaceNextButton->setAutoRaise(true);
-		ReplaceNextButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_NEXT]);
+		ReplaceNextButton->setDefaultAction(CreateAction(gMainWindow->mActions[LC_EDIT_REPLACE_NEXT], lcFindReplaceAction::ReplaceNext));
 		Layout->addWidget(ReplaceNextButton, 1, 3);
 
 		QToolButton* ReplaceAllButton = new QToolButton(this);
 		ReplaceAllButton->setAutoRaise(true);
-		ReplaceAllButton->setDefaultAction(gMainWindow->mActions[LC_EDIT_REPLACE_ALL]);
+		ReplaceAllButton->setDefaultAction(CreateAction(gMainWindow->mActions[LC_EDIT_REPLACE_ALL], lcFindReplaceAction::ReplaceAll));
 		Layout->addWidget(ReplaceAllButton, 1, 4);
 
 		connect(ReplaceColorPicker, &lcColorPicker::ColorChanged, this, &lcFindReplaceWidget::ReplaceColorIndexChanged);
@@ -98,6 +100,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	connect(CloseButton, &QToolButton::clicked, this, &QObject::deleteLater);
 
+	lcModel* Model = mView->GetActiveModel();
 	lcPartsList PartsList;
 	Model->GetPartsList(gDefaultColor, false, true, PartsList);
 
@@ -109,7 +112,7 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 
 	if (Focus)
 	{
-		lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+		lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
 		Params.FindPieceData = Focus->mPieceData.Get();
 		Params.FindColorIndex = Focus->GetColorIndex();
@@ -129,16 +132,42 @@ lcFindReplaceWidget::lcFindReplaceWidget(QWidget* Parent, lcModel* Model, bool R
 	show();
 }
 
+QAction* lcFindReplaceWidget::CreateAction(QAction* Source, lcFindReplaceAction Operation)
+{
+	QAction* Action = new QAction(Source->icon(), Source->text(), this);
+	Action->setToolTip(Source->toolTip());
+	Action->setStatusTip(Source->statusTip());
+	Action->setWhatsThis(Source->whatsThis());
+
+	connect(Action, &QAction::triggered, this, [this, Operation]()
+	{
+		mView->SetFocus(true);
+
+		if (lcModel* Model = mView->GetActiveModel())
+			Model->FindReplacePiece(mView->GetFindReplaceParams(), Operation);
+	});
+
+	return Action;
+}
+
+void lcFindReplaceWidget::FocusChanged(QWidget* Previous, QWidget* Focused)
+{
+	Q_UNUSED(Previous);
+
+	if (Focused && (Focused == this || isAncestorOf(Focused)) && !mView->IsLastFocused())
+		mView->SetFocus(true);
+}
+
 void lcFindReplaceWidget::FindColorIndexChanged(int ColorIndex)
 {
-	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
 	Params.FindColorIndex = ColorIndex;
 }
 
 void lcFindReplaceWidget::FindTextEdited(const QString& Text)
 {
-	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
 	Params.FindString = Text;
 	Params.FindPieceData = nullptr;
@@ -146,7 +175,7 @@ void lcFindReplaceWidget::FindTextEdited(const QString& Text)
 
 void lcFindReplaceWidget::FindActivated(int Index)
 {
-	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
 	Params.FindString.clear();
 	Params.FindPieceData = (lcPieceData*)mFindPartComboBox->itemData(Index).value<void*>();
@@ -154,21 +183,21 @@ void lcFindReplaceWidget::FindActivated(int Index)
 
 void lcFindReplaceWidget::ReplaceColorIndexChanged(int ColorIndex)
 {
-	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
 	Params.ReplaceColorIndex = ColorIndex;
 }
 
 void lcFindReplaceWidget::ReplaceButtonClicked()
 {
-	lcFindReplaceParams& Params = lcView::GetFindReplaceParams();
+	lcFindReplaceParams& Params = mView->GetFindReplaceParams();
 
-	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(Params.ReplacePieceData, std::vector<std::pair<lcPieceData*, std::string>>(),
+	std::optional<lcPieceData*> Result = lcShowPartSelectionPopup(Params.ReplacePieceData.Get(), std::vector<std::pair<lcPieceData*, std::string>>(),
                 gDefaultColor, mReplacePartButton, mReplacePartButton->mapToGlobal(mReplacePartButton->rect().bottomLeft()));
 
 	if (!Result.has_value())
 		return;
 
-	Params.ReplacePieceData = Result.value();
+	Params.ReplacePieceData = lcPieceDataRef(Result.value());
 	mReplacePartButton->setText(Result.value()->m_strDescription);
 }

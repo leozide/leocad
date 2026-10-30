@@ -2,6 +2,7 @@
 #include "lc_application.h"
 #include "lc_colors.h"
 #include "lc_context.h"
+#include "lc_findreplacewidget.h"
 #include "lc_library.h"
 #include "lc_mainwindow.h"
 #include "lc_model.h"
@@ -58,6 +59,7 @@ private slots:
 	void RepeatedInstances();
 	void InterfaceTransforms();
 	void CompletedExportEvaluatesExternalModels();
+	void FindReplaceViewIsolation();
 	void TexturedDirectGeometry3DS();
 
 private:
@@ -528,6 +530,116 @@ void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 	QCOMPARE(Reloaded.GetMainModel()->GetCameras().size(), size_t(1));
 	QCOMPARE(Reloaded.GetEmbeddedData().size(), size_t(1));
 	QCOMPARE(Reloaded.GetEmbeddedData().front()->RawBlock, DataBlock);
+}
+
+void lcModelInstanceTests::FindReplaceViewIsolation()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile File(Directory.filePath("host.ldr"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Host\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 alpha.dat\n"
+		"1 16 50 0 0 1 0 0 0 1 0 0 0 1 beta.dat\n");
+	File.close();
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	QVERIFY(Scope.Current.Load(File.fileName(), false));
+	lcModel* Model = Scope.Current.GetMainModel();
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	Window.mActions[LC_VIEW_SPLIT_HORIZONTAL]->trigger();
+	const std::vector<lcView*> Views = lcView::GetModelViews(Model);
+	QCOMPARE(Views.size(), size_t(2));
+	lcView* First = Views[0];
+	lcView* Second = Views[1];
+	First->ShowFindReplaceWidget(true);
+	Second->ShowFindReplaceWidget(true);
+	QPointer<lcFindReplaceWidget> FirstWidget = First->GetWidget()->findChild<lcFindReplaceWidget*>();
+	QPointer<lcFindReplaceWidget> SecondWidget = Second->GetWidget()->findChild<lcFindReplaceWidget*>();
+	QVERIFY(FirstWidget && SecondWidget);
+	QVERIFY(FirstWidget != SecondWidget);
+	QVERIFY(&First->GetFindReplaceParams() != &Second->GetFindReplaceParams());
+	QVERIFY(QMetaObject::invokeMethod(FirstWidget, "FindTextEdited", Qt::DirectConnection, Q_ARG(QString, QString("alpha"))));
+	QVERIFY(QMetaObject::invokeMethod(SecondWidget, "FindTextEdited", Qt::DirectConnection, Q_ARG(QString, QString("beta"))));
+	First->GetFindReplaceParams().FindColorIndex = lcGetColorIndex(LC_COLOR_NOCOLOR);
+	Second->GetFindReplaceParams().FindColorIndex = lcGetColorIndex(LC_COLOR_NOCOLOR);
+	First->GetFindReplaceParams().ReplaceColorIndex = lcGetColorIndex(4);
+	Second->GetFindReplaceParams().ReplaceColorIndex = lcGetColorIndex(1);
+	First->SetFocus(true);
+	Second->SetFocus(true);
+	QVERIFY(FirstWidget && SecondWidget);
+	QCOMPARE(First->GetFindReplaceParams().FindString, QString("alpha"));
+	QCOMPARE(Second->GetFindReplaceParams().FindString, QString("beta"));
+
+	const auto FindAction = [](lcFindReplaceWidget* Widget, QAction* Source) -> QAction*
+	{
+		for (QAction* Action : Widget->findChildren<QAction*>(QString(), Qt::FindDirectChildrenOnly))
+			if (Action->text() == Source->text())
+				return Action;
+
+		return nullptr;
+	};
+
+	// A button in the first view must use its owner even while the second is active.
+	QAction* FirstFind = FindAction(FirstWidget, Window.mActions[LC_EDIT_FIND_ALL]);
+	QVERIFY(FirstFind);
+	FirstFind->trigger();
+	QVERIFY(Model->GetPieces()[0]->IsSelected());
+	QVERIFY(!Model->GetPieces()[1]->IsSelected());
+	QCOMPARE(Window.GetActiveView(), First);
+	Second->SetFocus(true);
+	Window.mActions[LC_EDIT_FIND_ALL]->trigger();
+	QVERIFY(!Model->GetPieces()[0]->IsSelected());
+	QVERIFY(Model->GetPieces()[1]->IsSelected());
+
+	QAction* FirstReplace = FindAction(FirstWidget, Window.mActions[LC_EDIT_REPLACE_ALL]);
+	QVERIFY(FirstReplace);
+	FirstReplace->trigger();
+	QCOMPARE(Model->GetPieces()[0]->GetColorCode(), quint32(4));
+	QCOMPARE(Model->GetPieces()[1]->GetColorCode(), quint32(16));
+	Second->SetFocus(true);
+	Window.mActions[LC_EDIT_REPLACE_ALL]->trigger();
+	QCOMPARE(Model->GetPieces()[0]->GetColorCode(), quint32(4));
+	QCOMPARE(Model->GetPieces()[1]->GetColorCode(), quint32(1));
+
+	Second->GetFindReplaceParams().FindString.clear();
+	Window.mActions[LC_EDIT_FIND_NEXT]->trigger();
+	QCOMPARE(Model->GetFocusObject(), Model->GetPieces()[0].get());
+	Window.mActions[LC_EDIT_FIND_NEXT]->trigger();
+	QCOMPARE(Model->GetFocusObject(), Model->GetPieces()[1].get());
+	Window.mActions[LC_EDIT_FIND_PREVIOUS]->trigger();
+	QCOMPARE(Model->GetFocusObject(), Model->GetPieces()[0].get());
+	Second->GetFindReplaceParams().ReplaceColorIndex = lcGetColorIndex(14);
+	Window.mActions[LC_EDIT_REPLACE_NEXT]->trigger();
+	QCOMPARE(Model->GetPieces()[0]->GetColorCode(), quint32(14));
+	QCOMPARE(Model->GetPieces()[1]->GetColorCode(), quint32(1));
+	QCOMPARE(Model->GetFocusObject(), Model->GetPieces()[1].get());
+
+	// Reopening one view's panel leaves the other view's parameters untouched.
+	Second->ShowFindReplaceWidget(false);
+	QVERIFY(FirstWidget);
+	QCOMPARE(First->GetFindReplaceParams().FindString, QString("alpha"));
+	QCOMPARE(First->GetFindReplaceParams().ReplaceColorIndex, lcGetColorIndex(4));
+
+	{
+		lcView Temporary(lcViewType::PartsList, Model);
+		Temporary.GetFindReplaceParams().ReplacePieceData = lcGetPiecesLibrary()->AcquirePieceData(
+			"find-view-temporary.dat", &Scope.Current, true, false);
+		QVERIFY(lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
+	}
+	QVERIFY(!lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
 }
 
 void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()

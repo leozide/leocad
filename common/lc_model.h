@@ -25,8 +25,18 @@ enum class lcImageBackground
 	Opaque
 };
 
+enum class lcFindReplaceAction
+{
+	FindNext, // Select the next matching piece.
+	FindPrevious, // Select the previous matching piece.
+	FindAll, // Select all matching pieces.
+	ReplaceNext, // Replace the focused match and select the next match.
+	ReplaceAll // Replace all matching pieces.
+};
+
 enum class lcCameraProjection;
 struct lcSetInventoryItem;
+struct lcFindReplaceParams;
 struct lcModelHistoryEditState;
 struct lcGroupHistoryState;
 struct lcPieceHistoryState;
@@ -419,7 +429,7 @@ public:
 	void UnhideSelectedPieces();
 	void UnhideAllPieces();
 
-	void FindReplacePiece(bool SearchForward, bool FindAll, bool Replace);
+	void FindReplacePiece(const lcFindReplaceParams& Params, lcFindReplaceAction Action);
 
 	void UndoAction();
 	void RedoAction();

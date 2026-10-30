@@ -20,9 +20,6 @@
 #include "lc_qutils.h"
 #include "lc_partselectionpopup.h"
 
-lcFindReplaceParams lcView::mFindReplaceParams;
-QPointer<lcFindReplaceWidget> lcView::mFindWidget;
-
 lcView* lcView::mLastFocusedView;
 std::vector<lcView*> lcView::mViews;
 
@@ -56,6 +53,8 @@ lcView::lcView(lcViewType ViewType, lcModel* Model)
 
 lcView::~lcView()
 {
+	delete mFindWidget;
+
 	DestroyOutlineFramebuffers();
 
 	mContext->DestroyVertexBuffer(mGridBuffer);
@@ -163,9 +162,6 @@ void lcView::SetFocus(bool Focus)
 	{
 		if (mLastFocusedView != this)
 		{
-			delete mFindWidget;
-			mFindWidget = nullptr;
-
 			mLastFocusedView = this;
 		}
 
@@ -551,7 +547,7 @@ void lcView::ShowFindReplaceWidget(bool Replace)
 {
 	delete mFindWidget;
 	mFindReplaceParams = lcFindReplaceParams();
-	mFindWidget = new lcFindReplaceWidget(mWidget, GetActiveModel(), Replace);
+	mFindWidget = new lcFindReplaceWidget(mWidget, this, Replace);
 	mWidget->SetFindReplaceWidget(mFindWidget);
 }
 

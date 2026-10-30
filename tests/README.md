@@ -113,6 +113,16 @@ Run the executable with `LEOCAD_TEST_NATIVE_INTERFACE=1` to check camera and all
 four light types under translated and rotated in-place transforms. Without the
 environment variable, this drawing test is skipped.
 
+The same environment variable enables translucent-thumbnail checks with single
+and multisample framebuffers. These cover selected and hardcoded transparent
+colors, light and dark palettes, tiled image readback, parts-list composition,
+opaque solid and gradient backgrounds, and switching from custom backgrounds
+with alpha to transparent or opaque rendering.
+
+Native texture checks exercise source-over decal alpha in flat and lit shaders,
+including framebuffer blending, and sample uploaded mipmaps to check alpha-aware
+filtering for RGBA, RGB, and alpha-only textures, including one-pixel dimensions.
+
 The camera-context checks also cover active-model camera menus, live camera
 projection and zoom undo ownership, translated/rotated camera projection,
 world-space detachment across edit depths, camera deletion in multiple views,

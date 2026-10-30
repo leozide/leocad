@@ -104,6 +104,14 @@ enum class lcViewType
 	Count
 };
 
+enum class lcBackgroundMode
+{
+	Default, // Preferences onscreen; transparent offscreen.
+	Transparent,
+	Opaque, // Configured solid or gradient background.
+	CustomColor
+};
+
 struct lcFindReplaceParams
 {
 	lcPieceData* FindPieceData = nullptr;
@@ -208,10 +216,15 @@ public:
 		return mCameraRotationMouseAngle;
 	}
 
-	void SetBackgroundColorOverride(quint32 BackgroundColor)
+	void SetBackgroundColor(quint32 BackgroundColor)
 	{
-		mOverrideBackgroundColor = true;
+		mBackgroundMode = lcBackgroundMode::CustomColor;
 		mBackgroundColor = BackgroundColor;
+	}
+
+	void SetBackgroundMode(lcBackgroundMode Mode)
+	{
+		mBackgroundMode = Mode;
 	}
 
 	lcMatrix44 GetActiveSubmodelTransform() const
@@ -398,7 +411,7 @@ protected:
 	std::unique_ptr<QOpenGLFramebufferObject> mOutlineVisibleFramebuffer;
 	QSize mOutlineAttemptSize;
 	QPointer<QOpenGLContext> mOutlineGLContext;
-	bool mOverrideBackgroundColor = false;
+	lcBackgroundMode mBackgroundMode = lcBackgroundMode::Default;
 	quint32 mBackgroundColor = 0;
 
 	std::unique_ptr<lcScene> mScene;

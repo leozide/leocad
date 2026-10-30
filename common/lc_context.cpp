@@ -1138,67 +1138,26 @@ bool lcContext::UploadTexture(lcTexture* Texture)
 		{
 			int Width = Texture->mWidth;
 			int Height = Texture->mHeight;
-			int Components = Image.depth() / 8;
-			GLubyte* MipBuffer = nullptr;
-
-			if (!HasMipmaps)
-			{
-				MipBuffer = new GLubyte[Width * Height * Components];
-
-				if (!MipBuffer)
-					return FinishUpload(false);
-
-				const size_t RowBytes = static_cast<size_t>(Width) * Components;
-				for (int Row = 0; Row < Height; Row++)
-					memcpy(MipBuffer + Row * RowBytes, Image.constScanLine(Row), RowBytes);
-			}
+			QImage MipImage = Image;
 
 			for (int Level = 1; ((Width != 1) || (Height != 1)); Level++)
 			{
-				int PrevRowStride = Width * Components;
-				int PrevWidth = Width;
-				int PrevHeight = Height;
-
 				Width = lcMax(1, Width >> 1);
 				Height = lcMax(1, Height >> 1);
-				int RowStride = Width * Components;
 
-				if (!HasMipmaps)
-				{
-					for (int y = 0; y < Height; y++)
-					{
-						int SrcY0 = y * 2;
-						int SrcY1 = lcMin(SrcY0 + 1, PrevHeight - 1);
-
-						for (int x = 0; x < Width; x++)
-						{
-							int SrcX0 = x * 2;
-							int SrcX1 = lcMin(SrcX0 + 1, PrevWidth - 1);
-
-							for (int c = 0; c < Components; c++)
-							{
-								GLubyte c00 = MipBuffer[SrcX0 * Components + SrcY0 * PrevRowStride + c];
-								GLubyte c01 = MipBuffer[SrcX0 * Components + SrcY1 * PrevRowStride + c];
-								GLubyte c10 = MipBuffer[SrcX1 * Components + SrcY0 * PrevRowStride + c];
-								GLubyte c11 = MipBuffer[SrcX1 * Components + SrcY1 * PrevRowStride + c];
-
-								MipBuffer[x * Components + y * RowStride + c] = (c00 + c01 + c10 + c11) / 4;
-							}
-						}
-					}
-
-					glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-					glTexImage2D(Target, Level, Format, Width, Height, 0, Format, GL_UNSIGNED_BYTE, MipBuffer);
-				}
+				if (HasMipmaps)
+					MipImage = Texture->GetImage(++CurrentImage);
 				else
 				{
-					const QImage& MipImage = Texture->GetImage(++CurrentImage);
+					// Qt filters with premultiplied alpha, then restores straight RGBA for the shaders.
+					MipImage = MipImage.scaled(Width, Height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(Image.format());
 
-					UploadTextureImage(Target, Level, Format, MipImage);
+					if (MipImage.isNull())
+						return FinishUpload(false);
 				}
-			}
 
-			delete[] MipBuffer;
+				UploadTextureImage(Target, Level, Format, MipImage);
+			}
 		}
 
 		CurrentImage++;

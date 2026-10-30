@@ -350,8 +350,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	mView->MakeCurrent();
 	mView->BindRenderFramebuffer();
 
-	const uint BackgroundColor = QApplication::palette().color(QPalette::Base).rgba();
-	mView->SetBackgroundColorOverride(LC_RGBA(qRed(BackgroundColor), qGreen(BackgroundColor), qBlue(BackgroundColor), 0));
+	mView->SetBackgroundMode(lcBackgroundMode::Transparent);
 
 	lcPieceData* PieceData = Thumbnail.PieceData;
 

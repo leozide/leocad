@@ -14,6 +14,8 @@
 #include "lc_piecedata.h"
 #include "lc_scene.h"
 #include "lc_selectdialog.h"
+#include "lc_thumbnailmanager.h"
+#include "lc_texture.h"
 #include "lc_view.h"
 #include "lc_viewwidget.h"
 #include "camera.h"
@@ -60,6 +62,10 @@ private slots:
 	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
+	void TranslucentThumbnails_data();
+	void TranslucentThumbnails();
+	void TextureDecalAlpha();
+	void TextureMipmaps();
 	void CompletedExportEvaluatesExternalModels();
 	void ProjectFilesCategory();
 	void ProjectFilesRecoveryAndCycles();
@@ -2237,6 +2243,308 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 	CheckLightExport(Main->GetLights()[0].get(), lcMatrix44Identity());
 }
 
+
+void lcModelInstanceTests::TranslucentThumbnails_data()
+{
+	QTest::addColumn<int>("Samples");
+	QTest::newRow("single-sample") << 0;
+	QTest::newRow("multisample") << 4;
+}
+
+void lcModelInstanceTests::TranslucentThumbnails()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test thumbnail rendering.");
+
+	QVERIFY(lcContext::InitializeRenderer(true));
+	lcLoadDefaultColors(lcStudStyle::Plain);
+
+	struct ScopedSettings
+	{
+		lcPreferences Preferences = lcGetPreferences();
+		QPalette Palette = QApplication::palette();
+		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
+		lcMainWindow* Window = gMainWindow;
+		~ScopedSettings()
+		{
+			lcGetPreferences() = Preferences;
+			QApplication::setPalette(Palette);
+			QSurfaceFormat::setDefaultFormat(Format);
+			gMainWindow = Window;
+		}
+	} Settings;
+	gMainWindow = nullptr;
+	QFETCH(int, Samples);
+	QSurfaceFormat Format = Settings.Format;
+	Format.setSamples(Samples);
+	QSurfaceFormat::setDefaultFormat(Format);
+
+	lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+	lcGetPreferences().mDrawEdgeLines = false;
+	lcGetPreferences().mDrawConditionalLines = false;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile File(Directory.filePath("transparent.mpd"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 FILE transparent.ldr\n"
+		"4 47 -20 0 -20 20 0 -20 20 0 20 -20 0 20\n"
+		"4 47 -20 4 -20 20 4 -20 20 4 20 -20 4 20\n"
+		"0 FILE inherited.ldr\n"
+		"4 16 -20 0 -20 20 0 -20 20 0 20 -20 0 20\n"
+		"4 16 -20 4 -20 20 4 -20 20 4 20 -20 4 20\n");
+	File.close();
+	Project Project;
+	QVERIFY(Project.Load(File.fileName(), false));
+	QCOMPARE(Project.GetModels().size(), size_t(2));
+
+	for (const std::unique_ptr<lcModel>& Model : Project.GetModels())
+	{
+		Model->WaitForAssets();
+		QVERIFY(Model->GetPieceData()->GetMesh());
+		QImage Previous;
+
+		for (int Background : { 48, 255 })
+		{
+			QPalette Palette = Settings.Palette;
+			Palette.setColor(QPalette::Base, QColor(Background, Background, Background));
+			QApplication::setPalette(Palette);
+			lcThumbnailManager Thumbnails(lcGetPiecesLibrary());
+			const int ColorIndex = Model.get() == Project.GetMainModel() ? lcGetColorIndex(4) : lcGetColorIndex(47);
+			const auto [Id, Pixmap] = Thumbnails.RequestThumbnail(Model->GetPieceData(), ColorIndex, 64, 1.0f);
+			QVERIFY(!Pixmap.isNull());
+			const QImage Image = Pixmap.toImage().convertToFormat(QImage::Format_ARGB32);
+			int TranslucentPixels = 0;
+
+			for (int y = 0; y < Image.height(); y++)
+				for (int x = 0; x < Image.width(); x++)
+				{
+					const QRgb Pixel = Image.pixel(x, y);
+					if (qAlpha(Pixel) > 100 && qAlpha(Pixel) < 240)
+					{
+						QVERIFY(qRed(Pixel) > 245 && qGreen(Pixel) > 245 && qBlue(Pixel) > 245);
+						TranslucentPixels++;
+					}
+				}
+
+			QVERIFY(TranslucentPixels > 100);
+			if (!Previous.isNull())
+				QCOMPARE(Image, Previous);
+			Previous = Image;
+			Thumbnails.ReleaseThumbnail(Id);
+		}
+	}
+
+	// Compare tile assembly with framebuffer readback, then force a partial final tile.
+	lcView View(lcViewType::PartsList, Project.GetMainModel());
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+	for (const QSize Size : { QSize(64, 64), QSize(2051, 64) })
+	{
+		View.SetSize(Size.width(), Size.height());
+		View.ZoomExtents(lcGeometryBoundsMode::AvailableOnly, false);
+		QVERIFY(View.BeginRenderToImage(Size.width(), Size.height()));
+		View.OnDraw();
+		const QImage Image = View.GetRenderImage();
+		QCOMPARE(Image.size(), Size);
+		QCOMPARE(Image.format(), QImage::Format_ARGB32_Premultiplied);
+		QCOMPARE(Image.pixel(0, 0), QRgb(0));
+		QCOMPARE(Image.pixel(Size.width() - 1, Size.height() - 1), QRgb(0));
+		const QImage Straight = Image.convertToFormat(QImage::Format_ARGB32);
+		int TranslucentPixels = 0;
+		for (int y = 0; y < Straight.height(); y++)
+			for (int x = 0; x < Straight.width(); x++)
+			{
+				const QRgb Pixel = Straight.pixel(x, y);
+				if (qAlpha(Pixel) > 100 && qAlpha(Pixel) < 240)
+				{
+					QVERIFY(qRed(Pixel) > 245 && qGreen(Pixel) > 245 && qBlue(Pixel) > 245);
+					TranslucentPixels++;
+				}
+			}
+		QVERIFY(TranslucentPixels > 100);
+		if (Size.width() == 64)
+			QCOMPARE(Image, View.GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32_Premultiplied));
+		View.EndRenderToImage();
+	}
+
+	// Instruction backgrounds retain their color and alpha; mode changes replace them.
+	for (int Alpha : { 0, 128, 255 })
+	{
+		View.SetBackgroundColor(LC_RGBA(200, 100, 50, Alpha));
+		QVERIFY(View.BeginRenderToImage(64, 64));
+		View.OnDraw();
+		const QRgb Pixel = View.GetRenderImage().pixel(0, 0);
+		QCOMPARE(qAlpha(Pixel), Alpha);
+		QVERIFY(qAbs(qRed(Pixel) - qRound(200.0 * Alpha / 255.0)) <= 1);
+		QVERIFY(qAbs(qGreen(Pixel) - qRound(100.0 * Alpha / 255.0)) <= 1);
+		QVERIFY(qAbs(qBlue(Pixel) - qRound(50.0 * Alpha / 255.0)) <= 1);
+
+		View.SetBackgroundMode(lcBackgroundMode::Transparent);
+		View.OnDraw();
+		QCOMPARE(View.GetRenderImage().pixel(0, 0), QRgb(0));
+		View.EndRenderToImage();
+	}
+
+	View.SetBackgroundColor(LC_RGBA(200, 100, 50, 128));
+	View.SetBackgroundMode(lcBackgroundMode::Opaque);
+	for (bool Gradient : { false, true })
+	{
+		lcGetPreferences().mBackgroundGradient = Gradient;
+		QVERIFY(View.BeginRenderToImage(64, 64));
+		View.OnDraw();
+		QCOMPARE(qAlpha(View.GetRenderImage().pixel(0, 0)), 255);
+		View.EndRenderToImage();
+	}
+
+	lcModel PartsModel(QString(), nullptr, true);
+	PartsModel.SetPreviewPieceData(Project.GetMainModel()->GetPieceData(), lcGetColorIndex(4));
+	const lcResult<QImage> PartsImage = PartsModel.GetPartsListImage(128, 1, LC_RGBA(48, 48, 48, 255), QFont(), Qt::transparent, false);
+	QVERIFY(PartsImage);
+	QVERIFY(!PartsImage.value().isNull());
+	int BrightPixels = 0;
+	for (int y = 0; y < PartsImage.value().height(); y++)
+		for (int x = 0; x < PartsImage.value().width(); x++)
+		{
+			const QRgb Pixel = PartsImage.value().pixel(x, y);
+			QVERIFY(qRed(Pixel) >= 48 && qGreen(Pixel) >= 48 && qBlue(Pixel) >= 48);
+			if (qRed(Pixel) > 100)
+				BrightPixels++;
+		}
+	QVERIFY2(BrightPixels > 10, qPrintable(QString("Only %1 bright pixels in %2x%3 parts list").arg(BrightPixels).arg(PartsImage.value().width()).arg(PartsImage.value().height())));
+}
+
+void lcModelInstanceTests::TextureDecalAlpha()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test decal alpha.");
+
+	QVERIFY(lcContext::InitializeRenderer(true));
+	lcContext Context;
+	Context.SetOffscreenContext();
+	Context.MakeCurrent();
+	Context.SetDefaultState();
+	Context.SetWorldMatrix(lcMatrix44Identity());
+	Context.SetViewMatrix(lcMatrix44Identity());
+	Context.SetProjectionMatrix(lcMatrix44Identity());
+	Context.EnableDepthTest(false);
+
+	QOpenGLFramebufferObject Framebuffer(8, 8);
+	QVERIFY(Framebuffer.isValid());
+	QVERIFY(Framebuffer.bind());
+	Context.SetViewport(0, 0, 8, 8);
+	const quint32 Normal = lcPackNormal(lcVector3(0, 0, 1));
+	const lcVertexTextured Vertices[] =
+	{
+		{ lcVector3(-1, -1, 0), Normal, lcVector2(0, 0) },
+		{ lcVector3(3, -1, 0), Normal, lcVector2(2, 0) },
+		{ lcVector3(-1, 3, 0), Normal, lcVector2(0, 2) }
+	};
+	Context.SetVertexBufferPointer(Vertices);
+	Context.SetVertexFormat(0, 3, 1, 2, 0, true);
+
+	for (int TexelAlpha : { 0, 128, 255 })
+	{
+		QImage Image(2, 2, QImage::Format_RGBA8888);
+		Image.fill(QColor(0, 0, 255, TexelAlpha));
+		lcTexture Texture;
+		Texture.SetImage(Image, LC_TEXTURE_POINT);
+		Texture.Upload(&Context);
+		QVERIFY(Texture.IsReady());
+		Context.BindTexture2D(&Texture);
+
+		for (int MaterialAlpha : { 0, 128, 255 })
+			for (lcMaterialType Material : { lcMaterialType::UnlitTextureDecal, lcMaterialType::FakeLitTextureDecal })
+				for (bool Blend : { false, true })
+				{
+					const float TextureAlpha = TexelAlpha / 255.0f;
+					const float BaseAlpha = MaterialAlpha / 255.0f;
+					const float Alpha = TextureAlpha + BaseAlpha * (1.0f - TextureAlpha);
+					Context.ClearColorAndDepth(lcVector4(0, 0, 0, 0));
+					Context.SetMaterial(Material);
+					Context.SetColor(1, 0, 0, BaseAlpha);
+					Context.EnableColorBlend(Blend);
+					Context.DrawPrimitives(GL_TRIANGLES, 0, 3);
+					quint8 Pixel[4] = {};
+					Context.glReadPixels(4, 4, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, Pixel);
+					QVERIFY(qAbs(int(Pixel[3]) - qRound(Alpha * 255)) <= 1);
+					if (Material == lcMaterialType::UnlitTextureDecal && Alpha > 0.0f)
+					{
+						const float Scale = Blend ? 255.0f : 255.0f / Alpha;
+						QVERIFY(qAbs(int(Pixel[0]) - qRound(BaseAlpha * (1.0f - TextureAlpha) * Scale)) <= 1);
+						QCOMPARE(Pixel[1], quint8(0));
+						QVERIFY(qAbs(int(Pixel[2]) - qRound(TextureAlpha * Scale)) <= 1);
+					}
+				}
+
+		Context.ClearTexture2D();
+	}
+	Context.ClearResources();
+}
+
+void lcModelInstanceTests::TextureMipmaps()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test uploaded mipmaps.");
+
+	QVERIFY(lcContext::InitializeRenderer(true));
+	lcContext Context;
+	Context.SetOffscreenContext();
+	Context.MakeCurrent();
+	Context.SetDefaultState();
+	QOpenGLFramebufferObject Framebuffer(4, 4);
+	QVERIFY(Framebuffer.isValid());
+	QVERIFY(Framebuffer.bind());
+
+	for (QImage::Format Format : { QImage::Format_RGBA8888, QImage::Format_RGB888, QImage::Format_Alpha8 })
+		for (const QSize Size : { QSize(4, 4), QSize(4, 1), QSize(1, 4) })
+		{
+			QImage Image(Size, Format);
+			for (int y = 0; y < Size.height(); y++)
+				for (int x = 0; x < Size.width(); x++)
+				{
+					const bool Opaque = (x + y) % 2 == 0;
+					if (Format == QImage::Format_Alpha8)
+						Image.scanLine(y)[x] = Opaque ? 255 : 0;
+					else if (Format == QImage::Format_RGBA8888)
+						Image.setPixel(x, y, Opaque ? qRgba(255, 0, 0, 255) : qRgba(0, 0, 255, 0));
+					else
+						Image.setPixel(x, y, qRgb(255, 0, 0));
+				}
+
+			lcTexture Texture;
+			Texture.SetImage(Image, LC_TEXTURE_MIPMAPS);
+			Texture.Upload(&Context);
+			QVERIFY(Texture.IsReady());
+
+			// Sample the uploaded 1x1 mip through the production decal shader.
+			QVERIFY(Framebuffer.bind());
+			Context.SetViewport(0, 0, 1, 1);
+			Context.SetWorldMatrix(lcMatrix44Identity());
+			Context.SetViewMatrix(lcMatrix44Identity());
+			Context.SetProjectionMatrix(lcMatrix44Identity());
+			Context.EnableDepthTest(false);
+			Context.EnableColorBlend(false);
+			Context.SetMaterial(lcMaterialType::UnlitTextureDecal);
+			Context.SetColor(0, 0, 0, 0);
+			Context.BindTexture2D(&Texture);
+			const float Vertices[] = { -1, -1, 0, 0, 3, -1, 2, 0, -1, 3, 0, 2 };
+			Context.SetVertexBufferPointer(Vertices);
+			Context.SetVertexFormat(0, 2, 0, 2, 0, false);
+			Context.DrawPrimitives(GL_TRIANGLES, 0, 3);
+			quint8 Pixel[4] = {};
+			Context.glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, Pixel);
+			QVERIFY(qAbs(int(Pixel[3]) - (Format == QImage::Format_RGB888 ? 255 : 128)) <= 1);
+			if (Format != QImage::Format_Alpha8)
+			{
+				QCOMPARE(Pixel[0], quint8(255));
+				QCOMPARE(Pixel[1], quint8(0));
+				QCOMPARE(Pixel[2], quint8(0));
+			}
+			Context.ClearTexture2D();
+		}
+	Context.ClearResources();
+}
 
 void lcModelInstanceTests::InterfaceTransforms()
 {

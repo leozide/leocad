@@ -1708,8 +1708,20 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 	lcView View(lcViewType::View, this);
 
-	if (Background == lcImageBackground::Transparent)
-		View.SetBackgroundColorOverride(LC_RGBA(0, 0, 0, 0));
+	switch (Background)
+	{
+	case lcImageBackground::Default:
+		View.SetBackgroundMode(lcBackgroundMode::Default);
+		break;
+
+	case lcImageBackground::Transparent:
+		View.SetBackgroundMode(lcBackgroundMode::Transparent);
+		break;
+
+	case lcImageBackground::Opaque:
+		View.SetBackgroundMode(lcBackgroundMode::Opaque);
+		break;
+	}
 
 	if (OutputCamera)
 		View.SetCamera(OutputCamera, true);
@@ -1885,7 +1897,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 	for (lcPartsListImage& Image : Images)
 	{
 		View.BindRenderFramebuffer();
-		Context->ClearColorAndDepth(lcVector4(lcVector3FromColor(BackgroundColor), 0.0f));
+		Context->ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
 
 		lcScene Scene;
 

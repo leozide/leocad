@@ -992,7 +992,7 @@ bool lcView::BeginRenderToImage(int Width, int Height)
 
 	mWidth = TileWidth;
 	mHeight = TileHeight;
-	mRenderImage = QImage(Width, Height, QImage::Format_ARGB32);
+	mRenderImage = QImage(Width, Height, QImage::Format_ARGB32_Premultiplied);
 
 	QOpenGLFramebufferObjectFormat Format;
 	Format.setAttachment(QOpenGLFramebufferObject::Depth);
@@ -1231,7 +1231,7 @@ void lcView::OnDraw()
 			if (!mRenderImage.isNull())
 			{
 				UnbindRenderFramebuffer();
-				QImage TileImage = GetRenderFramebufferImage();
+				QImage TileImage = GetRenderFramebufferImage().convertToFormat(QImage::Format_ARGB32_Premultiplied);
 				BindRenderFramebuffer();
 
 				if (TileImage.isNull())
@@ -1352,19 +1352,38 @@ bool lcView::HasMissingAssets() const
 
 void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const
 {
-	if (mOverrideBackgroundColor)
+	lcBackgroundMode BackgroundMode = mBackgroundMode;
+
+	if (BackgroundMode == lcBackgroundMode::Default)
+		BackgroundMode = mContext->IsOffscreen() ? lcBackgroundMode::Transparent : lcBackgroundMode::Opaque;
+
+	switch (BackgroundMode)
+	{
+	case lcBackgroundMode::CustomColor:
 	{
 		lcVector4 BackgroundColor(lcVector4FromColor(mBackgroundColor));
+		BackgroundColor.x *= BackgroundColor.w;
+		BackgroundColor.y *= BackgroundColor.w;
+		BackgroundColor.z *= BackgroundColor.w;
 		mContext->ClearColorAndDepth(BackgroundColor);
 		return;
 	}
 
+	case lcBackgroundMode::Transparent:
+		// Transparent framebuffer pixels must have premultiplied RGB values.
+		mContext->ClearColorAndDepth(lcVector4(0.0f, 0.0f, 0.0f, 0.0f));
+		return;
+
+	case lcBackgroundMode::Default:
+	case lcBackgroundMode::Opaque:
+		break;
+	}
+
 	const lcPreferences& Preferences = lcGetPreferences();
-	float Alpha = mContext->IsOffscreen() ? 0.0f : 1.0f;
 
 	if (!Preferences.mBackgroundGradient)
 	{
-		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), Alpha);
+		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), 1.0f);
 		mContext->ClearColorAndDepth(BackgroundColor);
 		return;
 	}
@@ -1408,8 +1427,8 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	TopGreen = TopGreen + DeltaGreen * t1;
 	TopBlue = TopBlue + DeltaBlue * t1;
 
-	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, Alpha);
-	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, Alpha);
+	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, 255);
+	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, 255);
 
 	struct lcBackgroundVertex
 	{

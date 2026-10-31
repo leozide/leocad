@@ -87,14 +87,15 @@ leocad model.ldr --image model.png --background FF000080
 leocad model.ldr --image model.png --background-gradient FF0000FF 0000FF00</code></pre></div>
 
 <h4>Options</h4>
+<p>Square brackets mark optional arguments. Place the input filename before options with omitted output filenames.</p>
 
 <p><b>-l, --libpath <i>&lt;path&gt;</i></b></p><p style='margin-left:.25in'>Set the Parts Library location to path.</p>
-<p><b>-i, --image <i>&lt;outfile.ext&gt;</i></b></p><p style='margin-left:.25in'>Save a picture in the format specified by ext and exit. The output filename is optional; if omitted, it is based on the input filename and the image extension in preferences. An explicit filename without an extension is written as PNG. Place the input filename before <code>--image</code> when omitting the output filename.</p>
+<p><b>-i, --image <i>[outfile.ext]</i></b></p><p style='margin-left:.25in'>Save a picture in the format specified by ext and exit. The output filename is optional; if omitted, it is based on the input filename and the image extension in preferences. An explicit filename without an extension is written as PNG. Place the input filename before <code>--image</code> when omitting the output filename.</p>
 <p><b>--background <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>Set a solid image background or use <code>transparent</code>. Requires <code>--image</code>.</p>
 <p><b>--background-gradient <i>&lt;top&gt; &lt;bottom&gt;</i></b></p><p style='margin-left:.25in'>Set a vertical image background gradient using two colors. Each endpoint can have its own alpha. Requires <code>--image</code>.</p>
 <p style='margin-left:.25in'>Background options cannot be combined or repeated. Formats that do not preserve alpha require an opaque background and reject <code>transparent</code> or colors with alpha below <code>FF</code>.</p>
-<p><b>-w, --width <i>&lt;width&gt;</i></b></p><p style='margin-left:.25in'>Set the picture width.</p>
-<p><b>-h, --height <i>&lt;height&gt;</i></b></p><p style='margin-left:.25in'>Set the picture height.</p>
+<p><b>-w, --width <i>&lt;width&gt;</i></b></p><p style='margin-left:.25in'>Set the picture width (1 to 32768).</p>
+<p><b>-h, --height <i>&lt;height&gt;</i></b></p><p style='margin-left:.25in'>Set the picture height (1 to 32768).</p>
 <p><b>-f, --from <i>&lt;step&gt;</i></b></p><p style='margin-left:.25in'>Set the first step to save pictures (steps start at 1).</p>
 <p><b>-t, --to <i>&lt;step&gt;</i></b></p><p style='margin-left:.25in'>Set the last step to save pictures.</p>
 <p><b>-s, --submodel <i>&lt;submodel&gt;</i></b></p><p style='margin-left:.25in'>Set the active submodel.</p>
@@ -105,21 +106,21 @@ leocad model.ldr --image model.png --background-gradient FF0000FF 0000FF00</code
 <p><b>--camera-position <i>&lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;</i></b></p><p style='margin-left:.25in'>Set the camera position, target and up vector.</p>
 <p><b>--camera-position-ldraw <i>&lt;x&gt; &lt;y&gt; &lt;z&gt; &lt;tx&gt; &lt;ty&gt; &lt;tz&gt; &lt;ux&gt; &lt;uy&gt; &lt;uz&gt;</i></b></p><p style='margin-left:.25in'>Set the camera position, target and up vector using LDraw coordinates.</p>
 <p><b>--orthographic</b></p><p style='margin-left:.25in'>Render images using an orthographic projection.</p>
-<p><b>--fov <i>&lt;degrees&gt;</i></b></p><p style='margin-left:.25in'>Set the vertical field of view used to render images.</p>
+<p><b>--fov <i>&lt;degrees&gt;</i></b></p><p style='margin-left:.25in'>Set the vertical field of view used to render images (1 to 180 degrees, inclusive).</p>
 <p><b>--zplanes <i>&lt;near&gt; &lt;far&gt;</i></b></p><p style='margin-left:.25in'>Set the near and far clipping planes used to render images (1 &le; near &lt; far).</p>
 <p>Named cameras take precedence over the other camera controls; otherwise, viewpoint takes precedence over angles, which take precedence over an explicit position.</p>
 
 <p><b>--fade-steps</b></p><p style='margin-left:.25in'>Render parts from prior steps faded.</p>
 <p><b>--no-fade-steps</b></p><p style='margin-left:.25in'>Do not render parts from prior steps faded.</p>
-<p><b>--fade-steps-color <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>Rendering color for prior step parts.</p>
+<p><b>--fade-steps-color <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>Rendering color for prior step parts; specifying a color enables fading.</p>
 <p><b>--highlight</b></p><p style='margin-left:.25in'>Highlight parts in the steps they appear.</p>
 <p><b>--no-highlight</b></p><p style='margin-left:.25in'>Do not highlight parts in the steps they appear.</p>
-<p><b>--highlight-color <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>Rendering color for highlighted parts.</p>
+<p><b>--highlight-color <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>Rendering color for highlighted parts; specifying a color enables highlighting.</p>
 <p><b>--shading <i>&lt;mode&gt;</i></b></p><p style='margin-left:.25in'>Select shading mode for rendering (wireframe, flat, default, full).</p>
 <p><b>--line-width <i>&lt;width&gt;</i></b></p><p style='margin-left:.25in'>Set the width of the edge lines (0 to 10).</p>
 <p><b>--aa-samples <i>&lt;samples&gt;</i></b></p><p style='margin-left:.25in'>Anti-aliasing sample size (1, 2, 4, or 8).</p>
 
-<p><b>-ss, --stud-style <i>&lt;style&gt;</i></b></p><p style='margin-left:.25in'>Set the stud style (0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire).</p>
+<p><b>-ss, --stud-style <i>&lt;style&gt;</i></b></p><p style='margin-left:.25in'>Set the stud style (0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo).</p>
 <p><b>-nscc, --disable-stud-cylinder-color</b></p><p style='margin-left:.25in'>Disable high contrast stud cylinder color.</p>
 <p><b>-scc, --stud-cylinder-color <i>&lt;color&gt;</i></b></p><p style='margin-left:.25in'>High contrast stud cylinder color.</p>
 <p><b>-nec, --disable-edge-color</b></p><p style='margin-left:.25in'>Disable high contrast edge color.</p>
@@ -134,11 +135,11 @@ leocad model.ldr --image model.png --background-gradient FF0000FF 0000FF00</code
 
 <p>Stud-cylinder and manual edge color options require a high contrast stud style (6 or 7).</p>
 
-<p><b>-obj, --export-wavefront <i>&lt;outfile.obj&gt;</i></b></p><p style='margin-left:.25in'>Export the model to Wavefront OBJ format. The output filename is optional.</p>
-<p><b>-3ds, --export-3ds <i>&lt;outfile.3ds&gt;</i></b></p><p style='margin-left:.25in'>Export the model to 3D Studio 3DS format. The output filename is optional.</p>
-<p><b>-dae, --export-collada <i>&lt;outfile.dae&gt;</i></b></p><p style='margin-left:.25in'>Export the model to COLLADA DAE format. The output filename is optional.</p>
-<p><b>-csv, --export-csv <i>&lt;outfile.csv&gt;</i></b></p><p style='margin-left:.25in'>Export the list of parts used in CSV format. The output filename is optional.</p>
-<p><b>-html, --export-html <i>&lt;folder&gt;</i></b></p><p style='margin-left:.25in'>Create an HTML page for the model. The output folder is optional.</p>
+<p><b>-obj, --export-wavefront <i>[outfile.obj]</i></b></p><p style='margin-left:.25in'>Export the model to Wavefront OBJ format. The output filename is optional.</p>
+<p><b>-3ds, --export-3ds <i>[outfile.3ds]</i></b></p><p style='margin-left:.25in'>Export the model to 3D Studio 3DS format. The output filename is optional.</p>
+<p><b>-dae, --export-collada <i>[outfile.dae]</i></b></p><p style='margin-left:.25in'>Export the model to COLLADA DAE format. The output filename is optional.</p>
+<p><b>-csv, --export-csv <i>[outfile.csv]</i></b></p><p style='margin-left:.25in'>Export the list of parts used in CSV format. The output filename is optional.</p>
+<p><b>-html, --export-html <i>[folder]</i></b></p><p style='margin-left:.25in'>Create an HTML page for the model. The output folder is optional.</p>
 <p><b>-v, --version</b></p><p style='margin-left:.25in'>Output version information and exit.</p>
 <p><b>-?, --help</b></p><p style='margin-left:.25in'>Display help message and exit.</p>
 

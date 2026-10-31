@@ -2774,40 +2774,69 @@ void lcModelInstanceTests::CommandLineBackground()
 	Arguments.prepend(Model.fileName());
 	Arguments.prepend("leocad");
 	const lcCommandLineOptions Options(Arguments);
-	QCOMPARE(Options.ParseOK, Valid);
+	QCOMPARE(Options.mParseOK, Valid);
 	if (Valid)
 	{
-		QCOMPARE(int(Options.ImageBackground.Mode), Mode);
-		QCOMPARE(Options.ImageBackground.Color, Top);
-		QCOMPARE(Options.ImageBackground.GradientBottomColor, Bottom);
+		QCOMPARE(int(Options.mImageBackground.Mode), Mode);
+		QCOMPARE(Options.mImageBackground.Color, Top);
+		QCOMPARE(Options.mImageBackground.GradientBottomColor, Bottom);
 	}
 	else
-		QVERIFY(!Options.StdErr.isEmpty());
+		QVERIFY(!Options.mStdErr.isEmpty());
 }
 
 void lcModelInstanceTests::CommandLineOptions()
 {
 	const lcCommandLineOptions Empty(QStringList{});
-	QVERIFY(Empty.ParseOK);
-	QVERIFY(!Empty.Exit);
-	QVERIFY(!Empty.SaveImage);
+	QVERIFY(Empty.mParseOK);
+	QVERIFY(!Empty.mExit);
+	QVERIFY(!Empty.mSaveImage);
+	QVERIFY(!Empty.HasExportRequest());
+	for (const QString& Option : { QStringLiteral("--image"), QStringLiteral("--export-wavefront"), QStringLiteral("--export-3ds"),
+		QStringLiteral("--export-collada"), QStringLiteral("--export-csv"), QStringLiteral("--export-html") })
+		QVERIFY(lcCommandLineOptions({ QStringLiteral("leocad"), Option }).HasExportRequest());
+	QCOMPARE(Empty.GetExportFileName(QStringLiteral("/tmp/model"), QStringLiteral("obj")), QStringLiteral("/tmp/model.obj"));
+	QCOMPARE(Empty.GetExportFileName(QStringLiteral("/tmp/model.ldr"), QStringLiteral("obj")), QStringLiteral("/tmp/model.obj"));
+	QCOMPARE(Empty.GetExportFileName(QStringLiteral("/tmp/model.OBJ"), QStringLiteral("obj")), QStringLiteral("/tmp/model.OBJ"));
+	QCOMPARE(lcCommandLineOptions::GetImageFrameName(QStringLiteral("/tmp/model"), false), QStringLiteral("/tmp/model"));
+	QCOMPARE(lcCommandLineOptions::GetImageFrameName(QStringLiteral("/tmp/model"), true).arg(1, 2, 10, QLatin1Char('0')), QStringLiteral("/tmp/model01"));
+	QCOMPARE(lcCommandLineOptions::GetImageFrameName(QStringLiteral("/tmp/model."), true).arg(1, 2, 10, QLatin1Char('0')), QStringLiteral("/tmp/model01."));
+	QCOMPARE(lcCommandLineOptions::GetImageFrameName(QStringLiteral("/tmp/model.png"), true).arg(2, 2, 10, QLatin1Char('0')), QStringLiteral("/tmp/model02.png"));
+	QVERIFY(!Empty.mSetFoV && !Empty.mSetZPlanes && !Empty.mSetFadeStepsColor && !Empty.mSetHighlightColor);
+
+	const lcCommandLineOptions Camera({ "leocad", "--fov", "45", "--zplanes", "2", "300", "--fade-steps-color", "transparent", "--highlight-color", "transparent" });
+	QVERIFY(Camera.mParseOK);
+	QVERIFY(Camera.mSetFoV && Camera.mSetZPlanes && Camera.mSetFadeStepsColor && Camera.mSetHighlightColor);
+	QCOMPARE(Camera.mFoV, 45.0f);
+	QCOMPARE(Camera.mZPlanes[0], 2.0f);
+	QCOMPARE(Camera.mZPlanes[1], 300.0f);
+	QCOMPARE(Camera.mFadeStepsColor, quint32(0));
+	QCOMPARE(Camera.mHighlightColor, quint32(0));
+
+	const lcCommandLineOptions Invalid({ "leocad", "--fov", "45", "--fov", "bad", "--zplanes", "2", "300", "--zplanes", "bad", "4" });
+	QVERIFY(!Invalid.mParseOK);
+	QVERIFY(!Invalid.mSetFoV && !Invalid.mSetZPlanes);
 
 	const lcCommandLineOptions Help({ "leocad", "--help" });
-	QVERIFY(Help.ParseOK);
-	QVERIFY(Help.Exit);
-	QVERIFY(Help.StdOut.contains("--background-gradient"));
+	QVERIFY(Help.mParseOK);
+	QVERIFY(Help.mExit);
+	QVERIFY(Help.mStdOut.contains("--background-gradient"));
 
 	QTemporaryFile Model;
 	QVERIFY(Model.open());
 	const lcCommandLineOptions Image({ "leocad", Model.fileName(), "-i", "out.png",
 		"--width", "123", "--height", "456", "--aa-samples", "4", "--stud-style", "3", "--viewpoint", "front" });
-	QVERIFY(Image.ParseOK);
-	QVERIFY(Image.SaveImage);
-	QCOMPARE(Image.ImageWidth, 123);
-	QCOMPARE(Image.ImageHeight, 456);
-	QCOMPARE(Image.AASamples, 4);
-	QCOMPARE(int(Image.StudStyle), 3);
-	QCOMPARE(Image.Viewpoint, lcViewpoint::Front);
+	QVERIFY(Image.mParseOK);
+	QVERIFY(Image.mSaveImage);
+	QVERIFY(Image.HasExportRequest());
+	const QString ModelSuffix = QFileInfo(Model.fileName()).suffix();
+	const QString ModelBase = ModelSuffix.isEmpty() ? Model.fileName() : Model.fileName().left(Model.fileName().length() - ModelSuffix.length() - 1);
+	QCOMPARE(Image.GetExportFileName(QString(), QStringLiteral("csv")), ModelBase + QStringLiteral(".csv"));
+	QCOMPARE(Image.mImageWidth, 123);
+	QCOMPARE(Image.mImageHeight, 456);
+	QCOMPARE(Image.mAASamples, 4);
+	QCOMPARE(int(Image.mStudStyle), 3);
+	QCOMPARE(Image.mViewpoint, lcViewpoint::Front);
 }
 
 void lcModelInstanceTests::CommandLineParsing_data()
@@ -2843,16 +2872,16 @@ void lcModelInstanceTests::CommandLineParsing()
 	Arguments.prepend(Model.fileName());
 	Arguments.prepend("leocad");
 	const lcCommandLineOptions Options(Arguments);
-	QCOMPARE(Options.ParseOK, Valid);
+	QCOMPARE(Options.mParseOK, Valid);
 	if (!Message.isEmpty())
-		QVERIFY(Options.StdErr.contains(Message));
-	if (Options.SaveWavefront)
+		QVERIFY(Options.mStdErr.contains(Message));
+	if (Options.mSaveWavefront)
 	{
-		QVERIFY(Options.SaveWavefrontName.isEmpty());
-		QCOMPARE(Options.ImageWidth, 160);
+		QVERIFY(Options.mSaveWavefrontName.isEmpty());
+		QCOMPARE(Options.mImageWidth, 160);
 	}
-	if (Options.SetFadeStepsColor)
-		QCOMPARE(Options.FadeStepsColor, LC_RGBA(0x11, 0x22, 0x33, 0x80));
+	if (Options.mSetFadeStepsColor)
+		QCOMPARE(Options.mFadeStepsColor, LC_RGBA(0x11, 0x22, 0x33, 0x80));
 }
 
 void lcModelInstanceTests::CommandLineColors_data()
@@ -2883,26 +2912,25 @@ void lcModelInstanceTests::CommandLineColors()
 	QFETCH(quint32, Expected);
 	const std::pair<const char*, quint32 lcCommandLineOptions::*> Options[] =
 	{
-		{ "--fade-steps-color", &lcCommandLineOptions::FadeStepsColor },
-		{ "--highlight-color", &lcCommandLineOptions::HighlightColor },
-		{ "--stud-cylinder-color", &lcCommandLineOptions::StudCylinderColor },
-		{ "-scc", &lcCommandLineOptions::StudCylinderColor },
-		{ "--edge-color", &lcCommandLineOptions::PartEdgeColor },
-		{ "-ec", &lcCommandLineOptions::PartEdgeColor },
-		{ "--black-edge-color", &lcCommandLineOptions::BlackEdgeColor },
-		{ "-bec", &lcCommandLineOptions::BlackEdgeColor },
-		{ "--dark-edge-color", &lcCommandLineOptions::DarkEdgeColor },
-		{ "-dec", &lcCommandLineOptions::DarkEdgeColor }
+		{ "--fade-steps-color", &lcCommandLineOptions::mFadeStepsColor },
+		{ "--highlight-color", &lcCommandLineOptions::mHighlightColor },
+		{ "--stud-cylinder-color", &lcCommandLineOptions::mStudCylinderColor },
+		{ "-scc", &lcCommandLineOptions::mStudCylinderColor },
+		{ "--edge-color", &lcCommandLineOptions::mPartEdgeColor },
+		{ "-ec", &lcCommandLineOptions::mPartEdgeColor },
+		{ "--black-edge-color", &lcCommandLineOptions::mBlackEdgeColor },
+		{ "-bec", &lcCommandLineOptions::mBlackEdgeColor },
+		{ "--dark-edge-color", &lcCommandLineOptions::mDarkEdgeColor },
+		{ "-dec", &lcCommandLineOptions::mDarkEdgeColor }
 	};
-
 	for (const auto& [Option, Member] : Options)
 	{
 		const lcCommandLineOptions Parsed({ "leocad", "--stud-style", "6", Option, Input });
-		QCOMPARE(Parsed.ParseOK, Valid);
+		QCOMPARE(Parsed.mParseOK, Valid);
 		if (Valid)
 			QCOMPARE(Parsed.*Member, Expected);
 		else
-			QVERIFY(Parsed.StdErr.contains("Invalid color"));
+			QVERIFY(Parsed.mStdErr.contains("Invalid color"));
 	}
 }
 
@@ -3006,23 +3034,23 @@ void lcModelInstanceTests::CommandLineColorValidation()
 	lcSetProfileUInt(LC_PROFILE_DARK_EDGE_COLOR, LC_RGBA(27, 42, 52, 255));
 	Arguments.prepend("leocad");
 	const lcCommandLineOptions Options(Arguments);
-	QVERIFY(Options.ParseOK);
+	QVERIFY(Options.mParseOK);
 	const QByteArray TestName = QTest::currentDataTag();
 	if (TestName == "edge-enables-saved-disabled" || TestName == "edge-alias-enables-after-disable")
-		QVERIFY(Options.PartEdgeColorEnabled);
+		QVERIFY(Options.mPartEdgeColorEnabled);
 	else if (TestName == "edge-disable-after-color")
-		QVERIFY(!Options.PartEdgeColorEnabled);
+		QVERIFY(!Options.mPartEdgeColorEnabled);
 	else if (TestName == "cylinder-enables" || TestName == "cylinder-disable-last")
-		QCOMPARE(Options.StudCylinderColorEnabled, TestName == "cylinder-enables");
+		QCOMPARE(Options.mStudCylinderColorEnabled, TestName == "cylinder-enables");
 	else if (TestName == "black-enables" || TestName == "black-disable-last")
-		QCOMPARE(Options.BlackEdgeColorEnabled, TestName == "black-enables");
+		QCOMPARE(Options.mBlackEdgeColorEnabled, TestName == "black-enables");
 	else if (TestName == "dark-enables" || TestName == "dark-disable-last")
-		QCOMPARE(Options.DarkEdgeColorEnabled, TestName == "dark-enables");
-	QCOMPARE(Options.StdErr.count(QLatin1Char('\n')), Warnings);
+		QCOMPARE(Options.mDarkEdgeColorEnabled, TestName == "dark-enables");
+	QCOMPARE(Options.mStdErr.count(QLatin1Char('\n')), Warnings);
 	if (!Message.isEmpty())
-		QVERIFY2(Options.StdErr.contains(Message), qPrintable(Options.StdErr));
-	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
-		QVERIFY(!Options.StdErr.contains("stud-cylinder-color"));
+		QVERIFY2(Options.mStdErr.contains(Message), qPrintable(Options.mStdErr));
+	if (Options.mAutomateEdgeColor && lcIsHighContrast(Options.mStudStyle))
+		QVERIFY(!Options.mStdErr.contains("stud-cylinder-color"));
 }
 
 void lcModelInstanceTests::GradientBackground()
@@ -3076,6 +3104,10 @@ void lcModelInstanceTests::GradientBackground()
 	QVERIFY(!JPEG.isNull());
 	QVERIFY(!JPEG.hasAlphaChannel());
 	QCOMPARE(JPEG.pixelColor(0, 0), QColor(Qt::white));
+	const QString Frame = lcCommandLineOptions::GetImageFrameName(Directory.filePath("model"), true);
+	QVERIFY(View.SaveStepImages(Frame, true, 1, 2, {}));
+	QCOMPARE(QImageReader::imageFormat(Directory.filePath("model01")), QByteArray("png"));
+	QCOMPARE(QImageReader::imageFormat(Directory.filePath("model02")), QByteArray("png"));
 
 	// Model exports accept the same options, including color and gradient alpha.
 	for (const lcBackgroundOptions& OutputBackground : { Background,

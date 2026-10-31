@@ -401,28 +401,28 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	QTextStream StdErr(stderr, QIODevice::WriteOnly);
 	QTextStream StdOut(stdout, QIODevice::WriteOnly);
 
-	if (!Options.StdErr.isEmpty())
+	if (!Options.mStdErr.isEmpty())
 	{
-		StdErr << Options.StdErr;
+		StdErr << Options.mStdErr;
 		StdErr.flush();
 	}
 
-	if (!Options.StdOut.isEmpty())
+	if (!Options.mStdOut.isEmpty())
 	{
-		StdOut << Options.StdOut;
+		StdOut << Options.mStdOut;
 		StdOut.flush();
 	}
 
-	if (!Options.ParseOK)
+	if (!Options.mParseOK)
 		return lcStartupMode::Error;
 
-	if (Options.Exit)
+	if (Options.mExit)
 		return lcStartupMode::Success;
 
-	const bool SaveAndExit = (Options.SaveImage || Options.SaveWavefront || Options.Save3DS || Options.SaveCOLLADA || Options.SaveCSV || Options.SaveHTML);
+	const bool SaveAndExit = Options.HasExportRequest();
 
 #ifdef Q_OS_IOS
-	if (Options.SaveImage)
+	if (Options.mSaveImage)
 	{
 		StdErr << tr("Command line image export is not supported on iOS.\n");
 		return lcStartupMode::Error;
@@ -430,7 +430,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 #endif
 
 #ifndef Q_OS_IOS
-	const bool CreateRenderResources = !SaveAndExit || Options.SaveImage || Options.SaveHTML;
+	const bool CreateRenderResources = !SaveAndExit || Options.mSaveImage || Options.mSaveHTML;
 	const lcResult<void> RendererResult = lcContext::InitializeRenderer(CreateRenderResources);
 
 	if (!RendererResult)
@@ -458,21 +458,21 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		lcLoadDefaultMouseShortcuts();
 	}
 
-	mPreferences.mShadingMode = Options.ShadingMode;
-	mPreferences.mLineWidth = Options.LineWidth;
-	mPreferences.mStudCylinderColorEnabled = Options.StudCylinderColorEnabled;
-	mPreferences.mStudCylinderColor = Options.StudCylinderColor;
-	mPreferences.mPartEdgeColorEnabled = Options.PartEdgeColorEnabled;
-	mPreferences.mPartEdgeColor = Options.PartEdgeColor;
-	mPreferences.mBlackEdgeColorEnabled = Options.BlackEdgeColorEnabled;
-	mPreferences.mBlackEdgeColor = Options.BlackEdgeColor;
-	mPreferences.mDarkEdgeColorEnabled = Options.DarkEdgeColorEnabled;
-	mPreferences.mDarkEdgeColor = Options.DarkEdgeColor;
-	mPreferences.mPartEdgeContrast = Options.PartEdgeContrast;
-	mPreferences.mPartColorValueLDIndex = Options.PartColorValueLDIndex;
-	mPreferences.mAutomateEdgeColor = Options.AutomateEdgeColor;
+	mPreferences.mShadingMode = Options.mShadingMode;
+	mPreferences.mLineWidth = Options.mLineWidth;
+	mPreferences.mStudCylinderColorEnabled = Options.mStudCylinderColorEnabled;
+	mPreferences.mStudCylinderColor = Options.mStudCylinderColor;
+	mPreferences.mPartEdgeColorEnabled = Options.mPartEdgeColorEnabled;
+	mPreferences.mPartEdgeColor = Options.mPartEdgeColor;
+	mPreferences.mBlackEdgeColorEnabled = Options.mBlackEdgeColorEnabled;
+	mPreferences.mBlackEdgeColor = Options.mBlackEdgeColor;
+	mPreferences.mDarkEdgeColorEnabled = Options.mDarkEdgeColorEnabled;
+	mPreferences.mDarkEdgeColor = Options.mDarkEdgeColor;
+	mPreferences.mPartEdgeContrast = Options.mPartEdgeContrast;
+	mPreferences.mPartColorValueLDIndex = Options.mPartColorValueLDIndex;
+	mPreferences.mAutomateEdgeColor = Options.mAutomateEdgeColor;
 
-	if (!LoadPartsLibrary(Options.LibraryPaths.isEmpty() ? LibraryPaths : Options.LibraryPaths, !Options.LibraryPaths.isEmpty(), Options.StudStyle, Options.StudCylinderColorEnabled))
+	if (!LoadPartsLibrary(Options.mLibraryPaths.isEmpty() ? LibraryPaths : Options.mLibraryPaths, !Options.mLibraryPaths.isEmpty(), Options.mStudStyle, Options.mStudCylinderColorEnabled))
 	{
 		QString Message;
 
@@ -496,20 +496,20 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 	Project* NewProject = new Project();
 	SetProject(NewProject);
 
-	if (!SaveAndExit && Options.ProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
-		Options.ProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
+	if (!SaveAndExit && Options.mProjectName.isEmpty() && lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT))
+		Options.mProjectName = lcGetProfileString(LC_PROFILE_RECENT_FILE1);
 
 	bool ProjectLoaded = false;
 
-	if (!Options.ProjectName.isEmpty())
+	if (!Options.mProjectName.isEmpty())
 	{
 		if (gMainWindow)
-			gMainWindow->OpenProject(Options.ProjectName);
+			gMainWindow->OpenProject(Options.mProjectName);
 		else
 		{
 			Project* LoadedProject = new Project();
 
-			if (LoadedProject->Load(Options.ProjectName, false))
+			if (LoadedProject->Load(Options.mProjectName, false))
 			{
 				SetProject(LoadedProject);
 				ProjectLoaded = true;
@@ -523,22 +523,22 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 
 	if (ProjectLoaded)
 	{
-		if (!Options.ModelName.isEmpty())
-			mProject->SetActiveModel(Options.ModelName, true);
+		if (!Options.mModelName.isEmpty())
+			mProject->SetActiveModel(Options.mModelName, true);
 
 		std::unique_ptr<lcView> ActiveView;
 
-		if (Options.SaveImage)
+		if (Options.mSaveImage)
 		{
 			lcModel* Model;
 
-			if (!Options.ModelName.isEmpty())
+			if (!Options.mModelName.isEmpty())
 			{
-				Model = mProject->GetModel(Options.ModelName);
+				Model = mProject->GetModel(Options.mModelName);
 
 				if (!Model)
 				{
-					StdErr << tr("Error: model '%1' does not exist.\n").arg(Options.ModelName);
+					StdErr << tr("Error: model '%1' does not exist.\n").arg(Options.mModelName);
 					return lcStartupMode::Error;
 				}
 			}
@@ -546,94 +546,86 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				Model = mProject->GetMainModel();
 
 			ActiveView = std::unique_ptr<lcView>(new lcView(lcViewType::View, Model));
-			ActiveView->SetBackgroundOptions(Options.ImageBackground);
+			ActiveView->SetBackgroundOptions(Options.mImageBackground);
 
 			ActiveView->SetOffscreenContext();
 			ActiveView->MakeCurrent();
 		}
 
-		if (Options.SaveImage)
-			ActiveView->SetSize(Options.ImageWidth, Options.ImageHeight);
+		if (Options.mSaveImage)
+			ActiveView->SetSize(Options.mImageWidth, Options.mImageHeight);
 
 		if (ActiveView)
 		{
-			if (!Options.CameraName.isEmpty())
-				ActiveView->SetCamera(Options.CameraName);
+			if (!Options.mCameraName.isEmpty())
+				ActiveView->SetCamera(Options.mCameraName);
 			else
 			{
-				ActiveView->SetCameraProjection(Options.Orthographic ? lcCameraProjection::Orthographic : lcCameraProjection::Perspective);
+				ActiveView->SetCameraProjection(Options.mOrthographic ? lcCameraProjection::Orthographic : lcCameraProjection::Perspective);
 
-				if (Options.SetFoV)
-					ActiveView->GetCamera()->m_fovy = Options.FoV;
+				if (Options.mSetFoV)
+					ActiveView->GetCamera()->m_fovy = Options.mFoV;
 
-				if (Options.SetZPlanes)
+				if (Options.mSetZPlanes)
 				{
 					lcCamera* Camera = ActiveView->GetCamera();
 
-					Camera->m_zNear = Options.ZPlanes[0];
-					Camera->m_zFar = Options.ZPlanes[1];
+					Camera->m_zNear = Options.mZPlanes[0];
+					Camera->m_zFar = Options.mZPlanes[1];
 				}
 
-				if (Options.Viewpoint != lcViewpoint::Count)
-					ActiveView->SetViewpoint(Options.Viewpoint);
-				else if (Options.SetCameraAngles)
-					ActiveView->SetCameraAngles(Options.CameraLatLon[0], Options.CameraLatLon[1]);
-				else if (Options.SetCameraPosition)
-					ActiveView->SetViewpoint(Options.CameraPosition[0], Options.CameraPosition[1], Options.CameraPosition[2]);
+				if (Options.mViewpoint != lcViewpoint::Count)
+					ActiveView->SetViewpoint(Options.mViewpoint);
+				else if (Options.mSetCameraAngles)
+					ActiveView->SetCameraAngles(Options.mCameraLatLon[0], Options.mCameraLatLon[1]);
+				else if (Options.mSetCameraPosition)
+					ActiveView->SetViewpoint(Options.mCameraPosition[0], Options.mCameraPosition[1], Options.mCameraPosition[2]);
 			}
 		}
 
-		if (Options.SaveImage)
+		if (Options.mSaveImage)
 		{
 			lcModel* ActiveModel = ActiveView->GetModel();
 
-			if (Options.ImageName.isEmpty())
-				Options.ImageName = mProject->GetImageFileName(true);
+			if (Options.mImageName.isEmpty())
+				Options.mImageName = mProject->GetImageFileName(true);
 
-			if (Options.ImageEnd < Options.ImageStart)
-				Options.ImageEnd = Options.ImageStart;
-			else if (Options.ImageStart > Options.ImageEnd)
-				Options.ImageStart = Options.ImageEnd;
+			if (Options.mImageEnd < Options.mImageStart)
+				Options.mImageEnd = Options.mImageStart;
+			else if (Options.mImageStart > Options.mImageEnd)
+				Options.mImageStart = Options.mImageEnd;
 
-			if ((Options.ImageStart == 0) && (Options.ImageEnd == 0))
-				Options.ImageStart = Options.ImageEnd = ActiveModel->GetCurrentStep();
-			else if ((Options.ImageStart == 0) && (Options.ImageEnd != 0))
-				Options.ImageStart = Options.ImageEnd;
-			else if ((Options.ImageStart != 0) && (Options.ImageEnd == 0))
-				Options.ImageEnd = Options.ImageStart;
+			if ((Options.mImageStart == 0) && (Options.mImageEnd == 0))
+				Options.mImageStart = Options.mImageEnd = ActiveModel->GetCurrentStep();
+			else if ((Options.mImageStart == 0) && (Options.mImageEnd != 0))
+				Options.mImageStart = Options.mImageEnd;
+			else if ((Options.mImageStart != 0) && (Options.mImageEnd == 0))
+				Options.mImageEnd = Options.mImageStart;
 
-			if (Options.ImageStart > 255)
-				Options.ImageStart = 255;
+			if (Options.mImageStart > 255)
+				Options.mImageStart = 255;
 
-			if (Options.ImageEnd > 255)
-				Options.ImageEnd = 255;
+			if (Options.mImageEnd > 255)
+				Options.mImageEnd = 255;
 
-			QString Frame;
+			const QString Frame = lcCommandLineOptions::GetImageFrameName(Options.mImageName, Options.mImageStart != Options.mImageEnd);
 
-			if (Options.ImageStart != Options.ImageEnd)
-			{
-				QString Extension = QFileInfo(Options.ImageName).suffix();
-				Frame = Options.ImageName.left(Options.ImageName.length() - Extension.length() - 1) + QLatin1String("%1.") + Extension;
-			}
-			else
-				Frame = Options.ImageName;
-
-			mPreferences.mFadeSteps = Options.FadeSteps;
-			if (Options.SetFadeStepsColor)
-				mPreferences.mFadeStepsColor = Options.FadeStepsColor;
-			mPreferences.mHighlightNewParts = Options.ImageHighlight;
-			if (Options.SetHighlightColor)
-				mPreferences.mHighlightNewPartsColor = Options.HighlightColor;
+			mPreferences.mFadeSteps = Options.mFadeSteps;
+			if (Options.mSetFadeStepsColor)
+				mPreferences.mFadeStepsColor = Options.mFadeStepsColor;
+			mPreferences.mHighlightNewParts = Options.mImageHighlight;
+			if (Options.mSetHighlightColor)
+				mPreferences.mHighlightNewPartsColor = Options.mHighlightColor;
 
 			ActiveModel->WaitForAssets();
 
-			const bool UsesCameraPosition = Options.SetCameraPosition && Options.Viewpoint == lcViewpoint::Count && !Options.SetCameraAngles;
+			const bool UsesCameraPosition = Options.mSetCameraPosition && Options.mViewpoint == lcViewpoint::Count && !Options.mSetCameraAngles;
 
-			if (Options.CameraName.isEmpty() && !UsesCameraPosition)
+			if (Options.mCameraName.isEmpty() && !UsesCameraPosition)
 			{
-				const lcStep FitStep = Options.ImageStart == Options.ImageEnd ? Options.ImageStart : ActiveModel->GetLastStep();
+				const lcStep FitStep = Options.mImageStart == Options.mImageEnd ? Options.mImageStart : ActiveModel->GetLastStep();
 
-				ActiveView->ZoomExtentsAtStep(FitStep, lcGeometryBoundsMode::AvailableOnly, !Options.SetZPlanes);
+				ActiveView->ZoomExtentsAtStep(FitStep, lcGeometryBoundsMode::AvailableOnly, !Options.mSetZPlanes);
 			}
 
 			auto ProgressCallback = [&StdOut](const QString& FileName)
@@ -641,7 +633,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 			};
 
-			const lcResult<void> ImagesSaved = ActiveView->SaveStepImages(Frame, Options.ImageStart != Options.ImageEnd, Options.ImageStart, Options.ImageEnd, ProgressCallback);
+			const lcResult<void> ImagesSaved = ActiveView->SaveStepImages(Frame, Options.mImageStart != Options.mImageEnd, Options.mImageStart, Options.mImageEnd, ProgressCallback);
 
 			if (!ImagesSaved)
 			{
@@ -651,160 +643,55 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			}
 		}
 
-		if (Options.SaveWavefront)
+		const auto ReportExport = [&StdOut, &StdErr, &OutputFailed](const QString& FileName, const lcResult<void>& Result)
 		{
-			QString FileName;
-
-			if (!Options.SaveWavefrontName.isEmpty())
-				FileName = Options.SaveWavefrontName;
-			else
-				FileName = Options.ProjectName;
-
-			QString Extension = QFileInfo(FileName).suffix().toLower();
-
-			if (Extension.isEmpty())
-			{
-				FileName += ".obj";
-			}
-			else if (Extension != "obj")
-			{
-				FileName = FileName.left(FileName.length() - Extension.length() - 1);
-				FileName += ".obj";
-			}
-
-			lcResult<void> ExportResult = mProject->ExportWavefront(FileName);
-
-			if (ExportResult)
+			if (Result)
 				StdOut << tr("Saved '%1'.\n").arg(FileName);
 			else
 			{
 				OutputFailed = true;
 
-				if (!ExportResult.error().isEmpty())
-					StdErr << ExportResult.error() << '\n';
+				if (!Result.error().isEmpty())
+					StdErr << Result.error() << '\n';
 			}
-		}
+		};
 
-		if (Options.Save3DS)
+		if (Options.mSaveWavefront)
 		{
-			QString FileName;
+			const QString FileName = Options.GetExportFileName(Options.mSaveWavefrontName, QLatin1String("obj"));
 
-			if (!Options.Save3DSName.isEmpty())
-				FileName = Options.Save3DSName;
-			else
-				FileName = Options.ProjectName;
-
-			QString Extension = QFileInfo(FileName).suffix().toLower();
-
-			if (Extension.isEmpty())
-			{
-				FileName += ".3ds";
-			}
-			else if (Extension != "3ds")
-			{
-				FileName = FileName.left(FileName.length() - Extension.length() - 1);
-				FileName += ".3ds";
-			}
-
-			lcResult<void> ExportResult = mProject->Export3DStudio(FileName);
-
-			if (ExportResult)
-				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else
-			{
-				OutputFailed = true;
-
-				if (!ExportResult.error().isEmpty())
-					StdErr << ExportResult.error() << '\n';
-			}
+			ReportExport(FileName, mProject->ExportWavefront(FileName));
 		}
 
-		if (Options.SaveCOLLADA)
+		if (Options.mSave3DS)
 		{
-			QString FileName;
+			const QString FileName = Options.GetExportFileName(Options.mSave3DSName, QLatin1String("3ds"));
 
-			if (!Options.SaveCOLLADAName.isEmpty())
-				FileName = Options.SaveCOLLADAName;
-			else
-				FileName = Options.ProjectName;
-
-			QString Extension = QFileInfo(FileName).suffix().toLower();
-
-			if (Extension.isEmpty())
-			{
-				FileName += ".dae";
-			}
-			else if (Extension != "dae")
-			{
-				FileName = FileName.left(FileName.length() - Extension.length() - 1);
-				FileName += ".dae";
-			}
-
-			lcResult<void> ExportResult = mProject->ExportCOLLADA(FileName);
-
-			if (ExportResult)
-				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else
-			{
-				OutputFailed = true;
-
-				if (!ExportResult.error().isEmpty())
-					StdErr << ExportResult.error() << '\n';
-			}
+			ReportExport(FileName, mProject->Export3DStudio(FileName));
 		}
 
-		if (Options.SaveCSV)
+		if (Options.mSaveCOLLADA)
 		{
-			QString FileName;
+			const QString FileName = Options.GetExportFileName(Options.mSaveCOLLADAName, QLatin1String("dae"));
 
-			if (!Options.SaveCSVName.isEmpty())
-				FileName = Options.SaveCSVName;
-			else
-				FileName = Options.ProjectName;
-
-			QString Extension = QFileInfo(FileName).suffix().toLower();
-
-			if (Extension.isEmpty())
-			{
-				FileName += ".csv";
-			}
-			else if (Extension != "csv")
-			{
-				FileName = FileName.left(FileName.length() - Extension.length() - 1);
-				FileName += ".csv";
-			}
-
-			lcResult<void> ExportResult = mProject->ExportCSV(FileName);
-
-			if (ExportResult)
-				StdOut << tr("Saved '%1'.\n").arg(FileName);
-			else
-			{
-				OutputFailed = true;
-
-				if (!ExportResult.error().isEmpty())
-					StdErr << ExportResult.error() << '\n';
-			}
+			ReportExport(FileName, mProject->ExportCOLLADA(FileName));
 		}
 
-		if (Options.SaveHTML)
+		if (Options.mSaveCSV)
+		{
+			const QString FileName = Options.GetExportFileName(Options.mSaveCSVName, QLatin1String("csv"));
+
+			ReportExport(FileName, mProject->ExportCSV(FileName));
+		}
+
+		if (Options.mSaveHTML)
 		{
 			lcHTMLExportOptions HTMLOptions(mProject);
 
-			if (!Options.SaveHTMLName.isEmpty())
-				HTMLOptions.PathName = Options.SaveHTMLName;
+			if (!Options.mSaveHTMLName.isEmpty())
+				HTMLOptions.PathName = Options.mSaveHTMLName;
 
-			lcResult<void> ExportResult = mProject->ExportHTML(HTMLOptions);
-
-			if (ExportResult)
-				StdOut << tr("Saved '%1'.\n").arg(HTMLOptions.PathName);
-			else
-			{
-				OutputFailed = true;
-
-				if (!ExportResult.error().isEmpty())
-					StdErr << ExportResult.error() << '\n';
-			}
+			ReportExport(HTMLOptions.PathName, mProject->ExportHTML(HTMLOptions));
 		}
 	}
 

@@ -18,6 +18,41 @@ lcCommandLineOptions::lcCommandLineOptions(QStringList Arguments)
 	ValidateOptions();
 }
 
+bool lcCommandLineOptions::HasExportRequest() const
+{
+	return mSaveImage || mSaveWavefront || mSave3DS || mSaveCOLLADA || mSaveCSV || mSaveHTML;
+}
+
+QString lcCommandLineOptions::GetExportFileName(const QString& RequestedName, const QString& Extension) const
+{
+	QString FileName = RequestedName.isEmpty() ? mProjectName : RequestedName;
+	const QString Suffix = QFileInfo(FileName).suffix();
+
+	if (Suffix.isEmpty())
+		FileName += QLatin1Char('.') + Extension;
+	else if (Suffix.compare(Extension, Qt::CaseInsensitive) != 0)
+		FileName = FileName.left(FileName.length() - Suffix.length()) + Extension;
+
+	return FileName;
+}
+
+QString lcCommandLineOptions::GetImageFrameName(const QString& FileName, bool MultipleSteps)
+{
+	if (!MultipleSteps)
+		return FileName;
+
+	const QString Suffix = QFileInfo(FileName).suffix();
+
+	if (Suffix.isEmpty())
+	{
+		if (FileName.endsWith(QLatin1Char('.')))
+			return FileName.left(FileName.length() - 1) + QLatin1String("%1.");
+		return FileName + QLatin1String("%1");
+	}
+
+	return FileName.left(FileName.length() - Suffix.length() - 1) + QLatin1String("%1.") + Suffix;
+}
+
 bool lcCommandLineOptions::ParseColorValue(const QString& Parameter, quint32& Color)
 {
 	if (Parameter.compare(QLatin1String("transparent"), Qt::CaseInsensitive) == 0)
@@ -70,25 +105,25 @@ void lcCommandLineOptions::LoadPreferences()
 	lcPreferences Preferences;
 	Preferences.LoadDefaults();
 
-	FadeSteps = Preferences.mFadeSteps;
-	ImageHighlight = Preferences.mHighlightNewParts;
-	ImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
-	ImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
-	ShadingMode = Preferences.mShadingMode;
-	LineWidth = Preferences.mLineWidth;
-	AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
-	StudStyle = lcGetProfileStudStyle();
-	StudCylinderColorEnabled = Preferences.mStudCylinderColorEnabled;
-	StudCylinderColor = Preferences.mStudCylinderColor;
-	PartEdgeColorEnabled = Preferences.mPartEdgeColorEnabled;
-	PartEdgeColor = Preferences.mPartEdgeColor;
-	BlackEdgeColorEnabled = Preferences.mBlackEdgeColorEnabled;
-	BlackEdgeColor = Preferences.mBlackEdgeColor;
-	DarkEdgeColorEnabled = Preferences.mDarkEdgeColorEnabled;
-	DarkEdgeColor = Preferences.mDarkEdgeColor;
-	PartEdgeContrast = Preferences.mPartEdgeContrast;
-	PartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
-	AutomateEdgeColor = Preferences.mAutomateEdgeColor;
+	mFadeSteps = Preferences.mFadeSteps;
+	mImageHighlight = Preferences.mHighlightNewParts;
+	mImageWidth = lcGetProfileInt(LC_PROFILE_IMAGE_WIDTH);
+	mImageHeight = lcGetProfileInt(LC_PROFILE_IMAGE_HEIGHT);
+	mShadingMode = Preferences.mShadingMode;
+	mLineWidth = Preferences.mLineWidth;
+	mAASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
+	mStudStyle = lcGetProfileStudStyle();
+	mStudCylinderColorEnabled = Preferences.mStudCylinderColorEnabled;
+	mStudCylinderColor = Preferences.mStudCylinderColor;
+	mPartEdgeColorEnabled = Preferences.mPartEdgeColorEnabled;
+	mPartEdgeColor = Preferences.mPartEdgeColor;
+	mBlackEdgeColorEnabled = Preferences.mBlackEdgeColorEnabled;
+	mBlackEdgeColor = Preferences.mBlackEdgeColor;
+	mDarkEdgeColorEnabled = Preferences.mDarkEdgeColorEnabled;
+	mDarkEdgeColor = Preferences.mDarkEdgeColor;
+	mPartEdgeContrast = Preferences.mPartEdgeContrast;
+	mPartColorValueLDIndex = Preferences.mPartColorValueLDIndex;
+	mAutomateEdgeColor = Preferences.mAutomateEdgeColor;
 }
 
 void lcCommandLineOptions::ParseArguments(QStringList& Arguments)
@@ -103,9 +138,9 @@ void lcCommandLineOptions::ParseArguments(QStringList& Arguments)
 		if (Option[0] != '-')
 		{
 			if (QFileInfo(Option).isReadable())
-				ProjectName = Option;
+				mProjectName = Option;
 			else
-				StdErr += tr("The file '%1' is not readable.\n").arg(Option);
+				mStdErr += tr("The file '%1' is not readable.\n").arg(Option);
 		}
 		else
 			ParseOption(Option, Arguments);
@@ -123,22 +158,22 @@ void lcCommandLineOptions::ParseOption(const QString& Option, QStringList& Argum
 		QString LibPath;
 
 		if (ParseString(Option, Arguments, LibPath, true))
-			LibraryPaths += QPair<QString, bool>(LibPath, false);
+			mLibraryPaths += QPair<QString, bool>(LibPath, false);
 	}
 	else if (Option == QLatin1String("-v") || Option == QLatin1String("--version"))
 	{
 		AppendVersion();
-		Exit = true;
+		mExit = true;
 	}
 	else if (Option == QLatin1String("-?") || Option == QLatin1String("--help"))
 	{
 		AppendHelp();
-		Exit = true;
+		mExit = true;
 	}
 	else
 	{
-		StdErr += tr("Unknown option: '%1'.\n").arg(Option);
-		ParseOK = false;
+		mStdErr += tr("Unknown option: '%1'.\n").arg(Option);
+		mParseOK = false;
 	}
 }
 
@@ -146,8 +181,8 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 {
 	if (Option == QLatin1String("-i") || Option == QLatin1String("--image"))
 	{
-		SaveImage = true;
-		ParseString(Option, Arguments, ImageName, false);
+		mSaveImage = true;
+		ParseString(Option, Arguments, mImageName, false);
 	}
 	else if (Option == QLatin1String("--background") || Option == QLatin1String("--background-gradient"))
 	{
@@ -158,44 +193,44 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 		if (Gradient)
 			HasBottom = ParseString(Option, Arguments, Bottom, true);
 
-		if (SetImageBackground)
+		if (mSetImageBackground)
 		{
-			StdErr += tr("Specify only one --background or --background-gradient option.\n");
-			ParseOK = false;
+			mStdErr += tr("Specify only one --background or --background-gradient option.\n");
+			mParseOK = false;
 			return true;
 		}
 
-		SetImageBackground = true;
+		mSetImageBackground = true;
 		if (!HasTop || !HasBottom)
 			return true;
 
 		if (!Gradient && Top.compare(QLatin1String("transparent"), Qt::CaseInsensitive) == 0)
-			ImageBackground.Mode = lcBackgroundMode::Transparent;
+			mImageBackground.Mode = lcBackgroundMode::Transparent;
 		else
 		{
-			ImageBackground.Mode = Gradient ? lcBackgroundMode::CustomGradient : lcBackgroundMode::CustomColor;
-			if (!ParseColorValue(Top, ImageBackground.Color))
+			mImageBackground.Mode = Gradient ? lcBackgroundMode::CustomGradient : lcBackgroundMode::CustomColor;
+			if (!ParseColorValue(Top, mImageBackground.Color))
 			{
-				StdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Top);
-				ParseOK = false;
+				mStdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Top);
+				mParseOK = false;
 			}
-			if (Gradient && !ParseColorValue(Bottom, ImageBackground.GradientBottomColor))
+			if (Gradient && !ParseColorValue(Bottom, mImageBackground.GradientBottomColor))
 			{
-				StdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Bottom);
-				ParseOK = false;
+				mStdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Bottom);
+				mParseOK = false;
 			}
 		}
 	}
 	else if (Option == QLatin1String("-w") || Option == QLatin1String("--width"))
-		ParseInteger(Option, Arguments, ImageWidth, 1, LC_MAX_IMAGE_DIMENSION);
+		ParseInteger(Option, Arguments, mImageWidth, 1, LC_MAX_IMAGE_DIMENSION);
 	else if (Option == QLatin1String("-h") || Option == QLatin1String("--height"))
-		ParseInteger(Option, Arguments, ImageHeight, 1, LC_MAX_IMAGE_DIMENSION);
+		ParseInteger(Option, Arguments, mImageHeight, 1, LC_MAX_IMAGE_DIMENSION);
 	else if (Option == QLatin1String("-f") || Option == QLatin1String("--from"))
-		ParseUnsigned(Option, Arguments, ImageStart, 1, LC_STEP_MAX);
+		ParseUnsigned(Option, Arguments, mImageStart, 1, LC_STEP_MAX);
 	else if (Option == QLatin1String("-t") || Option == QLatin1String("--to"))
-		ParseUnsigned(Option, Arguments, ImageEnd, 1, LC_STEP_MAX);
+		ParseUnsigned(Option, Arguments, mImageEnd, 1, LC_STEP_MAX);
 	else if (Option == QLatin1String("-s") || Option == QLatin1String("--submodel"))
-		ParseString(Option, Arguments, ModelName, true);
+		ParseString(Option, Arguments, mModelName, true);
 	else if (Option == QLatin1String("--shading"))
 	{
 		QString ShadingString;
@@ -203,28 +238,28 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 		if (ParseString(Option, Arguments, ShadingString, true))
 		{
 			if (ShadingString == QLatin1String("wireframe"))
-				ShadingMode = lcShadingMode::Wireframe;
+				mShadingMode = lcShadingMode::Wireframe;
 			else if (ShadingString == QLatin1String("flat"))
-				ShadingMode = lcShadingMode::Flat;
+				mShadingMode = lcShadingMode::Flat;
 			else if (ShadingString == QLatin1String("default"))
-				ShadingMode = lcShadingMode::DefaultLights;
+				mShadingMode = lcShadingMode::DefaultLights;
 			else if (ShadingString == QLatin1String("full"))
-				ShadingMode = lcShadingMode::Full;
+				mShadingMode = lcShadingMode::Full;
 			else
 			{
-				StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ShadingString);
-				ParseOK = false;
+				mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ShadingString);
+				mParseOK = false;
 			}
 		}
 	}
 	else if (Option == QLatin1String("--line-width"))
-		ParseFloat(Option, Arguments, LineWidth, 0.0f, 10.0f);
+		ParseFloat(Option, Arguments, mLineWidth, 0.0f, 10.0f);
 	else if (Option == QLatin1String("--aa-samples"))
 	{
-		if (ParseInteger(Option, Arguments, AASamples, 1, 8) && AASamples != 1 && AASamples != 2 && AASamples != 4 && AASamples != 8)
+		if (ParseInteger(Option, Arguments, mAASamples, 1, 8) && mAASamples != 1 && mAASamples != 2 && mAASamples != 4 && mAASamples != 8)
 		{
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, QString::number(AASamples));
-			ParseOK = false;
+			mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, QString::number(mAASamples));
+			mParseOK = false;
 		}
 	}
 	else if (Option == QLatin1String("-ss") || Option == QLatin1String("--stud-style"))
@@ -232,7 +267,7 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 		int StudStyleValue;
 
 		if (ParseInteger(Option, Arguments, StudStyleValue, 0, static_cast<int>(lcStudStyle::Count) - 1))
-			StudStyle = static_cast<lcStudStyle>(StudStyleValue);
+			mStudStyle = static_cast<lcStudStyle>(StudStyleValue);
 	}
 	else
 		return false;
@@ -243,70 +278,70 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 bool lcCommandLineOptions::ParseCameraOption(const QString& Option, QStringList& Arguments)
 {
 	if (Option == QLatin1String("-c") || Option == QLatin1String("--camera"))
-		ParseString(Option, Arguments, CameraName, true);
+		ParseString(Option, Arguments, mCameraName, true);
 	else if (Option == QLatin1String("--viewpoint"))
 	{
 		QString ViewpointName;
 
 		if (ParseString(Option, Arguments, ViewpointName, true))
 		{
-			Viewpoint = lcCamera::GetViewpoint(ViewpointName);
+			mViewpoint = lcCamera::GetViewpoint(ViewpointName);
 
-			if (Viewpoint == lcViewpoint::Count)
+			if (mViewpoint == lcViewpoint::Count)
 			{
-				StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ViewpointName);
-				ParseOK = false;
+				mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, ViewpointName);
+				mParseOK = false;
 			}
 		}
 	}
 	else if (Option == QLatin1String("--camera-angles"))
 	{
-		if ((SetCameraAngles = ParseFloatArray(Option, Arguments, 2, CameraLatLon.GetFloats(), true)) && (fabsf(CameraLatLon[0]) > 360.0f || fabsf(CameraLatLon[1]) > 360.0f))
+		if ((mSetCameraAngles = ParseFloatArray(Option, Arguments, 2, mCameraLatLon.GetFloats(), true)) && (fabsf(mCameraLatLon[0]) > 360.0f || fabsf(mCameraLatLon[1]) > 360.0f))
 		{
-			StdErr += tr("Invalid parameter values specified for the '%1' option: limits are +/- 360.\n").arg(Option);
-			ParseOK = false;
+			mStdErr += tr("Invalid parameter values specified for the '%1' option: limits are +/- 360.\n").arg(Option);
+			mParseOK = false;
 		}
 	}
 	else if (Option == QLatin1String("--camera-position") || Option == QLatin1String("--camera-position-ldraw"))
 	{
-		if ((SetCameraPosition = ParseFloatArray(Option, Arguments, 9, CameraPosition[0].GetFloats(), true)))
+		if ((mSetCameraPosition = ParseFloatArray(Option, Arguments, 9, mCameraPosition[0].GetFloats(), true)))
 		{
 			if (Option == QLatin1String("--camera-position-ldraw"))
 			{
-				CameraPosition[0] = lcVector3LDrawToLeoCAD(CameraPosition[0]);
-				CameraPosition[1] = lcVector3LDrawToLeoCAD(CameraPosition[1]);
-				CameraPosition[2] = lcVector3LDrawToLeoCAD(CameraPosition[2]);
+				mCameraPosition[0] = lcVector3LDrawToLeoCAD(mCameraPosition[0]);
+				mCameraPosition[1] = lcVector3LDrawToLeoCAD(mCameraPosition[1]);
+				mCameraPosition[2] = lcVector3LDrawToLeoCAD(mCameraPosition[2]);
 			}
 
-			lcVector3 Front = CameraPosition[1] - CameraPosition[0];
+			lcVector3 Front = mCameraPosition[1] - mCameraPosition[0];
 
 			if (Front.LengthSquared() < 0.1f)
 			{
-				StdErr += tr("The camera position is too close to the camera target of the '%1' option.\n").arg(Option);
-				ParseOK = false;
+				mStdErr += tr("The camera position is too close to the camera target of the '%1' option.\n").arg(Option);
+				mParseOK = false;
 			}
-			else if (CameraPosition[2].LengthSquared() < 0.1f)
+			else if (mCameraPosition[2].LengthSquared() < 0.1f)
 			{
-				StdErr += tr("Invalid up vector length specified for the '%1' option.\n").arg(Option);
-				ParseOK = false;
+				mStdErr += tr("Invalid up vector length specified for the '%1' option.\n").arg(Option);
+				mParseOK = false;
 			}
-			else if (fabsf(lcDot(lcNormalize(Front), lcNormalize(CameraPosition[2]))) > 0.99f)
+			else if (fabsf(lcDot(lcNormalize(Front), lcNormalize(mCameraPosition[2]))) > 0.99f)
 			{
-				StdErr += tr("The up vector is parallel to the front vector specified for the '%1' option.\n").arg(Option);
-				ParseOK = false;
+				mStdErr += tr("The up vector is parallel to the front vector specified for the '%1' option.\n").arg(Option);
+				mParseOK = false;
 			}
 		}
 	}
 	else if (Option == QLatin1String("--orthographic"))
-		Orthographic = true;
+		mOrthographic = true;
 	else if (Option == QLatin1String("--fov"))
-		SetFoV = ParseFloat(Option, Arguments, FoV, 1.0f, 180.0f);
+		mSetFoV = ParseFloat(Option, Arguments, mFoV, 1.0f, 180.0f);
 	else if (Option == QLatin1String("--zplanes"))
 	{
-		if ((SetZPlanes = ParseFloatArray(Option, Arguments, 2, ZPlanes.GetFloats(), false)) && (ZPlanes[0] < 1.0 || ZPlanes[0] >= ZPlanes[1]))
+		if ((mSetZPlanes = ParseFloatArray(Option, Arguments, 2, mZPlanes.GetFloats(), false)) && (mZPlanes[0] < 1.0 || mZPlanes[0] >= mZPlanes[1]))
 		{
-			StdErr += tr("Invalid parameter values specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
-			ParseOK = false;
+			mStdErr += tr("Invalid parameter values specified for the '%1' option: requirements are: 1 <= <near> < <far>.\n").arg(Option);
+			mParseOK = false;
 		}
 	}
 	else
@@ -319,90 +354,90 @@ bool lcCommandLineOptions::ParseColorOption(const QString& Option, QStringList& 
 {
 	if (Option == QLatin1String("-nscc") || Option == QLatin1String("--disable-stud-cylinder-color"))
 	{
-		StudCylinderColorEnabled = false;
+		mStudCylinderColorEnabled = false;
 		mStudColorOptions.append(Option);
 	}
 	else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
 	{
-		if (ParseColor(Option, Arguments, StudCylinderColor))
+		if (ParseColor(Option, Arguments, mStudCylinderColor))
 		{
-			StudCylinderColorEnabled = true;
+			mStudCylinderColorEnabled = true;
 			mStudColorOptions.append(Option);
 		}
 	}
 	else if (Option == QLatin1String("-nec") || Option == QLatin1String("--disable-edge-color"))
 	{
-		PartEdgeColorEnabled = false;
+		mPartEdgeColorEnabled = false;
 		mEdgeColorOptions.append(Option);
 	}
 	else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
 	{
-		if (ParseColor(Option, Arguments, PartEdgeColor))
+		if (ParseColor(Option, Arguments, mPartEdgeColor))
 		{
-			PartEdgeColorEnabled = true;
+			mPartEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
 		}
 	}
 	else if (Option == QLatin1String("-nbec") || Option == QLatin1String("--disable-black-edge-color"))
 	{
-		BlackEdgeColorEnabled = false;
+		mBlackEdgeColorEnabled = false;
 		mEdgeColorOptions.append(Option);
 	}
 	else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
 	{
-		if (ParseColor(Option, Arguments, BlackEdgeColor))
+		if (ParseColor(Option, Arguments, mBlackEdgeColor))
 		{
-			BlackEdgeColorEnabled = true;
+			mBlackEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
 		}
 	}
 	else if (Option == QLatin1String("-ndec") || Option == QLatin1String("--disable-dark-edge-color"))
 	{
-		DarkEdgeColorEnabled = false;
+		mDarkEdgeColorEnabled = false;
 		mEdgeColorOptions.append(Option);
 	}
 	else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
 	{
-		if (ParseColor(Option, Arguments, DarkEdgeColor))
+		if (ParseColor(Option, Arguments, mDarkEdgeColor))
 		{
-			DarkEdgeColorEnabled = true;
+			mDarkEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
 		}
 	}
 	else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
-		AutomateEdgeColor = true;
+		mAutomateEdgeColor = true;
 	else if (Option == QLatin1String("-cc") || Option == QLatin1String("--color-contrast"))
 	{
-		if (ParseFloat(Option, Arguments, PartEdgeContrast, 0.0f, 1.0f))
+		if (ParseFloat(Option, Arguments, mPartEdgeContrast, 0.0f, 1.0f))
 			mPartEdgeContrastOption = Option;
 	}
 	else if (Option == QLatin1String("-ldv") || Option == QLatin1String("--light-dark-value"))
 	{
-		if (ParseFloat(Option, Arguments, PartColorValueLDIndex, 0.0f, 1.0f))
+		if (ParseFloat(Option, Arguments, mPartColorValueLDIndex, 0.0f, 1.0f))
 			mLightDarkValueOption = Option;
 	}
 	else if (Option == QLatin1String("--fade-steps"))
-		FadeSteps = true;
+		mFadeSteps = true;
 	else if (Option == QLatin1String("--no-fade-steps"))
-		FadeSteps = false;
+		mFadeSteps = false;
 	else if (Option == QLatin1String("--fade-steps-color"))
 	{
-		if (ParseColor(Option, Arguments, FadeStepsColor))
+		if (ParseColor(Option, Arguments, mFadeStepsColor))
 		{
-			SetFadeStepsColor = true;
-			FadeSteps = true;
+			mSetFadeStepsColor = true;
+			mFadeSteps = true;
 		}
 	}
 	else if (Option == QLatin1String("--highlight"))
-		ImageHighlight = true;
+		mImageHighlight = true;
 	else if (Option == QLatin1String("--no-highlight"))
-		ImageHighlight = false;
+		mImageHighlight = false;
 	else if (Option == QLatin1String("--highlight-color"))
 	{
-		if (ParseColor(Option, Arguments, HighlightColor))
+		if (ParseColor(Option, Arguments, mHighlightColor))
 		{
-			SetHighlightColor = true;
-			ImageHighlight = true;
+			mSetHighlightColor = true;
+			mImageHighlight = true;
 		}
 	}
 	else
@@ -415,28 +450,28 @@ bool lcCommandLineOptions::ParseExportOption(const QString& Option, QStringList&
 {
 	if (Option == QLatin1String("-obj") || Option == QLatin1String("--export-wavefront"))
 	{
-		SaveWavefront = true;
-		ParseString(Option, Arguments, SaveWavefrontName, false);
+		mSaveWavefront = true;
+		ParseString(Option, Arguments, mSaveWavefrontName, false);
 	}
 	else if (Option == QLatin1String("-3ds") || Option == QLatin1String("--export-3ds"))
 	{
-		Save3DS = true;
-		ParseString(Option, Arguments, Save3DSName, false);
+		mSave3DS = true;
+		ParseString(Option, Arguments, mSave3DSName, false);
 	}
 	else if (Option == QLatin1String("-dae") || Option == QLatin1String("--export-collada"))
 	{
-		SaveCOLLADA = true;
-		ParseString(Option, Arguments, SaveCOLLADAName, false);
+		mSaveCOLLADA = true;
+		ParseString(Option, Arguments, mSaveCOLLADAName, false);
 	}
 	else if (Option == QLatin1String("-csv") || Option == QLatin1String("--export-csv"))
 	{
-		SaveCSV = true;
-		ParseString(Option, Arguments, SaveCSVName, false);
+		mSaveCSV = true;
+		ParseString(Option, Arguments, mSaveCSVName, false);
 	}
 	else if (Option == QLatin1String("-html") || Option == QLatin1String("--export-html"))
 	{
-		SaveHTML = true;
-		ParseString(Option, Arguments, SaveHTMLName, false);
+		mSaveHTML = true;
+		ParseString(Option, Arguments, mSaveHTMLName, false);
 	}
 	else
 		return false;
@@ -453,8 +488,8 @@ bool lcCommandLineOptions::ParseString(const QString& Option, QStringList& Argum
 	}
 	else if (Required)
 	{
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
-		ParseOK = false;
+		mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+		mParseOK = false;
 		return false;
 	}
 
@@ -475,12 +510,12 @@ bool lcCommandLineOptions::ParseInteger(const QString& Option, QStringList& Argu
 			return true;
 		}
 		else
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 	}
 	else
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+		mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 
-	ParseOK = false;
+	mParseOK = false;
 	return false;
 }
 
@@ -498,12 +533,12 @@ bool lcCommandLineOptions::ParseUnsigned(const QString& Option, QStringList& Arg
 			return true;
 		}
 		else
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 	}
 	else
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+		mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 
-	ParseOK = false;
+	mParseOK = false;
 	return false;
 }
 
@@ -521,12 +556,12 @@ bool lcCommandLineOptions::ParseFloat(const QString& Option, QStringList& Argume
 			return true;
 		}
 		else
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 	}
 	else
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+		mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 
-	ParseOK = false;
+	mParseOK = false;
 	return false;
 }
 
@@ -534,9 +569,9 @@ bool lcCommandLineOptions::ParseFloatArray(const QString& Option, QStringList& A
 {
 	if (Arguments.size() < Count)
 	{
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+		mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 		Arguments.clear();
-		ParseOK = false;
+		mParseOK = false;
 		return false;
 	}
 
@@ -554,12 +589,12 @@ bool lcCommandLineOptions::ParseFloatArray(const QString& Option, QStringList& A
 				continue;
 			}
 
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
+			mStdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
 		}
 		else
-			StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+			mStdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
 
-		ParseOK = false;
+		mParseOK = false;
 		return false;
 	}
 
@@ -576,77 +611,77 @@ bool lcCommandLineOptions::ParseColor(const QString& Option, QStringList& Argume
 	if (ParseColorValue(Parameter, Color))
 		return true;
 
-	StdErr += tr("Invalid color for the '%1' option: '%2'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Option, Parameter);
-	ParseOK = false;
+	mStdErr += tr("Invalid color for the '%1' option: '%2'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Option, Parameter);
+	mParseOK = false;
 	return false;
 }
 
 void lcCommandLineOptions::AppendVersion()
 {
 #ifdef LC_CONTINUOUS_BUILD
-	StdOut += tr("LeoCAD Continuous Build %1\n").arg(QT_STRINGIFY(LC_CONTINUOUS_BUILD));
+	mStdOut += tr("LeoCAD Continuous Build %1\n").arg(QT_STRINGIFY(LC_CONTINUOUS_BUILD));
 #else
-	StdOut += tr("LeoCAD Version %1\n").arg(LC_VERSION_TEXT);
+	mStdOut += tr("LeoCAD Version %1\n").arg(LC_VERSION_TEXT);
 #endif
-	StdOut += tr("Compiled %1\n").arg(__DATE__);
+	mStdOut += tr("Compiled %1\n").arg(__DATE__);
 }
 
 void lcCommandLineOptions::AppendHelp()
 {
-	StdOut += tr("Usage: leocad [options] [file]\n");
-	StdOut += tr("  Square brackets mark optional arguments. Put the input file before options with omitted filenames.\n");
-	StdOut += tr("  [options] can be:\n");
-	StdOut += tr("  Colors use RRGGBB or RRGGBBAA (alpha last), with an optional # prefix, or transparent.\n");
-	StdOut += tr("  -l, --libpath <path>: Set the Pieces Library location to path.\n");
-	StdOut += tr("  -i, --image [outfile.ext]: Save a picture in the format specified by ext and exit.\n");
-	StdOut += tr("    Omitted image filename: use the input name and saved image extension. Explicit extensionless filename: PNG.\n");
-	StdOut += tr("  --background <transparent|RRGGBB|RRGGBBAA>: Set the image background; alpha is last.\n");
-	StdOut += tr("  --background-gradient <top> <bottom>: Set a vertical gradient using RRGGBB, RRGGBBAA, or transparent colors.\n");
-	StdOut += tr("    Background options require --image and cannot be combined or repeated. Default: transparent when the format preserves alpha, otherwise white. Alpha requires a format that preserves it.\n");
-	StdOut += tr("  -w, --width <width>: Set the picture width (1 to 32768).\n");
-	StdOut += tr("  -h, --height <height>: Set the picture height (1 to 32768).\n");
-	StdOut += tr("  -f, --from <step>: Set the first step to save pictures.\n");
-	StdOut += tr("  -t, --to <step>: Set the last step to save pictures.\n");
-	StdOut += tr("  -s, --submodel <submodel>: Set the active submodel.\n");
-	StdOut += tr("  -c, --camera <camera name>: Set the active camera.\n");
-	StdOut += tr("  --viewpoint <viewpoint>: Set the view to one of the preset viewpoints (front, back, left, right, top, bottom, home).\n");
-	StdOut += tr("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model (-360 to 360).\n");
-	StdOut += tr("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
-	StdOut += tr("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
-	StdOut += tr("  --orthographic: Render images using an orthographic projection.\n");
-	StdOut += tr("  --fov <degrees>: Set the vertical field of view used to render images (1 to 180 degrees, inclusive).\n");
-	StdOut += tr("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
-	StdOut += tr("    Camera precedence: named camera, then viewpoint, then angles, then position.\n");
-	StdOut += tr("  --fade-steps: Render pieces from prior steps faded.\n");
-	StdOut += tr("  --no-fade-steps: Do not render pieces from prior steps faded.\n");
-	StdOut += tr("  --fade-steps-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for prior step pieces; enables fading.\n");
-	StdOut += tr("  --highlight: Highlight pieces in the steps they appear.\n");
-	StdOut += tr("  --no-highlight: Do not highlight pieces in the steps they appear.\n");
-	StdOut += tr("  --highlight-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for highlighted pieces; enables highlighting.\n");
-	StdOut += tr("  --shading <mode>: Select shading mode for rendering (wireframe, flat, default, full).\n");
-	StdOut += tr("  --line-width <width>: Set the width of the edge lines (0 to 10).\n");
-	StdOut += tr("  --aa-samples <samples>: Anti-aliasing sample size (1, 2, 4, or 8).\n");
-	StdOut += tr("  -ss, --stud-style <style>: Set the stud style (0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo).\n");
-	StdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
-	StdOut += tr("  -scc, --stud-cylinder-color <RRGGBB|RRGGBBAA|transparent>: High contrast stud cylinder color.\n");
-	StdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
-	StdOut += tr("  -ec, --edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color.\n");
-	StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black pieces.\n");
-	StdOut += tr("  -bec, --black-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for black pieces.\n");
-	StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color pieces.\n");
-	StdOut += tr("  -dec, --dark-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for dark color pieces.\n");
-	StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors; overrides manual edge colors.\n");
-	StdOut += tr("  -cc, --color-contrast <contrast>: Color contrast value between 0.0 and 1.0; requires automatic edge colors.\n");
-	StdOut += tr("  -ldv, --light-dark-value <value>: Light/Dark value between 0.0 and 1.0; requires automatic edges or a high contrast stud style.\n");
-	StdOut += tr("    Stud-cylinder and manual edge options require stud style 6 or 7. Automatic edges preserve stud-cylinder settings.\n");
-	StdOut += tr("  -obj, --export-wavefront [outfile.obj]: Export the model to Wavefront OBJ format.\n");
-	StdOut += tr("  -3ds, --export-3ds [outfile.3ds]: Export the model to 3D Studio 3DS format.\n");
-	StdOut += tr("  -dae, --export-collada [outfile.dae]: Export the model to COLLADA DAE format.\n");
-	StdOut += tr("  -csv, --export-csv [outfile.csv]: Export the list of pieces used in CSV format.\n");
-	StdOut += tr("  -html, --export-html [folder]: Create an HTML page for the model.\n");
-	StdOut += tr("  -v, --version: Output version information and exit.\n");
-	StdOut += tr("  -?, --help: Display this help message and exit.\n");
-	StdOut += QLatin1String("\n");
+	mStdOut += tr("Usage: leocad [options] [file]\n");
+	mStdOut += tr("  Square brackets mark optional arguments. Put the input file before options with omitted filenames.\n");
+	mStdOut += tr("  [options] can be:\n");
+	mStdOut += tr("  Colors use RRGGBB or RRGGBBAA (alpha last), with an optional # prefix, or transparent.\n");
+	mStdOut += tr("  -l, --libpath <path>: Set the Pieces Library location to path.\n");
+	mStdOut += tr("  -i, --image [outfile.ext]: Save a picture in the format specified by ext and exit.\n");
+	mStdOut += tr("    Omitted image filename: use the input name and saved image extension. Explicit extensionless filename: PNG.\n");
+	mStdOut += tr("  --background <transparent|RRGGBB|RRGGBBAA>: Set the image background; alpha is last.\n");
+	mStdOut += tr("  --background-gradient <top> <bottom>: Set a vertical gradient using RRGGBB, RRGGBBAA, or transparent colors.\n");
+	mStdOut += tr("    Background options require --image and cannot be combined or repeated. Default: transparent when the format preserves alpha, otherwise white. Alpha requires a format that preserves it.\n");
+	mStdOut += tr("  -w, --width <width>: Set the picture width (1 to 32768).\n");
+	mStdOut += tr("  -h, --height <height>: Set the picture height (1 to 32768).\n");
+	mStdOut += tr("  -f, --from <step>: Set the first step to save pictures.\n");
+	mStdOut += tr("  -t, --to <step>: Set the last step to save pictures.\n");
+	mStdOut += tr("  -s, --submodel <submodel>: Set the active submodel.\n");
+	mStdOut += tr("  -c, --camera <camera name>: Set the active camera.\n");
+	mStdOut += tr("  --viewpoint <viewpoint>: Set the view to one of the preset viewpoints (front, back, left, right, top, bottom, home).\n");
+	mStdOut += tr("  --camera-angles <latitude> <longitude>: Set the camera angles in degrees around the model (-360 to 360).\n");
+	mStdOut += tr("  --camera-position <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector.\n");
+	mStdOut += tr("  --camera-position-ldraw <x> <y> <z> <tx> <ty> <tz> <ux> <uy> <uz>: Set the camera position, target and up vector using LDraw coordinates.\n");
+	mStdOut += tr("  --orthographic: Render images using an orthographic projection.\n");
+	mStdOut += tr("  --fov <degrees>: Set the vertical field of view used to render images (1 to 180 degrees, inclusive).\n");
+	mStdOut += tr("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
+	mStdOut += tr("    Camera precedence: named camera, then viewpoint, then angles, then position.\n");
+	mStdOut += tr("  --fade-steps: Render pieces from prior steps faded.\n");
+	mStdOut += tr("  --no-fade-steps: Do not render pieces from prior steps faded.\n");
+	mStdOut += tr("  --fade-steps-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for prior step pieces; enables fading.\n");
+	mStdOut += tr("  --highlight: Highlight pieces in the steps they appear.\n");
+	mStdOut += tr("  --no-highlight: Do not highlight pieces in the steps they appear.\n");
+	mStdOut += tr("  --highlight-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for highlighted pieces; enables highlighting.\n");
+	mStdOut += tr("  --shading <mode>: Select shading mode for rendering (wireframe, flat, default, full).\n");
+	mStdOut += tr("  --line-width <width>: Set the width of the edge lines (0 to 10).\n");
+	mStdOut += tr("  --aa-samples <samples>: Anti-aliasing sample size (1, 2, 4, or 8).\n");
+	mStdOut += tr("  -ss, --stud-style <style>: Set the stud style (0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo).\n");
+	mStdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
+	mStdOut += tr("  -scc, --stud-cylinder-color <RRGGBB|RRGGBBAA|transparent>: High contrast stud cylinder color.\n");
+	mStdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
+	mStdOut += tr("  -ec, --edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color.\n");
+	mStdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black pieces.\n");
+	mStdOut += tr("  -bec, --black-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for black pieces.\n");
+	mStdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color pieces.\n");
+	mStdOut += tr("  -dec, --dark-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for dark color pieces.\n");
+	mStdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors; overrides manual edge colors.\n");
+	mStdOut += tr("  -cc, --color-contrast <contrast>: Color contrast value between 0.0 and 1.0; requires automatic edge colors.\n");
+	mStdOut += tr("  -ldv, --light-dark-value <value>: Light/Dark value between 0.0 and 1.0; requires automatic edges or a high contrast stud style.\n");
+	mStdOut += tr("    Stud-cylinder and manual edge options require stud style 6 or 7. Automatic edges preserve stud-cylinder settings.\n");
+	mStdOut += tr("  -obj, --export-wavefront [outfile.obj]: Export the model to Wavefront OBJ format.\n");
+	mStdOut += tr("  -3ds, --export-3ds [outfile.3ds]: Export the model to 3D Studio 3DS format.\n");
+	mStdOut += tr("  -dae, --export-collada [outfile.dae]: Export the model to COLLADA DAE format.\n");
+	mStdOut += tr("  -csv, --export-csv [outfile.csv]: Export the list of pieces used in CSV format.\n");
+	mStdOut += tr("  -html, --export-html [folder]: Create an HTML page for the model.\n");
+	mStdOut += tr("  -v, --version: Output version information and exit.\n");
+	mStdOut += tr("  -?, --help: Display this help message and exit.\n");
+	mStdOut += QLatin1String("\n");
 }
 
 void lcCommandLineOptions::ValidateOptions()
@@ -654,108 +689,106 @@ void lcCommandLineOptions::ValidateOptions()
 	ValidateColorOptions();
 	ValidateCameraOptions();
 
-	const bool SaveAndExit = (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveCSV || SaveHTML);
-
-	if (!Exit && SetImageBackground && !SaveImage)
+	if (!mExit && mSetImageBackground && !mSaveImage)
 	{
-		StdErr += tr("Background options require --image.\n");
-		ParseOK = false;
+		mStdErr += tr("Background options require --image.\n");
+		mParseOK = false;
 	}
 
-	if (!Exit && ParseOK && SaveImage)
+	if (!mExit && mParseOK && mSaveImage)
 	{
-		QString FileName = ImageName;
+		QString FileName = mImageName;
 		if (FileName.isEmpty())
 			FileName = QStringLiteral("image") + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
 		const std::optional<bool> SupportsAlpha = ImageFormatSupportsAlpha(FileName);
 		if (!SupportsAlpha)
 		{
-			StdErr += tr("Unsupported image output format for '%1'.\n").arg(FileName);
-			ParseOK = false;
+			mStdErr += tr("Unsupported image output format for '%1'.\n").arg(FileName);
+			mParseOK = false;
 		}
-		else if (!SetImageBackground)
+		else if (!mSetImageBackground)
 		{
 			if (*SupportsAlpha)
-				ImageBackground.Mode = lcBackgroundMode::Transparent;
+				mImageBackground.Mode = lcBackgroundMode::Transparent;
 			else
 			{
-				ImageBackground.Mode = lcBackgroundMode::CustomColor;
-				ImageBackground.Color = LC_RGBA(255, 255, 255, 255);
+				mImageBackground.Mode = lcBackgroundMode::CustomColor;
+				mImageBackground.Color = LC_RGBA(255, 255, 255, 255);
 			}
 		}
 		else if (!*SupportsAlpha)
 		{
-			const lcBackgroundOptions& Background = ImageBackground;
+			const lcBackgroundOptions& Background = mImageBackground;
 			const bool Transparent = Background.Mode == lcBackgroundMode::Transparent || LC_RGBA_ALPHA(Background.Color) != 255 ||
 				(Background.Mode == lcBackgroundMode::CustomGradient && LC_RGBA_ALPHA(Background.GradientBottomColor) != 255);
 			if (Transparent)
 			{
-				StdErr += tr("The image format for '%1' does not preserve alpha; specify an opaque background.\n").arg(FileName);
-				ParseOK = false;
+				mStdErr += tr("The image format for '%1' does not preserve alpha; specify an opaque background.\n").arg(FileName);
+				mParseOK = false;
 			}
 		}
 	}
 
-	if (SaveAndExit && ProjectName.isEmpty())
+	if (HasExportRequest() && mProjectName.isEmpty())
 	{
-		StdErr += tr("No file name specified.\n");
-		ParseOK = false;
+		mStdErr += tr("No file name specified.\n");
+		mParseOK = false;
 	}
 }
 
 void lcCommandLineOptions::ValidateColorOptions()
 {
-	const bool HighContrast = lcIsHighContrast(StudStyle);
+	const bool HighContrast = lcIsHighContrast(mStudStyle);
 
-	if (!AutomateEdgeColor && !mPartEdgeContrastOption.isEmpty())
-		StdErr += tr("The '%1' option requires automatic edge colors (--automate-edge-color).\n").arg(mPartEdgeContrastOption);
+	if (!mAutomateEdgeColor && !mPartEdgeContrastOption.isEmpty())
+		mStdErr += tr("The '%1' option requires automatic edge colors (--automate-edge-color).\n").arg(mPartEdgeContrastOption);
 
-	if (!AutomateEdgeColor && !HighContrast && !mLightDarkValueOption.isEmpty())
-		StdErr += tr("The '%1' option requires automatic edge colors or a high contrast stud style.\n").arg(mLightDarkValueOption);
+	if (!mAutomateEdgeColor && !HighContrast && !mLightDarkValueOption.isEmpty())
+		mStdErr += tr("The '%1' option requires automatic edge colors or a high contrast stud style.\n").arg(mLightDarkValueOption);
 
 	mStudColorOptions.removeDuplicates();
 	mEdgeColorOptions.removeDuplicates();
 
 	if (!HighContrast)
 		for (const QString& Option : mStudColorOptions)
-			StdErr += tr("The '%1' option requires a high contrast stud style (--stud-style 6 or 7).\n").arg(Option);
+			mStdErr += tr("The '%1' option requires a high contrast stud style (--stud-style 6 or 7).\n").arg(Option);
 
 	for (const QString& Option : mEdgeColorOptions)
 	{
-		if (AutomateEdgeColor)
-			StdErr += tr("Automatic edge colors take precedence over the '%1' option.\n").arg(Option);
+		if (mAutomateEdgeColor)
+			mStdErr += tr("Automatic edge colors take precedence over the '%1' option.\n").arg(Option);
 		else if (!HighContrast)
-			StdErr += tr("The '%1' option requires a high contrast stud style (--stud-style 6 or 7).\n").arg(Option);
+			mStdErr += tr("The '%1' option requires a high contrast stud style (--stud-style 6 or 7).\n").arg(Option);
 	}
 }
 
 void lcCommandLineOptions::ValidateCameraOptions()
 {
-	if (!CameraName.isEmpty())
+	if (!mCameraName.isEmpty())
 	{
-		if (Viewpoint != lcViewpoint::Count)
-			StdErr += tr("--viewpoint is ignored when --camera is set.\n");
+		if (mViewpoint != lcViewpoint::Count)
+			mStdErr += tr("--viewpoint is ignored when --camera is set.\n");
 
-		if (Orthographic)
-			StdErr += tr("--orthographic is ignored when --camera is set.\n");
+		if (mOrthographic)
+			mStdErr += tr("--orthographic is ignored when --camera is set.\n");
 
-		if (SetCameraAngles)
-			StdErr += tr("--camera-angles is ignored when --camera is set.\n");
+		if (mSetCameraAngles)
+			mStdErr += tr("--camera-angles is ignored when --camera is set.\n");
 
-		if (SetCameraPosition)
-			StdErr += tr("--camera-position is ignored when --camera is set.\n");
+		if (mSetCameraPosition)
+			mStdErr += tr("--camera-position is ignored when --camera is set.\n");
 	}
-	else if (Viewpoint != lcViewpoint::Count)
+	else if (mViewpoint != lcViewpoint::Count)
 	{
-		if (SetCameraAngles)
-			StdErr += tr("--camera-angles is ignored when --viewpoint is set.\n");
+		if (mSetCameraAngles)
+			mStdErr += tr("--camera-angles is ignored when --viewpoint is set.\n");
 
-		if (SetCameraPosition)
-			StdErr += tr("--camera-position is ignored when --viewpoint is set.\n");
+		if (mSetCameraPosition)
+			mStdErr += tr("--camera-position is ignored when --viewpoint is set.\n");
 	}
-	else if (SetCameraAngles)
+	else if (mSetCameraAngles)
 	{
-		if (SetCameraPosition)
-			StdErr += tr("--camera-position is ignored when --camera-angles is set.\n");
+		if (mSetCameraPosition)
+			mStdErr += tr("--camera-position is ignored when --camera-angles is set.\n");
 	}
 }

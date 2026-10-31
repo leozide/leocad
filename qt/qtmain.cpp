@@ -129,10 +129,10 @@ static void lcInitializeSurfaceFormat(int argc, char* argv[])
 	QCoreApplication Application(argc, argv);
 	const lcCommandLineOptions Options(QCoreApplication::arguments());
 
-	if (Options.ParseOK && Options.AASamples > 1)
+	if (Options.mParseOK && Options.mAASamples > 1)
 	{
 		QSurfaceFormat Format = QSurfaceFormat::defaultFormat();
-		Format.setSamples(Options.AASamples);
+		Format.setSamples(Options.mAASamples);
 		QSurfaceFormat::setDefaultFormat(Format);
 	}
 }

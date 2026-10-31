@@ -2934,6 +2934,15 @@ void lcModelInstanceTests::CommandLineColorValidation_data()
 	Row("threshold-neither-mode", false, 0, true, { "--light-dark-value", "0.5" }, 1, "requires automatic edge colors or a high contrast stud style");
 	Row("saved-style-does-not-suppress-warning", false, 6, true, { "--stud-style", "0", "--edge-color", "#123456" }, 1, RequiresStyle);
 	Row("edge-cli-high-contrast", false, 0, true, { "--stud-style", "6", "--edge-color", "#123456" }, 0, {});
+	Row("edge-enables-saved-disabled", false, 6, false, { "--edge-color", "#123456" }, 0, {});
+	Row("edge-alias-enables-after-disable", false, 6, true, { "--disable-edge-color", "-ec", "#123456" }, 0, {});
+	Row("edge-disable-after-color", false, 6, false, { "--edge-color", "#123456", "--disable-edge-color" }, 0, {});
+	Row("cylinder-enables", false, 6, false, { "--stud-cylinder-color", "#123456" }, 0, {});
+	Row("cylinder-disable-last", false, 6, false, { "-scc", "#123456", "-nscc" }, 0, {});
+	Row("black-enables", false, 6, false, { "--black-edge-color", "#123456" }, 0, {});
+	Row("black-disable-last", false, 6, false, { "-bec", "#123456", "-nbec" }, 0, {});
+	Row("dark-enables", false, 6, false, { "--dark-edge-color", "#123456" }, 0, {});
+	Row("dark-disable-last", false, 6, false, { "-dec", "#123456", "-ndec" }, 0, {});
 	Row("manual-edge-under-auto", true, 6, true, { "--edge-color", "#123456" }, 1, Precedence);
 	Row("manual-edge-cli-auto", false, 6, true, { "--edge-color", "#123456", "--automate-edge-color" }, 1, Precedence);
 	Row("cylinder-under-auto", true, 6, true, { "--stud-cylinder-color", "#010203" }, 0, {});
@@ -2998,6 +3007,17 @@ void lcModelInstanceTests::CommandLineColorValidation()
 	Arguments.prepend("leocad");
 	const lcCommandLineOptions Options(Arguments);
 	QVERIFY(Options.ParseOK);
+	const QByteArray TestName = QTest::currentDataTag();
+	if (TestName == "edge-enables-saved-disabled" || TestName == "edge-alias-enables-after-disable")
+		QVERIFY(Options.PartEdgeColorEnabled);
+	else if (TestName == "edge-disable-after-color")
+		QVERIFY(!Options.PartEdgeColorEnabled);
+	else if (TestName == "cylinder-enables" || TestName == "cylinder-disable-last")
+		QCOMPARE(Options.StudCylinderColorEnabled, TestName == "cylinder-enables");
+	else if (TestName == "black-enables" || TestName == "black-disable-last")
+		QCOMPARE(Options.BlackEdgeColorEnabled, TestName == "black-enables");
+	else if (TestName == "dark-enables" || TestName == "dark-disable-last")
+		QCOMPARE(Options.DarkEdgeColorEnabled, TestName == "dark-enables");
 	QCOMPARE(Options.StdErr.count(QLatin1Char('\n')), Warnings);
 	if (!Message.isEmpty())
 		QVERIFY2(Options.StdErr.contains(Message), qPrintable(Options.StdErr));

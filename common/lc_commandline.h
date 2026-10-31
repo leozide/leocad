@@ -2,6 +2,7 @@
 
 #include "lc_background.h"
 #include "lc_math.h"
+#include "camera.h"
 
 class lcCommandLineOptions
 {
@@ -26,24 +27,24 @@ public:
 	bool SetZPlanes = false;
 	bool SetFadeStepsColor = false;
 	bool SetHighlightColor = false;
-	bool FadeSteps = false;
-	bool ImageHighlight = false;
-	bool AutomateEdgeColor = false;
+	bool FadeSteps;
+	bool ImageHighlight;
+	bool AutomateEdgeColor;
 	int ImageWidth;
 	int ImageHeight;
 	int AASamples;
 	lcShadingMode ShadingMode;
 	float LineWidth;
 	lcStudStyle StudStyle;
-	lcStep ImageStart;
-	lcStep ImageEnd;
-	lcVector3 CameraPosition[3];
-	lcVector2 CameraLatLon;
-	float FoV;
+	lcStep ImageStart = 0;
+	lcStep ImageEnd = 0;
+	lcVector3 CameraPosition[3] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+	lcVector2 CameraLatLon = { 0.0f, 0.0f };
+	float FoV = 0.0f;
 	float PartEdgeContrast;
 	float PartColorValueLDIndex;
-	lcVector2 ZPlanes;
-	lcViewpoint Viewpoint;
+	lcVector2 ZPlanes = { 0.0f, 0.0f };
+	lcViewpoint Viewpoint = lcViewpoint::Count;
 	bool StudCylinderColorEnabled;
 	quint32 StudCylinderColor;
 	bool PartEdgeColorEnabled;
@@ -52,8 +53,8 @@ public:
 	quint32 BlackEdgeColor;
 	bool DarkEdgeColorEnabled;
 	quint32 DarkEdgeColor;
-	quint32 FadeStepsColor;
-	quint32	HighlightColor;
+	quint32 FadeStepsColor = 0;
+	quint32 HighlightColor = 0;
 	QString ImageName;
 	QString ModelName;
 	QString CameraName;
@@ -70,7 +71,7 @@ public:
 private:
 	static bool ParseColorValue(const QString& Parameter, quint32& Color);
 	static std::optional<bool> ImageFormatSupportsAlpha(const QString& FileName);
-	void LoadDefaults();
+	void LoadPreferences();
 	void ParseArguments(QStringList& Arguments);
 	void ParseOption(const QString& Option, QStringList& Arguments);
 	bool ParseImageOption(const QString& Option, QStringList& Arguments);

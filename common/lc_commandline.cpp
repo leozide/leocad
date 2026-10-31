@@ -6,6 +6,18 @@
 #include "lc_qutils.h"
 #include "camera.h"
 
+lcCommandLineOptions::lcCommandLineOptions(QStringList Arguments)
+{
+	LoadPreferences();
+
+	if (Arguments.isEmpty())
+		return;
+
+	Arguments.removeFirst();
+	ParseArguments(Arguments);
+	ValidateOptions();
+}
+
 bool lcCommandLineOptions::ParseColorValue(const QString& Parameter, quint32& Color)
 {
 	if (Parameter.compare(QLatin1String("transparent"), Qt::CaseInsensitive) == 0)
@@ -53,19 +65,7 @@ std::optional<bool> lcCommandLineOptions::ImageFormatSupportsAlpha(const QString
 		qAlpha(Decoded.pixel(0, 0)) == 0 && qAlpha(Decoded.pixel(1, 0)) == 128;
 }
 
-lcCommandLineOptions::lcCommandLineOptions(QStringList Arguments)
-{
-	LoadDefaults();
-
-	if (Arguments.isEmpty())
-		return;
-
-	Arguments.removeFirst();
-	ParseArguments(Arguments);
-	ValidateOptions();
-}
-
-void lcCommandLineOptions::LoadDefaults()
+void lcCommandLineOptions::LoadPreferences()
 {
 	lcPreferences Preferences;
 	Preferences.LoadDefaults();
@@ -78,17 +78,6 @@ void lcCommandLineOptions::LoadDefaults()
 	LineWidth = Preferences.mLineWidth;
 	AASamples = lcGetProfileInt(LC_PROFILE_ANTIALIASING_SAMPLES);
 	StudStyle = lcGetProfileStudStyle();
-	ImageStart = 0;
-	ImageEnd = 0;
-	CameraPosition[0] = lcVector3(0.0f, 0.0f, 0.0f);
-	CameraPosition[1] = lcVector3(0.0f, 0.0f, 0.0f);
-	CameraPosition[2] = lcVector3(0.0f, 0.0f, 0.0f);
-	CameraLatLon = lcVector2(0.0f, 0.0f);
-	FoV = 0.0f;
-	ZPlanes = lcVector2(0.0f, 0.0f);
-	Viewpoint = lcViewpoint::Count;
-	FadeStepsColor = Preferences.mFadeStepsColor;
-	HighlightColor = Preferences.mHighlightNewPartsColor;
 	StudCylinderColorEnabled = Preferences.mStudCylinderColorEnabled;
 	StudCylinderColor = Preferences.mStudCylinderColor;
 	PartEdgeColorEnabled = Preferences.mPartEdgeColorEnabled;
@@ -336,7 +325,10 @@ bool lcCommandLineOptions::ParseColorOption(const QString& Option, QStringList& 
 	else if (Option == QLatin1String("-scc") || Option == QLatin1String("--stud-cylinder-color"))
 	{
 		if (ParseColor(Option, Arguments, StudCylinderColor))
+		{
+			StudCylinderColorEnabled = true;
 			mStudColorOptions.append(Option);
+		}
 	}
 	else if (Option == QLatin1String("-nec") || Option == QLatin1String("--disable-edge-color"))
 	{
@@ -346,7 +338,10 @@ bool lcCommandLineOptions::ParseColorOption(const QString& Option, QStringList& 
 	else if (Option == QLatin1String("-ec") || Option == QLatin1String("--edge-color"))
 	{
 		if (ParseColor(Option, Arguments, PartEdgeColor))
+		{
+			PartEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
+		}
 	}
 	else if (Option == QLatin1String("-nbec") || Option == QLatin1String("--disable-black-edge-color"))
 	{
@@ -356,7 +351,10 @@ bool lcCommandLineOptions::ParseColorOption(const QString& Option, QStringList& 
 	else if (Option == QLatin1String("-bec") || Option == QLatin1String("--black-edge-color"))
 	{
 		if (ParseColor(Option, Arguments, BlackEdgeColor))
+		{
+			BlackEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
+		}
 	}
 	else if (Option == QLatin1String("-ndec") || Option == QLatin1String("--disable-dark-edge-color"))
 	{
@@ -366,7 +364,10 @@ bool lcCommandLineOptions::ParseColorOption(const QString& Option, QStringList& 
 	else if (Option == QLatin1String("-dec") || Option == QLatin1String("--dark-edge-color"))
 	{
 		if (ParseColor(Option, Arguments, DarkEdgeColor))
+		{
+			DarkEdgeColorEnabled = true;
 			mEdgeColorOptions.append(Option);
+		}
 	}
 	else if (Option == QLatin1String("-aec") || Option == QLatin1String("--automate-edge-color"))
 		AutomateEdgeColor = true;

@@ -1,4 +1,4 @@
-.TH LEOCAD 1 "18 September 2026"
+.TH LEOCAD 1 "October 30, 2026"
 .\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
 .\" other params are allowed: see man(7), man(1)
 .SH NAME
@@ -34,11 +34,11 @@ Set the parts library location.
 .TP
 \fB\-i \fR[\fIoutfile.ext\fR], \fB\-\-image \fR[\fIoutfile.ext\fR]
 .br
-Saves a picture to \fIoutfile.ext \fR in the image format specified
-by \fIext\fR and exits. If outfile is not given then the program will
-use a name based on \fIinfile\fR. The file format is selected by \fIext\fR
-and can be gif, bmp, png or jpg (if \fIext\fR is not present then the
-default preferences format will be used).
+Save a picture and exit. The format is selected by the output filename
+extension and must be supported by the installed image codecs. An explicit
+filename without an extension is written as PNG. If the filename is omitted,
+use the input name and the saved image extension. Place the input filename
+before options with omitted output filenames.
 
 .TP
 .BI "\-\-background " color
@@ -54,12 +54,12 @@ preserve alpha require opaque colors.
 .TP
 \fB\-w \fIwidth\fR, \fB\-\-width \fIwidth
 .br
-Sets the width of the picture to \fIwidth\fR.
+Sets the width of the picture to \fIwidth\fR (1 to 32768).
 
 .TP
 \fB\-h \fIheight\fR, \fB\-\-height \fIheight
 .br
-Sets the height of the picture to \fIheight\fR.
+Sets the height of the picture to \fIheight\fR (1 to 32768).
 
 .TP
 \fB\-f \fItime\fR, \fB\-\-from \fItime
@@ -84,7 +84,9 @@ Sets the active camera to \fIcamera\fR.
 .TP
 \fB\-ss \fIid\fR,\ \fB\-\-stud\-style\ \fIid
 .br
-Set the stud style. Valid values 0=Plain, 1=Thin Lines Logo, 2=Outline Logo, 3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast, 7=High Contrast with Logo.
+Set the stud style. Valid values 0=Plain, 1=Thin Lines Logo, 2=Outline Logo,
+3=Sharp Top Logo, 4=Rounded Top Logo, 5=Flattened Logo, 6=High Contrast,
+7=High Contrast with Logo.
 
 .TP
 \fB\-\-viewpoint \fRfront\ |\ back\ |\ left\ |\ right\ |\ top\ |\ bottom\ |\ home
@@ -93,15 +95,17 @@ Sets the viewpoint to one of the predefined view angles.
 
 .TP
 .BI "\-\-camera\-angles " latitude " " longitude
-Set the camera angles in degrees around the model.
+Set the camera angles in degrees around the model (-360 to 360).
 
 .TP
 .BI "\-\-camera\-position " x " " y " " z "  " tx " " ty " " tz "  " ux " " uy " " uz
-Set the camera position, target and up vector using the \fILeoCAD\fR coordinate system.
+Set the camera position, target and up vector using the \fILeoCAD\fR
+coordinate system.
 
 .TP
 .BI "\-\-camera\-position-ldraw " x " " y " " z "  " tx " " ty " " tz "  " ux " " uy " " uz
-Set the camera position, target and up vector using the \fILDraw\fR coordinate system.
+Set the camera position, target and up vector using the \fILDraw\fR coordinate
+system.
 
 .TP
 .B \-\-orthographic
@@ -109,11 +113,18 @@ Use an orthographic projection.
 
 .TP
 .BI "\-\-fov " degrees
-Set the vertical field of view used to render images.
+Set the vertical field of view used to render images (1 to 180 degrees,
+inclusive).
 
 .TP
 .BI "\-\-zplanes " near " " far
-Set the near and far clipping planes used to render images (1 <= \fInear\fR < \fIfar\fR).
+Set the near and far clipping planes used to render images (1 <= \fInear\fR <
+\fIfar\fR).
+
+.PP
+Named cameras take precedence over the other camera controls. Otherwise,
+viewpoint takes precedence over angles, which take precedence over an explicit
+position.
 
 .TP
 .B \-\-fade\-steps
@@ -125,7 +136,7 @@ Do not render parts from prior steps faded.
 
 .TP
 .BI "\-\-fade\-steps\-color " color
-Color to use for rendering faded parts.
+Color to use for rendering faded parts. Specifying a color enables fading.
 
 .TP
 .B \-\-highlight
@@ -137,7 +148,7 @@ Do not highlight parts in the steps they appear.
 
 .TP
 .BI "\-\-highlight\-color " color
-Color to use to highlight parts.
+Color to use to highlight parts. Specifying a color enables highlighting.
 
 .TP
 \fB\-\-shading \fRwireframe\ |\ flat\ |\ default\ |\ full
@@ -146,11 +157,11 @@ Select shading mode for rendering.
 
 .TP
 .BI "\-\-line-width " width
-Set the width of the edge lines.
+Set the width of the edge lines (0 to 10).
 
 .TP
 .BI "\-\-aa\-samples " count
-AntiAliasing sample size (1, 2, 4, or 8).
+Anti-aliasing sample size (1, 2, 4, or 8).
 
 .TP
 \fB\-scc \fIRRGGBB|RRGGBBAA|transparent\fR,\ \fB\-\-stud\-cylinder\-color\ \fIRRGGBB|RRGGBBAA|transparent
@@ -173,37 +184,68 @@ High contrast edge color for black parts.
 High contrast edge color for dark color parts.
 
 .TP
+\fB\-nscc\fR, \fB\-\-disable\-stud\-cylinder\-color
+.br
+Disable high contrast stud cylinder color.
+
+.TP
+\fB\-nec\fR, \fB\-\-disable\-edge\-color
+.br
+Disable high contrast edge color.
+
+.TP
+\fB\-nbec\fR, \fB\-\-disable\-black\-edge\-color
+.br
+Disable high contrast edge color for black parts.
+
+.TP
+\fB\-ndec\fR, \fB\-\-disable\-dark\-edge\-color
+.br
+Disable high contrast edge color for dark color parts.
+
+.TP
 \fB\-aec,\ \fB\-\-automate\-edge\-color
 .br
-Enable automatically adjusted edge colors.\
+Enable automatically adjusted edge colors. This overrides manual edge colors;
+high contrast stud-cylinder settings still apply.
 
 .TP
 \fB\-cc \fIfloat\fR,\ \fB\-\-color\-contrast\ \fIfloat
 .br
-Set the near and far clipping planes used to render images (1 <= \fInear\fR < \fIfar\fR).
+Set color contrast between 0.0 and 1.0. Requires automatic edge colors.
 
 .TP
 \fB\-ldv \fIfloat\fR,\ \fB\-\-light\-dark\-value\ \fIfloat
 .br
-Set the value to indicate a light or dark color.
+Set the Light/Dark value between 0.0 and 1.0. Used by automatic edge colors
+or as the dark-color threshold for high contrast stud styles.
+
+.PP
+Stud-cylinder and manual edge color options require a high contrast stud style
+(6 or 7).
 
 .TP
-\fB\-obj \fR[\fIoutfile.obj\fR]
+\fB\-obj \fR[\fIoutfile.obj\fR], \fB\-\-export\-wavefront \fR[\fIoutfile.obj\fR]
 .br
 Exports the model to wavefront format.
 
 .TP
-\fB\-3ds \fR[\fIoutfile.3ds\fR]
+\fB\-3ds \fR[\fIoutfile.3ds\fR], \fB\-\-export\-3ds \fR[\fIoutfile.3ds\fR]
 .br
 Exports the model to 3DS format.
 
 .TP
-\fB\-dae \fR[\fIoutfile.dae\fR]
+\fB\-dae \fR[\fIoutfile.dae\fR], \fB\-\-export\-collada \fR[\fIoutfile.dae\fR]
 .br
 Exports the model to COLLADA DAE format.
 
 .TP
-\fB\-html \fR[\fIpath\fR]
+\fB\-csv \fR[\fIoutfile.csv\fR], \fB\-\-export\-csv \fR[\fIoutfile.csv\fR]
+.br
+Export the list of parts used in CSV format.
+
+.TP
+\fB\-html \fR[\fIpath\fR], \fB\-\-export\-html \fR[\fIpath\fR]
 .br
 Creates an HTML page for the model.
 
@@ -219,7 +261,6 @@ Display a brief usage synopsis and exit.
 ``LEOCAD_LIB'' may be set to the path of the parts library.
 
 .SH EXAMPLES
-.PP
  $ leocad car.lcd \-i car.png \-w 640 \-h 480
 .PP
 This will start LeoCAD, load the file "car.lcd," create a png called
@@ -231,7 +272,8 @@ This will start LeoCAD, load the file "car.lcd," create a png called
 User preferences file
 
 .SH BUGS
-If you find any bugs please report them at https://github.com/leozide/leocad/issues
+If you find any bugs please report them at
+https://github.com/leozide/leocad/issues
 
 .SH AUTHOR
 \fILeoCAD \fRis written by Leonardo Zide <leozide@gmail.com>.

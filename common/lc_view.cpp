@@ -2548,7 +2548,7 @@ void lcView::UpdateTrackTool()
 	case lcTool::Rotate:
 		{
 			NewTrackTool = mViewManipulator->UpdateRotate();
-			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::RotateTrackBall;
+			mTrackToolFromOverlay = NewTrackTool != lcTrackTool::None && NewTrackTool != lcTrackTool::RotateTrackBall;
 			Redraw = NewTrackTool != mTrackTool;
 		}
 		break;

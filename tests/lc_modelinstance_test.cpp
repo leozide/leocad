@@ -16,6 +16,7 @@
 #include "lc_piecedata.h"
 #include "lc_scene.h"
 #include "lc_selectdialog.h"
+#include "lc_shortcuts.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_texture.h"
 #include "lc_view.h"
@@ -62,6 +63,8 @@ private slots:
 	void MeshCacheValidation();
 	void MeshSectionCountOverflow();
 	void EmbeddedDataAfterLastPieceDeletion();
+	void RotateToolMouseShortcuts_data();
+	void RotateToolMouseShortcuts();
 	void RepeatedInstances();
 	void InterfaceTransforms();
 	void CommandLineBackground_data();
@@ -1107,6 +1110,97 @@ void lcModelInstanceTests::TexturedDirectGeometry3DS()
 		QCOMPARE(ReadU16(FaceChunk + 8 + Index * 2), quint16(Index));
 		QCOMPARE(ReadU16(FaceChunk + 16 + Index * 2), quint16(Index + 3));
 	}
+}
+
+void lcModelInstanceTests::RotateToolMouseShortcuts_data()
+{
+	QTest::addColumn<int>("Button");
+	QTest::addColumn<bool>("Selected");
+
+	for (bool Selected : { false, true })
+	{
+		const QByteArray Suffix = Selected ? "-selected" : "-unselected";
+		QTest::newRow(("orbit" + Suffix).constData()) << int(Qt::LeftButton) << Selected;
+		QTest::newRow(("pan" + Suffix).constData()) << int(Qt::MiddleButton) << Selected;
+		QTest::newRow(("zoom" + Suffix).constData()) << int(Qt::RightButton) << Selected;
+	}
+}
+
+void lcModelInstanceTests::RotateToolMouseShortcuts()
+{
+	QFETCH(int, Button);
+	QFETCH(bool, Selected);
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile File(Directory.filePath("rotate.ldr"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Rotate shortcuts\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 alpha.dat\n");
+	File.close();
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		lcMouseShortcuts PreviousShortcuts = gMouseShortcuts;
+		Project Current;
+		ScopedProject()
+		{
+			gApplication->mProject = &Current;
+			gMouseShortcuts.Reset();
+		}
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			gMouseShortcuts = PreviousShortcuts;
+		}
+	} Scope;
+	QVERIFY(Scope.Current.Load(File.fileName(), false));
+	lcModel* Model = Scope.Current.GetMainModel();
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, -500, 300), lcVector3(0, 0, 0), lcVector3(0, 0, 1));
+	View->SetCamera(&Camera, true);
+	lcPiece* Piece = Model->GetPieces()[0].get();
+	if (Selected)
+		Model->SetSelectionAndFocusAction({ Piece }, Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	const lcMatrix44 PieceBefore = Piece->mModelWorld;
+	const lcCameraHistoryState CameraBefore = View->GetCamera()->GetHistoryState();
+	Window.SetTool(lcTool::Rotate);
+	View->SetMouseModifiers(Qt::AltModifier);
+	// Empty viewport space outside the centered rotation gizmo and view sphere.
+	View->SetMousePosition(100, 100);
+	View->OnMouseMove();
+
+	if (Button == Qt::LeftButton)
+		View->OnLeftButtonDown();
+	else if (Button == Qt::MiddleButton)
+		View->OnMiddleButtonDown();
+	else
+		View->OnRightButtonDown();
+
+	const bool Tracking = View->IsTracking();
+	View->SetMousePosition(150, 140);
+	View->OnMouseMove();
+
+	if (Button == Qt::LeftButton)
+		View->OnLeftButtonUp();
+	else if (Button == Qt::MiddleButton)
+		View->OnMiddleButtonUp();
+	else if (Tracking)
+		View->OnRightButtonUp();
+
+	QVERIFY(Tracking);
+	QVERIFY(!View->IsTracking());
+	QVERIFY(!(View->GetCamera()->GetHistoryState() == CameraBefore));
+	QVERIFY(Piece->mModelWorld == PieceBefore);
+	QCOMPARE(Piece->IsSelected(), Selected);
+	QCOMPARE(Window.GetTool(), lcTool::Rotate);
 }
 
 void lcModelInstanceTests::RepeatedInstances()

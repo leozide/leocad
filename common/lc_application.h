@@ -34,12 +34,60 @@ enum class lcAxisIconLocation
 	BottomRight
 };
 
+struct lcRenderSettings
+{
+	lcShadingMode ShadingMode;
+	bool DrawEdgeLines;
+	bool DrawConditionalLines;
+	float LineWidth;
+};
+
+enum class lcRenderTarget
+{
+	ModelView,
+	Preview,
+	Pieces
+};
+
+struct lcTargetRenderSettings
+{
+	bool SyncRendering;
+	lcRenderSettings Settings;
+};
+
 class lcPreferences
 {
 public:
 	void LoadDefaults();
 	void SaveDefaults();
 	void SetInterfaceColors(lcColorTheme ColorTheme);
+
+	void LoadRenderTarget(lcRenderTarget Target);
+	void SaveRenderTarget(lcRenderTarget Target) const;
+
+	// The pieces preview and the pieces list use their own settings unless they are synced with the model views.
+	lcRenderSettings GetRenderSettings(lcRenderTarget Target) const
+	{
+		if (Target != lcRenderTarget::ModelView)
+		{
+			const lcTargetRenderSettings& TargetSettings = GetTargetRenderSettings(Target);
+
+			if (!TargetSettings.SyncRendering)
+				return TargetSettings.Settings;
+		}
+
+		return { mShadingMode, mDrawEdgeLines, mDrawConditionalLines, mLineWidth };
+	}
+
+	lcTargetRenderSettings& GetTargetRenderSettings(lcRenderTarget Target)
+	{
+		return Target == lcRenderTarget::Pieces ? mPiecesRendering : mPreviewRendering;
+	}
+
+	const lcTargetRenderSettings& GetTargetRenderSettings(lcRenderTarget Target) const
+	{
+		return Target == lcRenderTarget::Pieces ? mPiecesRendering : mPreviewRendering;
+	}
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
@@ -61,6 +109,8 @@ public:
 	bool mDrawConditionalLines;
 	float mLineWidth;
 	bool mAllowLOD;
+	lcTargetRenderSettings mPreviewRendering;
+	lcTargetRenderSettings mPiecesRendering;
 	float mMeshLODDistance;
 	bool mFadeSteps;
 	quint32 mFadeStepsColor;

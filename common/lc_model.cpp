@@ -1888,12 +1888,13 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 
 		lcScene Scene;
 
-		const lcPreferences& Preferences = lcGetPreferences();
-		lcShadingMode ShadingMode = Preferences.mShadingMode;
+		const lcRenderSettings RenderSettings = lcGetPreferences().GetRenderSettings(lcRenderTarget::Pieces);
+		lcShadingMode ShadingMode = RenderSettings.ShadingMode;
 		if (ShadingMode == lcShadingMode::Wireframe)
 			ShadingMode = lcShadingMode::Flat;
 
 		Scene.SetShadingMode(ShadingMode);
+		Scene.SetLineSettings(RenderSettings.DrawEdgeLines, RenderSettings.DrawConditionalLines, RenderSettings.LineWidth);
 		Scene.SetRequireCompleteAssets(true);
 		Scene.SetAllowLOD(false);
 		Scene.Begin(ViewMatrix);
@@ -1902,6 +1903,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 
 		Scene.End();
 
+		Context->SetLineWidth(RenderSettings.LineWidth);
 		Scene.Draw(Context, {});
 
 		View.UnbindRenderFramebuffer();

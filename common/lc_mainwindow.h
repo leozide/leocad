@@ -217,6 +217,15 @@ public:
 	void ToggleAxisIcon();
 	void ToggleGrid();
 	void ToggleFadePreviousSteps();
+	void ToggleEdgeLines(lcRenderTarget Target);
+	void ToggleConditionalLines(lcRenderTarget Target);
+	void ToggleSyncRendering(lcRenderTarget Target);
+	void SetTargetShadingMode(lcRenderTarget Target, lcShadingMode ShadingMode);
+	void AddRenderTargetActions(QMenu* Menu, lcRenderTarget Target);
+	QAction* AddMenuCommand(QMenu* Menu, const QString& Text, lcCommandId CommandId, bool Checked);
+	void TogglePreviewViewSphere();
+	void TogglePreviewAxisIcon();
+	void UpdatePartsRendering();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);
@@ -266,6 +275,7 @@ public:
 
 public slots:
 	void ProjectFileChanged(const QString& Path);
+	void ModelViewOptionsMenuAboutToShow();
 	void PreviewPiece(lcPieceData* PieceData, int ColorCode, bool ShowPreview);
 	void TogglePreviewWidget(bool Visible);
 	void SetInsertPieceData(lcPieceData* PieceData);

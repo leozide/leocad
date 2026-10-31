@@ -78,6 +78,16 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "InactiveViewColor", LC_RGBA(69, 69, 69, 255)),                             // LC_PROFILE_INACTIVE_VIEW_COLOR
 	lcProfileEntry("Settings", "DrawEdgeLines", 1),                                                        // LC_PROFILE_DRAW_EDGE_LINES
 	lcProfileEntry("Settings", "DrawConditionalLines", 1),                                                 // LC_PROFILE_DRAW_CONDITIONAL_LINES
+	lcProfileEntry("Settings", "PreviewSyncRendering", 1),                                                   // LC_PROFILE_PREVIEW_SYNC_RENDERING
+	lcProfileEntry("Settings", "PreviewShadingMode", static_cast<int>(lcShadingMode::DefaultLights)),        // LC_PROFILE_PREVIEW_SHADING_MODE
+	lcProfileEntry("Settings", "PreviewDrawEdgeLines", 1),                                                   // LC_PROFILE_PREVIEW_DRAW_EDGE_LINES
+	lcProfileEntry("Settings", "PreviewDrawConditionalLines", 1),                                            // LC_PROFILE_PREVIEW_DRAW_CONDITIONAL_LINES
+	lcProfileEntry("Settings", "PreviewLineWidth", 1.0f),                                                    // LC_PROFILE_PREVIEW_LINE_WIDTH
+	lcProfileEntry("Settings", "PiecesSyncRendering", 1),                                                    // LC_PROFILE_PIECES_SYNC_RENDERING
+	lcProfileEntry("Settings", "PiecesShadingMode", static_cast<int>(lcShadingMode::DefaultLights)),         // LC_PROFILE_PIECES_SHADING_MODE
+	lcProfileEntry("Settings", "PiecesDrawEdgeLines", 1),                                                    // LC_PROFILE_PIECES_DRAW_EDGE_LINES
+	lcProfileEntry("Settings", "PiecesDrawConditionalLines", 1),                                             // LC_PROFILE_PIECES_DRAW_CONDITIONAL_LINES
+	lcProfileEntry("Settings", "PiecesLineWidth", 1.0f),                                                     // LC_PROFILE_PIECES_LINE_WIDTH
 	lcProfileEntry("Settings", "GridStuds", 1),                                                            // LC_PROFILE_GRID_STUDS
 	lcProfileEntry("Settings", "GridStudColor", LC_RGBA(24, 24, 24, 192)),                                 // LC_PROFILE_GRID_STUD_COLOR
 	lcProfileEntry("Settings", "GridLines", 1),                                                            // LC_PROFILE_GRID_LINES
@@ -442,14 +452,14 @@ static void lcWriteProfileEnum(LC_PROFILE_KEY Key, Enum Value, const lcProfileEn
 	}
 }
 
-lcShadingMode lcGetProfileShadingMode()
+lcShadingMode lcGetProfileShadingMode(LC_PROFILE_KEY Key)
 {
-	return lcReadProfileEnum(LC_PROFILE_SHADING_MODE, ShadingModeValues);
+	return lcReadProfileEnum(Key, ShadingModeValues);
 }
 
-void lcSetProfileShadingMode(lcShadingMode Value)
+void lcSetProfileShadingMode(lcShadingMode Value, LC_PROFILE_KEY Key)
 {
-	lcWriteProfileEnum(LC_PROFILE_SHADING_MODE, Value, ShadingModeValues);
+	lcWriteProfileEnum(Key, Value, ShadingModeValues);
 }
 
 lcHighlightRenderMode lcGetProfileHighlightRenderMode()

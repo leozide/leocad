@@ -75,6 +75,7 @@ private slots:
 	void EdgeLinesToggled();
 	void ConditionalLinesCheckBoxToggled();
 	void LineWidthSliderValueChanged();
+	void RenderTargetChanged();
 	void MeshLODSliderValueChanged();
 	void FadeStepsToggled();
 	void HighlightNewPartsToggled();
@@ -112,6 +113,20 @@ private:
 	void UpdateMouseTree();
 	void UpdateMouseTreeItem(int ItemIndex);
 	void SetShortcutModified(QTreeWidgetItem* TreeItem, bool Modified);
+
+	struct lcRenderTargetWidgets
+	{
+		QCheckBox* SyncRendering;
+		QLabel* ShadingModeLabel;
+		QComboBox* ShadingMode;
+		QCheckBox* EdgeLines;
+		QCheckBox* ConditionalLines;
+		QLabel* LineWidthTitle;
+		QSlider* LineWidthSlider;
+		QLabel* LineWidthLabel;
+	};
+
+	lcRenderTargetWidgets GetRenderTargetWidgets(lcRenderTarget Target) const;
 
 	float mLineWidthRange[2];
 	float mLineWidthGranularity;

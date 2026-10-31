@@ -59,6 +59,17 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	connect(ui->edgeLines, &QCheckBox::toggled, this, &lcPreferencesDialog::EdgeLinesToggled);
 	connect(ui->ConditionalLinesCheckBox, &QCheckBox::toggled, this, &lcPreferencesDialog::ConditionalLinesCheckBoxToggled);
 	connect(ui->LineWidthSlider, QOverload<int>::of(&QSlider::valueChanged), this, &lcPreferencesDialog::LineWidthSliderValueChanged);
+
+	for (lcRenderTarget Target : { lcRenderTarget::Preview, lcRenderTarget::Pieces })
+	{
+		const lcRenderTargetWidgets Widgets = GetRenderTargetWidgets(Target);
+
+		connect(Widgets.SyncRendering, &QCheckBox::toggled, this, &lcPreferencesDialog::RenderTargetChanged);
+		connect(Widgets.EdgeLines, &QCheckBox::toggled, this, &lcPreferencesDialog::RenderTargetChanged);
+		connect(Widgets.ConditionalLines, &QCheckBox::toggled, this, &lcPreferencesDialog::RenderTargetChanged);
+		connect(Widgets.LineWidthSlider, QOverload<int>::of(&QSlider::valueChanged), this, &lcPreferencesDialog::RenderTargetChanged);
+	}
+
 	connect(ui->MeshLODSlider, QOverload<int>::of(&QSlider::valueChanged), this, &lcPreferencesDialog::MeshLODSliderValueChanged);
 	connect(ui->FadeSteps, &QCheckBox::toggled, this, &lcPreferencesDialog::FadeStepsToggled);
 	connect(ui->HighlightNewParts, &QCheckBox::toggled, this, &lcPreferencesDialog::HighlightNewPartsToggled);
@@ -172,6 +183,19 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->LineWidthSlider->setRange(0, (mLineWidthRange[1] - mLineWidthRange[0]) / mLineWidthGranularity);
 	ui->LineWidthSlider->setValue((mOptions->Preferences.mLineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
 
+	for (lcRenderTarget Target : { lcRenderTarget::Preview, lcRenderTarget::Pieces })
+	{
+		const lcRenderTargetWidgets Widgets = GetRenderTargetWidgets(Target);
+		const lcTargetRenderSettings& TargetSettings = mOptions->Preferences.GetTargetRenderSettings(Target);
+
+		Widgets.SyncRendering->setChecked(TargetSettings.SyncRendering);
+		Widgets.ShadingMode->setCurrentIndex(static_cast<int>(TargetSettings.Settings.ShadingMode));
+		Widgets.EdgeLines->setChecked(TargetSettings.Settings.DrawEdgeLines);
+		Widgets.ConditionalLines->setChecked(TargetSettings.Settings.DrawConditionalLines);
+		Widgets.LineWidthSlider->setRange(0, (mLineWidthRange[1] - mLineWidthRange[0]) / mLineWidthGranularity);
+		Widgets.LineWidthSlider->setValue((TargetSettings.Settings.LineWidth - mLineWidthRange[0]) / mLineWidthGranularity);
+	}
+
 	ui->MeshLOD->setChecked(mOptions->Preferences.mAllowLOD);
 
 	ui->MeshLODSlider->setRange(0, 1500.0f / mMeshLODMultiplier);
@@ -254,6 +278,16 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 		const QString Message = tr("Default Lights is unavailable. Flat shading is used instead.");
 		DefaultLightsItem->setToolTip(Message);
 		ui->ShadingMode->setToolTip(Message);
+
+		for (lcRenderTarget Target : { lcRenderTarget::Preview, lcRenderTarget::Pieces })
+		{
+			QComboBox* TargetShadingMode = GetRenderTargetWidgets(Target).ShadingMode;
+			QStandardItemModel* TargetShadingModel = qobject_cast<QStandardItemModel*>(TargetShadingMode->model());
+			QStandardItem* TargetDefaultLightsItem = TargetShadingModel->item(static_cast<int>(lcShadingMode::DefaultLights));
+			TargetDefaultLightsItem->setEnabled(false);
+			TargetDefaultLightsItem->setToolTip(Message);
+			TargetShadingMode->setToolTip(Message);
+		}
 	}
 
 	if (!lcContext::SupportsMaterial(lcMaterialType::UnlitViewSphere))
@@ -330,6 +364,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	AutomateEdgeColorToggled();
 	EdgeLinesToggled();
 	LineWidthSliderValueChanged();
+	RenderTargetChanged();
 	MeshLODSliderValueChanged();
 	FadeStepsToggled();
 	HighlightNewPartsToggled();
@@ -403,6 +438,19 @@ void lcPreferencesDialog::accept()
 	mOptions->Preferences.mDrawEdgeLines = ui->edgeLines->isChecked();
 	mOptions->Preferences.mDrawConditionalLines = ui->ConditionalLinesCheckBox->isChecked();
 	mOptions->Preferences.mLineWidth = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
+
+	for (lcRenderTarget Target : { lcRenderTarget::Preview, lcRenderTarget::Pieces })
+	{
+		const lcRenderTargetWidgets Widgets = GetRenderTargetWidgets(Target);
+		lcTargetRenderSettings& TargetSettings = mOptions->Preferences.GetTargetRenderSettings(Target);
+
+		TargetSettings.SyncRendering = Widgets.SyncRendering->isChecked();
+		TargetSettings.Settings.ShadingMode = static_cast<lcShadingMode>(Widgets.ShadingMode->currentIndex());
+		TargetSettings.Settings.DrawEdgeLines = Widgets.EdgeLines->isChecked();
+		TargetSettings.Settings.DrawConditionalLines = Widgets.ConditionalLines->isChecked();
+		TargetSettings.Settings.LineWidth = mLineWidthRange[0] + static_cast<float>(Widgets.LineWidthSlider->value()) * mLineWidthGranularity;
+	}
+
 	mOptions->Preferences.mAllowLOD = ui->MeshLOD->isChecked();
 	mOptions->Preferences.mMeshLODDistance = ui->MeshLODSlider->value() * mMeshLODMultiplier;
 	mOptions->Preferences.mFadeSteps = ui->FadeSteps->isChecked();
@@ -708,6 +756,35 @@ void lcPreferencesDialog::LineWidthSliderValueChanged()
 {
 	float Value = mLineWidthRange[0] + static_cast<float>(ui->LineWidthSlider->value()) * mLineWidthGranularity;
 	ui->LineWidthLabel->setText(lcFormatDoubleLocalized(Value, locale(), 'g', 6));
+}
+
+lcPreferencesDialog::lcRenderTargetWidgets lcPreferencesDialog::GetRenderTargetWidgets(lcRenderTarget Target) const
+{
+	if (Target == lcRenderTarget::Pieces)
+		return { ui->PiecesSyncRendering, ui->PiecesShadingModeLabel, ui->PiecesShadingMode, ui->PiecesEdgeLines, ui->PiecesConditionalLines, ui->PiecesLineWidthTitle, ui->PiecesLineWidthSlider, ui->PiecesLineWidthLabel };
+
+	return { ui->PreviewSyncRendering, ui->PreviewShadingModeLabel, ui->PreviewShadingMode, ui->PreviewEdgeLines, ui->PreviewConditionalLines, ui->PreviewLineWidthTitle, ui->PreviewLineWidthSlider, ui->PreviewLineWidthLabel };
+}
+
+void lcPreferencesDialog::RenderTargetChanged()
+{
+	for (lcRenderTarget Target : { lcRenderTarget::Preview, lcRenderTarget::Pieces })
+	{
+		const lcRenderTargetWidgets Widgets = GetRenderTargetWidgets(Target);
+		const bool Enable = !Widgets.SyncRendering->isChecked();
+		const bool EnableLineWidth = Enable && (Widgets.EdgeLines->isChecked() || Widgets.ConditionalLines->isChecked());
+
+		Widgets.ShadingModeLabel->setEnabled(Enable);
+		Widgets.ShadingMode->setEnabled(Enable);
+		Widgets.EdgeLines->setEnabled(Enable);
+		Widgets.ConditionalLines->setEnabled(Enable);
+		Widgets.LineWidthTitle->setEnabled(EnableLineWidth);
+		Widgets.LineWidthSlider->setEnabled(EnableLineWidth);
+		Widgets.LineWidthLabel->setEnabled(EnableLineWidth);
+
+		float Value = mLineWidthRange[0] + static_cast<float>(Widgets.LineWidthSlider->value()) * mLineWidthGranularity;
+		Widgets.LineWidthLabel->setText(lcFormatDoubleLocalized(Value, locale(), 'g', 6));
+	}
 }
 
 void lcPreferencesDialog::MeshLODSliderValueChanged()

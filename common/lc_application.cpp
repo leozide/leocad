@@ -45,6 +45,8 @@ void lcPreferences::LoadDefaults()
 	mDrawEdgeLines = lcGetProfileInt(LC_PROFILE_DRAW_EDGE_LINES);
 	mDrawConditionalLines = lcGetProfileInt(LC_PROFILE_DRAW_CONDITIONAL_LINES);
 	mLineWidth = lcGetProfileFloat(LC_PROFILE_LINE_WIDTH);
+	LoadRenderTarget(lcRenderTarget::Preview);
+	LoadRenderTarget(lcRenderTarget::Pieces);
 	mAllowLOD = lcGetProfileInt(LC_PROFILE_ALLOW_LOD);
 	mMeshLODDistance = lcGetProfileFloat(LC_PROFILE_LOD_DISTANCE);
 	mFadeSteps = lcGetProfileInt(LC_PROFILE_FADE_STEPS);
@@ -111,6 +113,8 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileInt(LC_PROFILE_DRAW_EDGE_LINES, mDrawEdgeLines);
 	lcSetProfileInt(LC_PROFILE_DRAW_CONDITIONAL_LINES, mDrawConditionalLines);
 	lcSetProfileFloat(LC_PROFILE_LINE_WIDTH, mLineWidth);
+	SaveRenderTarget(lcRenderTarget::Preview);
+	SaveRenderTarget(lcRenderTarget::Pieces);
 	lcSetProfileInt(LC_PROFILE_ALLOW_LOD, mAllowLOD);
 	lcSetProfileFloat(LC_PROFILE_LOD_DISTANCE, mMeshLODDistance);
 	lcSetProfileInt(LC_PROFILE_FADE_STEPS, mFadeSteps);
@@ -153,6 +157,47 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileUInt(LC_PROFILE_LIGHT_COLOR, mLightColor);
 	lcSetProfileUInt(LC_PROFILE_CONTROL_POINT_COLOR, mControlPointColor);
 	lcSetProfileUInt(LC_PROFILE_CONTROL_POINT_FOCUSED_COLOR, mControlPointFocusedColor);
+}
+
+struct lcRenderTargetProfileKeys
+{
+	LC_PROFILE_KEY SyncRendering;
+	LC_PROFILE_KEY ShadingMode;
+	LC_PROFILE_KEY DrawEdgeLines;
+	LC_PROFILE_KEY DrawConditionalLines;
+	LC_PROFILE_KEY LineWidth;
+};
+
+static lcRenderTargetProfileKeys lcGetRenderTargetProfileKeys(lcRenderTarget Target)
+{
+	if (Target == lcRenderTarget::Pieces)
+		return { LC_PROFILE_PIECES_SYNC_RENDERING, LC_PROFILE_PIECES_SHADING_MODE, LC_PROFILE_PIECES_DRAW_EDGE_LINES, LC_PROFILE_PIECES_DRAW_CONDITIONAL_LINES, LC_PROFILE_PIECES_LINE_WIDTH };
+
+	return { LC_PROFILE_PREVIEW_SYNC_RENDERING, LC_PROFILE_PREVIEW_SHADING_MODE, LC_PROFILE_PREVIEW_DRAW_EDGE_LINES, LC_PROFILE_PREVIEW_DRAW_CONDITIONAL_LINES, LC_PROFILE_PREVIEW_LINE_WIDTH };
+}
+
+void lcPreferences::LoadRenderTarget(lcRenderTarget Target)
+{
+	const lcRenderTargetProfileKeys Keys = lcGetRenderTargetProfileKeys(Target);
+	lcTargetRenderSettings& TargetSettings = GetTargetRenderSettings(Target);
+
+	TargetSettings.SyncRendering = lcGetProfileInt(Keys.SyncRendering);
+	TargetSettings.Settings.ShadingMode = lcGetProfileShadingMode(Keys.ShadingMode);
+	TargetSettings.Settings.DrawEdgeLines = lcGetProfileInt(Keys.DrawEdgeLines);
+	TargetSettings.Settings.DrawConditionalLines = lcGetProfileInt(Keys.DrawConditionalLines);
+	TargetSettings.Settings.LineWidth = lcGetProfileFloat(Keys.LineWidth);
+}
+
+void lcPreferences::SaveRenderTarget(lcRenderTarget Target) const
+{
+	const lcRenderTargetProfileKeys Keys = lcGetRenderTargetProfileKeys(Target);
+	const lcTargetRenderSettings& TargetSettings = GetTargetRenderSettings(Target);
+
+	lcSetProfileInt(Keys.SyncRendering, TargetSettings.SyncRendering);
+	lcSetProfileShadingMode(TargetSettings.Settings.ShadingMode, Keys.ShadingMode);
+	lcSetProfileInt(Keys.DrawEdgeLines, TargetSettings.Settings.DrawEdgeLines);
+	lcSetProfileInt(Keys.DrawConditionalLines, TargetSettings.Settings.DrawConditionalLines);
+	lcSetProfileFloat(Keys.LineWidth, TargetSettings.Settings.LineWidth);
 }
 
 void lcPreferences::SetInterfaceColors(lcColorTheme ColorTheme)
@@ -907,12 +952,19 @@ void lcApplication::ShowPreferencesDialog()
 	EdgeColorSettingsChanged |= Options.Preferences.mBlackEdgeColor != mPreferences.mBlackEdgeColor;
 	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColorEnabled != mPreferences.mDarkEdgeColorEnabled;
 	EdgeColorSettingsChanged |= Options.Preferences.mDarkEdgeColor != mPreferences.mDarkEdgeColor;
+	const lcRenderSettings OldPiecesRendering = mPreferences.GetRenderSettings(lcRenderTarget::Pieces);
+	const lcRenderSettings NewPiecesRendering = Options.Preferences.GetRenderSettings(lcRenderTarget::Pieces);
+	const bool PiecesRenderingChanged = OldPiecesRendering.ShadingMode != NewPiecesRendering.ShadingMode || OldPiecesRendering.DrawEdgeLines != NewPiecesRendering.DrawEdgeLines ||
+		OldPiecesRendering.DrawConditionalLines != NewPiecesRendering.DrawConditionalLines || OldPiecesRendering.LineWidth != NewPiecesRendering.LineWidth;
 
 
 	mPreferences = Options.Preferences;
 
 	mPreferences.SaveDefaults();
 	UpdateStyle();
+
+	if (PiecesRenderingChanged && gMainWindow && gMainWindow->GetPartSelectionWidget())
+		gMainWindow->GetPartSelectionWidget()->UpdateThumbnails();
 
 	lcSetProfileString(LC_PROFILE_DEFAULT_AUTHOR_NAME, Options.DefaultAuthor);
 	lcSetProfileString(LC_PROFILE_PARTS_LIBRARY, Options.LibraryPath);

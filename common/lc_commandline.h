@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lc_background.h"
 #include "lc_math.h"
 
 class lcCommandLineOptions
@@ -11,6 +12,8 @@ public:
 	bool ParseOK = true;
 	bool Exit = false;
 	bool SaveImage = false;
+	bool SetImageBackground = false;
+	lcBackgroundOptions ImageBackground;
 	bool SaveWavefront = false;
 	bool Save3DS = false;
 	bool SaveCOLLADA = false;
@@ -65,6 +68,8 @@ public:
 	QString StdErr;
 
 private:
+	static bool ParseColorValue(const QString& Parameter, quint32& Color);
+	static std::optional<bool> ImageFormatSupportsAlpha(const QString& FileName);
 	void LoadDefaults();
 	void ParseArguments(QStringList& Arguments);
 	void ParseOption(const QString& Option, QStringList& Arguments);

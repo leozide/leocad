@@ -1686,7 +1686,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 
 	WaitForAssets();
 
-	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr, lcImageBackground::Default);
+	const lcResult<QImage> Image = RenderStepImageWithReadyAssets(Zoom, Width, Height, Step, nullptr, {});
 
 	if (!Image)
 	{
@@ -1699,7 +1699,7 @@ QImage lcModel::GetStepImage(bool Zoom, int Width, int Height, lcStep Step)
 	return Image.value();
 }
 
-lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, lcImageBackground Background)
+lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, const lcBackgroundOptions& Background)
 {
 	lcScopedGLContextState GLState;
 
@@ -1708,20 +1708,7 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 
 	lcView View(lcViewType::View, this);
 
-	switch (Background)
-	{
-	case lcImageBackground::Default:
-		View.SetBackgroundMode(lcBackgroundMode::Default);
-		break;
-
-	case lcImageBackground::Transparent:
-		View.SetBackgroundMode(lcBackgroundMode::Transparent);
-		break;
-
-	case lcImageBackground::Opaque:
-		View.SetBackgroundMode(lcBackgroundMode::Opaque);
-		break;
-	}
+	View.SetBackgroundOptions(Background);
 
 	if (OutputCamera)
 		View.SetCamera(OutputCamera, true);
@@ -1769,7 +1756,7 @@ lcResult<QImage> lcModel::RenderStepImageWithReadyAssets(bool Zoom, int Width, i
 	if (!mActive)
 		CalculateStep(LC_STEP_MAX);
 
-	if (Background == lcImageBackground::Opaque)
+	if (Background.Mode == lcBackgroundMode::Opaque)
 		Image = Image.convertToFormat(QImage::Format_RGB32);
 
 	if (Image.isNull())
@@ -2064,7 +2051,7 @@ lcResult<QImage> lcModel::GetPartsListImage(int MaxWidth, lcStep Step, quint32 B
 	return PainterImage;
 }
 
-lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, lcImageBackground Background)
+lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, const lcBackgroundOptions& Background)
 {
 	WaitForAssets();
 

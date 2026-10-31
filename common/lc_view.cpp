@@ -965,8 +965,11 @@ lcResult<void> lcView::SaveStepImages(const QString& BaseName, bool AddStepSuffi
 
 		QImageWriter Writer(FileName);
 
-		if (Writer.format().isEmpty())
+		const QByteArray Format = QFileInfo(FileName).suffix().toLatin1().toLower();
+		if (Format.isEmpty())
 			Writer.setFormat("png");
+		else
+			Writer.setFormat(Format);
 
 		if (!Writer.write(Images[Step - Start]))
 			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(FileName, Writer.errorString()));
@@ -1352,7 +1355,7 @@ bool lcView::HasMissingAssets() const
 
 void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTileHeight) const
 {
-	lcBackgroundMode BackgroundMode = mBackgroundMode;
+	lcBackgroundMode BackgroundMode = mBackground.Mode;
 
 	if (BackgroundMode == lcBackgroundMode::Default)
 		BackgroundMode = mContext->IsOffscreen() ? lcBackgroundMode::Transparent : lcBackgroundMode::Opaque;
@@ -1361,7 +1364,7 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	{
 	case lcBackgroundMode::CustomColor:
 	{
-		lcVector4 BackgroundColor(lcVector4FromColor(mBackgroundColor));
+		lcVector4 BackgroundColor(lcVector4FromColor(mBackground.Color));
 		BackgroundColor.x *= BackgroundColor.w;
 		BackgroundColor.y *= BackgroundColor.w;
 		BackgroundColor.z *= BackgroundColor.w;
@@ -1376,12 +1379,13 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 
 	case lcBackgroundMode::Default:
 	case lcBackgroundMode::Opaque:
+	case lcBackgroundMode::CustomGradient:
 		break;
 	}
 
 	const lcPreferences& Preferences = lcGetPreferences();
 
-	if (!Preferences.mBackgroundGradient)
+	if (BackgroundMode != lcBackgroundMode::CustomGradient && !Preferences.mBackgroundGradient)
 	{
 		lcVector4 BackgroundColor(lcVector3FromColor(Preferences.mBackgroundSolidColor), 1.0f);
 		mContext->ClearColorAndDepth(BackgroundColor);
@@ -1406,29 +1410,41 @@ void lcView::DrawBackground(int CurrentTileRow, int TotalTileRows, int CurrentTi
 	const double t1 = 1.0 - (double)TopY / (double)TotalHeight;
 	const double t2 = 1.0 - (double)(TopY - CurrentTileHeight) / (double)TotalHeight;
 
-	const quint32 ColorTop = Preferences.mBackgroundGradientColorTop;
-	const quint32 ColorBottom = Preferences.mBackgroundGradientColorBottom;
+	const quint32 ColorTop = BackgroundMode == lcBackgroundMode::CustomGradient ? mBackground.Color : Preferences.mBackgroundGradientColorTop;
+	const quint32 ColorBottom = BackgroundMode == lcBackgroundMode::CustomGradient ? mBackground.GradientBottomColor : Preferences.mBackgroundGradientColorBottom;
 
-	double TopRed = LC_RGBA_RED(ColorTop);
-	double TopGreen = LC_RGBA_GREEN(ColorTop);
-	double TopBlue = LC_RGBA_BLUE(ColorTop);
-	double BottomRed = LC_RGBA_RED(ColorBottom);
-	double BottomGreen = LC_RGBA_GREEN(ColorBottom);
-	double BottomBlue = LC_RGBA_BLUE(ColorBottom);
+	double TopAlpha = 255.0;
+	double BottomAlpha = 255.0;
+
+	if (BackgroundMode == lcBackgroundMode::CustomGradient)
+	{
+		TopAlpha = LC_RGBA_ALPHA(ColorTop);
+		BottomAlpha = LC_RGBA_ALPHA(ColorBottom);
+	}
+
+	double TopRed = LC_RGBA_RED(ColorTop) * TopAlpha / 255.0;
+	double TopGreen = LC_RGBA_GREEN(ColorTop) * TopAlpha / 255.0;
+	double TopBlue = LC_RGBA_BLUE(ColorTop) * TopAlpha / 255.0;
+	double BottomRed = LC_RGBA_RED(ColorBottom) * BottomAlpha / 255.0;
+	double BottomGreen = LC_RGBA_GREEN(ColorBottom) * BottomAlpha / 255.0;
+	double BottomBlue = LC_RGBA_BLUE(ColorBottom) * BottomAlpha / 255.0;
 	const double DeltaRed = BottomRed - TopRed;
 	const double DeltaGreen = BottomGreen - TopGreen;
 	const double DeltaBlue = BottomBlue - TopBlue;
+	const double DeltaAlpha = BottomAlpha - TopAlpha;
 
 	BottomRed = TopRed + DeltaRed * t2;
 	BottomGreen = TopGreen + DeltaGreen * t2;
 	BottomBlue = TopBlue + DeltaBlue * t2;
+	BottomAlpha = TopAlpha + DeltaAlpha * t2;
 
 	TopRed = TopRed + DeltaRed * t1;
 	TopGreen = TopGreen + DeltaGreen * t1;
 	TopBlue = TopBlue + DeltaBlue * t1;
+	TopAlpha = TopAlpha + DeltaAlpha * t1;
 
-	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, 255);
-	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, 255);
+	const quint32 Color1 = LC_RGBA(TopRed, TopGreen, TopBlue, TopAlpha);
+	const quint32 Color2 = LC_RGBA(BottomRed, BottomGreen, BottomBlue, BottomAlpha);
 
 	struct lcBackgroundVertex
 	{

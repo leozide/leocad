@@ -350,7 +350,7 @@ void lcThumbnailManager::DrawThumbnail(lcPartThumbnailId ThumbnailId, lcPartThum
 	mView->MakeCurrent();
 	mView->BindRenderFramebuffer();
 
-	mView->SetBackgroundMode(lcBackgroundMode::Transparent);
+	mView->SetBackgroundOptions({ lcBackgroundMode::Transparent });
 
 	lcPieceData* PieceData = Thumbnail.PieceData;
 

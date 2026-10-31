@@ -123,6 +123,15 @@ Native texture checks exercise source-over decal alpha in flat and lit shaders,
 including framebuffer blending, and sample uploaded mipmaps to check alpha-aware
 filtering for RGBA, RGB, and alpha-only textures, including one-pixel dimensions.
 
+Color CLI tests check shared RGB/RGBA parsing with alpha last, optional # prefix, transparent,
+all rendering-color aliases, and invalid input. Background CLI tests validate
+RGB/RGBA syntax, output-format alpha support,
+defaults, missing parameters, and duplicate/conflicting options without OpenGL.
+The native gradient test checks premultiplied alpha, partial image tiles, PNG
+round trips, and JPEG encoding through the CLI image-saving path.
+Model image export also checks the shared background configuration for custom
+solid and gradient alpha, transparent output, and opaque output.
+
 The camera-context checks also cover active-model camera menus, live camera
 projection and zoom undo ownership, translated/rotated camera projection,
 world-space detachment across edit depths, camera deletion in multiple views,

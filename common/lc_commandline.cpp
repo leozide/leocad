@@ -6,6 +6,53 @@
 #include "lc_qutils.h"
 #include "camera.h"
 
+bool lcCommandLineOptions::ParseColorValue(const QString& Parameter, quint32& Color)
+{
+	if (Parameter.compare(QLatin1String("transparent"), Qt::CaseInsensitive) == 0)
+	{
+		Color = 0;
+		return true;
+	}
+
+	static const QRegularExpression Pattern(QStringLiteral("\\A#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?\\z"));
+	if (!Pattern.match(Parameter).hasMatch())
+		return false;
+
+	bool Valid;
+	const QString Hex = Parameter.startsWith(QLatin1Char('#')) ? Parameter.mid(1) : Parameter;
+	const quint32 Value = Hex.toUInt(&Valid, 16);
+	if (!Valid)
+		return false;
+
+	if (Hex.size() == 6)
+		Color = LC_RGBA((Value >> 16) & 255, (Value >> 8) & 255, Value & 255, 255);
+	else
+		Color = LC_RGBA((Value >> 24) & 255, (Value >> 16) & 255, (Value >> 8) & 255, Value & 255);
+	return true;
+}
+
+std::optional<bool> lcCommandLineOptions::ImageFormatSupportsAlpha(const QString& FileName)
+{
+	QByteArray Format = QFileInfo(FileName).suffix().toLatin1().toLower();
+	if (Format.isEmpty())
+		Format = "png";
+
+	// Probe the installed codec without touching the output file.
+	QImage Probe(2, 1, QImage::Format_ARGB32);
+	Probe.setPixel(0, 0, qRgba(100, 50, 25, 0));
+	Probe.setPixel(1, 0, qRgba(100, 50, 25, 128));
+	QByteArray Data;
+	QBuffer Buffer(&Data);
+	Buffer.open(QIODevice::WriteOnly);
+	QImageWriter Writer(&Buffer, Format);
+	if (!Writer.write(Probe))
+		return std::nullopt;
+
+	const QImage Decoded = QImage::fromData(Data, Format.constData());
+	return Decoded.size() == Probe.size() && Decoded.hasAlphaChannel() &&
+		qAlpha(Decoded.pixel(0, 0)) == 0 && qAlpha(Decoded.pixel(1, 0)) == 128;
+}
+
 lcCommandLineOptions::lcCommandLineOptions(QStringList Arguments)
 {
 	LoadDefaults();
@@ -112,6 +159,43 @@ bool lcCommandLineOptions::ParseImageOption(const QString& Option, QStringList& 
 	{
 		SaveImage = true;
 		ParseString(Option, Arguments, ImageName, false);
+	}
+	else if (Option == QLatin1String("--background") || Option == QLatin1String("--background-gradient"))
+	{
+		const bool Gradient = Option == QLatin1String("--background-gradient");
+		QString Top, Bottom;
+		const bool HasTop = ParseString(Option, Arguments, Top, true);
+		bool HasBottom = true;
+		if (Gradient)
+			HasBottom = ParseString(Option, Arguments, Bottom, true);
+
+		if (SetImageBackground)
+		{
+			StdErr += tr("Specify only one --background or --background-gradient option.\n");
+			ParseOK = false;
+			return true;
+		}
+
+		SetImageBackground = true;
+		if (!HasTop || !HasBottom)
+			return true;
+
+		if (!Gradient && Top.compare(QLatin1String("transparent"), Qt::CaseInsensitive) == 0)
+			ImageBackground.Mode = lcBackgroundMode::Transparent;
+		else
+		{
+			ImageBackground.Mode = Gradient ? lcBackgroundMode::CustomGradient : lcBackgroundMode::CustomColor;
+			if (!ParseColorValue(Top, ImageBackground.Color))
+			{
+				StdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Top);
+				ParseOK = false;
+			}
+			if (Gradient && !ParseColorValue(Bottom, ImageBackground.GradientBottomColor))
+			{
+				StdErr += tr("Invalid background color '%1'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Bottom);
+				ParseOK = false;
+			}
+		}
 	}
 	else if (Option == QLatin1String("-w") || Option == QLatin1String("--width"))
 		ParseInteger(Option, Arguments, ImageWidth, 1, LC_MAX_IMAGE_DIMENSION);
@@ -361,7 +445,7 @@ bool lcCommandLineOptions::ParseExportOption(const QString& Option, QStringList&
 
 bool lcCommandLineOptions::ParseString(const QString& Option, QStringList& Arguments, QString& Value, bool Required)
 {
-	if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
+	if (!Arguments.isEmpty() && !Arguments.front().startsWith(QLatin1Char('-')))
 	{
 		QString Parameter = Arguments.takeFirst();
 		Value = Parameter;
@@ -483,22 +567,15 @@ bool lcCommandLineOptions::ParseFloatArray(const QString& Option, QStringList& A
 
 bool lcCommandLineOptions::ParseColor(const QString& Option, QStringList& Arguments, quint32& Color)
 {
-	if (!Arguments.isEmpty() && Arguments.front()[0] != '-')
-	{
-		QString Parameter = Arguments.takeFirst();
-		QColor ParsedColor = QColor(Parameter);
+	QString Parameter;
 
-		if (ParsedColor.isValid())
-		{
-			Color = LC_RGBA(ParsedColor.red(), ParsedColor.green(), ParsedColor.blue(), ParsedColor.alpha());
-			return true;
-		}
-		else
-			StdErr += tr("Invalid parameter value specified for the '%1' option: '%2'.\n").arg(Option, Parameter);
-	}
-	else
-		StdErr += tr("Not enough parameters for the '%1' option.\n").arg(Option);
+	if (!ParseString(Option, Arguments, Parameter, true))
+		return false;
 
+	if (ParseColorValue(Parameter, Color))
+		return true;
+
+	StdErr += tr("Invalid color for the '%1' option: '%2'; use RRGGBB, RRGGBBAA, or transparent.\n").arg(Option, Parameter);
 	ParseOK = false;
 	return false;
 }
@@ -517,8 +594,12 @@ void lcCommandLineOptions::AppendHelp()
 {
 	StdOut += tr("Usage: leocad [options] [file]\n");
 	StdOut += tr("  [options] can be:\n");
+	StdOut += tr("  Colors use RRGGBB or RRGGBBAA (alpha last), with an optional # prefix, or transparent.\n");
 	StdOut += tr("  -l, --libpath <path>: Set the Pieces Library location to path.\n");
 	StdOut += tr("  -i, --image <outfile.ext>: Save a picture in the format specified by ext and exit.\n");
+	StdOut += tr("  --background <transparent|RRGGBB|RRGGBBAA>: Set the image background; alpha is last.\n");
+	StdOut += tr("  --background-gradient <top> <bottom>: Set a vertical gradient using RRGGBB, RRGGBBAA, or transparent colors.\n");
+	StdOut += tr("    Background options require --image and cannot be combined or repeated. Default: transparent when the format preserves alpha, otherwise white.\n");
 	StdOut += tr("  -w, --width <width>: Set the picture width.\n");
 	StdOut += tr("  -h, --height <height>: Set the picture height.\n");
 	StdOut += tr("  -f, --from <step>: Set the first step to save pictures.\n");
@@ -534,22 +615,22 @@ void lcCommandLineOptions::AppendHelp()
 	StdOut += tr("  --zplanes <near> <far>: Set the near and far clipping planes used to render images (1 <= <near> < <far>).\n");
 	StdOut += tr("  --fade-steps: Render pieces from prior steps faded.\n");
 	StdOut += tr("  --no-fade-steps: Do not render pieces from prior steps faded.\n");
-	StdOut += tr("  --fade-steps-color <#AARRGGBB>: Rendering color for prior step pieces.\n");
+	StdOut += tr("  --fade-steps-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for prior step pieces.\n");
 	StdOut += tr("  --highlight: Highlight pieces in the steps they appear.\n");
 	StdOut += tr("  --no-highlight: Do not highlight pieces in the steps they appear.\n");
-	StdOut += tr("  --highlight-color <#AARRGGBB>: Rendering color for highlighted pieces.\n");
+	StdOut += tr("  --highlight-color <RRGGBB|RRGGBBAA|transparent>: Rendering color for highlighted pieces.\n");
 	StdOut += tr("  --shading <mode>: Select shading mode for rendering (wireframe, flat, default, full).\n");
 	StdOut += tr("  --line-width <width>: Set the width of the edge lines.\n");
 	StdOut += tr("  --aa-samples <samples>: Anti-aliasing sample size (1, 2, 4, or 8).\n");
 	StdOut += tr("  -ss, --stud-style <style>: Set the stud style (0=No style, 1=LDraw single wire, 2=LDraw double wire, 3=LDraw raised floating, 4=LDraw raised rounded, 5=LDraw subtle rounded, 6=LEGO no logo, 7=LEGO single wire).\n");
 	StdOut += tr("  -nscc, --disable-stud-cylinder-color: Disable high contrast stud cylinder color.\n");
-	StdOut += tr("  -scc, --stud-cylinder-color <#AARRGGBB>: High contrast stud cylinder color.\n");
+	StdOut += tr("  -scc, --stud-cylinder-color <RRGGBB|RRGGBBAA|transparent>: High contrast stud cylinder color.\n");
 	StdOut += tr("  -nec, --disable-edge-color: Disable high contrast edge color.\n");
-	StdOut += tr("  -ec, --edge-color <#AARRGGBB>: High contrast edge color.\n");
+	StdOut += tr("  -ec, --edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color.\n");
 	StdOut += tr("  -nbec, --disable-black-edge-color: Disable high contrast edge color for black pieces.\n");
-	StdOut += tr("  -bec, --black-edge-color <#AARRGGBB>: High contrast edge color for black pieces.\n");
+	StdOut += tr("  -bec, --black-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for black pieces.\n");
 	StdOut += tr("  -ndec, --disable-dark-edge-color: Disable high contrast edge color for dark color pieces.\n");
-	StdOut += tr("  -dec, --dark-edge-color <#AARRGGBB>: High contrast edge color for dark color pieces.\n");
+	StdOut += tr("  -dec, --dark-edge-color <RRGGBB|RRGGBBAA|transparent>: High contrast edge color for dark color pieces.\n");
 	StdOut += tr("  -aec, --automate-edge-color: Enable automatically adjusted edge colors.\n");
 	StdOut += tr("  -cc, --color-contrast <contrast>: Color contrast value between 0.0 and 1.0.\n");
 	StdOut += tr("  -ldv, --light-dark-value <value>: Light/Dark color value between 0.0 and 1.0.\n");
@@ -569,6 +650,46 @@ void lcCommandLineOptions::ValidateOptions()
 	ValidateCameraOptions();
 
 	const bool SaveAndExit = (SaveImage || SaveWavefront || Save3DS || SaveCOLLADA || SaveCSV || SaveHTML);
+
+	if (!Exit && SetImageBackground && !SaveImage)
+	{
+		StdErr += tr("Background options require --image.\n");
+		ParseOK = false;
+	}
+
+	if (!Exit && ParseOK && SaveImage)
+	{
+		QString FileName = ImageName;
+		if (FileName.isEmpty())
+			FileName = QStringLiteral("image") + lcGetProfileString(LC_PROFILE_IMAGE_EXTENSION);
+		const std::optional<bool> SupportsAlpha = ImageFormatSupportsAlpha(FileName);
+		if (!SupportsAlpha)
+		{
+			StdErr += tr("Unsupported image output format for '%1'.\n").arg(FileName);
+			ParseOK = false;
+		}
+		else if (!SetImageBackground)
+		{
+			if (*SupportsAlpha)
+				ImageBackground.Mode = lcBackgroundMode::Transparent;
+			else
+			{
+				ImageBackground.Mode = lcBackgroundMode::CustomColor;
+				ImageBackground.Color = LC_RGBA(255, 255, 255, 255);
+			}
+		}
+		else if (!*SupportsAlpha)
+		{
+			const lcBackgroundOptions& Background = ImageBackground;
+			const bool Transparent = Background.Mode == lcBackgroundMode::Transparent || LC_RGBA_ALPHA(Background.Color) != 255 ||
+				(Background.Mode == lcBackgroundMode::CustomGradient && LC_RGBA_ALPHA(Background.GradientBottomColor) != 255);
+			if (Transparent)
+			{
+				StdErr += tr("The image format for '%1' does not preserve alpha; specify an opaque background.\n").arg(FileName);
+				ParseOK = false;
+			}
+		}
+	}
 
 	if (SaveAndExit && ProjectName.isEmpty())
 	{

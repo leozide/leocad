@@ -17,6 +17,11 @@ which is a single letter preceded by -, and the other of
 which is a long name preceded by --. Brackets ([ and ])
 indicate that an option takes an optional parameter.
 
+Colors use RRGGBB or RRGGBBAA hexadecimal notation, with alpha last
+and defaulting to FF (opaque). An optional # prefix and the keyword
+transparent are also accepted. For example, --background FF000080 selects
+half-transparent red. Quote colors with a # prefix in shell commands.
+
 .TP
 .B infile
 Loads the project file \fIinfile\fR
@@ -34,6 +39,17 @@ by \fIext\fR and exits. If outfile is not given then the program will
 use a name based on \fIinfile\fR. The file format is selected by \fIext\fR
 and can be gif, bmp, png or jpg (if \fIext\fR is not present then the
 default preferences format will be used).
+
+.TP
+.BI "\-\-background " color
+Set the image background to a color or transparent. Requires --image.
+The default is transparent for formats preserving alpha, otherwise white.
+
+.TP
+.BI "\-\-background-gradient " "top bottom"
+Set a vertical image background gradient using two colors. Requires --image.
+Background options cannot be repeated or combined. Formats that do not
+preserve alpha require opaque colors.
 
 .TP
 \fB\-w \fIwidth\fR, \fB\-\-width \fIwidth
@@ -109,7 +125,7 @@ Do not render parts from prior steps faded.
 
 .TP
 .BI "\-\-fade\-steps\-color " color
-Color to use for rendering faded parts. (#AARRGGBB where AA, RR, GG, and BB are hexadecimal values for alpha, red, green, and blue respectively.)
+Color to use for rendering faded parts.
 
 .TP
 .B \-\-highlight
@@ -121,7 +137,7 @@ Do not highlight parts in the steps they appear.
 
 .TP
 .BI "\-\-highlight\-color " color
-Color to use to highlight parts, (#AARRGGBB where AA, RR, GG, and BB are hexadecimal values for alpha, red, green, and blue respectively.)
+Color to use to highlight parts.
 
 .TP
 \fB\-\-shading \fRwireframe\ |\ flat\ |\ default\ |\ full
@@ -137,22 +153,22 @@ Set the width of the edge lines.
 AntiAliasing sample size (1, 2, 4, or 8).
 
 .TP
-\fB\-scc \fI#AARRGGBB\fR,\ \fB\-\-stud\-cylinder\-color\ \fI#AARRGGBB
+\fB\-scc \fIRRGGBB|RRGGBBAA|transparent\fR,\ \fB\-\-stud\-cylinder\-color\ \fIRRGGBB|RRGGBBAA|transparent
 .br
 High contrast stud cylinder color.
 
 .TP
-\fB\-ec \fI#AARRGGBB\fR,\ \fB\-\-edge\-color\ \fI#AARRGGBB
+\fB\-ec \fIRRGGBB|RRGGBBAA|transparent\fR,\ \fB\-\-edge\-color\ \fIRRGGBB|RRGGBBAA|transparent
 .br
 High contrast edge color.
 
 .TP
-\fB\-bec \fI#AARRGGBB\fR,\ \fB\-\-black\-edge\-color\ \fI#AARRGGBB
+\fB\-bec \fIRRGGBB|RRGGBBAA|transparent\fR,\ \fB\-\-black\-edge\-color\ \fIRRGGBB|RRGGBBAA|transparent
 .br
 High contrast edge color for black parts.
 
 .TP
-\fB\-dec \fI#AARRGGBB\fR,\ \fB\-\-dark\-edge\-color\ \fI#AARRGGBB
+\fB\-dec \fIRRGGBB|RRGGBBAA|transparent\fR,\ \fB\-\-dark\-edge\-color\ \fIRRGGBB|RRGGBBAA|transparent
 .br
 High contrast edge color for dark color parts.
 

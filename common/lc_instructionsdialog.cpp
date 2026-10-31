@@ -19,7 +19,7 @@ void lcInstructionsStepImageItem::Update()
 
 	View.SetOffscreenContext();
 	View.MakeCurrent();
-	View.SetBackgroundColor(lcRGBAFromQColor(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepBackgroundColor, mModel, mStep)));
+	View.SetBackgroundOptions({ lcBackgroundMode::CustomColor, lcRGBAFromQColor(mInstructions->GetColorProperty(lcInstructionsPropertyType::StepBackgroundColor, mModel, mStep)) });
 	View.SetSize(mWidth, mHeight);
 
 	std::vector<QImage> Images = View.GetStepImages(mStep, mStep);

@@ -280,6 +280,7 @@ HEADERS += \
 	common/lc_arraydialog.h \
 	common/lc_assetloader.h \
 	common/lc_assettypes.h \
+	common/lc_background.h \
 	common/lc_blenderpreferences.h \
 	common/lc_bricklink.h \
 	common/lc_category.h \

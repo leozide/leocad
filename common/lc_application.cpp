@@ -546,6 +546,7 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 				Model = mProject->GetMainModel();
 
 			ActiveView = std::unique_ptr<lcView>(new lcView(lcViewType::View, Model));
+			ActiveView->SetBackgroundOptions(Options.ImageBackground);
 
 			ActiveView->SetOffscreenContext();
 			ActiveView->MakeCurrent();

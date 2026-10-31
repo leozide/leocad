@@ -2,6 +2,7 @@
 
 #include "lc_math.h"
 #include "lc_assettypes.h"
+#include "lc_background.h"
 #include "lc_commands.h"
 #include "lc_objectproperty.h"
 #include "lc_result.h"
@@ -16,13 +17,6 @@ enum class lcModelSaveMode
 {
 	Document,
 	CompletedModel
-};
-
-enum class lcImageBackground
-{
-	Default,
-	Transparent,
-	Opaque
 };
 
 enum class lcFindReplaceAction
@@ -383,7 +377,7 @@ public:
 	QImage GetStepImage(bool Zoom, int Width, int Height, lcStep Step);
 	// Empty inventory succeeds with a null image; rendering failures return an error.
 	lcResult<QImage> GetPartsListImage(int MaxWidth, lcStep Step, quint32 BackgroundColor, QFont Font, QColor TextColor, bool KeepMissingParts) const;
-	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, lcImageBackground Background);
+	lcResult<void> SaveStepImages(const QString& BaseName, bool AddStepSuffix, bool Zoom, int Width, int Height, lcStep Start, lcStep End, const lcBackgroundOptions& Background);
 
 	void RayTest(lcObjectRayTest& ObjectRayTest) const;
 	void BoxTest(lcObjectBoxTest& ObjectBoxTest) const;
@@ -504,7 +498,7 @@ public:
 	void UpdateInterface();
 
 protected:
-	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, lcImageBackground Background);
+	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, const lcBackgroundOptions& Background);
 
 	void DeleteModel();
 	lcPieceDataRef AcquireInsertPieceData(lcPieceData* PieceData) const;

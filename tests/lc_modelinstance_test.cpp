@@ -64,9 +64,14 @@ private slots:
 	void EmbeddedDataAfterLastPieceDeletion();
 	void RepeatedInstances();
 	void InterfaceTransforms();
+	void CommandLineBackground_data();
+	void CommandLineBackground();
+	void GradientBackground();
 	void CommandLineOptions();
 	void CommandLineParsing_data();
 	void CommandLineParsing();
+	void CommandLineColors_data();
+	void CommandLineColors();
 	void CommandLineColorValidation_data();
 	void CommandLineColorValidation();
 	void TranslucentThumbnails_data();
@@ -2378,7 +2383,7 @@ void lcModelInstanceTests::TranslucentThumbnails()
 	// Instruction backgrounds retain their color and alpha; mode changes replace them.
 	for (int Alpha : { 0, 128, 255 })
 	{
-		View.SetBackgroundColor(LC_RGBA(200, 100, 50, Alpha));
+		View.SetBackgroundOptions({ lcBackgroundMode::CustomColor, LC_RGBA(200, 100, 50, Alpha) });
 		QVERIFY(View.BeginRenderToImage(64, 64));
 		View.OnDraw();
 		const QRgb Pixel = View.GetRenderImage().pixel(0, 0);
@@ -2387,14 +2392,14 @@ void lcModelInstanceTests::TranslucentThumbnails()
 		QVERIFY(qAbs(qGreen(Pixel) - qRound(100.0 * Alpha / 255.0)) <= 1);
 		QVERIFY(qAbs(qBlue(Pixel) - qRound(50.0 * Alpha / 255.0)) <= 1);
 
-		View.SetBackgroundMode(lcBackgroundMode::Transparent);
+		View.SetBackgroundOptions({ lcBackgroundMode::Transparent });
 		View.OnDraw();
 		QCOMPARE(View.GetRenderImage().pixel(0, 0), QRgb(0));
 		View.EndRenderToImage();
 	}
 
-	View.SetBackgroundColor(LC_RGBA(200, 100, 50, 128));
-	View.SetBackgroundMode(lcBackgroundMode::Opaque);
+	View.SetBackgroundOptions({ lcBackgroundMode::CustomColor, LC_RGBA(200, 100, 50, 128) });
+	View.SetBackgroundOptions({ lcBackgroundMode::Opaque });
 	for (bool Gradient : { false, true })
 	{
 		lcGetPreferences().mBackgroundGradient = Gradient;
@@ -2553,6 +2558,76 @@ void lcModelInstanceTests::TextureMipmaps()
 	Context.ClearResources();
 }
 
+void lcModelInstanceTests::CommandLineBackground_data()
+{
+	QTest::addColumn<QStringList>("Arguments");
+	QTest::addColumn<bool>("Valid");
+	QTest::addColumn<int>("Mode");
+	QTest::addColumn<quint32>("Top");
+	QTest::addColumn<quint32>("Bottom");
+	const auto Row = [](const char* Name, const QStringList& Arguments, bool Valid, lcBackgroundMode Mode, quint32 Top, quint32 Bottom)
+	{
+		QTest::newRow(Name) << Arguments << Valid << int(Mode) << Top << Bottom;
+	};
+	Row("default-png", { "-i", "out.png" }, true, lcBackgroundMode::Transparent, 0, 0);
+	Row("default-jpeg", { "-i", "out.jpg" }, true, lcBackgroundMode::CustomColor, LC_RGBA(255, 255, 255, 255), 0);
+	Row("default-extensionless", { "-i", "out" }, true, lcBackgroundMode::Transparent, 0, 0);
+	Row("transparent", { "--background", "transparent", "-i", "out.png" }, true, lcBackgroundMode::Transparent, 0, 0);
+	Row("rgb", { "-i", "out.png", "--background", "#123456" }, true, lcBackgroundMode::CustomColor, LC_RGBA(0x12, 0x34, 0x56, 255), 0);
+	Row("rgba", { "-i", "out.png", "--background", "#12345678" }, true, lcBackgroundMode::CustomColor, LC_RGBA(0x12, 0x34, 0x56, 0x78), 0);
+	Row("gradient", { "-i", "out.png", "--background-gradient", "#FF000080", "#0000FF00" }, true, lcBackgroundMode::CustomGradient, LC_RGBA(255, 0, 0, 128), LC_RGBA(0, 0, 255, 0));
+	Row("gradient-transparent", { "-i", "out.png", "--background-gradient", "#12345678", "transparent" }, true, lcBackgroundMode::CustomGradient, LC_RGBA(0x12, 0x34, 0x56, 0x78), 0);
+	Row("bare-rgb", { "-i", "out.png", "--background", "123456" }, true, lcBackgroundMode::CustomColor, LC_RGBA(0x12, 0x34, 0x56, 255), 0);
+	Row("bare-rgba", { "-i", "out.png", "--background", "12345678" }, true, lcBackgroundMode::CustomColor, LC_RGBA(0x12, 0x34, 0x56, 0x78), 0);
+	Row("bare-gradient", { "-i", "out.png", "--background-gradient", "FF000080", "0000FF00" }, true, lcBackgroundMode::CustomGradient, LC_RGBA(255, 0, 0, 128), LC_RGBA(0, 0, 255, 0));
+	Row("jpeg-opaque", { "-i", "out.jpg", "--background", "#102030FF" }, true, lcBackgroundMode::CustomColor, LC_RGBA(16, 32, 48, 255), 0);
+	Row("jpeg-gradient", { "-i", "out.jpg", "--background-gradient", "#102030", "#405060" }, true, lcBackgroundMode::CustomGradient, LC_RGBA(16, 32, 48, 255), LC_RGBA(64, 80, 96, 255));
+	const std::vector<std::pair<const char*, QStringList>> Invalid =
+	{
+		{ "missing-color", { "-i", "out.png", "--background" } },
+		{ "missing-bottom", { "-i", "out.png", "--background-gradient", "#123456" } },
+		{ "missing-both", { "-i", "out.png", "--background-gradient" } },
+		{ "empty-color", { "-i", "out.png", "--background", "" } },
+		{ "short-color", { "-i", "out.png", "--background", "#123" } },
+		{ "named-color", { "-i", "out.png", "--background", "red" } },
+		{ "invalid-hex", { "-i", "out.png", "--background", "#12345G" } },
+		{ "invalid-bottom", { "-i", "out.png", "--background-gradient", "#123456", "bad" } },
+		{ "duplicate", { "-i", "out.png", "--background", "transparent", "--background", "#123456" } },
+		{ "conflicting", { "-i", "out.png", "--background", "transparent", "--background-gradient", "#123456", "#654321" } },
+		{ "repeated-gradient", { "-i", "out.png", "--background-gradient", "#123456", "#654321", "--background-gradient", "#000000", "#FFFFFF" } },
+		{ "jpeg-transparent", { "-i", "out.jpg", "--background", "transparent" } },
+		{ "jpeg-translucent", { "-i", "out.jpg", "--background", "#FFFFFF80" } },
+		{ "jpeg-alpha-gradient", { "-i", "out.jpg", "--background-gradient", "#FFFFFF", "#00000080" } },
+		{ "without-image", { "--background", "transparent" } },
+		{ "unsupported-format", { "-i", "out.not-an-image" } }
+	};
+	for (const auto& [Name, Arguments] : Invalid)
+		Row(Name, Arguments, false, lcBackgroundMode::Default, 0, 0);
+}
+
+void lcModelInstanceTests::CommandLineBackground()
+{
+	QFETCH(QStringList, Arguments);
+	QFETCH(bool, Valid);
+	QFETCH(int, Mode);
+	QFETCH(quint32, Top);
+	QFETCH(quint32, Bottom);
+	QTemporaryFile Model;
+	QVERIFY(Model.open());
+	Arguments.prepend(Model.fileName());
+	Arguments.prepend("leocad");
+	const lcCommandLineOptions Options(Arguments);
+	QCOMPARE(Options.ParseOK, Valid);
+	if (Valid)
+	{
+		QCOMPARE(int(Options.ImageBackground.Mode), Mode);
+		QCOMPARE(Options.ImageBackground.Color, Top);
+		QCOMPARE(Options.ImageBackground.GradientBottomColor, Bottom);
+	}
+	else
+		QVERIFY(!Options.StdErr.isEmpty());
+}
+
 void lcModelInstanceTests::CommandLineOptions()
 {
 	const lcCommandLineOptions Empty(QStringList{});
@@ -2563,7 +2638,7 @@ void lcModelInstanceTests::CommandLineOptions()
 	const lcCommandLineOptions Help({ "leocad", "--help" });
 	QVERIFY(Help.ParseOK);
 	QVERIFY(Help.Exit);
-	QVERIFY(Help.StdOut.contains("--image"));
+	QVERIFY(Help.StdOut.contains("--background-gradient"));
 
 	QTemporaryFile Model;
 	QVERIFY(Model.open());
@@ -2585,7 +2660,7 @@ void lcModelInstanceTests::CommandLineParsing_data()
 	QTest::addColumn<QString>("Message");
 	QTest::newRow("image-range") << QStringList{ "-w", "64", "-h", "32", "--from", "1", "--to", "2" } << true << QString();
 	QTest::newRow("negative-camera-angles") << QStringList{ "--camera-angles", "-30", "45", "--orthographic" } << true << QString();
-	QTest::newRow("fade-color") << QStringList{ "--fade-steps-color", "#80112233" } << true << QString();
+	QTest::newRow("fade-color") << QStringList{ "--fade-steps-color", "#11223380" } << true << QString();
 	QTest::newRow("optional-export-name") << QStringList{ "--export-wavefront", "--width", "160" } << true << QString();
 	QTest::newRow("camera-precedence") << QStringList{ "--camera", "Camera", "--viewpoint", "front" } << true << QString("--viewpoint is ignored when --camera is set.");
 	QTest::newRow("missing-integer") << QStringList{ "--width" } << false << QString("Not enough parameters for the '--width' option.");
@@ -2595,7 +2670,7 @@ void lcModelInstanceTests::CommandLineParsing_data()
 	QTest::newRow("missing-array") << QStringList{ "--camera-angles", "30" } << false << QString("Not enough parameters");
 	QTest::newRow("invalid-camera") << QStringList{ "--camera-position", "0", "0", "0", "0", "0", "0", "0", "1", "0" } << false << QString("camera position is too close");
 	QTest::newRow("invalid-clipping") << QStringList{ "--zplanes", "2", "1" } << false << QString("1 <= <near> < <far>");
-	QTest::newRow("invalid-color") << QStringList{ "--highlight-color", "not-a-color" } << false << QString("Invalid parameter value");
+	QTest::newRow("invalid-color") << QStringList{ "--highlight-color", "not-a-color" } << false << QString("Invalid color");
 	QTest::newRow("invalid-shading") << QStringList{ "--shading", "unknown" } << false << QString("Invalid parameter value");
 	QTest::newRow("invalid-samples") << QStringList{ "--aa-samples", "3" } << false << QString("Invalid parameter value");
 	QTest::newRow("unknown-option") << QStringList{ "--unknown" } << false << QString("Unknown option");
@@ -2621,6 +2696,57 @@ void lcModelInstanceTests::CommandLineParsing()
 	}
 	if (Options.SetFadeStepsColor)
 		QCOMPARE(Options.FadeStepsColor, LC_RGBA(0x11, 0x22, 0x33, 0x80));
+}
+
+void lcModelInstanceTests::CommandLineColors_data()
+{
+	QTest::addColumn<QString>("Input");
+	QTest::addColumn<bool>("Valid");
+	QTest::addColumn<quint32>("Expected");
+	QTest::newRow("rgb") << QString("#123456") << true << LC_RGBA(0x12, 0x34, 0x56, 255);
+	QTest::newRow("rgba") << QString("#12345678") << true << LC_RGBA(0x12, 0x34, 0x56, 0x78);
+	QTest::newRow("lowercase") << QString("#abcdef80") << true << LC_RGBA(0xab, 0xcd, 0xef, 0x80);
+	QTest::newRow("zero-alpha") << QString("#12345600") << true << LC_RGBA(0x12, 0x34, 0x56, 0);
+	QTest::newRow("bare-rgb") << QString("123456") << true << LC_RGBA(0x12, 0x34, 0x56, 255);
+	QTest::newRow("bare-rgba") << QString("12345678") << true << LC_RGBA(0x12, 0x34, 0x56, 0x78);
+	QTest::newRow("bare-lowercase") << QString("abcdef80") << true << LC_RGBA(0xab, 0xcd, 0xef, 0x80);
+	QTest::newRow("bare-zero-alpha") << QString("12345600") << true << LC_RGBA(0x12, 0x34, 0x56, 0);
+	QTest::newRow("transparent") << QString("transparent") << true << quint32(0);
+	QTest::newRow("transparent-case") << QString("TRANSPARENT") << true << quint32(0);
+	for (const QString& Input : { QString(), QString("red"), QString("#123"), QString("#12345G"),
+		QString("#123456789"), QString("#123456789ABC"), QString("#12345678 "),
+		QString("123"), QString("1234567"), QString("12345G"), QString("0x123456"), QString("##123456"), QString("123456\n") })
+		QTest::newRow(qPrintable("invalid-" + Input)) << Input << false << quint32(0);
+}
+
+void lcModelInstanceTests::CommandLineColors()
+{
+	QFETCH(QString, Input);
+	QFETCH(bool, Valid);
+	QFETCH(quint32, Expected);
+	const std::pair<const char*, quint32 lcCommandLineOptions::*> Options[] =
+	{
+		{ "--fade-steps-color", &lcCommandLineOptions::FadeStepsColor },
+		{ "--highlight-color", &lcCommandLineOptions::HighlightColor },
+		{ "--stud-cylinder-color", &lcCommandLineOptions::StudCylinderColor },
+		{ "-scc", &lcCommandLineOptions::StudCylinderColor },
+		{ "--edge-color", &lcCommandLineOptions::PartEdgeColor },
+		{ "-ec", &lcCommandLineOptions::PartEdgeColor },
+		{ "--black-edge-color", &lcCommandLineOptions::BlackEdgeColor },
+		{ "-bec", &lcCommandLineOptions::BlackEdgeColor },
+		{ "--dark-edge-color", &lcCommandLineOptions::DarkEdgeColor },
+		{ "-dec", &lcCommandLineOptions::DarkEdgeColor }
+	};
+
+	for (const auto& [Option, Member] : Options)
+	{
+		const lcCommandLineOptions Parsed({ "leocad", "--stud-style", "6", Option, Input });
+		QCOMPARE(Parsed.ParseOK, Valid);
+		if (Valid)
+			QCOMPARE(Parsed.*Member, Expected);
+		else
+			QVERIFY(Parsed.StdErr.contains("Invalid color"));
+	}
 }
 
 void lcModelInstanceTests::CommandLineColorValidation_data()
@@ -2720,6 +2846,83 @@ void lcModelInstanceTests::CommandLineColorValidation()
 		QVERIFY2(Options.StdErr.contains(Message), qPrintable(Options.StdErr));
 	if (Options.AutomateEdgeColor && lcIsHighContrast(Options.StudStyle))
 		QVERIFY(!Options.StdErr.contains("stud-cylinder-color"));
+}
+
+void lcModelInstanceTests::GradientBackground()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test gradient backgrounds.");
+	QVERIFY(lcContext::InitializeRenderer(true));
+	lcModel Model(QString(), nullptr, true);
+	lcView View(lcViewType::PartsList, &Model);
+	View.SetOffscreenContext();
+	View.MakeCurrent();
+	lcBackgroundOptions Background;
+	Background.Mode = lcBackgroundMode::CustomGradient;
+	Background.Color = LC_RGBA(255, 0, 0, 128);
+	Background.GradientBottomColor = LC_RGBA(0, 0, 255, 0);
+	View.SetBackgroundOptions(Background);
+	for (const QSize Size : { QSize(32, 32), QSize(32, 2051) })
+	{
+		QVERIFY(View.BeginRenderToImage(Size.width(), Size.height()));
+		View.OnDraw();
+		const QImage Image = View.GetRenderImage();
+		QCOMPARE(Image.size(), Size);
+		for (int y = 0; y < Size.height(); y++)
+		{
+			const QRgb Pixel = Image.pixel(0, y);
+			const int ExpectedAlpha = qRound(128.0 * (1.0 - (y + 0.5) / Size.height()));
+			QVERIFY(qAbs(qAlpha(Pixel) - ExpectedAlpha) <= 2);
+			QVERIFY(qAbs(qRed(Pixel) - ExpectedAlpha) <= 2);
+			QCOMPARE(qGreen(Pixel), 0);
+			QCOMPARE(qBlue(Pixel), 0); // A transparent blue endpoint must not tint the gradient.
+		}
+		QByteArray Data;
+		QBuffer Buffer(&Data);
+		QVERIFY(Buffer.open(QIODevice::WriteOnly));
+		QVERIFY(Image.save(&Buffer, "PNG"));
+		const QImage Reloaded = QImage::fromData(Data, "PNG");
+		QVERIFY(qAbs(qAlpha(Reloaded.pixel(0, Size.height() / 2)) - 64) <= 3);
+		QVERIFY(qRed(Reloaded.pixel(0, Size.height() / 2)) > 245);
+		QCOMPARE(qBlue(Reloaded.pixel(0, Size.height() / 2)), 0);
+		View.EndRenderToImage();
+	}
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	View.SetBackgroundOptions({ lcBackgroundMode::CustomColor, LC_RGBA(255, 255, 255, 255) });
+	View.SetSize(32, 32);
+	const QString JPEGPath = Directory.filePath("opaque.jpg");
+	QVERIFY(View.SaveStepImages(JPEGPath, false, 1, 1, {}));
+	QCOMPARE(QImageReader::imageFormat(JPEGPath), QByteArray("jpeg"));
+	const QImage JPEG(JPEGPath);
+	QVERIFY(!JPEG.isNull());
+	QVERIFY(!JPEG.hasAlphaChannel());
+	QCOMPARE(JPEG.pixelColor(0, 0), QColor(Qt::white));
+
+	// Model exports accept the same options, including color and gradient alpha.
+	for (const lcBackgroundOptions& OutputBackground : { Background,
+		lcBackgroundOptions{ lcBackgroundMode::CustomColor, LC_RGBA(200, 100, 50, 128) },
+		lcBackgroundOptions{ lcBackgroundMode::Transparent }, lcBackgroundOptions{ lcBackgroundMode::Opaque } })
+	{
+		const QString Path = Directory.filePath(QString("model-%1.png").arg(int(OutputBackground.Mode)));
+		QVERIFY(Model.SaveStepImages(Path, false, false, 32, 32, 1, 1, OutputBackground));
+		const QImage Image(Path);
+		QVERIFY(!Image.isNull());
+		const QColor Color = Image.pixelColor(0, 16);
+		if (OutputBackground.Mode == lcBackgroundMode::CustomGradient)
+		{
+			QVERIFY(qAbs(Color.alpha() - 62) <= 2);
+			QVERIFY(Color.red() > 245);
+			QCOMPARE(Color.blue(), 0);
+		}
+		else if (OutputBackground.Mode == lcBackgroundMode::CustomColor)
+			QCOMPARE(Color.alpha(), 128);
+		else if (OutputBackground.Mode == lcBackgroundMode::Transparent)
+			QCOMPARE(Color.alpha(), 0);
+		else
+			QCOMPARE(Color.alpha(), 255);
+	}
 }
 
 void lcModelInstanceTests::InterfaceTransforms()

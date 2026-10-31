@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lc_assettypes.h"
+#include "lc_background.h"
 #include "lc_context.h"
 #include "lc_math.h"
 #include "lc_commands.h"
@@ -102,14 +103,6 @@ enum class lcViewType
 	Minifig,
 	PartsList,
 	Count
-};
-
-enum class lcBackgroundMode
-{
-	Default, // Preferences onscreen; transparent offscreen.
-	Transparent,
-	Opaque, // Configured solid or gradient background.
-	CustomColor
 };
 
 struct lcFindReplaceParams
@@ -216,15 +209,9 @@ public:
 		return mCameraRotationMouseAngle;
 	}
 
-	void SetBackgroundColor(quint32 BackgroundColor)
+	void SetBackgroundOptions(const lcBackgroundOptions& Background)
 	{
-		mBackgroundMode = lcBackgroundMode::CustomColor;
-		mBackgroundColor = BackgroundColor;
-	}
-
-	void SetBackgroundMode(lcBackgroundMode Mode)
-	{
-		mBackgroundMode = Mode;
+		mBackground = Background;
 	}
 
 	lcMatrix44 GetActiveSubmodelTransform() const
@@ -411,8 +398,7 @@ protected:
 	std::unique_ptr<QOpenGLFramebufferObject> mOutlineVisibleFramebuffer;
 	QSize mOutlineAttemptSize;
 	QPointer<QOpenGLContext> mOutlineGLContext;
-	lcBackgroundMode mBackgroundMode = lcBackgroundMode::Default;
-	quint32 mBackgroundColor = 0;
+	lcBackgroundOptions mBackground;
 
 	std::unique_ptr<lcScene> mScene;
 	std::unique_ptr<lcViewManipulator> mViewManipulator;

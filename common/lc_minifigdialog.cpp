@@ -353,7 +353,7 @@ void lcMinifigDialog::TemplateImportButtonClicked()
 
 void lcMinifigDialog::TemplateExportButtonClicked()
 {
-	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"));
+	QString FileName = lcGetSaveFileName(this, tr("Export Templates"), "", tr("Minifig Template Files (*.minifig);;All Files (*.*)"), QLatin1String("minifig"));
 
 	if (FileName.isEmpty())
 		return;

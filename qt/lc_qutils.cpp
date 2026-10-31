@@ -11,6 +11,24 @@
 #include <TlHelp32.h>
 #endif
 
+QString lcGetSaveFileName(QWidget* Parent, const QString& Title, const QString& FileName, const QString& Filter, const QString& DefaultSuffix)
+{
+	QFileDialog Dialog(Parent, Title, FileName, Filter);
+	Dialog.setAcceptMode(QFileDialog::AcceptSave);
+	Dialog.setDefaultSuffix(DefaultSuffix);
+
+	QObject::connect(&Dialog, &QFileDialog::filterSelected, &Dialog, [&Dialog, DefaultSuffix](const QString& SelectedFilter)
+	{
+		const QRegularExpressionMatch Match = QRegularExpression(QStringLiteral("\\(\\*\\.([A-Za-z0-9]+)\\)")).match(SelectedFilter);
+		Dialog.setDefaultSuffix(Match.hasMatch() ? Match.captured(1) : DefaultSuffix);
+	});
+
+	if (Dialog.exec() != QDialog::Accepted)
+		return QString();
+
+	return Dialog.selectedFiles().value(0);
+}
+
 QPoint lcGetPopupPosition(const QPoint& Position, const QSize& Size, const QPoint& ScreenPosition)
 {
 	QScreen* Screen = QGuiApplication::screenAt(ScreenPosition);

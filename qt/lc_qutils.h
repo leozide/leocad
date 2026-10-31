@@ -19,6 +19,7 @@ std::optional<float> lcParseFloatLocalized(const QString& Value, QLocale Locale)
 
 void lcSetupDialogHelp(QDialog* Dialog, QDialogButtonBox* ButtonBox);
 void lcSetupWidgetHelp(QWidget* Root, QDialogButtonBox* ButtonBox);
+QString lcGetSaveFileName(QWidget* Parent, const QString& Title, const QString& FileName, const QString& Filter, const QString& DefaultSuffix);
 
 // ScreenPosition selects the monitor independently of the desired popup position.
 QPoint lcGetPopupPosition(const QPoint& Position, const QSize& Size, const QPoint& ScreenPosition);

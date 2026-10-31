@@ -963,7 +963,7 @@ void lcPreferencesDialog::ImportCategoriesClicked()
 
 void lcPreferencesDialog::ExportCategoriesClicked()
 {
-	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+	QString FileName = lcGetSaveFileName(this, tr("Export Categories"), "", tr("Text Files (*.txt);;All Files (*.*)"), QLatin1String("txt"));
 
 	if (FileName.isEmpty())
 		return;
@@ -1258,7 +1258,7 @@ void lcPreferencesDialog::ShortcutsImportClicked()
 
 void lcPreferencesDialog::ShortcutsExportClicked()
 {
-	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+	QString FileName = lcGetSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"), QLatin1String("txt"));
 
 	if (FileName.isEmpty())
 		return;
@@ -1451,7 +1451,7 @@ void lcPreferencesDialog::MouseImportButtonClicked()
 
 void lcPreferencesDialog::MouseExportButtonClicked()
 {
-	QString FileName = QFileDialog::getSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"));
+	QString FileName = lcGetSaveFileName(this, tr("Export Shortcuts"), "", tr("Text Files (*.txt);;All Files (*.*)"), QLatin1String("txt"));
 
 	if (FileName.isEmpty())
 		return;

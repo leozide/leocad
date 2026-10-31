@@ -2864,7 +2864,8 @@ bool lcMainWindow::SaveProject(const QString& FileName)
 
 		QString Filter = (Project->GetModels().size() > 1) ? tr("Supported Files (*.mpd);;All Files (*.*)") : tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)");
 
-		SaveFileName = QFileDialog::getSaveFileName(this, tr("Save Model"), SaveFileName, Filter);
+		const QString DefaultSuffix = Project->GetModels().size() > 1 ? QLatin1String("mpd") : QLatin1String("ldr");
+		SaveFileName = lcGetSaveFileName(this, tr("Save Model"), SaveFileName, Filter, DefaultSuffix);
 
 		if (SaveFileName.isEmpty())
 			return false;

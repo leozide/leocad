@@ -823,7 +823,7 @@ void lcRenderDialog::ShowResult()
 
 void lcRenderDialog::OutputBrowseButtonClicked()
 {
-	const QString Result = QFileDialog::getSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
+	const QString Result = lcGetSaveFileName(this, tr("Select Output File"), ui->OutputEdit->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"), QLatin1String("png"));
 
 	if (!Result.isEmpty())
 		ui->OutputEdit->setText(QDir::toNativeSeparators(Result));

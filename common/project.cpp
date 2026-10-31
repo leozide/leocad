@@ -20,6 +20,7 @@
 #include "lc_bricklink.h"
 #include "lc_string.h"
 #include "lc_colors.h"
+#include "lc_qutils.h"
 
 // Evaluate project and referenced models at their final step, then restore their editing and evaluated states.
 class lcScopedModelExportState
@@ -2329,7 +2330,7 @@ QString Project::GetExportFileName(const QString& FileName, const QString& Defau
 		SaveFileName += "." + DefaultExtension;
 	}
 
-	return QFileDialog::getSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter);
+	return lcGetSaveFileName(gMainWindow, DialogTitle, SaveFileName, DialogFilter, DefaultExtension);
 }
 
 lcResult<void> Project::Export3DStudio(const QString& FileName)

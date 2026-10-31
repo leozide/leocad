@@ -105,7 +105,7 @@ void lcImageDialog::accept()
 
 void lcImageDialog::FileNameBrowseClicked()
 {
-	QString result = QFileDialog::getSaveFileName(this, tr("Save Image File"), ui->fileName->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"));
+	QString result = lcGetSaveFileName(this, tr("Save Image File"), ui->fileName->text(), tr("Supported Image Files (*.bmp *.png *.jpg);;BMP Files (*.bmp);;PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*.*)"), QLatin1String("png"));
 
 	if (!result.isEmpty())
 		ui->fileName->setText(QDir::toNativeSeparators(result));

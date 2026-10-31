@@ -9,6 +9,7 @@
 #include "lc_partselectionwidget.h"
 #include "lc_partselectionpopup.h"
 #include "lc_profile.h"
+#include "lc_qutils.h"
 #include "lc_model.h"
 #include "lc_modelhistory.h"
 #include "lc_meshloader.h"
@@ -70,6 +71,7 @@ private slots:
 	void CommandLineBackground_data();
 	void CommandLineBackground();
 	void GradientBackground();
+	void SaveDialogSuffix();
 	void CommandLineOptions();
 	void CommandLineParsing_data();
 	void CommandLineParsing();
@@ -93,6 +95,67 @@ private:
 	void SeparateRotations(lcMainWindow* Window, lcModel* Model);
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+void lcModelInstanceTests::SaveDialogSuffix()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	const bool DontUseNativeDialogs = QApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+	QApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+
+	const QString Filter = QStringLiteral("Images (*.bmp *.png *.jpg);;JPEG (*.jpg);;All Files (*)");
+	for (int Case = 0; Case < 4; Case++)
+	{
+		QTimer::singleShot(0, [&, Case]()
+		{
+			QFileDialog* Dialog = qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+			QVERIFY(Dialog);
+
+			if (Case == 2)
+			{
+				Dialog->selectNameFilter(QStringLiteral("JPEG (*.jpg)"));
+				QMetaObject::invokeMethod(Dialog, "filterSelected", Q_ARG(QString, QStringLiteral("JPEG (*.jpg)")));
+			}
+
+			Dialog->selectFile(Directory.filePath(Case == 1 ? QStringLiteral("model.custom") : QStringLiteral("model")));
+			QMetaObject::invokeMethod(Dialog, Case == 3 ? "reject" : "accept");
+		});
+
+		const QString Result = lcGetSaveFileName(nullptr, QStringLiteral("Save"), Directory.path(), Filter, QStringLiteral("png"));
+		QString Expected;
+		if (Case == 0)
+			Expected = Directory.filePath(QStringLiteral("model.png"));
+		else if (Case == 1)
+			Expected = Directory.filePath(QStringLiteral("model.custom"));
+		else if (Case == 2)
+			Expected = Directory.filePath(QStringLiteral("model.jpg"));
+		QCOMPARE(Result, Expected);
+	}
+
+	QFile Existing(Directory.filePath(QStringLiteral("existing.obj")));
+	QVERIFY(Existing.open(QIODevice::WriteOnly));
+	Existing.close();
+	bool OverwritePrompted = false;
+	QTimer::singleShot(0, [&]()
+	{
+		QFileDialog* Dialog = qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+		QVERIFY(Dialog);
+		Dialog->selectFile(Directory.filePath(QStringLiteral("existing")));
+		QTimer::singleShot(0, [&]()
+		{
+			QMessageBox* Prompt = qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+			OverwritePrompted = Prompt != nullptr;
+			if (Prompt)
+				Prompt->done(QMessageBox::No);
+			Dialog->reject();
+		});
+		QMetaObject::invokeMethod(Dialog, "accept");
+	});
+	QVERIFY(lcGetSaveFileName(nullptr, QStringLiteral("Save"), Directory.path(), QStringLiteral("Wavefront (*.obj);;All Files (*)"), QStringLiteral("obj")).isEmpty());
+	QVERIFY(OverwritePrompted);
+
+	QApplication::setAttribute(Qt::AA_DontUseNativeDialogs, DontUseNativeDialogs);
+}
 
 void lcModelInstanceTests::ArchiveSubpartPrecedence()
 {

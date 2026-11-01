@@ -6862,16 +6862,6 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">已儲存 '%1'.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Load Shadow Library</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Could not find a shadow library in &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>LeoCAD could not find a compatible Parts Library so only a small number of parts will be available. Please visit https://www.leocad.org for information on how to download and install a library.</source>
         <translation type="vanished">LeoCAD 找不到兼容的零件庫，因此只有少量零件可用。請訪問 https://www.leocad.org 瞭解如何下載和安裝零件庫。</translation>
     </message>
@@ -14329,6 +14319,11 @@ Unsupported video cards use face tint and colored edges.</source>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1447"/>
         <source>Export Shortcuts</source>
         <translation>導出快速鍵</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="545"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="536"/>

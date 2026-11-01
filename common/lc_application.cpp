@@ -832,9 +832,7 @@ void lcApplication::ShowPreferencesDialog()
 	// Unlike the parts library, the shadow library can be switched while running.
 	if (ShadowLibraryChanged)
 	{
-		if (!lcShadowLibrary::SetPath(Options.ShadowLibraryPath) && !Options.ShadowLibraryPath.isEmpty())
-			QMessageBox::warning(gMainWindow, tr("Load Shadow Library"), tr("Could not find a shadow library in '%1'.").arg(Options.ShadowLibraryPath));
-
+		lcShadowLibrary::SetPath(Options.ShadowLibraryPath);
 		gMainWindow->UpdateSelectedObjects(false);
 	}
 

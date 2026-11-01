@@ -8,6 +8,7 @@
 #include "lc_qutils.h"
 #include "lc_glextensions.h"
 #include "lc_piecedata.h"
+#include "lc_shadowlibrary.h"
 #include "lc_edgecolordialog.h"
 #include "lc_blenderpreferences.h"
 #include "lc_mainwindow.h"
@@ -535,8 +536,13 @@ void lcPreferencesDialog::ShadowLibraryBrowseButtonClicked()
 {
 	QString Result = QFileDialog::getExistingDirectory(this, tr("Select Shadow Library Folder"), ui->ShadowLibraryEdit->text());
 
-	if (!Result.isEmpty())
-		ui->ShadowLibraryEdit->setText(QDir::toNativeSeparators(Result));
+	if (Result.isEmpty())
+		return;
+
+	ui->ShadowLibraryEdit->setText(QDir::toNativeSeparators(Result));
+
+	if (!lcShadowLibrary::IsLibraryFolder(Result))
+		QMessageBox::information(this, windowTitle(), tr("Could not find a shadow library in '%1'.").arg(QDir::toNativeSeparators(Result)));
 }
 
 void lcPreferencesDialog::ColorThemeCurrentIndexChanged(int Index)

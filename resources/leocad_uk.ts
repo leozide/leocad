@@ -7512,16 +7512,6 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Деякі зміни набудуть чинності лише під час наступного запуску LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Load Shadow Library</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Could not find a shadow library in &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
         <translation type="vanished">Зміна бібліотек блоків та налаштувань згладжування вступить в силу лише після перезапуску LeoCAD.</translation>
     </message>
@@ -14776,6 +14766,11 @@ Unsupported video cards use face tint and colored edges.</source>
         <source>Export Shortcuts</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Експорт ярликів</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="545"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1434"/>

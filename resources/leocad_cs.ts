@@ -7036,16 +7036,6 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <source>Some changes will only take effect the next time you start LeoCAD.</source>
         <translation>Některé změny se projeví až při příštím spuštění LeoCADu.</translation>
     </message>
-    <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Load Shadow Library</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Could not find a shadow library in &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>lcArrayDialog</name>
@@ -14393,6 +14383,11 @@ Nepodporované grafické karty používají odstín obličeje a barevné okraje.
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1447"/>
         <source>Export Shortcuts</source>
         <translation>Exportovat zkratky</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="545"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1434"/>

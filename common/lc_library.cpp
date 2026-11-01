@@ -173,15 +173,18 @@ lcResult<Project*> lcPiecesLibrary::LoadExternalProject(const QFileInfo& FileInf
 	LoadingPaths.push_back(Path);
 
 	Project* ExternalProject = new Project(Preview);
+
 	ExternalProject->SetDeferModelMeshRequests(DeferModelMeshRequests);
-	const bool Loaded = ExternalProject->Load(FileInfo.absoluteFilePath(), false);
+
+	const lcResult<void> Loaded = ExternalProject->Load(FileInfo.absoluteFilePath());
 
 	LoadingPaths.pop_back();
 
 	if (!Loaded)
 	{
 		delete ExternalProject;
-		return lcUnexpected(tr("Could not load external model file '%1'.").arg(FileInfo.absoluteFilePath()));
+
+		return lcUnexpected(Loaded.error());
 	}
 
 	return ExternalProject;

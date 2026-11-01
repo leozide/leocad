@@ -509,7 +509,9 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 		{
 			Project* LoadedProject = new Project();
 
-			if (LoadedProject->Load(Options.mProjectName, false))
+			const lcResult<void> LoadResult = LoadedProject->Load(Options.mProjectName);
+
+			if (LoadResult)
 			{
 				SetProject(LoadedProject);
 				ProjectLoaded = true;
@@ -517,6 +519,10 @@ lcStartupMode lcApplication::Initialize(const QList<QPair<QString, bool>>& Libra
 			else
 			{
 				delete LoadedProject;
+
+				StdErr << LoadResult.error() << '\n';
+
+				return lcStartupMode::Error;
 			}
 		}
 	}

@@ -1388,13 +1388,17 @@ void lcMainWindow::ProjectFileChanged(const QString& Path)
 
 	std::unique_ptr<Project> NewProject = std::make_unique<Project>();
 
-	if (NewProject->Load(Path, true))
+	const lcResult<void> LoadResult = NewProject->Load(Path);
+
+	if (LoadResult)
 	{
 		QByteArray TabLayout = GetTabLayout();
 		gApplication->SetProject(NewProject.release());
 		RestoreTabLayout(TabLayout);
 		lcView::UpdateAllViews();
 	}
+	else
+		QMessageBox::warning(this, tr("Load Model"), LoadResult.error());
 
 	Ignore = false;
 }
@@ -2743,7 +2747,9 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 {
 	Project* NewProject = new Project();
 
-	if (NewProject->Load(FileName, true))
+	const lcResult<void> LoadResult = NewProject->Load(FileName);
+
+	if (LoadResult)
 	{
 		gApplication->SetProject(NewProject);
 		AddRecentFile(FileName);
@@ -2752,6 +2758,7 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 		return true;
 	}
 
+	QMessageBox::warning(this, tr("Load Model"), LoadResult.error());
 	delete NewProject;
 	lcGetPiecesLibrary()->RemoveTemporaryPieceData();
 	return false;
@@ -2779,8 +2786,13 @@ void lcMainWindow::ShowMergeDialog()
 	{
 		std::unique_ptr<Project>& NewProject = ProjectsToMerge.emplace_back(std::make_unique<Project>());
 
-		if (!NewProject->Load(LoadFileName, true))
+		const lcResult<void> LoadResult = NewProject->Load(LoadFileName);
+
+		if (!LoadResult)
+		{
+			QMessageBox::warning(this, tr("Merge Model"), LoadResult.error());
 			return;
+		}
 	}
 
 	size_t ModelCount = 0;

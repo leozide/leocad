@@ -1175,37 +1175,27 @@ std::vector<QString> Project::GetLoadWarningDetails() const
 	return Details;
 }
 
-bool Project::Load(const QString& FileName, bool ShowErrors)
+lcResult<void> Project::Load(const QString& FileName)
 {
-	QWidget *parent = nullptr;
-	if (!mIsPreview)
-		parent = gMainWindow;
-
 	QFile File(FileName);
 
 	if (!File.open(QIODevice::ReadOnly))
-	{
-		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Load Model"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
-		return false;
-	}
+		return lcUnexpected(tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 
 	QByteArray FileData = File.readAll();
 
 	if (File.error() != QFileDevice::NoError)
-	{
-		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Load Model"), tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
-		return false;
-	}
+		return lcUnexpected(tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 
 	mModels.clear();
 	mDocumentBlocks.clear();
 	mLoadWarnings.clear();
 	mEmbeddedData.clear();
 	mEmbeddedDataIndex.clear();
+
 	lcGetPiecesLibrary()->ReleaseProjectPieceData(this);
 	SetFileName(FileName);
+
 	QFileInfo FileInfo(FileName);
 	QString Extension = FileInfo.suffix().toLower();
 
@@ -1246,11 +1236,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 	}
 
 	if (mModels.empty())
-	{
-		if (ShowErrors)
-			QMessageBox::warning(parent, tr("Load Model"), tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
-		return false;
-	}
+		return lcUnexpected(tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));
 
 	if (mModels.size() == 1)
 	{
@@ -1302,7 +1288,7 @@ bool Project::Load(const QString& FileName, bool ShowErrors)
 
 	mModified = false;
 
-	return true;
+	return lcResult<void>();
 }
 
 lcResult<void> Project::Save(const QString& FileName)
@@ -2803,10 +2789,10 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	if (SaveFileName.isEmpty())
 		return lcUnexpected(QString());
 
-	QFile File(SaveFileName);
+	QSaveFile File(SaveFileName);
 
 	if (!File.open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
 
 	QTextStream Stream(&File);
 
@@ -3080,6 +3066,18 @@ lcResult<void> Project::ExportCOLLADA(const QString& FileName)
 	Stream << "</scene>\r\n";
 
 	Stream << "</COLLADA>\r\n";
+	Stream.flush();
+
+	if (Stream.status() != QTextStream::Ok)
+	{
+		if (File.error() != QFileDevice::NoError)
+			return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
+
+		return lcUnexpected(tr("Error writing text to file '%1'.").arg(SaveFileName));
+	}
+
+	if (!File.commit())
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, File.errorString()));
 
 	return lcResult<void>();
 }
@@ -3099,13 +3097,13 @@ lcResult<void> Project::ExportCSV(const QString& FileName)
 	if (SaveFileName.isEmpty())
 		return lcUnexpected(QString());
 
-	lcDiskFile CSVFile(SaveFileName);
+	QSaveFile CSVFile(SaveFileName);
 	char Line[1024];
 
-	if (!CSVFile.Open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
+	if (!CSVFile.open(QIODevice::WriteOnly))
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, CSVFile.errorString()));
 
-	CSVFile.WriteLine("Part Name,Color,Quantity,Part ID,Color Code\n");
+	CSVFile.write("Part Name,Color,Quantity,Part ID,Color Code\n");
 
 	for (const auto& PartIt : PartsList)
 	{
@@ -3117,9 +3115,12 @@ lcResult<void> Project::ExportCSV(const QString& FileName)
 			Description.erase(std::remove(Description.begin(), Description.end(), ','), Description.end());
 
 			snprintf(Line, sizeof(Line), "\"%s\",\"%s\",%d,%s,%d\n", Description.c_str(), gColorList[ColorIt.first].Name, ColorIt.second, PieceData->mFileName, gColorList[ColorIt.first].Code);
-			CSVFile.WriteLine(Line);
+			CSVFile.write(Line);
 		}
 	}
+
+	if (!CSVFile.commit())
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, CSVFile.errorString()));
 
 	return lcResult<void>();
 }

@@ -142,7 +142,7 @@ public:
 	QString GetNewModelName(QWidget* ParentWidget, const QString& DialogTitle, const QString& CurrentName, const QStringList& ExistingModels) const;
 	void ShowModelListDialog();
 
-	bool Load(const QString& FileName, bool ShowErrors);
+	lcResult<void> Load(const QString& FileName);
 	void AddLoadWarning(const QString& Warning);
 	std::vector<QString> GetLoadWarningDetails() const;
 	lcResult<void> Save(const QString& FileName);

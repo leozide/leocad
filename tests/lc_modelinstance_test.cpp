@@ -83,6 +83,7 @@ private slots:
 	void TranslucentThumbnails();
 	void TextureDecalAlpha();
 	void TextureMipmaps();
+	void ProjectLoadErrors();
 	void CompletedExportEvaluatesExternalModels();
 	void ProjectFilesCategory();
 	void ProjectFilesRecoveryAndCycles();
@@ -332,7 +333,7 @@ void lcModelInstanceTests::TexmapFallbackLoading()
 
 		Project Document;
 
-		QVERIFY(Document.Load(File.fileName(), false));
+		QVERIFY(Document.Load(File.fileName()));
 
 		lcModel* Model = Document.GetMainModel();
 
@@ -599,7 +600,7 @@ void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 	File.close();
 
 	Project Document(true);
-	QVERIFY(Document.Load(File.fileName(), false));
+	QVERIFY(Document.Load(File.fileName()));
 	QVERIFY(Document.Save(File.fileName()).has_value());
 	QVERIFY(File.open(QIODevice::ReadOnly));
 	QCOMPARE(File.readAll(), Fixture);
@@ -614,7 +615,7 @@ void lcModelInstanceTests::EmbeddedDataAfterLastPieceDeletion()
 	QVERIFY(Document.Save(File.fileName()).has_value());
 
 	Project Reloaded(true);
-	QVERIFY(Reloaded.Load(File.fileName(), false));
+	QVERIFY(Reloaded.Load(File.fileName()));
 	QCOMPARE(Reloaded.GetModels().size(), size_t(1));
 	QVERIFY(Reloaded.GetMainModel()->GetPieces().empty());
 	QCOMPARE(Reloaded.GetMainModel()->GetCameras().size(), size_t(1));
@@ -664,7 +665,7 @@ void lcModelInstanceTests::ProjectFilesCategory()
 	QVERIFY(List);
 	QCOMPARE(List->rowCount(), 0);
 
-	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd")));
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	QVERIFY(!Library->AcquirePieceData("child.ldr", &Scope.Current, lcAcquirePieceDataFlag::None));
 	Widget.UpdateProjectCategories();
@@ -710,7 +711,7 @@ void lcModelInstanceTests::ProjectFilesCategory()
 	QVERIFY(SavedData.contains(" child.ldr"));
 	QVERIFY(!SavedData.contains("./"));
 	Project Reloaded;
-	QVERIFY(Reloaded.Load(Directory.filePath("host.mpd"), false));
+	QVERIFY(Reloaded.Load(Directory.filePath("host.mpd")));
 	QCOMPARE(Reloaded.GetMainModel()->GetPieces().size(), size_t(1));
 	QVERIFY(Reloaded.GetMainModel()->GetPieces()[0]->mPieceData->IsProject());
 	QCOMPARE(Reloaded.GetMainModel()->GetPieces()[0]->GetID(), QString("child.ldr"));
@@ -762,7 +763,7 @@ void lcModelInstanceTests::ProjectFilesRecoveryAndCycles()
 		}
 	} Scope;
 
-	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd")));
 	lcPiecesLibrary* Library = lcGetPiecesLibrary();
 	lcPieceData* Missing = Scope.Current.GetMainModel()->GetPieces()[0]->mPieceData.Get();
 	lcPieceData* Blocked = Scope.Current.GetMainModel()->GetPieces()[1]->mPieceData.Get();
@@ -846,7 +847,7 @@ void lcModelInstanceTests::ProjectFilePopupOwnership()
 			gMainWindow = PreviousWindow;
 		}
 	} Scope;
-	QVERIFY(Scope.Current.Load(HostFile.fileName(), false));
+	QVERIFY(Scope.Current.Load(HostFile.fileName()));
 	lcMainWindow Window;
 	bool Picked = false;
 	QTimer::singleShot(0, [&Picked]()
@@ -904,7 +905,7 @@ void lcModelInstanceTests::ProjectFileInsertionValidation()
 			gMainWindow = PreviousWindow;
 		}
 	} Scope;
-	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd"), false));
+	QVERIFY(Scope.Current.Load(Directory.filePath("host.mpd")));
 	lcModel* Model = Scope.Current.GetMainModel();
 	lcMainWindow Window;
 	Window.CreateWidgets();
@@ -962,7 +963,7 @@ void lcModelInstanceTests::FindReplaceViewIsolation()
 			gMainWindow = PreviousWindow;
 		}
 	} Scope;
-	QVERIFY(Scope.Current.Load(File.fileName(), false));
+	QVERIFY(Scope.Current.Load(File.fileName()));
 	lcModel* Model = Scope.Current.GetMainModel();
 	lcMainWindow Window;
 	Window.CreateWidgets();
@@ -1050,6 +1051,28 @@ void lcModelInstanceTests::FindReplaceViewIsolation()
 	QVERIFY(!lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
 }
 
+void lcModelInstanceTests::ProjectLoadErrors()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	Project Model;
+	const QString MissingPath = Directory.filePath("missing.ldr");
+	const lcResult<void> Missing = Model.Load(MissingPath);
+	QVERIFY(!Missing);
+	QVERIFY(Missing.error().contains(MissingPath));
+	QVERIFY(Missing.error().contains("Error reading"));
+
+	const QString InvalidPath = Directory.filePath("invalid.lcd");
+	QFile InvalidFile(InvalidPath);
+	QVERIFY(InvalidFile.open(QIODevice::WriteOnly));
+	QCOMPARE(InvalidFile.write("invalid binary file"), qint64(19));
+	InvalidFile.close();
+	const lcResult<void> Invalid = Model.Load(InvalidPath);
+	QVERIFY(!Invalid);
+	QVERIFY(Invalid.error().contains(InvalidPath));
+	QVERIFY(Invalid.error().contains("not recognized"));
+}
+
 void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()
 {
 	QTemporaryDir Directory;
@@ -1066,7 +1089,7 @@ void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()
 	ChildFile.close();
 
 	Project Host;
-	QVERIFY(Host.Load(MainFile.fileName(), false));
+	QVERIFY(Host.Load(MainFile.fileName()));
 	lcModel* External = Host.GetMainModel()->GetPieces()[0]->mPieceData->GetProject()->GetMainModel();
 	QCOMPARE(External->GetCurrentStep(), lcStep(1));
 	QCOMPARE(External->GetLastStep(), lcStep(2));
@@ -1093,6 +1116,28 @@ void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()
 	QVERIFY(OBJFile.open(QIODevice::ReadOnly));
 	QVERIFY(OBJFile.readAll().contains("v 90.00 "));
 	QCOMPARE(External->GetEvaluatedStep(), lcStep(1));
+
+	const QString ColladaName = Directory.filePath("completed.dae");
+	QFile ColladaFile(ColladaName);
+	QVERIFY(ColladaFile.open(QIODevice::WriteOnly));
+	QCOMPARE(ColladaFile.write("old contents"), qint64(12));
+	ColladaFile.close();
+	QVERIFY(Host.ExportCOLLADA(ColladaName));
+	QVERIFY(ColladaFile.open(QIODevice::ReadOnly));
+	QVERIFY(ColladaFile.readAll().contains("</COLLADA>"));
+	const lcResult<void> ColladaError = Host.ExportCOLLADA(Directory.filePath("missing/completed.dae"));
+	QVERIFY(!ColladaError);
+	QVERIFY(ColladaError.error().contains("completed.dae"));
+
+	const QString CSVName = Directory.filePath("completed.csv");
+	QFile CSVFile(CSVName);
+	QVERIFY(CSVFile.open(QIODevice::WriteOnly));
+	QCOMPARE(CSVFile.write("old contents"), qint64(12));
+	CSVFile.close();
+	QVERIFY(Host.ExportCSV(CSVName));
+	QVERIFY(CSVFile.open(QIODevice::ReadOnly));
+	QVERIFY(CSVFile.readAll().startsWith("Part Name,Color,Quantity"));
+	QVERIFY(!Host.ExportCSV(Directory.filePath("missing/completed.csv")));
 }
 
 void lcModelInstanceTests::TexturedDirectGeometry3DS()
@@ -1106,7 +1151,7 @@ void lcModelInstanceTests::TexturedDirectGeometry3DS()
 	MainFile.close();
 
 	Project Host;
-	QVERIFY(Host.Load(MainFile.fileName(), false));
+	QVERIFY(Host.Load(MainFile.fileName()));
 	lcLoadDefaultColors(lcStudStyle::Plain);
 	lcModel* Main = Host.GetMainModel();
 	QVERIFY(Main->HasDirectGeometry());
@@ -1219,7 +1264,7 @@ void lcModelInstanceTests::RotateToolMouseShortcuts()
 			gMouseShortcuts = PreviousShortcuts;
 		}
 	} Scope;
-	QVERIFY(Scope.Current.Load(File.fileName(), false));
+	QVERIFY(Scope.Current.Load(File.fileName()));
 	lcModel* Model = Scope.Current.GetMainModel();
 	lcMainWindow Window;
 	Window.CreateWidgets();
@@ -1315,7 +1360,7 @@ void lcModelInstanceTests::RepeatedInstances()
 	lcApplication* Application = gApplication;
 	Application->mProject = new Project();
 	Project* Project = Application->mProject;
-	QVERIFY(Project->Load(File.fileName(), false));
+	QVERIFY(Project->Load(File.fileName()));
 
 	lcLoadDefaultColors(lcStudStyle::Plain);
 
@@ -2464,7 +2509,7 @@ void lcModelInstanceTests::TranslucentThumbnails()
 		"4 16 -20 4 -20 20 4 -20 20 4 20 -20 4 20\n");
 	File.close();
 	Project Project;
-	QVERIFY(Project.Load(File.fileName(), false));
+	QVERIFY(Project.Load(File.fileName()));
 	QCOMPARE(Project.GetModels().size(), size_t(2));
 
 	for (const std::unique_ptr<lcModel>& Model : Project.GetModels())

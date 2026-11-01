@@ -9,6 +9,7 @@ class lcShadowLibrary
 public:
 	// An empty path, or one without a shadow library, leaves all parts without connection shapes.
 	static bool SetPath(const QString& Path);
+	static bool IsLibraryFolder(const QString& Path);
 	static bool IsLoaded();
 
 	// PartName is a library file name such as "3001.dat" or "s/3001s01.dat".

@@ -7013,16 +7013,6 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <translation>Algunos cambios no tendrán efecto hasta que reinicies LeoCAD.</translation>
     </message>
     <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Load Shadow Library</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../common/lc_application.cpp" line="836"/>
-        <source>Could not find a shadow library in &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Parts library and Anti-aliasing changes will only take effect the next time you start LeoCAD.</source>
         <translation type="vanished">Los cambios en la biblioteca de piezas y anti-aliasing no tendrán efecto hasta que reinicies LeoCAD.</translation>
     </message>
@@ -14306,6 +14296,11 @@ Las tarjetas de video no compatibles usan tinte frontal y bordes coloreados.</tr
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1447"/>
         <source>Export Shortcuts</source>
         <translation>Exportar atajos</translation>
+    </message>
+    <message>
+        <location filename="../qt/lc_qpreferencesdialog.cpp" line="545"/>
+        <source>Could not find a shadow library in &apos;%1&apos;.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/lc_qpreferencesdialog.cpp" line="1434"/>

@@ -16,7 +16,7 @@ bool lcShadowLibrary::SetPath(const QString& Path)
 	mShadowLines.clear();
 	mCylinders.clear();
 
-	if (Path.isEmpty())
+	if (!IsLibraryFolder(Path))
 		return false;
 
 	const QDir Root(Path);
@@ -35,6 +35,22 @@ bool lcShadowLibrary::SetPath(const QString& Path)
 	}
 
 	return !mShadowFiles.empty();
+}
+
+bool lcShadowLibrary::IsLibraryFolder(const QString& Path)
+{
+	if (Path.isEmpty())
+		return false;
+
+	// Reads a single file. An LDraw parts folder has the same layout but no LDCad meta commands.
+	QDirIterator It(QDir(Path).filePath(QLatin1String("parts")), QStringList() << QLatin1String("*.dat"), QDir::Files);
+
+	if (!It.hasNext())
+		return false;
+
+	QFile File(It.next());
+
+	return File.open(QIODevice::ReadOnly) && File.readAll().contains("!LDCAD ");
 }
 
 bool lcShadowLibrary::IsLoaded()

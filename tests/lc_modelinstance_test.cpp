@@ -84,6 +84,7 @@ private slots:
 	void TextureDecalAlpha();
 	void TextureMipmaps();
 	void ProjectLoadErrors();
+	void WavefrontSaveFailures();
 	void CompletedExportEvaluatesExternalModels();
 	void ProjectFilesCategory();
 	void ProjectFilesRecoveryAndCycles();
@@ -1049,6 +1050,36 @@ void lcModelInstanceTests::FindReplaceViewIsolation()
 		QVERIFY(lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
 	}
 	QVERIFY(!lcGetPiecesLibrary()->FindPieceData("find-view-temporary.dat", &Scope.Current));
+}
+
+void lcModelInstanceTests::WavefrontSaveFailures()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	lcLoadDefaultColors(lcStudStyle::Plain);
+	Project Model;
+	const QString OBJPath = Directory.filePath("model.obj");
+	QFile OBJFile(OBJPath);
+	QVERIFY(OBJFile.open(QIODevice::WriteOnly));
+	QCOMPARE(OBJFile.write("existing OBJ"), qint64(12));
+	OBJFile.close();
+
+	const QString MaterialPath = Directory.filePath("model.mtl");
+	QVERIFY(QDir().mkdir(MaterialPath));
+	const lcResult<void> Result = Model.ExportWavefront(OBJPath);
+	QVERIFY(!Result);
+	QVERIFY(Result.error().contains(MaterialPath));
+	QVERIFY(OBJFile.open(QIODevice::ReadOnly));
+	QCOMPARE(OBJFile.readAll(), QByteArray("existing OBJ"));
+	OBJFile.close();
+
+	QVERIFY(QDir().rmdir(MaterialPath));
+	QVERIFY(Model.ExportWavefront(OBJPath));
+	QVERIFY(OBJFile.open(QIODevice::ReadOnly));
+	QVERIFY(OBJFile.readAll().contains("mtllib model.mtl"));
+	QFile MaterialFile(MaterialPath);
+	QVERIFY(MaterialFile.open(QIODevice::ReadOnly));
+	QVERIFY(MaterialFile.readAll().contains("newmtl"));
 }
 
 void lcModelInstanceTests::ProjectLoadErrors()
@@ -2869,6 +2900,20 @@ void lcModelInstanceTests::CommandLineOptions()
 
 	QTemporaryFile Model;
 	QVERIFY(Model.open());
+	QTemporaryDir MissingDirectory;
+	QVERIFY(MissingDirectory.isValid());
+	const QString MissingPath = MissingDirectory.filePath("missing.ldr");
+	for (const QStringList& Arguments : {
+		QStringList{ "leocad", MissingPath },
+		QStringList{ "leocad", "--export-csv", "out.csv", MissingPath },
+		QStringList{ "leocad", MissingPath, "--export-csv", "out.csv" },
+		QStringList{ "leocad", Model.fileName(), MissingPath } })
+	{
+		const lcCommandLineOptions MissingInput(Arguments);
+		QVERIFY(MissingInput.mParseOK);
+		QCOMPARE(MissingInput.mProjectName, MissingPath);
+		QVERIFY(MissingInput.mStdErr.isEmpty());
+	}
 	const lcCommandLineOptions Image({ "leocad", Model.fileName(), "-i", "out.png",
 		"--width", "123", "--height", "456", "--aa-samples", "4", "--stud-style", "3", "--viewpoint", "front" });
 	QVERIFY(Image.mParseOK);

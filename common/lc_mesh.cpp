@@ -360,7 +360,7 @@ void lcMesh::ExportPOVRay(lcFile& File, const char* MeshName, const char** Color
 }
 
 template<typename IndexType>
-void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset)
+void lcMesh::ExportWavefrontIndices(QIODevice& File, int DefaultColorIndex, int VertexOffset)
 {
 	char Line[1024];
 
@@ -378,7 +378,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 		else
 			snprintf(Line, sizeof(Line), "usemtl %s\n", gColorList[Section->ColorIndex].SafeName);
 
-		File.WriteLine(Line);
+		File.write(Line);
 
 		if (Section->PrimitiveType == LC_MESH_TRIANGLES)
 		{
@@ -391,7 +391,7 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 				if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 				{
 					snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1, idx1, idx2, idx2, idx3, idx3);
-					File.WriteLine(Line);
+					File.write(Line);
 				}
 			}
 		}
@@ -406,16 +406,16 @@ void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int Ver
 				if (idx1 != idx2 && idx1 != idx3 && idx2 != idx3)
 				{
 					snprintf(Line, sizeof(Line), "f %ld//%ld %ld//%ld %ld//%ld\n", idx1 + mNumVertices, idx1 + mNumVertices, idx2 + mNumVertices, idx2 + mNumVertices, idx3 + mNumVertices, idx3 + mNumVertices);
-					File.WriteLine(Line);
+					File.write(Line);
 				}
 			}
 		}
 	}
 
-	File.WriteLine("\n");
+	File.write("\n");
 }
 
-void lcMesh::ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset)
+void lcMesh::ExportWavefrontIndices(QIODevice& File, int DefaultColorIndex, int VertexOffset)
 {
 	if (mIndexType == GL_UNSIGNED_SHORT)
 		ExportWavefrontIndices<GLushort>(File, DefaultColorIndex, VertexOffset);

@@ -97,8 +97,8 @@ public:
 	void ExportPOVRay(lcFile& File, const char* MeshName, const char** ColorTable);
 
 	template<typename IndexType>
-	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
-	void ExportWavefrontIndices(lcFile& File, int DefaultColorIndex, int VertexOffset);
+	void ExportWavefrontIndices(QIODevice& File, int DefaultColorIndex, int VertexOffset);
+	void ExportWavefrontIndices(QIODevice& File, int DefaultColorIndex, int VertexOffset);
 
 	template<typename IndexType>
 	bool MinIntersectDist(const lcVector3& Start, const lcVector3& End, float& MinDist, lcVector3& HitPlane);

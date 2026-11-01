@@ -4182,26 +4182,26 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 	if (SaveFileName.isEmpty())
 		return lcUnexpected(QString());
 
-	lcDiskFile OBJFile(SaveFileName);
+	QSaveFile OBJFile(SaveFileName);
 	char Line[1024];
 
-	if (!OBJFile.Open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(SaveFileName));
+	if (!OBJFile.open(QIODevice::WriteOnly))
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, OBJFile.errorString()));
 
-	OBJFile.WriteLine("# Model exported from LeoCAD\n");
+	OBJFile.write("# Model exported from LeoCAD\n");
 
 	QFileInfo SaveInfo(SaveFileName);
 	QString MaterialFileName = QDir(SaveInfo.absolutePath()).absoluteFilePath(SaveInfo.completeBaseName() + QLatin1String(".mtl"));
 
 	snprintf(Line, sizeof(Line), "#\n\nmtllib %s\n\n", QFileInfo(MaterialFileName).fileName().toLatin1().constData());
-	OBJFile.WriteLine(Line);
+	OBJFile.write(Line);
 
-	lcDiskFile MaterialFile(MaterialFileName);
+	QSaveFile MaterialFile(MaterialFileName);
 
-	if (!MaterialFile.Open(QIODevice::WriteOnly))
-		return lcUnexpected(tr("Could not open file '%1' for writing.").arg(MaterialFileName));
+	if (!MaterialFile.open(QIODevice::WriteOnly))
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(MaterialFileName, MaterialFile.errorString()));
 
-	MaterialFile.WriteLine("# Colors used by LeoCAD\n\n");
+	MaterialFile.write("# Colors used by LeoCAD\n\n");
 
 	for (const lcColor& Color : gColorList)
 	{
@@ -4210,7 +4210,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 		else
 			snprintf(Line, sizeof(Line), "newmtl %s\nKd %.2f %.2f %.2f\n\n", Color.SafeName, Color.Value[0], Color.Value[1], Color.Value[2]);
 
-		MaterialFile.WriteLine(Line);
+		MaterialFile.write(Line);
 	}
 
 	auto WritePositions=[&Line, &OBJFile](const auto* Verts, int VertexCount, const lcMatrix44& ModelWorld)
@@ -4219,7 +4219,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 		{
 			lcVector3 Position = lcMul31(Verts[VertexIndex].Position, ModelWorld);
 			snprintf(Line, sizeof(Line), "v %.2f %.2f %.2f\n", Position[0], Position[1], Position[2]);
-			OBJFile.WriteLine(Line);
+			OBJFile.write(Line);
 		}
 	};
 
@@ -4229,7 +4229,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 		{
 			lcVector3 Normal = lcMul30(lcUnpackNormal(Verts[VertexIndex].Normal), ModelWorld);
 			snprintf(Line, sizeof(Line), "vn %.2f %.2f %.2f\n", Normal[0], Normal[1], Normal[2]);
-			OBJFile.WriteLine(Line);
+			OBJFile.write(Line);
 		}
 	};
 
@@ -4248,7 +4248,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 
 		WritePositions(VertsTextured, Mesh->mNumTexturedVertices, ModelPart.WorldMatrix);
 
-		OBJFile.WriteLine("#\n\n");
+		OBJFile.write("#\n\n");
 	}
 
 	for (const lcModelPartsEntry& ModelPart : ModelParts)
@@ -4266,7 +4266,7 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 
 		WriteNormals(VertsTextured, Mesh->mNumTexturedVertices, ModelPart.WorldMatrix);
 
-		OBJFile.WriteLine("#\n\n");
+		OBJFile.write("#\n\n");
 	}
 
 	int PieceCount = 0;
@@ -4280,11 +4280,20 @@ lcResult<void> Project::ExportWavefront(const QString& FileName)
 			continue;
 
 		snprintf(Line, sizeof(Line), "g Piece%.3d\n", PieceCount++);
-		OBJFile.WriteLine(Line);
+		OBJFile.write(Line);
 
 		Mesh->ExportWavefrontIndices(OBJFile, ModelPart.ColorIndex, BaseVertex);
 		BaseVertex += Mesh->mNumVertices + Mesh->mNumTexturedVertices;
 	}
+
+	if (!OBJFile.flush() || OBJFile.error() != QFileDevice::NoError)
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, OBJFile.errorString()));
+
+	if (!MaterialFile.commit())
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(MaterialFileName, MaterialFile.errorString()));
+
+	if (!OBJFile.commit())
+		return lcUnexpected(tr("Error writing to file '%1':\n%2").arg(SaveFileName, OBJFile.errorString()));
 
 	return lcResult<void>();
 }

@@ -136,12 +136,7 @@ void lcCommandLineOptions::ParseArguments(QStringList& Arguments)
 			continue;
 
 		if (Option[0] != '-')
-		{
-			if (QFileInfo(Option).isReadable())
-				mProjectName = Option;
-			else
-				mStdErr += tr("The file '%1' is not readable.\n").arg(Option);
-		}
+			mProjectName = Option;
 		else
 			ParseOption(Option, Arguments);
 	}

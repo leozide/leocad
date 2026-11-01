@@ -512,7 +512,7 @@ void lcViewWidget::mouseMoveEvent(QMouseEvent* MouseEvent)
 
 void lcViewWidget::wheelEvent(QWheelEvent* WheelEvent)
 {
-	if (WheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
+	if (WheelEvent->phase() != Qt::NoScrollPhase)
 	{
 		switch (WheelEvent->phase())
 		{

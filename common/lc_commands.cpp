@@ -1396,6 +1396,30 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_VIEW_COLORS_TOGGLE_SOLID
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Colors.ToggleSolid"),
+		QT_TRANSLATE_NOOP("Menu", "Solid Colors"),
+		QT_TRANSLATE_NOOP("Status", "Expand or collapse the solid colors"),
+		"",
+		""
+	},
+	// LC_VIEW_COLORS_TOGGLE_TRANSLUCENT
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Colors.ToggleTranslucent"),
+		QT_TRANSLATE_NOOP("Menu", "Translucent Colors"),
+		QT_TRANSLATE_NOOP("Status", "Expand or collapse the translucent colors"),
+		"",
+		""
+	},
+	// LC_VIEW_COLORS_TOGGLE_SPECIAL
+	{
+		QT_TRANSLATE_NOOP("Action", "View.Colors.ToggleSpecial"),
+		QT_TRANSLATE_NOOP("Menu", "Special Colors"),
+		QT_TRANSLATE_NOOP("Status", "Expand or collapse the special colors"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

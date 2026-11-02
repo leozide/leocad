@@ -137,6 +137,7 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	ui->fixedDirectionKeys->setChecked(mOptions->Preferences.mFixedAxes);
 	ui->autoLoadMostRecent->setChecked(mOptions->Preferences.mAutoLoadMostRecent);
 	ui->RestoreTabLayout->setChecked(mOptions->Preferences.mRestoreTabLayout);
+	ui->LoadPiecesBeforeShowing->setChecked(mOptions->Preferences.mLoadPiecesBeforeShowing);
 	ui->AutomateEdgeColor->setChecked(mOptions->Preferences.mAutomateEdgeColor);
 
 	ui->antiAliasing->setChecked(mOptions->AASamples != 1);
@@ -390,6 +391,7 @@ void lcPreferencesDialog::accept()
 	mOptions->Preferences.mFixedAxes = ui->fixedDirectionKeys->isChecked();
 	mOptions->Preferences.mAutoLoadMostRecent = ui->autoLoadMostRecent->isChecked();
 	mOptions->Preferences.mRestoreTabLayout = ui->RestoreTabLayout->isChecked();
+	mOptions->Preferences.mLoadPiecesBeforeShowing = ui->LoadPiecesBeforeShowing->isChecked();
 
 	if (!ui->antiAliasing->isChecked())
 		mOptions->AASamples = 1;

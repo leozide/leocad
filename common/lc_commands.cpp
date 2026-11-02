@@ -1396,6 +1396,14 @@ const lcCommand gCommands[] =
 		"",
 		""
 	},
+	// LC_FILE_TOGGLE_LOAD_PIECES_BEFORE_SHOWING
+	{
+		QT_TRANSLATE_NOOP("Action", "File.ToggleLoadPiecesBeforeShowing"),
+		QT_TRANSLATE_NOOP("Menu", "Load All Pieces Before Showing"),
+		QT_TRANSLATE_NOOP("Status", "Toggle waiting for every piece to load before showing a model"),
+		"",
+		""
+	},
 	// LC_PIECE_INSERT
 	{
 		QT_TRANSLATE_NOOP("Action", "Piece.Insert"),

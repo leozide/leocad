@@ -226,6 +226,7 @@ SOURCES += \
 	common/lc_library.cpp \
 	common/lc_lxf.cpp \
 	common/lc_mainwindow.cpp \
+	common/lc_math.cpp \
 	common/lc_mesh.cpp \
 	common/lc_meshloader.cpp \
 	common/lc_minifigdialog.cpp \

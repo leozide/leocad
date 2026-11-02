@@ -120,14 +120,19 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	for (int ConnectionIndex2 = 0; ConnectionIndex2 < static_cast<int>(Connections2.size()); ConnectionIndex2++)
 	{
 		const lcTrainTrackConnection& Connection2 = Connections2[ConnectionIndex2];
+
+		if (!AreConnectionsCompatible(TrainTrackInfo1->GetConnections()[ConnectionIndex1].Type, Connection2.Type, false))
+			continue;
+
 		const lcMatrix44 Transform2 = lcMul(Connection2.Transform, Piece2->mModelWorld);
 
 		if (lcLengthSquared(Transform1.GetTranslation() - Transform2.GetTranslation()) > 0.1f)
 			continue;
 
 		float Dot = lcDot3(Transform1[0], Transform2[0]);
+		float UpDot = lcDot3(Transform1[2], Transform2[2]);
 
-		if (Dot < -0.99f && Dot > -1.01f)
+		if (Dot < -0.99f && Dot > -1.01f && UpDot > 0.99f && UpDot < 1.01f)
 			return ConnectionIndex2;
 	}
 

@@ -2952,7 +2952,7 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 		{
 			quint32 FocusSection = Last->GetFocusSection();
 
-			if (FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
+			if (Section == LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 				Section = FocusSection;
 
 			if (!Last->IsFocused())
@@ -3162,7 +3162,7 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece.get() == TrackPiece || !Piece->mPieceData->GetTrainTrackInfo() || (IgnoreSelected && Piece->IsSelected()))
+		if (Piece.get() == TrackPiece || !Piece->mPieceData->GetTrainTrackInfo() || !Piece->IsVisible(mCurrentStep) || (IgnoreSelected && Piece->IsSelected()))
 			continue;
 
 		for (int ConnectionIndex = 0; ConnectionIndex < ConnectionCount; ConnectionIndex++)

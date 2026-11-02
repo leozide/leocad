@@ -142,6 +142,10 @@ types under nested instance transforms and for root-model export.
 Mesh checks reject section-count overflow and malformed cached draw ranges,
 primitive counts, and vertex indices with both 16-bit and 32-bit index buffers.
 
+Train-track checks cover connection groups, sleeper compatibility, endpoint
+position and orientation, visibility across steps, selected-piece exclusion,
+and insertion at an explicitly clicked endpoint or the focused endpoint.
+
 Security checks exercise long LGEO color-table tokens and reject unsafe add-on
 archive paths, archived and existing symlinks, corrupt checksums, and truncated
 entries. ZIP checks cover both stored and deflated entries, including deliberate

@@ -21,6 +21,7 @@
 #include "lc_shortcuts.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_texture.h"
+#include "lc_traintrack.h"
 #include "lc_view.h"
 #include "lc_viewwidget.h"
 #include "lc_zipfile.h"
@@ -76,6 +77,11 @@ private slots:
 	void AxisAlignedRotations_data();
 	void AxisAlignedRotations();
 	void AxisAlignedRotationTolerance();
+	void TrainTrackConnections_data();
+	void TrainTrackConnections();
+	void TrainTrackConnectionVisibility();
+	void TrainTrackInsertionSection_data();
+	void TrainTrackInsertionSection();
 	void RotateToolMouseShortcuts_data();
 	void RotateToolMouseShortcuts();
 	void RepeatedInstances();
@@ -1529,6 +1535,155 @@ void lcModelInstanceTests::TexturedDirectGeometry3DS()
 		QCOMPARE(ReadU16(FaceChunk + 8 + Index * 2), quint16(Index));
 		QCOMPARE(ReadU16(FaceChunk + 16 + Index * 2), quint16(Index + 3));
 	}
+}
+
+void lcModelInstanceTests::TrainTrackConnections_data()
+{
+	QTest::addColumn<int>("FirstSleeper");
+	QTest::addColumn<int>("SecondSleeper");
+	QTest::addColumn<bool>("SameGroup");
+	QTest::addColumn<float>("Roll");
+	QTest::addColumn<float>("Offset");
+	QTest::addColumn<bool>("Connected");
+
+	for (int First = 0; First < 3; First++)
+		for (int Second = 0; Second < 3; Second++)
+			for (bool SameGroup : { false, true })
+			{
+				const bool Compatible = (First == 0 && Second == 0) || (First == 1 && Second == 2) || (First == 2 && Second == 1);
+				QTest::newRow(qPrintable(QString("sleepers-%1-%2-group-%3").arg(First).arg(Second).arg(SameGroup)))
+					<< First << Second << SameGroup << 0.0f << 0.0f << (SameGroup && Compatible);
+			}
+
+	QTest::newRow("upside-down") << 0 << 0 << true << 180.0f << 0.0f << false;
+	QTest::newRow("rolled") << 0 << 0 << true << 90.0f << 0.0f << false;
+	QTest::newRow("position-tolerance") << 0 << 0 << true << 0.0f << 0.1f << true;
+	QTest::newRow("separated") << 0 << 0 << true << 0.0f << 0.4f << false;
+}
+
+void lcModelInstanceTests::TrainTrackConnections()
+{
+	QFETCH(int, FirstSleeper);
+	QFETCH(int, SecondSleeper);
+	QFETCH(bool, SameGroup);
+	QFETCH(float, Roll);
+	QFETCH(float, Offset);
+	QFETCH(bool, Connected);
+
+	Project Document(true);
+	lcModel* Model = Document.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 track-first.dat\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 track-second.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Document);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* First = Model->GetPieces()[0].get();
+	lcPiece* Second = Model->GetPieces()[1].get();
+	First->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44Identity(), { 1, static_cast<lcTrainTrackConnectionSleeper>(FirstSleeper) } } }, 16, true));
+	Second->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44Identity(), { SameGroup ? size_t(1) : size_t(2), static_cast<lcTrainTrackConnectionSleeper>(SecondSleeper) } } }, 16, true));
+
+	// Test both ordinary placement and tracks tilted/translated together.
+	for (const lcMatrix44& Parent : { lcMatrix44Identity(), lcMatrix44(lcMatrix33RotationY(0.7f), lcVector3(100, -50, 20)) })
+	{
+		First->Initialize(Parent, 1);
+		lcMatrix44 Transform = lcMul(lcMatrix44RotationX(Roll * LC_DTOR), lcMatrix44RotationZ(LC_PI));
+		Transform.SetTranslation(lcVector3(Offset, 0, 0));
+		Second->Initialize(lcMul(Transform, Parent), 1);
+		QCOMPARE(lcTrainTrackInfo::GetPieceConnectionIndex(First, 0, Second), Connected ? 0 : -1);
+		QCOMPARE(lcTrainTrackInfo::GetPieceConnectionIndex(Second, 0, First), Connected ? 0 : -1);
+	}
+}
+
+void lcModelInstanceTests::TrainTrackConnectionVisibility()
+{
+	Project Document(true);
+	lcModel* Model = Document.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 track-visibility.dat\n"
+		"1 16 320 0 0 1 0 0 0 1 0 0 0 1 track-visibility.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Document);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* First = Model->GetPieces()[0].get();
+	lcPiece* Second = Model->GetPieces()[1].get();
+	First->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } }
+	}, 16, true));
+
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(First->IsTrainTrackConnected(0));
+	QVERIFY(!First->IsTrainTrackConnected(1));
+	Second->SetHidden(true);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(!First->IsTrainTrackConnected(0));
+	Second->SetHidden(false);
+	Second->SetStepShow(2);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(!First->IsTrainTrackConnected(0));
+	Model->SetTemporaryStep(2);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(First->IsTrainTrackConnected(0));
+	Second->SetStepHide(3);
+	Model->SetTemporaryStep(3);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(!First->IsTrainTrackConnected(0));
+	Model->SetTemporaryStep(2);
+	Second->SetSelected(true);
+	Model->UpdateTrainTrackConnections(First, true);
+	QVERIFY(!First->IsTrainTrackConnected(0));
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(First->IsTrainTrackConnected(0));
+}
+
+void lcModelInstanceTests::TrainTrackInsertionSection_data()
+{
+	QTest::addColumn<bool>("ExplicitSection");
+	QTest::newRow("clicked-endpoint") << true;
+	QTest::newRow("focused-endpoint") << false;
+}
+
+void lcModelInstanceTests::TrainTrackInsertionSection()
+{
+	QFETCH(bool, ExplicitSection);
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 track-insertion.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	lcPiece* First = Model->GetPieces()[0].get();
+	First->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } }
+	}, 16, true));
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	Model->SetSelectionAndFocusAction({}, First, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST, lcSelectionMode::Single);
+	Model->UpdateTrainTrackConnections(First, false);
+	lcPiece* Inserted = Model->AddPiece(First->mPieceData.Get(), ExplicitSection ? LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST + 1 : LC_PIECE_SECTION_INVALID);
+	QVERIFY(Inserted);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	const lcVector3 Expected(ExplicitSection ? -320.0f : 320.0f, 0, 0);
+	QVERIFY(lcLength(Inserted->mModelWorld.GetTranslation() - Expected) < 0.001f);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(First->IsTrainTrackConnected(ExplicitSection ? 1 : 0));
 }
 
 void lcModelInstanceTests::AxisAlignedRotations_data()

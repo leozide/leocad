@@ -13,6 +13,8 @@ private slots:
 	void MathTriangleClipping();
 	void MathRayIntersections();
 	void MathSphereRayDistances();
+	void MathSphereSurfaceIntersections();
+	void MathClosestPointDegenerateSegment();
 	void MathZoomTranslation();
 	void PropertyKeysAffectEquality();
 	void LastKeyFrameTracksTimeEdits();

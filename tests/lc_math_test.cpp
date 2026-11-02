@@ -210,6 +210,49 @@ void lcTests::MathSphereRayDistances()
 	QCOMPARE(Distance, 0.0f);
 }
 
+void lcTests::MathSphereSurfaceIntersections()
+{
+	const lcVector3 Center(10, 20, 30);
+	lcVector3 Intersection;
+	for (float Step : { 0.5f, 1.0f, 10.0f })
+	{
+		QVERIFY(lcSphereRayIntersection(Center, 1, Center, Center + lcVector3(Step, 0, 0), Intersection));
+		QVERIFY(lcLength(Intersection - (Center + lcVector3(1, 0, 0))) < 0.00001f);
+		// An interior origin may point away from the center and still hit the exit.
+		const lcVector3 Inside = Center + lcVector3(0.5f, 0, 0);
+		QVERIFY(lcSphereRayIntersection(Center, 1, Inside, Inside + lcVector3(Step, 0, 0), Intersection));
+		QVERIFY(lcLength(Intersection - (Center + lcVector3(1, 0, 0))) < 0.00001f);
+		const lcVector3 Outside = Center + lcVector3(-3, 0, 0);
+		QVERIFY(lcSphereRayIntersection(Center, 1, Outside, Outside + lcVector3(Step, 0, 0), Intersection));
+		QVERIFY(lcLength(Intersection - (Center + lcVector3(-1, 0, 0))) < 0.00001f);
+		QVERIFY(!lcSphereRayIntersection(Center, 1, Outside, Outside - lcVector3(Step, 0, 0), Intersection));
+	}
+
+	const lcVector3 Diagonal(0.6f, 0.8f, 0);
+	QVERIFY(lcSphereRayIntersection(Center, 2, Center, Center + Diagonal, Intersection));
+	QVERIFY(lcLength(Intersection - Center - 2 * Diagonal) < 0.00001f);
+	const lcVector3 Tangent = Center + lcVector3(-3, 1, 0);
+	QVERIFY(lcSphereRayIntersection(Center, 1, Tangent, Tangent + lcVector3(1, 0, 0), Intersection));
+	QVERIFY(lcLength(Intersection - Center - lcVector3(0, 1, 0)) < 0.00001f);
+	const lcVector3 Surface = Center + lcVector3(1, 0, 0);
+	QVERIFY(lcSphereRayIntersection(Center, 1, Surface, Surface + lcVector3(1, 0, 0), Intersection));
+	QVERIFY(lcLength(Intersection - Surface) < 0.00001f);
+	Intersection = lcVector3(4, 5, 6);
+	QVERIFY(!lcSphereRayIntersection(Center, 1, Center, Center, Intersection));
+	QVERIFY(Intersection == lcVector3(4, 5, 6));
+}
+
+void lcTests::MathClosestPointDegenerateSegment()
+{
+	const lcVector3 Point(4, 6, 3), Start(1, 2, 3);
+	QVERIFY(lcRayPointClosestPoint(Point, Start, Start) == Start);
+	QCOMPARE(lcRayPointDistance(Point, Start, Start), 5.0f);
+	const lcVector3 End(5, 2, 3);
+	QVERIFY(lcRayPointClosestPoint(Point, Start, End) == lcVector3(4, 2, 3));
+	QVERIFY(lcRayPointClosestPoint(lcVector3(-1, 6, 3), Start, End) == Start);
+	QVERIFY(lcRayPointClosestPoint(lcVector3(9, 6, 3), Start, End) == End);
+}
+
 void lcTests::MathZoomTranslation()
 {
 	const lcVector3 Eye(0, 0, 10000), Target(0, 0, 0), Up(0, 1, 0);

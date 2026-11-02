@@ -1576,21 +1576,35 @@ inline bool lcBoundingBoxRayIntersectDistance(const lcVector3& Min, const lcVect
 
 inline bool lcSphereRayIntersection(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, lcVector3& Intersection)
 {
-	const lcVector3 RayDirection = lcNormalize(End - Start);
-	const lcVector3 RayCenter = Center - Start;
-	const float RayCenterSquared = lcDot(RayCenter, RayCenter);
-	const float ClosestApproach = lcDot(RayCenter, RayDirection);
-
-	if (ClosestApproach < 0)
+	if (Radius < 0.0f)
 		return false;
 
-	const float HalfCordSquared = (Radius * Radius) - RayCenterSquared + (ClosestApproach * ClosestApproach);
+	const lcVector3 Ray = End - Start;
+	const double RayLengthSquared = static_cast<double>(Ray.x) * Ray.x + static_cast<double>(Ray.y) * Ray.y + static_cast<double>(Ray.z) * Ray.z;
 
-	if (HalfCordSquared < 0)
+	if (RayLengthSquared == 0.0)
 		return false;
 
-	Intersection = Start + RayDirection * (ClosestApproach - sqrtf(HalfCordSquared));
+	const lcVector3 Offset = Center - Start;
+	const double CenterDistanceSquared = static_cast<double>(Offset.x) * Offset.x + static_cast<double>(Offset.y) * Offset.y + static_cast<double>(Offset.z) * Offset.z;
+	const double RayLength = std::sqrt(RayLengthSquared);
+	const double Projection = (static_cast<double>(Offset.x) * Ray.x + static_cast<double>(Offset.y) * Ray.y + static_cast<double>(Offset.z) * Ray.z) / RayLength;
+	const double HalfChordSquared = static_cast<double>(Radius) * Radius - CenterDistanceSquared + Projection * Projection;
 
+	if (HalfChordSquared < 0.0)
+		return false;
+
+	const double HalfChord = std::sqrt(HalfChordSquared);
+	double Distance = Projection - HalfChord;
+
+	// Starting inside the sphere puts the entry behind us; use the forward exit.
+	if (Distance < 0.0)
+		Distance = Projection + HalfChord;
+
+	if (Distance < 0.0)
+		return false;
+
+	Intersection = Start + static_cast<float>(Distance / RayLength) * Ray;
 	return true;
 }
 
@@ -1778,7 +1792,12 @@ inline lcVector3 lcRayPointClosestPoint(const lcVector3& Point, const lcVector3&
 	const lcVector3 Dir = Point - Start;
 	const lcVector3 RayDir = End - Start;
 
-	float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
+	const float LengthSquared = lcLengthSquared(RayDir);
+
+	if (LengthSquared == 0.0f)
+		return Start;
+
+	float t = lcDot(Dir, RayDir) / LengthSquared;
 	t = lcClamp(t, 0.0f, 1.0f);
 
 	return Start + t * RayDir;

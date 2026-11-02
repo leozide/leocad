@@ -14,4 +14,10 @@ private slots:
 	void HistoryCancelsPendingEdit();
 	void HistoryReplaysAndMergesEdits();
 	void HistoryDropsRevertedMerge();
+	void ShadowParsesLines();
+	void ShadowParsesIncludesAndClears();
+	void ShadowReadsSubFileReferences();
+	void ShadowScalesAndMirrorsSubFileShapes();
+	void ConnectivityFitsShapesAlongTheirAxis();
+	void ConnectivityConnectsSeatedShapes();
 };

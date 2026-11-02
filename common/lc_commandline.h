@@ -69,6 +69,7 @@ public:
 	QString mSaveCSVName;
 	QString mSaveHTMLName;
 	QList<QPair<QString, bool>> mLibraryPaths;
+	QString mShadowLibraryPath;
 	QString mStdOut;
 	QString mStdErr;
 

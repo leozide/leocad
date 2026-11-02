@@ -8,6 +8,7 @@ public:
 	lcCollapsibleWidgetButton(const QString& Title, QWidget* Parent = nullptr);
 
 	void Collapse();
+	void SetCollapsible(bool Collapsible);
 
 	bool IsExpanded() const
 	{
@@ -24,6 +25,7 @@ protected:
 	void UpdateIcon();
 
 	bool mExpanded = true;
+	bool mCollapsible = true;
 
 	static QImage mExpandedIcon;
 	static QImage mCollapsedIcon;

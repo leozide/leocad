@@ -2723,7 +2723,7 @@ bool lcMainWindow::OpenProject(const QString& FileName)
 		if (LoadFileName.isEmpty())
 			LoadFileName = lcGetProfileString(LC_PROFILE_PROJECTS_PATH);
 
-		LoadFileName = QFileDialog::getOpenFileName(this, tr("Open Model"), LoadFileName, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+		LoadFileName = QFileDialog::getOpenFileName(this, tr("Open Model"), LoadFileName, tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)"));
 
 		if (LoadFileName.isEmpty())
 			return false;
@@ -2773,7 +2773,7 @@ void lcMainWindow::ShowMergeDialog()
 	else
 		InitialFolder = QFileInfo(InitialFolder).absolutePath();
 
-	QStringList LoadFileNames = QFileDialog::getOpenFileNames(this, tr("Merge Model"), InitialFolder, tr("Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)"));
+	QStringList LoadFileNames = QFileDialog::getOpenFileNames(this, tr("Merge Model"), InitialFolder, tr("Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)"));
 
 	if (LoadFileNames.isEmpty())
 		return;

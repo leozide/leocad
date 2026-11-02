@@ -3688,6 +3688,12 @@ Le format du fichier n'est pas reconnu.</translation>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Nouveau sous-modèle</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -10482,12 +10488,6 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation>&amp;Refaire</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Fichiers pris en charge (*.lcd *.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
-    </message>
-    <message>
         <source>LeoCAD</source>
         <translation type="vanished">LeoCAD</translation>
     </message>
@@ -10501,7 +10501,9 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <translation>Fichiers pris en charge (*.mpd);;Tous les fichiers (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Fichiers pris en charge (*.ldr *.dat *.mpd);;Tous les fichiers (*.*)</translation>
     </message>

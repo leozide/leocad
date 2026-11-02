@@ -1,4 +1,34 @@
 !include "MUI2.nsh"
+!include "LogicLib.nsh"
+
+!define LDRAW_PROGID "LeoCAD.LDraw"
+!define FILE_ASSOCIATIONS_KEY "Software\LeoCAD Software\LeoCAD\FileAssociations"
+
+!macro RegisterLDrawExtension Extension
+  ReadRegStr $0 HKLM "Software\Classes\${Extension}" ""
+  ; Preserve the original association when reinstalling over LeoCAD.
+  ${If} $0 != "${LDRAW_PROGID}"
+    WriteRegStr HKLM "${FILE_ASSOCIATIONS_KEY}" "${Extension}" "$0"
+  ${EndIf}
+  WriteRegStr HKLM "Software\Classes\${Extension}" "" "${LDRAW_PROGID}"
+  WriteRegStr HKLM "Software\Classes\${Extension}\OpenWithProgids" "${LDRAW_PROGID}" ""
+!macroend
+
+!macro UnregisterLDrawExtension Extension
+  ReadRegStr $0 HKLM "Software\Classes\${Extension}" ""
+  ; Leave a different application's association in place.
+  ${If} $0 == "${LDRAW_PROGID}"
+    ReadRegStr $1 HKLM "${FILE_ASSOCIATIONS_KEY}" "${Extension}"
+    ${If} $1 == ""
+      DeleteRegValue HKLM "Software\Classes\${Extension}" ""
+    ${Else}
+      WriteRegStr HKLM "Software\Classes\${Extension}" "" "$1"
+    ${EndIf}
+  ${EndIf}
+  DeleteRegValue HKLM "Software\Classes\${Extension}\OpenWithProgids" "${LDRAW_PROGID}"
+  DeleteRegKey /ifempty HKLM "Software\Classes\${Extension}\OpenWithProgids"
+  DeleteRegKey /ifempty HKLM "Software\Classes\${Extension}"
+!macroend
 
 ; The name of the installer
 Name "LeoCAD"
@@ -59,15 +89,6 @@ Section "Application Files" SecLeoCAD
 
   File /r /x library.bin "appdir\*.*"
 
-  ;Register file extension
-  WriteRegStr HKCR ".lcd" "" "LeoCAD.Project"
-  WriteRegStr HKCR ".lcd\ShellNew" "NullFile" ""
-  WriteRegStr HKCR "LeoCAD.Project" "" "LeoCAD Project"
-  WriteRegStr HKCR "LeoCAD.Project\DefaultIcon" "" "$INSTDIR\LeoCAD.exe,0"
-  WriteRegStr HKCR "LeoCAD.Project\shell" "" "open"
-  WriteRegStr HKCR "LeoCAD.Project\shell\open\command" "" '"$INSTDIR\LeoCAD.exe" "%1"'
-  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
-
   IfFileExists "$INSTDIR\vc_redist.x64.exe" VcRedist64Exists PastVcRedist64Check
   VcRedist64Exists:
     ExecWait '"$INSTDIR\vc_redist.x64.exe"  /quiet /norestart'
@@ -98,6 +119,18 @@ Section "Application Files" SecLeoCAD
 
 SectionEnd
 
+Section /o "Associate .ldr and .mpd files" SecFileAssociations
+
+  WriteRegStr HKLM "Software\Classes\${LDRAW_PROGID}" "" "LDraw Model"
+  WriteRegStr HKLM "Software\Classes\${LDRAW_PROGID}\DefaultIcon" "" '$\"$INSTDIR\LeoCAD.exe$\",0'
+  WriteRegStr HKLM "Software\Classes\${LDRAW_PROGID}\shell" "" "open"
+  WriteRegStr HKLM "Software\Classes\${LDRAW_PROGID}\shell\open\command" "" '$\"$INSTDIR\LeoCAD.exe$\" $\"%1$\"'
+  !insertmacro RegisterLDrawExtension ".ldr"
+  !insertmacro RegisterLDrawExtension ".mpd"
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
+
+SectionEnd
+
 Section "Parts Library" SecLibrary
 
   SetOutPath "$INSTDIR"
@@ -111,11 +144,13 @@ SectionEnd
 
   ;Language strings
   LangString DESC_SecLeoCAD ${LANG_ENGLISH} "Application Files (required)"
+  LangString DESC_SecFileAssociations ${LANG_ENGLISH} "Associate LDraw models (.ldr and .mpd) with LeoCAD."
   LangString DESC_SecLibrary ${LANG_ENGLISH} "Library of parts that represent those produced by the LEGO company and created by the LDraw community"
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLeoCAD} $(DESC_SecLeoCAD)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecFileAssociations} $(DESC_SecFileAssociations)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLibrary} $(DESC_SecLibrary)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -139,6 +174,14 @@ Section "Uninstall"
 
   DeleteRegKey HKCR ".lcd"
   DeleteRegKey HKCR "LeoCAD.Project"
+  ; An older uninstaller must not remove a newer installation's registration.
+  ReadRegStr $0 HKLM "Software\Classes\${LDRAW_PROGID}\shell\open\command" ""
+  ${If} $0 == '$\"$INSTDIR\LeoCAD.exe$\" $\"%1$\"'
+    !insertmacro UnregisterLDrawExtension ".ldr"
+    !insertmacro UnregisterLDrawExtension ".mpd"
+    DeleteRegKey HKLM "Software\Classes\${LDRAW_PROGID}"
+    DeleteRegKey HKLM "${FILE_ASSOCIATIONS_KEY}"
+  ${EndIf}
   System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (0x08000000, 0, 0, 0)'
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\LeoCAD"

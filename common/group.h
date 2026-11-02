@@ -1,7 +1,5 @@
 #pragma once
 
-#define LC_MAX_GROUP_NAME 64
-
 enum class lcGroupId : uint32_t;
 
 constexpr uint32_t LC_GROUP_ID_INVALID = std::numeric_limits<uint32_t>::max();
@@ -33,7 +31,6 @@ public:
 		return mId;
 	}
 
-	void FileLoad(lcFile* File);
 	void CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups);
 
 	lcGroupHistoryState GetHistoryState() const;

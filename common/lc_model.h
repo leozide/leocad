@@ -350,7 +350,6 @@ public:
 
 	void SaveLDraw(QTextStream& Stream, bool SelectedOnly, lcStep LastStep, lcModelSaveMode SaveMode) const;
 	void LoadLDraw(QIODevice& Device, Project* Project);
-	bool LoadBinary(lcFile* File);
 	bool LoadLDD(const QString& FileData);
 	bool LoadInventory(const std::vector<lcSetInventoryItem>& SetInventory);
 	void Merge(std::unique_ptr<lcModel> Other);

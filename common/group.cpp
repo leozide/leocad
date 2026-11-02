@@ -1,7 +1,6 @@
 #include "lc_global.h"
 #include <stdlib.h>
 #include "group.h"
-#include "lc_file.h"
 
 lcGroupId lcGroup::mNextId;
 
@@ -9,19 +8,6 @@ lcGroup::lcGroup()
     : mId(mNextId)
 {
 	mNextId = static_cast<lcGroupId>(static_cast<uint32_t>(mNextId) + 1);
-}
-
-void lcGroup::FileLoad(lcFile* File)
-{
-	qint32 GroupIndex;
-	char Name[LC_MAX_GROUP_NAME + 1];
-
-	File->ReadU8();
-	File->ReadBuffer(Name, sizeof(Name));
-	mName = QString::fromUtf8(Name);
-	File->ReadVector3();
-	File->ReadS32(&GroupIndex, 1);
-	mGroup = (lcGroup*)(quintptr)GroupIndex;
 }
 
 void lcGroup::CreateName(const std::vector<std::unique_ptr<lcGroup>>& Groups)

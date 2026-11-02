@@ -166,7 +166,6 @@ public:
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max) const;
 	void SetPieceData(lcPieceDataRef PieceDataRef, const QString& ID, bool Wait, bool UpdateSynthInfo);
 	bool SetPieceId(lcPieceData* PieceData);
-	bool FileLoad(lcFile& file, Project* Project);
 
 	lcMatrix44 GetWorldMatrix(lcStep Step) const;
 	void UpdatePosition(lcStep Step) override;

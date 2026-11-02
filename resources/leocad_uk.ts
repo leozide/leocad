@@ -3756,6 +3756,12 @@ File format is not recognized.</source>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Файли Wavefront (*.obj);;Усі файли (*.*)</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -10559,13 +10565,6 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">&amp;Повторити</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
-        <translation type="unfinished">Підтримувані файли (*.lcd *.ldr *.dat *.mpd);;Усі файли (*.*)</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="2716"/>
         <location filename="../common/lc_mainwindow.cpp" line="2751"/>
         <source>Merge Model</source>
@@ -10644,7 +10643,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation type="unfinished">Підтримувані файли (*.mpd);;Усі файли (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Підтримувані файли (*.ldr *.dat *.mpd);;Усі файли (*.*)</translation>

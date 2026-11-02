@@ -85,6 +85,8 @@ private slots:
 	void TextureDecalAlpha();
 	void TextureMipmaps();
 	void ProjectLoadErrors();
+	void ProjectLegacyFormats_data();
+	void ProjectLegacyFormats();
 	void WavefrontSaveFailures();
 	void CompletedExportEvaluatesExternalModels();
 	void ProjectFilesCategory();
@@ -1102,7 +1104,64 @@ void lcModelInstanceTests::ProjectLoadErrors()
 	const lcResult<void> Invalid = Model.Load(InvalidPath);
 	QVERIFY(!Invalid);
 	QVERIFY(Invalid.error().contains(InvalidPath));
-	QVERIFY(Invalid.error().contains("not recognized"));
+	QVERIFY(Invalid.error().contains("older version of LeoCAD"));
+}
+
+void lcModelInstanceTests::ProjectLegacyFormats_data()
+{
+	QTest::addColumn<QString>("FileName");
+	QTest::addColumn<QByteArray>("Data");
+	QTest::addColumn<bool>("Supported");
+
+	const QByteArray LDraw = "0 Test model\n3 16 0 0 0 10 0 0 0 10 0\n";
+	const QByteArray Binary = QByteArray("LeoCAD 0.4") + QByteArray(256, '\0');
+	for (const QString& Extension : { QString("ldr"), QString("dat"), QString("mpd"), QString("bin"), QString() })
+	{
+		const QString FileName = Extension.isEmpty() ? QString("model") : QString("model.") + Extension;
+		QTest::newRow(qPrintable(FileName + "-text")) << FileName << LDraw << true;
+		QTest::newRow(qPrintable(FileName + "-binary")) << FileName << Binary << false;
+	}
+	for (const QString& Extension : { QString("lcd"), QString("leocad"), QString("LCD"), QString("LEOCAD") })
+	{
+		const QString FileName = "model." + Extension;
+		QTest::newRow(qPrintable(FileName + "-text")) << FileName << LDraw << false;
+		QTest::newRow(qPrintable(FileName + "-binary")) << FileName << Binary << false;
+		QTest::newRow(qPrintable(FileName + "-empty")) << FileName << QByteArray() << false;
+	}
+	QTest::newRow("truncated-magic") << QString("model.ldr") << QByteArray("LeoCAD ") << false;
+}
+
+void lcModelInstanceTests::ProjectLegacyFormats()
+{
+	QFETCH(QString, FileName);
+	QFETCH(QByteArray, Data);
+	QFETCH(bool, Supported);
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile InitialFile(Directory.filePath("initial.ldr"));
+	QVERIFY(InitialFile.open(QIODevice::WriteOnly));
+	InitialFile.write("0 Original model\n");
+	InitialFile.close();
+	Project Model;
+	QVERIFY(Model.Load(InitialFile.fileName()));
+	lcModel* InitialModel = Model.GetMainModel();
+
+	QFile File(Directory.filePath(FileName));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	QCOMPARE(File.write(Data), qint64(Data.size()));
+	File.close();
+	const lcResult<void> Result = Model.Load(File.fileName());
+	QCOMPARE(Result.has_value(), Supported);
+	if (!Supported)
+	{
+		QVERIFY(Result.error().contains(File.fileName()));
+		QVERIFY(Result.error().contains("older version of LeoCAD"));
+		QVERIFY(Result.error().contains("LDraw format (.ldr or .mpd)"));
+		QCOMPARE(Model.GetMainModel(), InitialModel);
+		QCOMPARE(Model.GetFileName(), InitialFile.fileName());
+	}
+	else
+		QCOMPARE(Model.GetModels().size(), size_t(1));
 }
 
 void lcModelInstanceTests::CompletedExportEvaluatesExternalModels()

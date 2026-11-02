@@ -79,49 +79,6 @@ static void lcSehInit()
 	SetUnhandledExceptionFilter(lcSehHandler);
 }
 
-static void lcRegisterShellFileTypes()
-{
-	TCHAR ModulePath[_MAX_PATH], LongModulePath[_MAX_PATH];
-	TCHAR Temp[2*_MAX_PATH];
-
-	GetModuleFileName(nullptr, LongModulePath, _MAX_PATH);
-	if (GetShortPathName(LongModulePath, ModulePath, _MAX_PATH) == 0)
-		lstrcpy(ModulePath, LongModulePath);
-
-	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project"), REG_SZ, TEXT("LeoCAD Model"), lstrlen(TEXT("LeoCAD Model")) * sizeof(TCHAR)) != ERROR_SUCCESS)
-		return;
-
-	lstrcpy(Temp, ModulePath);
-	lstrcat(Temp, TEXT(",0"));
-	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\DefaultIcon"), REG_SZ, Temp, lstrlen(Temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
-		return;
-
-	lstrcpy(Temp, ModulePath);
-	lstrcat(Temp, TEXT(" \"%1\""));
-	if (RegSetValue(HKEY_CLASSES_ROOT, TEXT("LeoCAD.Project\\shell\\open\\command"), REG_SZ, Temp, lstrlen(Temp) * sizeof(TCHAR)) != ERROR_SUCCESS)
-		return;
-
-	LONG Size = 2 * _MAX_PATH;
-	LONG Result = RegQueryValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), Temp, &Size);
-
-	if (Result != ERROR_SUCCESS || !lstrlen(Temp) || lstrcmp(Temp, TEXT("LeoCAD.Project")))
-	{
-		if (RegSetValue(HKEY_CLASSES_ROOT, TEXT(".lcd"), REG_SZ, TEXT("LeoCAD.Project"), lstrlen(TEXT("LeoCAD.Project")) * sizeof(TCHAR)) != ERROR_SUCCESS)
-			return;
-
-		HKEY Key;
-		DWORD Disposition = 0;
-
-		if (RegCreateKeyEx(HKEY_CLASSES_ROOT, TEXT(".lcd\\ShellNew"), 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE | KEY_READ, nullptr, &Key, &Disposition) != ERROR_SUCCESS)
-			return;
-
-		Result = RegSetValueEx(Key, TEXT("NullFile"), 0, REG_SZ, (CONST BYTE*)TEXT(""), (lstrlen(TEXT("")) + 1) * sizeof(TCHAR));
-
-		if (RegCloseKey(Key) != ERROR_SUCCESS || Result != ERROR_SUCCESS)
-			return;
-	}
-}
-
 #endif
 
 static void lcInitializeSurfaceFormat(int argc, char* argv[])
@@ -193,7 +150,6 @@ int main(int argc, char *argv[])
 	QList<QPair<QString, bool>> LibraryPaths;
 
 #ifdef Q_OS_WIN
-	lcRegisterShellFileTypes();
 	lcSehInit();
 
 	LibraryPaths += qMakePair(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/library.bin"), true);

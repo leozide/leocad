@@ -3689,6 +3689,12 @@ O formato do ficheiro não é reconhecido.</translation>
         <translatorcomment>Machine-translated draft (Google Translate); requires human review.</translatorcomment>
         <translation type="unfinished">Novo submodelo</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -10447,12 +10453,6 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation>&amp;Refazer</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Ficheiros Aceites (*.lcd *.ldr *.dat *.mpd);;Todos os Ficheiros (*.*)</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="2716"/>
         <location filename="../common/lc_mainwindow.cpp" line="2751"/>
         <source>Merge Model</source>
@@ -10486,7 +10486,9 @@ Veja https://www.leocad.org para saber como descarragar e instalar uma bibliotec
         <translation>Ficheiros Aceites (*.mpd);;Todos os Ficheiros (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Ficheiros Aceites (*.ldr *.dat *.mpd);;Todos os Ficheiros (*.*)</translation>
     </message>

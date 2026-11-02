@@ -198,8 +198,6 @@ public:
 	void InsertTime(lcStep Start, lcStep Time);
 	void RemoveTime(lcStep Start, lcStep Time);
 
-	static bool FileLoad(lcFile& file);
-
 	void CompareBoundingBox(lcVector3& Min, lcVector3& Max);
 	void UpdatePosition(lcStep Step) override;
 	void CopyPosition(const lcCamera* Camera);

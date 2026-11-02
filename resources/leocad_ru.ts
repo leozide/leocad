@@ -3291,6 +3291,12 @@ File format is not recognized.</source>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Файлы Wavefront (*.obj);;Все файлы (*.*)</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -9916,12 +9922,6 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>&amp;Повторить</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Поддерживаемые файлы (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="2716"/>
         <location filename="../common/lc_mainwindow.cpp" line="2751"/>
         <source>Merge Model</source>
@@ -10004,7 +10004,9 @@ Please visit https://www.leocad.org for information on how to download and insta
         <translation>Поддерживаемые файлы (*.mpd);;Все файлы (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Поддерживаемые файлы (*.ldr *.dat *.mpd);;Все файлы (*.*)</translation>
     </message>

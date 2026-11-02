@@ -1187,6 +1187,12 @@ lcResult<void> Project::Load(const QString& FileName)
 	if (File.error() != QFileDevice::NoError)
 		return lcUnexpected(tr("Error reading file '%1':\n%2").arg(FileName, File.errorString()));
 
+	QFileInfo FileInfo(FileName);
+	const QString Extension = FileInfo.suffix().toLower();
+
+	if (Extension == QLatin1String("lcd") || Extension == QLatin1String("leocad") || FileData.startsWith("LeoCAD "))
+		return lcUnexpected(tr("Error loading file '%1':\nThe legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).").arg(FileName));
+
 	mModels.clear();
 	mDocumentBlocks.clear();
 	mLoadWarnings.clear();
@@ -1196,44 +1202,12 @@ lcResult<void> Project::Load(const QString& FileName)
 	lcGetPiecesLibrary()->ReleaseProjectPieceData(this);
 	SetFileName(FileName);
 
-	QFileInfo FileInfo(FileName);
-	QString Extension = FileInfo.suffix().toLower();
-
 	mFileHash = QCryptographicHash::hash(FileData, QCryptographicHash::Sha256);
 	mFileExists = true;
 	mFileReadable = true;
 	mFileReadAttempts = 0;
 
-	bool LoadDAT;
-
-	if (Extension == QLatin1String("dat") || Extension == QLatin1String("ldr") || Extension == QLatin1String("mpd"))
-		LoadDAT = true;
-	else if (Extension == QLatin1String("lcd") || Extension == QLatin1String("leocad"))
-		LoadDAT = false;
-	else
-		LoadDAT = FileData.size() > 7 && memcmp(FileData, "LeoCAD ", 7);
-
-	if (LoadDAT)
-	{
-		LoadLDrawDocument(FileData, nullptr, false);
-	}
-	else
-	{
-		lcMemFile MemFile;
-		MemFile.WriteBuffer(FileData.constData(), FileData.size());
-		MemFile.Seek(0, SEEK_SET);
-
-		lcModel* Model = new lcModel(QString(), this, mIsPreview);
-
-		if (Model->LoadBinary(&MemFile))
-		{
-			mModels.emplace_back(Model);
-			Model->CreatePieceData(this);
-			Model->SetSaved();
-		}
-		else
-			delete Model;
-	}
+	LoadLDrawDocument(FileData, nullptr, false);
 
 	if (mModels.empty())
 		return lcUnexpected(tr("Error loading file '%1':\nFile format is not recognized.").arg(FileName));

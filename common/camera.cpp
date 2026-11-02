@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-#include "lc_file.h"
 #include "camera.h"
 #include "lc_application.h"
 #include "lc_context.h"
@@ -11,8 +10,6 @@
 
 #define LC_CAMERA_POSITION_EDGE 7.5f
 #define LC_CAMERA_TARGET_EDGE 7.5f
-
-#define LC_CAMERA_SAVE_VERSION 7 // LeoCAD 0.80
 
 lcCamera::lcCamera()
     : lcObject(lcObjectType::Camera)
@@ -249,149 +246,6 @@ bool lcCamera::ParseLDrawLine(QTextStream& Stream)
 	}
 
 	return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Camera save/load
-
-bool lcCamera::FileLoad(lcFile& file)
-{
-	quint8 version, ch;
-
-	version = file.ReadU8();
-
-	if (version > LC_CAMERA_SAVE_VERSION)
-		return false;
-
-	if (version > 5)
-	{
-		if (file.ReadU8() != 1)
-			return false;
-
-		quint16 time;
-		float param[4];
-		quint8 type;
-		quint32 n;
-
-		file.ReadU32(&n, 1);
-		while (n--)
-		{
-			file.ReadU16(&time, 1);
-			file.ReadFloats(param, 4);
-			file.ReadU8(&type, 1);
-		}
-
-		file.ReadU32(&n, 1);
-		while (n--)
-		{
-			file.ReadU16(&time, 1);
-			file.ReadFloats(param, 4);
-			file.ReadU8(&type, 1);
-		}
-	}
-
-	if (version == 4)
-	{
-		char Name[81];
-		file.ReadBuffer(Name, 80);
-	}
-	else
-	{
-		ch = file.ReadU8();
-		if (ch == 0xFF)
-			return false;
-		char Name[81];
-		file.ReadBuffer(Name, ch);
-	}
-
-	if (version < 3)
-	{
-		double d[3];
-
-		file.ReadDoubles(d, 3);
-		file.ReadDoubles(d, 3);
-		file.ReadDoubles(d, 3);
-	}
-
-	if (version == 3)
-	{
-		ch = file.ReadU8();
-
-		while (ch--)
-		{
-			quint8 step;
-			double eye[3], target[3], up[3];
-
-			file.ReadDoubles(eye, 3);
-			file.ReadDoubles(target, 3);
-			file.ReadDoubles(up, 3);
-			file.ReadU8(&step, 1);
-
-			file.ReadS32(); // snapshot
-			file.ReadS32(); // cam
-		}
-	}
-
-	if (version < 4)
-	{
-		file.ReadDouble(); // m_fovy
-		file.ReadDouble(); // m_zFar
-		file.ReadDouble(); // m_zNear
-	}
-	else
-	{
-		qint32 n;
-
-		if (version < 6)
-		{
-			quint16 time;
-			float param[4];
-			quint8 type;
-
-			n = file.ReadS32();
-			while (n--)
-			{
-				file.ReadU16(&time, 1);
-				file.ReadFloats(param, 3);
-				file.ReadU8(&type, 1);
-			}
-
-			n = file.ReadS32();
-			while (n--)
-			{
-				file.ReadU16(&time, 1);
-				file.ReadFloats(param, 3);
-				file.ReadU8(&type, 1);
-			}
-		}
-
-		float f;
-		file.ReadFloats(&f, 1); // m_fovy
-		file.ReadFloats(&f, 1); // m_zFar
-		file.ReadFloats(&f, 1); // m_zNear
-
-		if (version < 5)
-		{
-			file.ReadS32();
-		}
-		else
-		{
-			file.ReadU8();
-			file.ReadU8();
-		}
-	}
-
-	if ((version > 1) && (version < 4))
-	{
-		quint32 show;
-		qint32 user;
-
-		file.ReadU32(&show, 1);
-//		if (version > 2)
-		file.ReadS32(&user, 1);
-	}
-
-	return true;
 }
 
 void lcCamera::CompareBoundingBox(lcVector3& Min, lcVector3& Max)

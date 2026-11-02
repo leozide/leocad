@@ -3332,6 +3332,12 @@ Formato de archivo no reconocido.</translation>
         <source>New Submodel</source>
         <translation>Nuevo submodelo</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -10085,12 +10091,6 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <translation>&amp;Rehacer</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Archivos soportados (*.lcd *.ldr *.dat *.mpd);;Todos los archivos (*.*)</translation>
-    </message>
-    <message>
         <source>LeoCAD</source>
         <translation type="vanished">LeoCAD</translation>
     </message>
@@ -10104,7 +10104,9 @@ Por favor, visita https://www.leocad.org para saber cómo descargar e instalar u
         <translation>Archivos soportados (*.mpd);;Todos los archivos (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Archivos soportados (*.ldr *.dat *.mpd);;Todos los archivos (*.*)</translation>
     </message>

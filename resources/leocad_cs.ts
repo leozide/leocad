@@ -3409,6 +3409,12 @@ Formát souboru není rozpoznán.</translation>
         <source>Wavefront Files (*.obj);;All Files (*.*)</source>
         <translation>Wavefront soubory (*.obj);;všechny soubory (*.*)</translation>
     </message>
+    <message>
+        <location filename="../common/project.cpp" line="1194"/>
+        <source>Error loading file &apos;%1&apos;:
+The legacy LeoCAD format is no longer supported. Open this file in an older version of LeoCAD and save it in LDraw format (.ldr or .mpd).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QApplication</name>
@@ -10112,12 +10118,6 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>&amp;Znovu</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2669"/>
-        <location filename="../common/lc_mainwindow.cpp" line="2716"/>
-        <source>Supported Files (*.lcd *.ldr *.dat *.mpd);;All Files (*.*)</source>
-        <translation>Podporované soubory (*.lcd *.ldr *.dat *.mpd);;všechny soubory (*.*)</translation>
-    </message>
-    <message>
         <location filename="../common/lc_mainwindow.cpp" line="2716"/>
         <location filename="../common/lc_mainwindow.cpp" line="2751"/>
         <source>Merge Model</source>
@@ -10151,7 +10151,9 @@ Informace o tom, jak stáhnout a nainstalovat knihovnu, naleznete na adrese http
         <translation>Podporované soubory (*.mpd);;všechny soubory (*.*)</translation>
     </message>
     <message>
-        <location filename="../common/lc_mainwindow.cpp" line="2812"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2726"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2776"/>
+        <location filename="../common/lc_mainwindow.cpp" line="2877"/>
         <source>Supported Files (*.ldr *.dat *.mpd);;All Files (*.*)</source>
         <translation>Podporované soubory (*.ldr *.dat *.mpd);;všechny soubory (*.*)</translation>
     </message>

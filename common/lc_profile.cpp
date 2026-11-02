@@ -91,6 +91,9 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ViewSphereColor", LC_RGBA(27, 31, 36, 255)),                               // LC_PROFILE_VIEW_SPHERE_COLOR
 	lcProfileEntry("Settings", "ViewSphereTextColor", LC_RGBA(232, 237, 242, 255)),                        // LC_PROFILE_VIEW_SPHERE_TEXT_COLOR
 	lcProfileEntry("Settings", "ViewSphereHighlightColor", LC_RGBA(41, 128, 185, 255)),                    // LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR
+	lcProfileEntry("Settings", "AxisXColor", LC_RGBA(200, 40, 60, 255)),                                   // LC_PROFILE_AXIS_X_COLOR
+	lcProfileEntry("Settings", "AxisYColor", LC_RGBA(100, 200, 20, 255)),                                  // LC_PROFILE_AXIS_Y_COLOR
+	lcProfileEntry("Settings", "AxisZColor", LC_RGBA(40, 60, 230, 255)),                                   // LC_PROFILE_AXIS_Z_COLOR
 	lcProfileEntry("Settings", "ObjectSelectedColor", static_cast<uint>(LC_RGBA(229, 76, 102, 255))),      // LC_PROFILE_OBJECT_SELECTED_COLOR
 	lcProfileEntry("Settings", "ObjectFocusedColor", static_cast<uint>(LC_RGBA(102, 76, 229, 255))),       // LC_PROFILE_OBJECT_FOCUSED_COLOR
 	lcProfileEntry("Settings", "CameraColor", static_cast<uint>(LC_RGBA(128, 204, 128, 255))),             // LC_PROFILE_CAMERA_COLOR

@@ -63,6 +63,9 @@ void lcPreferences::LoadDefaults()
 	mViewSphereColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_COLOR);
 	mViewSphereTextColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR);
 	mViewSphereHighlightColor = lcGetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR);
+	mAxisXColor = lcGetProfileUInt(LC_PROFILE_AXIS_X_COLOR);
+	mAxisYColor = lcGetProfileUInt(LC_PROFILE_AXIS_Y_COLOR);
+	mAxisZColor = lcGetProfileUInt(LC_PROFILE_AXIS_Z_COLOR);
 	mAutoLoadMostRecent = lcGetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT);
 	mRestoreTabLayout = lcGetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT);
 	mColorTheme = lcGetProfileColorTheme();
@@ -129,6 +132,9 @@ void lcPreferences::SaveDefaults()
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_COLOR, mViewSphereColor);
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_TEXT_COLOR, mViewSphereTextColor);
 	lcSetProfileUInt(LC_PROFILE_VIEW_SPHERE_HIGHLIGHT_COLOR, mViewSphereHighlightColor);
+	lcSetProfileUInt(LC_PROFILE_AXIS_X_COLOR, mAxisXColor);
+	lcSetProfileUInt(LC_PROFILE_AXIS_Y_COLOR, mAxisYColor);
+	lcSetProfileUInt(LC_PROFILE_AXIS_Z_COLOR, mAxisZColor);
 	lcSetProfileInt(LC_PROFILE_AUTOLOAD_MOSTRECENT, mAutoLoadMostRecent);
 	lcSetProfileInt(LC_PROFILE_RESTORE_TAB_LAYOUT, mRestoreTabLayout);
 	lcSetProfileColorTheme(mColorTheme);

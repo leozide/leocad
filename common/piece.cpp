@@ -1013,13 +1013,15 @@ void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 
 		const lcMatrix33 LocalToFocusMatrix = lcMul(LocalToWorldMatrix, RotationFrame);
 		lcMatrix33 NewLocalToWorldMatrix = lcMul(LocalToFocusMatrix, RotationMatrix);
-
-		const lcMatrix33 WorldToLocalMatrix = lcMatrix33AffineInverse(LocalToWorldMatrix);
-
-		Distance = lcMul(Distance, WorldToLocalMatrix);
-		Distance = lcMul(Distance, NewLocalToWorldMatrix);
-
 		NewLocalToWorldMatrix.Orthonormalize();
+		NewLocalToWorldMatrix.SnapToAxisAligned();
+
+		// Rotate the offset directly in world space. Multiplying through the old
+		// orientation and its transpose also compounds their rounding errors.
+		lcMatrix33 WorldRotationMatrix = lcMul(RotationFrame, RotationMatrix);
+		WorldRotationMatrix.Orthonormalize();
+		WorldRotationMatrix.SnapToAxisAligned();
+		Distance = lcMul(Distance, WorldRotationMatrix);
 
 		SetPosition(Center + Distance, Step, AddKey);
 		SetRotation(NewLocalToWorldMatrix, Step, AddKey);
@@ -1038,6 +1040,7 @@ void lcPiece::Rotate(lcStep Step, bool AddKey, const lcMatrix33& RotationMatrix,
 			lcMatrix33 NewLocalToWorldMatrix = lcMul(lcMul(LocalToFocusMatrix, RotationMatrix), lcMatrix33AffineInverse(PieceWorldMatrix));
 
 			NewLocalToWorldMatrix.Orthonormalize();
+			NewLocalToWorldMatrix.SnapToAxisAligned();
 			Transform = lcMatrix44(NewLocalToWorldMatrix, Transform.GetTranslation());
 		}
 
@@ -1061,6 +1064,7 @@ void lcPiece::RotatePivotPoint(const lcMatrix33& RotationMatrix)
 
 	lcMatrix33 NewPivotRotationMatrix = lcMul(RotationMatrix, lcMatrix33(mPivotMatrix));
 	NewPivotRotationMatrix.Orthonormalize();
+	NewPivotRotationMatrix.SnapToAxisAligned();
 
 	mPivotMatrix = lcMatrix44(NewPivotRotationMatrix, mPivotMatrix.GetTranslation());
 	mPivotPointValid = true;

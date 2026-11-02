@@ -251,6 +251,7 @@ public:
 	}
 
 	void Orthonormalize();
+	void SnapToAxisAligned();
 
 	lcVector3 r[3];
 };
@@ -872,6 +873,39 @@ inline void lcMatrix33::Orthonormalize()
 	r[2] = r[2] - lcDot(r[2], r[0]) * r[0];
 	r[2] -= lcDot(r[2], r[1]) * r[1];
 	r[2] = lcNormalize(r[2]);
+}
+
+inline void lcMatrix33::SnapToAxisAligned()
+{
+	// Only replace a complete orientation close to a signed permutation matrix.
+	// Rounding individual elements would distort intentionally angled parts.
+	lcMatrix33 Snapped;
+	unsigned int Columns = 0;
+
+	for (int Row = 0; Row < 3; Row++)
+	{
+		unsigned int RowColumns = 0;
+
+		for (int Column = 0; Column < 3; Column++)
+		{
+			const float Value = roundf(r[Row][Column]);
+
+			if (!(fabsf(r[Row][Column] - Value) <= 0.000001f) || fabsf(Value) > 1.0f)
+				return;
+
+			Snapped[Row][Column] = Value == 0.0f ? 0.0f : Value;
+
+			if (Value != 0.0f)
+				RowColumns |= 1U << Column;
+		}
+
+		if (RowColumns == 0 || (RowColumns & (RowColumns - 1)) != 0 || (Columns & RowColumns) != 0)
+			return;
+
+		Columns |= RowColumns;
+	}
+
+	*this = Snapped;
 }
 
 inline lcMatrix33 lcMatrix33Identity()

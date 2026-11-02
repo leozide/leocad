@@ -73,6 +73,9 @@ private slots:
 	void MeshCacheValidation();
 	void MeshSectionCountOverflow();
 	void EmbeddedDataAfterLastPieceDeletion();
+	void AxisAlignedRotations_data();
+	void AxisAlignedRotations();
+	void AxisAlignedRotationTolerance();
 	void RotateToolMouseShortcuts_data();
 	void RotateToolMouseShortcuts();
 	void RepeatedInstances();
@@ -1526,6 +1529,164 @@ void lcModelInstanceTests::TexturedDirectGeometry3DS()
 		QCOMPARE(ReadU16(FaceChunk + 8 + Index * 2), quint16(Index));
 		QCOMPARE(ReadU16(FaceChunk + 16 + Index * 2), quint16(Index + 3));
 	}
+}
+
+void lcModelInstanceTests::AxisAlignedRotations_data()
+{
+	QTest::addColumn<int>("Axis");
+	QTest::addColumn<int>("Increment");
+	QTest::addColumn<bool>("AxisAngle");
+	QTest::addColumn<bool>("Relative");
+
+	for (int Axis = 0; Axis < 3; Axis++)
+		for (int Increment : { -90, -30, -15, 15, 30, 90 })
+			for (bool AxisAngle : { false, true })
+				for (bool Relative : { false, true })
+					QTest::newRow(qPrintable(QString("%1-%2-%3-%4").arg(Axis).arg(Increment).arg(AxisAngle).arg(Relative))) << Axis << Increment << AxisAngle << Relative;
+}
+
+void lcModelInstanceTests::AxisAlignedRotations()
+{
+	QFETCH(int, Axis);
+	QFETCH(int, Increment);
+	QFETCH(bool, AxisAngle);
+	QFETCH(bool, Relative);
+
+	lcVector3 Unit(0, 0, 0);
+	Unit[Axis] = 1.0f;
+	lcMatrix33 Rotation;
+
+	if (AxisAngle)
+		Rotation = lcMatrix33FromAxisAngle(Unit, Increment * LC_DTOR);
+	else if (Axis == 0)
+		Rotation = lcMatrix33RotationX(Increment * LC_DTOR);
+	else if (Axis == 1)
+		Rotation = lcMatrix33RotationY(Increment * LC_DTOR);
+	else
+		Rotation = lcMatrix33RotationZ(Increment * LC_DTOR);
+
+	const lcVector3 Center(100, 200, 300);
+	const lcVector3 Offset(20, 40, 60);
+	lcPiece CenterPiece;
+	lcPiece OrbitPiece;
+	CenterPiece.Initialize(lcMatrix44(lcMatrix33Identity(), Center), 1);
+	OrbitPiece.Initialize(lcMatrix44(lcMatrix33Identity(), Center + Offset), 1);
+	CenterPiece.SetFocused(LC_PIECE_SECTION_POSITION, true);
+	OrbitPiece.SetFocused(LC_PIECE_SECTION_POSITION, true);
+
+	lcMatrix33 Expected = lcMatrix33Identity();
+	const int First = (Axis + 1) % 3;
+	const int Second = (Axis + 2) % 3;
+	Expected[First][First] = 0;
+	Expected[Second][Second] = 0;
+	Expected[First][Second] = Increment > 0 ? 1.0f : -1.0f;
+	Expected[Second][First] = -Expected[First][Second];
+	const int StepsPerQuarter = 90 / std::abs(Increment);
+
+	for (int Step = 1; Step <= StepsPerQuarter * 4; Step++)
+	{
+		for (lcPiece* Piece : { &CenterPiece, &OrbitPiece })
+		{
+			const lcMatrix33 Orientation(Piece->mModelWorld);
+			const lcMatrix33 Frame = Relative ? lcMatrix33AffineInverse(Orientation) : lcMatrix33Identity();
+			const lcMatrix33 Delta = Relative ? lcMul(Rotation, Orientation) : Rotation;
+			Piece->Rotate(1, false, Delta, Center, Frame);
+			Piece->UpdatePosition(1);
+		}
+
+		if (Step % StepsPerQuarter != 0)
+			continue;
+
+		const int Quarter = Step / StepsPerQuarter;
+		lcMatrix33 QuarterRotation = lcMatrix33Identity();
+
+		for (int Turn = 0; Turn < Quarter; Turn++)
+			QuarterRotation = lcMul(QuarterRotation, Expected);
+
+		for (lcPiece* Piece : { &CenterPiece, &OrbitPiece })
+		{
+			for (int Row = 0; Row < 3; Row++)
+				for (int Column = 0; Column < 3; Column++)
+					QCOMPARE(Piece->mModelWorld[Row][Column], QuarterRotation[Row][Column]);
+		}
+
+		const lcVector3 ExpectedPosition = Center + lcMul(Offset, QuarterRotation);
+
+		for (int Component = 0; Component < 3; Component++)
+		{
+			QCOMPARE(CenterPiece.mModelWorld.GetTranslation()[Component], Center[Component]);
+			QVERIFY(fabsf(OrbitPiece.mModelWorld.GetTranslation()[Component] - ExpectedPosition[Component]) < 0.0001f);
+		}
+
+		// Relative grid movement must introduce no fractional coordinates.
+		const lcVector3 Distance = lcMul(lcVector3(20, 0, 0), CenterPiece.GetRelativeRotation());
+		CenterPiece.MoveSelected(1, false, Distance);
+		CenterPiece.UpdatePosition(1);
+
+		for (int Component = 0; Component < 3; Component++)
+			QCOMPARE(CenterPiece.mModelWorld.GetTranslation()[Component], Center[Component] + 20 * QuarterRotation[0][Component]);
+
+		CenterPiece.MoveSelected(1, false, -Distance);
+		CenterPiece.UpdatePosition(1);
+	}
+
+	CenterPiece.ResetPivotPoint();
+	for (int Step = 0; Step < StepsPerQuarter; Step++)
+		CenterPiece.RotatePivotPoint(Rotation);
+
+	for (int Row = 0; Row < 3; Row++)
+		for (int Column = 0; Column < 3; Column++)
+			QCOMPARE(CenterPiece.mPivotMatrix[Row][Column], Expected[Row][Column]);
+}
+
+void lcModelInstanceTests::AxisAlignedRotationTolerance()
+{
+	// Check all 48 signed permutations, including mirrored parts.
+	for (int First = 0; First < 3; First++)
+		for (int Second = 0; Second < 3; Second++)
+		{
+			if (First == Second)
+				continue;
+
+			for (int Signs = 0; Signs < 8; Signs++)
+			{
+				lcMatrix33 Expected = lcMatrix33Scale(lcVector3(0, 0, 0));
+				Expected[0][First] = (Signs & 1) ? -1.0f : 1.0f;
+				Expected[1][Second] = (Signs & 2) ? -1.0f : 1.0f;
+				Expected[2][3 - First - Second] = (Signs & 4) ? -1.0f : 1.0f;
+				lcMatrix33 Perturbed = Expected;
+
+				for (int Row = 0; Row < 3; Row++)
+					for (int Column = 0; Column < 3; Column++)
+						Perturbed[Row][Column] += 0.0000005f;
+
+				Perturbed.SnapToAxisAligned();
+
+				for (int Row = 0; Row < 3; Row++)
+					for (int Column = 0; Column < 3; Column++)
+						QCOMPARE(Perturbed[Row][Column], Expected[Row][Column]);
+			}
+		}
+
+	for (float Degrees : { 0.001f, 15.0f, 30.0f, 45.0f, 89.999f, 90.001f })
+	{
+		const lcMatrix33 Original = lcMatrix33RotationZ(Degrees * LC_DTOR);
+		lcMatrix33 Rotation = Original;
+		Rotation.SnapToAxisAligned();
+
+		for (int Row = 0; Row < 3; Row++)
+			for (int Column = 0; Column < 3; Column++)
+				QCOMPARE(Rotation[Row][Column], Original[Row][Column]);
+	}
+
+	// Reject matrices with duplicate axes even if every entry is an integer.
+	lcMatrix33 Invalid(lcVector3(1, 0, 0), lcVector3(1, 0, 0), lcVector3(0, 0, 1));
+	const lcMatrix33 Original = Invalid;
+	Invalid.SnapToAxisAligned();
+
+	for (int Row = 0; Row < 3; Row++)
+		for (int Column = 0; Column < 3; Column++)
+			QCOMPARE(Invalid[Row][Column], Original[Row][Column]);
 }
 
 void lcModelInstanceTests::RotateToolMouseShortcuts_data()

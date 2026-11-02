@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_application.h"
+#include "lc_blenderpreferences.h"
 #include "lc_commandline.h"
 #include "lc_colors.h"
 #include "lc_context.h"
@@ -22,6 +23,7 @@
 #include "lc_texture.h"
 #include "lc_view.h"
 #include "lc_viewwidget.h"
+#include "lc_zipfile.h"
 #include "camera.h"
 #include "light.h"
 #include "piece.h"
@@ -57,6 +59,13 @@ class lcModelInstanceTests : public QObject
 
 private slots:
 	void ArchiveSubpartPrecedence();
+	void LgeoLongColorTokens();
+	void ZipExtractionIntegrity_data();
+	void ZipExtractionIntegrity();
+#if !LC_DISABLE_BLENDER
+	void AddonExtraction_data();
+	void AddonExtraction();
+#endif
 	void TexmapFallbackBranches();
 	void TexmapFallbackLoading();
 	void TexmapFallbackIncludes();
@@ -97,9 +106,217 @@ private slots:
 	void TexturedDirectGeometry3DS();
 
 private:
+	static QByteArray CreateAddonArchive(const QByteArray& Name, const QByteArray& Data, quint32 Mode, quint32 DeclaredSize, bool BadCrc, bool Deflated);
 	void SeparateRotations(lcMainWindow* Window, lcModel* Model);
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
+
+QByteArray lcModelInstanceTests::CreateAddonArchive(const QByteArray& Name, const QByteArray& Data, quint32 Mode, quint32 DeclaredSize, bool BadCrc, bool Deflated)
+{
+	quint32 Crc = 0xffffffff;
+	for (unsigned char Byte : Data)
+	{
+		Crc ^= Byte;
+		for (int Bit = 0; Bit < 8; Bit++)
+			Crc = (Crc >> 1) ^ (0xedb88320u & (0u - (Crc & 1u)));
+	}
+	Crc ^= 0xffffffff;
+	if (BadCrc)
+		Crc ^= 1;
+
+	QByteArray Compressed = Data;
+	if (Deflated)
+	{
+		const QByteArray Zlib = qCompress(Data);
+		Compressed = Zlib.mid(6, Zlib.size() - 10);
+	}
+	const quint16 Method = Deflated ? 8 : 0;
+	QByteArray Zip;
+	QDataStream Stream(&Zip, QIODevice::WriteOnly);
+	Stream.setByteOrder(QDataStream::LittleEndian);
+	Stream << quint32(0x04034b50) << quint16(20) << quint16(0) << Method << quint32(0)
+		<< Crc << quint32(Compressed.size()) << DeclaredSize << quint16(Name.size()) << quint16(0);
+	Stream.writeRawData(Name.constData(), Name.size());
+	Stream.writeRawData(Compressed.constData(), Compressed.size());
+	const quint32 CentralOffset = static_cast<quint32>(Zip.size());
+	Stream << quint32(0x02014b50) << quint16(0x0314) << quint16(20) << quint16(0) << Method << quint32(0)
+		<< Crc << quint32(Compressed.size()) << DeclaredSize << quint16(Name.size()) << quint16(0)
+		<< quint16(0) << quint16(0) << quint16(0) << quint32(Mode << 16) << quint32(0);
+	Stream.writeRawData(Name.constData(), Name.size());
+	const quint32 CentralSize = static_cast<quint32>(Zip.size()) - CentralOffset;
+	Stream << quint32(0x06054b50) << quint16(0) << quint16(0) << quint16(1) << quint16(1)
+		<< CentralSize << CentralOffset << quint16(0);
+	return Zip;
+}
+
+void lcModelInstanceTests::ZipExtractionIntegrity_data()
+{
+	QTest::addColumn<bool>("Deflated");
+	QTest::addColumn<bool>("BadCrc");
+	QTest::addColumn<int>("ExtraBytes");
+	QTest::addColumn<quint32>("Limit");
+	QTest::addColumn<bool>("Accepted");
+	for (bool Deflated : { false, true })
+	{
+		const QByteArray Prefix = Deflated ? "deflated-" : "stored-";
+		QTest::newRow((Prefix + "valid").constData()) << Deflated << false << 0 << quint32(100) << true;
+		QTest::newRow((Prefix + "prefix").constData()) << Deflated << false << 0 << quint32(3) << true;
+		QTest::newRow((Prefix + "bad-crc").constData()) << Deflated << true << 0 << quint32(100) << false;
+		QTest::newRow((Prefix + "truncated").constData()) << Deflated << false << 10 << quint32(100) << false;
+	}
+}
+
+void lcModelInstanceTests::ZipExtractionIntegrity()
+{
+	QFETCH(bool, Deflated);
+	QFETCH(bool, BadCrc);
+	QFETCH(int, ExtraBytes);
+	QFETCH(quint32, Limit);
+	QFETCH(bool, Accepted);
+	const QByteArray Data("payload");
+	const QByteArray Zip = CreateAddonArchive("test", Data, 0100644, Data.size() + ExtraBytes, BadCrc, Deflated);
+	std::unique_ptr<lcMemFile> Source = std::make_unique<lcMemFile>();
+	Source->WriteBuffer(Zip.constData(), Zip.size());
+	lcZipFile Archive;
+	QVERIFY(Archive.OpenRead(std::move(Source)));
+	lcMemFile Output;
+	QCOMPARE(Archive.ExtractFile("test", Output, Limit), Accepted);
+	if (Accepted)
+		QCOMPARE(QByteArray(reinterpret_cast<const char*>(Output.mBuffer), Output.GetLength()), Data.left(Limit));
+}
+
+#if !LC_DISABLE_BLENDER
+void lcModelInstanceTests::AddonExtraction_data()
+{
+	QTest::addColumn<QByteArray>("Name");
+	QTest::addColumn<quint32>("Mode");
+	QTest::addColumn<int>("ExistingLink");
+	QTest::addColumn<int>("ExtraBytes");
+	QTest::addColumn<bool>("BadCrc");
+	QTest::addColumn<bool>("Accepted");
+	QTest::addColumn<QByteArray>("Data");
+	QTest::newRow("normal") << QByteArray("addons/test.py") << quint32(0100644) << 0 << 0 << false << true << QByteArray("payload");
+	QTest::newRow("empty-file") << QByteArray("addons/empty.py") << quint32(0100644) << 0 << 0 << false << true << QByteArray();
+	QTest::newRow("directory") << QByteArray("addons/") << quint32(0040755) << 0 << 0 << false << true << QByteArray();
+	for (const QByteArray& Name : { QByteArray("../victim"), QByteArray("addons/../../victim"),
+		QByteArray("addons\\..\\..\\victim"), QByteArray("/victim"), QByteArray("C:/victim"),
+		QByteArray("\\\\server\\share"), QByteArray("addons/file:stream"), QByteArray("addons/.. /victim"),
+		QByteArray("addons./victim"), QByteArray("./victim"), QByteArray(), QByteArray(256, 'A'), QByteArray("victim\0suffix", 13) })
+		QTest::newRow(qPrintable(QString::fromLatin1(Name.toHex()))) << Name << quint32(0100644) << 0 << 0 << false << false << QByteArray("payload");
+	QTest::newRow("archive-symlink") << QByteArray("addons/link") << quint32(0120777) << 0 << 0 << false << false << QByteArray("payload");
+	QTest::newRow("bad-crc") << QByteArray("addons/test.py") << quint32(0100644) << 0 << 0 << true << false << QByteArray("payload");
+	QTest::newRow("truncated") << QByteArray("addons/test.py") << quint32(0100644) << 0 << 10 << false << false << QByteArray("payload");
+#ifdef Q_OS_UNIX
+	QTest::newRow("parent-symlink") << QByteArray("addons/victim") << quint32(0100644) << 1 << 0 << false << false << QByteArray("payload");
+	QTest::newRow("leaf-symlink") << QByteArray("victim") << quint32(0100644) << 2 << 0 << false << false << QByteArray("payload");
+#endif
+}
+
+void lcModelInstanceTests::AddonExtraction()
+{
+	QFETCH(QByteArray, Name);
+	QFETCH(quint32, Mode);
+	QFETCH(int, ExistingLink);
+	QFETCH(int, ExtraBytes);
+	QFETCH(bool, BadCrc);
+	QFETCH(bool, Accepted);
+	QFETCH(QByteArray, Data);
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkdir("extract"));
+	const QString Root = Directory.filePath("extract");
+	QFile Victim(Directory.filePath("victim"));
+	QVERIFY(Victim.open(QIODevice::WriteOnly));
+	Victim.write("original");
+	Victim.close();
+	if (ExistingLink == 1)
+		QVERIFY(QFile::link(Directory.path(), QDir(Root).filePath("addons")));
+	else if (ExistingLink == 2)
+		QVERIFY(QFile::link(Victim.fileName(), QDir(Root).filePath("victim")));
+
+	const quint32 DeclaredSize = ExtraBytes > 0 ? Data.size() + ExtraBytes : Data.size();
+	const QByteArray Zip = CreateAddonArchive(Name, Data, Mode, DeclaredSize, BadCrc, false);
+	QFile Archive(QDir(Root).filePath("addon.zip"));
+	QVERIFY(Archive.open(QIODevice::WriteOnly));
+	QCOMPARE(Archive.write(Zip), qint64(Zip.size()));
+	Archive.close();
+
+	class TestPreferences : public lcBlenderPreferences
+	{
+	public:
+		using lcBlenderPreferences::ExtractAddon;
+	};
+	QString Result;
+	QCOMPARE(TestPreferences::ExtractAddon(Archive.fileName(), Result), Accepted);
+	QVERIFY(Victim.open(QIODevice::ReadOnly));
+	QCOMPARE(Victim.readAll(), QByteArray("original"));
+	if (Accepted)
+	{
+		const QString OutputPath = QDir(Root).filePath(QString::fromUtf8(Name));
+		if ((Mode & 0170000) == 0040000)
+			QVERIFY(QFileInfo(OutputPath).isDir());
+		else
+		{
+			QFile Output(OutputPath);
+			QVERIFY(Output.open(QIODevice::ReadOnly));
+			QCOMPARE(Output.readAll(), Data);
+		}
+	}
+	else
+	{
+		QVERIFY(!Result.isEmpty());
+		QVERIFY(!QFileInfo(QDir(Root).filePath("addons/test.py")).exists());
+	}
+}
+#endif
+
+void lcModelInstanceTests::LgeoLongColorTokens()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile Elements(Directory.filePath("lg_elements.lst"));
+	QVERIFY(Elements.open(QIODevice::WriteOnly));
+	Elements.close();
+	QFile Colors(Directory.filePath("lg_colors.lst"));
+	QVERIFY(Colors.open(QIODevice::WriteOnly));
+	Colors.write("7 safe_color L\n");
+	Colors.write("7 " + QByteArray(1800, 'A') + " L\n");
+	Colors.write("7 color " + QByteArray(1800, 'B') + "\n");
+	Colors.write(QByteArray(1800, '9') + " color L\n");
+	Colors.write("4294967303 wrapped_code L\n");
+	Colors.write("-4294967289 wrapped_code L\n");
+	Colors.write("7x invalid_code L\n");
+	Colors.close();
+	QFile ModelFile(Directory.filePath("model.ldr"));
+	QVERIFY(ModelFile.open(QIODevice::WriteOnly));
+	ModelFile.write("0 LGEO test\n0 !LEOCAD POV_RAY USE_LGEO\n");
+	ModelFile.close();
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		QString PreviousLgeoPath = lcGetProfileString(LC_PROFILE_POVRAY_LGEO_PATH);
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, PreviousLgeoPath);
+		}
+	} Scope;
+	lcSetProfileString(LC_PROFILE_POVRAY_LGEO_PATH, Directory.path());
+	lcLoadDefaultColors(lcStudStyle::Plain);
+	QVERIFY(Scope.Current.Load(ModelFile.fileName()));
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Scope.Current.GetMainModel(), false);
+	QVERIFY(Scope.Current.ExportPOVRay(Directory.filePath("model.pov")));
+	QFile Output(Directory.filePath("model.pov"));
+	QVERIFY(Output.open(QIODevice::ReadOnly));
+	QVERIFY(Output.readAll().contains("safe_color"));
+}
 
 void lcModelInstanceTests::SaveDialogSuffix()
 {

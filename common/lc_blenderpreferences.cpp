@@ -1342,7 +1342,7 @@ bool lcBlenderPreferences::ExtractBlenderAddon(const QString& BlenderDir)
 		const QString BlenderAddonFile = QDir::toNativeSeparators(QString("%1/%2").arg(BlenderDir, LC_BLENDER_ADDON_FILE));
 
 		QString Result;
-		Extracted = gAddonPreferences->ExtractAddon(BlenderAddonFile, Result);
+		Extracted = ExtractAddon(BlenderAddonFile, Result);
 
 		if (!Extracted)
 		{
@@ -3736,6 +3736,8 @@ enum
 
 bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 {
+	Result.clear();
+
 	enum ZipHostOS
 	{
 		HostFAT      = 0,
@@ -3790,7 +3792,10 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 	if (!ZipFile.OpenRead(FileName))
 		return false;
 
-	const QString DestinationDir = QFileInfo(FileName).absolutePath();
+	const QString DestinationDir = QFileInfo(QFileInfo(FileName).absolutePath()).canonicalFilePath();
+	if (DestinationDir.isEmpty())
+		return false;
+	const QString DestinationPrefix = DestinationDir + QLatin1Char('/');
 
 	bool Ok = true;
 
@@ -3842,23 +3847,47 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 				FileInfo.permissions |= QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther;
 			break;
 		default:
-			QMessageBox::warning(this, tr("Extract Blender Add-on"), tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx));
-			Ok = false;
+			Result = tr("ZipFile entry format (HostOS %1) at index %2 is not supported. Extract terminated.").arg(HostOS).arg(FileIdx);
+			return false;
 		}
 
 		if (!Ok || !(Ok = FileInfo.IsValid()))
 			break;
 
-		// Check the file path - if broken, convert separators, eat leading and trailing ones
-		FileInfo.filePath = QDir::fromNativeSeparators(FileInfo.ZipInfo.file_name);
-		QString FilePathRef(FileInfo.filePath);
-		while (FilePathRef.startsWith(QLatin1Char('.')) || FilePathRef.startsWith(QLatin1Char('/')))
-			FilePathRef = FilePathRef.mid(1);
-		while (FilePathRef.endsWith(QLatin1Char('/')))
-			FilePathRef.chop(1);
-		FileInfo.filePath = FilePathRef;
+		// ZIP names are untrusted, including Windows path syntax on other platforms.
+		FileInfo.filePath = QString::fromUtf8(FileInfo.ZipInfo.file_name).replace(QLatin1Char('\\'), QLatin1Char('/'));
+		if (FileInfo.isSymLink || FileInfo.ZipInfo.size_filename != strlen(FileInfo.ZipInfo.file_name) ||
+			FileInfo.filePath.isEmpty() || FileInfo.filePath.startsWith(QLatin1Char('/')) || FileInfo.filePath.contains(QLatin1Char(':')))
+		{
+			Ok = false;
+			break;
+		}
 
-		const QString AbsPath = QDir::fromNativeSeparators(DestinationDir + QDir::separator() + FileInfo.filePath);
+		if (FileInfo.isDir && FileInfo.filePath.endsWith(QLatin1Char('/')))
+			FileInfo.filePath.chop(1);
+
+		const QStringList Components = FileInfo.filePath.split(QLatin1Char('/'));
+		QString AbsPath = DestinationDir;
+		for (const QString& Component : Components)
+		{
+			if (Component.isEmpty() || Component == QLatin1String(".") || Component == QLatin1String("..") ||
+				Component.endsWith(QLatin1Char('.')) || Component.endsWith(QLatin1Char(' ')))
+			{
+				Ok = false;
+				break;
+			}
+
+			AbsPath = QDir(AbsPath).filePath(Component);
+			const QFileInfo Existing(AbsPath);
+			const QString CanonicalPath = Existing.canonicalFilePath();
+			if (Existing.isSymLink() || (!CanonicalPath.isEmpty() && !CanonicalPath.startsWith(DestinationPrefix)))
+			{
+				Ok = false;
+				break;
+			}
+		}
+		if (!Ok)
+			break;
 
 		// directories
 		if (FileInfo.isDir)
@@ -3874,34 +3903,21 @@ bool lcBlenderPreferences::ExtractAddon(const QString FileName, QString& Result)
 
 		lcMemFile MemFile;
 
-		ZipFile.ExtractFile(FileIdx, MemFile);
+		if (!(Ok = FileInfo.ZipInfo.uncompressed_size <= static_cast<quint64>(std::numeric_limits<int>::max()) && ZipFile.ExtractFile(FileIdx, MemFile)))
+			break;
 
 		QByteArray const& ByteArray = QByteArray::fromRawData((const char*)MemFile.mBuffer, (int)MemFile.GetLength());
-
-		// symlinks
-		if (FileInfo.isSymLink)
-		{
-			QString Destination = QFile::decodeName(ByteArray);
-			if (!(Ok = !Destination.isEmpty()))
-				break;
-			QFileInfo LinkFileInfo(AbsPath);
-			if (!QFile::exists(LinkFileInfo.absolutePath()))
-				QDir::root().mkpath(LinkFileInfo.absolutePath());
-			if (!(Ok = QFile::link(Destination, AbsPath)))
-				break;
-			Extracted++;
-			continue;
-		}
 
 		// files
 		if (FileInfo.isFile)
 		{
-			QFile File(AbsPath);
-			if(!(Ok = File.open(QIODevice::WriteOnly)))
+			if (!(Ok = QDir().mkpath(QFileInfo(AbsPath).absolutePath())))
 				break;
-			File.write(ByteArray);
-			File.setPermissions(FileInfo.permissions);
-			File.close();
+			QSaveFile File(AbsPath);
+			if (!(Ok = File.open(QIODevice::WriteOnly)))
+				break;
+			if (!(Ok = File.write(ByteArray) == ByteArray.size() && File.setPermissions(FileInfo.permissions) && File.commit()))
+				break;
 			Extracted++;
 		}
 	}

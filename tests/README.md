@@ -142,6 +142,13 @@ types under nested instance transforms and for root-model export.
 Mesh checks reject section-count overflow and malformed cached draw ranges,
 primitive counts, and vertex indices with both 16-bit and 32-bit index buffers.
 
+Security checks exercise long LGEO color-table tokens and reject unsafe add-on
+archive paths, archived and existing symlinks, corrupt checksums, and truncated
+entries. ZIP checks cover both stored and deflated entries, including deliberate
+prefix reads. Run file-watcher checks with filesystem notifications available;
+a sandbox that blocks those notifications can cause timeouts. Native rendering
+checks can run separately from the offscreen suite to avoid interactive dialogs.
+
 TEXMAP checks cover preferred/fallback branch selection, nested scopes, NEXT,
 missing and corrupt textures, exhausted upload retries, and cached primitive
 includes while preserving the shared textured geometry. Include checks also

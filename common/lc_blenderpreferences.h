@@ -70,7 +70,7 @@ protected:
 	void ClearGroupBox(QGroupBox* GroupBox);
 	void InitPathsAndSettings();
 	void InitPathsAndSettingsMM();
-	bool ExtractAddon(const QString FileName, QString &Result);
+	static bool ExtractAddon(const QString FileName, QString &Result);
 
 signals:
 	void SettingChangedSig(bool);

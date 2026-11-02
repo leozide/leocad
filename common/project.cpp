@@ -3917,15 +3917,20 @@ lcResult<void> Project::ExportPOVRay(const QString& FileName)
 
 		while (LgeoColorFile.ReadLine(Line, sizeof(Line)))
 		{
-			char Name[1024], Flags[1024];
-			int Code;
-
 			if (*Line == ';')
 				continue;
 
-			if (sscanf(Line,"%d%s%s", &Code, Name, Flags) != 3)
+			char Name[1024], Flags[1024];
+			long long ParsedCode;
+			int CodeEnd, NameEnd, FlagsEnd;
+
+			// Bound the numeric field so conversion cannot overflow before range checking.
+			if (sscanf(Line, "%11lld%n %1023s%n %1023s%n", &ParsedCode, &CodeEnd, Name, &NameEnd, Flags, &FlagsEnd) != 3 ||
+				ParsedCode < std::numeric_limits<int>::min() || ParsedCode > std::numeric_limits<int>::max() ||
+				!strchr(" \t\r\n\f\v", Line[CodeEnd]) || !strchr(" \t\r\n\f\v", Line[NameEnd]) || !strchr(" \t\r\n\f\v", Line[FlagsEnd]))
 				continue;
 
+			const int Code = static_cast<int>(ParsedCode);
 			size_t ColorIndex = lcGetColorIndex(Code);
 
 			if (ColorIndex >= NumColors)

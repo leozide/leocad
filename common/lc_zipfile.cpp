@@ -668,7 +668,7 @@ bool lcZipFile::ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLengt
 			quint32 DoCopy, i;
 
 			if ((Stream.avail_in == 0) && (RestReadCompressed == 0))
-				return (Read == 0) ? false : true;
+				return false;
 
 			if (Stream.avail_out < Stream.avail_in)
 				DoCopy = Stream.avail_out;
@@ -722,7 +722,7 @@ bool lcZipFile::ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLengt
 				}
 
 				if (err == Z_STREAM_END)
-					return (Read == 0) ? false : true;
+					return Read == Length;
 
 				return false;
 			}
@@ -732,5 +732,5 @@ bool lcZipFile::ExtractFile(quint32 FileIndex, lcMemFile& File, quint32 MaxLengt
 	if (FileInfo.compression_method == Z_DEFLATED)
 		inflateEnd(&Stream);
 
-	return true;
+	return Read == Length && (Length < FileInfo.uncompressed_size || Crc32 == FileInfo.crc);
 }

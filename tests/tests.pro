@@ -15,7 +15,9 @@ INCLUDEPATH += ../common
 HEADERS += lc_tests.h
 
 SOURCES += \
+	../common/lc_math.cpp \
 	../common/lc_objectproperty.cpp \
+	lc_math_test.cpp \
 	lc_objecthistory_test.cpp \
 	lc_objectproperty_test.cpp \
 	main.cpp

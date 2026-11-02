@@ -419,13 +419,13 @@ std::tuple<lcVector3, float> lcZoomExtents(const lcVector3& Position, const lcMa
 
 	for (size_t PointIdx = 0; PointIdx < NumPoints; PointIdx++)
 	{
-		const float Distance = lcDot(Points[PointIdx], Front);
+		const float Distance = lcDot(NewPosition - Points[PointIdx], Front);
 
 		if (Distance > FarDistance)
 			FarDistance = Distance;
 	}
 
-	return std::make_tuple(NewPosition, FarDistance + lcDot(NewPosition, Front));
+	return std::make_tuple(NewPosition, FarDistance);
 }
 
 lcVector3 lcRGBToHSL(const lcVector3& rgb)

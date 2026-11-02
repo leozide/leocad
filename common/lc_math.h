@@ -361,7 +361,7 @@ inline lcVector3 operator*(float a, const lcVector3& b)
 
 inline lcVector3 operator/(float a, const lcVector3& b)
 {
-	return lcVector3(b.x / a, b.y / a, b.z / a);
+	return lcVector3(a / b.x, a / b.y, a / b.z);
 }
 
 inline lcVector3 operator-(const lcVector3& a)
@@ -1342,52 +1342,40 @@ inline bool lcLineSegmentPlaneIntersection(lcVector3* Intersection, const lcVect
 
 inline bool lcLineTriangleMinIntersection(const lcVector3& p1, const lcVector3& p2, const lcVector3& p3, const lcVector3& Start, const lcVector3& End, float* MinDist, lcVector3* Intersection)
 {
-	// Calculate the polygon plane.
-	const lcVector3 PlaneNormal = lcCross(p1 - p2, p3 - p2);
-	const float PlaneD = -lcDot(PlaneNormal, p1);
+	// Barycentric ray/triangle intersection includes vertices and edges without
+	// normalizing vectors that become zero at a vertex.
+	const lcVector3 Edge1 = p2 - p1;
+	const lcVector3 Edge2 = p3 - p1;
+	const lcVector3 Direction = End - Start;
+	const lcVector3 P = lcCross(Direction, Edge2);
+	const double Determinant = lcDot(Edge1, P);
 
-	// Check if the line is parallel to the plane.
-	const lcVector3 Dir = End - Start;
-
-	const float t1 = lcDot(PlaneNormal, Start) + PlaneD;
-	const float t2 = lcDot(PlaneNormal, Dir);
-
-	if (t2 == 0)
+	if (Determinant == 0.0)
 		return false;
 
-	const float t = -(t1 / t2);
+	const lcVector3 Offset = Start - p1;
+	const double u = lcDot(Offset, P) / Determinant;
+	const lcVector3 Q = lcCross(Offset, Edge1);
+	const double v = lcDot(Direction, Q) / Determinant;
+	constexpr double EdgeTolerance = 0.000001;
 
-	if (t < 0)
+	if (u < -EdgeTolerance || v < -EdgeTolerance || u + v > 1.0 + EdgeTolerance)
 		return false;
 
-	// Intersection of the plane and line segment.
-	*Intersection = Start - (t1 / t2) * Dir;
+	const double t = lcDot(Edge2, Q) / Determinant;
 
-	float Dist = lcLength(Start - *Intersection);
-
-	if (Dist > *MinDist)
+	if (t < 0.0)
 		return false;
 
-	// Check if we're inside the triangle.
-	lcVector3 pa1, pa2, pa3;
-	pa1 = lcNormalize(p1 - *Intersection);
-	pa2 = lcNormalize(p2 - *Intersection);
-	pa3 = lcNormalize(p3 - *Intersection);
+	const lcVector3 Point = Start + static_cast<float>(t) * Direction;
+	const float Distance = lcLength(Point - Start);
 
-	float a1, a2, a3;
-	a1 = lcDot(pa1, pa2);
-	a2 = lcDot(pa2, pa3);
-	a3 = lcDot(pa3, pa1);
+	if (Distance > *MinDist)
+		return false;
 
-	const float total = (acosf(a1) + acosf(a2) + acosf(a3)) * LC_RTOD;
-
-	if (fabs(total - 360) <= 0.001f)
-	{
-		*MinDist = Dist;
-		return true;
-	}
-
-	return false;
+	*Intersection = Point;
+	*MinDist = Distance;
+	return true;
 }
 
 // Sutherland-Hodgman method of clipping a polygon to a plane.
@@ -1396,6 +1384,10 @@ inline void lcPolygonPlaneClip(lcVector3* InPoints, int NumInPoints, lcVector3* 
 	lcVector3 *s, *p, i;
 
 	*NumOutPoints = 0;
+
+	if (NumInPoints <= 0)
+		return;
+
 	s = &InPoints[NumInPoints-1];
 
 	for (int j = 0; j < NumInPoints; j++)
@@ -1465,8 +1457,8 @@ inline bool lcTriangleIntersectsPlanes(const lcVector3& p1, const lcVector3& p2,
 	if (!Outcodes[0] || !Outcodes[1] || !Outcodes[2])
 		return true;
 
-	// Buffers for clipping the polygon.
-	lcVector3 ClipPoints[2][8];
+	// Each clipping plane can add one vertex to the triangle.
+	lcVector3 ClipPoints[2][NumPoints + NumPlanes];
 	int NumClipPoints[2];
 	int ClipBuffer = 0;
 
@@ -1602,154 +1594,182 @@ inline bool lcSphereRayIntersection(const lcVector3& Center, float Radius, const
 	return true;
 }
 
+// Returns the nearest forward hit distance in world units, or zero when inside.
 inline bool lcSphereRayMinIntersectDistance(const lcVector3& Center, float Radius, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	const lcVector3 Dir = Center - Start;
-	const float LengthSquaredDir = lcLengthSquared(Dir);
-	const float RadiusSquared = Radius * Radius;
+	if (Radius < 0.0f)
+		return false;
 
-	if (LengthSquaredDir < RadiusSquared)
+	const lcVector3 Offset = Center - Start;
+	const double CenterDistanceSquared = static_cast<double>(Offset.x) * Offset.x + static_cast<double>(Offset.y) * Offset.y + static_cast<double>(Offset.z) * Offset.z;
+	const double RadiusSquared = static_cast<double>(Radius) * Radius;
+
+	if (CenterDistanceSquared <= RadiusSquared)
 	{
-		// Ray origin inside sphere.
-		*Dist = 0;
+		*Dist = 0.0f;
 		return true;
 	}
-	else
-	{
-		const lcVector3 RayDir = End - Start;
-		float t = lcDot(Dir, RayDir) / lcLengthSquared(RayDir);
 
-		// Ray points away from sphere.
-		if (t < 0)
-			return false;
+	const lcVector3 Ray = End - Start;
+	const double RayLengthSquared = static_cast<double>(Ray.x) * Ray.x + static_cast<double>(Ray.y) * Ray.y + static_cast<double>(Ray.z) * Ray.z;
 
-		const float c = (RadiusSquared - LengthSquaredDir) / lcLengthSquared(RayDir) + (t * t);
-		if (c > 0)
-		{
-			*Dist = t - sqrtf(c);
-			return true;
-		}
-
+	if (RayLengthSquared == 0.0)
 		return false;
-	}
+
+	const double Projection = (static_cast<double>(Offset.x) * Ray.x + static_cast<double>(Offset.y) * Ray.y + static_cast<double>(Offset.z) * Ray.z) / std::sqrt(RayLengthSquared);
+
+	if (Projection < 0.0)
+		return false;
+
+	const double HalfChordSquared = RadiusSquared - CenterDistanceSquared + Projection * Projection;
+
+	if (HalfChordSquared < 0.0)
+		return false;
+
+	// Rationalizing the nearest root avoids subtracting nearly equal distances.
+	*Dist = static_cast<float>((CenterDistanceSquared - RadiusSquared) / (Projection + std::sqrt(HalfChordSquared)));
+	return true;
 }
 
 inline bool lcConeRayMinIntersectDistance(const lcVector3& Tip, const lcVector3& Direction, float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	const lcVector3 v = End - Start;
-	const lcVector3 h = Direction;
-	const lcVector3 w = Start - Tip;
-	const float vh = lcDot(v, h);
-	const float wh = lcDot(w, h);
-	const float m = (Radius * Radius) / (Height * Height);
-
-	const float a = lcDot(v, v) - m * vh * vh - vh * vh;
-	const float b = 2 * (lcDot(v, w) - m * vh * wh - vh * wh);
-	const float c = lcDot(w, w) - m * wh * wh - wh * wh;
-
-	const float delta = b * b - 4 * a * c;
-
-	if (delta < 0.0f)
+	if (Radius < 0.0f || Height <= 0.0f)
 		return false;
 
-	float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
+	const lcVector3 Ray = End - Start;
+	const double RayLengthSquared = lcLengthSquared(Ray);
 
-	for (int ti = 0; ti < 2; ti++)
+	if (RayLengthSquared == 0.0)
+		return false;
+
+	const lcVector3 Offset = Start - Tip;
+	const double AxialStart = lcDot(Offset, Direction);
+	const double AxialRay = lcDot(Ray, Direction);
+	const double SlopeSquared = (static_cast<double>(Radius) * Radius) / (static_cast<double>(Height) * Height);
+	const double a = RayLengthSquared - (1.0 + SlopeSquared) * AxialRay * AxialRay;
+	const double b = 2.0 * (lcDot(Ray, Offset) - (1.0 + SlopeSquared) * AxialRay * AxialStart);
+	const double c = lcLengthSquared(Offset) - (1.0 + SlopeSquared) * AxialStart * AxialStart;
+
+	if (AxialStart >= 0.0 && AxialStart <= Height && c <= 0.0)
 	{
-		float t = ts[ti];
-		lcVector3 Intersection = Start + v * t;
+		*Dist = 0.0f;
+		return true;
+	}
 
-		float ConeD = lcDot(Intersection - Tip, Direction);
+	double MinParameter = std::numeric_limits<double>::infinity();
+	auto CheckSide = [&](double t)
+	{
+		const double AxialPosition = AxialStart + t * AxialRay;
 
-		if (ConeD < 0.0f)
-			continue;
+		if (t >= 0.0 && AxialPosition >= 0.0 && AxialPosition <= Height && t < MinParameter)
+			MinParameter = t;
+	};
 
-		if (ConeD < Height)
+	// A ray parallel to a cone generator leaves a linear equation.
+	if (a == 0.0)
+	{
+		if (b != 0.0)
+			CheckSide(-c / b);
+	}
+	else
+	{
+		const double Discriminant = b * b - 4.0 * a * c;
+
+		if (Discriminant >= 0.0)
 		{
-			*Dist = lcLength(Intersection - Start);
+			const double q = -0.5 * (b + std::copysign(std::sqrt(Discriminant), b));
 
-			return true;
-		}
-
-		lcVector3 Center(Tip + Direction * Height);
-		lcVector4 Plane(Direction, -lcDot(Direction, Center));
-
-		if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
-		{
-			if (lcLengthSquared(Center - Intersection) < Radius * Radius)
+			if (q == 0.0)
+				CheckSide(-b / (2.0 * a));
+			else
 			{
-				*Dist = lcLength(Intersection - Start);
-
-				return true;
+				CheckSide(q / a);
+				CheckSide(c / q);
 			}
 		}
 	}
 
-	return false;
+	// Test the base independently of the side roots, using the forward ray.
+	if (AxialRay != 0.0)
+	{
+		const double t = (Height - AxialStart) / AxialRay;
+		const double x = Offset.x + t * Ray.x - static_cast<double>(Height) * Direction.x;
+		const double y = Offset.y + t * Ray.y - static_cast<double>(Height) * Direction.y;
+		const double z = Offset.z + t * Ray.z - static_cast<double>(Height) * Direction.z;
+
+		if (t >= 0.0 && x * x + y * y + z * z <= static_cast<double>(Radius) * Radius && t < MinParameter)
+			MinParameter = t;
+	}
+
+	if (!std::isfinite(MinParameter))
+		return false;
+
+	*Dist = static_cast<float>(MinParameter * std::sqrt(RayLengthSquared));
+	return true;
 }
 
 inline bool lcCylinderRayMinIntersectDistance(float Radius, float Height, const lcVector3& Start, const lcVector3& End, float* Dist)
 {
-	lcVector4 BottomPlane(0.0f, 0.0f, 1.0f, 0.0f);
-	lcVector3 Intersection;
-	float MinDistance = FLT_MAX;
-
-	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, BottomPlane))
-	{
-		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
-		{
-			float Distance = lcLength(Intersection - Start);
-
-			if (Distance < MinDistance)
-				MinDistance = Distance;
-		}
-	}
-
-	lcVector4 TopPlane(0.0f, 0.0f, 1.0f, -Height);
-
-	if (lcLineSegmentPlaneIntersection(&Intersection, Start, End, TopPlane))
-	{
-		if (Intersection.x * Intersection.x + Intersection.y * Intersection.y < Radius * Radius)
-		{
-			float Distance = lcLength(Intersection - Start);
-
-			if (Distance < MinDistance)
-				MinDistance = Distance;
-		}
-	}
-
-	lcVector3 Direction = End - Start;
-
-	float a = (Direction.x * Direction.x) + (Direction.y * Direction.y);
-	float b = 2 * (Direction.x * Start.x + Direction.y * Start.y);
-	float c = (Start.x * Start.x) + (Start.y * Start.y) - (Radius * Radius);
-
-	float delta = b * b - 4 * (a * c);
-
-	if (delta > 0.0f)
-	{
-		float ts[2] = { (-b - sqrtf(delta)) / (2 * a), (-b + sqrtf(delta)) / (2 * a) };
-
-		for (int ti = 0; ti < 2; ti++)
-		{
-			float t = ts[ti];
-			Intersection = Start + Direction * t;
-
-			if (Intersection.z < 0.0f || Intersection.z > Height)
-				continue;
-
-			float Distance = lcLength(Intersection - Start);
-
-			if (Distance < MinDistance)
-				MinDistance = Distance;
-		}
-	}
-
-	if (MinDistance == FLT_MAX)
+	if (Radius < 0.0f || Height <= 0.0f)
 		return false;
 
-	*Dist = MinDistance;
+	const lcVector3 Ray = End - Start;
+	const double RayLengthSquared = lcLengthSquared(Ray);
 
+	if (RayLengthSquared == 0.0)
+		return false;
+
+	const double a = static_cast<double>(Ray.x) * Ray.x + static_cast<double>(Ray.y) * Ray.y;
+	const double b = 2.0 * (static_cast<double>(Ray.x) * Start.x + static_cast<double>(Ray.y) * Start.y);
+	const double c = static_cast<double>(Start.x) * Start.x + static_cast<double>(Start.y) * Start.y - static_cast<double>(Radius) * Radius;
+
+	if (Start.z >= 0.0f && Start.z <= Height && c <= 0.0)
+	{
+		*Dist = 0.0f;
+		return true;
+	}
+
+	double MinParameter = std::numeric_limits<double>::infinity();
+	auto CheckSide = [&](double t)
+	{
+		const double z = Start.z + t * Ray.z;
+
+		if (t >= 0.0 && z >= 0.0 && z <= Height && t < MinParameter)
+			MinParameter = t;
+	};
+
+	const double Discriminant = b * b - 4.0 * a * c;
+
+	if (a != 0.0 && Discriminant >= 0.0)
+	{
+		const double q = -0.5 * (b + std::copysign(std::sqrt(Discriminant), b));
+
+		if (q == 0.0)
+			CheckSide(-b / (2.0 * a));
+		else
+		{
+			CheckSide(q / a);
+			CheckSide(c / q);
+		}
+	}
+
+	if (Ray.z != 0.0f)
+	{
+		for (float z : { 0.0f, Height })
+		{
+			const double t = (z - Start.z) / Ray.z;
+			const double x = Start.x + t * Ray.x;
+			const double y = Start.y + t * Ray.y;
+
+			if (t >= 0.0 && x * x + y * y <= static_cast<double>(Radius) * Radius && t < MinParameter)
+				MinParameter = t;
+		}
+	}
+
+	if (!std::isfinite(MinParameter))
+		return false;
+
+	*Dist = static_cast<float>(MinParameter * std::sqrt(RayLengthSquared));
 	return true;
 }
 
@@ -1777,14 +1797,14 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 	constexpr int NumPlanes = 6;
 	lcVector3 Points[8] =
 	{
-		Points[0] = lcVector3(Min[0], Min[1], Min[2]),
-		Points[1] = lcVector3(Min[0], Max[1], Min[2]),
-		Points[2] = lcVector3(Max[0], Max[1], Min[2]),
-		Points[3] = lcVector3(Max[0], Min[1], Min[2]),
-		Points[4] = lcVector3(Min[0], Min[1], Max[2]),
-		Points[5] = lcVector3(Min[0], Max[1], Max[2]),
-		Points[6] = lcVector3(Max[0], Max[1], Max[2]),
-		Points[7] = lcVector3(Max[0], Min[1], Max[2])
+		lcVector3(Min[0], Min[1], Min[2]),
+		lcVector3(Min[0], Max[1], Min[2]),
+		lcVector3(Max[0], Max[1], Min[2]),
+		lcVector3(Max[0], Min[1], Min[2]),
+		lcVector3(Min[0], Min[1], Max[2]),
+		lcVector3(Min[0], Max[1], Max[2]),
+		lcVector3(Max[0], Max[1], Max[2]),
+		lcVector3(Max[0], Min[1], Max[2])
 	};
 
 	// Start by testing trivial reject/accept cases.
@@ -1835,8 +1855,63 @@ inline bool lcBoundingBoxIntersectsVolume(const lcVector3& Min, const lcVector3&
 	};
 
 	for (int Idx = 0; Idx < 36; Idx += 3)
-		if (lcTriangleIntersectsPlanes(Points[Indices[Idx]*3], Points[Indices[Idx+1]*3], Points[Indices[Idx+2]*3], Planes))
+		if (lcTriangleIntersectsPlanes(Points[Indices[Idx]], Points[Indices[Idx+1]], Points[Indices[Idx+2]], Planes))
 			return true;
+
+	// With no box face crossing, the volume may be wholly inside the box.
+	// Its vertices are intersections of triples of its boundary planes.
+	for (int First = 0; First < NumPlanes - 2; First++)
+		for (int Second = First + 1; Second < NumPlanes - 1; Second++)
+			for (int Third = Second + 1; Third < NumPlanes; Third++)
+			{
+				double Cross23[3], Cross31[3], Cross12[3];
+
+				for (int Axis = 0; Axis < 3; Axis++)
+				{
+					const int Next = (Axis + 1) % 3;
+					const int Last = (Axis + 2) % 3;
+					Cross23[Axis] = static_cast<double>(Planes[Second][Next]) * Planes[Third][Last] - static_cast<double>(Planes[Second][Last]) * Planes[Third][Next];
+					Cross31[Axis] = static_cast<double>(Planes[Third][Next]) * Planes[First][Last] - static_cast<double>(Planes[Third][Last]) * Planes[First][Next];
+					Cross12[Axis] = static_cast<double>(Planes[First][Next]) * Planes[Second][Last] - static_cast<double>(Planes[First][Last]) * Planes[Second][Next];
+				}
+
+				const double Determinant = Planes[First][0] * Cross23[0] + Planes[First][1] * Cross23[1] + Planes[First][2] * Cross23[2];
+
+				if (Determinant == 0.0)
+					continue;
+
+				double Point[3];
+				bool Inside = true;
+
+				for (int Axis = 0; Axis < 3; Axis++)
+				{
+					Point[Axis] = -(Planes[First][3] * Cross23[Axis] + Planes[Second][3] * Cross31[Axis] + Planes[Third][3] * Cross12[Axis]) / Determinant;
+
+					if (Point[Axis] < Min[Axis] || Point[Axis] > Max[Axis])
+						Inside = false;
+				}
+
+				if (!Inside)
+					continue;
+
+				for (int Plane = 0; Plane < NumPlanes; Plane++)
+				{
+					const double x = Planes[Plane][0] * Point[0];
+					const double y = Planes[Plane][1] * Point[1];
+					const double z = Planes[Plane][2] * Point[2];
+					// Allow rounding at the planes defining this vertex.
+					const double Tolerance = 1e-9 * (1.0 + fabs(x) + fabs(y) + fabs(z) + fabs(Planes[Plane][3]));
+
+					if (x + y + z + Planes[Plane][3] > Tolerance)
+					{
+						Inside = false;
+						break;
+					}
+				}
+
+				if (Inside)
+					return true;
+			}
 
 	return false;
 }

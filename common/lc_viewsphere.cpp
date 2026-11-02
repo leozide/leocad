@@ -384,7 +384,7 @@ std::bitset<6> lcViewSphere::GetIntersectionFlags(lcVector3& Intersection) const
 	float Distance;
 	if (lcSphereRayMinIntersectDistance(lcVector3(0.0f, 0.0f, 0.0f), mRadius, StartEnd[0], StartEnd[1], &Distance))
 	{
-		Intersection = (StartEnd[0] + (StartEnd[1] - StartEnd[0]) * Distance) / mRadius;
+		Intersection = (StartEnd[0] + lcNormalize(StartEnd[1] - StartEnd[0]) * Distance) / mRadius;
 
 		auto CheckIntersection = [&]()
 		{

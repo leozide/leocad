@@ -1125,8 +1125,25 @@ void lcView::OnDraw()
 	const lcPreferences& Preferences = lcGetPreferences();
 	const bool DrawOverlays = mWidget != nullptr;
 	const bool DrawInterface = mWidget != nullptr && mViewType == lcViewType::View;
-
 	lcShadingMode ShadingMode = Preferences.mShadingMode;
+
+	if (mViewType == lcViewType::PartsList)
+	{
+		switch (Preferences.mThumbnailShadingMode)
+		{
+		case lcThumbnailShadingMode::UseViewShading:
+			break;
+
+		case lcThumbnailShadingMode::Flat:
+			ShadingMode = lcShadingMode::Flat;
+			break;
+
+		case lcThumbnailShadingMode::DefaultLights:
+			ShadingMode = lcShadingMode::DefaultLights;
+			break;
+		}
+	}
+
 	if (ShadingMode == lcShadingMode::Wireframe && !mWidget)
 		ShadingMode = lcShadingMode::Flat;
 

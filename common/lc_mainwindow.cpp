@@ -3,6 +3,7 @@
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 #include "lc_partselectionwidget.h"
+#include "lc_thumbnailmanager.h"
 #include "lc_propertieswidget.h"
 #include "lc_timelinewidget.h"
 #include "lc_viewwidget.h"
@@ -1661,8 +1662,7 @@ void lcMainWindow::SetShadingMode(lcShadingMode ShadingMode)
 
 	lcView::UpdateAllViews();
 
-	if (mPartSelectionWidget)
-		mPartSelectionWidget->UpdateThumbnails();
+	lcGetPiecesLibrary()->GetThumbnailManager()->RefreshThumbnails();
 }
 
 void lcMainWindow::SetSelectionMode(lcSelectionMode SelectionMode)

@@ -282,8 +282,6 @@ class lcPartSelectionWidget : public QWidget
 
 public:
 	lcPartSelectionWidget(bool IsPopup, QWidget* Parent);
-
-	void UpdateThumbnails();
 	void SetDefaultPart();
 	void UpdateProjectCategories();
 	void UpdateInUseCategory();

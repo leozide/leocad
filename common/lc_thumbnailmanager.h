@@ -29,9 +29,12 @@ public:
 	std::pair<lcPartThumbnailId, QPixmap> RequestThumbnail(lcPieceData* PieceData, int ColorIndex, int Size, float DeviceScale);
 	void ReleaseThumbnail(lcPartThumbnailId ThumbnailId);
 	void Clear();
+	// Invalidates thumbnail IDs so consumers can request visible thumbnails again.
+	void RefreshThumbnails();
 	void RefreshPieces(const std::vector<lcPieceData*>& ChangedPieces);
 
 signals:
+	void ThumbnailsInvalidated();
 	void ThumbnailReady(lcPartThumbnailId ThumbnailId, QPixmap Pixmap);
 
 protected slots:

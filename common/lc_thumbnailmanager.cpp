@@ -30,6 +30,13 @@ void lcThumbnailManager::Clear()
 	mThumbnails.clear();
 }
 
+void lcThumbnailManager::RefreshThumbnails()
+{
+	Clear();
+
+	emit ThumbnailsInvalidated();
+}
+
 void lcThumbnailManager::RefreshPieces(const std::vector<lcPieceData*>& ChangedPieces)
 {
 	const std::unordered_set<lcPieceData*> Changed(ChangedPieces.begin(), ChangedPieces.end());

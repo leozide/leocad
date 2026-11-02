@@ -120,6 +120,7 @@ static lcProfileEntry gProfileEntries[LC_NUM_PROFILE_KEYS] =
 	lcProfileEntry("Settings", "ImageWidth", 1280),                                            // LC_PROFILE_IMAGE_WIDTH
 	lcProfileEntry("Settings", "ImageHeight", 720),                                            // LC_PROFILE_IMAGE_HEIGHT
 	lcProfileEntry("Settings", "ImageExtension", ".png"),                                      // LC_PROFILE_IMAGE_EXTENSION
+	lcProfileEntry("Settings", "ThumbnailShadingMode", static_cast<int>(lcThumbnailShadingMode::UseViewShading)), // LC_PROFILE_THUMBNAIL_SHADING_MODE
 	lcProfileEntry("Settings", "PartsListIcons", 64),                                          // LC_PROFILE_PARTS_LIST_ICONS
 	lcProfileEntry("Settings", "PartsListNames", 1),                                           // LC_PROFILE_PARTS_LIST_NAMES
 	lcProfileEntry("Settings", "PartsListFixedColor", static_cast<uint>(LC_COLOR_NOCOLOR)),                                     // LC_PROFILE_PARTS_LIST_COLOR
@@ -348,6 +349,13 @@ constexpr lcProfileEnumValue<lcShadingMode> ShadingModeValues[] =
 	{ lcShadingMode::Full, "Full", 3 }
 };
 
+constexpr lcProfileEnumValue<lcThumbnailShadingMode> ThumbnailShadingModeValues[] =
+{
+	{ lcThumbnailShadingMode::UseViewShading, "UseViewShading", 0 },
+	{ lcThumbnailShadingMode::Flat, "Flat", 1 },
+	{ lcThumbnailShadingMode::DefaultLights, "DefaultLights", 2 }
+};
+
 constexpr lcProfileEnumValue<lcHighlightRenderMode> HighlightRenderModeValues[] =
 {
 	{ lcHighlightRenderMode::Outline, "Outline", 0 },
@@ -450,6 +458,16 @@ lcShadingMode lcGetProfileShadingMode()
 void lcSetProfileShadingMode(lcShadingMode Value)
 {
 	lcWriteProfileEnum(LC_PROFILE_SHADING_MODE, Value, ShadingModeValues);
+}
+
+lcThumbnailShadingMode lcGetProfileThumbnailShadingMode()
+{
+	return lcReadProfileEnum(LC_PROFILE_THUMBNAIL_SHADING_MODE, ThumbnailShadingModeValues);
+}
+
+void lcSetProfileThumbnailShadingMode(lcThumbnailShadingMode Value)
+{
+	lcWriteProfileEnum(LC_PROFILE_THUMBNAIL_SHADING_MODE, Value, ThumbnailShadingModeValues);
 }
 
 lcHighlightRenderMode lcGetProfileHighlightRenderMode()

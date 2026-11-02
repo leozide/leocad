@@ -12240,6 +12240,31 @@ SVP visitez https://www.leocad.org pour apprendre comment télécharger et insta
         <source>&lt;p&gt;&lt;b&gt;Files&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Shows model files in the saved project's folder. Select or drag a file to insert an external reference. The current project is excluded. Save a new project to choose its folder.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1428"/>
+        <source>Choose the shading mode for all piece selection widgets.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1420"/>
+        <source>Use View Shading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1421"/>
+        <source>Flat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1422"/>
+        <source>Default Lights</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../common/lc_partselectionwidget.cpp" line="1383"/>
+        <source>Thumbnails</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>lcPiecesLibrary</name>

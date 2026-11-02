@@ -14,6 +14,13 @@ enum class lcShadingMode
 	Full
 };
 
+enum class lcThumbnailShadingMode
+{
+	UseViewShading,
+	Flat,
+	DefaultLights
+};
+
 enum class lcColorTheme
 {
 	Dark,
@@ -43,6 +50,7 @@ public:
 
 	int mMouseSensitivity;
 	lcShadingMode mShadingMode;
+	lcThumbnailShadingMode mThumbnailShadingMode;
 	lcHighlightRenderMode mHighlightRenderMode;
 	bool mBackgroundGradient;
 	quint32 mBackgroundSolidColor;

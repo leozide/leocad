@@ -79,6 +79,7 @@ private slots:
 	void CommandLineColors();
 	void CommandLineColorValidation_data();
 	void CommandLineColorValidation();
+	void ThumbnailShading();
 	void TranslucentThumbnails_data();
 	void TranslucentThumbnails();
 	void TextureDecalAlpha();
@@ -2486,6 +2487,165 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 	QVERIFY(!Window->GetActiveView()->GetCamera()->IsSimple());
 	QVERIFY(ParentCamera->GetHistoryState() == ParentBefore);
 	CheckLightExport(Main->GetLights()[0].get(), lcMatrix44Identity());
+}
+
+
+void lcModelInstanceTests::ThumbnailShading()
+{
+	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test thumbnail rendering.");
+
+	QVERIFY(lcContext::InitializeRenderer(true));
+	lcLoadDefaultColors(lcStudStyle::Plain);
+
+	struct ScopedSettings
+	{
+		lcPreferences Preferences = lcGetPreferences();
+		lcMainWindow* Window = gMainWindow;
+		Project* ActiveProject = gApplication->mProject;
+		~ScopedSettings()
+		{
+			lcGetPreferences() = Preferences;
+			gMainWindow = Window;
+			gApplication->mProject = ActiveProject;
+		}
+	} Settings;
+	gMainWindow = nullptr;
+	lcGetPreferences().mShadingMode = lcShadingMode::Flat;
+	lcGetPreferences().mThumbnailShadingMode = lcThumbnailShadingMode::UseViewShading;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile File(Directory.filePath("shading.ldr"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Shading\n4 4 -20 0 -20 20 0 -20 20 0 20 -20 0 20\n"
+		"4 4 -20 0 -20 20 0 -20 20 -40 -20 -20 -40 -20\n"
+		"4 4 20 0 -20 20 0 20 20 -40 20 20 -40 -20\n"
+		"4 4 -20 -40 -20 -20 -40 20 20 -40 20 20 -40 -20\n"
+		"2 24 -20 0 -20 20 0 -20\n");
+	File.close();
+	Project Project;
+	QVERIFY(Project.Load(File.fileName()));
+	lcModel* Model = Project.GetMainModel();
+	Model->WaitForAssets();
+
+	lcThumbnailManager Thumbnails(lcGetPiecesLibrary());
+	const auto [Id, Flat] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QVERIFY(!Flat.isNull());
+	const auto [SharedId, SharedFlat] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QCOMPARE(Id, SharedId);
+	QCOMPARE(Flat.toImage(), SharedFlat.toImage());
+
+	int ReadyCount = 0;
+	int InvalidatedCount = 0;
+	lcPartThumbnailId ReadyId = lcPartThumbnailId::Invalid;
+	QPixmap ReadyPixmap;
+	connect(&Thumbnails, &lcThumbnailManager::ThumbnailReady, this, [&](lcPartThumbnailId ThumbnailId, QPixmap Pixmap)
+	{
+		ReadyCount++;
+		ReadyId = ThumbnailId;
+		ReadyPixmap = Pixmap;
+	});
+	connect(&Thumbnails, &lcThumbnailManager::ThumbnailsInvalidated, this, [&InvalidatedCount]()
+	{
+		InvalidatedCount++;
+	});
+
+	lcGetPreferences().mThumbnailShadingMode = lcThumbnailShadingMode::DefaultLights;
+	Thumbnails.RefreshThumbnails();
+	QCOMPARE(InvalidatedCount, 1);
+	QCOMPARE(ReadyCount, 0);
+	const auto [LitId, LitPixmap] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QCOMPARE(ReadyCount, 1);
+	QCOMPARE(ReadyId, LitId);
+	QVERIFY(LitId != Id);
+	const QImage Lit = LitPixmap.toImage();
+	QCOMPARE(ReadyPixmap.toImage(), Lit);
+	if (lcContext::SupportsDefaultLights())
+		QVERIFY(Lit != Flat.toImage());
+	QCOMPARE(lcGetPreferences().mShadingMode, lcShadingMode::Flat);
+
+	// An explicit selector setting stays independent of subsequent main view changes.
+	lcGetPreferences().mThumbnailShadingMode = lcThumbnailShadingMode::Flat;
+	lcGetPreferences().mShadingMode = lcShadingMode::Wireframe;
+	Thumbnails.RefreshThumbnails();
+	QCOMPARE(InvalidatedCount, 2);
+	QCOMPARE(ReadyCount, 1);
+	const auto [FlatId, ExplicitFlat] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QCOMPARE(ExplicitFlat.toImage(), Flat.toImage());
+	QCOMPARE(ReadyCount, 2);
+
+	// Inherited wireframe falls back to flat shading for thumbnails.
+	lcGetPreferences().mThumbnailShadingMode = lcThumbnailShadingMode::UseViewShading;
+	Thumbnails.RefreshThumbnails();
+	QCOMPARE(InvalidatedCount, 3);
+	QCOMPARE(ReadyCount, 2);
+	const auto [InheritedId, Inherited] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QCOMPARE(Inherited.toImage(), Flat.toImage());
+	QCOMPARE(ReadyCount, 3);
+	const auto [CachedId, Cached] = Thumbnails.RequestThumbnail(Model->GetPieceData(), gDefaultColor, 64, 1.0f);
+	QCOMPARE(CachedId, InheritedId);
+	QCOMPARE(Cached.toImage(), Flat.toImage());
+	QCOMPARE(ReadyCount, 3);
+	Thumbnails.ReleaseThumbnail(InheritedId);
+	Thumbnails.ReleaseThumbnail(CachedId);
+
+	// Both selectors drop stale pixmaps without losing selection or drawing offscreen items.
+	gApplication->mProject = &Project;
+	lcMainWindow Window;
+	lcPartSelectionWidget Docked(false, nullptr);
+	lcPartSelectionWidget Popup(true, nullptr);
+	const std::vector<std::pair<lcPieceData*, std::string>> Parts = { { Model->GetPieceData(), "Shading" } };
+	Docked.SetCustomParts(Parts, gDefaultColor);
+	Popup.SetCustomParts(Parts, gDefaultColor);
+	lcPartSelectionListView* DockedView = Docked.findChild<lcPartSelectionListView*>();
+	lcPartSelectionListView* PopupView = Popup.findChild<lcPartSelectionListView*>();
+	QVERIFY(DockedView);
+	QVERIFY(PopupView);
+	lcPartSelectionListModel* DockedList = DockedView->GetListModel();
+	lcPartSelectionListModel* PopupList = PopupView->GetListModel();
+	for (lcPartSelectionListView* View : { DockedView, PopupView })
+	{
+		lcPartSelectionListModel* List = View->GetListModel();
+		List->SetIconSize(64, 1.0f);
+		View->setCurrentIndex(List->index(0, 0));
+		List->RequestThumbnail(0);
+		QVERIFY(!qvariant_cast<QPixmap>(List->data(List->index(0, 0), Qt::DecorationRole)).isNull());
+	}
+
+	lcThumbnailManager* SharedThumbnails = lcGetPiecesLibrary()->GetThumbnailManager();
+	int SharedReadyCount = 0;
+	QObject ReadyContext;
+	connect(SharedThumbnails, &lcThumbnailManager::ThumbnailReady, &ReadyContext, [&SharedReadyCount](lcPartThumbnailId, QPixmap)
+	{
+		SharedReadyCount++;
+	});
+	lcGetPreferences().mThumbnailShadingMode = lcThumbnailShadingMode::Flat;
+	SharedThumbnails->RefreshThumbnails();
+	QCOMPARE(SharedReadyCount, 0);
+	for (lcPartSelectionListView* View : { DockedView, PopupView })
+	{
+		lcPartSelectionListModel* List = View->GetListModel();
+		QCOMPARE(View->currentIndex(), List->index(0, 0));
+		QVERIFY(qvariant_cast<QPixmap>(List->data(List->index(0, 0), Qt::DecorationRole)).isNull());
+	}
+	DockedList->RequestThumbnail(0);
+	QCOMPARE(SharedReadyCount, 1);
+	PopupList->RequestThumbnail(0);
+	QCOMPARE(SharedReadyCount, 1);
+	QCOMPARE(qvariant_cast<QPixmap>(DockedList->data(DockedList->index(0, 0), Qt::DecorationRole)).toImage(), Flat.toImage());
+	QCOMPARE(qvariant_cast<QPixmap>(PopupList->data(PopupList->index(0, 0), Qt::DecorationRole)).toImage(), Flat.toImage());
+
+	// Color changes use the same lazy invalidation and retain the current selection.
+	DockedList->ToggleColorLocked();
+	DockedList->SetColorIndex(lcGetColorIndex(1));
+	QCOMPARE(DockedList->GetColorIndex(), lcGetColorIndex(1));
+	QCOMPARE(DockedView->currentIndex(), DockedList->index(0, 0));
+	QCOMPARE(SharedReadyCount, 1);
+	QVERIFY(qvariant_cast<QPixmap>(DockedList->data(DockedList->index(0, 0), Qt::DecorationRole)).isNull());
+	QCOMPARE(qvariant_cast<QPixmap>(PopupList->data(PopupList->index(0, 0), Qt::DecorationRole)).toImage(), Flat.toImage());
+	DockedList->RequestThumbnail(0);
+	QCOMPARE(SharedReadyCount, 2);
 }
 
 

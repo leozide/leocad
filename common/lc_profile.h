@@ -3,6 +3,7 @@
 #define LC_IMAGE_TRANSPARENT 0x2000
 
 enum class lcShadingMode;
+enum class lcThumbnailShadingMode;
 enum class lcHighlightRenderMode;
 enum class lcAxisIconLocation;
 enum class lcViewSphereLocation;
@@ -81,6 +82,7 @@ enum LC_PROFILE_KEY
 	LC_PROFILE_IMAGE_WIDTH,
 	LC_PROFILE_IMAGE_HEIGHT,
 	LC_PROFILE_IMAGE_EXTENSION,
+	LC_PROFILE_THUMBNAIL_SHADING_MODE,
 	LC_PROFILE_PARTS_LIST_ICONS,
 	LC_PROFILE_PARTS_LIST_NAMES,
 	LC_PROFILE_PARTS_LIST_COLOR,
@@ -175,6 +177,8 @@ void lcSetProfileBuffer(LC_PROFILE_KEY Key, const QByteArray& Buffer);
 
 lcShadingMode lcGetProfileShadingMode();
 void lcSetProfileShadingMode(lcShadingMode Value);
+lcThumbnailShadingMode lcGetProfileThumbnailShadingMode();
+void lcSetProfileThumbnailShadingMode(lcThumbnailShadingMode Value);
 
 lcHighlightRenderMode lcGetProfileHighlightRenderMode();
 void lcSetProfileHighlightRenderMode(lcHighlightRenderMode Value);

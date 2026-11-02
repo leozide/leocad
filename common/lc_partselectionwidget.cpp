@@ -88,6 +88,7 @@ lcPartSelectionListModel::lcPartSelectionListModel(QObject* Parent)
 		mColorLocked = (LockedFlag != 0) || (ColorCode != LC_COLOR_NOCOLOR);
 	}
 
+	connect(lcGetPiecesLibrary()->GetThumbnailManager(), &lcThumbnailManager::ThumbnailsInvalidated, this, &lcPartSelectionListModel::UpdateThumbnails);
 	connect(lcGetPiecesLibrary()->GetThumbnailManager(), &lcThumbnailManager::ThumbnailReady, this, &lcPartSelectionListModel::ThumbnailReady);
 }
 
@@ -98,13 +99,10 @@ lcPartSelectionListModel::~lcPartSelectionListModel()
 
 void lcPartSelectionListModel::UpdateThumbnails()
 {
-	beginResetModel();
-
 	ReleaseThumbnails();
 
-	endResetModel();
-
-	SetFilter(mFilterString);
+	if (!mParts.empty())
+		emit dataChanged(index(0, 0), index(static_cast<int>(mParts.size()) - 1, 0), { Qt::DecorationRole });
 }
 
 void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
@@ -1382,46 +1380,76 @@ void lcPartSelectionWidget::OptionsMenuAboutToShow()
 
 	if (gSupportsFramebufferObject)
 	{
-		QMenu* IconMenu = Menu->addMenu(tr("Icons"));
+		QMenu* ThumbnailMenu = Menu->addMenu(tr("Thumbnails"));
 
-		QActionGroup* IconGroup = new QActionGroup(Menu);
+		QActionGroup* IconGroup = new QActionGroup(ThumbnailMenu);
 
-		QAction* NoIcons = IconMenu->addAction(tr("No Icons"), mPartsWidget, &lcPartSelectionListView::SetNoIcons);
+		QAction* NoIcons = ThumbnailMenu->addAction(tr("No Icons"), mPartsWidget, &lcPartSelectionListView::SetNoIcons);
 		NoIcons->setCheckable(true);
 		NoIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::NoIconSize);
 		IconGroup->addAction(NoIcons);
 
-		QAction* SmallIcons = IconMenu->addAction(tr("Small Icons"), mPartsWidget, &lcPartSelectionListView::SetSmallIcons);
+		QAction* SmallIcons = ThumbnailMenu->addAction(tr("Small Icons"), mPartsWidget, &lcPartSelectionListView::SetSmallIcons);
 		SmallIcons->setCheckable(true);
 		SmallIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::SmallIconSize);
 		IconGroup->addAction(SmallIcons);
 
-		QAction* MediumIcons = IconMenu->addAction(tr("Medium Icons"), mPartsWidget, &lcPartSelectionListView::SetMediumIcons);
+		QAction* MediumIcons = ThumbnailMenu->addAction(tr("Medium Icons"), mPartsWidget, &lcPartSelectionListView::SetMediumIcons);
 		MediumIcons->setCheckable(true);
 		MediumIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::MediumIconSize);
 		IconGroup->addAction(MediumIcons);
 
-		QAction* LargeIcons = IconMenu->addAction(tr("Large Icons"), mPartsWidget, &lcPartSelectionListView::SetLargeIcons);
+		QAction* LargeIcons = ThumbnailMenu->addAction(tr("Large Icons"), mPartsWidget, &lcPartSelectionListView::SetLargeIcons);
 		LargeIcons->setCheckable(true);
 		LargeIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::LargeIconSize);
 		IconGroup->addAction(LargeIcons);
 
-		QAction* ExtraLargeIcons = IconMenu->addAction(tr("Extra Large Icons"), mPartsWidget, &lcPartSelectionListView::SetExtraLargeIcons);
+		QAction* ExtraLargeIcons = ThumbnailMenu->addAction(tr("Extra Large Icons"), mPartsWidget, &lcPartSelectionListView::SetExtraLargeIcons);
 		ExtraLargeIcons->setCheckable(true);
 		ExtraLargeIcons->setChecked(ListModel->GetIconSize() == lcPartSelectionListView::ExtraLargeIconSize);
 		IconGroup->addAction(ExtraLargeIcons);
 
 		if (ListModel->GetIconSize() != lcPartSelectionListView::NoIconSize)
 		{
-			IconMenu->addSeparator();
+			ThumbnailMenu->addSeparator();
 
-			QAction* ListMode = IconMenu->addAction(tr("List Mode"), mPartsWidget, &lcPartSelectionListView::ToggleListMode);
+			QActionGroup* ShadingGroup = new QActionGroup(ThumbnailMenu);
+
+			const std::pair<lcThumbnailShadingMode, QString> ShadingModes[] =
+			{
+				{ lcThumbnailShadingMode::UseViewShading, tr("Use View Shading") },
+				{ lcThumbnailShadingMode::Flat, tr("Flat") },
+				{ lcThumbnailShadingMode::DefaultLights, tr("Default Lights") }
+			};
+
+			for (const auto& [Mode, Name] : ShadingModes)
+			{
+				QAction* Action = ThumbnailMenu->addAction(Name);
+				Action->setToolTip(tr("Choose the shading mode for all piece selection widgets."));
+				Action->setCheckable(true);
+				Action->setChecked(lcGetPreferences().mThumbnailShadingMode == Mode);
+				ShadingGroup->addAction(Action);
+
+				connect(Action, &QAction::triggered, this, [ShadingMode = Mode]()
+				{
+					if (lcGetPreferences().mThumbnailShadingMode == ShadingMode)
+						return;
+
+					lcGetPreferences().mThumbnailShadingMode = ShadingMode;
+					lcSetProfileThumbnailShadingMode(ShadingMode);
+					lcGetPiecesLibrary()->GetThumbnailManager()->RefreshThumbnails();
+				});
+			}
+
+			ThumbnailMenu->addSeparator();
+
+			QAction* ListMode = ThumbnailMenu->addAction(tr("List Mode"), mPartsWidget, &lcPartSelectionListView::ToggleListMode);
 			ListMode->setCheckable(true);
 			ListMode->setChecked(ListModel->IsListMode());
 
 			if (!mIsPopup)
 			{
-				QAction* FixedColor = IconMenu->addAction(tr("Lock Color"), mPartsWidget, &lcPartSelectionListView::ToggleFixedColor);
+				QAction* FixedColor = ThumbnailMenu->addAction(tr("Lock Color"), mPartsWidget, &lcPartSelectionListView::ToggleFixedColor);
 				FixedColor->setCheckable(true);
 				FixedColor->setChecked(ListModel->IsColorLocked());
 			}
@@ -1460,11 +1488,6 @@ void lcPartSelectionWidget::EditPartPalettes()
 
 	SavePartPalettes();
 	UpdateCategories();
-}
-
-void lcPartSelectionWidget::UpdateThumbnails()
-{
-	mPartsWidget->GetListModel()->UpdateThumbnails();
 }
 
 void lcPartSelectionWidget::SetDefaultPart()

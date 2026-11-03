@@ -136,7 +136,7 @@ public:
 
 	bool IsTrainTrackConnected(int ConnectionIndex) const
 	{
-		return mTrainTrackConnections[ConnectionIndex];
+		return ConnectionIndex >= 0 && static_cast<size_t>(ConnectionIndex) < mTrainTrackConnections.size() && mTrainTrackConnections[ConnectionIndex];
 	}
 
 	void SetTrainTrackConnections(std::vector<bool>&& Connections)

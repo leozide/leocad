@@ -36,6 +36,7 @@ struct lcGroupHistoryState;
 struct lcPieceHistoryState;
 struct lcCameraHistoryState;
 struct lcLightHistoryState;
+struct lcTrainTrackSnapContext;
 template<typename StateType> struct lcObjectHistory;
 class lcModelHistory;
 class lcModelHistorySelect;
@@ -363,6 +364,7 @@ public:
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
+	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance);
 	void UpdateSelectedPiecesTrainTrackConnections();
 	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);
 
@@ -452,7 +454,7 @@ public:
 	bool InsertPieceToolClicked();
 	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
-	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag);
+	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Snap);
 	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag);
 	void UpdateRotateTool(const lcVector3& Axis, float Angle, bool AlternateButtonDrag, bool Relative);
 	void UpdateRotateTool(const lcMatrix33& RotationMatrix, bool AlternateButtonDrag, bool Relative);

@@ -7,10 +7,7 @@
 #include "lc_application.h"
 
 // todo:
-// when moving existing pieces:
-//   need to check for parts intersecting instead of mouse intersection because it's hard to connect tracks
-//   look into the snapping that happens when there are no available connections
-//   fix comments in UpdateFreeMoveTool
+// review UpdateTrainTrackConnections call frequency and cache invalidation
 // hide some of the 12v tracks to avoid bloat
 // auto replace cross when going over a straight section
 // set focus connection after adding
@@ -139,12 +136,60 @@ int lcTrainTrackInfo::GetPieceConnectionIndex(const lcPiece* Piece1, int Connect
 	return -1;
 }
 
-std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint)
+std::optional<float> lcTrainTrackInfo::GetSnapDistanceSquared(const lcTrainTrackConnection& Connection, const lcMatrix44& Transform, const lcTrainTrackConnection& MovingConnection, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context)
+{
+	constexpr float MinimumUpAlignment = 0.99f;
+	constexpr float MaximumPlaneDistance = 0.1f;
+	constexpr float EdgeOnThreshold = 0.05f;
+	constexpr float MaximumEdgeOnDepthDistance = 20.0f;
+
+	if (Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f || !AreConnectionsCompatible(Connection.Type, MovingConnection.Type, true))
+		return std::nullopt;
+
+	const lcMatrix44 ConnectionWorld = lcMul(Connection.Transform, Transform);
+	const lcVector3 Position = ConnectionWorld.GetTranslation();
+	const lcVector3 Up = lcNormalize(lcVector3(ConnectionWorld[2]));
+	const lcVector4 Clip = lcMul4(lcVector4(Position, 1.0f), Context.ModelToClip);
+
+	if (Clip.w <= LC_EPSILON || fabsf(Clip.z) > Clip.w)
+		return std::nullopt;
+
+	const lcMatrix44 MovingConnectionWorld = lcMul(MovingConnection.Transform, MovingTransform);
+	const lcVector3 MovingPosition = MovingConnectionWorld.GetTranslation();
+	const lcVector3 MovingUp = lcNormalize(lcVector3(MovingConnectionWorld[2]));
+	const lcVector3 Difference = Position - MovingPosition;
+
+	// Screen overlap must not join different track planes or heights.
+	if (lcDot(Up, MovingUp) < MinimumUpAlignment || fabsf(lcDot(Difference, Up)) > MaximumPlaneDistance || fabsf(lcDot(Difference, MovingUp)) > MaximumPlaneDistance)
+		return std::nullopt;
+
+	// Edge-on views cannot resolve depth along the track plane.
+	const lcVector3 ViewDirection = lcNormalize(Context.Direction);
+
+	if (fabsf(lcDot(Up, ViewDirection)) < EdgeOnThreshold && fabsf(lcDot(Difference, ViewDirection)) > MaximumEdgeOnDepthDistance)
+		return std::nullopt;
+
+	const lcVector4 MovingClip = lcMul4(lcVector4(MovingPosition, 1.0f), Context.ModelToClip);
+
+	if (MovingClip.w <= LC_EPSILON || fabsf(MovingClip.z) > MovingClip.w)
+		return std::nullopt;
+
+	const float DistanceX = (Clip.x / Clip.w - MovingClip.x / MovingClip.w) * Context.LogicalViewportSize.x * 0.5f;
+	const float DistanceY = (Clip.y / Clip.w - MovingClip.y / MovingClip.w) * Context.LogicalViewportSize.y * 0.5f;
+	const float DistanceSquared = DistanceX * DistanceX + DistanceY * DistanceY;
+
+	if (!std::isfinite(DistanceSquared))
+		return std::nullopt;
+
+	return DistanceSquared;
+}
+
+std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint)
 {
 	std::vector<lcInsertPieceInfo> Pieces;
 	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceData->GetTrainTrackInfo();
 
-	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty() || (MovingPiece && PieceData != MovingPiece->mPieceData))
+	if (!CurrentTrackInfo || CurrentTrackInfo->GetConnections().empty())
 		return Pieces;
 
 	quint32 ConnectionIndex = 0;
@@ -160,28 +205,8 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 			if (CurrentPiece->IsTrainTrackConnected(CheckIndex))
 				continue;
 
-			if (MovingPiece)
-			{
-				const std::vector<lcTrainTrackConnection>& MovingConnections = PieceData->GetTrainTrackInfo()->GetConnections();
-				bool CanConnect = false;
-
-				for (quint32 MovingConnectionIndex = 0; MovingConnectionIndex < MovingConnections.size(); MovingConnectionIndex++)
-				{
-					if (!MovingPiece->IsTrainTrackConnected(MovingConnectionIndex) && AreConnectionsCompatible(CurrentTrackInfo->GetConnections()[CheckIndex].Type, MovingConnections[MovingConnectionIndex].Type, AllowNewPieces))
-					{
-						CanConnect = true;
-						break;
-					}
-				}
-
-				if (!CanConnect)
-					continue;
-			}
-			else
-			{
-				if (!PieceData->GetTrainTrackInfo()->CanConnectTo(CurrentTrackInfo->GetConnections()[CheckIndex].Type, AllowNewPieces))
-					continue;
-			}
+			if (!PieceData->GetTrainTrackInfo()->CanConnectTo(CurrentTrackInfo->GetConnections()[CheckIndex].Type, AllowNewPieces))
+				continue;
 
 			float Distance = (CurrentTrackInfo->GetConnections()[CheckIndex].Transform.GetTranslation() - LocalClosestPoint).LengthSquared();
 
@@ -214,28 +239,31 @@ std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetInsertPieceInfo(lcPiece* Cur
 
 	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
 	const std::vector<lcTrainTrackConnection>& NewConnections = PieceData->GetTrainTrackInfo()->GetConnections();
-	quint32 NewConnectionIndex;// = ConnectionIndex ? 0 : 1;
+	quint32 NewConnectionIndex;
 
 	for (NewConnectionIndex = 0; NewConnectionIndex < NewConnections.size(); NewConnectionIndex++)
-	{
-		if (MovingPiece)
-		{
-			if (MovingPiece->IsTrainTrackConnected(NewConnectionIndex))
-				continue;
-
-			const std::vector<lcTrainTrackConnection>& MovingConnections = PieceData->GetTrainTrackInfo()->GetConnections();
-
-			if (AreConnectionsCompatible(CurrentTrackInfo->GetConnections()[ConnectionIndex].Type, MovingConnections[NewConnectionIndex].Type, AllowNewPieces))
-				break;
-		}
-		else
-		{
-			if (AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type, AllowNewPieces))
-				break;
-		}
-	}
+		if (AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type, AllowNewPieces))
+			break;
 
 	if (NewConnectionIndex == NewConnections.size())
+		return Pieces;
+
+	return GetConnectionPieceInfo(CurrentPiece, ConnectionIndex, PieceData, NewConnectionIndex, ColorIndex);
+}
+
+std::vector<lcInsertPieceInfo> lcTrainTrackInfo::GetConnectionPieceInfo(lcPiece* CurrentPiece, quint32 ConnectionIndex, lcPieceData* PieceData, quint32 NewConnectionIndex, int ColorIndex)
+{
+	std::vector<lcInsertPieceInfo> Pieces;
+	const lcTrainTrackInfo* CurrentTrackInfo = CurrentPiece->mPieceData->GetTrainTrackInfo();
+	const lcTrainTrackInfo* TrackInfo = PieceData->GetTrainTrackInfo();
+
+	if (!CurrentTrackInfo || !TrackInfo || ConnectionIndex >= CurrentTrackInfo->GetConnections().size() || NewConnectionIndex >= TrackInfo->GetConnections().size())
+		return Pieces;
+
+	const lcTrainTrackConnectionType& CurrentConnectionType = CurrentTrackInfo->GetConnections()[ConnectionIndex].Type;
+	const std::vector<lcTrainTrackConnection>& NewConnections = TrackInfo->GetConnections();
+
+	if (!AreConnectionsCompatible(CurrentConnectionType, NewConnections[NewConnectionIndex].Type, true))
 		return Pieces;
 
 	if (CurrentConnectionType.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper && NewConnections[NewConnectionIndex].Type.Sleeper == lcTrainTrackConnectionSleeper::NeedsSleeper)

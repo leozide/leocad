@@ -1397,6 +1397,9 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 	if (!TrainTrackInfo)
 		return { NewTrackTool, NewTrackSection, ClosestIntersectionDistance };
 
+	lcModel* ActiveModel = mView->GetActiveModel();
+	ActiveModel->UpdateTrainTrackConnections(Piece, false);
+
 	const std::vector<lcTrainTrackConnection>& Connections = TrainTrackInfo->GetConnections();
 
 	auto MinIntersectDist=[&ClosestIntersectionDistance](int FirstIndex, int IndexCount, const lcVector3& LocalStart, const lcVector3& LocalEnd)
@@ -1420,7 +1423,6 @@ std::tuple<lcTrackTool, quint32, float> lcViewManipulator::UpdateSelectMoveTrain
 	for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
 	{
 		lcMatrix44 WorldMatrix = lcMul(Connections[ConnectionIndex].Transform, Piece->mModelWorld);
-		lcModel* ActiveModel = mView->GetActiveModel();
 
 		if (ActiveModel != mView->GetModel())
 			WorldMatrix = lcMul(WorldMatrix, mView->GetActiveSubmodelTransform());

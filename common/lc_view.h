@@ -303,6 +303,8 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
 	void UpdatePiecePreview();
+	bool ShouldDrawInsertPreview() const;
+	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform) const;
 	std::pair<std::vector<lcInsertPieceInfo>, bool> GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
@@ -389,6 +391,7 @@ protected:
 	quint32 mTrackToolSection = ~0U;
 	lcMatrix44 mMouseDownTransform;
 	lcPiece* mMouseDownPiece = nullptr;
+	std::optional<lcVector4> mTrainTrackDragPlane;
 	int mPanX = 0;
 	int mPanY = 0;
 

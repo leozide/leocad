@@ -145,6 +145,26 @@ primitive counts, and vertex indices with both 16-bit and 32-bit index buffers.
 Train-track checks cover connection groups, sleeper compatibility, endpoint
 position and orientation, visibility across steps, selected-piece exclusion,
 and insertion at an explicitly clicked endpoint or the focused endpoint.
+Drag checks cover the nearest compatible pair of endpoints within the snap
+radius, occupied endpoints, rotated models, selection assemblies, exact
+placement and snap release, and dragging with the cursor over empty space,
+including undo/redo.
+Viewport drags preserve the grab offset and track height, and check endpoints
+before coarse grid snapping. Sleeper tests cover 4.5V and 12V insertion, drag
+previews, accepting/cancelling a drag, releasing a snap, and undo/redo of the
+movement and automatically added sleeper together.
+Perspective and orthographic side-view drags exercise a stable drag plane and
+check preview visibility after deleting a hovered piece without moving the mouse.
+Delete/undo/reselect checks start another drag without moving the mouse, with
+heap reuse, to verify that button-down picking replaces stale hover pointers.
+Body drags clear connection focus before transforming the piece. Close-view
+perspective tests verify that the clicked surface point stays under the cursor.
+Screen-space snapping uses a 12-logical-pixel radius between projected endpoints.
+Selection checks click and release a track before its first redraw, verify
+connection-cache bounds, and refresh occupancy after geometry visibility changes.
+Checks cover perspective/orthographic zoom, 1x/2x device scales, mismatched track
+planes and heights, edge-on depth ambiguity, and endpoints outside the camera's
+near/far clipping planes or behind the camera.
 
 Security checks exercise long LGEO color-table tokens and reject unsafe add-on
 archive paths, archived and existing symlinks, corrupt checksums, and truncated

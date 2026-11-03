@@ -620,6 +620,28 @@ lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
 	return BestRight * Direction.y - BestUp * Direction.x + lcVector3(0.0f, 0.0f, Direction.z);
 }
 
+std::vector<lcInsertPieceInfo> lcView::GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform) const
+{
+	const lcMatrix44 ModelToView = lcMul(mActiveSubmodelTransform, GetWorldViewMatrix());
+	const float DeviceScale = GetUIScale();
+	const lcTrainTrackSnapContext SnapContext
+	{
+		lcMul(ModelToView, GetProjectionMatrix()),
+		lcVector2(mWidth / DeviceScale, mHeight / DeviceScale),
+		lcNormalize(lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform)))
+	};
+
+	return GetActiveModel()->GetTrainTrackSnapInfo(MovingPiece, MovingTransform, SnapContext, 12.0f);
+}
+
+bool lcView::ShouldDrawInsertPreview() const
+{
+	return std::any_of(mViews.begin(), mViews.end(), [](lcView* View)
+	{
+		return View->mTrackTool == lcTrackTool::Insert || (View->mTrackTool == lcTrackTool::MoveXYZ && View->IsTracking());
+	});
+}
+
 void lcView::UpdatePiecePreview()
 {
 	const lcPieceDataRef PreviewPieceData(gMainWindow->GetInsertPieceData());
@@ -676,14 +698,14 @@ std::pair<std::vector<lcInsertPieceInfo>, bool> lcView::GetMouseInsertPieceInfo(
 		lcTrainTrackInfo* RayTrackInfo = MousePiece->mPieceData->GetTrainTrackInfo();
 		lcTrainTrackInfo* InfoTrackInfo = PieceData->GetTrainTrackInfo();
 
-		if (RayTrackInfo && InfoTrackInfo)
+		if (!MovingPiece && RayTrackInfo && InfoTrackInfo)
 		{
 			ActiveModel->UpdateTrainTrackConnections(MousePiece, IgnoreSelected);
 
 			lcVector3 ClosestPoint = ObjectRayTest.Start + lcNormalize(ObjectRayTest.End - ObjectRayTest.Start) * ObjectRayTest.Distance;
 			quint32 FocusSection = MousePiece->GetFocusSection();
 
-			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, PieceData.Get(), MovingPiece, gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
+			std::vector<lcInsertPieceInfo> TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(MousePiece, PieceData.Get(), gMainWindow->mColorIndex, FocusSection, AllowNewPieces, ClosestPoint);
 
 			if (!TrainTracks.empty())
 				return { TrainTracks, true };
@@ -1158,7 +1180,7 @@ void lcView::OnDraw()
 	mScene->SetModelEditingPath(mSubmodelEditingPath, mActiveSubmodelTransform);
 	mScene->SetDrawInterface(DrawInterface);
 
-	bool DrawInsertPreview = DrawInterface && std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
+	bool DrawInsertPreview = DrawInterface && ShouldDrawInsertPreview();
 	mScene->SetDrawInsertPreview(DrawInsertPreview);
 	
 	mModel->GetScene(mScene.get(), mCamera, Preferences.mHighlightNewParts, Preferences.mFadeSteps && mViewType == lcViewType::View);
@@ -1815,7 +1837,7 @@ void lcView::DrawGrid()
 	lcVector3 Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	bool GridSizeValid = mModel->GetVisiblePiecesBoundingBox(Min, Max);
-	bool DrawInsertPreview = std::any_of(mViews.begin(), mViews.end(), [](lcView* View){ return View->mTrackTool == lcTrackTool::Insert; });
+	bool DrawInsertPreview = ShouldDrawInsertPreview();
 
 	if (DrawInsertPreview)
 	{
@@ -2774,6 +2796,7 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 	mTrackUpdated = false;
 	mMouseDownX = mMouseX;
 	mMouseDownY = mMouseY;
+	mTrainTrackDragPlane.reset();
 	mCameraRotationAngle = 0.0f;
 	lcTool Tool = GetCurrentTool();
 	lcModel* ActiveModel = GetActiveModel();
@@ -2791,7 +2814,42 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 
 		case lcTool::Move:
 		case lcTool::Rotate:
+			if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece && mMouseDownPiece->mPieceData->GetTrainTrackInfo() && !mMouseDownPiece->IsFocused(LC_PIECE_SECTION_POSITION))
+				ActiveModel->FocusOrDeselectObjectAction(mMouseDownPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+
 			ActiveModel->BeginMouseTool(Tool, this);
+
+			if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece && mMouseDownPiece->mPieceData->GetTrainTrackInfo())
+			{
+				lcMatrix44 DragWorld = mMouseDownTransform;
+
+				if (ActiveModel != mModel)
+					DragWorld = lcMul(DragWorld, mActiveSubmodelTransform);
+
+				lcVector3 Normal = lcNormalize(lcMul30(lcVector3(0, 0, 1), DragWorld));
+				const lcVector3 CameraDirection = lcNormalize(GetWorldCameraDirection());
+				lcVector3 GrabPosition = DragWorld.GetTranslation();
+				const lcObjectRayTest GrabRay = RayTest(true, false);
+
+				if (GrabRay.ObjectSection.Object == mMouseDownPiece)
+				{
+					const lcVector3 ModelGrabPosition = GrabRay.Start + lcNormalize(GrabRay.End - GrabRay.Start) * GrabRay.Distance;
+					GrabPosition = lcMul31(ModelGrabPosition, mActiveSubmodelTransform);
+				}
+
+				lcVector4 Plane(Normal, -lcDot(Normal, GrabPosition));
+				lcVector3 Start, End, Intersection;
+				GetRayUnderPointer(Start, End);
+
+				// Pick one plane for the entire drag, including nearly edge-on views.
+				if (fabsf(lcDot(Normal, CameraDirection)) < 0.05f || !lcLineSegmentPlaneIntersection(&Intersection, Start, End, Plane))
+				{
+					Normal = CameraDirection;
+					Plane = lcVector4(Normal, -lcDot(Normal, GrabPosition));
+				}
+
+				mTrainTrackDragPlane = Plane;
+			}
 
 			if (mTrackTool == lcTrackTool::RotateX || mTrackTool == lcTrackTool::RotateY || mTrackTool == lcTrackTool::RotateZ || mTrackTool == lcTrackTool::RotateCamera)
 			{
@@ -2949,6 +3007,7 @@ void lcView::StopTracking(bool Accept)
 	}
 
 	mTrackButton = lcTrackButton::None;
+	mTrainTrackDragPlane.reset();
 	UpdateTrackTool();
 	ActiveModel->UpdateAllViews();
 }
@@ -3159,6 +3218,8 @@ void lcView::OnLeftButtonDown()
 	if (mViewSphere->OnLeftButtonDown())
 		return;
 
+	UpdateTrackTool();
+
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::LeftButton);
 
 	if (OverrideTool != lcTrackTool::None)
@@ -3219,6 +3280,8 @@ void lcView::OnMiddleButtonDown()
 		return;
 	}
 
+	UpdateTrackTool();
+
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::MiddleButton);
 
 	if (OverrideTool != lcTrackTool::None)
@@ -3242,6 +3305,8 @@ void lcView::OnRightButtonDown()
 		StopTracking(false);
 		return;
 	}
+
+	UpdateTrackTool();
 
 	lcTrackTool OverrideTool = GetOverrideTrackTool(Qt::RightButton);
 
@@ -3390,7 +3455,7 @@ void lcView::OnMouseMove()
 
 				lcVector3 Distance = Intersection - MoveStart;
 				Distance = lcMul(Distance, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
-				ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
+				ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left, true);
 			}
 			else if (mTrackTool == lcTrackTool::MoveXY || mTrackTool == lcTrackTool::MoveXZ || mTrackTool == lcTrackTool::MoveYZ)
 			{
@@ -3415,20 +3480,51 @@ void lcView::OnMouseMove()
 					{
 						lcVector3 Distance = Intersection - MoveStart;
 						Distance = lcMul(Distance, lcMatrix33AffineInverse(lcMatrix33(WorldMatrix)));
-						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
+						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left, true);
 					}
 				}
 			}
 			else if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece)
 			{
 				if (mMouseDownPiece->mPieceData->GetTrainTrackInfo())
-					ActiveModel->UpdateSelectedPiecesTrainTrackConnections();
-
-				auto [PieceInfoTransforms, IsConnection] = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceData, mMouseDownPiece);
-
-				if (!PieceInfoTransforms.empty())
 				{
-					ActiveModel->UpdateFreeMoveTool(mMouseDownPiece, mMouseDownTransform, PieceInfoTransforms.back().Transform, IsConnection, mTrackButton != lcTrackButton::Left);
+					if (!mTrainTrackDragPlane)
+						return;
+
+					const lcVector4& Plane = mTrainTrackDragPlane.value();
+					lcVector3 Intersection, MoveStart;
+
+					if (lcLineSegmentPlaneIntersection(&Intersection, CurrentStart, CurrentEnd, Plane) && lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
+					{
+						lcVector3 Distance = Intersection - MoveStart;
+
+						if (ActiveModel != mModel)
+							Distance = lcMul30(Distance, lcMatrix44AffineInverse(mActiveSubmodelTransform));
+
+						// Preserve the grabbed point and test endpoints before rounding movement to the grid.
+						lcMatrix44 Transform = mMouseDownTransform;
+						Transform.SetTranslation(mMouseDownTransform.GetTranslation() + Distance);
+						std::vector<lcInsertPieceInfo> SnapPieces = GetTrainTrackSnapInfo(mMouseDownPiece, Transform);
+						const bool IsConnection = !SnapPieces.empty();
+
+						if (IsConnection)
+						{
+							Transform = SnapPieces.back().Transform;
+							SnapPieces.pop_back();
+						}
+						else
+							Transform.SetTranslation(mMouseDownTransform.GetTranslation() + ActiveModel->SnapPosition(Distance));
+
+						ActiveModel->SetPreviewInsertPieceInfo(std::move(SnapPieces));
+						ActiveModel->UpdateFreeMoveTool(mMouseDownPiece, mMouseDownTransform, Transform, IsConnection, mTrackButton != lcTrackButton::Left);
+					}
+				}
+				else
+				{
+					auto [PieceInfoTransforms, IsConnection] = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceData, mMouseDownPiece);
+
+					if (!PieceInfoTransforms.empty())
+						ActiveModel->UpdateFreeMoveTool(mMouseDownPiece, mMouseDownTransform, PieceInfoTransforms.back().Transform, IsConnection, mTrackButton != lcTrackButton::Left);
 				}
 			}
 			else if (mTrackTool == lcTrackTool::ScalePlus || mTrackTool == lcTrackTool::ScaleMinus)
@@ -3482,7 +3578,7 @@ void lcView::OnMouseMove()
 					if (lcLineSegmentPlaneIntersection(&MoveStart, MouseDownStart, MouseDownEnd, Plane))
 					{
 						lcVector3 Distance = Intersection - MoveStart;
-						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left);
+						ActiveModel->UpdateMoveTool(Distance, true, mTrackButton != lcTrackButton::Left, true);
 					}
 				}
 			}

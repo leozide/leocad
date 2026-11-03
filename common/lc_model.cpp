@@ -2955,10 +2955,9 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 			if (Section == LC_PIECE_SECTION_INVALID && FocusSection != LC_PIECE_SECTION_INVALID && FocusSection >= LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST)
 				Section = FocusSection;
 
-			if (!Last->IsFocused())
-				UpdateTrainTrackConnections(Last, false);
+			UpdateTrainTrackConnections(Last, false);
 
-			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, PieceData, nullptr, gMainWindow->mColorIndex, Section, true, std::nullopt);
+			TrainTracks = lcTrainTrackInfo::GetInsertPieceInfo(Last, PieceData, gMainWindow->mColorIndex, Section, true, std::nullopt);
 
 			for (const lcInsertPieceInfo& TrainTrack : TrainTracks)
 				CreatePiece(TrainTrack.PieceData, TrainTrack.Transform, TrainTrack.ColorIndex);
@@ -3096,6 +3095,8 @@ void lcModel::RotateFocusedTrainTrack(int Direction)
 	std::optional<lcMatrix44> Transform;
 	int FirstConnectionIndex = 0, RotateConnectionIndex = 0, TracksConnected = 0;
 
+	UpdateTrainTrackConnections(FocusPiece, false);
+
 	for (int ConnectionIndex = 0; ConnectionIndex < static_cast<int>(TrainTrackInfo->GetConnections().size()); ConnectionIndex++)
 	{
 		if (FocusPiece->IsTrainTrackConnected(ConnectionIndex))
@@ -3171,6 +3172,68 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	}
 
 	TrackPiece->SetTrainTrackConnections(std::move(Connections));
+}
+
+std::vector<lcInsertPieceInfo> lcModel::GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance)
+{
+	const lcTrainTrackInfo* MovingTrackInfo = MovingPiece->mPieceData->GetTrainTrackInfo();
+
+	if (!MovingTrackInfo || !MovingPiece->IsSelected() || SnapDistance <= 0.0f || Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f)
+		return {};
+
+	UpdateSelectedPiecesTrainTrackConnections();
+
+	const std::vector<lcTrainTrackConnection>& MovingConnections = MovingTrackInfo->GetConnections();
+	float BestDistanceSquared = SnapDistance * SnapDistance;
+	std::vector<lcInsertPieceInfo> BestPieces;
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		const lcTrainTrackInfo* TrackInfo = Piece->mPieceData->GetTrainTrackInfo();
+
+		if (Piece.get() == MovingPiece || Piece->IsSelected() || !Piece->IsVisible(mCurrentStep) || !TrackInfo)
+			continue;
+
+		const std::vector<lcTrainTrackConnection>& Connections = TrackInfo->GetConnections();
+		bool ConnectionsUpdated = false;
+
+		for (quint32 ConnectionIndex = 0; ConnectionIndex < Connections.size(); ConnectionIndex++)
+		{
+			const lcTrainTrackConnection& Connection = Connections[ConnectionIndex];
+
+			for (quint32 MovingIndex = 0; MovingIndex < MovingConnections.size(); MovingIndex++)
+			{
+				const lcTrainTrackConnection& MovingConnection = MovingConnections[MovingIndex];
+
+				if (MovingPiece->IsTrainTrackConnected(MovingIndex))
+					continue;
+
+				const std::optional<float> DistanceSquared = lcTrainTrackInfo::GetSnapDistanceSquared(Connection, Piece->mModelWorld, MovingConnection, MovingTransform, Context);
+
+				if (!DistanceSquared || DistanceSquared.value() >= BestDistanceSquared)
+					continue;
+
+				if (!ConnectionsUpdated)
+				{
+					UpdateTrainTrackConnections(Piece.get(), true);
+					ConnectionsUpdated = true;
+				}
+
+				if (Piece->IsTrainTrackConnected(ConnectionIndex))
+					continue;
+
+				std::vector<lcInsertPieceInfo> Pieces = lcTrainTrackInfo::GetConnectionPieceInfo(Piece.get(), ConnectionIndex, MovingPiece->mPieceData.Get(), MovingIndex, MovingPiece->GetColorIndex());
+
+				if (!Pieces.empty())
+				{
+					BestDistanceSquared = DistanceSquared.value();
+					BestPieces = std::move(Pieces);
+				}
+			}
+		}
+	}
+
+	return BestPieces;
 }
 
 void lcModel::UpdateSelectedPiecesTrainTrackConnections()
@@ -5289,6 +5352,7 @@ void lcModel::BeginMouseTool(lcTool Tool, lcView* View)
 
 		case lcTool::Move:
 		case lcTool::Rotate:
+			mPreviewInsertPieceInfo.clear();
 			BeginHistorySequence();
 			BeginEditHistory();
 			break;
@@ -5355,6 +5419,9 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 {
 	if (!Accept)
 	{
+		if (Tool == lcTool::Move)
+			mPreviewInsertPieceInfo.clear();
+
 		RevertHistorySequence();
 		return;
 	}
@@ -5373,6 +5440,18 @@ void lcModel::EndMouseTool(lcTool Tool, lcView* View, bool Accept)
 		break;
 
 	case lcTool::Move:
+		for (const lcPreviewInsertPieceInfo& Info : mPreviewInsertPieceInfo)
+		{
+			lcPiece* Piece = new lcPiece(Info.PieceData);
+			Piece->Initialize(Info.Transform, mCurrentStep);
+			Piece->SetColorIndex(Info.ColorIndex);
+			AddPiece(Piece);
+		}
+
+		if (!mPreviewInsertPieceInfo.empty())
+			gMainWindow->UpdateTimeline(false, false);
+
+		mPreviewInsertPieceInfo.clear();
 		EndEditHistory();
 		EndHistorySequence(tr("Move"));
 		break;
@@ -5548,9 +5627,9 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 	EndHistorySequence(ActionName);
 }
 
-void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag)
+void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Snap)
 {
-	const lcVector3 PieceDistance = SnapPosition(Distance) - SnapPosition(mMouseToolDistance);
+	const lcVector3 PieceDistance = Snap ? SnapPosition(Distance) - SnapPosition(mMouseToolDistance) : Distance - mMouseToolDistance;
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
 	lcModelTransformFlags Flags = (AllowRelative ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None) | (mMouseToolFirstMove ? lcModelTransformFlag::FirstMove : lcModelTransformFlag::None);
@@ -5586,7 +5665,7 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 	lcMatrix33 NewRotation = IsConnection ? lcMatrix33(NewTransform) : lcMatrix33(StartTransform);
 	lcMatrix33 CurrentRotation = lcMatrix33(MousePiece->mModelWorld);
 
-	if (!lcMatrix33Similar(CurrentRotation, NewRotation))
+	if (IsConnection || !lcMatrix33Similar(CurrentRotation, NewRotation))
 	{
 		const lcVector3 Distance = NewTransform.GetTranslation() - MousePiece->mModelWorld.GetTranslation();
 
@@ -5649,7 +5728,8 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 	{
 		lcVector3 Distance = NewTransform.GetTranslation() - StartTransform.GetTranslation();
 
-		UpdateMoveTool(Distance, false, AlternateButtonDrag);
+		// Track placement has already been snapped; preserve exact endpoint offsets when releasing a snap.
+		UpdateMoveTool(Distance, false, AlternateButtonDrag, !MousePiece->mPieceData->GetTrainTrackInfo());
 	}
 }
 

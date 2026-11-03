@@ -26,6 +26,13 @@ struct lcTrainTrackConnection
 	lcTrainTrackConnectionType Type;
 };
 
+struct lcTrainTrackSnapContext
+{
+	lcMatrix44 ModelToClip;
+	lcVector2 LogicalViewportSize;
+	lcVector3 Direction;
+};
+
 class lcTrainTrackInfo
 {
 public:
@@ -45,10 +52,12 @@ public:
 	}
 
 	static void Initialize(lcPiecesLibrary* Library);
-	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, lcPiece* MovingPiece, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint);
+	static std::vector<lcInsertPieceInfo> GetInsertPieceInfo(lcPiece* CurrentPiece, lcPieceData* PieceData, int ColorIndex, quint32 PreferredSection, bool AllowNewPieces, std::optional<lcVector3> ClosestPoint);
+	static std::vector<lcInsertPieceInfo> GetConnectionPieceInfo(lcPiece* CurrentPiece, quint32 ConnectionIndex, lcPieceData* PieceData, quint32 NewConnectionIndex, int ColorIndex);
 	static std::optional<lcMatrix44> GetConnectionTransform(lcPieceData* CurrentPieceData, const lcMatrix44& CurrentTransform, quint32 CurrentConnectionIndex, lcPieceData* PieceData, quint32 NewConnectionIndex);
 	static std::optional<lcMatrix44> CalculateTransformToConnection(const lcMatrix44& ConnectionTransform, lcPieceData* PieceData, quint32 ConnectionIndex);
 	static int GetPieceConnectionIndex(const lcPiece* Piece1, int ConnectionIndex1, const lcPiece* Piece2);
+	static std::optional<float> GetSnapDistanceSquared(const lcTrainTrackConnection& Connection, const lcMatrix44& Transform, const lcTrainTrackConnection& MovingConnection, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context);
 
 	const std::vector<lcTrainTrackConnection>& GetConnections() const
 	{

@@ -54,6 +54,18 @@ public:
 	}
 };
 
+class lcModelInstanceTestTrackInfo : public lcTrainTrackInfo
+{
+public:
+	using lcTrainTrackInfo::mSleepers;
+};
+
+struct lcModelInstanceTestSleepers
+{
+	std::map<size_t, lcPieceData*> Previous = lcModelInstanceTestTrackInfo::mSleepers;
+	~lcModelInstanceTestSleepers() { lcModelInstanceTestTrackInfo::mSleepers = std::move(Previous); }
+};
+
 class lcModelInstanceTests : public QObject
 {
 	Q_OBJECT
@@ -79,9 +91,23 @@ private slots:
 	void AxisAlignedRotationTolerance();
 	void TrainTrackConnections_data();
 	void TrainTrackConnections();
+	void TrainTrackFocusBeforeDraw();
 	void TrainTrackConnectionVisibility();
 	void TrainTrackInsertionSection_data();
 	void TrainTrackInsertionSection();
+	void TrainTrackDragSnap_data();
+	void TrainTrackDragSnap();
+	void TrainTrackScreenSnap_data();
+	void TrainTrackScreenSnap();
+	void TrainTrackSnapDepth_data();
+	void TrainTrackSnapDepth();
+	void TrainTrackDragMovement();
+	void TrainTrackDragView_data();
+	void TrainTrackDragView();
+	void TrainTrackSideViewDrag_data();
+	void TrainTrackSideViewDrag();
+	void TrainTrackDragSleepers_data();
+	void TrainTrackDragSleepers();
 	void RotateToolMouseShortcuts_data();
 	void RotateToolMouseShortcuts();
 	void RepeatedInstances();
@@ -1595,6 +1621,91 @@ void lcModelInstanceTests::TrainTrackConnections()
 	}
 }
 
+void lcModelInstanceTests::TrainTrackFocusBeforeDraw()
+{
+	lcPiece Uninitialized;
+	QVERIFY(!Uninitialized.IsTrainTrackConnected(0));
+	QVERIFY(!Uninitialized.IsTrainTrackConnected(-1));
+	QVERIFY(!Uninitialized.IsTrainTrackConnected(100));
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		lcMouseShortcuts PreviousShortcuts = gMouseShortcuts;
+		Project Current;
+		ScopedProject()
+		{
+			gApplication->mProject = &Current;
+			gMouseShortcuts.Reset();
+		}
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			gMouseShortcuts = PreviousShortcuts;
+		}
+	} Scope;
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 focus-track.dat\n"
+		"1 16 320 0 0 1 0 0 0 1 0 0 0 1 focus-track.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Piece = Model->GetPieces()[0].get();
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	Mesh->mBoundingBox = { lcVector3(-160, -40, 0), lcVector3(160, 40, 4) };
+	lcVertex* Vertices = static_cast<lcVertex*>(Mesh->mVertexData);
+	for (int Index = 0; Index < Mesh->mNumVertices; Index++)
+	{
+		Vertices[Index].Position.x *= 16;
+		Vertices[Index].Position.y *= 4;
+		Vertices[Index].Position.z = lcMax(0.0f, Vertices[Index].Position.z);
+	}
+	Piece->mPieceData->SetMesh(Mesh);
+	Piece->mPieceData->mState = lcAssetState::Loaded;
+	Piece->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } }
+	}, 16, true));
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, 0, 1000), lcVector3(0, 0, 0), lcVector3(0, 1, 0));
+	View->SetCamera(&Camera, true);
+	Window.SetTool(lcTool::Select);
+	const lcVector3 Screen = View->ProjectPoint(lcVector3(140, 30, 4));
+	View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Piece));
+	View->OnLeftButtonDown();
+	QCOMPARE(Model->GetFocusObject(), static_cast<lcObject*>(Piece));
+	// No scene has been drawn: releasing the click must compute occupancy before overlay picking.
+	View->OnLeftButtonUp();
+	QVERIFY(!View->IsTracking());
+	QVERIFY(Piece->IsTrainTrackConnected(0));
+	QVERIFY(!Piece->IsTrainTrackConnected(1));
+	QVERIFY(!Piece->IsTrainTrackConnected(100));
+
+	// A subsequent geometry change must also be reflected without waiting for a redraw.
+	Model->GetPieces()[1]->SetHidden(true);
+	View->OnMouseMove();
+	QVERIFY(!Piece->IsTrainTrackConnected(0));
+	QVERIFY(!Piece->IsTrainTrackConnected(1));
+
+	// Keyboard insertion on a focused track also needs current occupancy without a preceding draw.
+	Model->GetPieces()[1]->SetHidden(false);
+	Piece->SetTrainTrackConnections({});
+	lcPiece* Inserted = Model->AddPiece(Piece->mPieceData.Get(), LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST);
+	QVERIFY(Inserted);
+	QVERIFY(lcLength(Inserted->mModelWorld.GetTranslation() - lcVector3(-320, 0, 0)) < 0.001f);
+}
+
 void lcModelInstanceTests::TrainTrackConnectionVisibility()
 {
 	Project Document(true);
@@ -1684,6 +1795,681 @@ void lcModelInstanceTests::TrainTrackInsertionSection()
 	QVERIFY(lcLength(Inserted->mModelWorld.GetTranslation() - Expected) < 0.001f);
 	Model->UpdateTrainTrackConnections(First, false);
 	QVERIFY(First->IsTrainTrackConnected(ExplicitSection ? 1 : 0));
+}
+
+void lcModelInstanceTests::TrainTrackDragSnap_data()
+{
+	QTest::addColumn<QString>("Scenario");
+	QTest::addColumn<bool>("Snaps");
+	for (const QString& Scenario : { QString("right"), QString("left"), QString("nearest"), QString("rotated"), QString("sleeper") })
+		QTest::newRow(qPrintable(Scenario)) << Scenario << true;
+	for (const QString& Scenario : { QString("distant"), QString("hidden"), QString("future"), QString("incompatible"),
+		QString("occupied-target"), QString("occupied-moving"), QString("selected-target"), QString("needs-sleeper"), QString("zero-radius") })
+		QTest::newRow(qPrintable(Scenario)) << Scenario << false;
+}
+
+void lcModelInstanceTests::TrainTrackDragSnap()
+{
+	QFETCH(QString, Scenario);
+	QFETCH(bool, Snaps);
+	Project Document(true);
+	lcModel* Model = Document.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 snap-target.dat\n"
+		"1 16 -1000 0 0 1 0 0 0 1 0 0 0 1 snap-moving.dat\n"
+		"1 16 10000 0 0 1 0 0 0 1 0 0 0 1 snap-other.dat\n"
+		"1 16 10000 0 0 1 0 0 0 1 0 0 0 1 snap-blocker.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Document);
+	QCOMPARE(Model->GetPieces().size(), size_t(4));
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	lcPiece* Other = Model->GetPieces()[2].get();
+	lcPiece* Blocker = Model->GetPieces()[3].get();
+	const lcTrainTrackConnectionSleeper TargetSleeper = Scenario == "sleeper" ? lcTrainTrackConnectionSleeper::HasSleeper : lcTrainTrackConnectionSleeper::None;
+	lcTrainTrackConnectionSleeper MovingSleeper = lcTrainTrackConnectionSleeper::None;
+	if (Scenario == "sleeper" || Scenario == "needs-sleeper")
+		MovingSleeper = lcTrainTrackConnectionSleeper::NeedsSleeper;
+
+	for (lcPiece* Piece : { Target, Moving, Other })
+	{
+		const size_t Group = Piece == Moving && Scenario == "incompatible" ? 2 : 1;
+		lcTrainTrackConnectionSleeper Sleeper = Piece == Moving ? MovingSleeper : TargetSleeper;
+		if (Scenario == "needs-sleeper")
+			Sleeper = lcTrainTrackConnectionSleeper::NeedsSleeper;
+		Piece->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+			{ lcMatrix44Translation(lcVector3(160, 0, 0)), { Group, Sleeper } },
+			{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { Group, Sleeper } }
+		}, 16, true));
+	}
+	Blocker->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44RotationZ(LC_PI), { 1, lcTrainTrackConnectionSleeper::None } }
+	}, 16, true));
+	Moving->SetSelected(true);
+	Target->SetHidden(Scenario == "hidden");
+	Target->SetSelected(Scenario == "selected-target");
+	Blocker->SetSelected(Scenario == "occupied-moving");
+
+	for (const lcMatrix44& Parent : { lcMatrix44Identity(), lcMatrix44(lcMatrix33RotationY(0.7f), lcVector3(100, -50, 20)) })
+	{
+		Target->Initialize(Parent, Scenario == "future" ? 2 : 1);
+		Moving->Initialize(lcMul(lcMatrix44Translation(lcVector3(-1000, 0, 0)), Parent), 1);
+		Other->Initialize(lcMul(lcMatrix44Translation(lcVector3(Scenario == "nearest" ? 630 : 10000, 0, 0)), Parent), 1);
+		lcVector3 BlockerPosition(10000, 0, 0);
+		if (Scenario == "occupied-target")
+			BlockerPosition.x = 160;
+		else if (Scenario == "occupied-moving")
+			BlockerPosition.x = -840;
+		Blocker->Initialize(lcMul(lcMatrix44Translation(BlockerPosition), Parent), 1);
+
+		lcVector3 ProposedPosition(310, 0, 0);
+		float ExpectedX = 320;
+		if (Scenario == "left" || Scenario == "occupied-moving")
+		{
+			ProposedPosition.x = -310;
+			ExpectedX = -320;
+		}
+		else if (Scenario == "distant")
+			ProposedPosition.x = 400;
+		else if (Scenario == "nearest")
+			ExpectedX = 310;
+		lcMatrix33 ProposedRotation = lcMatrix33Identity();
+		if (Scenario == "rotated")
+		{
+			ProposedPosition = lcVector3(160, 150, 0);
+			ProposedRotation = lcMatrix33RotationZ(LC_PI / 2.0f);
+		}
+
+		const lcMatrix44 Before = Moving->mModelWorld;
+		const lcMatrix44 Proposed = lcMul(lcMatrix44(ProposedRotation, ProposedPosition), Parent);
+		const lcTrainTrackSnapContext SnapContext
+		{
+			lcMul(lcMatrix44AffineInverse(Parent), lcMul(lcMatrix44Translation(lcVector3(0, 0, -2000)), lcMatrix44Ortho(-1000, 1000, -1000, 1000, 1, 4000))),
+			lcVector2(2000, 2000),
+			lcMul30(lcVector3(0, 0, -1), Parent)
+		};
+		const std::vector<lcInsertPieceInfo> Snap = Model->GetTrainTrackSnapInfo(Moving, Proposed, SnapContext, Scenario == "zero-radius" ? 0.0f : 20.0f);
+		QCOMPARE(!Snap.empty(), Snaps);
+		QVERIFY(Moving->mModelWorld == Before);
+		if (!Snap.empty())
+		{
+			QVERIFY(lcLength(Snap.back().Transform.GetTranslation() - lcMul31(lcVector3(ExpectedX, 0, 0), Parent)) < 0.001f);
+			Moving->Initialize(Snap.back().Transform, 1);
+			const int MovingConnection = Scenario == "left" || Scenario == "nearest" ? 0 : 1;
+			lcPiece* ConnectedTarget = Scenario == "nearest" ? Other : Target;
+			QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Moving, MovingConnection, ConnectedTarget) != -1);
+		}
+	}
+}
+
+void lcModelInstanceTests::TrainTrackScreenSnap_data()
+{
+	QTest::addColumn<bool>("Orthographic");
+	QTest::addColumn<float>("CameraDistance");
+	QTest::addColumn<int>("DeviceScale");
+	QTest::addColumn<int>("PixelGap");
+	for (bool Orthographic : { false, true })
+		for (float CameraDistance : { 500.0f, 5000.0f, 50000.0f })
+			for (int DeviceScale : { 1, 2 })
+				for (int PixelGap : { 8, 16 })
+					QTest::newRow(qPrintable(QString("ortho-%1-distance-%2-scale-%3-gap-%4").arg(Orthographic).arg(CameraDistance).arg(DeviceScale).arg(PixelGap)))
+						<< Orthographic << CameraDistance << DeviceScale << PixelGap;
+}
+
+void lcModelInstanceTests::TrainTrackScreenSnap()
+{
+	QFETCH(bool, Orthographic);
+	QFETCH(float, CameraDistance);
+	QFETCH(int, DeviceScale);
+	QFETCH(int, PixelGap);
+	Project Document(true);
+	lcModel* Model = Document.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 pixel-target.dat\n"
+		"1 16 10000 0 0 1 0 0 0 1 0 0 0 1 pixel-moving.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Document);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	Target->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44Identity(), { 1, lcTrainTrackConnectionSleeper::None } } }, 16, true));
+	Moving->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44RotationZ(LC_PI), { 1, lcTrainTrackConnectionSleeper::None } } }, 16, true));
+	Moving->SetSelected(true);
+	const lcMatrix44 ModelToView = lcMatrix44Translation(lcVector3(0, 0, -CameraDistance));
+	lcMatrix44 Projection;
+	if (Orthographic)
+	{
+		const float HalfHeight = CameraDistance * tanf(15.0f * LC_DTOR);
+		Projection = lcMatrix44Ortho(-2 * HalfHeight, 2 * HalfHeight, -HalfHeight, HalfHeight, 1, 100000);
+	}
+	else
+		Projection = lcMatrix44Perspective(30, 2, 1, 100000);
+	const int PhysicalViewport[4] = { 0, 0, 1200 * DeviceScale, 600 * DeviceScale };
+	lcVector3 ScreenPoint = lcProjectPoint(lcVector3(0, 0, 0), ModelToView, Projection, PhysicalViewport);
+	ScreenPoint.x += PixelGap * DeviceScale;
+	const lcVector3 Position = lcUnprojectPoint(ScreenPoint, ModelToView, Projection, PhysicalViewport);
+	// Keep exact coplanarity: perspective depth-buffer roundoff is unrelated to the pixel metric.
+	const lcMatrix44 Proposed = lcMatrix44Translation(lcVector3(Position.x, Position.y, 0));
+	const lcTrainTrackSnapContext SnapContext
+	{
+		lcMul(ModelToView, Projection),
+		lcVector2(PhysicalViewport[2] / DeviceScale, PhysicalViewport[3] / DeviceScale),
+		lcVector3(0, 0, -1)
+	};
+	const std::vector<lcInsertPieceInfo> Snap = Model->GetTrainTrackSnapInfo(Moving, Proposed, SnapContext, 12);
+	QCOMPARE(!Snap.empty(), PixelGap < 12);
+	if (!Snap.empty())
+	{
+		QVERIFY(lcLength(Snap.back().Transform.GetTranslation()) < 0.001f);
+		Moving->Initialize(Snap.back().Transform, 1);
+		QCOMPARE(lcTrainTrackInfo::GetPieceConnectionIndex(Moving, 0, Target), 0);
+	}
+}
+
+void lcModelInstanceTests::TrainTrackSnapDepth_data()
+{
+	QTest::addColumn<QString>("Scenario");
+	for (const QString& Scenario : { QString("coplanar"), QString("different-height"), QString("different-plane"), QString("upside-down"),
+		QString("behind-camera"), QString("near-clipped"), QString("far-clipped"), QString("edge-on-distant"), QString("edge-on-near") })
+		QTest::newRow(qPrintable(Scenario)) << Scenario;
+}
+
+void lcModelInstanceTests::TrainTrackSnapDepth()
+{
+	QFETCH(QString, Scenario);
+	Project Document(true);
+	lcModel* Model = Document.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 depth-target.dat\n"
+		"1 16 10000 0 0 1 0 0 0 1 0 0 0 1 depth-moving.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Document);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	Target->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44Identity(), { 1, lcTrainTrackConnectionSleeper::None } } }, 16, true));
+	Moving->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({ { lcMatrix44RotationZ(LC_PI), { 1, lcTrainTrackConnectionSleeper::None } } }, 16, true));
+	Moving->SetSelected(true);
+	lcMatrix44 Proposed = lcMatrix44Identity();
+	lcMatrix44 ModelToView = lcMatrix44Translation(lcVector3(0, 0, -1000));
+	lcVector3 Direction(0, 0, -1);
+	if (Scenario == "different-height")
+		Proposed = lcMatrix44Translation(lcVector3(0, 0, 5));
+	else if (Scenario == "different-plane")
+		Proposed = lcMatrix44RotationX(LC_PI / 2);
+	else if (Scenario == "upside-down")
+		Proposed = lcMatrix44RotationX(LC_PI);
+	else if (Scenario == "behind-camera" || Scenario == "near-clipped" || Scenario == "far-clipped")
+	{
+		float Height = 2000;
+		if (Scenario == "near-clipped")
+			Height = 999.5f;
+		else if (Scenario == "far-clipped")
+			Height = -10000;
+		Target->Initialize(lcMatrix44Translation(lcVector3(0, 0, Height)), 1);
+		Proposed = Target->mModelWorld;
+	}
+	else if (Scenario.startsWith("edge-on"))
+	{
+		ModelToView = lcMatrix44LookAt(lcVector3(0, -1000, 0), lcVector3(0, 0, 0), lcVector3(0, 0, 1));
+		Direction = lcVector3(0, 1, 0);
+		Proposed = lcMatrix44Translation(lcVector3(0, Scenario == "edge-on-near" ? 10 : 500, 0));
+	}
+	const lcTrainTrackSnapContext SnapContext
+	{
+		lcMul(ModelToView, lcMatrix44Perspective(30, 2, 1, 4000)),
+		lcVector2(1200, 600), Direction
+	};
+	const std::vector<lcInsertPieceInfo> Snap = Model->GetTrainTrackSnapInfo(Moving, Proposed, SnapContext, 12);
+	QCOMPARE(!Snap.empty(), Scenario == "coplanar" || Scenario == "edge-on-near");
+}
+
+void lcModelInstanceTests::TrainTrackDragMovement()
+{
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 drag-moving.dat\n"
+		"1 16 -320 0 0 1 0 0 0 1 0 0 0 1 drag-neighbour.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Moving = Model->GetPieces()[0].get();
+	lcPiece* Neighbour = Model->GetPieces()[1].get();
+	for (lcPiece* Piece : { Moving, Neighbour })
+		Piece->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+			{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } },
+			{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } }
+		}, 16, true));
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	Model->SetSelectionAndFocusAction({ Neighbour }, Moving, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	const lcMatrix44 Start = Moving->mModelWorld;
+	const lcVector3 Offset = Neighbour->mModelWorld.GetTranslation() - Start.GetTranslation();
+	Model->BeginMouseTool(lcTool::Move, Window.GetActiveView());
+
+	// Same-orientation snapping must retain fractional coordinates instead of rounding to the move grid.
+	const lcMatrix44 Snapped = lcMatrix44Translation(lcVector3(313.25f, 27.5f, 0));
+	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false);
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) < 0.001f);
+	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Snapped.GetTranslation() - Offset) < 0.001f);
+	const lcMatrix44 Released = lcMatrix44Translation(lcVector3(400, 40, 0));
+	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false);
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Released.GetTranslation()) < 0.001f);
+	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Released.GetTranslation() - Offset) < 0.001f);
+
+	// Rotating onto a connection moves the selected group as one rigid assembly.
+	const lcMatrix44 Rotated(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(300, 100, 0));
+	Model->UpdateFreeMoveTool(Moving, Start, Rotated, true, false);
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Rotated.GetTranslation()) < 0.001f);
+	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - lcMul31(Offset, Rotated)) < 0.001f);
+	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false);
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Released.GetTranslation()) < 0.001f);
+	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Released.GetTranslation() - Offset) < 0.001f);
+	Model->EndMouseTool(lcTool::Move, Window.GetActiveView(), true);
+}
+
+void lcModelInstanceTests::TrainTrackDragView_data()
+{
+	QTest::addColumn<float>("GrabX");
+	QTest::addColumn<bool>("NeedsSleeper");
+	QTest::addColumn<bool>("ConnectionFocused");
+	QTest::newRow("grab-right-end") << 140.0f << false << false;
+	QTest::newRow("grab-left-end") << -140.0f << false << false;
+	QTest::newRow("grab-right-end-with-sleeper") << 140.0f << true << false;
+	QTest::newRow("grab-left-end-with-sleeper") << -140.0f << true << false;
+	QTest::newRow("focused-connection") << -140.0f << false << true;
+	QTest::newRow("focused-connection-with-sleeper") << -140.0f << true << true;
+}
+
+void lcModelInstanceTests::TrainTrackDragView()
+{
+	QFETCH(float, GrabX);
+	QFETCH(bool, NeedsSleeper);
+	QFETCH(bool, ConnectionFocused);
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		lcMouseShortcuts PreviousShortcuts = gMouseShortcuts;
+		Project Current;
+		ScopedProject()
+		{
+			gApplication->mProject = &Current;
+			gMouseShortcuts.Reset();
+		}
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			gMouseShortcuts = PreviousShortcuts;
+		}
+	} Scope;
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 3.25 -48 0 1 0 0 0 1 0 0 0 1 drag-view.dat\n"
+		"1 16 -1000 -48 0 1 0 0 0 1 0 0 0 1 drag-view.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	Mesh->mBoundingBox = { lcVector3(-160, -40, 0), lcVector3(160, 40, 4) };
+	lcVertex* Vertices = static_cast<lcVertex*>(Mesh->mVertexData);
+	for (int VertexIndex = 0; VertexIndex < Mesh->mNumVertices; VertexIndex++)
+	{
+		Vertices[VertexIndex].Position.x *= 16;
+		Vertices[VertexIndex].Position.y *= 4;
+		Vertices[VertexIndex].Position.z = lcMax(0.0f, Vertices[VertexIndex].Position.z);
+	}
+	Target->mPieceData->SetMesh(Mesh);
+	Target->mPieceData->SetBoundingBox(Mesh->mBoundingBox.Min, Mesh->mBoundingBox.Max);
+	Target->mPieceData->mState = lcAssetState::Loaded;
+	const lcTrainTrackConnectionSleeper SleeperType = NeedsSleeper ? lcTrainTrackConnectionSleeper::NeedsSleeper : lcTrainTrackConnectionSleeper::None;
+	Target->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, SleeperType } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, SleeperType } }
+	}, 16, true));
+	lcPieceDataRef SleeperData;
+	lcModelInstanceTestSleepers Sleepers;
+	if (NeedsSleeper)
+	{
+		SleeperData = lcGetPiecesLibrary()->AcquirePieceData("view-sleeper.dat", &Scope.Current, lcAcquirePieceDataFlag::CreateMissing);
+		QVERIFY(SleeperData);
+		lcMesh* SleeperMesh = new lcMesh;
+		SleeperMesh->CreateBox();
+		SleeperData->SetMesh(SleeperMesh);
+		SleeperData->mState = lcAssetState::Loaded;
+		SleeperData->SetTrainTrackInfo(new lcTrainTrackInfo({
+			{ lcMatrix44(lcMatrix33RotationZ(LC_PI / 2), lcVector3(0, 0, 16)), { 1, lcTrainTrackConnectionSleeper::HasSleeper } },
+			{ lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2), lcVector3(0, 0, 16)), { 1, lcTrainTrackConnectionSleeper::HasSleeper } }
+		}, 0, true));
+		lcModelInstanceTestTrackInfo::mSleepers[1] = SleeperData.Get();
+	}
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(-400, 0, 2000), lcVector3(-400, 0, 0), lcVector3(0, 1, 0));
+	View->SetCamera(&Camera, true);
+	if (ConnectionFocused)
+		Model->SetSelectionAndFocusAction({}, Moving, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST, lcSelectionMode::Single);
+	else
+		Model->SetSelectionAndFocusAction({ Moving }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	Window.SetMoveXYSnapIndex(9);
+	const lcVector3 Start = View->ProjectPoint(lcVector3(-1000 + GrabX, 30, 52));
+	View->SetMousePosition(qRound(Start.x), qRound(Start.y));
+	View->OnMouseMove();
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	QVERIFY(Moving->IsFocused(LC_PIECE_SECTION_POSITION));
+	QVERIFY(View->ShouldDrawInsertPreview());
+	View->OnMouseMove();
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - lcVector3(-1000, 0, 48)) < 0.001f);
+
+	// The grab offset stays fixed; endpoint snapping precedes the coarse 160-unit move grid.
+	const lcVector3 End = View->ProjectPoint(lcVector3(316 + GrabX, 30, 52));
+	View->SetMousePosition(qRound(End.x), qRound(End.y));
+	QVERIFY(!View->FindObjectUnderPointer(true, true).Object);
+	View->OnMouseMove();
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), NeedsSleeper ? size_t(1) : size_t(0));
+	View->OnLeftButtonUp();
+	QVERIFY(!View->IsTracking());
+	QVERIFY(!View->ShouldDrawInsertPreview());
+	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - lcVector3(323.25f, 0, 48)) < 0.001f);
+	QCOMPARE(Model->GetPieces().size(), NeedsSleeper ? size_t(3) : size_t(2));
+	if (NeedsSleeper)
+	{
+		lcPiece* Sleeper = Model->GetPieces()[2].get();
+		QCOMPARE(Sleeper->mPieceData, SleeperData);
+		QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Moving, 1, Sleeper) != -1);
+		QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Target, 0, Sleeper) != -1);
+	}
+	else
+		QCOMPARE(lcTrainTrackInfo::GetPieceConnectionIndex(Moving, 1, Target), 0);
+	Model->UndoAction();
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - lcVector3(-1000, 0, 48)) < 0.001f);
+	Model->RedoAction();
+	QCOMPARE(Model->GetPieces().size(), NeedsSleeper ? size_t(3) : size_t(2));
+	QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - lcVector3(323.25f, 0, 48)) < 0.001f);
+}
+
+void lcModelInstanceTests::TrainTrackSideViewDrag_data()
+{
+	QTest::addColumn<bool>("Orthographic");
+	QTest::addColumn<float>("CameraDistance");
+	QTest::newRow("perspective") << false << 2000.0f;
+	QTest::newRow("perspective-close") << false << 400.0f;
+	QTest::newRow("orthographic") << true << 2000.0f;
+	QTest::newRow("orthographic-close") << true << 400.0f;
+}
+
+void lcModelInstanceTests::TrainTrackSideViewDrag()
+{
+	QFETCH(bool, Orthographic);
+	QFETCH(float, CameraDistance);
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		lcMouseShortcuts PreviousShortcuts = gMouseShortcuts;
+		Project Current;
+		ScopedProject()
+		{
+			gApplication->mProject = &Current;
+			gMouseShortcuts.Reset();
+		}
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			gMouseShortcuts = PreviousShortcuts;
+		}
+	} Scope;
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 side-track.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	lcPiece* Moving = Model->GetPieces()[0].get();
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	Mesh->mBoundingBox = { lcVector3(-160, -40, 0), lcVector3(160, 40, 40) };
+	lcVertex* Vertices = static_cast<lcVertex*>(Mesh->mVertexData);
+	for (int Index = 0; Index < Mesh->mNumVertices; Index++)
+	{
+		Vertices[Index].Position.x *= 16;
+		Vertices[Index].Position.y *= 4;
+		Vertices[Index].Position.z = Vertices[Index].Position.z < 0 ? 0 : 40;
+	}
+	Moving->mPieceData->SetMesh(Mesh);
+	Moving->mPieceData->SetBoundingBox(Mesh->mBoundingBox.Min, Mesh->mBoundingBox.Max);
+	Moving->mPieceData->mState = lcAssetState::Loaded;
+	Moving->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { 1, lcTrainTrackConnectionSleeper::None } }
+	}, 16, true));
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, -CameraDistance, 30), lcVector3(0, 0, 30), lcVector3(0, 0, 1));
+	Camera.SetProjection(Orthographic ? lcCameraProjection::Orthographic : lcCameraProjection::Perspective);
+	View->SetCamera(&Camera, true);
+	Model->SetSelectionAndFocusAction({ Moving }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	Window.SetMoveXYSnapIndex(0);
+	Window.SetMoveZSnapIndex(0);
+	const lcVector3 Start = View->ProjectPoint(lcVector3(140, -40, 30));
+	View->SetMousePosition(qRound(Start.x), qRound(Start.y));
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Moving));
+	const lcObjectRayTest GrabRay = View->RayTest(true, false);
+	const lcVector3 GrabPosition = GrabRay.Start + lcNormalize(GrabRay.End - GrabRay.Start) * GrabRay.Distance;
+	QVERIFY(!View->ShouldDrawInsertPreview());
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	QVERIFY(View->ShouldDrawInsertPreview());
+
+	// The initial ray is parallel to the track plane. Move above and then below it.
+	for (const lcVector3& Point : { lcVector3(150, -40, 40), lcVector3(180, -40, 50), lcVector3(240, -40, 130), lcVector3(340, -40, -70) })
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+		View->OnMouseMove();
+		const lcVector3 Position = Moving->mModelWorld.GetTranslation();
+		QVERIFY(Position.x > Point.x - 160);
+		QVERIFY(fabsf(Position.y) < 0.001f);
+		if (Point.z > 100)
+			QVERIFY(Position.z > 80);
+		else if (Point.z < 0)
+			QVERIFY(Position.z < -80);
+
+		const lcVector3 GrabbedScreen = View->ProjectPoint(lcMul31(GrabPosition, Moving->mModelWorld));
+		const float GrabError = lcLength(lcVector3(GrabbedScreen.x - qRound(Screen.x), GrabbedScreen.y - qRound(Screen.y), 0));
+		QVERIFY2(GrabError < 1.0f, qPrintable(QString("Grab point drifts %1 framebuffer pixels from the cursor").arg(GrabError)));
+	}
+	View->OnLeftButtonUp();
+	QVERIFY(!View->IsTracking());
+	QVERIFY(!View->ShouldDrawInsertPreview());
+
+	// Deleting the hovered piece leaves the cached hover pointer stale until the next mouse move.
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Moving));
+	const lcPieceDataRef TrackData = Moving->mPieceData;
+	Model->DeleteSelectedObjects();
+	QVERIFY(Model->GetPieces().empty());
+	QVERIFY(!View->ShouldDrawInsertPreview());
+
+	// Exercise heap reuse while the view still caches the deleted piece's address.
+	std::vector<std::unique_ptr<lcPiece>> Allocations;
+	for (int Index = 0; Index < 64; Index++)
+		Allocations.push_back(std::make_unique<lcPiece>());
+
+	Model->UndoAction();
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	QVERIFY(!View->ShouldDrawInsertPreview());
+	lcPiece* Restored = Model->GetPieces()[0].get();
+	QCOMPARE(Restored->mPieceData, TrackData);
+	Model->SelectAllPiecesAction();
+	const lcMatrix44 Before = Restored->mModelWorld;
+
+	// Start another drag without any intervening mouse movement.
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	QCOMPARE(Model->GetFocusObject(), static_cast<lcObject*>(Restored));
+	View->OnMouseMove();
+	QVERIFY(lcLength(Restored->mModelWorld.GetTranslation() - Before.GetTranslation()) < 0.001f);
+	const lcVector3 BeforeScreen = View->ProjectPoint(lcMul31(GrabPosition, Before));
+	View->SetMousePosition(qRound(BeforeScreen.x) + 10, qRound(BeforeScreen.y) + 5);
+	View->OnMouseMove();
+	QVERIFY(lcLength(Restored->mModelWorld.GetTranslation() - Before.GetTranslation()) > 0.01f);
+	View->OnLeftButtonUp();
+	QVERIFY(!View->IsTracking());
+	Model->UndoAction();
+	QVERIFY(lcLength(Model->GetPieces()[0]->mModelWorld.GetTranslation() - Before.GetTranslation()) < 0.001f);
+}
+
+void lcModelInstanceTests::TrainTrackDragSleepers_data()
+{
+	QTest::addColumn<QString>("Group");
+	QTest::addColumn<QString>("Outcome");
+	for (const QString& Group : { QString("4.5V"), QString("12V") })
+		for (const QString& Outcome : { QString("accept"), QString("cancel"), QString("release-snap"), QString("insert") })
+			QTest::newRow(qPrintable(Group + "-" + Outcome)) << Group << Outcome;
+}
+
+void lcModelInstanceTests::TrainTrackDragSleepers()
+{
+	QFETCH(QString, Group);
+	QFETCH(QString, Outcome);
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		Project Current;
+		ScopedProject() { gApplication->mProject = &Current; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 sleeper-track.dat\n"
+		"1 3 -1000 0 0 1 0 0 0 1 0 0 0 1 sleeper-track.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	const size_t ConnectionGroup = qHash(Group);
+	Target->mPieceData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44Translation(lcVector3(160, 0, 0)), { ConnectionGroup, lcTrainTrackConnectionSleeper::NeedsSleeper } },
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI), lcVector3(-160, 0, 0)), { ConnectionGroup, lcTrainTrackConnectionSleeper::NeedsSleeper } }
+	}, 7, true));
+	lcPieceDataRef SleeperData = lcGetPiecesLibrary()->AcquirePieceData("drag-sleeper.dat", &Scope.Current, lcAcquirePieceDataFlag::CreateMissing);
+	QVERIFY(SleeperData);
+	lcMesh* Mesh = new lcMesh;
+	Mesh->CreateBox();
+	SleeperData->SetMesh(Mesh);
+	SleeperData->mState = lcAssetState::Loaded;
+	SleeperData->SetTrainTrackInfo(new lcTrainTrackInfo({
+		{ lcMatrix44(lcMatrix33RotationZ(LC_PI / 2), lcVector3(0, 0, 16)), { ConnectionGroup, lcTrainTrackConnectionSleeper::HasSleeper } },
+		{ lcMatrix44(lcMatrix33RotationZ(-LC_PI / 2), lcVector3(0, 0, 16)), { ConnectionGroup, lcTrainTrackConnectionSleeper::HasSleeper } }
+	}, 0, true));
+
+	lcModelInstanceTestSleepers Sleepers;
+	lcModelInstanceTestTrackInfo::mSleepers[ConnectionGroup] = SleeperData.Get();
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	if (Outcome == "insert")
+	{
+		Model->SetSelectionAndFocusAction({}, Target, LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST, lcSelectionMode::Single);
+		Model->UpdateTrainTrackConnections(Target, false);
+		QVERIFY(Model->AddPiece(Target->mPieceData.Get(), LC_PIECE_SECTION_TRAIN_TRACK_CONNECTION_FIRST));
+		QCOMPARE(Model->GetPieces().size(), size_t(4));
+		QCOMPARE(Model->GetPieces()[2]->mPieceData, SleeperData);
+		QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Model->GetPieces()[3].get(), 0, Model->GetPieces()[2].get()) != -1);
+		Model->UndoAction();
+		QCOMPARE(Model->GetPieces().size(), size_t(2));
+		Model->RedoAction();
+		QCOMPARE(Model->GetPieces().size(), size_t(4));
+		return;
+	}
+
+	Model->SetSelectionAndFocusAction({}, Moving, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	const lcMatrix44 Start = Moving->mModelWorld;
+	Model->BeginMouseTool(lcTool::Move, Window.GetActiveView());
+	const lcTrainTrackSnapContext SnapContext
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -2000)), lcMatrix44Ortho(-1000, 1000, -1000, 1000, 1, 4000)),
+		lcVector2(2000, 2000), lcVector3(0, 0, -1)
+	};
+	std::vector<lcInsertPieceInfo> Snap = Model->GetTrainTrackSnapInfo(Moving, lcMatrix44Translation(lcVector3(310, 0, 0)), SnapContext, 20);
+	QCOMPARE(Snap.size(), size_t(2));
+	QCOMPARE(Snap[0].PieceData, SleeperData.Get());
+	QCOMPARE(Snap[0].ColorIndex, lcGetColorIndex(0));
+	QCOMPARE(Snap[1].ColorIndex, Moving->GetColorIndex());
+	const lcMatrix44 Snapped = Snap.back().Transform;
+	Snap.pop_back();
+	Model->SetPreviewInsertPieceInfo(std::move(Snap));
+	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false);
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+
+	if (Outcome == "release-snap")
+	{
+		QVERIFY(Model->GetTrainTrackSnapInfo(Moving, lcMatrix44Translation(lcVector3(500, 0, 0)), SnapContext, 20).empty());
+		Model->SetPreviewInsertPieceInfo({});
+		Model->UpdateFreeMoveTool(Moving, Start, lcMatrix44Translation(lcVector3(500, 0, 0)), false, false);
+	}
+	Model->EndMouseTool(lcTool::Move, Window.GetActiveView(), Outcome != "cancel");
+	QVERIFY(Model->GetPreviewInsertPieceInfo().empty());
+	if (Outcome == "accept")
+	{
+		QCOMPARE(Model->GetPieces().size(), size_t(3));
+		lcPiece* Sleeper = Model->GetPieces()[2].get();
+		QCOMPARE(Sleeper->mPieceData, SleeperData);
+		QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Target, 0, Sleeper) != -1);
+		QVERIFY(lcTrainTrackInfo::GetPieceConnectionIndex(Moving, 1, Sleeper) != -1);
+		Model->UndoAction();
+		QCOMPARE(Model->GetPieces().size(), size_t(2));
+		QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - Start.GetTranslation()) < 0.001f);
+		Model->RedoAction();
+		QCOMPARE(Model->GetPieces().size(), size_t(3));
+	}
+	else
+	{
+		QCOMPARE(Model->GetPieces().size(), size_t(2));
+		if (Outcome == "cancel")
+			QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - Start.GetTranslation()) < 0.001f);
+	}
 }
 
 void lcModelInstanceTests::AxisAlignedRotations_data()

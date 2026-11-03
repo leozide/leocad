@@ -1767,10 +1767,15 @@ void lcModelInstanceTests::AxisAlignedRotations()
 
 		const lcVector3 ExpectedPosition = Center + lcMul(Offset, QuarterRotation);
 
+		// Repeated rotations accumulate float rounding in the position, especially
+		// on platforms without fused multiply-add. Orientations above remain exact.
 		for (int Component = 0; Component < 3; Component++)
 		{
 			QCOMPARE(CenterPiece.mModelWorld.GetTranslation()[Component], Center[Component]);
-			QVERIFY(fabsf(OrbitPiece.mModelWorld.GetTranslation()[Component] - ExpectedPosition[Component]) < 0.0001f);
+			const float Actual = OrbitPiece.mModelWorld.GetTranslation()[Component];
+			QVERIFY2(fabsf(Actual - ExpectedPosition[Component]) < 0.001f,
+				qPrintable(QString("Step %1, component %2: position %3, expected %4")
+					.arg(Step).arg(Component).arg(Actual, 0, 'g', 9).arg(ExpectedPosition[Component], 0, 'g', 9)));
 		}
 
 		// Relative grid movement must introduce no fractional coordinates.

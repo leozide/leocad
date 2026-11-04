@@ -29,9 +29,22 @@ QString lcGetSaveFileName(QWidget* Parent, const QString& Title, const QString& 
 	return Dialog.selectedFiles().value(0);
 }
 
+QScreen* lcScreenAt(const QPoint& Position)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+	return QGuiApplication::screenAt(Position);
+#else
+	for (QScreen* Screen : QGuiApplication::screens())
+		if (Screen->geometry().contains(Position))
+			return Screen;
+
+	return nullptr;
+#endif
+}
+
 QPoint lcGetPopupPosition(const QPoint& Position, const QSize& Size, const QPoint& ScreenPosition)
 {
-	QScreen* Screen = QGuiApplication::screenAt(ScreenPosition);
+	QScreen* Screen = lcScreenAt(ScreenPosition);
 
 	if (!Screen)
 		Screen = QGuiApplication::primaryScreen();

@@ -151,7 +151,7 @@ void lcDoubleSpinBox::mouseMoveEvent(QMouseEvent* MouseEvent)
 
 		stepBy(mLastPosition.y() - Position.y());
 
-		QScreen* Screen = QGuiApplication::screenAt(Position);
+		QScreen* Screen = lcScreenAt(Position);
 
 		if (Screen)
 		{

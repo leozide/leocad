@@ -5,8 +5,8 @@
 
 #define QT_NO_DEPRECATED_WARNINGS
 #include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-typedef int qsizetype;
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+typedef qptrdiff qsizetype;
 #endif
 #include <QtWidgets>
 #include <QtConcurrent>

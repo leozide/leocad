@@ -23,7 +23,15 @@ qtHaveModule(gamepad) {
 }
 
 INCLUDEPATH += qt common
-CONFIG += precompile_header incremental c++17 force_debug_info
+CONFIG += precompile_header incremental force_debug_info
+
+equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 12) {
+	CONFIG += c++1z
+	win32-msvc*: QMAKE_CXXFLAGS += /std:c++17
+	else: QMAKE_CXXFLAGS += -std=c++17
+} else {
+	CONFIG += c++17
+}
 
 win32 {
 	DEFINES += NOMINMAX

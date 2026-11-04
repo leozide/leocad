@@ -1,7 +1,14 @@
 TEMPLATE = app
 TARGET = leocad_tests
 
-CONFIG += console testcase c++17
+CONFIG += console testcase
+equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 12) {
+	CONFIG += c++1z
+	win32-msvc*: QMAKE_CXXFLAGS += /std:c++17
+	else: QMAKE_CXXFLAGS += -std=c++17
+} else {
+	CONFIG += c++17
+}
 CONFIG -= app_bundle
 
 QT += concurrent opengl printsupport testlib widgets

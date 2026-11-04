@@ -65,7 +65,11 @@ public:
 
 	int GetRefCount() const
 	{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
 		return mRefCount.loadRelaxed();
+#else
+		return mRefCount.load();
+#endif
 	}
 
 	void SetTemporary(bool Temporary)

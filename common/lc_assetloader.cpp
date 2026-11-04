@@ -36,7 +36,11 @@ void lcAssetLoader::RequestPieceLoad(lcPieceData* PieceData, lcLoadPriority Load
 
 	if (Existing != mPieceRequests.end())
 	{
-		PromotePiecePriority(Existing->second, LoadPriority);
+		if (Existing->second->LoadPriority < LoadPriority)
+		{
+			PromotePiecePriority(Existing->second, LoadPriority);
+			DispatchJobs();
+		}
 
 		return;
 	}
@@ -115,7 +119,11 @@ void lcAssetLoader::RequestTextureLoad(lcTexture* Texture, lcFileSource Source, 
 	if (Existing != mTextureRequests.end())
 	{
 		if (Existing->second->LoadPriority < LoadPriority)
+		{
 			Existing->second->LoadPriority = LoadPriority;
+			DispatchJobs();
+		}
+
 		return;
 	}
 
@@ -142,92 +150,133 @@ void lcAssetLoader::DispatchJobs()
 		return Future.isFinished();
 	}), mFutures.end());
 
+	const qint64 Now = QDateTime::currentMSecsSinceEpoch();
+
+	const auto Score = [Now](const auto& Item)
+	{
+		// Each ten seconds of waiting promotes one priority level.
+		return qMin<qint64>(static_cast<qint64>(lcLoadPriority::Blocking),
+			static_cast<qint64>(Item->LoadPriority) + qMax<qint64>(0, Now - Item->QueuedAt) / 10000);
+	};
+
+	// Workers only take prepared jobs under this mutex; request state remains UI-owned.
+	QMutexLocker CompletionLock(&mCompletionMutex);
+
+	for (auto It = mBuildQueue.begin(); It != mBuildQueue.end();)
+	{
+		RequestBase* Request = GetJobRequest(*It);
+
+		if (mStopping || Request->State == RequestState::Cancelled)
+		{
+			Request->State = RequestState::Cancelled;
+			mCompletions.push_back(std::move(*It));
+			It = mBuildQueue.erase(It);
+		}
+		else if (mPaused)
+		{
+			Request->State = RequestState::Queued;
+			mOutstandingJobs--;
+			It = mBuildQueue.erase(It);
+		}
+		else
+			++It;
+	}
+
 	if (mPaused || mStopping)
 		return;
 
-	const int MaxJobs = qMax(1, QThread::idealThreadCount() / 2);
-
-	while (mActiveJobs < MaxJobs)
+	const auto PrepareRequests = [this](const auto& Requests, auto RequestMember)
 	{
-		const qint64 Now = QDateTime::currentMSecsSinceEpoch();
-
-		const auto Score = [Now](const auto& Item)
+		for (const auto& [Key, Request] : Requests)
 		{
-			// Each ten seconds of waiting promotes one priority level.
-			return qMin<qint64>(static_cast<qint64>(lcLoadPriority::Blocking),
-				static_cast<qint64>(Item->LoadPriority) + qMax<qint64>(0, Now - Item->QueuedAt) / 10000);
-		};
+			if (Request->State != RequestState::Queued)
+				continue;
 
-		const auto Less = [&Score](const auto& Left, const auto& Right)
-		{
-			return Score(Left) < Score(Right) || (Score(Left) == Score(Right) && Left->QueuedAt > Right->QueuedAt);
-		};
-
-		const auto BestQueued = [&Less](const auto& Requests)
-		{
-			typename std::decay_t<decltype(Requests)>::mapped_type Best;
-
-			for (const auto& [Key, Request] : Requests)
-				if (Request->State == RequestState::Queued && (!Best || Less(Best, Request)))
-					Best = Request;
-
-			return Best;
-		};
-
-		std::shared_ptr<PieceRequest> RequestedPiece = BestQueued(mPieceRequests);
-		std::shared_ptr<TextureRequest> RequestedTexture = BestQueued(mTextureRequests);
-		std::shared_ptr<SynthRequest> RequestedSynth = BestQueued(mSynthRequests);
-
-		if (RequestedTexture && (!RequestedPiece || !Less(RequestedTexture, RequestedPiece)) &&
-			(!RequestedSynth || !Less(RequestedTexture, RequestedSynth)))
-		{
-			RequestedPiece.reset();
-			RequestedSynth.reset();
-			RequestedTexture->State = RequestState::AwaitingCompletion;
+			Completion Job;
+			Job.*RequestMember = Request;
+			mBuildQueue.push_back(std::move(Job));
+			Request->State = RequestState::AwaitingCompletion;
+			mOutstandingJobs++;
 		}
-		else if (RequestedSynth && (!RequestedPiece || !Less(RequestedSynth, RequestedPiece)))
-		{
-			RequestedPiece.reset();
-			RequestedTexture.reset();
-			RequestedSynth->State = RequestState::AwaitingCompletion;
-		}
-		else if (RequestedPiece)
-		{
-			RequestedTexture.reset();
-			RequestedSynth.reset();
-			RequestedPiece->State = RequestState::AwaitingCompletion;
-		}
-		else
-			break;
+	};
 
-		mActiveJobs++;
-		mFutures.emplace_back(QtConcurrent::run([this, RequestedPiece, RequestedTexture, RequestedSynth]()
+	PrepareRequests(mPieceRequests, &Completion::RequestedPiece);
+	PrepareRequests(mTextureRequests, &Completion::RequestedTexture);
+	PrepareRequests(mSynthRequests, &Completion::RequestedSynth);
+
+	const auto HigherPriority = [&Score](const Completion& Left, const Completion& Right)
+	{
+		const RequestBase* LeftRequest = GetJobRequest(Left);
+		const RequestBase* RightRequest = GetJobRequest(Right);
+
+		if (Score(LeftRequest) != Score(RightRequest))
+			return Score(LeftRequest) > Score(RightRequest);
+
+		if (LeftRequest->QueuedAt != RightRequest->QueuedAt)
+			return LeftRequest->QueuedAt < RightRequest->QueuedAt;
+
+		if (bool(Left.RequestedTexture) != bool(Right.RequestedTexture))
+			return bool(Left.RequestedTexture);
+
+		return bool(Left.RequestedSynth) && !Right.RequestedSynth;
+	};
+
+	if (!std::is_sorted(mBuildQueue.begin(), mBuildQueue.end(), HigherPriority))
+		std::stable_sort(mBuildQueue.begin(), mBuildQueue.end(), HigherPriority);
+
+	const int MaxWorkers = qMax(1, QThread::idealThreadCount() - 1);
+	const int AdditionalWorkers = qMin(MaxWorkers - mActiveWorkers, static_cast<int>(mBuildQueue.size()));
+
+	for (int Worker = 0; Worker < AdditionalWorkers; Worker++)
+	{
+		mActiveWorkers++;
+		mFutures.emplace_back(QtConcurrent::run([this]() { RunWorker(); }));
+	}
+}
+
+lcAssetLoader::RequestBase* lcAssetLoader::GetJobRequest(const Completion& Job)
+{
+	if (Job.RequestedPiece)
+		return Job.RequestedPiece.get();
+
+	if (Job.RequestedTexture)
+		return Job.RequestedTexture.get();
+
+	return Job.RequestedSynth.get();
+}
+
+void lcAssetLoader::RunWorker()
+{
+	for (;;)
+	{
+		Completion Completed;
+
+		mCompletionMutex.lock();
+
+		if (mBuildQueue.empty())
 		{
-			Completion Completed;
-
-			if (RequestedPiece)
-			{
-				Completed.RequestedPiece = RequestedPiece;
-				Completed.PieceResult = mLibrary->BuildPieceData(RequestedPiece->Source);
-			}
-			else if (RequestedTexture)
-			{
-				Completed.RequestedTexture = RequestedTexture;
-				Completed.TextureResult = mLibrary->BuildTextureData(RequestedTexture->Source);
-			}
-			else
-			{
-				Completed.RequestedSynth = RequestedSynth;
-				Completed.SynthMesh = RequestedSynth->SynthInfo->BuildMesh(RequestedSynth->ControlPoints, RequestedSynth->Cancelled);
-			}
-
-			mCompletionMutex.lock();
-			mCompletions.push_back(std::move(Completed));
-			mCompletionReady.wakeAll();
+			mActiveWorkers--;
 			mCompletionMutex.unlock();
+			return;
+		}
 
-			QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
-		}));
+		Completed = std::move(mBuildQueue.front());
+		mBuildQueue.pop_front();
+		mCompletionMutex.unlock();
+
+		if (Completed.RequestedPiece)
+			Completed.PieceResult = mLibrary->BuildPieceData(Completed.RequestedPiece->Source);
+		else if (Completed.RequestedTexture)
+			Completed.TextureResult = mLibrary->BuildTextureData(Completed.RequestedTexture->Source);
+		else
+			Completed.SynthMesh = Completed.RequestedSynth->SynthInfo->BuildMesh(Completed.RequestedSynth->ControlPoints, Completed.RequestedSynth->Cancelled);
+
+		mCompletionMutex.lock();
+		mCompletions.push_back(std::move(Completed));
+		mCompletionReady.wakeAll();
+		mCompletionMutex.unlock();
+
+		QCoreApplication::postEvent(this, new QEvent(lcAssetLoaderCompletionEvent));
 	}
 }
 
@@ -236,9 +285,11 @@ void lcAssetLoader::ProcessCompletions()
 	// Bounded UI-thread publication also runs during scoped waits, without public callbacks.
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	constexpr int MaxCompletionsPerPump = 16;
+	QElapsedTimer Timer;
+	Timer.start();
 
-	for (int Processed = 0; Processed < MaxCompletionsPerPump; Processed++)
+	// Always process one result, even if a single upload/publication exceeds the budget.
+	for (int Processed = 0; Processed == 0 || Timer.elapsed() < PublicationBudgetMs; Processed++)
 	{
 		Completion Completed;
 		std::shared_ptr<TextureRequest> Retry;
@@ -291,8 +342,8 @@ void lcAssetLoader::ProcessCompletions()
 			continue;
 		}
 
-		// The build has finished; texture dependencies and retries use no job slot.
-		mActiveJobs--;
+		// The result is consumed; texture dependencies and retries are no longer outstanding jobs.
+		mOutstandingJobs--;
 
 		if (Completed.RequestedTexture)
 			ProcessTextureCompletion(Completed);
@@ -689,9 +740,10 @@ void lcAssetLoader::DispatchNotifications()
 	// Event-handler delivery avoids reentering consumers inside a synchronous readiness wait.
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	constexpr int MaxNotificationsPerPump = 32;
+	QElapsedTimer Timer;
+	Timer.start();
 
-	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mPieceNotifications.empty(); Delivered++)
+	for (int Delivered = 0; !mPieceNotifications.empty() && (Delivered == 0 || Timer.elapsed() < PublicationBudgetMs); Delivered++)
 	{
 		const std::shared_ptr<PieceRequest> RequestedPiece = std::move(mPieceNotifications.front());
 
@@ -726,7 +778,7 @@ void lcAssetLoader::DispatchNotifications()
 
 	std::unordered_set<lcPieceData*> SettledSynths;
 
-	for (int Delivered = 0; Delivered < MaxNotificationsPerPump && !mSynthNotifications.empty(); Delivered++)
+	for (int Delivered = 0; !mSynthNotifications.empty() && (Delivered == 0 || Timer.elapsed() < PublicationBudgetMs); Delivered++)
 	{
 		SynthNotification Notification = std::move(mSynthNotifications.front());
 
@@ -942,7 +994,7 @@ void lcAssetLoader::WaitForAllWork()
 	{
 		ProcessCompletions();
 
-		if (mPieceRequests.empty() && mTextureRequests.empty() && mSynthRequests.empty() && mActiveJobs == 0)
+		if (!HasPendingWork())
 			break;
 
 		WaitForCompletionOrRetry();
@@ -958,7 +1010,7 @@ bool lcAssetLoader::HasPendingWork()
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
-	return !mPieceRequests.empty() || !mTextureRequests.empty() || !mSynthRequests.empty() || mActiveJobs != 0;
+	return !mPieceRequests.empty() || !mTextureRequests.empty() || !mSynthRequests.empty() || mOutstandingJobs != 0;
 }
 
 void lcAssetLoader::InvalidatePieceLoad(lcPieceData* PieceData)
@@ -984,8 +1036,24 @@ void lcAssetLoader::CancelPieceLoad(lcPieceData* PieceData)
 
 	const auto It = mPieceRequests.find(PieceData);
 
-	if (It == mPieceRequests.end() || It->second->State == RequestState::AwaitingCompletion)
+	if (It == mPieceRequests.end())
 		return;
+
+	if (It->second->State == RequestState::AwaitingCompletion)
+	{
+		QMutexLocker CompletionLock(&mCompletionMutex);
+		const auto Prepared = std::find_if(mBuildQueue.begin(), mBuildQueue.end(), [&It](const Completion& Job)
+		{
+			return Job.RequestedPiece == It->second;
+		});
+
+		if (Prepared == mBuildQueue.end())
+			return;
+
+		mBuildQueue.erase(Prepared);
+		mOutstandingJobs--;
+		It->second->State = RequestState::Queued;
+	}
 
 	mLibrary->PieceDataLoadCancelled(PieceData);
 
@@ -1083,7 +1151,7 @@ void lcAssetLoader::PauseQueuedWork()
 	{
 		ProcessCompletions();
 
-		if (mActiveJobs == 0)
+		if (mOutstandingJobs == 0)
 			break;
 
 		WaitForCompletionOrRetry();

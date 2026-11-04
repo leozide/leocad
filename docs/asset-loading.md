@@ -434,15 +434,18 @@ clears partial data on failure, so failed primitive builds cannot seed a later
 successful mesh with incomplete cached geometry.
 
 Workers post results and wake the loader's completion event. `ProcessCompletions()`
-processes at most 16 completions per pump, including texture retries. Publication
+uses a 4 ms budget per pump, including texture retries, and always processes at least
+one item. An individual publication or upload is not preempted. Publication
 and rendering remain sequential on the UI thread. `DispatchNotifications()`
 later delivers `PartLoaded`, `PartLoadFailed`, and `GeneratedMeshSettled`, with
-bounded batches and stale-target checks. Synchronous waits drive completion
+time-budgeted batches and stale-target checks. Synchronous waits drive completion
 processing but defer these public settlement notifications to the event handler;
 they do not run an unrestricted nested UI event loop. `AssetStatusChanged`
 also signals request-list or consumer changes and is not a success notification.
 
-The main window coalesces updates, propagates affected bounds, and redraws views.
+The main window coalesces pending changes into one update on the next event-loop turn. The update propagates bounds
+and redraws views. Blocking readiness waits publish assets synchronously and defer
+public callbacks; they do not depend on this timer or run a nested UI event loop.
 Its loading indicator counts the active project's requirements, including
 generated meshes; unrelated work does not keep that indicator visible. Mesh
 publication schedules a debounced shared-buffer repack after loader work becomes
@@ -563,12 +566,18 @@ promotion received from any parent or direct wait. There is no consumer identity
 map, priority demotion, or step-based scheduling. Priority lasts until that request
 completes or is cancelled, not merely until the requesting view closes.
 
-The UI thread limits outstanding QtConcurrent jobs to half the reported hardware
-thread count, with a minimum of one and no fixed upper cap. A job slot is released
-when the UI consumes its worker completion, before resolving texture dependencies.
-Meshes waiting for textures and texture upload retries occupy no job slot. Request
-maps, priorities, lifecycle states, and job counts belong to the UI thread; only
-completion handoff uses the loader mutex. Running work is nonpreemptive. Queued
+The UI thread prepares queued jobs for QtConcurrent drain workers. The worker
+limit is `max(1, reported hardware threads - 1)`, with no fixed upper cap.
+A worker takes another prepared job without waiting for UI
+publication. Completed results have no count or byte limit, so workers can finish
+all prepared builds while the UI is busy.
+The UI sorts prepared jobs by priority and age on dispatch so new requests and
+priority promotions can overtake work that has not started. Pause withdraws prepared jobs before draining
+running builds; shutdown discards prepared jobs through the normal stale-result path.
+Meshes waiting for textures and texture upload retries occupy no worker slot. Request
+maps, priorities, lifecycle states, and outstanding-job counts belong to the UI thread;
+the loader mutex protects prepared jobs, completed results, and active
+worker counts. Running work is nonpreemptive. Queued
 work gains one scheduling priority level per ten seconds of waiting, capped at
 Blocking, with oldest work winning ties. Completion processing uses promoted
 priorities. Acquiring a pending asset
@@ -766,9 +775,10 @@ suite.
 - Keep workers on copied source/settings/control-point data and private results.
   Published meshes, texture pointers, global color registration, GL upload,
   model mutations, and consumer notifications belong on the UI thread.
-- Keep scheduling decisions and request state on the UI thread. Protect completion
-  handoff with the completion mutex; release it before publication, GL upload, or
-  settlement callbacks. Check for a completion and sleep under the same mutex to
+- Keep request selection, priorities, and lifecycle state on the UI thread. Workers
+  take prepared jobs under the completion mutex without reading mutable request state.
+  Protect queues and worker counts with that mutex; release it
+  before publication, GL upload, or settlement callbacks. Check for a completion and sleep under the same mutex to
   avoid lost wakeups. Do not hold library locks needed by workers while draining.
 - Preserve in-flight holds through stale-result disposal and deferred notification.
   Validate request identity and cancellation before publishing; deleting an owner must

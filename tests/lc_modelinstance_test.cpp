@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_application.h"
+#include "lc_assetloader.h"
 #include "lc_blenderpreferences.h"
 #include "lc_commandline.h"
 #include "lc_colors.h"
@@ -71,6 +72,9 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void AssetLoaderIndependentBuilds();
+	void AssetLoaderCancelPreparedBuild();
+	void AssetUpdateThrottle();
 	void ArchiveSubpartPrecedence();
 	void LgeoLongColorTokens();
 	void ZipExtractionIntegrity_data();
@@ -549,6 +553,169 @@ void lcModelInstanceTests::TexmapFallbackBranches()
 	Build(Start + Triangle + Fallback + End + Nested + Triangle + End, { "MISSING" }, true, true, 21);
 	Build("0 !TEXMAP NEXT PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n" + Triangle + Triangle, {}, true, true, 1);
 	Build("0 !TEXMAP NEXT PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n" + Triangle, { "MISSING" }, false, false, 0);
+}
+
+void lcModelInstanceTests::AssetLoaderIndependentBuilds()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	for (int Index = 0; Index < 200; Index++)
+	{
+		QFile File(Directory.filePath(QString("parts/backlog%1.dat").arg(Index)));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QVERIFY(File.write("0 Backlog test\n3 16 0 0 0 1 0 0 0 1 0\n") > 0);
+	}
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QVERIFY(Library->Load(Directory.path(), false, false));
+	std::vector<lcPieceDataRef> Pieces;
+
+	for (int Index = 0; Index < 200; Index++)
+		Pieces.push_back(Library->AcquirePieceData(QString("backlog%1.dat").arg(Index).toLatin1().constData(), nullptr, lcAcquirePieceDataFlag::None));
+
+	// Exercise the loader through its public scheduling and readiness interfaces.
+	lcAssetLoader Loader(Library);
+	qRegisterMetaType<lcPieceData*>("lcPieceData*");
+	QSignalSpy Loaded(Library, &lcPiecesLibrary::PartLoaded);
+
+	for (const lcPieceDataRef& Piece : Pieces)
+	{
+		QVERIFY(Piece);
+		Piece->mState = lcAssetState::Loading;
+		Loader.RequestPieceLoad(Piece.Get(), lcLoadPriority::Normal);
+	}
+
+	// Joining the pool does not pump UI events. Once workers finish, hide their sources:
+	// readiness can succeed only if every queued build already produced its private result.
+	QVERIFY(QThreadPool::globalInstance()->waitForDone(10000));
+	QCOMPARE(Loaded.count(), 0);
+	QDir Root(Directory.path());
+	QVERIFY(Root.rename("parts", "built-parts"));
+
+	// Pause consumes worker results without public callbacks.
+	Loader.PauseQueuedWork();
+	Loader.ResumeQueuedWork();
+	std::vector<lcPieceData*> Required;
+	for (const lcPieceDataRef& Piece : Pieces)
+		Required.push_back(Piece.Get());
+	QVERIFY(Loader.WaitForPieces(Required));
+	QVERIFY(!Loader.HasPendingWork());
+	QCOMPARE(Loaded.count(), 0); // Scoped waits defer public callbacks.
+	for (const lcPieceDataRef& Piece : Pieces)
+		QCOMPARE(Piece->mState, lcAssetState::Loaded);
+
+	QVERIFY(Root.rename("built-parts", "parts"));
+	QTRY_COMPARE(Loaded.count(), 200);
+
+	// Teardown must also drain outstanding results and discard prepared/cancelled jobs.
+	{
+		lcAssetLoader CancelledLoader(Library);
+		for (const lcPieceDataRef& Piece : Pieces)
+		{
+			Piece->mState = lcAssetState::Loading;
+			CancelledLoader.RequestPieceLoad(Piece.Get(), lcLoadPriority::Normal);
+		}
+		CancelledLoader.InvalidatePieceLoad(Pieces.front().Get());
+	}
+	QCOMPARE(Loaded.count(), 200);
+}
+
+void lcModelInstanceTests::AssetLoaderCancelPreparedBuild()
+{
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+	QFile File(Directory.filePath("parts/cancel.dat"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Cancellation test\n3 16 0 0 0 1 0 0 0 1 0\n");
+	File.close();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QVERIFY(Library->Load(Directory.path(), false, false));
+
+	// Keep prepared jobs in the queue so releasing a consumer cannot race a build.
+	struct BlockPool
+	{
+		QThreadPool* Pool = QThreadPool::globalInstance();
+		int PreviousMaximum = Pool->maxThreadCount();
+		QSemaphore Started;
+		QSemaphore Release;
+		QFuture<void> Future;
+		BlockPool()
+		{
+			Pool->setMaxThreadCount(1);
+			Future = QtConcurrent::run([this]() { Started.release(); Release.acquire(); });
+			Started.acquire();
+		}
+		~BlockPool()
+		{
+			Release.release();
+			Pool->waitForDone();
+			Pool->setMaxThreadCount(PreviousMaximum);
+		}
+	} Blocker;
+
+	lcPieceDataRef Piece = Library->AcquirePieceData("cancel.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Piece);
+	Library->RequestPieceDataLoad(Piece.Get(), lcLoadPriority::Normal);
+	QCOMPARE(Piece->mState, lcAssetState::Loading);
+	Piece.Reset();
+	Piece = Library->AcquirePieceData("cancel.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Piece);
+	QCOMPARE(Piece->mState, lcAssetState::Unloaded);
+}
+
+void lcModelInstanceTests::AssetUpdateThrottle()
+{
+	class TestWindow : public lcMainWindow
+	{
+	public:
+		using lcMainWindow::CreateStatusBar;
+		using lcMainWindow::mAssetUpdateScheduled;
+	};
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		ScopedProject() { gApplication->mProject = nullptr; }
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+		}
+	} Scope;
+	TestWindow Window;
+	Window.CreateStatusBar();
+	QTemporaryDir Directory;
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+	QFile File(Directory.filePath("parts/throttle.dat"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Throttle test\n3 16 0 0 0 1 0 0 0 1 0\n");
+	File.close();
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QVERIFY(Library->Load(Directory.path(), false, false));
+	lcPieceDataRef Piece = Library->AcquirePieceData("throttle.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Piece);
+	Library->RequestPieceDataLoad(Piece.Get(), lcLoadPriority::Normal);
+	QVERIFY(Window.mAssetUpdateScheduled);
+	QSignalSpy Loaded(Library, &lcPiecesLibrary::PartLoaded);
+	Window.ScheduleAssetUpdate();
+
+	// Blocking readiness publishes the mesh without waiting for the UI timer or callbacks.
+	QVERIFY(Library->WaitForPieceData(Piece));
+	QCOMPARE(Piece->mState, lcAssetState::Loaded);
+	QVERIFY(Piece->GetMesh());
+	QCOMPARE(Loaded.count(), 0);
+	QVERIFY(Window.mAssetUpdateScheduled);
+	QCoreApplication::sendPostedEvents(nullptr, QEvent::User + 1);
+	QCOMPARE(Loaded.count(), 1);
+	QVERIFY(Window.mAssetUpdateScheduled); // Settlement uses the same pending update.
+	QTRY_VERIFY(!Window.mAssetUpdateScheduled);
+
 }
 
 void lcModelInstanceTests::TexmapFallbackLoading()

@@ -177,3 +177,11 @@ TEXMAP checks cover preferred/fallback branch selection, nested scopes, NEXT,
 missing and corrupt textures, exhausted upload retries, and cached primitive
 includes while preserving the shared textured geometry. Include checks also
 reject cycles through nested TEXMAP blocks and allow repeated sibling includes.
+
+Asset-loader checks join workers without processing UI events, then hide the part
+sources to verify that every queued build has completed before publication. They
+also exercise pause/resume, cancellation, shutdown, and deferred settlement through
+public loader interfaces.
+Consumer-release checks hold workers busy to verify cancellation of prepared jobs.
+Main-window checks verify update coalescing and synchronous readiness
+independent of the UI timer and deferred notifications.

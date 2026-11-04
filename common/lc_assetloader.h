@@ -61,11 +61,13 @@ public:
 	void ResumeQueuedWork();
 
 private:
+	static constexpr qint64 PublicationBudgetMs = 4;
+
 	// UI-thread request lifecycle; synth workers use a separate cooperative cancellation token.
 	enum class RequestState
 	{
 		Queued,
-		AwaitingCompletion, // A worker job or its completion is outstanding.
+		AwaitingCompletion, // A prepared/running job or its completion is outstanding.
 		AwaitingPublication, // UI-thread completion, texture dependencies, or upload retries.
 		Succeeded,
 		Failed,
@@ -145,10 +147,12 @@ private:
 	// Promote requests on the UI thread.
 	void PromotePiecePriority(const std::shared_ptr<PieceRequest>& RequestedPiece, lcLoadPriority LoadPriority);
 
-	// Fill available job slots using queued request priority and age.
+	// Prepare queued jobs using request priority/age and start drain workers.
 	void DispatchJobs();
+	void RunWorker();
+	static RequestBase* GetJobRequest(const Completion& Job);
 
-	// Process a bounded batch of results and upload retries, then start more jobs.
+	// Process results and upload retries within a time budget, then prepare more jobs.
 	// Consumer signals remain deferred.
 	void ProcessCompletions();
 
@@ -198,9 +202,9 @@ private:
 	TextureRequestMap mTextureRequests;
 	SynthRequestMap mSynthRequests;
 
-	// UI-thread job bookkeeping; futures may include finished jobs awaiting cleanup.
+	// UI-thread job bookkeeping; includes prepared jobs and unconsumed results.
 	std::vector<QFuture<void>> mFutures;
-	int mActiveJobs = 0; // Includes completed jobs until the UI consumes their results.
+	int mOutstandingJobs = 0;
 
 	// Temporarily suspend dispatch while shared library data changes.
 	bool mPaused = false;
@@ -208,11 +212,13 @@ private:
 	// Permanently stop accepting work and discard results during shutdown.
 	bool mStopping = false;
 
-	// Worker-to-UI result handoff; the mutex protects the completion queue.
+	// The mutex protects prepared jobs, completion handoff and worker counts.
 	// Workers wake synchronous UI waits when they enqueue a completion.
 	QMutex mCompletionMutex;
 	QWaitCondition mCompletionReady;
+	std::deque<Completion> mBuildQueue;
 	std::deque<Completion> mCompletions;
+	int mActiveWorkers = 0;
 
 	// UI-thread only; public signals are deferred until outside synchronous waits.
 	// Retains each request and its definition reference through notification delivery.

@@ -105,7 +105,11 @@ void lcViewSphere::CreateResources(lcContext* Context)
 		// The shader displays the middle 80% of each cell. Leave six pixels
 		// on either side for the SDF halo, including for translated labels.
 		constexpr int MaxLabelWidth = 90;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 		while (LabelFont.pointSize() > 1 && QFontMetrics(LabelFont).horizontalAdvance(ViewNames[ViewIdx]) > MaxLabelWidth)
+#else
+		while (LabelFont.pointSize() > 1 && QFontMetrics(LabelFont).width(ViewNames[ViewIdx]) > MaxLabelWidth)
+#endif
 			LabelFont.setPointSize(LabelFont.pointSize() - 1);
 
 		Painter.begin(&PainterImage);

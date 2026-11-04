@@ -43,7 +43,11 @@ bool TexFont::Initialize(lcContext* Context)
 	int GlyphIndex = 0;
 	for (const unsigned char Glyph : GlyphData)
 	{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
 		const int Advance = Metrics.horizontalAdvance(QChar(Glyph));
+#else
+		const int Advance = Metrics.width(QChar(Glyph));
+#endif
 		const int TileX = (GlyphIndex % 10) * TileWidth;
 		const int TileY = (GlyphIndex / 10) * TileHeight;
 		const int MaskWidth = lcMin(TileWidth, Advance + Padding * 2);

@@ -26,7 +26,7 @@ jobs:
     - name: Build with legacy Qt 5
       run: |
         qmake PREFIX=/usr
-        make -j2
+        make -k -j2
 
   build-ubuntu:
     runs-on: ubuntu-latest

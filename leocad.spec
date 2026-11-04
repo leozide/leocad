@@ -46,7 +46,7 @@ BuildRoot: %{_builddir}/%{name}
 %if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version} || 0%{?scientificlinux_version}
 %if ( 0%{?centos_version}>=600 || 0%{?rhel_version}>=600 || 0%{?scientificlinux_version}>=600 )
 %if 0%{?qt5}
-BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist
+BuildRequires: qt5-qtbase-devel >= 5.9.0, qt5-linguist
 %else
 BuildRequires: qt-devel >= 1:4.7.0
 %endif
@@ -54,7 +54,7 @@ BuildRequires: qt-devel >= 1:4.7.0
 %endif
 %if 0%{?fedora}
 %if 0%{?qt5}
-BuildRequires: qt5-qtbase-devel >= 5.4.0, qt5-linguist, qt5-qtgamepad-devel
+BuildRequires: qt5-qtbase-devel >= 5.9.0, qt5-linguist, qt5-qtgamepad-devel
 %else
 BuildRequires: qt-devel
 %endif
@@ -85,7 +85,7 @@ BuildRequires: qca, gnu-free-sans-fonts
 %if 0%{?suse_version}
 BuildRequires: update-desktop-files
 %if 0%{?qt5}
-BuildRequires: libqt5-qtbase-devel >= 5.4.0, zlib-devel, libqt5-linguist
+BuildRequires: libqt5-qtbase-devel >= 5.9.0, zlib-devel, libqt5-linguist
 %else
 BuildRequires: libqt4-devel
 %endif

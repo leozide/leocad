@@ -902,11 +902,7 @@ void lcPartSelectionListView::UpdateIconSize()
 	const int Size = gSupportsFramebufferObject ? mRequestedIconSize : NoIconSize;
 	setIconSize(QSize(Size, Size));
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 	float DeviceScale = devicePixelRatioF();
-#else
-	float DeviceScale = devicePixelRatio();
-#endif
 
 	mListModel->SetIconSize(Size, DeviceScale);
 	UpdateViewMode();

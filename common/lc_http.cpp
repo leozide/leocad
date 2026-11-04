@@ -86,11 +86,7 @@ lcHttpReply* lcHttpManager::lcHttpManager::DownloadFile(const QString& Url)
 	QNetworkRequest Request = QNetworkRequest(QUrl(Url));
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0)) // default changed in Qt6
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 9, 0))
 	Request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-#elif (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
-	Request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#endif
 #endif
 
 	return (lcHttpReply*)get(Request);

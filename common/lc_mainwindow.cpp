@@ -51,11 +51,9 @@ lcMainWindow::lcMainWindow()
 	for (size_t FileIndex = 0; FileIndex < mRecentFiles.size(); FileIndex++)
 		mRecentFiles[FileIndex] = lcGetProfileString((LC_PROFILE_KEY)(LC_PROFILE_RECENT_FILE1 + FileIndex));
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	connect(&mGamepadTimer, &QTimer::timeout, this, &lcMainWindow::UpdateGamepads);
 	mLastGamepadUpdate = QDateTime::currentDateTime();
 	mGamepadTimer.start(33);
-#endif
 
 	gMainWindow = this;
 }

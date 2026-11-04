@@ -3,11 +3,11 @@ QT *= printsupport
 TEMPLATE = app
 
 lessThan(QT_MAJOR_VERSION, 5) {
-	error("LeoCAD requires Qt5.4 or later.")
+	error("LeoCAD requires Qt 5.9 or later.")
 }
 
-equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 4) {
-	error("LeoCAD requires Qt5.4 or later.")
+equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 9) {
+	error("LeoCAD requires Qt 5.9 or later.")
 }
 
 greaterThan(QT_MAJOR_VERSION, 5) {

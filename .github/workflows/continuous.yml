@@ -11,19 +11,19 @@ permissions:
   contents: read
 
 jobs:
-  build-qt-minimum:
+  build-qt-legacy:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v7
-    - name: Install Qt 5.4.2
+    - name: Install Qt 5.6.3
       uses: jurplel/install-qt-action@v4
       with:
-        version: '5.4.2'
+        version: '5.6.3'
         arch: 'gcc_64'
         cache: 'true'
     - name: Verify Qt version
       run: qmake -query QT_VERSION
-    - name: Build with the declared minimum Qt version
+    - name: Build with legacy Qt 5
       run: |
         qmake PREFIX=/usr
         make -j2

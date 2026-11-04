@@ -11,6 +11,23 @@ permissions:
   contents: read
 
 jobs:
+  build-qt-minimum:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install Qt 5.4.2
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '5.4.2'
+        arch: 'gcc_64'
+        cache: 'true'
+    - name: Verify Qt version
+      run: qmake -query QT_VERSION
+    - name: Build with the declared minimum Qt version
+      run: |
+        qmake PREFIX=/usr
+        make -j2
+
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:

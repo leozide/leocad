@@ -3343,62 +3343,62 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_PIECE_MOVE_PLUSX:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSX:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetMoveXYSnap(), 0.1f), 0.0f, 0.0f), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_PLUSY:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetMoveXYSnap(), 0.1f), 0.0f), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSY:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetMoveXYSnap(), 0.1f), 0.0f), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_PLUSZ:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f))), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetMoveZSnap(), 0.1f)), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_MOVE_MINUSZ:
 		if (ActiveModel)
-			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f))), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
+			ActiveModel->MoveSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetMoveZSnap(), 0.1f)), true), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove, lcModelHistoryEditMerge::KeyboardMove);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSX:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(-lcMax(GetAngleSnap(), 1.0f), 0.0f, 0.0f), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, lcMax(GetAngleSnap(), 1.0f), 0.0f), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSY:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f)), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, -lcMax(GetAngleSnap(), 1.0f), 0.0f), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_PLUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f))), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, lcMax(GetAngleSnap(), 1.0f)), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_ROTATE_MINUSZ:
 		if (ActiveModel)
-			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f))), lcModelTransformFlag::Relative | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
+			ActiveModel->RotateSelectedObjects(ActiveView->GetMoveDirection(lcVector3(0.0f, 0.0f, -lcMax(GetAngleSnap(), 1.0f)), false), (lcGetPreferences().mFixedAxes ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | lcModelTransformFlag::Checkpoint, lcModelHistoryEditMerge::KeyboardRotate);
 		break;
 
 	case LC_PIECE_MINIFIG_WIZARD:

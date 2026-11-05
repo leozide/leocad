@@ -301,7 +301,7 @@ public:
 
 	float GetUIScale() const;
 	float GetOverlayScale() const;
-	lcVector3 GetMoveDirection(const lcVector3& Direction) const;
+	lcVector3 GetMoveDirection(const lcVector3& Direction, bool Relative) const;
 	void UpdatePiecePreview();
 	bool ShouldDrawInsertPreview() const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform) const;

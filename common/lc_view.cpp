@@ -551,18 +551,18 @@ void lcView::ShowFindReplaceWidget(bool Replace)
 	mWidget->SetFindReplaceWidget(mFindWidget);
 }
 
-lcVector3 lcView::GetMoveDirection(const lcVector3& Direction) const
+lcVector3 lcView::GetMoveDirection(const lcVector3& Direction, bool Relative) const
 {
 	if (lcGetPreferences().mFixedAxes)
 		return Direction;
 
-	// Match the axes used by MoveSelectedObjects/RotateSelectedObjects before
-	// projecting them, so relative transforms do not rotate the mapping again.
-	lcMatrix33 LocalToWorld = GetActiveModel()->GetRelativeRotation();
+	// Match the transform frame before projecting the axes. Camera-relative
+	// keyboard rotations use model axes so turning a piece cannot remap the keys.
+	lcMatrix33 LocalToWorld = Relative ? GetActiveModel()->GetRelativeRotation() : lcMatrix33Identity();
 
 	// Separate transforms always use each piece's axes. Use the focused piece
 	// as the reference for the shared keyboard direction.
-	if (gMainWindow->GetSeparateTransform())
+	if (Relative && gMainWindow->GetSeparateTransform())
 	{
 		lcObject* Focus = GetActiveModel()->GetFocusObject();
 

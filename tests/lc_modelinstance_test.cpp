@@ -112,6 +112,8 @@ private slots:
 	void TrainTrackSideViewDrag();
 	void TrainTrackDragSleepers_data();
 	void TrainTrackDragSleepers();
+	void KeyboardRotationAxes_data();
+	void KeyboardRotationAxes();
 	void RotateToolMouseShortcuts_data();
 	void RotateToolMouseShortcuts();
 	void RepeatedInstances();
@@ -2800,6 +2802,98 @@ void lcModelInstanceTests::AxisAlignedRotationTolerance()
 	for (int Row = 0; Row < 3; Row++)
 		for (int Column = 0; Column < 3; Column++)
 			QCOMPARE(Invalid[Row][Column], Original[Row][Column]);
+}
+
+void lcModelInstanceTests::KeyboardRotationAxes_data()
+{
+	QTest::addColumn<int>("Axis");
+	QTest::addColumn<int>("Sign");
+	QTest::addColumn<bool>("Fixed");
+	QTest::addColumn<bool>("Relative");
+	QTest::addColumn<bool>("Separate");
+
+	for (int Axis = 0; Axis < 3; Axis++)
+		for (int Sign : { -1, 1 })
+			for (bool Fixed : { false, true })
+				for (bool Relative : { false, true })
+					for (bool Separate : { false, true })
+						QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5").arg(Axis).arg(Sign).arg(Fixed).arg(Relative).arg(Separate))) << Axis << Sign << Fixed << Relative << Separate;
+}
+
+void lcModelInstanceTests::KeyboardRotationAxes()
+{
+	QFETCH(int, Axis);
+	QFETCH(int, Sign);
+	QFETCH(bool, Fixed);
+	QFETCH(bool, Relative);
+	QFETCH(bool, Separate);
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QFile File(Directory.filePath("rotate.ldr"));
+	QVERIFY(File.open(QIODevice::WriteOnly));
+	File.write("0 Keyboard rotation\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 alpha.dat\n");
+	File.close();
+
+	struct ScopedProject
+	{
+		Project* Previous = gApplication->mProject;
+		lcMainWindow* PreviousWindow = gMainWindow;
+		bool PreviousFixed = lcGetPreferences().mFixedAxes;
+		Project Current;
+		ScopedProject()
+		{
+			gApplication->mProject = &Current;
+		}
+		~ScopedProject()
+		{
+			gApplication->mProject = Previous;
+			gMainWindow = PreviousWindow;
+			lcGetPreferences().mFixedAxes = PreviousFixed;
+		}
+	} Scope;
+	QVERIFY(Scope.Current.Load(File.fileName()));
+	lcModel* Model = Scope.Current.GetMainModel();
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	Window.SetRelativeTransform(Relative);
+	Window.SetSeparateTransform(Separate);
+	Window.SetAngleSnapEnabled(true);
+	lcGetPreferences().mFixedAxes = Fixed;
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(400, -500, 300), lcVector3(0, 0, 0), lcVector3(0, 0, 1));
+	View->SetCamera(&Camera, true);
+	lcPiece* Piece = Model->GetPieces()[0].get();
+	const lcMatrix33 Initial = lcMul(lcMatrix33RotationX(LC_PI / 2), lcMatrix33RotationZ(LC_PI / 6));
+	Piece->Initialize(lcMatrix44(Initial, lcVector3(0, 0, 0)), 1);
+	Model->SetSelectionAndFocusAction({ Piece }, Piece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+
+	lcVector3 Input(0, 0, 0);
+	Input[Axis] = Sign * Window.GetAngleSnap();
+	// Capture the camera mapping before rotating; it must remain stable for
+	// every command, even when the piece's local axes turn past the camera.
+	const lcVector3 Angles = View->GetMoveDirection(Input, false);
+	const lcMatrix33 Delta = lcMul(lcMul(lcMatrix33RotationX(Angles.x * LC_DTOR), lcMatrix33RotationY(Angles.y * LC_DTOR)), lcMatrix33RotationZ(Angles.z * LC_DTOR));
+	const lcCommandId Commands[3][2] =
+	{
+		{ LC_PIECE_ROTATE_MINUSX, LC_PIECE_ROTATE_PLUSX },
+		{ LC_PIECE_ROTATE_MINUSY, LC_PIECE_ROTATE_PLUSY },
+		{ LC_PIECE_ROTATE_MINUSZ, LC_PIECE_ROTATE_PLUSZ }
+	};
+	lcMatrix33 Expected = Initial;
+
+	for (int Turn = 0; Turn < 24; Turn++)
+	{
+		Window.HandleCommand(Commands[Axis][Sign > 0 ? 1 : 0]);
+		Expected = Fixed && (Relative || Separate) ? lcMul(Delta, Expected) : lcMul(Expected, Delta);
+
+		for (int Row = 0; Row < 3; Row++)
+			for (int Column = 0; Column < 3; Column++)
+				QVERIFY(fabsf(Piece->mModelWorld[Row][Column] - Expected[Row][Column]) < 0.001f);
+	}
 }
 
 void lcModelInstanceTests::RotateToolMouseShortcuts_data()

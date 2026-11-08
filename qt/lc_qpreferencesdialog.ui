@@ -1600,6 +1600,138 @@
          </layout>
         </widget>
        </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QGroupBox" name="AxisColorsGroup">
+         <property name="title">
+          <string>Axes</string>
+         </property>
+         <layout class="QHBoxLayout" name="AxisColorsLayout">
+          <item>
+           <widget class="QLabel" name="AxisXColorLabel">
+            <property name="toolTip">
+             <string>Choose the X axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="buddy">
+             <cstring>AxisXColorButton</cstring>
+            </property>
+            <property name="text">
+             <string>X:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="AxisXColorButton">
+            <property name="accessibleName">
+             <string>X Axis Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the X axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="AxisXSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="AxisYColorLabel">
+            <property name="toolTip">
+             <string>Choose the Y axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="buddy">
+             <cstring>AxisYColorButton</cstring>
+            </property>
+            <property name="text">
+             <string>Y:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="AxisYColorButton">
+            <property name="accessibleName">
+             <string>Y Axis Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the Y axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="AxisYSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="AxisZColorLabel">
+            <property name="toolTip">
+             <string>Choose the Z axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="buddy">
+             <cstring>AxisZColorButton</cstring>
+            </property>
+            <property name="text">
+             <string>Z:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="AxisZColorButton">
+            <property name="accessibleName">
+             <string>Z Axis Color</string>
+            </property>
+            <property name="toolTip">
+             <string>Choose the Z axis color used by the axis icon, grid origin lines and transform handles.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="AxisZSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item row="6" column="0">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
@@ -2777,6 +2909,9 @@
   <tabstop>ViewSphereColorButton</tabstop>
   <tabstop>ViewSphereTextColorButton</tabstop>
   <tabstop>ViewSphereHighlightColorButton</tabstop>
+  <tabstop>AxisXColorButton</tabstop>
+  <tabstop>AxisYColorButton</tabstop>
+  <tabstop>AxisZColorButton</tabstop>
   <tabstop>categoriesTree</tabstop>
   <tabstop>partsTree</tabstop>
   <tabstop>importCategories</tabstop>

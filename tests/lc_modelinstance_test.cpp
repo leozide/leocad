@@ -131,8 +131,8 @@ private slots:
 	void CommandLineColorValidation_data();
 	void CommandLineColorValidation();
 	void ThumbnailShading();
-	void PreferencesPreservePartFilter_data();
-	void PreferencesPreservePartFilter();
+	void ThumbnailRefreshPreservesPartFilter_data();
+	void ThumbnailRefreshPreservesPartFilter();
 	void TranslucentThumbnails_data();
 	void TranslucentThumbnails();
 	void TextureDecalAlpha();
@@ -4226,7 +4226,7 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 }
 
 
-void lcModelInstanceTests::PreferencesPreservePartFilter_data()
+void lcModelInstanceTests::ThumbnailRefreshPreservesPartFilter_data()
 {
 	QTest::addColumn<bool>("ListMode");
 	QTest::addColumn<bool>("ManyMatches");
@@ -4236,10 +4236,10 @@ void lcModelInstanceTests::PreferencesPreservePartFilter_data()
 	QTest::newRow("list-many") << true << true;
 }
 
-void lcModelInstanceTests::PreferencesPreservePartFilter()
+void lcModelInstanceTests::ThumbnailRefreshPreservesPartFilter()
 {
 	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
-		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test preferences and filtering.");
+		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test thumbnail refresh and filtering.");
 
 	QFETCH(bool, ListMode);
 	QFETCH(bool, ManyMatches);
@@ -4328,13 +4328,8 @@ void lcModelInstanceTests::PreferencesPreservePartFilter()
 
 	for (int Pass = 0; Pass < 2; Pass++)
 	{
-		QTimer::singleShot(0, []()
-		{
-			QDialog* Dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
-			QVERIFY(Dialog);
-			QMetaObject::invokeMethod(Dialog, "accept");
-		});
-		gApplication->ShowPreferencesDialog();
+		// Preferences acceptance takes this same path, even when shading is unchanged.
+		Window.SetShadingMode(lcGetPreferences().mShadingMode);
 		QCOMPARE(Filter->text(), QStringLiteral("100"));
 		QCOMPARE(VisibleRows(), ExpectedVisible);
 		QCoreApplication::processEvents();

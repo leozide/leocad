@@ -119,9 +119,10 @@ colors, light and dark palettes, tiled image readback, parts-list composition,
 opaque solid and gradient backgrounds, and switching from custom backgrounds
 with alpha to transparent or opaque rendering.
 
-`PreferencesPreservePartFilter` uses the same native setting to check All Pieces
-filtered by `100`, repeated Preferences confirmations, and thumbnail requests for
-hidden rows in both icon and list layouts.
+`ThumbnailRefreshPreservesPartFilter` uses the same native setting to check All
+Pieces filtered by `100`, repeated thumbnail refreshes through the shading path
+used when accepting Preferences, and requests for hidden rows in icon and list
+layouts. It calls that path directly without opening a modal dialog.
 
 Native texture checks exercise source-over decal alpha in flat and lit shaders,
 including framebuffer blending, and sample uploaded mipmaps to check alpha-aware

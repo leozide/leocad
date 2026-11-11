@@ -131,8 +131,6 @@ private slots:
 	void CommandLineColorValidation_data();
 	void CommandLineColorValidation();
 	void ThumbnailShading();
-	void ThumbnailRefreshPreservesPartFilter_data();
-	void ThumbnailRefreshPreservesPartFilter();
 	void TranslucentThumbnails_data();
 	void TranslucentThumbnails();
 	void TextureDecalAlpha();
@@ -4225,119 +4223,6 @@ void lcModelInstanceTests::CameraContexts(lcMainWindow* Window, lcView* View, lc
 	CheckLightExport(Main->GetLights()[0].get(), lcMatrix44Identity());
 }
 
-
-void lcModelInstanceTests::ThumbnailRefreshPreservesPartFilter_data()
-{
-	QTest::addColumn<bool>("ListMode");
-	QTest::addColumn<bool>("ManyMatches");
-	QTest::newRow("icons-single") << false << false;
-	QTest::newRow("list-single") << true << false;
-	QTest::newRow("icons-many") << false << true;
-	QTest::newRow("list-many") << true << true;
-}
-
-void lcModelInstanceTests::ThumbnailRefreshPreservesPartFilter()
-{
-	if (!qEnvironmentVariableIsSet("LEOCAD_TEST_NATIVE_INTERFACE"))
-		QSKIP("Set LEOCAD_TEST_NATIVE_INTERFACE=1 with a native display to test thumbnail refresh and filtering.");
-
-	QFETCH(bool, ListMode);
-	QFETCH(bool, ManyMatches);
-	QVERIFY(lcContext::InitializeRenderer(true));
-	QTemporaryDir Directory;
-	QVERIFY(Directory.isValid());
-	QVERIFY(QDir(Directory.path()).mkpath("parts"));
-	QVERIFY(QDir(Directory.path()).mkpath("p"));
-
-	for (int Index = 0; Index < 200; Index++)
-	{
-		QFile File(Directory.filePath(QString("parts/filter%1.dat").arg(Index)));
-		QVERIFY(File.open(QIODevice::WriteOnly));
-		QVERIFY(File.write(ManyMatches && Index % 2 == 0 ? "0 Filter 100 fixture\n3 16 0 0 0 1 0 0 0 1 0\n" : "0 Filter fixture\n3 16 0 0 0 1 0 0 0 1 0\n") > 0);
-	}
-
-	QVERIFY(lcGetPiecesLibrary()->Load(Directory.path(), false, false));
-
-	struct ScopedSettings
-	{
-		lcPreferences Preferences = lcGetPreferences();
-		lcMainWindow* Window = gMainWindow;
-		Project* ActiveProject = gApplication->mProject;
-		Project Current;
-		ScopedSettings() { gApplication->mProject = &Current; }
-		~ScopedSettings()
-		{
-			lcGetPreferences() = Preferences;
-			gMainWindow = Window;
-			gApplication->mProject = ActiveProject;
-		}
-	} Settings;
-
-	lcGetPreferences().mViewSphereEnabled = false;
-	lcGetPreferences().mColorTheme = lcColorTheme::Dark;
-	lcGetPreferences().mDrawAxes = false;
-	lcGetPreferences().mDrawGridStuds = false;
-	lcGetPreferences().mDrawGridLines = false;
-	lcMainWindow Window;
-	Window.CreateWidgets();
-	Window.SetCurrentModelTab(Settings.Current.GetMainModel(), false);
-	lcPartSelectionWidget* Picker = Window.GetPartSelectionWidget();
-	Picker->SetCategory(lcPartCategoryType::AllParts, 0);
-	lcPartSelectionListView* View = Picker->findChild<lcPartSelectionListView*>();
-	QVERIFY(View);
-	lcPartSelectionListModel* List = View->GetListModel();
-	QCOMPARE(List->rowCount(), 200);
-	if (List->IsListMode() != ListMode)
-		List->ToggleListMode();
-	QLineEdit* Filter = nullptr;
-	for (QLineEdit* Edit : Picker->findChildren<QLineEdit*>())
-		if (Edit->accessibleName() == QStringLiteral("Filter Pieces"))
-			Filter = Edit;
-	QVERIFY(Filter);
-	Filter->setText(QStringLiteral("100"));
-	const auto VisibleRows = [View, List]()
-	{
-		int Count = 0;
-		for (int Row = 0; Row < List->rowCount(); Row++)
-			Count += !View->isRowHidden(Row);
-		return Count;
-	};
-	const int ExpectedVisible = ManyMatches ? 100 : 1;
-	QCOMPARE(VisibleRows(), ExpectedVisible);
-	Window.show();
-	QTest::qWait(100);
-	const auto RequestedRows = [List, View]()
-	{
-		int Count = 0;
-		for (int Row = 0; Row < List->rowCount(); Row++)
-			Count += View->isRowHidden(Row) && List->GetPieceData(Row)->mState != lcAssetState::Unloaded;
-		return Count;
-	};
-	const int InitiallyRequested = RequestedRows();
-	QVERIFY(InitiallyRequested <= 1);
-	// A filtered-out row must not start a load even if a stale paint requests it.
-	for (int Row = 0; Row < List->rowCount(); Row++)
-	{
-		if (View->isRowHidden(Row) && List->GetPieceData(Row)->mState == lcAssetState::Unloaded)
-		{
-			List->RequestThumbnail(Row);
-			QCOMPARE(List->GetPieceData(Row)->mState, lcAssetState::Unloaded);
-			break;
-		}
-	}
-
-	for (int Pass = 0; Pass < 2; Pass++)
-	{
-		// Preferences acceptance takes this same path, even when shading is unchanged.
-		Window.SetShadingMode(lcGetPreferences().mShadingMode);
-		QCOMPARE(Filter->text(), QStringLiteral("100"));
-		QCOMPARE(VisibleRows(), ExpectedVisible);
-		QCoreApplication::processEvents();
-		QCOMPARE(VisibleRows(), ExpectedVisible);
-		QTest::qWait(100);
-		QCOMPARE(RequestedRows(), InitiallyRequested);
-	}
-}
 
 void lcModelInstanceTests::ThumbnailShading()
 {

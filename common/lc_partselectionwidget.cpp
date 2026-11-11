@@ -101,8 +101,20 @@ void lcPartSelectionListModel::UpdateThumbnails()
 {
 	ReleaseThumbnails();
 
-	if (!mParts.empty())
-		emit dataChanged(index(0, 0), index(static_cast<int>(mParts.size()) - 1, 0), { Qt::DecorationRole });
+	// Qt's icon view resizes hidden items in dataChanged(), making their empty
+	// layout rectangles paintable again. Only invalidate rows that are displayed.
+	for (int Row = 0; Row < static_cast<int>(mParts.size()); Row++)
+	{
+		if (mListView->isRowHidden(Row))
+			continue;
+
+		const int FirstRow = Row;
+
+		while (Row + 1 < static_cast<int>(mParts.size()) && !mListView->isRowHidden(Row + 1))
+			Row++;
+
+		emit dataChanged(index(FirstRow, 0), index(Row, 0), { Qt::DecorationRole });
+	}
 }
 
 void lcPartSelectionListModel::SetColorIndex(int ColorIndex)
@@ -479,7 +491,7 @@ void lcPartSelectionListModel::ReleaseThumbnails()
 
 void lcPartSelectionListModel::RequestThumbnail(int PartIndex)
 {
-	if (!mIconSize || !mParts[PartIndex].Pixmap.isNull() || mParts[PartIndex].ThumbnailId != lcPartThumbnailId::Invalid)
+	if (!mIconSize || mListView->isRowHidden(PartIndex) || !mParts[PartIndex].Pixmap.isNull() || mParts[PartIndex].ThumbnailId != lcPartThumbnailId::Invalid)
 		return;
 
 	lcPieceData* PieceData = mParts[PartIndex].PieceData;

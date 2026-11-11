@@ -294,7 +294,7 @@ protected:
 	// Returns a converted private mesh or an error without publishing asset state.
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
 
-	// Saves geometry using the settings and cache location captured for the build.
+	// Serializes geometry on the UI thread; compression and atomic writes run in the global pool.
 	void SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
 
 	// Returns private decoded pixels/errors without GL upload or publication.
@@ -336,7 +336,7 @@ protected:
 	// Reads/writes Qt-compressed caches with version, size and payload checksum validation.
 	// Archive caches also validate source archive sizes and modification times.
 	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile, CacheType Type);
-	bool WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type);
+	static bool WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const qint64 (&ArchiveCheckSum)[4]);
 
 	// Restores/saves descriptions and patterned parent IDs in library index order.
 	bool LoadCacheIndex(const QString& FileName);
@@ -409,6 +409,7 @@ protected:
 	// Cache location and official/unofficial archive size/timestamp validation data.
 	QString mCachePath;
 	qint64 mArchiveCheckSum[4];
+	std::vector<QFuture<void>> mCacheWrites;
 
 	// Shared GPU buffers, placeholder geometry and deferred repacking state.
 	lcVertexBuffer mVertexBuffer;

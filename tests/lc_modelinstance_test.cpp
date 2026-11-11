@@ -88,6 +88,7 @@ private slots:
 	void TexmapFallbackIncludes();
 	void MeshCacheValidation_data();
 	void MeshCacheValidation();
+	void MeshCacheBackgroundWrite();
 	void MeshSectionCountOverflow();
 	void EmbeddedDataAfterLastPieceDeletion();
 	void AxisAlignedRotations_data();
@@ -897,6 +898,95 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 
 	Cycle.Reset();
 	Piece.Reset();
+}
+
+void lcModelInstanceTests::MeshCacheBackgroundWrite()
+{
+	lcLoadDefaultColors(lcStudStyle::Plain);
+
+	class CacheLibrary : public lcPiecesLibrary
+	{
+	public:
+		CacheLibrary() : lcPiecesLibrary(lcStudStyle::Plain, false) {}
+		using lcPiecesLibrary::CacheType;
+		using lcPiecesLibrary::ReadCacheFile;
+		using lcPiecesLibrary::SaveBuiltPieceDataCache;
+		using lcPiecesLibrary::mArchiveCheckSum;
+		using lcPiecesLibrary::mCacheWrites;
+	};
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QSemaphore Started, Resume;
+	CacheLibrary Library;
+	std::fill(std::begin(Library.mArchiveCheckSum), std::end(Library.mArchiveCheckSum), 17);
+
+	// Hold the writer to prove queuing neither compresses nor writes on the caller.
+	QThreadPool* Pool = QThreadPool::globalInstance();
+	const int MaxThreadCount = Pool->maxThreadCount();
+	Pool->setMaxThreadCount(1);
+	QFuture<void> Blocker = QtConcurrent::run([&Started, &Resume]()
+	{
+		Started.release();
+		Resume.acquire();
+	});
+	Started.acquire();
+	struct ResumeOnExit
+	{
+		QSemaphore& Semaphore;
+		QFuture<void>& Blocker;
+		QThreadPool* Pool;
+		int MaxThreadCount;
+		~ResumeOnExit()
+		{
+			Semaphore.release();
+			Blocker.waitForFinished();
+			Pool->setMaxThreadCount(MaxThreadCount);
+		}
+	} ResumeGuard{ Resume, Blocker, Pool, MaxThreadCount };
+
+	lcPieceSourceSnapshot Source;
+	Source.ZipFileType = lcZipFileType::Official;
+	Source.StudStyle = lcStudStyle::Plain;
+	Source.CachePath = Directory.filePath("mesh.cache");
+	QFile Existing(Source.CachePath);
+	QVERIFY(Existing.open(QIODevice::WriteOnly));
+	QCOMPARE(Existing.write("previous cache"), qint64(14));
+	Existing.close();
+
+	{
+		lcMesh Mesh;
+		Mesh.CreateBox();
+		Library.SaveBuiltPieceDataCache(Source, Mesh);
+		QCOMPARE(Library.mCacheWrites.size(), size_t(1));
+	}
+
+	QVERIFY(Existing.open(QIODevice::ReadOnly));
+	QCOMPARE(Existing.readAll(), QByteArray("previous cache"));
+	Existing.close();
+
+	// The job owns serialized bytes and a checksum snapshot, not the live mesh/library data.
+	Library.mArchiveCheckSum[0] = 18;
+	Resume.release();
+	Library.mCacheWrites.front().waitForFinished();
+	lcMemFile Data;
+	QVERIFY(!Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
+	Library.mArchiveCheckSum[0] = 17;
+	QVERIFY(Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
+	Data.ReadU32(); // Mesh settings precede the existing mesh file format.
+	lcMesh Restored;
+	QVERIFY(Restored.FileLoad(Data));
+	QCOMPARE(Restored.mNumVertices, quint32(24));
+	Restored.FinalizeSections();
+
+	// Destruction drains queued writes without needing the UI event loop.
+	{
+		CacheLibrary DrainingLibrary;
+		std::fill(std::begin(DrainingLibrary.mArchiveCheckSum), std::end(DrainingLibrary.mArchiveCheckSum), 17);
+		Source.CachePath = Directory.filePath("drained.cache");
+		DrainingLibrary.SaveBuiltPieceDataCache(Source, Restored);
+	}
+	QVERIFY(Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
 }
 
 void lcModelInstanceTests::MeshCacheValidation_data()

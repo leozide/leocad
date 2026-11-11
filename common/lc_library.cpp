@@ -98,6 +98,9 @@ void lcPiecesLibrary::Unload()
 		mThumbnailManager->Clear();
 
 	mAssetLoader.reset();
+	for (QFuture<void>& Write : mCacheWrites)
+		Write.waitForFinished();
+	mCacheWrites.clear();
 	mSynthPieces.clear();
 
 	mPieceManager->Clear();
@@ -1161,7 +1164,7 @@ void lcPiecesLibrary::ReadDirectoryDescriptions(const QFileInfoList (&FileLists)
 			NewIndexFile.WriteU64(FileTime);
 		}
 
-		WriteCacheFile(IndexFileName, NewIndexFile, CacheType::Directory);
+		WriteCacheFile(IndexFileName, NewIndexFile, CacheType::Directory, mArchiveCheckSum);
 	}
 }
 
@@ -1211,12 +1214,12 @@ bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFil
 	return true;
 }
 
-bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type)
+bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const qint64 (&ArchiveCheckSum)[4])
 {
 	if (CacheFile.GetLength() > static_cast<size_t>(std::numeric_limits<int>::max()))
 		return false;
 
-	QFile File(FileName);
+	QSaveFile File(FileName);
 
 	if (!File.open(QIODevice::WriteOnly))
 		return false;
@@ -1228,7 +1231,7 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& C
 		File.write(reinterpret_cast<const char*>(&CacheFlags), sizeof(CacheFlags)) != sizeof(CacheFlags))
 		return false;
 
-	if (Type == CacheType::Archive && File.write(reinterpret_cast<const char*>(mArchiveCheckSum), sizeof(mArchiveCheckSum)) != sizeof(mArchiveCheckSum))
+	if (Type == CacheType::Archive && File.write(reinterpret_cast<const char*>(ArchiveCheckSum), sizeof(ArchiveCheckSum)) != sizeof(ArchiveCheckSum))
 		return false;
 
 	const quint32 UncompressedSize = static_cast<quint32>(CacheFile.GetLength());
@@ -1238,7 +1241,7 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& C
 
 	const QByteArray CompressedData = qCompress(CacheFile.mBuffer, static_cast<int>(CacheFile.GetLength()));
 
-	return !CompressedData.isEmpty() && File.write(CompressedData) == CompressedData.size();
+	return !CompressedData.isEmpty() && File.write(CompressedData) == CompressedData.size() && File.commit();
 }
 
 bool lcPiecesLibrary::ReadIndexString(lcMemFile& File, std::string& String)
@@ -1454,7 +1457,7 @@ bool lcPiecesLibrary::SaveArchiveCacheIndex(const QString& FileName)
 		IndexFile.WriteU8(CacheData.Flags);
 	}
 
-	return WriteCacheFile(FileName, IndexFile, CacheType::Archive);
+	return WriteCacheFile(FileName, IndexFile, CacheType::Archive, mArchiveCheckSum);
 }
 
 void lcPiecesLibrary::RequestPieceDataLoad(lcPieceData* PieceData, lcLoadPriority LoadPriority)
@@ -1860,17 +1863,29 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 
 void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh)
 {
+	Q_ASSERT(QThread::currentThread() == thread());
+
 	if (Source.ZipFileType == lcZipFileType::Count)
 		return;
 
-	lcMemFile MeshData;
+	const std::shared_ptr<lcMemFile> MeshData = std::make_shared<lcMemFile>();
 
 	const qint32 Flags = MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled);
 
-	if (MeshData.WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(MeshData))
+	if (MeshData->WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(*MeshData))
 		return;
 
-	WriteCacheFile(Source.CachePath, MeshData, CacheType::Archive);
+	const qint64 ArchiveCheckSum[4] = { mArchiveCheckSum[0], mArchiveCheckSum[1], mArchiveCheckSum[2], mArchiveCheckSum[3] };
+
+	mCacheWrites.erase(std::remove_if(mCacheWrites.begin(), mCacheWrites.end(), [](const QFuture<void>& Write)
+	{
+		return Write.isFinished();
+	}), mCacheWrites.end());
+
+	mCacheWrites.emplace_back(QtConcurrent::run([FileName = Source.CachePath, MeshData, ArchiveCheckSum]()
+	{
+		WriteCacheFile(FileName, *MeshData, CacheType::Archive, ArchiveCheckSum);
+	}));
 }
 
 lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)

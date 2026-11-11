@@ -906,8 +906,11 @@ void lcModelInstanceTests::MeshCacheBackgroundWrite()
 	{
 	public:
 		CacheLibrary() : lcPiecesLibrary(lcStudStyle::Plain, false) {}
-		using lcPiecesLibrary::CacheType;
-		using lcPiecesLibrary::ReadCacheFile;
+		bool ReadArchiveCacheFile(const QString& FileName, lcMemFile& CacheFile)
+		{
+			return ReadCacheFile(FileName, CacheFile, CacheType::Archive);
+		}
+
 		using lcPiecesLibrary::SaveBuiltPieceDataCache;
 		using lcPiecesLibrary::mArchiveCheckSum;
 		using lcPiecesLibrary::mCacheWrites;
@@ -968,9 +971,9 @@ void lcModelInstanceTests::MeshCacheBackgroundWrite()
 	Resume.release();
 	Library.mCacheWrites.front().waitForFinished();
 	lcMemFile Data;
-	QVERIFY(!Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
+	QVERIFY(!Library.ReadArchiveCacheFile(Source.CachePath, Data));
 	Library.mArchiveCheckSum[0] = 17;
-	QVERIFY(Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
+	QVERIFY(Library.ReadArchiveCacheFile(Source.CachePath, Data));
 	Data.ReadU32(); // Mesh settings precede the existing mesh file format.
 	lcMesh Restored;
 	QVERIFY(Restored.FileLoad(Data));
@@ -984,7 +987,7 @@ void lcModelInstanceTests::MeshCacheBackgroundWrite()
 		Source.CachePath = Directory.filePath("drained.cache");
 		DrainingLibrary.SaveBuiltPieceDataCache(Source, Restored);
 	}
-	QVERIFY(Library.ReadCacheFile(Source.CachePath, Data, CacheLibrary::CacheType::Archive));
+	QVERIFY(Library.ReadArchiveCacheFile(Source.CachePath, Data));
 }
 
 void lcModelInstanceTests::MeshCacheValidation_data()

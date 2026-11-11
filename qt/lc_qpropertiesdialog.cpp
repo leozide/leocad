@@ -205,8 +205,8 @@ void lcPartsTableWidget::scrollTo(const QModelIndex& Index, ScrollHint Hint)
 class lcPartsTableWidgetItem : public QTableWidgetItem
 {
 public:
-	explicit lcPartsTableWidgetItem(const QString& Text, int Type = QTableWidgetItem::Type)
-		: QTableWidgetItem(Text, Type)
+	explicit lcPartsTableWidgetItem(const QString& Text, int ItemType = QTableWidgetItem::Type)
+		: QTableWidgetItem(Text, ItemType)
 	{
 		mLast = false;
 	}

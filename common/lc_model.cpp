@@ -2170,12 +2170,12 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 	bool SelectionChanged = false;
 	bool EditChanged = false;
 
-	auto RunAction=[this, &SelectionChanged, &EditChanged](const lcModelHistory* ModelHistory, bool Apply)
+	auto LoadState=[this, &SelectionChanged, &EditChanged](const lcModelHistory* ModelHistory, bool EndState)
 	{
 		if (!ModelHistory)
 			return;
 
-		if (Apply)
+		if (EndState)
 			ModelHistory->LoadEndState(this);
 		else
 			ModelHistory->LoadStartState(this);
@@ -2197,12 +2197,12 @@ void lcModel::RunHistorySequence(const std::vector<std::unique_ptr<lcModelHistor
 	if (Apply)
 	{
 		for (auto ModelHistory = HistorySequence.begin(); ModelHistory != HistorySequence.end(); ++ModelHistory)
-			RunAction(ModelHistory->get(), true);
+			LoadState(ModelHistory->get(), true);
 	}
 	else
 	{
 		for (auto ModelHistory = HistorySequence.rbegin(); ModelHistory != HistorySequence.rend(); ++ModelHistory)
-			RunAction(ModelHistory->get(), false);
+			LoadState(ModelHistory->get(), false);
 	}
 
 	if (EditChanged)
@@ -2933,9 +2933,9 @@ lcPiece* lcModel::AddPiece(lcPieceData* PieceData, quint32 Section)
 	const lcBoundingBox& PieceDataBoundingBox = PieceData->GetBoundingBox();
 	lcPiece* Piece = nullptr;
 
-	auto CreatePiece=[this, &Piece](lcPieceData* PieceData, const lcMatrix44& WorldMatrix, int ColorIndex)
+	auto CreatePiece=[this, &Piece](lcPieceData* NewPieceData, const lcMatrix44& WorldMatrix, int ColorIndex)
 	{
-		Piece = new lcPiece(PieceData);
+		Piece = new lcPiece(NewPieceData);
 		Piece->Initialize(WorldMatrix, mCurrentStep);
 		Piece->SetColorIndex(ColorIndex);
 		AddPiece(Piece);

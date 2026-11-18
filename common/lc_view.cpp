@@ -686,6 +686,34 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 		return false;
 	};
 
+	auto TryStudPlacement = [&](lcMatrix44 ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit) -> lcMouseInsertPieceInfo
+	{
+		RetainStudPlacement();
+		const std::optional<std::pair<size_t, size_t>> PreviousPair = StudDragState.Pair;
+		const lcMatrix44 MovingToProposed = MovingPiece ? lcMul(lcMatrix44AffineInverse(MovingPiece->mModelWorld), ProposedTransform) : lcMatrix44Identity();
+		const lcConnectionSnapContext Context
+		{
+			lcMul(lcMul(mActiveSubmodelTransform, GetWorldViewMatrix()), GetProjectionMatrix()),
+			lcVector2(mWidth / DeviceScale, mHeight / DeviceScale),
+			lcNormalize(lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform))),
+			SurfacePiece,
+			HasSurfaceHit
+		};
+
+		const lcInsertPieceInfo ProposedInsert { PieceData.Get(), ProposedTransform, gMainWindow->mColorIndex };
+		const std::optional<lcVector3> Translation = ActiveModel->GetStudSnapTranslation(MovingToProposed, Context, MovingPiece ? nullptr : &ProposedInsert, StudDragState);
+		if (!Translation)
+			return lcMouseInsertPieceInfo();
+
+		ProposedTransform.SetTranslation(ProposedTransform.GetTranslation() + Translation.value());
+		StudDragState.SnappedTransform = ProposedTransform;
+
+		if (StudDragState.Pair != PreviousPair)
+			StudDragState.ReleaseCenter = lcVector2(Cursor.x + StudDragState.ScreenCorrection.x, Cursor.y + StudDragState.ScreenCorrection.y);
+
+		return { { lcInsertPieceInfo{ PieceData.Get(), ProposedTransform, gMainWindow->mColorIndex } }, true, true };
+	};
+
 	lcGetPiecesLibrary()->EnsurePieceDataAssetsReady(PieceData);
 
 	if (MovingPiece && PieceData->GetSynthInfo())
@@ -815,48 +843,25 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 			}
 		}
 
-		lcMatrix33 PlacementRotation = MovingPiece ? StartRotation : lcMatrix33(SurfaceTransform);
+		const lcMatrix33 PlacementRotation = MovingPiece ? StartRotation : lcMatrix33(SurfaceTransform);
 		const lcConnectionType MovingType = FaceSign > 0.0f ? lcConnectionType::StudReceiver : lcConnectionType::StudMale;
-		bool CanSnapToFace = HitConnectionFace;
+		const lcMatrix33 NoRotation = lcMatrix33Identity();
+		lcMatrix33 GrabRotation = NoRotation;
 
 		if (MovingPiece && HitConnectionFace)
 		{
-			const std::vector<std::unique_ptr<lcPiece>>& Pieces = ActiveModel->GetPieces();
-			const lcStep Step = ActiveModel->GetCurrentStep();
-			// The drag rotates the whole selection from the grabbed piece's axis.
-			const lcVector3 GrabbedAxis(MovingPiece->mModelWorld[2]);
-			CanSnapToFace = std::any_of(Pieces.begin(), Pieces.end(), [MovingType, Step, &GrabbedAxis](const std::unique_ptr<lcPiece>& Piece)
-			{
-				const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
-				if (!Info || !Piece->IsSelected() || !Piece->IsVisible(Step))
-					return false;
-
-				const std::vector<lcConnectionPoint>& Connections = Info->GetConnections();
-				return std::any_of(Connections.begin(), Connections.end(), [MovingType, &GrabbedAxis, &Piece](const lcConnectionPoint& Connection)
-				{
-					return Connection.Type == MovingType &&
-						lcConnectionInfo::AreStudDirectionsAligned(lcMul30(Connection.Direction, Piece->mModelWorld), GrabbedAxis);
-				});
-			});
-		}
-
-		if (MovingPiece && CanSnapToFace)
-		{
-			// Stud and receiver axes in the bundled data both use local +Z.
-			const lcVector3 TargetAxis = lcNormalize(lcVector3(SurfaceTransform[2]));
+			// Build a tilted proposal without changing the ordinary placement rotation.
+			const lcVector3 SurfaceAxis = lcNormalize(lcVector3(SurfaceTransform[2]));
 			const lcVector3 MovingAxis = lcNormalize(StartRotation[2]);
-			const lcVector3 RotationAxis = lcCross(MovingAxis, TargetAxis);
-			const float Sine = RotationAxis.Length();
-			const float Cosine = lcDot(MovingAxis, TargetAxis);
+			const lcVector3 Axis = lcCross(MovingAxis, SurfaceAxis);
+			const float Sine = Axis.Length();
+			const float Cosine = lcDot(MovingAxis, SurfaceAxis);
 
 			if (Sine > LC_EPSILON)
-				PlacementRotation = lcMul(StartRotation, lcMatrix33FromAxisAngle(RotationAxis, atan2f(Sine, Cosine)));
+				GrabRotation = lcMatrix33FromAxisAngle(Axis, atan2f(Sine, Cosine));
 			else if (Cosine < 0.0f)
-				PlacementRotation = lcMul(StartRotation, lcMatrix33FromAxisAngle(StartRotation[0], LC_PI));
+				GrabRotation = lcMatrix33FromAxisAngle(StartRotation[0], LC_PI);
 		}
-
-		if (MovingPiece && StudDragState.Pair && (!CanSnapToFace || !lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), PlacementRotation)))
-			StudDragState.Pair.reset();
 
 		float PlacementOffset = FaceSign > 0.0f ? fabsf(BoundingBox.Min[FaceAxis]) : (FaceSign < 0.0f ? -fabsf(BoundingBox.Max[FaceAxis]) : 0.0f);
 		
@@ -876,64 +881,91 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 
 		Position[FaceAxis] += PlacementOffset;
 
-		if (CanSnapToFace)
+		const lcMatrix44 ModelToSurface = lcMatrix44AffineInverse(SurfaceTransform);
+		const lcVector3 LocalGrabOffset = MovingPiece && AllowStudSnap ? lcMul30(mMouseDownGrabOffset, ModelToSurface) : lcVector3(0, 0, 0);
+		if (AllowStudSnap && SurfaceConnections)
 		{
-			RetainStudPlacement();
-			const std::optional<std::pair<size_t, size_t>> PreviousPair = StudDragState.Pair;
-			float MatingOffset = PlacementOffset;
-			
-			if (const lcConnectionInfo* MovingConnections = PieceData->GetConnectionInfo())
-			{
-				const lcVector3 SurfaceAxis(SurfaceTransform[2]);
-				float BestOffsetDifference = std::numeric_limits<float>::infinity();
-
-				for (const lcConnectionPoint& Connection : MovingConnections->GetConnections())
-				{
-					if (Connection.Type != MovingType)
-						continue;
-
-					const float Offset = -lcDot(lcMul(Connection.Position, PlacementRotation), SurfaceAxis);
-					const float Difference = fabsf(Offset - PlacementOffset);
-					if (Difference < BestOffsetDifference)
-					{
-						BestOffsetDifference = Difference;
-						MatingOffset = Offset;
-					}
-				}
-			}
-
-			// Rank the anchors at mating depth. Hitting the top of a raised stud can
-			// otherwise shift the projected receiver outside the snap radius at close zoom.
-			SurfacePosition.z = ConnectionFaceZ + MatingOffset;
-
-			lcMatrix44 ProposedTransform(PlacementRotation, lcMul31(SurfacePosition, SurfaceTransform));
-			const lcMatrix44 MovingToProposed = MovingPiece ? lcMul(lcMatrix44AffineInverse(MovingPiece->mModelWorld), ProposedTransform) : lcMatrix44Identity();
-
-			const lcConnectionSnapContext Context
-			{
-				lcMul(lcMul(mActiveSubmodelTransform, GetWorldViewMatrix()), GetProjectionMatrix()),
-				lcVector2(mWidth / DeviceScale, mHeight / DeviceScale),
-				lcNormalize(lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform))),
-				Cursor,
-				MousePiece
-			};
-
-			const lcInsertPieceInfo ProposedInsert { PieceData.Get(), ProposedTransform, gMainWindow->mColorIndex };
-			const std::optional<lcVector3> Translation = ActiveModel->GetStudSnapTranslation(MovingToProposed, Context, MovingPiece ? nullptr : &ProposedInsert, StudDragState);
-			if (Translation)
-			{
-				ProposedTransform.SetTranslation(ProposedTransform.GetTranslation() + Translation.value());
-				StudDragState.SnappedTransform = ProposedTransform;
-				
-				if (StudDragState.Pair != PreviousPair)
-					StudDragState.ReleaseCenter = lcVector2(Cursor.x + StudDragState.ScreenCorrection.x, Cursor.y + StudDragState.ScreenCorrection.y);
-
-				return { { lcInsertPieceInfo{ PieceData.Get(), ProposedTransform, gMainWindow->mColorIndex } }, true, true };
-			}
+			// The contact face controls the depth. The grab offset controls motion along it.
+			for (int Axis = 0; Axis < 2; Axis++)
+				if (Axis != FaceAxis)
+					Position[Axis] += LocalGrabOffset[Axis];
 		}
 
-		if (RetainStudPlacement())
-			return { { lcInsertPieceInfo{ PieceData.Get(), StudDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
+		if (HitConnectionFace)
+		{
+			auto TryMatingPose = [&](const lcMatrix33& Rotation)
+			{
+				const lcMatrix33 SnapRotation = lcMul(PlacementRotation, Rotation);
+
+				if (MovingPiece && StudDragState.Pair && !lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), SnapRotation))
+					StudDragState.Pair.reset();
+
+				float MatingOffset = PlacementOffset;
+
+				if (const lcConnectionInfo* MovingConnections = PieceData->GetConnectionInfo())
+				{
+					const lcVector3 SurfaceAxis(SurfaceTransform[2]);
+					float BestOffsetDifference = std::numeric_limits<float>::infinity();
+
+					for (const lcConnectionPoint& Connection : MovingConnections->GetConnections())
+					{
+						if (Connection.Type != MovingType)
+							continue;
+
+						const float Offset = -lcDot(lcMul(Connection.Position, SnapRotation), SurfaceAxis);
+						const float Difference = fabsf(Offset - PlacementOffset);
+						if (Difference < BestOffsetDifference)
+						{
+							BestOffsetDifference = Difference;
+							MatingOffset = Offset;
+						}
+					}
+				}
+
+				// Rank the anchors at mating depth. Hitting the top of a raised stud can
+				// otherwise shift the projected receiver outside the snap radius at close zoom.
+				lcVector3 ProposedPosition = SurfacePosition;
+				ProposedPosition.z = ConnectionFaceZ + MatingOffset;
+				const lcVector3 SnapGrabOffset = MovingPiece ? lcMul30(lcMul(mMouseDownGrabOffset, Rotation), ModelToSurface) : LocalGrabOffset;
+				ProposedPosition.x += SnapGrabOffset.x;
+				ProposedPosition.y += SnapGrabOffset.y;
+				return TryStudPlacement(lcMatrix44(SnapRotation, lcMul31(ProposedPosition, SurfaceTransform)), MousePiece, true);
+			};
+
+			const bool CanTryTilt = MovingPiece && !lcIsZero(GrabRotation[2] - NoRotation[2]);
+			const bool RetainedTilt = CanTryTilt && StudDragState.Pair &&
+				lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), lcMul(PlacementRotation, GrabRotation)) &&
+				!lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), PlacementRotation);
+			lcMouseInsertPieceInfo Snap = TryMatingPose(RetainedTilt ? GrabRotation : NoRotation);
+			if (Snap.IsConnection)
+				return Snap;
+
+			if (CanTryTilt)
+			{
+				Snap = TryMatingPose(RetainedTilt ? NoRotation : GrabRotation);
+				if (Snap.IsConnection)
+					return Snap;
+			}
+		}
+		else if (AllowStudSnap && MovingPiece)
+		{
+			lcVector3 ProposedPosition = Position;
+			if (!SurfaceConnections)
+			{
+				const lcVector3 RayDirection = lcNormalize(ObjectRayTest.End - ObjectRayTest.Start);
+				const lcVector3 HitPoint = ObjectRayTest.Start + RayDirection * ObjectRayTest.Distance;
+				ProposedPosition = lcMul31(HitPoint, ModelToSurface) + LocalGrabOffset;
+				ProposedPosition[FaceAxis] = Position[FaceAxis];
+
+				// Keep the grab point in the ordinary placement too, with the existing contact height.
+				Position.x = ProposedPosition.x;
+				Position.y = ProposedPosition.y;
+			}
+
+			lcMouseInsertPieceInfo Snap = TryStudPlacement(lcMatrix44(PlacementRotation, lcMul31(ProposedPosition, SurfaceTransform)), nullptr, true);
+			if (Snap.IsConnection)
+				return Snap;
+		}
 
 		const float ContactCoordinate = Position[FaceAxis];
 		
@@ -946,7 +978,7 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 		if (UsePlacementTransform)
 		{
 			// Grid rounding can change the depth on a tilted face. Keep it on the contact plane.
-			lcVector3 LocalPosition = lcMul31(Position, lcMatrix44AffineInverse(SurfaceTransform));
+			lcVector3 LocalPosition = lcMul31(Position, ModelToSurface);
 			LocalPosition[FaceAxis] = ContactCoordinate;
 			if (FaceAxis != 2)
 				LocalPosition.z = Face.z;
@@ -959,10 +991,7 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 		return { { lcInsertPieceInfo{ PieceData.Get(), WorldMatrix, gMainWindow->mColorIndex } }, false, UsePlacementTransform };
 	}
 
-	if (MovingPiece)
-		StudDragState.Pair.reset();
-
-	if (RetainStudPlacement())
+	if (!MovingPiece && RetainStudPlacement())
 		return { { lcInsertPieceInfo{ PieceData.Get(), StudDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
 
 	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
@@ -976,10 +1005,35 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 			Point = lcMul31(Point, InverseMatrix);
 	}
 
+	if (MovingPiece && AllowStudSnap)
+	{
+		// Keep the mating depth across a face edge while the pointer remains in the release radius.
+		const bool Retained = RetainStudPlacement() && lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), StartRotation);
+		const lcVector3 GrabStart = (Retained ? StudDragState.SnappedTransform : mMouseDownTransform).GetTranslation() - mMouseDownGrabOffset;
+		const lcVector3 DragNormal = Retained ? StudDragState.Stationary[StudDragState.Pair->second].Connection.Direction : lcVector3(0, 0, 1);
+		const lcVector3 ViewDirection = lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform));
+		lcVector3 ProposedPosition;
+
+		if (!lcLineSegmentPlaneIntersection(&ProposedPosition, ClickPoints[0], ClickPoints[1], lcVector4(DragNormal, -lcDot(DragNormal, GrabStart))) &&
+			!lcLineSegmentPlaneIntersection(&ProposedPosition, ClickPoints[0], ClickPoints[1], lcVector4(ViewDirection, -lcDot(ViewDirection, GrabStart))))
+		{
+			ProposedPosition = lcMul31(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)), lcMatrix44AffineInverse(mActiveSubmodelTransform));
+		}
+
+		lcMouseInsertPieceInfo Snap = TryStudPlacement(lcMatrix44(StartRotation, ProposedPosition + mMouseDownGrabOffset), nullptr, false);
+		if (Snap.IsConnection)
+			return Snap;
+
+		StudDragState.Pair.reset();
+	}
+
 	lcVector3 Intersection;
+	const lcVector3 GrabOffset = MovingPiece && AllowStudSnap ? mMouseDownGrabOffset : lcVector3(0, 0, 0);
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
+		Intersection.x += GrabOffset.x;
+		Intersection.y += GrabOffset.y;
 		Intersection = ActiveModel->SnapPosition(Intersection);
 		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44(StartRotation, Intersection), gMainWindow->mColorIndex } }, false };
 	}
@@ -993,13 +1047,15 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(FrontVector, -lcDot(FrontVector, Position))))
 	{
+		const lcVector3 PlaneNormal = lcNormalize(FrontVector);
+		Intersection += GrabOffset - lcDot(GrabOffset, PlaneNormal) * PlaneNormal;
 		Intersection = ActiveModel->SnapPosition(Intersection);
 		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44(StartRotation, Intersection), gMainWindow->mColorIndex } }, false };
 	}
 
 	const lcVector3 FallbackPosition = lcMul31(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)), lcMatrix44AffineInverse(mActiveSubmodelTransform));
 
-	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44(StartRotation, FallbackPosition), gMainWindow->mColorIndex } }, false };
+	return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44(StartRotation, FallbackPosition + GrabOffset), gMainWindow->mColorIndex } }, false };
 }
 
 lcVector3 lcView::GetCameraLightInsertPosition() const
@@ -3030,6 +3086,7 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 	mTrackUpdated = false;
 	mMouseDownX = mMouseX;
 	mMouseDownY = mMouseY;
+	mMouseDownGrabOffset = lcVector3(0, 0, 0);
 	mTrainTrackDragPlane.reset();
 	mCameraRotationAngle = 0.0f;
 	lcTool Tool = GetCurrentTool();
@@ -3052,6 +3109,17 @@ void lcView::StartTracking(lcTrackButton TrackButton)
 				ActiveModel->FocusOrDeselectObjectAction(mMouseDownPiece, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
 
 			ActiveModel->BeginMouseTool(Tool, this);
+
+			if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece && TrackButton == lcTrackButton::Left &&
+				!gMainWindow->GetSeparateTransform() && !mMouseDownPiece->mPieceData->GetTrainTrackInfo())
+			{
+				const lcObjectRayTest GrabRay = RayTest(true, false);
+				if (GrabRay.ObjectSection.Object == mMouseDownPiece)
+				{
+					const lcVector3 GrabPosition = GrabRay.Start + lcNormalize(GrabRay.End - GrabRay.Start) * GrabRay.Distance;
+					mMouseDownGrabOffset = mMouseDownTransform.GetTranslation() - GrabPosition;
+				}
+			}
 
 			if (mTrackTool == lcTrackTool::MoveXYZ && mMouseDownPiece && mMouseDownPiece->mPieceData->GetTrainTrackInfo())
 			{

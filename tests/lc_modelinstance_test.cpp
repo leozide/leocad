@@ -76,6 +76,12 @@ private slots:
 	void ConnectionPartParsing();
 	void ConnectionPartRejectsInvalidData();
 	void ConnectionArchiveLoadAndValidation();
+	void StudDragAcceptance_data();
+	void StudDragAcceptance();
+	void StudDragOccupiedContact();
+	void StudDragShallowViewRetention();
+	void StudDragBaseplateBenchmark();
+	void StudDragBaseplateViewBenchmark();
 	void AssetLoaderIndependentBuilds();
 	void AssetLoaderCancelPreparedBuild();
 	void AssetUpdateThrottle();
@@ -235,6 +241,341 @@ void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()
 	const lcConnectionInfo* ConnectionInfo = PieceData->GetConnectionInfo();
 	QVERIFY(ConnectionInfo);
 	QCOMPARE(static_cast<int>(ConnectionInfo->GetConnections().size()), 12);
+}
+
+struct lcModelInstanceTestStudProject
+{
+	Project* Previous = gApplication->mProject;
+	lcMainWindow* PreviousWindow = gMainWindow;
+	lcMouseShortcuts PreviousShortcuts = gMouseShortcuts;
+	Project Current;
+
+	lcModelInstanceTestStudProject()
+	{
+		gApplication->mProject = &Current;
+		gMouseShortcuts.Reset();
+	}
+
+	~lcModelInstanceTestStudProject()
+	{
+		gApplication->mProject = Previous;
+		gMainWindow = PreviousWindow;
+		gMouseShortcuts = PreviousShortcuts;
+	}
+};
+
+void lcModelInstanceTests::StudDragAcceptance_data()
+{
+	QTest::addColumn<QByteArray>("TargetMatrix");
+	QTest::addColumn<float>("GrabOffset");
+	QTest::addColumn<float>("TargetHeight");
+	QTest::addColumn<bool>("ExpectSnap");
+	QTest::addColumn<QString>("Finish");
+
+	QTest::newRow("grab-at-end") << QByteArray("1 0 0 0 1 0 0 0 1") << 18.0f << 0.0f << true << QStringLiteral("undo");
+	QTest::newRow("anchor-near-stud-with-no-hit") << QByteArray("1 0 0 0 1 0 0 0 1") << -18.0f << 0.0f << true << QStringLiteral("cancel");
+	QTest::newRow("tilted-target-without-snap-preserves-rotation") << QByteArray("0.866025 -0.5 0 0.5 0.866025 0 0 0 1") << 18.0f << 0.0f << false << QStringLiteral("cancel");
+	QTest::newRow("release-stud-snap") << QByteArray("1 0 0 0 1 0 0 0 1") << -18.0f << 0.0f << true << QStringLiteral("release");
+	QTest::newRow("tilted-target-rotates-on-snap") << QByteArray("0.866025 -0.5 0 0.5 0.866025 0 0 0 1") << 18.0f << 0.0f << true << QStringLiteral("release");
+	QTest::newRow("raised-snap-retains-depth-beyond-edge") << QByteArray("1 0 0 0 1 0 0 0 1") << 18.0f << 24.0f << true << QStringLiteral("cross-edge");
+	QTest::newRow("raised-snap-revalidates-over-lower-face") << QByteArray("1 0 0 0 1 0 0 0 1") << 18.0f << 24.0f << true << QStringLiteral("lower-face");
+	QTest::newRow("mixed-orientations-try-tilted-pose") << QByteArray("0.866025 -0.5 0 0.5 0.866025 0 0 0 1") << 18.0f << 0.0f << true << QStringLiteral("mixed-orientation");
+}
+
+void lcModelInstanceTests::StudDragAcceptance()
+{
+	QFETCH(QByteArray, TargetMatrix);
+	QFETCH(float, GrabOffset);
+	QFETCH(float, TargetHeight);
+	QFETCH(bool, ExpectSnap);
+	QFETCH(QString, Finish);
+
+	lcModelInstanceTestStudProject Scope;
+
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("3005.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	const bool MixedOrientation = Finish == QStringLiteral("mixed-orientation");
+	const bool LowerFace = Finish == QStringLiteral("lower-face");
+	QByteArray ModelData = "1 16 0 " + QByteArray::number(-TargetHeight) + " 0 " + TargetMatrix + " 3005.dat\n"
+		"1 16 -80 -24 0 1 0 0 0 1 0 0 0 1 3004.dat\n";
+
+	if (MixedOrientation)
+		ModelData += "1 16 -160 -24 0 " + TargetMatrix + " 3005.dat\n";
+	if (LowerFace)
+		ModelData += "1 16 20 0 0 1 0 0 0 1 0 0 0 1 3005.dat\n";
+
+	QBuffer Buffer(&ModelData);
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), MixedOrientation || LowerFace ? size_t(3) : size_t(2));
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	QVERIFY(Moving->mPieceData->GetConnectionInfo());
+	QVERIFY(Model->EnsureAssetsReady());
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(-40, 0, 420), lcVector3(-40, 0, 0), lcVector3(0, 1, 0));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+	std::vector<lcObject*> Selection { Moving };
+	if (MixedOrientation)
+		Selection.push_back(Model->GetPieces()[2].get());
+	Model->SetSelectionAndFocusAction(Selection, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	Window.SetMoveXYSnapIndex(9);
+	Window.SetMoveZSnapIndex(0);
+
+	const lcMatrix44 Start = Moving->mModelWorld;
+	auto PointAt = [View](const lcVector3& Point)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	};
+
+	PointAt(lcVector3(-80.0f + GrabOffset, 7, 24));
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Moving));
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	QVERIFY(View->ShouldDrawInsertPreview());
+
+	PointAt(lcVector3(ExpectSnap ? -10.0f + GrabOffset : -8.0f, 7, TargetHeight));
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object != nullptr, GrabOffset > 0.0f);
+	View->OnMouseMove();
+	const lcMatrix44 Target = Model->GetPieces()[0]->mModelWorld;
+	const lcVector3 Seated = lcMul31(lcVector3(-10, 0, 24), Target);
+	const lcVector3 Actual = Moving->mModelWorld.GetTranslation();
+	QVERIFY2((lcLength(Actual - Seated) < 0.01f) == ExpectSnap,
+		qPrintable(QStringLiteral("Unexpected placement (%1, %2, %3)").arg(Actual.x).arg(Actual.y).arg(Actual.z)));
+	QVERIFY(lcMatrix33Similar(lcMatrix33(ExpectSnap ? Target : Start), lcMatrix33(Moving->mModelWorld)));
+
+	if (Finish == QStringLiteral("release"))
+	{
+		PointAt(lcVector3(90, 40, 0));
+		View->OnMouseMove();
+		QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Seated) > 20.0f);
+		QVERIFY(lcMatrix33Similar(lcMatrix33(Start), lcMatrix33(Moving->mModelWorld)));
+	}
+
+	if (Finish == QStringLiteral("cross-edge"))
+	{
+		PointAt(lcVector3(11, 7, TargetHeight));
+		QVERIFY(!View->FindObjectUnderPointer(true, true).Object);
+		View->OnMouseMove();
+		QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Seated) < 0.01f);
+	}
+
+	if (LowerFace)
+	{
+		PointAt(lcVector3(11, 7, 0));
+		QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<lcObject*>(Model->GetPieces()[2].get()));
+		View->OnMouseMove();
+		QVERIFY(Moving->mModelWorld.GetTranslation().z < Seated.z - 8.0f);
+	}
+
+	if (Finish != QStringLiteral("undo"))
+		View->StopTracking(false);
+	else
+	{
+		View->OnLeftButtonUp();
+		QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - Seated) < 0.01f);
+		Model->UndoAction();
+	}
+
+	QVERIFY(!View->IsTracking());
+	QVERIFY(lcLength(Model->GetPieces()[1]->mModelWorld.GetTranslation() - Start.GetTranslation()) < 0.01f);
+}
+
+void lcModelInstanceTests::StudDragOccupiedContact()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("3001.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	Project Project;
+	lcModel* Model = Project.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat\n"
+		"1 16 30 -24 -10 1 0 0 0 1 0 0 0 1 3005.dat\n"
+		"1 16 100 -24 -10 1 0 0 0 1 0 0 0 1 3004.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Project);
+	QCOMPARE(Model->GetPieces().size(), size_t(3));
+	Model->GetPieces()[2]->SetSelected(true);
+
+	const lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(1200, 1200), lcVector3(0, 0, -1), nullptr, false
+	};
+	lcConnectionDragState State;
+	QVERIFY(!Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-80, 0, 0)), Context, nullptr, State));
+
+	const std::optional<lcVector3> FreePair = Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State);
+	QVERIFY(FreePair);
+	QVERIFY(lcLength(*FreePair) < 0.001f);
+}
+
+void lcModelInstanceTests::StudDragShallowViewRetention()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("3005.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	Project Project;
+	lcModel* Model = Project.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 -24 0 1 0 0 0 1 0 0 0 1 3005.dat\n"
+		"1 16 100 -48 0 1 0 0 0 1 0 0 0 1 3005.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Project);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	Model->GetPieces()[1]->SetSelected(true);
+
+	const lcVector3 Eye(-100, 0, 44);
+	const lcVector3 Target(0, 0, 24);
+	lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44LookAt(Eye, Target, lcVector3(0, 0, 1)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(600, 600), lcNormalize(Target - Eye), Model->GetPieces()[0].get(), true
+	};
+
+	lcConnectionDragState State;
+	QVERIFY(Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	Context.SurfacePiece = nullptr;
+	Context.HasSurfaceHit = false;
+
+	// Ten units along the mating plane exceed the camera-depth limit in this view.
+	const lcMatrix44 AlongPlane = lcMatrix44Translation(lcVector3(-90, 0, 0));
+	const std::optional<lcVector3> Retained = Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, State);
+	QVERIFY(Retained);
+	QVERIFY(lcLength(*Retained - lcVector3(-10, 0, 0)) < 0.001f);
+
+	lcConnectionDragState FreshState;
+	QVERIFY(!Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, FreshState));
+	QVERIFY(!Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-79, 0, 0)), Context, nullptr, State));
+
+	QVERIFY(Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	Context.HasSurfaceHit = true;
+	QVERIFY(!Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, State));
+}
+
+void lcModelInstanceTests::StudDragBaseplateBenchmark()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("4186.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	Project Project;
+	lcModel* Model = Project.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 4186.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Project);
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+	lcPiece* Baseplate = Model->GetPieces()[0].get();
+	const lcConnectionInfo* Info = Baseplate->mPieceData->GetConnectionInfo();
+	QVERIFY(Info);
+	QCOMPARE(Info->GetConnections().size(), size_t(2304));
+	lcPieceData* Brick = Library->FindPieceData("3005.dat", nullptr);
+	QVERIFY(Brick);
+
+	const lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -1000)), lcMatrix44Ortho(-700, 700, -700, 700, 1, 2000)),
+		lcVector2(1400, 1400), lcVector3(0, 0, -1), Baseplate, true
+	};
+	lcConnectionDragState State;
+	lcInsertPieceInfo Insert { Brick, lcMatrix44Identity(), lcGetColorIndex(16) };
+	size_t Matches = 0;
+	constexpr size_t Samples = 100;
+	QBENCHMARK
+	{
+		Matches = 0;
+		for (size_t Index = 0; Index < Samples; Index++)
+		{
+			const lcVector3 Position = Info->GetConnections()[Index * 23].Position;
+			Insert.Transform.SetTranslation(Position + lcVector3(0.5f, 0, 24));
+			State.Pair.reset();
+			Matches += Model->GetStudSnapTranslation(lcMatrix44Identity(), Context, &Insert, State).has_value();
+		}
+	}
+	QCOMPARE(Matches, Samples);
+}
+
+void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
+{
+	lcModelInstanceTestStudProject Scope;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("4186.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 4186.dat\n"
+		"1 16 -560 -24 0 1 0 0 0 1 0 0 0 1 3005.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	const lcConnectionInfo* Info = Model->GetPieces()[0]->mPieceData->GetConnectionInfo();
+	QVERIFY(Info);
+	QCOMPARE(Info->GetConnections().size(), size_t(2304));
+	QVERIFY(Model->EnsureAssetsReady());
+	lcPiece* Moving = Model->GetPieces()[1].get();
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, 0, 2500), lcVector3(0, 0, 0), lcVector3(0, 1, 0));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+	Model->SetSelectionAndFocusAction({ Moving }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	Window.SetMoveXYSnapIndex(0);
+	Window.SetMoveZSnapIndex(0);
+
+	const lcVector3 Start = View->ProjectPoint(lcVector3(-560, 0, 24));
+	View->SetMousePosition(qRound(Start.x), qRound(Start.y));
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Moving));
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	QVERIFY(View->ShouldDrawInsertPreview());
+
+	std::array<QPoint, 100> CursorPositions;
+	for (size_t Index = 0; Index < CursorPositions.size(); Index++)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Info->GetConnections()[Index * 23].Position);
+		CursorPositions[Index] = QPoint(qRound(Screen.x), qRound(Screen.y));
+	}
+
+	// Measure the complete drag update, including picking, but exclude repainting.
+	QBENCHMARK
+	{
+		for (const QPoint& Cursor : CursorPositions)
+		{
+			View->SetMousePosition(Cursor.x(), Cursor.y());
+			View->OnMouseMove();
+		}
+	}
+
+	const lcVector3 Opening = lcMul31(lcVector3(0, 0, -24), Moving->mModelWorld);
+	const std::vector<lcConnectionPoint>& Connections = Info->GetConnections();
+	QVERIFY(std::any_of(Connections.begin(), Connections.end(), [&Opening](const lcConnectionPoint& Connection)
+	{
+		return lcLengthSquared(Opening - Connection.Position) < 0.0001f;
+	}));
+	View->StopTracking(false);
 }
 
 void lcModelInstanceTests::ZipExtractionIntegrity_data()

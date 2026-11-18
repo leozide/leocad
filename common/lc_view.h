@@ -399,6 +399,7 @@ protected:
 	bool mTrackToolFromOverlay;
 	quint32 mTrackToolSection = ~0U;
 	lcMatrix44 mMouseDownTransform;
+	lcVector3 mMouseDownGrabOffset = lcVector3(0, 0, 0);
 	lcPiece* mMouseDownPiece = nullptr;
 	std::optional<lcVector4> mTrainTrackDragPlane;
 	int mPanX = 0;

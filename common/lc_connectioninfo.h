@@ -27,8 +27,8 @@ struct lcConnectionSnapContext
 	lcMatrix44 ModelToClip;
 	lcVector2 LogicalViewportSize;
 	lcVector3 ViewDirection;
-	lcVector2 Cursor;
 	const lcPiece* SurfacePiece;
+	bool HasSurfaceHit;
 };
 
 struct lcConnectionDragState

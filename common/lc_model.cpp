@@ -3202,6 +3202,29 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 
 	const lcPieceData* InsertData = InsertPiece ? InsertPiece->PieceData : nullptr;
 
+	std::vector<Endpoint> MovingEndpoints;
+
+	if (InsertPiece)
+	{
+		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo())
+			AddEndpoints(MovingEndpoints, nullptr, *Info, InsertPiece->Transform);
+	}
+	else
+	{
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		{
+			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
+				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
+		}
+	}
+
+	if (MovingEndpoints.empty())
+	{
+		DragState.Pair.reset();
+		return std::nullopt;
+	}
+
 	if (DragState.Model != this || DragState.Step != mCurrentStep || DragState.InsertData != InsertData)
 	{
 		DragState = lcConnectionDragState();
@@ -3221,23 +3244,6 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 		{
 			return A.Connection.Position.x < B.Connection.Position.x;
 		});
-	}
-
-	std::vector<Endpoint> MovingEndpoints;
-	
-	if (InsertPiece)
-	{
-		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo())
-			AddEndpoints(MovingEndpoints, nullptr, *Info, InsertPiece->Transform);
-	}
-	else
-	{
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
-			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
-				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
-		}
 	}
 
 	const lcMatrix44 Identity = lcMatrix44Identity();
@@ -3325,13 +3331,17 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 
 		const lcVector3 Difference = Target.Connection.Position - Proposed.Position;
 		const float WorldDistanceSquared = lcLengthSquared(Difference);
+		const bool OnMatingPlane = fabsf(lcDot(Difference, Target.Connection.Direction)) <= OccupiedTolerance;
 		// A ray hit establishes which surface is under the cursor. On that same
 		// mating plane, cover the gaps between studs even when zoomed in.
 		const bool OnHoveredFace = Target.Piece == Context.SurfacePiece &&
 			WorldDistanceSquared <= 2.0f * HalfStudPitch * HalfStudPitch + OccupiedTolerance &&
-			fabsf(lcDot(Difference, Target.Connection.Direction)) <= OccupiedTolerance;
+			OnMatingPlane;
 
-		if (WorldDistanceSquared > WorldLimit * WorldLimit || (!OnHoveredFace && fabsf(lcDot(Difference, Context.ViewDirection)) > DepthLimit))
+		// With no new surface hit, the retained pair already identifies the mating plane.
+		const bool DepthValid = Retained && !Context.HasSurfaceHit ? OnMatingPlane :
+			OnHoveredFace || fabsf(lcDot(Difference, Context.ViewDirection)) <= DepthLimit;
+		if (WorldDistanceSquared > WorldLimit * WorldLimit || !DepthValid)
 			return;
 
 		const std::optional<lcVector2> TargetScreen = Project(Target.Connection.Position);
@@ -3384,23 +3394,13 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 		}
 	}
 
-	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
-	
-	if (DragState.Pair)
-	{
-		float RetainedDistanceSquared = BestDistanceSquared;
-		
-		if (!BestPair)
-		{
-			// A hover face change can invalidate the proposal while the cursor is still within the retained pair's radius.
-			const float X = Context.Cursor.x - DragState.ReleaseCenter.x;
-			const float Y = Context.Cursor.y - DragState.ReleaseCenter.y;
-			
-			RetainedDistanceSquared = X * X + Y * Y;
-		}
+	if (!BestPair)
+		DragState.Pair.reset();
 
-		const float SwitchRadius = lcMax(sqrtf(RetainedDistanceSquared) - SwitchMargin, 0.0f);
-		
+	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
+	if (BestPair)
+	{
+		const float SwitchRadius = lcMax(sqrtf(BestDistanceSquared) - SwitchMargin, 0.0f);
 		SearchRadiusSquared = SwitchRadius * SwitchRadius;
 	}
 

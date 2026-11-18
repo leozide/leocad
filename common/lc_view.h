@@ -432,4 +432,12 @@ protected:
 
 	static lcView* mLastFocusedView;
 	static std::vector<lcView*> mViews;
+
+private:
+	lcObjectRayTest GetReadyPieceHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, bool IgnoreSelected) const;
+	bool RetainStudPlacement(lcConnectionDragState& StudDragState, const lcPieceData* InsertData) const;
+	lcMouseInsertPieceInfo TryStudPlacement(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, lcMatrix44 ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit) const;
+	lcMouseInsertPieceInfo TryStudPlacementOnFace(const lcObjectRayTest& ObjectRayTest, const lcStudMatingFace& MatingFace, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, const lcMatrix33& PlacementRotation, float PlacementOffset) const;
+	lcMouseInsertPieceInfo GetSurfacePlacement(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
+	lcMouseInsertPieceInfo GetPlacementWithoutHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
 };

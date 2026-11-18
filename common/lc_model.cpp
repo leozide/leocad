@@ -3177,14 +3177,6 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 
 std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
 {
-	constexpr float ScreenLimit = 12.0f;
-	constexpr float SwitchMargin = 3.0f;
-	// Distances in LDraw units.
-	constexpr float WorldLimit = 20.0f;
-	constexpr float DepthLimit = 8.0f;
-	constexpr float OccupiedTolerance = 0.1f;
-	constexpr float HalfStudPitch = 10.0f;
-
 	if (Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f)
 		return std::nullopt;
 
@@ -3214,6 +3206,7 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
 			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+
 			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
 				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
 		}
@@ -3236,6 +3229,7 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
 			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+
 			if (Info && Piece->IsVisible(mCurrentStep) && (InsertPiece || !Piece->IsSelected()))
 				AddEndpoints(DragState.Stationary, Piece.get(), *Info, Piece->mModelWorld);
 		}
@@ -3246,193 +3240,7 @@ std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& Movin
 		});
 	}
 
-	const lcMatrix44 Identity = lcMatrix44Identity();
-	
-	auto LowerBound = [](const std::vector<Endpoint>& Endpoints, float X)
-	{
-		return std::lower_bound(Endpoints.cbegin(), Endpoints.cend(), X, [](const Endpoint& Point, float Value)
-		{
-			return Point.Connection.Position.x < Value;
-		});
-	};
-
-	auto IsOccupied = [&Identity, &LowerBound](Endpoint& Point, const std::vector<Endpoint>& Endpoints, bool Sorted)
-	{
-		if (!Point.Occupied)
-		{
-			const float X = Point.Connection.Position.x;
-			Point.Occupied = false;
-			for (auto Other = Sorted ? LowerBound(Endpoints, X - OccupiedTolerance) : Endpoints.cbegin(); Other != Endpoints.cend(); ++Other)
-			{
-				if (Sorted && Other->Connection.Position.x > X + OccupiedTolerance)
-					break;
-
-				if (Point.Piece != Other->Piece && Point.Connection.Type != Other->Connection.Type &&
-					lcLengthSquared(Other->Connection.Position - Point.Connection.Position) <= OccupiedTolerance * OccupiedTolerance &&
-					lcConnectionInfo::GetStudSnapTranslation(Point.Connection, Identity, Other->Connection, Identity))
-				{
-					Point.Occupied = true;
-					break;
-				}
-			}
-		}
-
-		return *Point.Occupied;
-	};
-
-	auto HasOccupiedContact = [&](const lcVector3& Translation)
-	{
-		for (Endpoint& Moving : MovingEndpoints)
-		{
-			const lcConnectionPoint Proposed
-			{
-				Moving.Connection.Type,
-				lcMul31(Moving.Connection.Position, MovingToProposed) + Translation,
-				lcMul30(Moving.Connection.Direction, MovingToProposed)
-			};
-
-			const float X = Proposed.Position.x;
-			for (auto Target = LowerBound(DragState.Stationary, X - OccupiedTolerance);
-				Target != DragState.Stationary.cend() && Target->Connection.Position.x <= X + OccupiedTolerance; ++Target)
-			{
-				if (Proposed.Type == Target->Connection.Type ||
-					lcLengthSquared(Proposed.Position - Target->Connection.Position) > OccupiedTolerance * OccupiedTolerance ||
-					!lcConnectionInfo::GetStudSnapTranslation(Proposed, Identity, Target->Connection, Identity))
-					continue;
-
-				Endpoint& Stationary = DragState.Stationary[Target - DragState.Stationary.cbegin()];
-				if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Stationary, DragState.Stationary, true))
-					return true;
-			}
-		}
-
-		return false;
-	};
-
-	auto Project = [&Context](const lcVector3& Position) -> std::optional<lcVector2>
-	{
-		const lcVector4 Clip = lcMul4(lcVector4(Position, 1.0f), Context.ModelToClip);
-		if (!(Clip.w > LC_EPSILON && fabsf(Clip.z) <= Clip.w))
-			return std::nullopt;
-
-		return lcVector2(Clip.x / Clip.w * Context.LogicalViewportSize.x * 0.5f, Clip.y / Clip.w * Context.LogicalViewportSize.y * 0.5f);
-	};
-
-	float BestDistanceSquared = std::numeric_limits<float>::infinity();
-	std::optional<lcVector3> BestTranslation;
-	std::optional<std::pair<size_t, size_t>> BestPair;
-
-	auto ConsiderPair = [&](size_t MovingIndex, size_t TargetIndex, const lcConnectionPoint& Proposed, const lcVector2& MovingScreen, float RadiusSquared, bool Retained)
-	{
-		Endpoint& Moving = MovingEndpoints[MovingIndex];
-		Endpoint& Target = DragState.Stationary[TargetIndex];
-		if (Proposed.Type == Target.Connection.Type)
-			return;
-
-		const lcVector3 Difference = Target.Connection.Position - Proposed.Position;
-		const float WorldDistanceSquared = lcLengthSquared(Difference);
-		const bool OnMatingPlane = fabsf(lcDot(Difference, Target.Connection.Direction)) <= OccupiedTolerance;
-		// A ray hit establishes which surface is under the cursor. On that same
-		// mating plane, cover the gaps between studs even when zoomed in.
-		const bool OnHoveredFace = Target.Piece == Context.SurfacePiece &&
-			WorldDistanceSquared <= 2.0f * HalfStudPitch * HalfStudPitch + OccupiedTolerance &&
-			OnMatingPlane;
-
-		// With no new surface hit, the retained pair already identifies the mating plane.
-		const bool DepthValid = Retained && !Context.HasSurfaceHit ? OnMatingPlane :
-			OnHoveredFace || fabsf(lcDot(Difference, Context.ViewDirection)) <= DepthLimit;
-		if (WorldDistanceSquared > WorldLimit * WorldLimit || !DepthValid)
-			return;
-
-		const std::optional<lcVector2> TargetScreen = Project(Target.Connection.Position);
-		
-		if (!TargetScreen)
-			return;
-
-		const float X = TargetScreen->x - MovingScreen.x;
-		const float Y = TargetScreen->y - MovingScreen.y;
-		const float DistanceSquared = X * X + Y * Y;
-		
-		if (!Retained && !OnHoveredFace && DistanceSquared >= ScreenLimit * ScreenLimit)
-			return;
-
-		if (!(DistanceSquared < RadiusSquared))
-			return;
-
-		const std::optional<lcVector3> Translation = lcConnectionInfo::GetStudSnapTranslation(Proposed, Identity, Target.Connection, Identity);
-		
-		if (!Translation)
-			return;
-
-		if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Target, DragState.Stationary, true) || HasOccupiedContact(*Translation))
-		{
-			if (Retained)
-				DragState.Pair.reset();
-
-			return;
-		}
-
-		BestTranslation = Translation;
-		BestDistanceSquared = DistanceSquared;
-		BestPair = std::make_pair(MovingIndex, TargetIndex);
-		DragState.ScreenCorrection = lcVector2(X, Y);
-	};
-
-	if (DragState.Pair)
-	{
-		const auto [MovingIndex, TargetIndex] = *DragState.Pair;
-		
-		if (MovingIndex < MovingEndpoints.size() && TargetIndex < DragState.Stationary.size())
-		{
-			lcConnectionPoint Proposed = MovingEndpoints[MovingIndex].Connection;
-			
-			Proposed.Position = lcMul31(Proposed.Position, MovingToProposed);
-			Proposed.Direction = lcMul30(Proposed.Direction, MovingToProposed);
-			
-			if (const std::optional<lcVector2> Screen = Project(Proposed.Position))
-				ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, DragState.ReleaseRadius * DragState.ReleaseRadius, true);
-		}
-	}
-
-	if (!BestPair)
-		DragState.Pair.reset();
-
-	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
-	if (BestPair)
-	{
-		const float SwitchRadius = lcMax(sqrtf(BestDistanceSquared) - SwitchMargin, 0.0f);
-		SearchRadiusSquared = SwitchRadius * SwitchRadius;
-	}
-
-	for (size_t MovingIndex = 0; MovingIndex < MovingEndpoints.size() && SearchRadiusSquared > 0.0f; MovingIndex++)
-	{
-		lcConnectionPoint Proposed = MovingEndpoints[MovingIndex].Connection;
-		
-		Proposed.Position = lcMul31(Proposed.Position, MovingToProposed);
-		Proposed.Direction = lcMul30(Proposed.Direction, MovingToProposed);
-		
-		const std::optional<lcVector2> Screen = Project(Proposed.Position);
-		
-		if (!Screen)
-			continue;
-
-		for (auto Target = LowerBound(DragState.Stationary, Proposed.Position.x - WorldLimit);
-			Target != DragState.Stationary.cend() && Target->Connection.Position.x <= Proposed.Position.x + WorldLimit; ++Target)
-		{
-			const size_t TargetIndex = static_cast<size_t>(Target - DragState.Stationary.cbegin());
-			ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, lcMin(SearchRadiusSquared, BestDistanceSquared), false);
-		}
-	}
-
-	if (BestPair)
-	{
-		if (BestPair != DragState.Pair)
-			DragState.ReleaseRadius = lcMax(lcConnectionDragState::DefaultReleaseRadius, sqrtf(BestDistanceSquared) + 4.0f);
-
-		DragState.Pair = BestPair;
-	}
-	
-	return BestTranslation;
+	return lcConnectionInfo::FindStudSnap(MovingEndpoints, MovingToProposed, Context, DragState);
 }
 
 std::vector<lcInsertPieceInfo> lcModel::GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance)

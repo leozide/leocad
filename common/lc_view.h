@@ -3,11 +3,19 @@
 #include "lc_assettypes.h"
 #include "lc_background.h"
 #include "lc_context.h"
+#include "lc_connectioninfo.h"
 #include "lc_math.h"
 #include "lc_commands.h"
 #include "lc_result.h"
 
 struct lcInsertPieceInfo;
+
+struct lcMouseInsertPieceInfo
+{
+	std::vector<lcInsertPieceInfo> Pieces;
+	bool IsConnection = false;
+	bool UsePlacementTransform = false;
+};
 enum class lcCameraProjection;
 enum class lcModelHistoryEditMerge;
 
@@ -305,7 +313,7 @@ public:
 	void UpdatePiecePreview();
 	bool ShouldDrawInsertPreview() const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform) const;
-	std::pair<std::vector<lcInsertPieceInfo>, bool> GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece) const;
+	lcMouseInsertPieceInfo GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectRayTest RayTest(bool PiecesOnly, bool IgnoreSelected) const;
@@ -387,6 +395,7 @@ protected:
 	lcCursor mCursor = lcCursor::Default;
 
 	lcDragState mDragState;
+	lcConnectionDragState mStudDragState;
 	bool mTrackToolFromOverlay;
 	quint32 mTrackToolSection = ~0U;
 	lcMatrix44 mMouseDownTransform;

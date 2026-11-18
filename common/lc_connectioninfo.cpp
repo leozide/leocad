@@ -18,6 +18,32 @@ void lcConnectionInfo::Initialize(lcPiecesLibrary* Library)
 		qWarning() << "Could not load bundled connection data:" << LoadResult.error();
 }
 
+bool lcConnectionInfo::AreStudDirectionsAligned(const lcVector3& FirstDirection, const lcVector3& SecondDirection)
+{
+	// The male axis points out from its base and the receiver axis points in from its opening.
+	constexpr float MinAlignment = 0.9999f;
+	const float Alignment = lcDot(FirstDirection, SecondDirection) / (FirstDirection.Length() * SecondDirection.Length());
+	return std::isfinite(Alignment) && Alignment >= MinAlignment;
+}
+
+std::optional<lcVector3> lcConnectionInfo::GetStudSnapTranslation(const lcConnectionPoint& MovingConnection, const lcMatrix44& MovingTransform, const lcConnectionPoint& TargetConnection, const lcMatrix44& TargetTransform)
+{
+	const bool StudPair = (MovingConnection.Type == lcConnectionType::StudMale && TargetConnection.Type == lcConnectionType::StudReceiver) ||
+		(MovingConnection.Type == lcConnectionType::StudReceiver && TargetConnection.Type == lcConnectionType::StudMale);
+
+	if (!StudPair)
+		return std::nullopt;
+
+	const lcVector3 MovingDirection = lcMul30(MovingConnection.Direction, MovingTransform);
+	const lcVector3 TargetDirection = lcMul30(TargetConnection.Direction, TargetTransform);
+	if (!AreStudDirectionsAligned(MovingDirection, TargetDirection))
+		return std::nullopt;
+
+	const lcVector3 MovingAnchor = lcMul31(MovingConnection.Position, MovingTransform);
+	const lcVector3 TargetAnchor = lcMul31(TargetConnection.Position, TargetTransform);
+	return TargetAnchor - MovingAnchor;
+}
+
 bool lcConnectionInfo::ParseVector(const QJsonValue& Value, lcVector3& Vector)
 {
 	if (!Value.isArray())

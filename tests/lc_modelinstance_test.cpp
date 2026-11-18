@@ -2371,20 +2371,20 @@ void lcModelInstanceTests::TrainTrackDragMovement()
 
 	// Same-orientation snapping must retain fractional coordinates instead of rounding to the move grid.
 	const lcMatrix44 Snapped = lcMatrix44Translation(lcVector3(313.25f, 27.5f, 0));
-	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false);
+	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false, false);
 	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) < 0.001f);
 	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Snapped.GetTranslation() - Offset) < 0.001f);
 	const lcMatrix44 Released = lcMatrix44Translation(lcVector3(400, 40, 0));
-	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false);
+	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false, false);
 	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Released.GetTranslation()) < 0.001f);
 	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Released.GetTranslation() - Offset) < 0.001f);
 
 	// Rotating onto a connection moves the selected group as one rigid assembly.
 	const lcMatrix44 Rotated(lcMatrix33RotationZ(LC_PI / 2.0f), lcVector3(300, 100, 0));
-	Model->UpdateFreeMoveTool(Moving, Start, Rotated, true, false);
+	Model->UpdateFreeMoveTool(Moving, Start, Rotated, true, false, false);
 	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Rotated.GetTranslation()) < 0.001f);
 	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - lcMul31(Offset, Rotated)) < 0.001f);
-	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false);
+	Model->UpdateFreeMoveTool(Moving, Start, Released, false, false, false);
 	QVERIFY(lcLength(Moving->mModelWorld.GetTranslation() - Released.GetTranslation()) < 0.001f);
 	QVERIFY(lcLength(Neighbour->mModelWorld.GetTranslation() - Released.GetTranslation() - Offset) < 0.001f);
 	Model->EndMouseTool(lcTool::Move, Window.GetActiveView(), true);
@@ -2747,7 +2747,7 @@ void lcModelInstanceTests::TrainTrackDragSleepers()
 	const lcMatrix44 Snapped = Snap.back().Transform;
 	Snap.pop_back();
 	Model->SetPreviewInsertPieceInfo(std::move(Snap));
-	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false);
+	Model->UpdateFreeMoveTool(Moving, Start, Snapped, true, false, false);
 	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
 	QCOMPARE(Model->GetPieces().size(), size_t(2));
 
@@ -2755,7 +2755,7 @@ void lcModelInstanceTests::TrainTrackDragSleepers()
 	{
 		QVERIFY(Model->GetTrainTrackSnapInfo(Moving, lcMatrix44Translation(lcVector3(500, 0, 0)), SnapContext, 20).empty());
 		Model->SetPreviewInsertPieceInfo({});
-		Model->UpdateFreeMoveTool(Moving, Start, lcMatrix44Translation(lcVector3(500, 0, 0)), false, false);
+		Model->UpdateFreeMoveTool(Moving, Start, lcMatrix44Translation(lcVector3(500, 0, 0)), false, false, false);
 	}
 	Model->EndMouseTool(lcTool::Move, Window.GetActiveView(), Outcome != "cancel");
 	QVERIFY(Model->GetPreviewInsertPieceInfo().empty());
@@ -3635,9 +3635,10 @@ void lcModelInstanceTests::RepeatedInstances()
 	View->SetMousePosition(600, 300);
 	const lcVector3 WorldFallback = View->UnprojectPoint(lcVector3(600, 300, 0.9f));
 	const lcVector3 LocalFallback = lcMul31(WorldFallback, lcMatrix44AffineInverse(View->GetActiveSubmodelTransform()));
-	const std::pair<std::vector<lcInsertPieceInfo>, bool> Insert = View->GetMouseInsertPieceInfo(false, true, Leaf->mPieceData, nullptr);
-	QCOMPARE(Insert.first.size(), size_t(1));
-	QVERIFY(lcLength(Insert.first[0].Transform.GetTranslation() - LocalFallback) < 0.01f);
+	lcConnectionDragState StudDragState;
+	const lcMouseInsertPieceInfo Insert = View->GetMouseInsertPieceInfo(false, true, Leaf->mPieceData, nullptr, StudDragState);
+	QCOMPARE(Insert.Pieces.size(), size_t(1));
+	QVERIFY(lcLength(Insert.Pieces[0].Transform.GetTranslation() - LocalFallback) < 0.01f);
 
 	for (const std::unique_ptr<lcPiece>& Piece : A->GetPieces())
 		Piece->SetHidden(false);

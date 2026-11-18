@@ -1,5 +1,6 @@
 #include "lc_global.h"
 #include "lc_model.h"
+#include "lc_connectioninfo.h"
 #include "lc_modelhistory.h"
 #include "piece.h"
 #include "camera.h"
@@ -3174,6 +3175,266 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	TrackPiece->SetTrainTrackConnections(std::move(Connections));
 }
 
+std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
+{
+	constexpr float ScreenLimit = 12.0f;
+	constexpr float SwitchMargin = 3.0f;
+	// Distances in LDraw units.
+	constexpr float WorldLimit = 20.0f;
+	constexpr float DepthLimit = 8.0f;
+	constexpr float OccupiedTolerance = 0.1f;
+	constexpr float HalfStudPitch = 10.0f;
+
+	if (Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f)
+		return std::nullopt;
+
+	using Endpoint = lcConnectionDragState::Endpoint;
+
+	auto AddEndpoints = [](std::vector<Endpoint>& Endpoints, const lcPiece* Piece, const lcConnectionInfo& Info, const lcMatrix44& Transform)
+	{
+		for (const lcConnectionPoint& Connection : Info.GetConnections())
+		{
+			const lcVector3 Position = lcMul31(Connection.Position, Transform);
+			if (std::isfinite(Position.x) && std::isfinite(Position.y) && std::isfinite(Position.z))
+				Endpoints.push_back({ Piece, { Connection.Type, Position, lcMul30(Connection.Direction, Transform) }, std::nullopt });
+		}
+	};
+
+	const lcPieceData* InsertData = InsertPiece ? InsertPiece->PieceData : nullptr;
+
+	if (DragState.Model != this || DragState.Step != mCurrentStep || DragState.InsertData != InsertData)
+	{
+		DragState = lcConnectionDragState();
+		DragState.Model = this;
+		DragState.Step = mCurrentStep;
+		DragState.InsertData = InsertData;
+		DragState.HistoryRevision = InsertData ? GetCurrentHistoryRevision() : 0;
+
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		{
+			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+			if (Info && Piece->IsVisible(mCurrentStep) && (InsertPiece || !Piece->IsSelected()))
+				AddEndpoints(DragState.Stationary, Piece.get(), *Info, Piece->mModelWorld);
+		}
+
+		std::stable_sort(DragState.Stationary.begin(), DragState.Stationary.end(), [](const Endpoint& A, const Endpoint& B)
+		{
+			return A.Connection.Position.x < B.Connection.Position.x;
+		});
+	}
+
+	std::vector<Endpoint> MovingEndpoints;
+	
+	if (InsertPiece)
+	{
+		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo())
+			AddEndpoints(MovingEndpoints, nullptr, *Info, InsertPiece->Transform);
+	}
+	else
+	{
+		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		{
+			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
+				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
+		}
+	}
+
+	const lcMatrix44 Identity = lcMatrix44Identity();
+	
+	auto LowerBound = [](const std::vector<Endpoint>& Endpoints, float X)
+	{
+		return std::lower_bound(Endpoints.cbegin(), Endpoints.cend(), X, [](const Endpoint& Point, float Value)
+		{
+			return Point.Connection.Position.x < Value;
+		});
+	};
+
+	auto IsOccupied = [&Identity, &LowerBound](Endpoint& Point, const std::vector<Endpoint>& Endpoints, bool Sorted)
+	{
+		if (!Point.Occupied)
+		{
+			const float X = Point.Connection.Position.x;
+			Point.Occupied = false;
+			for (auto Other = Sorted ? LowerBound(Endpoints, X - OccupiedTolerance) : Endpoints.cbegin(); Other != Endpoints.cend(); ++Other)
+			{
+				if (Sorted && Other->Connection.Position.x > X + OccupiedTolerance)
+					break;
+
+				if (Point.Piece != Other->Piece && Point.Connection.Type != Other->Connection.Type &&
+					lcLengthSquared(Other->Connection.Position - Point.Connection.Position) <= OccupiedTolerance * OccupiedTolerance &&
+					lcConnectionInfo::GetStudSnapTranslation(Point.Connection, Identity, Other->Connection, Identity))
+				{
+					Point.Occupied = true;
+					break;
+				}
+			}
+		}
+
+		return *Point.Occupied;
+	};
+
+	auto HasOccupiedContact = [&](const lcVector3& Translation)
+	{
+		for (Endpoint& Moving : MovingEndpoints)
+		{
+			const lcConnectionPoint Proposed
+			{
+				Moving.Connection.Type,
+				lcMul31(Moving.Connection.Position, MovingToProposed) + Translation,
+				lcMul30(Moving.Connection.Direction, MovingToProposed)
+			};
+
+			const float X = Proposed.Position.x;
+			for (auto Target = LowerBound(DragState.Stationary, X - OccupiedTolerance);
+				Target != DragState.Stationary.cend() && Target->Connection.Position.x <= X + OccupiedTolerance; ++Target)
+			{
+				if (Proposed.Type == Target->Connection.Type ||
+					lcLengthSquared(Proposed.Position - Target->Connection.Position) > OccupiedTolerance * OccupiedTolerance ||
+					!lcConnectionInfo::GetStudSnapTranslation(Proposed, Identity, Target->Connection, Identity))
+					continue;
+
+				Endpoint& Stationary = DragState.Stationary[Target - DragState.Stationary.cbegin()];
+				if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Stationary, DragState.Stationary, true))
+					return true;
+			}
+		}
+
+		return false;
+	};
+
+	auto Project = [&Context](const lcVector3& Position) -> std::optional<lcVector2>
+	{
+		const lcVector4 Clip = lcMul4(lcVector4(Position, 1.0f), Context.ModelToClip);
+		if (!(Clip.w > LC_EPSILON && fabsf(Clip.z) <= Clip.w))
+			return std::nullopt;
+
+		return lcVector2(Clip.x / Clip.w * Context.LogicalViewportSize.x * 0.5f, Clip.y / Clip.w * Context.LogicalViewportSize.y * 0.5f);
+	};
+
+	float BestDistanceSquared = std::numeric_limits<float>::infinity();
+	std::optional<lcVector3> BestTranslation;
+	std::optional<std::pair<size_t, size_t>> BestPair;
+
+	auto ConsiderPair = [&](size_t MovingIndex, size_t TargetIndex, const lcConnectionPoint& Proposed, const lcVector2& MovingScreen, float RadiusSquared, bool Retained)
+	{
+		Endpoint& Moving = MovingEndpoints[MovingIndex];
+		Endpoint& Target = DragState.Stationary[TargetIndex];
+		if (Proposed.Type == Target.Connection.Type)
+			return;
+
+		const lcVector3 Difference = Target.Connection.Position - Proposed.Position;
+		const float WorldDistanceSquared = lcLengthSquared(Difference);
+		// A ray hit establishes which surface is under the cursor. On that same
+		// mating plane, cover the gaps between studs even when zoomed in.
+		const bool OnHoveredFace = Target.Piece == Context.SurfacePiece &&
+			WorldDistanceSquared <= 2.0f * HalfStudPitch * HalfStudPitch + OccupiedTolerance &&
+			fabsf(lcDot(Difference, Target.Connection.Direction)) <= OccupiedTolerance;
+
+		if (WorldDistanceSquared > WorldLimit * WorldLimit || (!OnHoveredFace && fabsf(lcDot(Difference, Context.ViewDirection)) > DepthLimit))
+			return;
+
+		const std::optional<lcVector2> TargetScreen = Project(Target.Connection.Position);
+		
+		if (!TargetScreen)
+			return;
+
+		const float X = TargetScreen->x - MovingScreen.x;
+		const float Y = TargetScreen->y - MovingScreen.y;
+		const float DistanceSquared = X * X + Y * Y;
+		
+		if (!Retained && !OnHoveredFace && DistanceSquared >= ScreenLimit * ScreenLimit)
+			return;
+
+		if (!(DistanceSquared < RadiusSquared))
+			return;
+
+		const std::optional<lcVector3> Translation = lcConnectionInfo::GetStudSnapTranslation(Proposed, Identity, Target.Connection, Identity);
+		
+		if (!Translation)
+			return;
+
+		if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Target, DragState.Stationary, true) || HasOccupiedContact(*Translation))
+		{
+			if (Retained)
+				DragState.Pair.reset();
+
+			return;
+		}
+
+		BestTranslation = Translation;
+		BestDistanceSquared = DistanceSquared;
+		BestPair = std::make_pair(MovingIndex, TargetIndex);
+		DragState.ScreenCorrection = lcVector2(X, Y);
+	};
+
+	if (DragState.Pair)
+	{
+		const auto [MovingIndex, TargetIndex] = *DragState.Pair;
+		
+		if (MovingIndex < MovingEndpoints.size() && TargetIndex < DragState.Stationary.size())
+		{
+			lcConnectionPoint Proposed = MovingEndpoints[MovingIndex].Connection;
+			
+			Proposed.Position = lcMul31(Proposed.Position, MovingToProposed);
+			Proposed.Direction = lcMul30(Proposed.Direction, MovingToProposed);
+			
+			if (const std::optional<lcVector2> Screen = Project(Proposed.Position))
+				ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, DragState.ReleaseRadius * DragState.ReleaseRadius, true);
+		}
+	}
+
+	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
+	
+	if (DragState.Pair)
+	{
+		float RetainedDistanceSquared = BestDistanceSquared;
+		
+		if (!BestPair)
+		{
+			// A hover face change can invalidate the proposal while the cursor is still within the retained pair's radius.
+			const float X = Context.Cursor.x - DragState.ReleaseCenter.x;
+			const float Y = Context.Cursor.y - DragState.ReleaseCenter.y;
+			
+			RetainedDistanceSquared = X * X + Y * Y;
+		}
+
+		const float SwitchRadius = lcMax(sqrtf(RetainedDistanceSquared) - SwitchMargin, 0.0f);
+		
+		SearchRadiusSquared = SwitchRadius * SwitchRadius;
+	}
+
+	for (size_t MovingIndex = 0; MovingIndex < MovingEndpoints.size() && SearchRadiusSquared > 0.0f; MovingIndex++)
+	{
+		lcConnectionPoint Proposed = MovingEndpoints[MovingIndex].Connection;
+		
+		Proposed.Position = lcMul31(Proposed.Position, MovingToProposed);
+		Proposed.Direction = lcMul30(Proposed.Direction, MovingToProposed);
+		
+		const std::optional<lcVector2> Screen = Project(Proposed.Position);
+		
+		if (!Screen)
+			continue;
+
+		for (auto Target = LowerBound(DragState.Stationary, Proposed.Position.x - WorldLimit);
+			Target != DragState.Stationary.cend() && Target->Connection.Position.x <= Proposed.Position.x + WorldLimit; ++Target)
+		{
+			const size_t TargetIndex = static_cast<size_t>(Target - DragState.Stationary.cbegin());
+			ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, lcMin(SearchRadiusSquared, BestDistanceSquared), false);
+		}
+	}
+
+	if (BestPair)
+	{
+		if (BestPair != DragState.Pair)
+			DragState.ReleaseRadius = lcMax(lcConnectionDragState::DefaultReleaseRadius, sqrtf(BestDistanceSquared) + 4.0f);
+
+		DragState.Pair = BestPair;
+	}
+	
+	return BestTranslation;
+}
+
 std::vector<lcInsertPieceInfo> lcModel::GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance)
 {
 	const lcTrainTrackInfo* MovingTrackInfo = MovingPiece->mPieceData->GetTrainTrackInfo();
@@ -5630,6 +5891,11 @@ void lcModel::InsertLightToolClicked(const lcVector3& Position, lcLightType Ligh
 void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Snap)
 {
 	const lcVector3 PieceDistance = Snap ? SnapPosition(Distance) - SnapPosition(mMouseToolDistance) : Distance - mMouseToolDistance;
+	ApplyMoveTool(Distance, PieceDistance, AllowRelative, AlternateButtonDrag);
+}
+
+void lcModel::ApplyMoveTool(const lcVector3& Distance, const lcVector3& PieceDistance, bool AllowRelative, bool AlternateButtonDrag)
+{
 	const lcVector3 ObjectDistance = Distance - mMouseToolDistance;
 
 	lcModelTransformFlags Flags = (AllowRelative ? lcModelTransformFlag::Relative : lcModelTransformFlag::None) | (AlternateButtonDrag ? lcModelTransformFlag::RotatePivotPoint : lcModelTransformFlag::None) | (mMouseToolFirstMove ? lcModelTransformFlag::FirstMove : lcModelTransformFlag::None);
@@ -5660,18 +5926,40 @@ void lcModel::UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool
 	UpdateAllViews();
 }
 
-void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag)
+void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag, bool UsePlacementTransform)
 {
-	lcMatrix33 NewRotation = IsConnection ? lcMatrix33(NewTransform) : lcMatrix33(StartTransform);
-	lcMatrix33 CurrentRotation = lcMatrix33(MousePiece->mModelWorld);
-
-	if (IsConnection || !lcMatrix33Similar(CurrentRotation, NewRotation))
+	const lcMatrix33 NewRotation = (IsConnection || UsePlacementTransform) ? lcMatrix33(NewTransform) : lcMatrix33(StartTransform);
+	const lcMatrix33 CurrentRotation = lcMatrix33(MousePiece->mModelWorld);
+	const bool TrackDrag = MousePiece->mPieceData->GetTrainTrackInfo() != nullptr;
+	bool RotationChanged = !lcMatrix33Similar(CurrentRotation, NewRotation);
+	if (!TrackDrag)
 	{
-		const lcVector3 Distance = NewTransform.GetTranslation() - MousePiece->mModelWorld.GetTranslation();
+		// Even a tilt smaller than the matching tolerance needs to be undone on release.
+		constexpr float RotationToleranceSquared = 1e-10f;
+		for (int Axis = 0; Axis < 3; Axis++)
+			RotationChanged |= lcLengthSquared(CurrentRotation[Axis] - NewRotation[Axis]) > RotationToleranceSquared;
+	}
+
+	const lcVector3 StartPosition = StartTransform.GetTranslation();
+	const lcVector3 RequestedPosition = NewTransform.GetTranslation();
+	const bool UseOriginalGrid = !IsConnection && !UsePlacementTransform && !AlternateButtonDrag &&
+		!gMainWindow->GetSeparateTransform() && !TrackDrag;
+	const lcVector3 NewPosition = UseOriginalGrid ? StartPosition + SnapPosition(RequestedPosition - StartPosition) : RequestedPosition;
+
+	if (!IsConnection && !RotationChanged && (UsePlacementTransform || UseOriginalGrid))
+	{
+		ApplyMoveTool(RequestedPosition - StartPosition, NewPosition - MousePiece->mModelWorld.GetTranslation(), false, AlternateButtonDrag);
+		return;
+	}
+
+	if (IsConnection || RotationChanged)
+	{
+		const lcVector3 Distance = NewPosition - MousePiece->mModelWorld.GetTranslation();
+		const bool ApplyRotation = RotationChanged || !UsePlacementTransform;
 
 		lcMatrix33 RotationMatrix = lcMul(lcMatrix33AffineInverse(CurrentRotation), NewRotation);
 
-		const lcVector3& Center = NewTransform.GetTranslation();
+		const lcVector3& Center = NewPosition;
 		lcMatrix33 RelativeRotation = MousePiece->GetRelativeRotation();
 
 		lcMatrix33 WorldToFocusMatrix = lcMatrix33AffineInverse(RelativeRotation);
@@ -5693,8 +5981,11 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 				Piece->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance);
 				Piece->UpdatePosition(mCurrentStep);
 
-				Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-				Piece->UpdatePosition(mCurrentStep);
+				if (ApplyRotation)
+				{
+					Piece->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Piece->UpdatePosition(mCurrentStep);
+				}
 			}
 			else if (Object->IsCamera())
 			{
@@ -5703,8 +5994,11 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 				Camera->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance);
 				Camera->UpdatePosition(mCurrentStep);
 
-				Camera->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-				Camera->UpdatePosition(mCurrentStep);
+				if (ApplyRotation)
+				{
+					Camera->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Camera->UpdatePosition(mCurrentStep);
+				}
 			}
 			else if (Object->IsLight())
 			{
@@ -5713,12 +6007,16 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 				Light->MoveSelected(mCurrentStep, gMainWindow->GetAddKeys(), Distance, mMouseToolFirstMove);
 				Light->UpdatePosition(mCurrentStep);
 
-				Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
-				Light->UpdatePosition(mCurrentStep);
+				if (ApplyRotation)
+				{
+					Light->Rotate(mCurrentStep, gMainWindow->GetAddKeys(), RotationMatrix, Center, WorldToFocusMatrix);
+					Light->UpdatePosition(mCurrentStep);
+				}
 			}
 		}
 
-		mMouseToolDistance = NewTransform.GetTranslation() - StartTransform.GetTranslation();
+		// Pieces use their applied positions. Camera and light deltas use the requested drag position.
+		mMouseToolDistance = RequestedPosition - StartPosition;
 		mMouseToolFirstMove = false;
 
 		gMainWindow->UpdateSelectedObjects(false);
@@ -5726,10 +6024,10 @@ void lcModel::UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTra
 	}
 	else
 	{
-		lcVector3 Distance = NewTransform.GetTranslation() - StartTransform.GetTranslation();
+		lcVector3 Distance = NewPosition - StartPosition;
 
 		// Track placement has already been snapped; preserve exact endpoint offsets when releasing a snap.
-		UpdateMoveTool(Distance, false, AlternateButtonDrag, !MousePiece->mPieceData->GetTrainTrackInfo());
+		UpdateMoveTool(Distance, false, AlternateButtonDrag, !TrackDrag);
 	}
 }
 

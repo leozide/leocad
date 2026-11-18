@@ -37,6 +37,8 @@ struct lcPieceHistoryState;
 struct lcCameraHistoryState;
 struct lcLightHistoryState;
 struct lcTrainTrackSnapContext;
+struct lcConnectionSnapContext;
+struct lcConnectionDragState;
 template<typename StateType> struct lcObjectHistory;
 class lcModelHistory;
 class lcModelHistorySelect;
@@ -364,6 +366,8 @@ public:
 	void DuplicateSelectedPieces();
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
+	quint64 GetCurrentHistoryRevision() const;
+	std::optional<lcVector3> GetStudSnapTranslation(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance);
 	void UpdateSelectedPiecesTrainTrackConnections();
 	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);
@@ -455,7 +459,7 @@ public:
 	void InsertCameraToolClicked(const lcVector3& Position);
 	void InsertLightToolClicked(const lcVector3& Position, lcLightType LightType);
 	void UpdateMoveTool(const lcVector3& Distance, bool AllowRelative, bool AlternateButtonDrag, bool Snap);
-	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag);
+	void UpdateFreeMoveTool(lcPiece* MousePiece, const lcMatrix44& StartTransform, const lcMatrix44& NewTransform, bool IsConnection, bool AlternateButtonDrag, bool UsePlacementTransform);
 	void UpdateRotateTool(const lcVector3& Axis, float Angle, bool AlternateButtonDrag, bool Relative);
 	void UpdateRotateTool(const lcMatrix33& RotationMatrix, bool AlternateButtonDrag, bool Relative);
 	void UpdateScaleTool(const float Scale);
@@ -499,6 +503,7 @@ public:
 	void UpdateInterface();
 
 protected:
+	void ApplyMoveTool(const lcVector3& Distance, const lcVector3& PieceDistance, bool AllowRelative, bool AlternateButtonDrag);
 	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, const lcBackgroundOptions& Background);
 
 	void DeleteModel();
@@ -528,7 +533,6 @@ protected:
 	void DiscardHistorySequence();
 	void RevertHistorySequence();
 	void RemoveFirstUndoIfUnchanged();
-	quint64 GetCurrentHistoryRevision() const;
 
 	QString GetGroupName(const QString& Prefix);
 	void RemoveEmptyGroups();

@@ -4,6 +4,7 @@
 #include "lc_blenderpreferences.h"
 #include "lc_commandline.h"
 #include "lc_colors.h"
+#include "lc_connectioninfo.h"
 #include "lc_context.h"
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
@@ -72,6 +73,9 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
+	void ConnectionPartParsing();
+	void ConnectionPartRejectsInvalidData();
+	void ConnectionArchiveLoadAndValidation();
 	void AssetLoaderIndependentBuilds();
 	void AssetLoaderCancelPreparedBuild();
 	void AssetUpdateThrottle();
@@ -189,6 +193,48 @@ QByteArray lcModelInstanceTests::CreateAddonArchive(const QByteArray& Name, cons
 	Stream << quint32(0x06054b50) << quint16(0) << quint16(0) << quint16(1) << quint16(1)
 		<< CentralSize << CentralOffset << quint16(0);
 	return Zip;
+}
+
+class lcModelInstanceTestConnectionInfo : public lcConnectionInfo
+{
+public:
+	using lcConnectionInfo::ParsePart;
+};
+
+void lcModelInstanceTests::ConnectionPartParsing()
+{
+	const QByteArray Data = R"({"part":"3009.dat","version":1,"connections":[{"id":"male-1","type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
+	std::vector<lcConnectionPoint> Connections;
+	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, 1, Connections));
+	QCOMPARE(static_cast<int>(Connections.size()), 1);
+	QCOMPARE(Connections[0].Type, lcConnectionType::StudMale);
+	QCOMPARE(Connections[0].Position.x, 10.0f);
+	QCOMPARE(Connections[0].Position.y, 30.0f);
+	QCOMPARE(Connections[0].Position.z, -20.0f);
+	QCOMPARE(Connections[0].Direction.x, 0.0f);
+	QCOMPARE(Connections[0].Direction.y, 0.0f);
+	QCOMPARE(Connections[0].Direction.z, 1.0f);
+}
+
+void lcModelInstanceTests::ConnectionPartRejectsInvalidData()
+{
+	std::vector<lcConnectionPoint> Connections;
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"connections":[]})", "3009.dat", 1, 0, Connections));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"connections":[{"id":"bad","type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, 1, Connections));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"connections":[{"id":"bad","type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, 1, Connections));
+}
+
+void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	const lcPieceData* PieceData = Library->FindPieceData("3009.dat", nullptr);
+	QVERIFY(PieceData);
+
+	const lcConnectionInfo* ConnectionInfo = PieceData->GetConnectionInfo();
+	QVERIFY(ConnectionInfo);
+	QCOMPARE(static_cast<int>(ConnectionInfo->GetConnections().size()), 12);
 }
 
 void lcModelInstanceTests::ZipExtractionIntegrity_data()

@@ -58,6 +58,16 @@ public:
 		mTrainTrackInfo = TrainTrackInfo;
 	}
 
+	lcConnectionInfo* GetConnectionInfo() const
+	{
+		return mConnectionInfo;
+	}
+
+	void SetConnectionInfo(lcConnectionInfo* ConnectionInfo)
+	{
+		mConnectionInfo = ConnectionInfo;
+	}
+
 	lcMesh* GetMesh() const
 	{
 		return mMesh;
@@ -225,6 +235,7 @@ protected:
 	std::string mPatternParentId;
 	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
+	lcConnectionInfo* mConnectionInfo = nullptr;
 
 private:
 	static bool HasDecorationDescription(const char* Description);

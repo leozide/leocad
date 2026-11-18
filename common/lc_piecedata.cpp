@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_connectioninfo.h"
 #include "lc_math.h"
 #include "lc_mesh.h"
 #include "lc_colors.h"
@@ -147,6 +148,7 @@ void lcPieceData::SetLoadingBoundingBox()
 lcPieceData::~lcPieceData()
 {
 	delete mTrainTrackInfo;
+	delete mConnectionInfo;
 
 	Unload();
 }

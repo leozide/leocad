@@ -215,6 +215,7 @@ SOURCES += \
 	common/lc_colors.cpp \
 	common/lc_commandline.cpp \
 	common/lc_commands.cpp \
+	common/lc_connectioninfo.cpp \
 	common/lc_context.cpp \
 	common/lc_doublespinbox.cpp \
 	common/lc_edgecolordialog.cpp \
@@ -300,6 +301,7 @@ HEADERS += \
 	common/lc_colors.h \
 	common/lc_commandline.h \
 	common/lc_commands.h \
+	common/lc_connectioninfo.h \
 	common/lc_context.h \
 	common/lc_doublespinbox.h \
 	common/lc_edgecolordialog.h \

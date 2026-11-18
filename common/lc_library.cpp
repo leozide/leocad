@@ -1,4 +1,5 @@
 #include "lc_global.h"
+#include "lc_connectioninfo.h"
 #include "lc_library.h"
 #include "lc_assetloader.h"
 #include "lc_thumbnailmanager.h"
@@ -634,6 +635,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 	lcLoadDefaultCategories();
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);
+	lcConnectionInfo::Initialize(this);
 
 	return true;
 }
@@ -2529,6 +2531,7 @@ bool lcPiecesLibrary::LoadBuiltinPieceLibrary()
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);
+	lcConnectionInfo::Initialize(this);
 
 	return true;
 }

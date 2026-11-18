@@ -89,6 +89,7 @@ class lcModelHistory;
 class lcPieceData;
 class lcSynthInfo;
 class lcTrainTrackInfo;
+class lcConnectionInfo;
 typedef std::map<const lcPieceData*, std::map<int, int>> lcPartsList;
 struct lcModelPartsEntry;
 struct lcMinifig;

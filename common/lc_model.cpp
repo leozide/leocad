@@ -3175,7 +3175,7 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	TrackPiece->SetTrainTrackConnections(std::move(Connections));
 }
 
-std::optional<lcVector3> lcModel::GetStudSnapTranslation(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
+std::optional<lcMatrix44> lcModel::GetStudSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
 {
 	if (Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f)
 		return std::nullopt;

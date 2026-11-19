@@ -80,6 +80,12 @@ private slots:
 	void StudDragAcceptance();
 	void StudDragOccupiedContact();
 	void StudDragShallowViewRetention();
+	void StudDragTurnsForMoreContacts();
+	void StudDragTurnStaysOnFace();
+	void StudDragTurnRespectsScreenLimits();
+	void StudDragTurnRetainsAtSnappedGrab();
+	void StudDragTurnRetainsInAngledView();
+	void StudDragTurnLimitsAlternateTranslation();
 	void StudDragBaseplateBenchmark();
 	void StudDragBaseplateViewBenchmark();
 	void AssetLoaderIndependentBuilds();
@@ -416,11 +422,11 @@ void lcModelInstanceTests::StudDragOccupiedContact()
 		lcVector2(1200, 1200), lcVector3(0, 0, -1), nullptr, false
 	};
 	lcConnectionDragState State;
-	QVERIFY(!Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-80, 0, 0)), Context, nullptr, State));
+	QVERIFY(!Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-80, 0, 0)), Context, nullptr, State));
 
-	const std::optional<lcVector3> FreePair = Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State);
+	const std::optional<lcMatrix44> FreePair = Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State);
 	QVERIFY(FreePair);
-	QVERIFY(lcLength(*FreePair) < 0.001f);
+	QVERIFY(lcLength(FreePair->GetTranslation()) < 0.001f);
 }
 
 void lcModelInstanceTests::StudDragShallowViewRetention()
@@ -448,23 +454,402 @@ void lcModelInstanceTests::StudDragShallowViewRetention()
 	};
 
 	lcConnectionDragState State;
-	QVERIFY(Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	QVERIFY(Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
 	Context.SurfacePiece = nullptr;
 	Context.HasSurfaceHit = false;
 
 	// Ten units along the mating plane exceed the camera-depth limit in this view.
 	const lcMatrix44 AlongPlane = lcMatrix44Translation(lcVector3(-90, 0, 0));
-	const std::optional<lcVector3> Retained = Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, State);
+	const std::optional<lcMatrix44> Retained = Model->GetStudSnapTransform(AlongPlane, Context, nullptr, State);
 	QVERIFY(Retained);
-	QVERIFY(lcLength(*Retained - lcVector3(-10, 0, 0)) < 0.001f);
+	QVERIFY(lcLength(Retained->GetTranslation() - lcVector3(-10, 0, 0)) < 0.001f);
 
 	lcConnectionDragState FreshState;
-	QVERIFY(!Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, FreshState));
-	QVERIFY(!Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-79, 0, 0)), Context, nullptr, State));
+	QVERIFY(!Model->GetStudSnapTransform(AlongPlane, Context, nullptr, FreshState));
+	QVERIFY(!Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-79, 0, 0)), Context, nullptr, State));
 
-	QVERIFY(Model->GetStudSnapTranslation(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	QVERIFY(Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
 	Context.HasSurfaceHit = true;
-	QVERIFY(!Model->GetStudSnapTranslation(AlongPlane, Context, nullptr, State));
+	QVERIFY(!Model->GetStudSnapTransform(AlongPlane, Context, nullptr, State));
+}
+
+void lcModelInstanceTests::StudDragTurnsForMoreContacts()
+{
+	lcModelInstanceTestStudProject Scope;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("3001.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	// The two bricks from snap.ldr, with the red one offset so it can be grabbed clear of the target.
+	QBuffer Buffer;
+	Buffer.setData("1 7 190 -24 60 0.5 0 -0.866026 0 1 0 0.866025 0 0.5 3001.dat\n"
+		"1 4 296.3398 -48 49.0192 1 0 0 0 1 0 0 0 1 3001.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	QVERIFY(Model->EnsureAssetsReady());
+	const lcPiece* Target = Model->GetPieces()[0].get();
+	const lcMatrix44 TargetTransform = Target->mModelWorld;
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	const lcConnectionInfo* Info = Moving->mPieceData->GetConnectionInfo();
+	QVERIFY(Info);
+
+	auto CountContacts = [&](const lcMatrix44& Pose)
+	{
+		int Count = 0;
+		for (const lcConnectionPoint& Receiver : Info->GetConnections())
+		{
+			if (Receiver.Type != lcConnectionType::StudReceiver)
+				continue;
+
+			for (const lcConnectionPoint& Stud : Info->GetConnections())
+			{
+				if (Stud.Type == lcConnectionType::StudMale &&
+					lcLengthSquared(lcMul31(Receiver.Position, Pose) - lcMul31(Stud.Position, TargetTransform)) < 0.0001f)
+				{
+					Count++;
+					break;
+				}
+			}
+		}
+		return Count;
+	};
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(240, 50, 420), lcVector3(240, 50, 0), lcVector3(0, 1, 0));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+	Model->SetSelectionAndFocusAction({ Moving }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+
+	auto PointAt = [View](const lcVector3& Point)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	};
+
+	const lcMatrix44 Start = Moving->mModelWorld;
+	const lcVector3 SavedPosition = Start.GetTranslation() - lcVector3(100, 0, 0);
+	const lcVector3 GrabOffset(-3, -7, 0);
+	QCOMPARE(CountContacts(lcMatrix44(lcMatrix33(Start), SavedPosition)), 1);
+	PointAt(Start.GetTranslation() + GrabOffset);
+	View->OnMouseMove();
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Moving));
+	View->OnLeftButtonDown();
+	QVERIFY(View->ShouldDrawInsertPreview());
+
+	PointAt(SavedPosition + GrabOffset);
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<const lcObject*>(Target));
+	View->OnMouseMove();
+	const lcMatrix44 Snapped = Moving->mModelWorld;
+	QVERIFY(CountContacts(Snapped) >= 4);
+	QVERIFY(!lcMatrix33Similar(lcMatrix33(Snapped), lcMatrix33(Start)));
+
+	PointAt(SavedPosition + GrabOffset + lcVector3(1, 0, 0));
+	View->OnMouseMove();
+	QVERIFY(lcLengthSquared(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) < 0.0001f);
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Moving->mModelWorld), lcMatrix33(Snapped)));
+
+	PointAt(SavedPosition + lcVector3(80, 80, 0));
+	View->OnMouseMove();
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Moving->mModelWorld), lcMatrix33(Start)));
+	View->StopTracking(false);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	QVERIFY(lcLengthSquared(Model->GetPieces()[1]->mModelWorld.GetTranslation() - Start.GetTranslation()) < 0.0001f);
+
+	const lcMatrix44 Seated = lcMul(lcMatrix44Translation(lcVector3(0, 0, 24)), TargetTransform);
+	QCOMPARE(CountContacts(Seated), 8);
+	const lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44LookAt(lcVector3(190, 60, 300), lcVector3(190, 60, 0), lcVector3(0, 1, 0)),
+			lcMatrix44Ortho(-100, 100, -100, 100, 1, 400)),
+		lcVector2(600, 600), lcVector3(0, 0, -1), Model->GetPieces()[0].get(), true,
+		lcStudTurnContext{ Seated.GetTranslation(), TargetTransform.GetTranslation(), lcVector3(0, 0, 1), lcConnectionType::StudMale },
+		lcVector2(300, 300)
+	};
+	Model->GetPieces()[1]->SetSelected(true);
+	lcConnectionDragState State;
+	const lcMatrix44 MovingToSeated = lcMul(lcMatrix44AffineInverse(Start), Seated);
+	const std::optional<lcMatrix44> Correction = Model->GetStudSnapTransform(MovingToSeated, Context, nullptr, State);
+	QVERIFY(Correction);
+	QVERIFY(lcMatrix33Similar(lcMatrix33(*Correction), lcMatrix33Identity()));
+	QVERIFY(lcLengthSquared(Correction->GetTranslation()) < 0.0001f);
+}
+
+void lcModelInstanceTests::StudDragTurnStaysOnFace()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	lcPiece MovingPiece, TargetPiece;
+	const lcVector3 Normal(0, 0, 1);
+	const lcVector3 Top(0, 0, 0);
+	const lcVector3 Bottom(0, 0, -8);
+	std::vector<Endpoint> Moving
+	{
+		{ &MovingPiece, { lcConnectionType::StudReceiver, Top, Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudMale, lcVector3(0, 0, 8), Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudMale, lcVector3(20, 0, 8), Normal }, std::nullopt }
+	};
+	const std::vector<Endpoint> Stationary
+	{
+		{ &TargetPiece, { lcConnectionType::StudMale, Top, Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudReceiver, Bottom, Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudReceiver, lcVector3(17.3205f, 10, -8), Normal }, std::nullopt }
+	};
+
+	const lcVector3 Eye(0, -94, 34.2f);
+	lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44LookAt(Eye, Top, Normal), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(110, 110), lcNormalize(-Eye), &TargetPiece, true,
+		lcStudTurnContext{ Top, Top, Normal, lcConnectionType::StudMale }, lcVector2(55, 55)
+	};
+	lcConnectionDragState TopState;
+	TopState.Stationary = Stationary;
+	const std::optional<lcMatrix44> TopSnap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, TopState);
+	QVERIFY(TopSnap);
+	QCOMPARE(TopState.TurnAngle, 0.0f);
+	QVERIFY(lcLengthSquared(TopSnap->GetTranslation()) < 0.0001f);
+
+	// The same contacts can turn when the receiver face is actually hovered.
+	Context.Turn = lcStudTurnContext{ Top, Bottom, Normal, lcConnectionType::StudReceiver };
+	lcConnectionDragState BottomState;
+	BottomState.Stationary = Stationary;
+	const std::optional<lcMatrix44> BottomSnap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, BottomState);
+	QVERIFY(BottomSnap);
+	QVERIFY(fabsf(BottomState.TurnAngle - LC_PI / 6.0f) < 0.001f);
+	QVERIFY(fabsf(BottomSnap->GetTranslation().z + 16.0f) < 0.001f);
+
+	Context.Turn = lcStudTurnContext{ Top, Top, Normal, lcConnectionType::StudMale };
+	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, BottomState));
+	QCOMPARE(BottomState.TurnAngle, 0.0f);
+}
+
+void lcModelInstanceTests::StudDragTurnRespectsScreenLimits()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	lcPiece MovingPiece, TargetPiece;
+	const lcVector3 Origin(0, 0, 0);
+	const lcVector3 Normal(0, 0, 1);
+	const lcVector3 GrabPoint(20, 0, 0);
+	std::vector<Endpoint> Moving
+	{
+		{ &MovingPiece, { lcConnectionType::StudReceiver, Origin, Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudReceiver, GrabPoint, Normal }, std::nullopt }
+	};
+	const std::vector<Endpoint> Stationary
+	{
+		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(17.3205f, 10, 0), Normal }, std::nullopt }
+	};
+	lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(600, 600), lcVector3(0, 0, -1), &TargetPiece, true,
+		lcStudTurnContext{ GrabPoint, Origin, Normal, lcConnectionType::StudMale }, lcVector2(360, 300)
+	};
+	lcConnectionDragState State;
+	State.Stationary = Stationary;
+	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, State));
+	QCOMPARE(State.TurnAngle, 0.0f);
+	const std::optional<std::pair<size_t, size_t>> OriginalPair = State.Pair;
+
+	// At one pixel per unit, a turn fits the grab limit. Its anchor still has to beat the retained pair.
+	Context.LogicalViewportSize = lcVector2(200, 200);
+	const lcVector3 CursorMove(-5, 0, 0);
+	Context.Turn->GrabPoint = GrabPoint + CursorMove;
+	Context.Cursor = lcVector2(115, 100);
+	const lcMatrix44 Proposal = lcMatrix44Translation(CursorMove);
+	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, State));
+	QCOMPARE(State.TurnAngle, 0.0f);
+	QVERIFY(State.Pair == OriginalPair);
+
+	lcConnectionDragState FreshState;
+	FreshState.Stationary = Stationary;
+	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, FreshState));
+	QVERIFY(fabsf(FreshState.TurnAngle - LC_PI / 6.0f) < 0.001f);
+
+	const lcVector3 CloserMove = Stationary[1].Connection.Position - GrabPoint;
+	Context.Turn->GrabPoint = GrabPoint + CloserMove;
+	Context.Cursor = lcVector2(100 + Context.Turn->GrabPoint.x, 100 + Context.Turn->GrabPoint.y);
+	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Translation(CloserMove), Context, State));
+	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
+	QVERIFY(State.Pair != OriginalPair);
+}
+
+void lcModelInstanceTests::StudDragTurnRetainsAtSnappedGrab()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	lcPiece MovingPiece, TargetPiece;
+	const lcVector3 Origin(0, 0, 0);
+	const lcVector3 Normal(0, 0, 1);
+	const lcVector3 GrabPoint(10, -40, 0);
+	std::vector<Endpoint> Moving
+	{
+		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(10, 0, 0), Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(10, 20, 0), Normal }, std::nullopt }
+	};
+	lcConnectionDragState State;
+	State.Stationary =
+	{
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(-10, 17.3205f, 0), Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt }
+	};
+	lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), &TargetPiece, true,
+		lcStudTurnContext{ GrabPoint, Origin, Normal, lcConnectionType::StudMale }, lcVector2(106, 60)
+	};
+	const std::optional<lcMatrix44> Snap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, State);
+	QVERIFY(Snap);
+	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
+	QCOMPARE(State.ReleaseRadius, lcConnectionDragState::DefaultReleaseRadius);
+	const lcVector3 SnappedGrab = lcMul31(GrabPoint, *Snap);
+	QVERIFY(fabsf(State.ReleaseCenter.x - (100 + SnappedGrab.x)) < 0.001f);
+	QVERIFY(fabsf(State.ReleaseCenter.y - (100 + SnappedGrab.y)) < 0.001f);
+
+	// Follow the seated grip far enough that the proposed pivot is over 20 units from its target.
+	const lcVector3 CursorMove(11, 5, 0);
+	Context.Turn->GrabPoint = GrabPoint + CursorMove;
+	Context.Cursor = lcVector2(121, 65);
+	const lcMatrix44 Proposal = lcMatrix44Translation(CursorMove);
+	const std::optional<lcMatrix44> Retained = lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, State);
+	QVERIFY(Retained);
+	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
+	QVERIFY(lcLengthSquared(lcMul31(Context.Turn->GrabPoint, *Retained) - SnappedGrab) < 0.0001f);
+}
+
+void lcModelInstanceTests::StudDragTurnRetainsInAngledView()
+{
+	lcModelInstanceTestStudProject Scope;
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("4186.dat", nullptr))
+		QVERIFY(Library->LoadBuiltinPieceLibrary());
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 7 0 0 0 1 0 0 0 1 0 0 0 1 4186.dat\n"
+		"1 4 100 -100 -100 0.866025 0 -0.5 0 1 0 0.5 0 0.866025 3001.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	QVERIFY(Model->EnsureAssetsReady());
+	const lcPiece* Baseplate = Model->GetPieces()[0].get();
+	lcPiece* Moving = Model->GetPieces()[1].get();
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 600);
+	const float DeviceScale = View->GetUIScale();
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, -990, 570) / DeviceScale, lcVector3(0, 0, 0), lcVector3(0, 0, 1));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+	Model->SetSelectionAndFocusAction({ Moving }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+
+	auto PointAt = [View](const lcVector3& Point)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	};
+
+	const lcMatrix44 Start = Moving->mModelWorld;
+	PointAt(lcMul31(lcVector3(-8, -7, 0), Start));
+	View->OnMouseMove();
+	const lcObjectRayTest GrabRay = View->RayTest(true, false);
+	QCOMPARE(GrabRay.ObjectSection.Object, static_cast<lcObject*>(Moving));
+	const lcVector3 GrabPoint = GrabRay.Start + lcNormalize(GrabRay.End - GrabRay.Start) * GrabRay.Distance;
+	const lcVector3 LocalGrab = lcMul31(GrabPoint, lcMatrix44AffineInverse(Start));
+	View->OnLeftButtonDown();
+	QVERIFY(View->ShouldDrawInsertPreview());
+
+	const lcVector3 HoverPoint(92, -7, 0);
+	PointAt(HoverPoint);
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<const lcObject*>(Baseplate));
+	View->OnMouseMove();
+	const lcMatrix44 Snapped = Moving->mModelWorld;
+	QVERIFY(!lcMatrix33Similar(lcMatrix33(Snapped), lcMatrix33(Start)));
+
+	const lcVector3 SeatedGrab = lcMul31(LocalGrab, Snapped);
+	const lcVector3 HoverScreen = View->ProjectPoint(HoverPoint);
+	const lcVector3 GrabScreen = View->ProjectPoint(SeatedGrab);
+	QVERIFY(fabsf(GrabScreen.y - HoverScreen.y) / DeviceScale > lcConnectionDragState::DefaultReleaseRadius);
+
+	PointAt(SeatedGrab);
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<const lcObject*>(Baseplate));
+	View->OnMouseMove();
+	QVERIFY(lcLengthSquared(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) < 0.0001f);
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Moving->mModelWorld), lcMatrix33(Snapped)));
+
+	View->OnMouseWheel(8.0f / DeviceScale);
+	QVERIFY(View->IsTracking());
+	const lcVector3 ZoomedGrabScreen = View->ProjectPoint(SeatedGrab);
+	QVERIFY(fabsf(ZoomedGrabScreen.x - GrabScreen.x) / DeviceScale > lcConnectionDragState::DefaultReleaseRadius);
+	PointAt(SeatedGrab);
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<const lcObject*>(Baseplate));
+	View->OnMouseMove();
+	QVERIFY(lcLengthSquared(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) < 0.0001f);
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Moving->mModelWorld), lcMatrix33(Snapped)));
+
+	// Eighteen logical pixels clears the normal radius while staying over the same face.
+	View->SetMousePosition(qRound(ZoomedGrabScreen.x + 18.0f * DeviceScale), qRound(ZoomedGrabScreen.y));
+	QCOMPARE(View->FindObjectUnderPointer(true, true).Object, static_cast<const lcObject*>(Baseplate));
+	View->OnMouseMove();
+	QVERIFY(lcLengthSquared(Moving->mModelWorld.GetTranslation() - Snapped.GetTranslation()) > 0.0001f);
+	View->StopTracking(false);
+}
+
+void lcModelInstanceTests::StudDragTurnLimitsAlternateTranslation()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	lcPiece MovingPiece, TargetPiece;
+	const lcVector3 Origin(0, 0, 0);
+	const lcVector3 Normal(0, 0, 1);
+	std::vector<Endpoint> Moving
+	{
+		{ &MovingPiece, { lcConnectionType::StudReceiver, Origin, Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(20, 0, 0), Normal }, std::nullopt },
+		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(40, 0, 0), Normal }, std::nullopt }
+	};
+	const std::vector<Endpoint> Stationary
+	{
+		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(0, 10, 0), Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(17.3205f, 10, 0), Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(20, 10, 0), Normal }, std::nullopt },
+		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(40, 10, 0), Normal }, std::nullopt }
+	};
+	lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(1000, 1000), lcVector3(0, 0, -1), &TargetPiece, true,
+		lcStudTurnContext{ Origin, Origin, Normal, lcConnectionType::StudMale }, lcVector2(500, 500)
+	};
+	lcConnectionDragState CloseState;
+	CloseState.Stationary = Stationary;
+	const std::optional<lcMatrix44> Turned = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, CloseState);
+	QVERIFY(Turned);
+	QVERIFY(fabsf(CloseState.TurnAngle - LC_PI / 6.0f) < 0.001f);
+	QVERIFY(lcLengthSquared(Turned->GetTranslation()) < 0.0001f);
+
+	// The parallel row adds a third contact and can win once the 10-unit translation fits the screen limit.
+	Context.LogicalViewportSize = lcVector2(200, 200);
+	Context.Cursor = lcVector2(100, 100);
+	lcConnectionDragState FarState;
+	FarState.Stationary = Stationary;
+	const std::optional<lcMatrix44> Translated = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, FarState);
+	QVERIFY(Translated);
+	QCOMPARE(FarState.TurnAngle, 0.0f);
+	QVERIFY(lcLengthSquared(Translated->GetTranslation() - lcVector3(0, 10, 0)) < 0.0001f);
 }
 
 void lcModelInstanceTests::StudDragBaseplateBenchmark()
@@ -504,7 +889,7 @@ void lcModelInstanceTests::StudDragBaseplateBenchmark()
 			const lcVector3 Position = Info->GetConnections()[Index * 23].Position;
 			Insert.Transform.SetTranslation(Position + lcVector3(0.5f, 0, 24));
 			State.Pair.reset();
-			Matches += Model->GetStudSnapTranslation(lcMatrix44Identity(), Context, &Insert, State).has_value();
+			Matches += Model->GetStudSnapTransform(lcMatrix44Identity(), Context, &Insert, State).has_value();
 		}
 	}
 	QCOMPARE(Matches, Samples);

@@ -14,14 +14,24 @@ namespace
 	constexpr float DepthLimit = 8.0f;
 	constexpr float OccupiedTolerance = 0.1f;
 	constexpr float HalfStudPitch = 10.0f;
+	constexpr float MaxStudTurn = LC_PI / 4.0f;
+	constexpr float StudTurnTolerance = 0.001f;
+	constexpr float StudTurnNeighborDistance = 4.0f * HalfStudPitch;
+	constexpr float StudTurnGrabScreenLimit = 2.0f * ScreenLimit;
+	constexpr size_t MaxStudTurnAnchors = 8;
 }
 
-bool lcConnectionDragState::IsWithinReleaseRadius(const lcVector2& Cursor) const
+float lcConnectionDragState::GetReleaseDistanceSquared(const lcVector2& Cursor) const
 {
 	const float X = Cursor.x - ReleaseCenter.x;
 	const float Y = Cursor.y - ReleaseCenter.y;
 
-	return X * X + Y * Y < ReleaseRadius * ReleaseRadius;
+	return X * X + Y * Y;
+}
+
+bool lcConnectionDragState::IsWithinReleaseRadius(const lcVector2& Cursor) const
+{
+	return GetReleaseDistanceSquared(Cursor) < ReleaseRadius * ReleaseRadius;
 }
 
 void lcConnectionInfo::Initialize(lcPiecesLibrary* Library)
@@ -387,20 +397,22 @@ bool lcConnectionInfo::IsOccupied(lcConnectionDragState::Endpoint& Point, const 
 	return *Point.Occupied;
 }
 
-bool lcConnectionInfo::HasOccupiedContact(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const lcMatrix44& MovingToProposed, const lcVector3& Translation)
+std::optional<size_t> lcConnectionInfo::GetStudContactCount(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const lcMatrix44& MovingToSnapped, bool CountContacts)
 {
 	using Endpoint = lcConnectionDragState::Endpoint;
+	std::unordered_set<size_t> MatchedTargets;
 
 	for (Endpoint& Moving : MovingEndpoints)
 	{
 		const lcConnectionPoint Proposed
 		{
 			Moving.Connection.Type,
-			lcMul31(Moving.Connection.Position, MovingToProposed) + Translation,
-			lcMul30(Moving.Connection.Direction, MovingToProposed)
+			lcMul31(Moving.Connection.Position, MovingToSnapped),
+			lcMul30(Moving.Connection.Direction, MovingToSnapped)
 		};
 
 		const float X = Proposed.Position.x;
+		bool Matched = false;
 
 		for (auto Target = FindEndpointByX(StationaryEndpoints, X - OccupiedTolerance);
 			Target != StationaryEndpoints.cend() && Target->Connection.Position.x <= X + OccupiedTolerance; ++Target)
@@ -410,14 +422,141 @@ bool lcConnectionInfo::HasOccupiedContact(std::vector<lcConnectionDragState::End
 				!AreStudDirectionsAligned(Proposed.Direction, Target->Connection.Direction))
 				continue;
 
-			Endpoint& Stationary = StationaryEndpoints[Target - StationaryEndpoints.cbegin()];
+			const size_t TargetIndex = static_cast<size_t>(Target - StationaryEndpoints.cbegin());
+			Endpoint& Stationary = StationaryEndpoints[TargetIndex];
 
+			// Reject the entire pose if it tries to reuse an occupied connector.
 			if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Stationary, StationaryEndpoints, true))
-				return true;
+				return std::nullopt;
+
+			if (CountContacts && !Matched)
+				Matched = MatchedTargets.insert(TargetIndex).second;
 		}
 	}
 
-	return false;
+	return MatchedTargets.size();
+}
+
+lcMatrix44 lcConnectionInfo::GetStudTurnCorrection(const lcVector3& MovingAnchor, const lcConnectionPoint& Target, float Angle)
+{
+	const lcMatrix33 Rotation = lcMatrix33FromAxisAngle(Target.Direction, Angle);
+	return lcMatrix44(Rotation, Target.Position - lcMul(MovingAnchor, Rotation));
+}
+
+bool lcConnectionInfo::IsStudTurnTarget(const lcConnectionDragState::Endpoint& Target, const lcConnectionSnapContext& Context)
+{
+	if (!Context.Turn || Target.Piece != Context.SurfacePiece)
+		return false;
+
+	const lcStudTurnContext& Turn = *Context.Turn;
+	return Target.Connection.Type == Turn.TargetType && AreStudDirectionsAligned(Target.Connection.Direction, Turn.FaceDirection) &&
+		fabsf(lcDot(Target.Connection.Position - Turn.FacePoint, Turn.FaceDirection)) <= OccupiedTolerance;
+}
+
+std::vector<float> lcConnectionInfo::GetStudTurnAngles(const std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const StudSnapAnchor& Anchor, const lcMatrix44& MovingToProposed)
+{
+	const lcConnectionDragState::Endpoint& MovingAnchor = MovingEndpoints[Anchor.Pair.first];
+	const lcConnectionDragState::Endpoint& TargetAnchor = StationaryEndpoints[Anchor.Pair.second];
+	const lcVector3 Axis = lcNormalize(TargetAnchor.Connection.Direction);
+	std::vector<float> Angles;
+
+	for (const lcConnectionDragState::Endpoint& Moving : MovingEndpoints)
+	{
+		if (Moving.Piece != MovingAnchor.Piece || Moving.Connection.Type != MovingAnchor.Connection.Type)
+			continue;
+
+		const lcVector3 MovingOffset = lcMul30(Moving.Connection.Position - MovingAnchor.Connection.Position, MovingToProposed);
+		const float Distance = MovingOffset.Length();
+		if (Distance <= OccupiedTolerance || Distance > StudTurnNeighborDistance + OccupiedTolerance || fabsf(lcDot(MovingOffset, Axis)) > OccupiedTolerance)
+			continue;
+
+		if (!AreStudDirectionsAligned(lcMul30(Moving.Connection.Direction, MovingToProposed), Axis))
+			continue;
+
+		const float X = TargetAnchor.Connection.Position.x;
+		const float Range = Distance + OccupiedTolerance;
+		for (auto Target = FindEndpointByX(StationaryEndpoints, X - Range); Target != StationaryEndpoints.cend() && Target->Connection.Position.x <= X + Range; ++Target)
+		{
+			if (Target->Piece != TargetAnchor.Piece || Target->Connection.Type != TargetAnchor.Connection.Type)
+				continue;
+
+			const lcVector3 TargetOffset = Target->Connection.Position - TargetAnchor.Connection.Position;
+			if (fabsf(lcDot(TargetOffset, Axis)) > OccupiedTolerance || fabsf(TargetOffset.Length() - Distance) > OccupiedTolerance ||
+				!AreStudDirectionsAligned(Target->Connection.Direction, Axis))
+				continue;
+
+			const float Angle = atan2f(lcDot(Axis, lcCross(MovingOffset, TargetOffset)), lcDot(MovingOffset, TargetOffset));
+			if (fabsf(Angle) <= StudTurnTolerance || fabsf(Angle) > MaxStudTurn + StudTurnTolerance)
+				continue;
+
+			if (std::none_of(Angles.begin(), Angles.end(), [Angle](float Other) { return fabsf(Angle - Other) < StudTurnTolerance; }))
+				Angles.push_back(Angle);
+		}
+	}
+
+	return Angles;
+}
+
+std::optional<lcConnectionInfo::StudSnapCandidate> lcConnectionInfo::FindStudSnapWithTurn(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const std::vector<StudSnapAnchor>& Anchors, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcVector2& GrabScreen, const std::optional<lcMatrix44>& UnturnedCorrection)
+{
+	std::optional<StudSnapCandidate> BestTurn;
+	size_t BestCount = 1;
+	constexpr float GrabLimitSquared = StudTurnGrabScreenLimit * StudTurnGrabScreenLimit;
+
+	auto CountContacts = [&](const lcMatrix44& Correction)
+	{
+		return GetStudContactCount(MovingEndpoints, StationaryEndpoints, lcMul(MovingToProposed, Correction), true).value_or(0);
+	};
+
+	for (size_t Index = 0; Index < Anchors.size(); Index++)
+	{
+		const StudSnapAnchor& Anchor = Anchors[Index];
+		const lcConnectionPoint& Target = StationaryEndpoints[Anchor.Pair.second].Connection;
+		for (float Angle : GetStudTurnAngles(MovingEndpoints, StationaryEndpoints, Anchor, MovingToProposed))
+		{
+			const lcMatrix44 Correction = GetStudTurnCorrection(Anchor.ProposedPosition, Target, Angle);
+			lcVector2 SnappedGrabScreen;
+			const std::optional<float> GrabDistance = GetStudGrabScreenDistanceSquared(Correction, Context, GrabScreen, SnappedGrabScreen);
+			if (!GrabDistance || *GrabDistance > GrabLimitSquared)
+				continue;
+
+			const size_t Count = CountContacts(Correction);
+
+			if (Count < 2 || Count < BestCount)
+				continue;
+
+			if (BestTurn && Count == BestCount && (*GrabDistance > BestTurn->GrabDistanceSquared ||
+				(*GrabDistance == BestTurn->GrabDistanceSquared && fabsf(Angle) >= fabsf(BestTurn->Angle))))
+				continue;
+
+			BestCount = Count;
+			BestTurn = StudSnapCandidate{ Index, Correction, Angle, SnappedGrabScreen, *GrabDistance };
+		}
+	}
+
+	if (!BestTurn || (UnturnedCorrection && CountContacts(*UnturnedCorrection) >= BestCount))
+		return std::nullopt;
+
+	// On equal coverage, keep the original rotation.
+	for (size_t Index = 0; Index < Anchors.size(); Index++)
+	{
+		const StudSnapAnchor& Anchor = Anchors[Index];
+		const lcVector3 Position = StationaryEndpoints[Anchor.Pair.second].Connection.Position;
+		const lcMatrix44 Correction = lcMatrix44Translation(Position - Anchor.ProposedPosition);
+		lcVector2 SnappedGrabScreen;
+		const std::optional<float> GrabDistance = GetStudGrabScreenDistanceSquared(Correction, Context, GrabScreen, SnappedGrabScreen);
+		if (!GrabDistance || *GrabDistance > GrabLimitSquared)
+			continue;
+
+		const size_t Count = CountContacts(Correction);
+		if (Count > BestCount || (Count == BestCount && BestTurn->Angle != 0.0f))
+		{
+			BestCount = Count;
+			BestTurn = StudSnapCandidate{ Index, Correction, 0.0f, SnappedGrabScreen, *GrabDistance };
+		}
+	}
+
+	return BestTurn;
 }
 
 std::optional<lcVector2> lcConnectionInfo::ProjectEndpoint(const lcConnectionSnapContext& Context, const lcVector3& Position)
@@ -427,7 +566,24 @@ std::optional<lcVector2> lcConnectionInfo::ProjectEndpoint(const lcConnectionSna
 	if (!(Clip.w > LC_EPSILON && fabsf(Clip.z) <= Clip.w))
 		return std::nullopt;
 
-	return lcVector2(Clip.x / Clip.w * Context.LogicalViewportSize.x * 0.5f, Clip.y / Clip.w * Context.LogicalViewportSize.y * 0.5f);
+	return lcVector2((Clip.x / Clip.w + 1.0f) * Context.LogicalViewportSize.x * 0.5f, (Clip.y / Clip.w + 1.0f) * Context.LogicalViewportSize.y * 0.5f);
+}
+
+std::optional<float> lcConnectionInfo::GetStudGrabScreenDistanceSquared(const lcMatrix44& Correction, const lcConnectionSnapContext& Context, const lcVector2& GrabScreen, lcVector2& SnappedGrabScreen)
+{
+	const lcVector3& GrabPoint = Context.Turn->GrabPoint;
+	const lcVector3 SnappedGrab = lcMul31(GrabPoint, Correction);
+	if (lcLengthSquared(SnappedGrab - GrabPoint) > WorldLimit * WorldLimit)
+		return std::nullopt;
+
+	const std::optional<lcVector2> SnappedScreen = ProjectEndpoint(Context, SnappedGrab);
+	if (!SnappedScreen)
+		return std::nullopt;
+
+	SnappedGrabScreen = *SnappedScreen;
+	const float X = SnappedGrabScreen.x - GrabScreen.x;
+	const float Y = SnappedGrabScreen.y - GrabScreen.y;
+	return X * X + Y * Y;
 }
 
 std::optional<float> lcConnectionInfo::GetStudPairScreenDistanceSquared(const lcConnectionPoint& Proposed, const lcConnectionDragState::Endpoint& Target, const lcVector2& MovingScreen, const lcConnectionSnapContext& Context, bool Retained, lcVector2& ScreenCorrection)
@@ -467,14 +623,20 @@ std::optional<float> lcConnectionInfo::GetStudPairScreenDistanceSquared(const lc
 	return DistanceSquared;
 }
 
-std::optional<lcVector3> lcConnectionInfo::FindStudSnap(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, lcConnectionDragState& DragState)
+std::optional<lcMatrix44> lcConnectionInfo::FindStudSnap(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, lcConnectionDragState& DragState)
 {
 	using Endpoint = lcConnectionDragState::Endpoint;
 	const lcMatrix44 Identity = lcMatrix44Identity();
+	const std::optional<lcVector2> GrabScreen = Context.Turn && Context.SurfacePiece ? ProjectEndpoint(Context, Context.Turn->GrabPoint) : std::nullopt;
+	std::vector<StudSnapAnchor> TurnAnchors;
+	if (GrabScreen)
+		TurnAnchors.reserve(MaxStudTurnAnchors + 1);
 
 	float BestDistanceSquared = std::numeric_limits<float>::infinity();
-	std::optional<lcVector3> BestTranslation;
+	std::optional<lcMatrix44> BestCorrection;
 	std::optional<std::pair<size_t, size_t>> BestPair;
+	float BestAngle = 0.0f;
+	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
 
 	auto ConsiderPair = [&](size_t MovingIndex, size_t TargetIndex, const lcConnectionPoint& Proposed, const lcVector2& MovingScreen, float RadiusSquared, bool Retained)
 	{
@@ -482,23 +644,38 @@ std::optional<lcVector3> lcConnectionInfo::FindStudSnap(std::vector<lcConnection
 		Endpoint& Target = DragState.Stationary[TargetIndex];
 		lcVector2 ScreenCorrection;
 		const std::optional<float> DistanceSquared = GetStudPairScreenDistanceSquared(Proposed, Target, MovingScreen, Context, Retained, ScreenCorrection);
-		if (!DistanceSquared || !(*DistanceSquared < RadiusSquared))
+		if (!DistanceSquared)
+			return;
+
+		const bool TryTurn = !Retained && GrabScreen && *DistanceSquared < SearchRadiusSquared && IsStudTurnTarget(Target, Context) &&
+			(TurnAnchors.size() < MaxStudTurnAnchors || *DistanceSquared < TurnAnchors.back().DistanceSquared);
+		if (!TryTurn && !(*DistanceSquared < RadiusSquared))
 			return;
 
 		const std::optional<lcVector3> Translation = lcConnectionInfo::GetStudSnapTranslation(Proposed, Identity, Target.Connection, Identity);
 
-		if (!Translation)
+		if (!Translation || IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Target, DragState.Stationary, true))
 			return;
 
-		if (IsOccupied(Moving, MovingEndpoints, false) || IsOccupied(Target, DragState.Stationary, true) || HasOccupiedContact(MovingEndpoints, DragState.Stationary, MovingToProposed, *Translation))
+		if (TryTurn)
 		{
-			if (Retained)
-				DragState.Pair.reset();
-
-			return;
+			// Keep the search local even when the hovered piece has thousands of studs.
+			const StudSnapAnchor Candidate{ { MovingIndex, TargetIndex }, Proposed.Position, *DistanceSquared };
+			const auto Position = std::upper_bound(TurnAnchors.begin(), TurnAnchors.end(), *DistanceSquared,
+				[](float Distance, const StudSnapAnchor& Other) { return Distance < Other.DistanceSquared; });
+			TurnAnchors.insert(Position, Candidate);
+			if (TurnAnchors.size() > MaxStudTurnAnchors)
+				TurnAnchors.pop_back();
 		}
 
-		BestTranslation = Translation;
+		if (!(*DistanceSquared < RadiusSquared))
+			return;
+
+		const lcMatrix44 Correction = lcMatrix44Translation(*Translation);
+		if (!GetStudContactCount(MovingEndpoints, DragState.Stationary, lcMul(MovingToProposed, Correction), false))
+			return;
+
+		BestCorrection = Correction;
 		BestDistanceSquared = *DistanceSquared;
 		BestPair = std::make_pair(MovingIndex, TargetIndex);
 		DragState.ScreenCorrection = ScreenCorrection;
@@ -515,15 +692,44 @@ std::optional<lcVector3> lcConnectionInfo::FindStudSnap(std::vector<lcConnection
 			Proposed.Position = lcMul31(Proposed.Position, MovingToProposed);
 			Proposed.Direction = lcMul30(Proposed.Direction, MovingToProposed);
 
-			if (const std::optional<lcVector2> Screen = ProjectEndpoint(Context, Proposed.Position))
-				ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, DragState.ReleaseRadius * DragState.ReleaseRadius, true);
+			const float RadiusSquared = DragState.ReleaseRadius * DragState.ReleaseRadius;
+			if (DragState.TurnAngle == 0.0f)
+			{
+				if (const std::optional<lcVector2> Screen = ProjectEndpoint(Context, Proposed.Position))
+					ConsiderPair(MovingIndex, TargetIndex, Proposed, *Screen, RadiusSquared, true);
+			}
+			else if (IsStudTurnTarget(DragState.Stationary[TargetIndex], Context))
+			{
+				const lcConnectionPoint& Target = DragState.Stationary[TargetIndex].Connection;
+				const lcVector3 AnchorDelta = Target.Position - Proposed.Position;
+				const bool DepthValid = fabsf(lcDot(AnchorDelta, Target.Direction)) <= OccupiedTolerance ||
+					fabsf(lcDot(AnchorDelta, Context.ViewDirection)) <= DepthLimit;
+				if (DepthValid && Proposed.Type != Target.Type && AreStudDirectionsAligned(Proposed.Direction, Target.Direction))
+				{
+					const lcMatrix44 Correction = GetStudTurnCorrection(Proposed.Position, Target, DragState.TurnAngle);
+					const std::optional<lcVector2> SnappedGrab = ProjectEndpoint(Context, lcMul31(Context.Turn->GrabPoint, Correction));
+					if (SnappedGrab)
+					{
+						DragState.ReleaseCenter = *SnappedGrab;
+						const float DistanceSquared = DragState.GetReleaseDistanceSquared(Context.Cursor);
+						if (DistanceSquared < RadiusSquared &&
+							GetStudContactCount(MovingEndpoints, DragState.Stationary, lcMul(MovingToProposed, Correction), true).value_or(0) >= 2)
+						{
+							// The larger radius only covers the initial move to the seated grip.
+							constexpr float DefaultRadius = lcConnectionDragState::DefaultReleaseRadius;
+							if (DistanceSquared < DefaultRadius * DefaultRadius)
+								DragState.ReleaseRadius = DefaultRadius;
+
+							return Correction;
+						}
+					}
+				}
+			}
 		}
 	}
 
 	if (!BestPair)
 		DragState.Pair.reset();
-
-	float SearchRadiusSquared = std::numeric_limits<float>::infinity();
 
 	if (BestPair)
 	{
@@ -551,13 +757,40 @@ std::optional<lcVector3> lcConnectionInfo::FindStudSnap(std::vector<lcConnection
 		}
 	}
 
+	if (GrabScreen && !TurnAnchors.empty())
+	{
+		if (const std::optional<StudSnapCandidate> Candidate = FindStudSnapWithTurn(MovingEndpoints, DragState.Stationary, TurnAnchors, MovingToProposed, Context, *GrabScreen, BestCorrection))
+		{
+			const StudSnapAnchor& Anchor = TurnAnchors[Candidate->AnchorIndex];
+			BestAngle = Candidate->Angle;
+			BestCorrection = Candidate->Correction;
+			BestPair = Anchor.Pair;
+			BestDistanceSquared = Candidate->GrabDistanceSquared;
+
+			const lcVector2 SnappedGrab = Candidate->SnappedGrabScreen;
+			if (BestAngle != 0.0f)
+			{
+				DragState.ReleaseCenter = SnappedGrab;
+				BestDistanceSquared = DragState.GetReleaseDistanceSquared(Context.Cursor);
+			}
+			else
+				DragState.ScreenCorrection = lcVector2(SnappedGrab.x - GrabScreen->x, SnappedGrab.y - GrabScreen->y);
+		}
+	}
+
 	if (BestPair)
 	{
-		if (BestPair != DragState.Pair)
-			DragState.ReleaseRadius = lcMax(lcConnectionDragState::DefaultReleaseRadius, sqrtf(BestDistanceSquared) + 4.0f);
+		if (BestPair != DragState.Pair || BestAngle != DragState.TurnAngle)
+		{
+			constexpr float DefaultRadius = lcConnectionDragState::DefaultReleaseRadius;
+			DragState.ReleaseRadius = DefaultRadius;
+			if (BestAngle == 0.0f || BestDistanceSquared >= DefaultRadius * DefaultRadius)
+				DragState.ReleaseRadius = lcMax(DefaultRadius, sqrtf(BestDistanceSquared) + 4.0f);
+		}
 
 		DragState.Pair = BestPair;
 	}
 
-	return BestTranslation;
+	DragState.TurnAngle = BestAngle;
+	return BestCorrection;
 }

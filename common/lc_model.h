@@ -367,7 +367,8 @@ public:
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
 	quint64 GetCurrentHistoryRevision() const;
-	std::optional<lcVector3> GetStudSnapTranslation(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const;
+	// Returns a model-space correction to apply after the proposed transform.
+	std::optional<lcMatrix44> GetStudSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance);
 	void UpdateSelectedPiecesTrainTrackConnections();
 	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);

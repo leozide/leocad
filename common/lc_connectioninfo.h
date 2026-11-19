@@ -22,6 +22,14 @@ struct lcConnectionPoint
 	lcVector3 Direction;
 };
 
+struct lcStudTurnContext
+{
+	lcVector3 GrabPoint;
+	lcVector3 FacePoint;
+	lcVector3 FaceDirection;
+	lcConnectionType TargetType;
+};
+
 struct lcConnectionSnapContext
 {
 	lcMatrix44 ModelToClip;
@@ -29,12 +37,15 @@ struct lcConnectionSnapContext
 	lcVector3 ViewDirection;
 	const lcPiece* SurfacePiece;
 	bool HasSurfaceHit;
+	std::optional<lcStudTurnContext> Turn = std::nullopt;
+	lcVector2 Cursor = lcVector2(0, 0);
 };
 
 struct lcConnectionDragState
 {
 	static constexpr float DefaultReleaseRadius = 16.0f;
 
+	float GetReleaseDistanceSquared(const lcVector2& Cursor) const;
 	bool IsWithinReleaseRadius(const lcVector2& Cursor) const;
 
 	struct Endpoint
@@ -54,6 +65,8 @@ struct lcConnectionDragState
 	lcVector2 ReleaseCenter = lcVector2(0, 0);
 	float ReleaseRadius = DefaultReleaseRadius;
 	lcMatrix44 SnappedTransform = lcMatrix44Identity();
+	lcMatrix33 ProposalRotation = lcMatrix33Identity();
+	float TurnAngle = 0.0f;
 };
 
 struct lcStudMatingFace
@@ -75,8 +88,8 @@ public:
 	static bool AreStudDirectionsAligned(const lcVector3& FirstDirection, const lcVector3& SecondDirection);
 	static std::optional<lcVector3> GetStudSnapTranslation(const lcConnectionPoint& MovingConnection, const lcMatrix44& MovingTransform, const lcConnectionPoint& TargetConnection, const lcMatrix44& TargetTransform);
 
-	// Stationary endpoints are sorted by model-space X. Matching updates the retained pair and occupancy cache.
-	static std::optional<lcVector3> FindStudSnap(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, lcConnectionDragState& DragState);
+	// Returns a correction from the proposed pose. Stationary endpoints are sorted by model-space X.
+	static std::optional<lcMatrix44> FindStudSnap(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, lcConnectionDragState& DragState);
 
 	std::optional<lcStudMatingFace> FindStudMatingFace(const lcVector3& HitPosition, const lcVector3& RayDirection, float HitDistance, const lcBoundingBox& SurfaceBounds) const;
 	static lcMatrix44 GetStudMatingTransform(const lcStudMatingFace& Face, const lcMatrix44& SurfaceTransform, const lcMatrix33& SnapRotation, const lcVector3& GrabOffset, float PlacementOffset, const lcConnectionInfo* MovingConnections);
@@ -88,6 +101,22 @@ public:
 	}
 
 protected:
+	struct StudSnapAnchor
+	{
+		std::pair<size_t, size_t> Pair;
+		lcVector3 ProposedPosition;
+		float DistanceSquared;
+	};
+
+	struct StudSnapCandidate
+	{
+		size_t AnchorIndex;
+		lcMatrix44 Correction;
+		float Angle;
+		lcVector2 SnappedGrabScreen;
+		float GrabDistanceSquared;
+	};
+
 	static lcResult<void> LoadArchive(lcZipFile& Archive, lcPiecesLibrary* Library);
 	static bool ParsePart(const QByteArray& Data, const std::string& PartName, int ExpectedVersion, int ExpectedConnections, std::vector<lcConnectionPoint>& Connections);
 	static bool ParseVector(const QJsonValue& Value, lcVector3& Vector);
@@ -95,8 +124,13 @@ protected:
 	float GetStudMatingOffset(lcConnectionType Type, const lcMatrix33& Rotation, const lcVector3& SurfaceAxis, float PlacementOffset) const;
 	static std::vector<lcConnectionDragState::Endpoint>::const_iterator FindEndpointByX(const std::vector<lcConnectionDragState::Endpoint>& Endpoints, float X);
 	static bool IsOccupied(lcConnectionDragState::Endpoint& Point, const std::vector<lcConnectionDragState::Endpoint>& Endpoints, bool Sorted);
-	static bool HasOccupiedContact(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const lcMatrix44& MovingToProposed, const lcVector3& Translation);
+	static std::optional<size_t> GetStudContactCount(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const lcMatrix44& MovingToSnapped, bool CountContacts);
+	static lcMatrix44 GetStudTurnCorrection(const lcVector3& MovingAnchor, const lcConnectionPoint& Target, float Angle);
+	static bool IsStudTurnTarget(const lcConnectionDragState::Endpoint& Target, const lcConnectionSnapContext& Context);
+	static std::vector<float> GetStudTurnAngles(const std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, const std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const StudSnapAnchor& Anchor, const lcMatrix44& MovingToProposed);
+	static std::optional<StudSnapCandidate> FindStudSnapWithTurn(std::vector<lcConnectionDragState::Endpoint>& MovingEndpoints, std::vector<lcConnectionDragState::Endpoint>& StationaryEndpoints, const std::vector<StudSnapAnchor>& Anchors, const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcVector2& GrabScreen, const std::optional<lcMatrix44>& UnturnedCorrection);
 	static std::optional<float> GetStudPairScreenDistanceSquared(const lcConnectionPoint& Proposed, const lcConnectionDragState::Endpoint& Target, const lcVector2& MovingScreen, const lcConnectionSnapContext& Context, bool Retained, lcVector2& ScreenCorrection);
+	static std::optional<float> GetStudGrabScreenDistanceSquared(const lcMatrix44& Correction, const lcConnectionSnapContext& Context, const lcVector2& GrabScreen, lcVector2& SnappedGrabScreen);
 	static std::optional<lcVector2> ProjectEndpoint(const lcConnectionSnapContext& Context, const lcVector3& Position);
 
 	std::vector<lcConnectionPoint> mConnections;

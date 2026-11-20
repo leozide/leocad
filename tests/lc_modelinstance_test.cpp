@@ -215,10 +215,12 @@ public:
 
 void lcModelInstanceTests::ConnectionPartParsing()
 {
-	const QByteArray Data = R"({"part":"3009.dat","version":1,"connections":[{"id":"male-1","type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
+	const QByteArray Data = R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
 	std::vector<lcConnectionPoint> Connections;
-	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, 1, Connections));
+	std::vector<std::string> Variants;
+	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, Connections, Variants));
 	QCOMPARE(static_cast<int>(Connections.size()), 1);
+	QVERIFY(Variants == std::vector<std::string>{ "3009p01.dat" });
 	QCOMPARE(Connections[0].Type, lcConnectionType::StudMale);
 	QCOMPARE(Connections[0].Position.x, 10.0f);
 	QCOMPARE(Connections[0].Position.y, 30.0f);
@@ -231,9 +233,13 @@ void lcModelInstanceTests::ConnectionPartParsing()
 void lcModelInstanceTests::ConnectionPartRejectsInvalidData()
 {
 	std::vector<lcConnectionPoint> Connections;
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"connections":[]})", "3009.dat", 1, 0, Connections));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"connections":[{"id":"bad","type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, 1, Connections));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"connections":[{"id":"bad","type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, 1, Connections));
+	std::vector<std::string> Variants;
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"variants":[],"connections":[]})", "3009.dat", 0, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["parts/3009p01.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat","3009P01.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
 }
 
 void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()

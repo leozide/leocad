@@ -3,122 +3,42 @@
 // Object states are captured while an edit is in progress, then reduced to the
 // changed objects. Ordering is only retained for insertions, deletions or reordering.
 template<typename StateType>
-struct lcObjectHistory
+class lcObjectHistory
 {
-	std::vector<StateType> States;
-	std::optional<std::vector<uint32_t>> Order;
-
-	template<typename ObjectType>
-	void Save(const std::vector<std::unique_ptr<ObjectType>>& Objects)
+public:
+	std::vector<StateType>& GetStates()
 	{
-		States.clear();
-		States.reserve(Objects.size());
-		Order.emplace();
-		Order->reserve(Objects.size());
+		return mStates;
+	}
 
-		for (const std::unique_ptr<ObjectType>& Object : Objects)
-		{
-			States.emplace_back(Object->GetHistoryState());
-			Order->emplace_back(static_cast<uint32_t>(Object->GetId()));
-		}
+	const std::vector<StateType>& GetStates() const
+	{
+		return mStates;
+	}
+
+	const std::optional<std::vector<uint32_t>>& GetOrder() const
+	{
+		return mOrder;
 	}
 
 	bool IsEmpty() const
 	{
-		return States.empty() && !Order;
+		return mStates.empty() && !mOrder;
 	}
 
-	static void Compact(lcObjectHistory& Start, lcObjectHistory& End)
+	template<typename ObjectType>
+	void Save(const std::vector<std::unique_ptr<ObjectType>>& Objects)
 	{
-		std::unordered_map<uint32_t, const StateType*> StartStates;
-		std::unordered_map<uint32_t, const StateType*> EndStates;
+		mStates.clear();
+		mStates.reserve(Objects.size());
+		mOrder.emplace();
+		mOrder->reserve(Objects.size());
 
-		StartStates.reserve(Start.States.size());
-		EndStates.reserve(End.States.size());
-
-		for (const StateType& State : Start.States)
-			StartStates.emplace(static_cast<uint32_t>(State.Id), &State);
-
-		for (const StateType& State : End.States)
-			EndStates.emplace(static_cast<uint32_t>(State.Id), &State);
-
-		std::unordered_set<uint32_t> Changed;
-
-		for (const StateType& State : Start.States)
+		for (const std::unique_ptr<ObjectType>& Object : Objects)
 		{
-			const auto Other = EndStates.find(static_cast<uint32_t>(State.Id));
-
-			if (Other == EndStates.end() || !(State == *Other->second))
-				Changed.emplace(static_cast<uint32_t>(State.Id));
+			mStates.emplace_back(Object->GetHistoryState());
+			mOrder->emplace_back(static_cast<uint32_t>(Object->GetId()));
 		}
-
-		for (const StateType& State : End.States)
-			if (StartStates.find(static_cast<uint32_t>(State.Id)) == StartStates.end())
-				Changed.emplace(static_cast<uint32_t>(State.Id));
-
-		auto KeepChanges = [&Changed](std::vector<StateType>& States)
-		{
-			std::vector<StateType> Changes;
-			Changes.reserve(std::min(States.size(), Changed.size()));
-
-			for (StateType& State : States)
-				if (Changed.find(static_cast<uint32_t>(State.Id)) != Changed.end())
-					Changes.emplace_back(std::move(State));
-
-			States = std::move(Changes);
-		};
-
-		KeepChanges(Start.States);
-		KeepChanges(End.States);
-
-		if (Start.Order == End.Order)
-		{
-			Start.Order.reset();
-			End.Order.reset();
-		}
-	}
-
-	static void Merge(lcObjectHistory& Start, lcObjectHistory& End, lcObjectHistory& NextStart, lcObjectHistory& NextEnd)
-	{
-		std::map<uint32_t, StateType> Before;
-		std::map<uint32_t, StateType> After;
-
-		for (StateType& State : Start.States)
-			Before.emplace(static_cast<uint32_t>(State.Id), std::move(State));
-
-		for (StateType& State : End.States)
-			After.emplace(static_cast<uint32_t>(State.Id), std::move(State));
-
-		for (StateType& State : NextStart.States)
-		{
-			const uint32_t Id = static_cast<uint32_t>(State.Id);
-
-			if (After.find(Id) == After.end())
-				Before.emplace(Id, std::move(State));
-		}
-
-		for (const StateType& State : NextStart.States)
-			After.erase(static_cast<uint32_t>(State.Id));
-
-		for (StateType& State : NextEnd.States)
-			After.insert_or_assign(static_cast<uint32_t>(State.Id), std::move(State));
-
-		Start.States.clear();
-		End.States.clear();
-
-		for (auto& [Id, State] : Before)
-			Start.States.emplace_back(std::move(State));
-
-		for (auto& [Id, State] : After)
-			End.States.emplace_back(std::move(State));
-
-		if (!Start.Order)
-			Start.Order = std::move(NextStart.Order);
-
-		if (NextEnd.Order)
-			End.Order = std::move(NextEnd.Order);
-
-		Compact(Start, End);
 	}
 
 	template<typename ObjectType>
@@ -126,7 +46,7 @@ struct lcObjectHistory
 	{
 		std::unordered_map<uint32_t, ObjectType*> ObjectsById;
 
-		if (!Order)
+		if (!mOrder)
 		{
 			ObjectsById.reserve(Objects.size());
 
@@ -145,13 +65,13 @@ struct lcObjectHistory
 		std::unordered_set<uint32_t> StateIds;
 		std::vector<std::unique_ptr<ObjectType>> NewObjects;
 
-		for (const StateType& State : States)
+		for (const StateType& State : mStates)
 			StateIds.emplace(static_cast<uint32_t>(State.Id));
 
-		NewObjects.reserve(Order->size());
-		ObjectsById.reserve(Order->size());
+		NewObjects.reserve(mOrder->size());
+		ObjectsById.reserve(mOrder->size());
 
-		for (uint32_t Id : *Order)
+		for (uint32_t Id : *mOrder)
 		{
 			const auto Object = ObjectIndices.find(Id);
 
@@ -170,4 +90,101 @@ struct lcObjectHistory
 
 		return ObjectsById;
 	}
+
+	static void Compact(lcObjectHistory& Start, lcObjectHistory& End)
+	{
+		std::unordered_map<uint32_t, const StateType*> StartStates;
+		std::unordered_map<uint32_t, const StateType*> EndStates;
+
+		StartStates.reserve(Start.mStates.size());
+		EndStates.reserve(End.mStates.size());
+
+		for (const StateType& State : Start.mStates)
+			StartStates.emplace(static_cast<uint32_t>(State.Id), &State);
+
+		for (const StateType& State : End.mStates)
+			EndStates.emplace(static_cast<uint32_t>(State.Id), &State);
+
+		std::unordered_set<uint32_t> Changed;
+
+		for (const StateType& State : Start.mStates)
+		{
+			const auto Other = EndStates.find(static_cast<uint32_t>(State.Id));
+
+			if (Other == EndStates.end() || !(State == *Other->second))
+				Changed.emplace(static_cast<uint32_t>(State.Id));
+		}
+
+		for (const StateType& State : End.mStates)
+			if (StartStates.find(static_cast<uint32_t>(State.Id)) == StartStates.end())
+				Changed.emplace(static_cast<uint32_t>(State.Id));
+
+		auto KeepChanges = [&Changed](std::vector<StateType>& States)
+		{
+			std::vector<StateType> Changes;
+			Changes.reserve(std::min(States.size(), Changed.size()));
+
+			for (StateType& State : States)
+				if (Changed.find(static_cast<uint32_t>(State.Id)) != Changed.end())
+					Changes.emplace_back(std::move(State));
+
+			States = std::move(Changes);
+		};
+
+		KeepChanges(Start.mStates);
+		KeepChanges(End.mStates);
+
+		if (Start.mOrder == End.mOrder)
+		{
+			Start.mOrder.reset();
+			End.mOrder.reset();
+		}
+	}
+
+	static void Merge(lcObjectHistory& Start, lcObjectHistory& End, lcObjectHistory& NextStart, lcObjectHistory& NextEnd)
+	{
+		std::map<uint32_t, StateType> Before;
+		std::map<uint32_t, StateType> After;
+
+		for (StateType& State : Start.mStates)
+			Before.emplace(static_cast<uint32_t>(State.Id), std::move(State));
+
+		for (StateType& State : End.mStates)
+			After.emplace(static_cast<uint32_t>(State.Id), std::move(State));
+
+		for (StateType& State : NextStart.mStates)
+		{
+			const uint32_t Id = static_cast<uint32_t>(State.Id);
+
+			if (After.find(Id) == After.end())
+				Before.emplace(Id, std::move(State));
+		}
+
+		for (const StateType& State : NextStart.mStates)
+			After.erase(static_cast<uint32_t>(State.Id));
+
+		for (StateType& State : NextEnd.mStates)
+			After.insert_or_assign(static_cast<uint32_t>(State.Id), std::move(State));
+
+		Start.mStates.clear();
+		End.mStates.clear();
+
+		for (auto& [Id, State] : Before)
+			Start.mStates.emplace_back(std::move(State));
+
+		for (auto& [Id, State] : After)
+			End.mStates.emplace_back(std::move(State));
+
+		if (!Start.mOrder)
+			Start.mOrder = std::move(NextStart.mOrder);
+
+		if (NextEnd.mOrder)
+			End.mOrder = std::move(NextEnd.mOrder);
+
+		Compact(Start, End);
+	}
+
+protected:
+	std::vector<StateType> mStates;
+	std::optional<std::vector<uint32_t>> mOrder;
 };

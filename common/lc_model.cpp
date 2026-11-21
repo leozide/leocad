@@ -2040,7 +2040,7 @@ std::unordered_map<uint32_t, lcGroup*> lcModel::RestoreGroups(const lcObjectHist
 	const std::unordered_map<uint32_t, lcGroup*> GroupsById = History.RestoreObjects(mGroups);
 
 	// The lookup uses saved IDs, so a parent can be linked before its state is restored.
-	for (const lcGroupHistoryState& State : History.States)
+	for (const lcGroupHistoryState& State : History.GetStates())
 	{
 		const auto Group = GroupsById.find(static_cast<uint32_t>(State.Id));
 		const auto Parent = GroupsById.find(State.ParentId);
@@ -2056,7 +2056,7 @@ void lcModel::RestorePieces(const lcObjectHistory<lcPieceHistoryState>& History,
 {
 	const std::unordered_map<uint32_t, lcPiece*> PiecesById = History.RestoreObjects(mPieces);
 
-	for (const lcPieceHistoryState& State : History.States)
+	for (const lcPieceHistoryState& State : History.GetStates())
 	{
 		const auto Piece = PiecesById.find(static_cast<uint32_t>(State.Id));
 		const auto Group = GroupsById.find(State.GroupId);
@@ -2078,9 +2078,9 @@ void lcModel::RestoreCameras(const lcObjectHistory<lcCameraHistoryState>& Histor
 	if (History.IsEmpty())
 		return;
 
-	if (History.Order)
+	if (History.GetOrder())
 	{
-		const std::unordered_set<uint32_t> CameraIds(History.Order->begin(), History.Order->end());
+		const std::unordered_set<uint32_t> CameraIds(History.GetOrder()->begin(), History.GetOrder()->end());
 
 		for (const std::unique_ptr<lcCamera>& Camera : mCameras)
 			if (CameraIds.find(static_cast<uint32_t>(Camera->GetId())) == CameraIds.end())
@@ -2089,7 +2089,7 @@ void lcModel::RestoreCameras(const lcObjectHistory<lcCameraHistoryState>& Histor
 
 	const std::unordered_map<uint32_t, lcCamera*> CamerasById = History.RestoreObjects(mCameras);
 
-	for (const lcCameraHistoryState& State : History.States)
+	for (const lcCameraHistoryState& State : History.GetStates())
 	{
 		const auto Camera = CamerasById.find(static_cast<uint32_t>(State.Id));
 
@@ -2104,8 +2104,8 @@ void lcModel::RestoreLights(const lcObjectHistory<lcLightHistoryState>& History)
 		return;
 
 	const std::unordered_map<uint32_t, lcLight*> LightsById = History.RestoreObjects(mLights);
-
-	for (const lcLightHistoryState& State : History.States)
+	
+	for (const lcLightHistoryState& State : History.GetStates())
 	{
 		const auto Light = LightsById.find(static_cast<uint32_t>(State.Id));
 

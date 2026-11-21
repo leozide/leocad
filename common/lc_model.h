@@ -39,7 +39,7 @@ struct lcLightHistoryState;
 struct lcTrainTrackSnapContext;
 struct lcConnectionSnapContext;
 struct lcConnectionDragState;
-template<typename StateType> struct lcObjectHistory;
+template<typename StateType> class lcObjectHistory;
 class lcModelHistory;
 class lcModelHistorySelect;
 class lcModelHistoryEdit;

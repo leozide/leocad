@@ -200,7 +200,7 @@ void lcModelHistoryEdit::RenamePieces(const std::vector<lcModelPieceRename>& Ren
 
 	auto RenamePieceIds = [&Renames](lcModelHistoryEditState& State)
 	{
-		for (lcPieceHistoryState& Piece : State.Pieces.States)
+		for (lcPieceHistoryState& Piece : State.Pieces.GetStates())
 		{
 			for (const lcModelPieceRename& Rename : Renames)
 			{

@@ -54,7 +54,7 @@ static void Load(const History& State, Objects& Model, int& Removed)
 	const std::unordered_map<uint32_t, TestObject*> ObjectsById = State.RestoreObjects(Model);
 	Removed += TestObject::Destructions - DestructionsBefore;
 
-	for (const TestState& Saved : State.States)
+	for (const TestState& Saved : State.GetStates())
 	{
 		const auto Object = ObjectsById.find(Saved.Id);
 
@@ -108,11 +108,11 @@ void lcTests::HistoryStoresOnlyChangedObjects()
 	Model[7500]->State.Value = 1;
 	History End = Capture(Model);
 	History::Compact(Start, End);
-	QCOMPARE(Start.States.size(), size_t(1));
-	QCOMPARE(End.States.size(), size_t(1));
-	QCOMPARE(Start.States.capacity(), size_t(1));
-	QCOMPARE(End.States.capacity(), size_t(1));
-	QVERIFY(!Start.Order && !End.Order);
+	QCOMPARE(Start.GetStates().size(), size_t(1));
+	QCOMPARE(End.GetStates().size(), size_t(1));
+	QCOMPARE(Start.GetStates().capacity(), size_t(1));
+	QCOMPARE(End.GetStates().capacity(), size_t(1));
+	QVERIFY(!Start.GetOrder() && !End.GetOrder());
 	TestObject* Untouched = Model[0].get();
 	int Removed = 0;
 	Load(Start, Model, Removed);
@@ -130,7 +130,7 @@ void lcTests::HistoryCancelsPendingEdit()
 		Add(Model, Id, 0);
 
 	const History Start = Capture(Model);
-	const std::vector<TestState> Expected = Start.States;
+	const std::vector<TestState> Expected = Start.GetStates();
 	Model.erase(Model.begin());
 	Add(Model, 4, 3);
 
@@ -159,7 +159,7 @@ void lcTests::HistoryReplaysAndMergesEdits()
 		for (int Index = 0; Index < 12; Index++)
 			Add(Model, NextId++, 0);
 
-		const std::vector<TestState> Initial = Capture(Model).States;
+		const std::vector<TestState> Initial = Capture(Model).GetStates();
 		History MergedStart;
 		History MergedEnd;
 
@@ -189,8 +189,8 @@ void lcTests::HistoryReplaysAndMergesEdits()
 			}
 
 			End = Capture(Model);
-			const std::vector<TestState> Expected = End.States;
-			const std::vector<TestState> Previous = Start.States;
+			const std::vector<TestState> Expected = End.GetStates();
+			const std::vector<TestState> Previous = Start.GetStates();
 			History::Compact(Start, End);
 			Load(Start, Model, Removed);
 			QVERIFY2(Matches(Model, Previous), qPrintable(QString("Undo failed: seed 1050, trial %1, edit %2").arg(Trial).arg(Edit)));

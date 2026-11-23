@@ -76,6 +76,7 @@ private slots:
 	void ConnectionPartParsing();
 	void ConnectionPartRejectsInvalidData();
 	void ConnectionArchiveLoadAndValidation();
+	void PatternConnectionsPublishWithMesh();
 	void StudDragAcceptance_data();
 	void StudDragAcceptance();
 	void StudDragOccupiedContact();
@@ -215,12 +216,10 @@ public:
 
 void lcModelInstanceTests::ConnectionPartParsing()
 {
-	const QByteArray Data = R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
+	const QByteArray Data = R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
 	std::vector<lcConnectionPoint> Connections;
-	std::vector<std::string> Variants;
-	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, Connections, Variants));
+	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, Connections));
 	QCOMPARE(static_cast<int>(Connections.size()), 1);
-	QVERIFY(Variants == std::vector<std::string>{ "3009p01.dat" });
 	QCOMPARE(Connections[0].Type, lcConnectionType::StudMale);
 	QCOMPARE(Connections[0].Position.x, 10.0f);
 	QCOMPARE(Connections[0].Position.y, 30.0f);
@@ -228,18 +227,18 @@ void lcModelInstanceTests::ConnectionPartParsing()
 	QCOMPARE(Connections[0].Direction.x, 0.0f);
 	QCOMPARE(Connections[0].Direction.y, 0.0f);
 	QCOMPARE(Connections[0].Direction.z, 1.0f);
+
+	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[]})", "3009.dat", 0, Connections));
+	QVERIFY(Connections.empty());
 }
 
 void lcModelInstanceTests::ConnectionPartRejectsInvalidData()
 {
 	std::vector<lcConnectionPoint> Connections;
-	std::vector<std::string> Variants;
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":1,"variants":[],"connections":[]})", "3009.dat", 0, Connections, Variants));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, Connections, Variants));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat"],"connections":[{"type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, Connections, Variants));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["parts/3009p01.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"variants":["3009p01.dat","3009P01.dat"],"connections":[]})", "3009.dat", 0, Connections, Variants));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"connections":[]})", "3009.dat", 0, Connections));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"variants":[],"connections":[]})", "3009.dat", 0, Connections));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, Connections));
+	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, Connections));
 }
 
 void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()
@@ -250,9 +249,53 @@ void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()
 	const lcPieceData* PieceData = Library->FindPieceData("3009.dat", nullptr);
 	QVERIFY(PieceData);
 
-	const lcConnectionInfo* ConnectionInfo = PieceData->GetConnectionInfo();
+	const lcConnectionInfo* ConnectionInfo = PieceData->GetConnectionInfo().get();
 	QVERIFY(ConnectionInfo);
 	QCOMPARE(static_cast<int>(ConnectionInfo->GetConnections().size()), 12);
+}
+
+void lcModelInstanceTests::PatternConnectionsPublishWithMesh()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	for (const QString& Name : { QStringLiteral("3009.dat"), QStringLiteral("3009p01.dat"), QStringLiteral("3009p01d01.dat") })
+	{
+		QFile File(Directory.filePath(QStringLiteral("parts/") + Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QVERIFY(File.write("0 Connection test\n3 16 0 0 0 1 0 0 0 1 0\n") > 0);
+	}
+
+	lcPiecesLibrary* Library = Scope.Library.get();
+	QVERIFY(Library->Load(Directory.path(), false, false));
+	const lcPieceData* Base = Library->FindPieceData("3009.dat", nullptr);
+	const lcPieceData* Parent = Library->FindPieceData("3009p01.dat", nullptr);
+	const lcPieceDataRef Variant = Library->AcquirePieceData("3009p01d01.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Base && Parent && Variant);
+	QVERIFY(Base->GetConnectionInfo());
+	QVERIFY(!Parent->GetConnectionInfo());
+	QVERIFY(!Variant->GetConnectionInfo());
+	QCOMPARE(Variant->GetPatternParentId(), std::string("3009P01.DAT"));
+
+	QVERIFY(Library->WaitForPieceData(Variant));
+	QCOMPARE(Variant->GetConnectionInfo().get(), Base->GetConnectionInfo().get());
+	QVERIFY(!Parent->GetConnectionInfo());
+	QVERIFY(!Parent->GetMesh());
+	QVERIFY(!Base->GetMesh());
 }
 
 struct lcModelInstanceTestStudProject
@@ -498,7 +541,7 @@ void lcModelInstanceTests::StudDragTurnsForMoreContacts()
 	const lcPiece* Target = Model->GetPieces()[0].get();
 	const lcMatrix44 TargetTransform = Target->mModelWorld;
 	lcPiece* Moving = Model->GetPieces()[1].get();
-	const lcConnectionInfo* Info = Moving->mPieceData->GetConnectionInfo();
+	const lcConnectionInfo* Info = Moving->mPieceData->GetConnectionInfo().get();
 	QVERIFY(Info);
 
 	auto CountContacts = [&](const lcMatrix44& Pose)
@@ -872,7 +915,7 @@ void lcModelInstanceTests::StudDragBaseplateBenchmark()
 	Model->LoadLDraw(Buffer, &Project);
 	QCOMPARE(Model->GetPieces().size(), size_t(1));
 	lcPiece* Baseplate = Model->GetPieces()[0].get();
-	const lcConnectionInfo* Info = Baseplate->mPieceData->GetConnectionInfo();
+	const lcConnectionInfo* Info = Baseplate->mPieceData->GetConnectionInfo().get();
 	QVERIFY(Info);
 	QCOMPARE(Info->GetConnections().size(), size_t(2304));
 	lcPieceData* Brick = Library->FindPieceData("3005.dat", nullptr);
@@ -915,7 +958,7 @@ void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
 	QVERIFY(Buffer.open(QIODevice::ReadOnly));
 	Model->LoadLDraw(Buffer, &Scope.Current);
 	QCOMPARE(Model->GetPieces().size(), size_t(2));
-	const lcConnectionInfo* Info = Model->GetPieces()[0]->mPieceData->GetConnectionInfo();
+	const lcConnectionInfo* Info = Model->GetPieces()[0]->mPieceData->GetConnectionInfo().get();
 	QVERIFY(Info);
 	QCOMPARE(Info->GetConnections().size(), size_t(2304));
 	QVERIFY(Model->EnsureAssetsReady());

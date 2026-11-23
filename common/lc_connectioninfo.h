@@ -117,11 +117,11 @@ protected:
 		float GrabDistanceSquared;
 	};
 
-	static constexpr int ArchiveVersion = 2;
+	static constexpr int ArchiveVersion = 3;
 
 	static bool IsArchivePartName(std::string_view Name);
 	static lcResult<void> LoadArchive(lcZipFile& Archive, lcPiecesLibrary* Library);
-	static bool ParsePart(const QByteArray& Data, const std::string& PartName, int ExpectedConnections, std::vector<lcConnectionPoint>& Connections, std::vector<std::string>& Variants);
+	static bool ParsePart(const QByteArray& Data, const std::string& PartName, int ExpectedConnections, std::vector<lcConnectionPoint>& Connections);
 	static bool ParseVector(const QJsonValue& Value, lcVector3& Vector);
 
 	float GetStudMatingOffset(lcConnectionType Type, const lcMatrix33& Rotation, const lcVector3& SurfaceAxis, float PlacementOffset) const;

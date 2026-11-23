@@ -3198,14 +3198,14 @@ std::optional<lcMatrix44> lcModel::GetStudSnapTransform(const lcMatrix44& Moving
 
 	if (InsertPiece)
 	{
-		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo())
+		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo().get())
 			AddEndpoints(MovingEndpoints, nullptr, *Info, InsertPiece->Transform);
 	}
 	else
 	{
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
-			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo().get();
 
 			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
 				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
@@ -3228,7 +3228,7 @@ std::optional<lcMatrix44> lcModel::GetStudSnapTransform(const lcMatrix44& Moving
 
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 		{
-			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo();
+			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo().get();
 
 			if (Info && Piece->IsVisible(mCurrentStep) && (InsertPiece || !Piece->IsSelected()))
 				AddEndpoints(DragState.Stationary, Piece.get(), *Info, Piece->mModelWorld);

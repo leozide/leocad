@@ -1621,6 +1621,7 @@ bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_p
 		if (Mesh)
 			PieceData->SetMesh(Mesh.release());
 
+		InheritPieceConnections(PieceData);
 		PieceData->mState = lcAssetState::Loaded;
 		ClearPieceDataLoadError(PieceData);
 	}
@@ -1630,6 +1631,36 @@ bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_p
 	ScheduleBufferRepack();
 
 	return Loaded;
+}
+
+void lcPiecesLibrary::InheritPieceConnections(lcPieceData* PieceData)
+{
+	if (!PieceData->IsLibraryPiece() || PieceData->GetConnectionInfo())
+		return;
+
+	const lcPieceData* Current = PieceData;
+
+	while (!Current->IsAlias())
+	{
+		const std::string& ParentId = Current->GetPatternParentId();
+
+		// Pattern parents remove a suffix. This also bounds traversal of cached parent IDs.
+		if (ParentId.empty() || ParentId.size() >= strlen(Current->mFileName))
+			return;
+
+		const lcPieceData* Parent = FindPieceData(ParentId.c_str(), nullptr);
+
+		if (!Parent || !Parent->IsLibraryPiece() || strlen(Parent->mFileName) >= strlen(Current->mFileName))
+			return;
+
+		if (const std::shared_ptr<const lcConnectionInfo>& ConnectionInfo = Parent->GetConnectionInfo())
+		{
+			PieceData->SetConnectionInfo(ConnectionInfo);
+			return;
+		}
+
+		Current = Parent;
+	}
 }
 
 bool lcPiecesLibrary::PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error)

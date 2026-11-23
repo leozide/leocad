@@ -798,7 +798,7 @@ lcMouseInsertPieceInfo lcView::TryStudPlacementOnFace(const lcObjectRayTest& Obj
 			StudDragState.Pair.reset();
 
 		const lcVector3 GrabOffset = MovingPiece ? lcMul(mMouseDownGrabOffset, Rotation) : lcVector3(0, 0, 0);
-		const lcMatrix44 ProposedTransform = lcConnectionInfo::GetStudMatingTransform(MatingFace, SurfaceTransform, SnapRotation, GrabOffset, PlacementOffset, PieceData->GetConnectionInfo());
+		const lcMatrix44 ProposedTransform = lcConnectionInfo::GetStudMatingTransform(MatingFace, SurfaceTransform, SnapRotation, GrabOffset, PlacementOffset, PieceData->GetConnectionInfo().get());
 		std::optional<lcStudTurnContext> Turn;
 		if (MovingPiece)
 			Turn = lcStudTurnContext{ ProposedTransform.GetTranslation() - GrabOffset, FacePoint, FaceDirection, TargetType };
@@ -827,7 +827,7 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 	const lcMatrix44& SurfaceTransform = ObjectRayTest.PieceRayTest.Transform;
 	const lcVector3& Face = ObjectRayTest.PieceRayTest.Plane;
 	const lcPieceData* SurfacePieceData = ObjectRayTest.PieceRayTest.PieceData;
-	const lcConnectionInfo* SurfaceConnections = SurfacePieceData ? SurfacePieceData->GetConnectionInfo() : nullptr;
+	const lcConnectionInfo* SurfaceConnections = SurfacePieceData ? SurfacePieceData->GetConnectionInfo().get() : nullptr;
 	lcVector3 Position = Face;
 	int FaceAxis = 2;
 	float FaceSign = Face.z;

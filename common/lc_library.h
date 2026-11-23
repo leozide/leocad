@@ -306,6 +306,7 @@ protected:
 	// Publishes current results on the UI thread; the loader rejects stale requests first.
 	// A successful piece result may have no mesh when its geometry is empty.
 	bool PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, QString Error);
+	void InheritPieceConnections(lcPieceData* PieceData);
 	bool PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error);
 
 	// Applies decoded pixels or a decode failure; upload scheduling and retries stay in the loader.

@@ -192,7 +192,7 @@ bool lcConnectionInfo::IsArchivePartName(std::string_view Name)
 		Name.find('\\') == std::string_view::npos && Name.find('\0') == std::string_view::npos;
 }
 
-bool lcConnectionInfo::ParsePart(const QByteArray& Data, const std::string& PartName, int ExpectedConnections, std::vector<lcConnectionPoint>& Connections, std::vector<std::string>& Variants)
+bool lcConnectionInfo::ParsePart(const QByteArray& Data, const std::string& PartName, int ExpectedConnections, std::vector<lcConnectionPoint>& Connections)
 {
 	QJsonParseError ParseError;
 	const QJsonDocument Document = QJsonDocument::fromJson(Data, &ParseError);
@@ -203,8 +203,8 @@ bool lcConnectionInfo::ParsePart(const QByteArray& Data, const std::string& Part
 	const QJsonObject Root = Document.object();
 	
 	if (!Root.value(QStringLiteral("part")).isString() || Root.value(QStringLiteral("part")).toString().toStdString() != PartName ||
-		!Root.value(QStringLiteral("version")).isDouble() || Root.value(QStringLiteral("version")).toInt(-1) != ArchiveVersion ||
-		!Root.value(QStringLiteral("connections")).isArray() || !Root.value(QStringLiteral("variants")).isArray())
+		Root.value(QStringLiteral("version")).toInt(-1) != ArchiveVersion || !Root.value(QStringLiteral("connections")).isArray() ||
+		Root.contains(QStringLiteral("variants")))
 		return false;
 
 	const QJsonArray Array = Root.value(QStringLiteral("connections")).toArray();
@@ -214,17 +214,6 @@ bool lcConnectionInfo::ParsePart(const QByteArray& Data, const std::string& Part
 
 	std::vector<lcConnectionPoint> ParsedConnections;
 	ParsedConnections.reserve(static_cast<size_t>(Array.size()));
-	std::vector<std::string> ParsedVariants;
-	std::unordered_set<std::string> VariantNames { lcPiecesLibrary::NormalizePieceDataName(PartName.c_str()) };
-
-	for (const QJsonValue& Variant : Root.value(QStringLiteral("variants")).toArray())
-	{
-		const std::string Name = Variant.toString().toStdString();
-		if (!IsArchivePartName(Name) || !VariantNames.insert(lcPiecesLibrary::NormalizePieceDataName(Name.c_str())).second)
-			return false;
-
-		ParsedVariants.push_back(Name);
-	}
 
 	for (const QJsonValue& ConnectionValue : Array)
 	{
@@ -259,7 +248,6 @@ bool lcConnectionInfo::ParsePart(const QByteArray& Data, const std::string& Part
 	}
 
 	Connections = std::move(ParsedConnections);
-	Variants = std::move(ParsedVariants);
 	
 	return true;
 }
@@ -286,7 +274,6 @@ lcResult<void> lcConnectionInfo::LoadArchive(lcZipFile& Archive, lcPiecesLibrary
 	const QJsonObject Manifest = ManifestDocument.object();
 	
 	if (Manifest.value(QStringLiteral("format")).toString() != QStringLiteral("leocad-connections") ||
-		!Manifest.value(QStringLiteral("version")).isDouble() ||
 		Manifest.value(QStringLiteral("version")).toInt(-1) != ArchiveVersion ||
 		Manifest.value(QStringLiteral("coordinates")).toString() != QStringLiteral("ldraw_part_local") ||
 		Manifest.value(QStringLiteral("units")).toString() != QStringLiteral("ldu") ||
@@ -299,7 +286,7 @@ lcResult<void> lcConnectionInfo::LoadArchive(lcZipFile& Archive, lcPiecesLibrary
 	qint64 ConnectionTotal = 0;
 	qint64 MaleTotal = 0;
 	qint64 ReceiverTotal = 0;
-	std::vector<std::pair<lcPieceData*, std::vector<lcConnectionPoint>>> PendingConnections;
+	std::vector<std::pair<lcPieceData*, std::shared_ptr<const lcConnectionInfo>>> PendingConnections;
 
 	for (auto Entry = PartEntries.constBegin(); Entry != PartEntries.constEnd(); ++Entry)
 	{
@@ -308,12 +295,15 @@ lcResult<void> lcConnectionInfo::LoadArchive(lcZipFile& Archive, lcPiecesLibrary
 		if (!Entry.value().isObject() || !IsArchivePartName(PartName))
 			return lcUnexpected(QStringLiteral("Connection archive contains an invalid part entry."));
 
+		if (!PartNames.insert(lcPiecesLibrary::NormalizePieceDataName(PartName.c_str())).second)
+			return lcUnexpected(QStringLiteral("Connection archive contains a duplicate part."));
+
 		const QJsonObject PartEntry = Entry.value().toObject();
 		const QString ArchivePath = PartEntry.value(QStringLiteral("file")).toString();
 		const int Count = PartEntry.value(QStringLiteral("connections")).toInt(-1);
 		const QString ExpectedHash = PartEntry.value(QStringLiteral("sha256")).toString().toLower();
 		const QJsonValue Version = PartEntry.value(QStringLiteral("version"));
-		const bool SupportedVersion = Version.isUndefined() || (Version.isDouble() && Version.toInt(-1) == ArchiveVersion);
+		const bool SupportedVersion = Version.isUndefined() || Version.toInt(-1) == ArchiveVersion;
 		const bool HashIsHex = ExpectedHash.size() == 64 && std::all_of(ExpectedHash.cbegin(), ExpectedHash.cend(), [](QChar Character)
 		{
 			return Character.isDigit() || (Character >= QLatin1Char('a') && Character <= QLatin1Char('f'));
@@ -339,32 +329,23 @@ lcResult<void> lcConnectionInfo::LoadArchive(lcZipFile& Archive, lcPiecesLibrary
 			return lcUnexpected(QStringLiteral("Connection data hash mismatch for %1.").arg(Entry.key()));
 
 		std::vector<lcConnectionPoint> Connections;
-		std::vector<std::string> Variants;
 
-		if (!ParsePart(PartBytes, PartName, Count, Connections, Variants))
+		if (!ParsePart(PartBytes, PartName, Count, Connections))
 			return lcUnexpected(QStringLiteral("Connection data is invalid for %1.").arg(Entry.key()));
 
-		Variants.push_back(PartName);
-		const qint64 Copies = static_cast<qint64>(Variants.size());
 		for (const lcConnectionPoint& Connection : Connections)
 			if (Connection.Type == lcConnectionType::StudMale)
-				MaleTotal += Copies;
+				MaleTotal++;
 			else
-				ReceiverTotal += Copies;
+				ReceiverTotal++;
 
-		ConnectionTotal += Copies * Count;
+		ConnectionTotal += Count;
 		ExpectedArchiveEntries.insert(ArchivePath.toStdString());
 
-		for (const std::string& Name : Variants)
-		{
-			if (!PartNames.insert(lcPiecesLibrary::NormalizePieceDataName(Name.c_str())).second)
-				return lcUnexpected(QStringLiteral("Connection archive contains a duplicate part or variant."));
+		lcPieceData* PieceData = Library->FindPieceData(PartName.c_str(), nullptr);
 
-			lcPieceData* PieceData = Library->FindPieceData(Name.c_str(), nullptr);
-
-			if (PieceData && PieceData->IsLibraryPiece() && !PieceData->GetConnectionInfo())
-				PendingConnections.emplace_back(PieceData, Connections);
-		}
+		if (PieceData && PieceData->IsLibraryPiece() && !PieceData->GetConnectionInfo())
+			PendingConnections.emplace_back(PieceData, std::make_shared<const lcConnectionInfo>(std::move(Connections)));
 	}
 
 	const QJsonObject Counts = Manifest.value(QStringLiteral("counts")).toObject();
@@ -380,9 +361,8 @@ lcResult<void> lcConnectionInfo::LoadArchive(lcZipFile& Archive, lcPiecesLibrary
 		if (ExpectedArchiveEntries.find(FileInfo.file_name) == ExpectedArchiveEntries.end())
 			return lcUnexpected(QStringLiteral("Connection archive contains an unlisted entry."));
 	
-	for (auto& [PieceData, Connections] : PendingConnections)
-		if (!PieceData->GetConnectionInfo())
-			PieceData->SetConnectionInfo(new lcConnectionInfo(std::move(Connections)));
+	for (auto& [PieceData, ConnectionInfo] : PendingConnections)
+		PieceData->SetConnectionInfo(std::move(ConnectionInfo));
 
 	return lcResult<void>();
 }

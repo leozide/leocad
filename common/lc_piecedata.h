@@ -58,14 +58,14 @@ public:
 		mTrainTrackInfo = TrainTrackInfo;
 	}
 
-	lcConnectionInfo* GetConnectionInfo() const
+	const std::shared_ptr<const lcConnectionInfo>& GetConnectionInfo() const
 	{
 		return mConnectionInfo;
 	}
 
-	void SetConnectionInfo(lcConnectionInfo* ConnectionInfo)
+	void SetConnectionInfo(std::shared_ptr<const lcConnectionInfo> ConnectionInfo)
 	{
-		mConnectionInfo = ConnectionInfo;
+		mConnectionInfo = std::move(ConnectionInfo);
 	}
 
 	lcMesh* GetMesh() const
@@ -235,7 +235,7 @@ protected:
 	std::string mPatternParentId;
 	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
-	lcConnectionInfo* mConnectionInfo = nullptr;
+	std::shared_ptr<const lcConnectionInfo> mConnectionInfo;
 
 private:
 	static bool HasDecorationDescription(const char* Description);

@@ -24,8 +24,25 @@ void lcCollapsibleWidgetButton::Collapse()
 		Clicked();
 }
 
+void lcCollapsibleWidgetButton::SetCollapsible(bool Collapsible)
+{
+	mCollapsible = Collapsible;
+
+	if (!mCollapsible && !mExpanded)
+		Clicked();
+
+	UpdateIcon();
+}
+
 void lcCollapsibleWidgetButton::UpdateIcon()
 {
+	// Fixed headers show no expand arrow.
+	if (!mCollapsible)
+	{
+		setIcon(QIcon());
+		return;
+	}
+
 	if (mExpanded)
 	{
 		if (mExpandedIcon.isNull())
@@ -64,6 +81,9 @@ void lcCollapsibleWidgetButton::UpdateIcon()
 
 void lcCollapsibleWidgetButton::Clicked()
 {
+	if (!mCollapsible && mExpanded)
+		return;
+
 	mExpanded = !mExpanded;
 	UpdateIcon();
 

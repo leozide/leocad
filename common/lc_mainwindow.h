@@ -217,6 +217,9 @@ public:
 	void ToggleAxisIcon();
 	void ToggleGrid();
 	void ToggleFadePreviousSteps();
+	void SetHighlightRenderMode(lcHighlightRenderMode HighlightRenderMode);
+	void ToggleAutomateEdgeColor();
+	void SetStudStyle(lcStudStyle StudStyle);
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);

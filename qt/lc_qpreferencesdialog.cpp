@@ -101,6 +101,9 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	connect(ui->ViewSphereColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ViewSphereTextColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ViewSphereHighlightColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
+	connect(ui->AxisXColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
+	connect(ui->AxisYColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
+	connect(ui->AxisZColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ObjectSelectedColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->ObjectFocusedColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
 	connect(ui->CameraColorButton, &QToolButton::clicked, this, &lcPreferencesDialog::ColorButtonClicked);
@@ -318,6 +321,9 @@ lcPreferencesDialog::lcPreferencesDialog(QWidget* Parent, lcPreferencesDialogOpt
 	SetButtonPixmap(mOptions->Preferences.mViewSphereColor, ui->ViewSphereColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereTextColor, ui->ViewSphereTextColorButton);
 	SetButtonPixmap(mOptions->Preferences.mViewSphereHighlightColor, ui->ViewSphereHighlightColorButton);
+	SetButtonPixmap(mOptions->Preferences.mAxisXColor, ui->AxisXColorButton);
+	SetButtonPixmap(mOptions->Preferences.mAxisYColor, ui->AxisYColorButton);
+	SetButtonPixmap(mOptions->Preferences.mAxisZColor, ui->AxisZColorButton);
 	SetButtonPixmap(mOptions->Preferences.mObjectSelectedColor, ui->ObjectSelectedColorButton);
 	SetButtonPixmap(mOptions->Preferences.mObjectFocusedColor, ui->ObjectFocusedColorButton);
 	SetButtonPixmap(mOptions->Preferences.mCameraColor, ui->CameraColorButton);
@@ -632,6 +638,21 @@ void lcPreferencesDialog::ColorButtonClicked()
 	{
 		Color = &mOptions->Preferences.mViewSphereHighlightColor;
 		Title = tr("Select View Sphere Highlight Color");
+	}
+	else if (Button == ui->AxisXColorButton)
+	{
+		Color = &mOptions->Preferences.mAxisXColor;
+		Title = tr("Select X Axis Color");
+	}
+	else if (Button == ui->AxisYColorButton)
+	{
+		Color = &mOptions->Preferences.mAxisYColor;
+		Title = tr("Select Y Axis Color");
+	}
+	else if (Button == ui->AxisZColorButton)
+	{
+		Color = &mOptions->Preferences.mAxisZColor;
+		Title = tr("Select Z Axis Color");
 	}
 	else if (Button == ui->ObjectSelectedColorButton)
 	{

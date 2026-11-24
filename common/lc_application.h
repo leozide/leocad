@@ -88,6 +88,9 @@ public:
 	quint32 mViewSphereColor;
 	quint32 mViewSphereTextColor;
 	quint32 mViewSphereHighlightColor;
+	quint32 mAxisXColor;
+	quint32 mAxisYColor;
+	quint32 mAxisZColor;
 	bool mAutoLoadMostRecent;
 	bool mRestoreTabLayout;
 	lcColorTheme mColorTheme;

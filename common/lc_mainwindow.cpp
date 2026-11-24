@@ -1693,6 +1693,12 @@ void lcMainWindow::ToggleGrid()
 	lcView::UpdateAllViews();
 }
 
+void lcMainWindow::ToggleLoadPiecesBeforeShowing()
+{
+	lcGetPreferences().mLoadPiecesBeforeShowing = !lcGetPreferences().mLoadPiecesBeforeShowing;
+	lcSetProfileInt(LC_PROFILE_LOAD_PIECES_BEFORE_SHOWING, lcGetPreferences().mLoadPiecesBeforeShowing);
+}
+
 void lcMainWindow::ToggleFadePreviousSteps()
 {
 	lcGetPreferences().mFadeSteps = !lcGetPreferences().mFadeSteps;
@@ -2750,6 +2756,15 @@ bool lcMainWindow::OpenProjectFile(const QString& FileName)
 	if (LoadResult)
 	{
 		gApplication->SetProject(NewProject);
+
+		// Show the model complete instead of drawing pieces as they finish loading.
+		if (lcGetPreferences().mLoadPiecesBeforeShowing)
+		{
+			QApplication::setOverrideCursor(Qt::WaitCursor);
+			NewProject->GetMainModel()->WaitForAssets();
+			QApplication::restoreOverrideCursor();
+		}
+
 		AddRecentFile(FileName);
 		lcView::UpdateProjectViews(NewProject);
 
@@ -3284,6 +3299,10 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_FILE_TOGGLE_LOAD_PIECES_BEFORE_SHOWING:
+		ToggleLoadPiecesBeforeShowing();
 		break;
 
 	case LC_PIECE_INSERT:

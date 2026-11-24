@@ -217,6 +217,7 @@ public:
 	void ToggleAxisIcon();
 	void ToggleGrid();
 	void ToggleFadePreviousSteps();
+	void ToggleLoadPiecesBeforeShowing();
 
 	void NewProject();
 	bool OpenProject(const QString& FileName);

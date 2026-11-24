@@ -413,6 +413,16 @@
          </property>
         </widget>
        </item>
+       <item row="13" column="0" colspan="2">
+        <widget class="QCheckBox" name="LoadPiecesBeforeShowing">
+         <property name="toolTip">
+          <string>Wait until every piece of a model is loaded before showing it, instead of showing pieces as they load.</string>
+         </property>
+         <property name="text">
+          <string>Load all pieces before showing a model</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabRendering">
@@ -2725,6 +2735,7 @@
   <tabstop>fixedDirectionKeys</tabstop>
   <tabstop>autoLoadMostRecent</tabstop>
   <tabstop>RestoreTabLayout</tabstop>
+  <tabstop>LoadPiecesBeforeShowing</tabstop>
   <tabstop>antiAliasing</tabstop>
   <tabstop>antiAliasingSamples</tabstop>
   <tabstop>FadeSteps</tabstop>

@@ -402,6 +402,8 @@ void lcMainWindow::CreateMenus()
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_TOP]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_BOTTOM]);
 	mViewpointMenu->addAction(mActions[LC_VIEW_VIEWPOINT_HOME]);
+	mViewpointMenu->addSeparator();
+	mViewpointMenu->addAction(mActions[LC_VIEW_NORMAL_TO_FACE]);
 
 	mProjectionMenu = new QMenu(tr("Projection"), this);
 	mProjectionMenu->addAction(mActions[LC_VIEW_PROJECTION_PERSPECTIVE]);
@@ -3284,6 +3286,11 @@ void lcMainWindow::HandleCommand(lcCommandId CommandId)
 
 	case LC_VIEW_FADE_PREVIOUS_STEPS:
 		ToggleFadePreviousSteps();
+		break;
+
+	case LC_VIEW_NORMAL_TO_FACE:
+		if (ActiveView)
+			ActiveView->StartFaceNormalPick();
 		break;
 
 	case LC_PIECE_INSERT:

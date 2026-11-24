@@ -282,6 +282,7 @@ public:
 	void StartOrbitTracking();
 	void StopTracking(bool Accept);
 	void CancelTrackingOrClearSelectionAction();
+	void StartFaceNormalPick();
 
 	void SetViewpoint(lcViewpoint Viewpoint);
 	void SetViewpoint(const lcVector3& Position);
@@ -393,6 +394,10 @@ protected:
 	lcTrackTool mTrackTool = lcTrackTool::None;
 	lcTrackButton mTrackButton = lcTrackButton::None;
 	lcCursor mCursor = lcCursor::Default;
+	bool mPickingFaceNormal = false;
+
+	void PickFaceNormal();
+	void StopFaceNormalPick();
 
 	lcDragState mDragState;
 	lcConnectionDragState mStudDragState;

@@ -23,6 +23,7 @@ struct lcPieceRayTest
 	const lcPieceData* PieceData = nullptr;
 	lcMatrix44 Transform;
 	lcVector3 Plane;
+	lcVector3 Normal = lcVector3(0.0f, 0.0f, 1.0f);
 };
 
 struct lcObjectRayTest

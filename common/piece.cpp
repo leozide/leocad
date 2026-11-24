@@ -335,7 +335,7 @@ bool lcPiece::MinIntersectDist(const lcVector3& Start, const lcVector3& End, flo
 	if (!Mesh || mPieceData->IsLoading())
 		return mPieceData->MinIntersectDist(Start, End, MinDistance, PieceRayTest);
 
-	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane))
+	if (!Mesh->MinIntersectDist(Start, End, MinDistance, PieceRayTest.Plane, PieceRayTest.Normal))
 		return false;
 
 	PieceRayTest.PieceData = mPieceData.Get();

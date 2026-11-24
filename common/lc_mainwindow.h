@@ -204,6 +204,7 @@ public:
 	void SetTool(lcTool Tool);
 	void SetTransformType(lcTransformType TransformType);
 	void SetColorIndex(int ColorIndex);
+	void ToggleFirstPieceAtOrigin();
 	void SetMoveSnapEnabled(bool Enabled);
 	void SetAngleSnapEnabled(bool Enabled);
 	void SetMoveXYSnapIndex(int Index);

@@ -752,6 +752,10 @@ lcObjectRayTest lcView::GetReadyPieceHit(const lcPieceDataRef& PieceData, lcPiec
 	if (MovingPiece && PieceData->GetSynthInfo())
 		lcGetPiecesLibrary()->WaitForSynthMeshes({ MovingPiece });
 
+	// The first piece of an empty model goes to the origin when enabled.
+	if (!MovingPiece && lcGetPreferences().mFirstPieceAtOrigin && ActiveModel->GetPieces().empty())
+		return { { lcInsertPieceInfo{ PieceData.Get(), lcMatrix44Identity(), gMainWindow->mColorIndex } }, false };
+
 	lcObjectRayTest ObjectRayTest = RayTest(true, IgnoreSelected);
 
 	// Settling a hit's geometry can reveal another pending piece behind it, so pick again until the hit is stable.

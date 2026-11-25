@@ -363,7 +363,17 @@ public:
 		Data.Connections.reserve(Resolved.Items.size());
 
 		for (lcShadowConnectionRecord& Item : Resolved.Items)
-			Data.Connections.emplace_back(std::move(Item.Data));
+		{
+			lcShadowConnection& Connection = Item.Data;
+			Connection.Frame = lcMatrix44LDrawToLeoCAD(Connection.Frame);
+			Connection.Scale = lcVector3Abs(lcVector3LDrawToLeoCAD(Connection.Scale));
+
+			lcShadowGenericConnector* Generic = std::get_if<lcShadowGenericConnector>(&Connection.Shape);
+			if (Generic && Generic->Shape == lcShadowGenericConnector::Bounds::Box)
+				Generic->Dimensions = lcVector3Abs(lcVector3LDrawToLeoCAD(Generic->Dimensions));
+
+			Data.Connections.emplace_back(std::move(Connection));
+		}
 
 		return Data;
 	}

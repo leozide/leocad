@@ -335,7 +335,8 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 			"0 !LDCAD SNAP_INCL [ref=pin.dat] [scale=0 1 1] [grid=C 10000 1 20 0]\n"
 			"0 !LDCAD SNAP_INCL [ref=pin.dat] [pos=0 10 0] [ori=0 1 0 -1 0 0 0 0 1] [grid=1 C 2 1 0 6 0] [slide=true]\n"
 			"0 !LDCAD SNAP_FGR [genderOfs=F] [seq=4.5 8 4.5]\n"
-			"0 !LDCAD SNAP_GEN [group=joint] [bounding=sph 8] [match=size] [placement=free]\n" },
+			"0 !LDCAD SNAP_GEN [group=joint] [bounding=sph 8] [match=size] [placement=free]\n"
+			"0 !LDCAD SNAP_GEN [bounding=box 1 2 3]\n" },
 		{ "parts/s/body.dat", "0 Body\n1 16 0 4 0 -1 0 0 0 2 0 0 0 1 pin.dat\n"
 			"0 !LDCAD SNAP_CLP [radius=4] [length=8] [center=true] [ori=-1 0 0 0 0 1 0 -1 0]\n" },
 		{ "p/pin.dat", "0 Pin\n3 16 0 0 0 1 0 0 0 1 0\n"
@@ -358,12 +359,13 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 
 	const lcShadowConnectionData& Shadow = Piece->GetShadowConnections();
 	QVERIFY(Shadow.HasDefinitions);
-	QCOMPARE(static_cast<int>(Shadow.Connections.size()), 6);
+	QCOMPARE(static_cast<int>(Shadow.Connections.size()), 7);
 	const lcShadowConnection& Inherited = Shadow.Connections[0];
 	QCOMPARE(Inherited.Frame.GetTranslation().x, 9.0f);
-	QCOMPARE(Inherited.Frame.GetTranslation().y, 4.0f);
+	QCOMPARE(Inherited.Frame.GetTranslation().z, -4.0f);
 	QCOMPARE(Inherited.Frame.Determinant(), 1.0f);
-	QCOMPARE(Inherited.Scale.y, 2.0f);
+	QCOMPARE(Inherited.Scale.y, 1.0f);
+	QCOMPARE(Inherited.Scale.z, 2.0f);
 	const lcShadowCylinder* Cylinder = std::get_if<lcShadowCylinder>(&Inherited.Shape);
 	QVERIFY(Cylinder);
 	QCOMPARE(Cylinder->Gender, lcShadowGender::Female);
@@ -378,8 +380,8 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 	QCOMPARE(Clip.Frame.GetTranslation().x, 10.0f);
 	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().x, -3.0f);
 	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().x, 3.0f);
-	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().y, 9.0f);
-	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().y, 9.0f);
+	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().z, -9.0f);
+	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().z, -9.0f);
 	QVERIFY(std::get<lcShadowCylinder>(Shadow.Connections[2].Shape).Sliding);
 	const lcShadowFingers& Fingers = std::get<lcShadowFingers>(Shadow.Connections[4].Shape);
 	QVERIFY(Fingers.Centered);
@@ -387,8 +389,14 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 	QCOMPARE(Fingers.Widths[1], 8.0f);
 	const lcShadowGenericConnector& Generic = std::get<lcShadowGenericConnector>(Shadow.Connections[5].Shape);
 	QCOMPARE(Generic.Shape, lcShadowGenericConnector::Bounds::Sphere);
+	QCOMPARE(Generic.Dimensions.x, 8.0f);
 	QCOMPARE(Generic.Match, QByteArray("size"));
 	QCOMPARE(Generic.Placement, QByteArray("free"));
+	const lcShadowGenericConnector& Box = std::get<lcShadowGenericConnector>(Shadow.Connections[6].Shape);
+	QCOMPARE(Box.Shape, lcShadowGenericConnector::Bounds::Box);
+	QCOMPARE(Box.Dimensions.x, 1.0f);
+	QCOMPARE(Box.Dimensions.y, 3.0f);
+	QCOMPARE(Box.Dimensions.z, 2.0f);
 }
 
 void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
@@ -424,7 +432,7 @@ void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
 
 	const QByteArray Geometry = "0 Root\n3 16 0 0 0 1 0 0 0 1 0\n";
 	const QByteArray Patch =
-		"0 !LDCAD SNAP_CYL [secs=R 6 4] [pos=0 8 0]\n"
+		"0 !LDCAD SNAP_CYL [secs=R 6 4] [pos=0 8 3]\n"
 		"0 !LDCAD SNAP_CYL [secs=R 4 16] [pos=11.822 8.408 1.576] [ori=0.215 -0.911 0.308 0.951 0.288 0.111 0.275 -0.308 -0.911]\n";
 	const std::map<QString, QByteArray> Archives = {
 		{ "library.bin", CreateAddonArchive("ldraw/parts/root.dat", Geometry, 0100644, Geometry.size(), false, false) },
@@ -455,13 +463,18 @@ void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
 	QVERIFY(Cached.FromCache);
 	QVERIFY(Cached.ShadowConnections.HasDefinitions);
 	QCOMPARE(static_cast<int>(Cached.ShadowConnections.Connections.size()), 2);
-	QCOMPARE(Cached.ShadowConnections.Connections.front().Frame.GetTranslation().y, 8.0f);
+	const lcMatrix44& Frame = Cached.ShadowConnections.Connections.front().Frame;
+	QCOMPARE(Frame.GetTranslation().y, 3.0f);
+	QCOMPARE(Frame.GetTranslation().z, -8.0f);
+	QCOMPARE(Frame[2][0], 0.0f);
+	QCOMPARE(Frame[2][1], 0.0f);
+	QCOMPARE(Frame[2][2], 1.0f);
 	const lcShadowConnection& Skewed = Cached.ShadowConnections.Connections.back();
 	QCOMPARE(Skewed.Frame.GetTranslation().x, 11.822f);
-	const lcVector3 Axial = lcVector3(Skewed.Frame[1]) * Skewed.Scale.y;
-	QCOMPARE(Axial.x, -0.911f);
-	QCOMPARE(Axial.y, 0.288f);
-	QCOMPARE(Axial.z, -0.308f);
+	const lcVector3 Axial = lcVector3(Skewed.Frame[2]) * Skewed.Scale.z;
+	QCOMPARE(Axial.x, 0.911f);
+	QCOMPARE(Axial.y, 0.308f);
+	QCOMPARE(Axial.z, 0.288f);
 }
 
 void lcModelInstanceTests::ShadowConnectionsLargeGrid()

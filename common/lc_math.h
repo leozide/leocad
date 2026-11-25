@@ -537,6 +537,11 @@ inline lcVector3 lcNormalize(const lcVector3& a)
 	return Ret;
 }
 
+inline lcVector3 lcVector3Abs(const lcVector3& Vector)
+{
+	return lcVector3(fabsf(Vector.x), fabsf(Vector.y), fabsf(Vector.z));
+}
+
 inline float lcDot(const lcVector3& a, const lcVector3& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;

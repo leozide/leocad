@@ -48,7 +48,8 @@ struct lcShadowGenericConnector
 	enum class Bounds : quint8 { Point, Box, Cube, Cylinder, Sphere };
 
 	Bounds Shape = Bounds::Point;
-	// Parameters are in the order used by the Shadow bounding declaration.
+	// Box half-extents use connector-local LeoCAD axes. Other bounds keep the
+	// parameter order of the Shadow declaration.
 	lcVector3 Dimensions = lcVector3(0.0f, 0.0f, 0.0f);
 	lcShadowGender Gender = lcShadowGender::Male;
 	QByteArray Match = "shape";
@@ -57,8 +58,8 @@ struct lcShadowGenericConnector
 
 struct lcShadowConnection
 {
-	// Apply Scale along the connector's local axes before mapping through Frame
-	// into piece-local LDraw coordinates. The connector axis is -Y.
+	// Returned frames map from connector-local to piece-local LeoCAD coordinates.
+	// Apply Scale along the connector's local axes first. The connector axis is +Z.
 	lcMatrix44 Frame = lcMatrix44Identity();
 	lcVector3 Scale = lcVector3(1.0f, 1.0f, 1.0f);
 	QByteArray Group;

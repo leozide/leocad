@@ -68,6 +68,16 @@ public:
 		mConnectionInfo = std::move(ConnectionInfo);
 	}
 
+	const lcShadowConnectionData& GetShadowConnections() const
+	{
+		return mShadowConnections;
+	}
+
+	void SetShadowConnections(lcShadowConnectionData ShadowConnections)
+	{
+		mShadowConnections = std::move(ShadowConnections);
+	}
+
 	lcMesh* GetMesh() const
 	{
 		return mMesh;
@@ -236,6 +246,7 @@ protected:
 	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
 	std::shared_ptr<const lcConnectionInfo> mConnectionInfo;
+	lcShadowConnectionData mShadowConnections;
 
 private:
 	static bool HasDecorationDescription(const char* Description);

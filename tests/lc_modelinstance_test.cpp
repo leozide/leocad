@@ -77,6 +77,10 @@ private slots:
 	void ConnectionPartRejectsInvalidData();
 	void ConnectionArchiveLoadAndValidation();
 	void PatternConnectionsPublishWithMesh();
+	void ShadowConnectionsPublishWithMesh();
+	void ShadowConnectionsWithCachedMesh();
+	void ShadowConnectionsLargeGrid();
+	void ShadowConnectionsDeepReferences();
 	void StudDragAcceptance_data();
 	void StudDragAcceptance();
 	void StudDragOccupiedContact();
@@ -296,6 +300,231 @@ void lcModelInstanceTests::PatternConnectionsPublishWithMesh()
 	QVERIFY(!Parent->GetConnectionInfo());
 	QVERIFY(!Parent->GetMesh());
 	QVERIFY(!Base->GetMesh());
+}
+
+void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts/s"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	const QByteArray Patch = "0 !LDCAD SNAP_CYL [id=pin] [gender=F] [caps=one] [scale=YOnly] [secs=R 6 4 _L 6.25 2] [pos=1 0 0]\n";
+	const std::map<QString, QByteArray> Files = {
+		{ "parts/shape.dat", "0 Shadow test\n"
+			"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 shadow-test.png\n"
+			"0 !: 1 16 10 0 0 1 0 0 0 1 0 0 0 1 s\\body.dat\n"
+			"0 !TEXMAP FALLBACK\n"
+			"1 16 10 0 0 1 0 0 0 1 0 0 0 1 s\\body.dat\n"
+			"0 !TEXMAP END\n"
+			"0 !LDCAD SNAP_CLEAR [id=discard]\n"
+			"0 !LDCAD SNAP_INCL [ref=pin.dat] [id=duplicate] [grid=C 2 1 20 0]\n"
+			"0 !LDCAD SNAP_CLEAR [id=duplicate]\n"
+			"0 !LDCAD SNAP_INCL [ref=pin.dat] [scale=0 1 1] [grid=C 10000 1 20 0]\n"
+			"0 !LDCAD SNAP_INCL [ref=pin.dat] [pos=0 10 0] [ori=0 1 0 -1 0 0 0 0 1] [grid=1 C 2 1 0 6 0] [slide=true]\n"
+			"0 !LDCAD SNAP_FGR [genderOfs=F] [seq=4.5 8 4.5]\n"
+			"0 !LDCAD SNAP_GEN [group=joint] [bounding=sph 8] [match=size] [placement=free]\n" },
+		{ "parts/s/body.dat", "0 Body\n1 16 0 4 0 -1 0 0 0 2 0 0 0 1 pin.dat\n"
+			"0 !LDCAD SNAP_CLP [radius=4] [length=8] [center=true] [ori=-1 0 0 0 0 1 0 -1 0]\n" },
+		{ "p/pin.dat", "0 Pin\n3 16 0 0 0 1 0 0 0 1 0\n"
+			"0 !LDCAD SNAP_CYL [id=discard] [scale=YOnly] [secs=R 2 3]\n" },
+		{ "shadow.zip", CreateAddonArchive("p/pin.dat", Patch, 0100644, Patch.size(), false, false) }
+	};
+
+	for (const auto& [Name, Content] : Files)
+	{
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Content), static_cast<qint64>(Content.size()));
+	}
+
+	lcPiecesLibrary* Library = Scope.Library.get();
+	QVERIFY(Library->Load(Directory.path(), false, false));
+	const lcPieceDataRef Piece = Library->AcquirePieceData("shape.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Piece);
+	QVERIFY(Library->WaitForPieceData(Piece));
+
+	const lcShadowConnectionData& Shadow = Piece->GetShadowConnections();
+	QVERIFY(Shadow.HasDefinitions);
+	QCOMPARE(static_cast<int>(Shadow.Connections.size()), 6);
+	const lcShadowConnection& Inherited = Shadow.Connections[0];
+	QCOMPARE(Inherited.Frame.GetTranslation().x, 9.0f);
+	QCOMPARE(Inherited.Frame.GetTranslation().y, 4.0f);
+	QCOMPARE(Inherited.Frame.Determinant(), 1.0f);
+	QCOMPARE(Inherited.Scale.y, 2.0f);
+	const lcShadowCylinder* Cylinder = std::get_if<lcShadowCylinder>(&Inherited.Shape);
+	QVERIFY(Cylinder);
+	QCOMPARE(Cylinder->Gender, lcShadowGender::Female);
+	QCOMPARE(Cylinder->Ends, lcShadowCylinder::Caps::B);
+	QCOMPARE(static_cast<int>(Cylinder->Sections.size()), 2);
+	QCOMPARE(Cylinder->Sections[1].Shape, lcShadowCylinder::Profile::FlexPrevious);
+	QCOMPARE(Cylinder->Sections[1].Radius, 6.25f);
+
+	const lcShadowConnection& Clip = Shadow.Connections[1];
+	QVERIFY(std::get<lcShadowClip>(Clip.Shape).Centered);
+	QCOMPARE(Clip.Frame.Determinant(), -1.0f);
+	QCOMPARE(Clip.Frame.GetTranslation().x, 10.0f);
+	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().x, -3.0f);
+	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().x, 3.0f);
+	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().y, 9.0f);
+	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().y, 9.0f);
+	QVERIFY(std::get<lcShadowCylinder>(Shadow.Connections[2].Shape).Sliding);
+	const lcShadowFingers& Fingers = std::get<lcShadowFingers>(Shadow.Connections[4].Shape);
+	QVERIFY(Fingers.Centered);
+	QCOMPARE(Fingers.FirstGender, lcShadowGender::Female);
+	QCOMPARE(Fingers.Widths[1], 8.0f);
+	const lcShadowGenericConnector& Generic = std::get<lcShadowGenericConnector>(Shadow.Connections[5].Shape);
+	QCOMPARE(Generic.Shape, lcShadowGenericConnector::Bounds::Sphere);
+	QCOMPARE(Generic.Match, QByteArray("size"));
+	QCOMPARE(Generic.Placement, QByteArray("free"));
+}
+
+void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
+{
+	class CacheLibrary : public lcPiecesLibrary
+	{
+	public:
+		explicit CacheLibrary(const QString& CachePath) : lcPiecesLibrary(lcStudStyle::Plain, false)
+		{
+			mCachePath = CachePath;
+		}
+
+		using lcPiecesLibrary::BuildPieceData;
+		using lcPiecesLibrary::SnapshotPieceDataSource;
+		using lcPiecesLibrary::Unload;
+	};
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("cache"));
+
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<CacheLibrary> Library;
+		explicit ScopedLibrary(const QString& CachePath) : Library(std::make_unique<CacheLibrary>(CachePath)) { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope(Directory.filePath("cache"));
+
+	const QByteArray Geometry = "0 Root\n3 16 0 0 0 1 0 0 0 1 0\n";
+	const QByteArray Patch =
+		"0 !LDCAD SNAP_CYL [secs=R 6 4] [pos=0 8 0]\n"
+		"0 !LDCAD SNAP_CYL [secs=R 4 16] [pos=11.822 8.408 1.576] [ori=0.215 -0.911 0.308 0.951 0.288 0.111 0.275 -0.308 -0.911]\n";
+	const std::map<QString, QByteArray> Archives = {
+		{ "library.bin", CreateAddonArchive("ldraw/parts/root.dat", Geometry, 0100644, Geometry.size(), false, false) },
+		{ "shadow.zip", CreateAddonArchive("parts/root.dat", Patch, 0100644, Patch.size(), false, false) }
+	};
+	for (const auto& [Name, Bytes] : Archives)
+	{
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Bytes), static_cast<qint64>(Bytes.size()));
+	}
+
+	const QString Path = Directory.filePath("library.bin");
+	QVERIFY(Scope.Library->Load(Path, false, true));
+	{
+		const lcPieceDataRef Piece = Scope.Library->AcquirePieceData("root.dat", nullptr, lcAcquirePieceDataFlag::None);
+		QVERIFY(Piece);
+		QVERIFY(Scope.Library->WaitForPieceData(Piece));
+		QVERIFY(Piece->GetShadowConnections().HasDefinitions);
+		QCOMPARE(static_cast<int>(Piece->GetShadowConnections().Connections.size()), 2);
+	}
+	Scope.Library->Unload();
+
+	QVERIFY(Scope.Library->Load(Path, false, true));
+	const lcPieceData* Piece = Scope.Library->FindPieceData("root.dat", nullptr);
+	QVERIFY(Piece);
+	const lcPieceBuildResult Cached = Scope.Library->BuildPieceData(Scope.Library->SnapshotPieceDataSource(Piece));
+	QVERIFY(Cached.FromCache);
+	QVERIFY(Cached.ShadowConnections.HasDefinitions);
+	QCOMPARE(static_cast<int>(Cached.ShadowConnections.Connections.size()), 2);
+	QCOMPARE(Cached.ShadowConnections.Connections.front().Frame.GetTranslation().y, 8.0f);
+	const lcShadowConnection& Skewed = Cached.ShadowConnections.Connections.back();
+	QCOMPARE(Skewed.Frame.GetTranslation().x, 11.822f);
+	const lcVector3 Axial = lcVector3(Skewed.Frame[1]) * Skewed.Scale.y;
+	QCOMPARE(Axial.x, -0.911f);
+	QCOMPARE(Axial.y, 0.288f);
+	QCOMPARE(Axial.z, -0.308f);
+}
+
+void lcModelInstanceTests::ShadowConnectionsLargeGrid()
+{
+	lcPiecesLibrary Library(lcStudStyle::Plain, false);
+	const QByteArray Grid = "0 !LDCAD SNAP_CLP [id=grid] [grid=100001 1 20 0]\n";
+	const QByteArray ClearGrid =
+		"0 !LDCAD SNAP_CYL [secs=R 6 4]\n"
+		"0 !LDCAD SNAP_CLEAR [id=grid]\n";
+	lcMemFile File;
+	File.WriteBuffer(Grid.constData(), Grid.size());
+	{
+		const lcShadowConnectionData Shadow = lcLoadShadowConnections(Library, File, QStringLiteral("parts/grid.dat"));
+		QCOMPARE(Shadow.Connections.size(), size_t(100001));
+		QCOMPARE(Shadow.Connections.back().Frame.GetTranslation().x, 2000000.0f);
+	}
+
+	File.Seek(0, SEEK_END);
+	File.WriteBuffer(ClearGrid.constData(), ClearGrid.size());
+	const lcShadowConnectionData Cleared = lcLoadShadowConnections(Library, File, QStringLiteral("parts/grid.dat"));
+	QCOMPARE(Cleared.Connections.size(), size_t(1));
+	QVERIFY(std::holds_alternative<lcShadowCylinder>(Cleared.Connections.front().Shape));
+}
+
+void lcModelInstanceTests::ShadowConnectionsDeepReferences()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts/s"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+	constexpr int Depth = 300;
+
+	for (int Index = 0; Index <= Depth; Index++)
+	{
+		const QString Name = Index == 0 ? QStringLiteral("parts/root.dat") : QStringLiteral("parts/s/link%1.dat").arg(Index);
+		const QByteArray Reference = Index == Depth ? QByteArray("root.dat") : "s/link" + QByteArray::number(Index + 1) + ".dat";
+		QByteArray Data = "0 Deep reference test\n1 16 1 0 0 1 0 0 0 1 0 0 0 1 " + Reference + '\n';
+		if (Index == Depth)
+			Data += "0 !LDCAD SNAP_CYL [secs=R 6 4]\n";
+
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Data), static_cast<qint64>(Data.size()));
+	}
+
+	QVERIFY(Scope.Library->Load(Directory.path(), false, false));
+	lcDiskFile File(Directory.filePath("parts/root.dat"));
+	QVERIFY(File.Open(QIODevice::ReadOnly));
+	const lcShadowConnectionData Shadow = lcLoadShadowConnections(*Scope.Library, File, QStringLiteral("parts/root.dat"));
+	QCOMPARE(Shadow.Connections.size(), size_t(1));
+	QCOMPARE(Shadow.Connections.front().Frame.GetTranslation().x, static_cast<float>(Depth));
 }
 
 struct lcModelInstanceTestStudProject

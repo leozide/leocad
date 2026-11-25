@@ -5,6 +5,7 @@
 - Prefer std containers, use Qt containers where a Qt API boundary makes them useful.
 - Prefer `lcstrcpy()` and `lcstrcat()` from `lc_string.h` for bounded C-string copies and concatenation. Use the array overloads when possible; avoid `strncpy()` plus manual null termination. Keep standard functions where no suitable `lc` helper exists.
 - Avoid using `auto` for ordinary variable types. Template iterators, lambdas, and structured bindings may use it for readability.
+- Prefer naming the type explicitly when assigning or returning a constructed value. Use `Value = Type();` or `return Type();` in place of bare brace lists.
 - Do not nest ternary expressions. Use explicit branches when a choice needs another condition.
 - Prefer a private static member function over a file-scope helper when the function belongs to a class and does not use instance state.
 - Prefer explicit `lock()` and `unlock()` over an extra scope with `QMutexLocker` for short, straight-line critical sections that must end before the following code. Keep `QMutexLocker` for early returns, waits, or nontrivial control flow.

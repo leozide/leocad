@@ -178,6 +178,7 @@ lcMesh* lcPieceData::GetDisplayMesh() const
 void lcPieceData::SetFailed(QString Error)
 {
 	ReleaseMesh();
+	mShadowConnections = lcShadowConnectionData();
 	if (!IsModel() && !IsProject())
 		SetLoadingBoundingBox();
 
@@ -296,6 +297,7 @@ void lcPieceData::Unload()
 	lcGetPiecesLibrary()->ClearPieceDataLoadError(this);
 
 	ReleaseMesh();
+	mShadowConnections = lcShadowConnectionData();
 	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();
 	mModel = nullptr;

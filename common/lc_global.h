@@ -75,6 +75,7 @@ typedef quint32 lcStep;
 #define LC_VERSION_TEXT "26.09"
 
 // Forward declarations.
+class lcPiecesLibrary;
 class Project;
 class lcModel;
 enum class lcGeometryBoundsMode;

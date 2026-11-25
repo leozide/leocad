@@ -803,7 +803,10 @@ bool lcPiecesLibrary::ReadShadowFile(const QString& FileName, lcMemFile& File) c
 	if (Entry == mShadowArchiveEntries.end())
 		return false;
 
-	return mShadowZipFile->ExtractFile(Entry->second, File, 1024 * 1024);
+	if (mShadowZipFile->mFiles[Entry->second].uncompressed_size > 1024 * 1024)
+		return false;
+
+	return mShadowZipFile->ExtractFile(Entry->second, File);
 }
 
 bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType)
@@ -1663,7 +1666,7 @@ QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
 	return It != mSynthPieces.end() ? It->second : QString();
 }
 
-bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, QString Error)
+bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, lcShadowConnectionData ShadowConnections, QString Error)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1674,6 +1677,7 @@ bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_p
 		if (Mesh)
 			PieceData->SetMesh(Mesh.release());
 
+		PieceData->SetShadowConnections(std::move(ShadowConnections));
 		InheritPieceConnections(PieceData);
 		PieceData->mState = lcAssetState::Loaded;
 		ClearPieceDataLoadError(PieceData);
@@ -1831,7 +1835,19 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		return Result;
 	}
 
-	if (Source.UnavailableTextures.empty() && !Source.InlineModel && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
+	const bool ArchivePiece = !Source.InlineModel && Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)];
+	lcFileSource PieceFileSource;
+
+	if (ArchivePiece)
+	{
+		PieceFileSource.ArchiveType = static_cast<int>(Source.ZipFileType);
+		PieceFileSource.ArchiveIndex = Source.ZipFileIndex;
+	}
+
+	const QString RelativePartPath = QStringLiteral("parts/") + Source.FileName;
+	std::unique_ptr<lcFile> PieceFile;
+
+	if (Source.UnavailableTextures.empty() && ArchivePiece)
 	{
 		lcMemFile CacheData;
 
@@ -1843,106 +1859,121 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 			{
 				Result.Mesh.reset(new lcMesh);
 
-				if (Result.Mesh->FileLoad(CacheData))
-				{
-					Result.FromCache = true;
-					return Result;
-				}
-
-				Result.Mesh.reset();
+				Result.FromCache = Result.Mesh->FileLoad(CacheData);
+				if (!Result.FromCache)
+					Result.Mesh.reset();
 			}
 		}
 	}
 
-	lcLibraryMeshData MeshData;
-	lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
-
-	MeshLoader.SetUnavailableTextures(Source.UnavailableTextures);
-
-	if (Source.InlineModel)
+	if (!Result.FromCache)
 	{
-		lcMemFile PieceFile;
+		lcLibraryMeshData MeshData;
+		lcMeshLoader MeshLoader(MeshData, nullptr, lcMeshLoaderFlag::Optimize | lcMeshLoaderFlag::RequireAllIncludes);
 
-		for (const QString& Line : Source.InlineMeshLines)
+		MeshLoader.SetUnavailableTextures(Source.UnavailableTextures);
+
+		if (Source.InlineModel)
 		{
-			const QByteArray Buffer = Line.toLatin1();
+			lcMemFile InlineFile;
 
-			PieceFile.WriteBuffer(Buffer.constData(), Buffer.size());
-			PieceFile.WriteBuffer("\r\n", 2);
-		}
+			for (const QString& Line : Source.InlineMeshLines)
+			{
+				const QByteArray Buffer = Line.toLatin1();
 
-		PieceFile.Seek(0, SEEK_SET);
+				InlineFile.WriteBuffer(Buffer.constData(), Buffer.size());
+				InlineFile.WriteBuffer("\r\n", 2);
+			}
 
-		if (!MeshLoader.LoadMesh(PieceFile, LC_MESHDATA_SHARED))
-		{
-			Result.Error = tr("Could not load model geometry '%1'.").arg(Source.FileName);
+			InlineFile.Seek(0, SEEK_SET);
 
-			if (!MeshLoader.GetError().isEmpty())
-				Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
+			if (!MeshLoader.LoadMesh(InlineFile, LC_MESHDATA_SHARED))
+			{
+				Result.Error = tr("Could not load model geometry '%1'.").arg(Source.FileName);
 
-			return Result;
-		}
+				if (!MeshLoader.GetError().isEmpty())
+					Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
 
-		if (MeshData.IsEmpty())
-		{
-			Result.EmptyGeometry = true;
-			return Result;
-		}
-	}
-	else
-	{
-		bool Loaded = false;
+				return Result;
+			}
 
-		if (Source.ZipFileType != lcZipFileType::Count && mZipFiles[static_cast<int>(Source.ZipFileType)])
-		{
-			lcFileSource FileSource;
-			FileSource.ArchiveType = static_cast<int>(Source.ZipFileType);
-			FileSource.ArchiveIndex = Source.ZipFileIndex;
-			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(FileSource);
-
-			if (File)
-				Loaded = MeshLoader.LoadMesh(*File.value(), LC_MESHDATA_SHARED);
+			if (MeshData.IsEmpty())
+			{
+				Result.EmptyGeometry = true;
+				return Result;
+			}
 		}
 		else
 		{
-			lcFileSource FileSource;
-			FileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("parts/") + Source.FileName);
-			const lcResult<std::unique_ptr<lcFile>> File = OpenFile(FileSource);
+			bool Loaded = false;
 
-			if (File)
-				Loaded = MeshLoader.LoadMesh(*File.value(), LC_MESHDATA_SHARED);
-
-			// Directory loading retries unofficial geometry after an open or parse failure.
-			if (mHasUnofficial && !Loaded)
+			auto LoadPieceFile = [this, &MeshLoader, &PieceFile](const lcFileSource& FileSource)
 			{
-				MeshData.Clear();
+				lcResult<std::unique_ptr<lcFile>> File = OpenFile(FileSource);
 
-				FileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("unofficial/parts/") + Source.FileName);
-				const lcResult<std::unique_ptr<lcFile>> UnofficialFile = OpenFile(FileSource);
+				if (!File || !MeshLoader.LoadMesh(*File.value(), LC_MESHDATA_SHARED))
+					return false;
 
-				if (UnofficialFile)
-					Loaded = MeshLoader.LoadMesh(*UnofficialFile.value(), LC_MESHDATA_SHARED);
+				PieceFile = std::move(File.value());
+				return true;
+			};
+
+			if (ArchivePiece)
+				Loaded = LoadPieceFile(PieceFileSource);
+			else
+			{
+				PieceFileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(RelativePartPath);
+				Loaded = LoadPieceFile(PieceFileSource);
+
+				// Directory loading retries unofficial geometry after an open or parse failure.
+				if (mHasUnofficial && !Loaded)
+				{
+					MeshData.Clear();
+
+					PieceFileSource.FilePath = QDir(Source.LibraryDirectory).absoluteFilePath(QStringLiteral("unofficial/") + RelativePartPath);
+					Loaded = LoadPieceFile(PieceFileSource);
+				}
 			}
+
+			if (mCancelLoading.load())
+				Result.Error = tr("Library loading was canceled.");
+			else if (!Loaded)
+			{
+				Result.Error = tr("Could not load piece '%1'.").arg(Source.FileName);
+
+				if (!MeshLoader.GetError().isEmpty())
+					Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
+			}
+
+			if (!Result.Error.isEmpty())
+				return Result;
 		}
 
-		if (mCancelLoading.load())
-			Result.Error = tr("Library loading was canceled.");
-		else if (!Loaded)
+		Result.Mesh.reset(MeshData.CreateMesh(nullptr));
+
+		if (!Result.Mesh)
 		{
-			Result.Error = tr("Could not load piece '%1'.").arg(Source.FileName);
-
-			if (!MeshLoader.GetError().isEmpty())
-				Result.Error += QLatin1Char('\n') + MeshLoader.GetError();
-		}
-
-		if (!Result.Error.isEmpty())
+			Result.Error = tr("Could not prepare piece '%1' for rendering.").arg(Source.FileName);
 			return Result;
+		}
 	}
 
-	Result.Mesh.reset(MeshData.CreateMesh(nullptr));
+	if (!Source.InlineModel && mShadowZipFile && !ShouldCancelLoading())
+	{
+		// A cached mesh has not opened the piece file yet.
+		if (Result.FromCache)
+		{
+			lcResult<std::unique_ptr<lcFile>> File = OpenFile(PieceFileSource);
+			if (File)
+				PieceFile = std::move(File.value());
+		}
 
-	if (!Result.Mesh)
-		Result.Error = tr("Could not prepare piece '%1' for rendering.").arg(Source.FileName);
+		if (PieceFile)
+			Result.ShadowConnections = lcLoadShadowConnections(*this, *PieceFile, RelativePartPath);
+	}
+
+	if (!Source.InlineModel && ShouldCancelLoading())
+		Result.Error = tr("Library loading was canceled.");
 
 	return Result;
 }

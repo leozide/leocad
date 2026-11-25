@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lc_shadowconnection.h"
+
 class lcPieceData;
 class lcTexture;
 class lcPiecesLibrary;
@@ -180,6 +182,7 @@ struct lcPieceBuildResult
 	lcPieceBuildResult& operator=(const lcPieceBuildResult&) = delete;
 
 	std::unique_ptr<lcMesh> Mesh;
+	lcShadowConnectionData ShadowConnections;
 	bool FromCache = false;
 	bool EmptyGeometry = false;
 	QString Error;

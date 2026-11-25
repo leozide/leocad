@@ -144,6 +144,12 @@ macx {
 		QMAKE_BUNDLE_DATA += library
 	}
 
+	!isEmpty(CI)|exists($$_PRO_FILE_PWD_/shadow.zip) {
+		shadow_library.files = $$_PRO_FILE_PWD_/shadow.zip
+		shadow_library.path = Contents/Resources
+		QMAKE_BUNDLE_DATA += shadow_library
+	}
+
 	!isEmpty(CI)|exists($$_PRO_FILE_PWD_/povray) {
 		povray.files += $$_PRO_FILE_PWD_/povray
 		povray.path = Contents/MacOS

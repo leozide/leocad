@@ -110,6 +110,8 @@ void lcPiecesLibrary::Unload()
 
 	mTextureManager->Clear();
 	mTextureDiskEntries.clear();
+	mShadowArchiveEntries.clear();
+	mShadowZipFile.reset();
 
 	for (std::map<QString, int>& Entries : mTextureArchiveEntries)
 		Entries.clear();
@@ -631,6 +633,7 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 			return false;
 	}
 
+	LoadShadowArchive(LibraryPath);
 	UpdateStudStyleSource();
 	lcLoadDefaultCategories();
 	lcSynthInit();
@@ -751,6 +754,56 @@ bool lcPiecesLibrary::OpenArchive(const QString& FileName, lcZipFileType ZipFile
 		return false;
 
 	return OpenArchive(std::move(File), ZipFileType);
+}
+
+void lcPiecesLibrary::LoadShadowArchive(const QString& LibraryPath)
+{
+	mShadowArchiveEntries.clear();
+	mShadowZipFile.reset();
+
+	const QFileInfo LibraryInfo(LibraryPath);
+	const QString LibraryDir = LibraryInfo.isDir() ? LibraryInfo.absoluteFilePath() : LibraryInfo.absolutePath();
+	const QString ShadowFileName = QDir(LibraryDir).filePath(QLatin1String("shadow.zip"));
+
+	std::unique_ptr<lcZipFile> ShadowZipFile(new lcZipFile());
+
+	if (!ShadowZipFile->OpenRead(QDir::cleanPath(ShadowFileName)))
+		return;
+
+	for (quint32 FileIdx = 0; FileIdx < ShadowZipFile->mFiles.size(); FileIdx++)
+	{
+		const QString FileName = QString::fromLatin1(ShadowZipFile->mFiles[FileIdx].file_name).replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+		if (FileName.endsWith(QLatin1Char('/')))
+			continue;
+
+		const QString NormalizedName = QDir::cleanPath(FileName).toUpper();
+
+		if (!NormalizedName.startsWith(QLatin1String("PARTS/")) && !NormalizedName.startsWith(QLatin1String("P/")))
+			continue;
+
+		mShadowArchiveEntries.emplace(NormalizedName, FileIdx);
+	}
+
+	mShadowZipFile = std::move(ShadowZipFile);
+}
+
+bool lcPiecesLibrary::ReadShadowFile(const QString& FileName, lcMemFile& File) const
+{
+	if (!mShadowZipFile)
+		return false;
+
+	QString NormalizedPath = FileName;
+
+	NormalizedPath.replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+	const QString NormalizedName = QDir::cleanPath(NormalizedPath).toUpper();
+	const auto Entry = mShadowArchiveEntries.find(NormalizedName);
+
+	if (Entry == mShadowArchiveEntries.end())
+		return false;
+
+	return mShadowZipFile->ExtractFile(Entry->second, File, 1024 * 1024);
 }
 
 bool lcPiecesLibrary::OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType)

@@ -239,6 +239,9 @@ public:
 	lcResult<lcOpenedLibraryFile> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive);
 	lcResult<lcOpenedLibraryFile> OpenPieceDataFile(const char* PieceName);
 
+	// Reads a normalized entry from the optional bundled Shadow archive.
+	bool ReadShadowFile(const QString& FileName, lcMemFile& File) const;
+
 	// Worker builds poll this shutdown flag without consulting live UI state.
 	bool ShouldCancelLoading() const
 	{
@@ -320,6 +323,7 @@ protected:
 	lcResult<Project*> LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests);
 
 	// Discovers source entries before workers consume their metadata.
+	void LoadShadowArchive(const QString& LibraryPath);
 	bool OpenArchive(const QString& FileName, lcZipFileType ZipFileType);
 	bool OpenArchive(std::unique_ptr<lcFile> File, lcZipFileType ZipFileType);
 	bool OpenDirectory(const QDir& LibraryDir, bool ShowProgress);
@@ -377,6 +381,8 @@ protected:
 	// Library directory, archive readers and primitive sources; workers drain before replacement or teardown.
 	QDir mLibraryDir;
 	std::unique_ptr<lcZipFile> mZipFiles[static_cast<int>(lcZipFileType::Count)];
+	std::unique_ptr<lcZipFile> mShadowZipFile;
+	std::map<QString, quint32> mShadowArchiveEntries;
 	std::vector<std::unique_ptr<lcLibrarySource>> mSources;
 	bool mHasUnofficial;
 

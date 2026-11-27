@@ -132,7 +132,8 @@ class lcLibraryMeshData
 public:
 	lcLibraryMeshData()
 	{
-		mHasTextures = false;
+		mHasTexturedGeometry = false;
+		mHasTexmapDirectives = false;
 		mHasStyleStud = false;
 
 		for (lcMeshLoaderTypeData& Data : mData)
@@ -158,7 +159,8 @@ public:
 
 		mMaterials.clear();
 		mTexturedVertices.clear();
-		mHasTextures = false;
+		mHasTexturedGeometry = false;
+		mHasTexmapDirectives = false;
 		mHasStyleStud = false;
 	}
 
@@ -178,7 +180,8 @@ public:
 	lcMeshLoaderMaterial* GetTexturedMaterial(quint32 ColorCode, const lcMeshLoaderTextureParams& TextureMap);
 
 	std::array<lcMeshLoaderTypeData, LC_NUM_MESHDATA_TYPES> mData;
-	bool mHasTextures;
+	bool mHasTexturedGeometry;
+	bool mHasTexmapDirectives;
 	bool mHasStyleStud;
 
 protected:
@@ -219,6 +222,11 @@ public:
 	bool LoadMesh(lcFile& File, lcMeshDataType MeshDataType);
 	static std::vector<std::string> GetTextureReferences(const QByteArray& FileData);
 
+	static bool IsTextureBranchActive(const std::vector<lcMeshLoaderTextureMap>& TextureStack, const std::set<std::string>& UnavailableTextures);
+	static bool ApplyTextureMapCommand(const char* Text, const lcMatrix44& Transform, std::vector<lcMeshLoaderTextureMap>& TextureStack,
+		size_t StackStart, const std::set<std::string>& UnavailableTextures, QString& Error);
+	static bool FinishTextureMap(const lcMeshLoaderTextureMap& Map, const std::set<std::string>& UnavailableTextures, QString& Error);
+
 	const QString& GetError() const
 	{
 		return mError;
@@ -245,9 +253,6 @@ public:
 protected:
 	static bool ParseTextureName(const char* Text, char* Name, size_t NameSize, const char** EndOfName);
 	bool ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform, quint32 CurrentColorCode, bool InvertWinding, lcMeshDataType MeshDataType);
-
-	bool IsTextureBranchActive() const;
-	bool FinishTextureMap(const lcMeshLoaderTextureMap& Map);
 
 	std::set<std::string> mUnavailableTextures;
 	std::vector<lcFileSource> mActiveSources;

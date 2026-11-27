@@ -1,6 +1,6 @@
 #include "lc_global.h"
-#include "lc_connectioninfo.h"
 #include "lc_library.h"
+#include "lc_connectionloader.h"
 #include "lc_assetloader.h"
 #include "lc_thumbnailmanager.h"
 #include "lc_zipfile.h"
@@ -553,7 +553,7 @@ lcTextureBuildResult lcPiecesLibrary::BuildTextureData(const lcFileSource& Sourc
 	return Result;
 }
 
-lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenFile(const lcFileSource& Source)
+lcResult<std::unique_ptr<lcFile>> lcPiecesLibrary::OpenFile(const lcFileSource& Source) const
 {
 	if (Source.EmbeddedData)
 	{
@@ -638,7 +638,6 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 	lcLoadDefaultCategories();
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);
-	lcConnectionInfo::Initialize(this);
 
 	return true;
 }
@@ -786,6 +785,26 @@ void lcPiecesLibrary::LoadShadowArchive(const QString& LibraryPath)
 	}
 
 	mShadowZipFile = std::move(ShadowZipFile);
+}
+
+QString lcPiecesLibrary::GetShadowPath(const lcFileSource& Source) const
+{
+	QString Path;
+	if (Source.ArchiveType >= 0)
+	{
+		const lcZipFile& Archive = *mZipFiles[Source.ArchiveType];
+		Path = QString::fromLatin1(Archive.mFiles[Source.ArchiveIndex].file_name);
+	}
+	else
+		Path = QDir(mLibraryDir.canonicalPath()).relativeFilePath(Source.FilePath);
+
+	Path.replace(QLatin1Char('\\'), QLatin1Char('/'));
+	if (Path.startsWith(QLatin1String("ldraw/"), Qt::CaseInsensitive))
+		Path.remove(0, 6);
+	else if (Path.startsWith(QLatin1String("unofficial/"), Qt::CaseInsensitive))
+		Path.remove(0, 11);
+
+	return Path;
 }
 
 bool lcPiecesLibrary::ReadShadowFile(const QString& FileName, lcMemFile& File) const
@@ -1666,7 +1685,7 @@ QString lcPiecesLibrary::GetSynthMeshError(const lcPiece* Piece) const
 	return It != mSynthPieces.end() ? It->second : QString();
 }
 
-bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, lcShadowConnectionData ShadowConnections, QString Error)
+bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, lcConnections Connections, QString Error)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1677,8 +1696,7 @@ bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_p
 		if (Mesh)
 			PieceData->SetMesh(Mesh.release());
 
-		PieceData->SetShadowConnections(std::move(ShadowConnections));
-		InheritPieceConnections(PieceData);
+		PieceData->SetConnections(std::move(Connections));
 		PieceData->mState = lcAssetState::Loaded;
 		ClearPieceDataLoadError(PieceData);
 	}
@@ -1688,36 +1706,6 @@ bool lcPiecesLibrary::PublishPieceDataMesh(lcPieceData* PieceData, std::unique_p
 	ScheduleBufferRepack();
 
 	return Loaded;
-}
-
-void lcPiecesLibrary::InheritPieceConnections(lcPieceData* PieceData)
-{
-	if (!PieceData->IsLibraryPiece() || PieceData->GetConnectionInfo())
-		return;
-
-	const lcPieceData* Current = PieceData;
-
-	while (!Current->IsAlias())
-	{
-		const std::string& ParentId = Current->GetPatternParentId();
-
-		// Pattern parents remove a suffix. This also bounds traversal of cached parent IDs.
-		if (ParentId.empty() || ParentId.size() >= strlen(Current->mFileName))
-			return;
-
-		const lcPieceData* Parent = FindPieceData(ParentId.c_str(), nullptr);
-
-		if (!Parent || !Parent->IsLibraryPiece() || strlen(Parent->mFileName) >= strlen(Current->mFileName))
-			return;
-
-		if (const std::shared_ptr<const lcConnectionInfo>& ConnectionInfo = Parent->GetConnectionInfo())
-		{
-			PieceData->SetConnectionInfo(ConnectionInfo);
-			return;
-		}
-
-		Current = Parent;
-	}
 }
 
 bool lcPiecesLibrary::PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error)
@@ -1969,7 +1957,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		}
 
 		if (PieceFile)
-			Result.ShadowConnections = lcLoadShadowConnections(*this, *PieceFile, RelativePartPath);
+			Result.Connections = lcConnectionLoader(*this).Load(*PieceFile, RelativePartPath, Source.UnavailableTextures);
 	}
 
 	if (!Source.InlineModel && ShouldCancelLoading())
@@ -2005,7 +1993,7 @@ void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Sourc
 	}));
 }
 
-lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive)
+lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPrimitiveFile(const lcLibraryPrimitive* Primitive) const
 {
 	lcResult<std::unique_ptr<lcFile>> File = OpenFile(Primitive->mSource);
 
@@ -2015,7 +2003,7 @@ lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPrimitiveFile(const lcLibrary
 	return lcOpenedLibraryFile{ std::move(File.value()), Primitive->mSource };
 }
 
-lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPieceDataFile(const char* PieceName)
+lcResult<lcOpenedLibraryFile> lcPiecesLibrary::OpenPieceDataFile(const char* PieceName) const
 {
 	const std::optional<lcPieceManager::FileInfo> FileInfo = mPieceManager->GetPieceDataFileInfo(PieceName);
 
@@ -2646,7 +2634,6 @@ bool lcPiecesLibrary::LoadBuiltinPieceLibrary()
 	lcLoadDefaultCategories(true);
 	lcSynthInit();
 	lcTrainTrackInfo::Initialize(this);
-	lcConnectionInfo::Initialize(this);
 
 	return true;
 }

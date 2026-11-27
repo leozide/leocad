@@ -367,8 +367,10 @@ public:
 	void PaintSelectedPieces();
 	void UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelected) const;
 	quint64 GetCurrentHistoryRevision() const;
+	bool IsConnectionPlacementCurrent(const lcConnectionDragState& DragState, const lcPieceData* InsertData) const;
+	void RefreshConnectionPlacement(lcConnectionDragState& DragState, const lcPieceData* InsertData) const;
 	// Returns a model-space correction to apply after the proposed transform.
-	std::optional<lcMatrix44> GetStudSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const;
+	std::optional<lcMatrix44> GetConnectionSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance);
 	void UpdateSelectedPiecesTrainTrackConnections();
 	void SetPreviewInsertPieceInfo(std::vector<lcInsertPieceInfo>&& PreviewInsertPieceInfo);
@@ -504,6 +506,9 @@ public:
 	void UpdateInterface();
 
 protected:
+	bool HasConnectionPlacementContext(const lcConnectionDragState& DragState, const lcPieceData* InsertData) const;
+	std::unordered_map<const lcPieceData*, quint64> GetConnectionSourceRevisions(const lcPieceData* InsertData) const;
+
 	void ApplyMoveTool(const lcVector3& Distance, const lcVector3& PieceDistance, bool AllowRelative, bool AlternateButtonDrag);
 	lcResult<QImage> RenderStepImageWithReadyAssets(bool Zoom, int Width, int Height, lcStep Step, lcCamera* OutputCamera, const lcBackgroundOptions& Background);
 

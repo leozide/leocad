@@ -535,7 +535,8 @@ void lcLibraryMeshData::AddMeshData(const lcLibraryMeshData& Data, const lcMatri
 		mData[DestIndex].AddMeshData(Data.mData[MeshDataIdx], Transform, CurrentColorCode, InvertWinding, InvertNormals, TextureMap);
 	}
 
-	mHasTextures |= (Data.mHasTextures || TextureMap);
+	mHasTexturedGeometry |= (Data.mHasTexturedGeometry || TextureMap);
+	mHasTexmapDirectives |= Data.mHasTexmapDirectives;
 }
 
 void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Data, const lcMatrix44& Transform, quint32 CurrentColorCode, bool InvertWinding, bool InvertNormals, lcMeshLoaderTextureMap* TextureMap, lcMeshDataType OverrideDestIndex)
@@ -546,7 +547,8 @@ void lcLibraryMeshData::AddMeshDataNoDuplicateCheck(const lcLibraryMeshData& Dat
 		mData[DestIndex].AddMeshDataNoDuplicateCheck(Data.mData[MeshDataIdx], Transform, CurrentColorCode, InvertWinding, InvertNormals, TextureMap);
 	}
 
-	mHasTextures |= (Data.mHasTextures || TextureMap);
+	mHasTexturedGeometry |= (Data.mHasTexturedGeometry || TextureMap);
+	mHasTexmapDirectives |= Data.mHasTexmapDirectives;
 }
 
 lcMeshLoaderMaterial* lcLibraryMeshData::GetMaterial(quint32 ColorCode)
@@ -791,7 +793,7 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::atomic_bool* Cancelled)
 				ConditionalVertexCount += static_cast<int>(Section->mIndices.size());
 	}
 
-	if (mHasTextures)
+	if (mHasTexturedGeometry)
 		GenerateTexturedVertices();
 
 	quint16 NumSections[LC_NUM_MESH_LODS];
@@ -882,7 +884,7 @@ lcMesh* lcLibraryMeshData::CreateMesh(const std::atomic_bool* Cancelled)
 
 	lcVertexTextured* DstTexturedVerts = (lcVertexTextured*)DstVerts;
 
-	if (mHasTextures)
+	if (mHasTexturedGeometry)
 	{
 		size_t VertexIndex = 0;
 
@@ -1354,20 +1356,101 @@ bool lcMeshLoader::ParseTextureName(const char* Text, char* Name, size_t NameSiz
 	return true;
 }
 
-bool lcMeshLoader::IsTextureBranchActive() const
+bool lcMeshLoader::IsTextureBranchActive(const std::vector<lcMeshLoaderTextureMap>& TextureStack, const std::set<std::string>& UnavailableTextures)
 {
-	for (const lcMeshLoaderTextureMap& Map : mTextureStack)
-		if (!Map.Active || Map.InFallback != (mUnavailableTextures.count(Map.Name) != 0))
+	for (const lcMeshLoaderTextureMap& Map : TextureStack)
+		if (!Map.Active || Map.InFallback != (UnavailableTextures.count(Map.Name) != 0))
 			return false;
 
 	return true;
 }
 
-bool lcMeshLoader::FinishTextureMap(const lcMeshLoaderTextureMap& Map)
+bool lcMeshLoader::ApplyTextureMapCommand(const char* Text, const lcMatrix44& Transform, std::vector<lcMeshLoaderTextureMap>& TextureStack,
+	size_t StackStart, const std::set<std::string>& UnavailableTextures, QString& Error)
 {
-	if (Map.Active && mUnavailableTextures.count(Map.Name) && !Map.HasFallback)
+	char Action[16];
+	int Offset = 0;
+	if (sscanf(Text, "%15s%n", Action, &Offset) != 1)
+		return true;
+
+	if (!strcmp(Action, "FALLBACK"))
 	{
-		mError = tr("Texture '%1' is unavailable and has no fallback geometry.").arg(QString::fromLatin1(Map.Name));
+		if (TextureStack.size() > StackStart)
+		{
+			TextureStack.back().InFallback = true;
+			TextureStack.back().HasFallback = true;
+		}
+		return true;
+	}
+
+	if (!strcmp(Action, "END"))
+	{
+		if (TextureStack.size() > StackStart)
+		{
+			if (!FinishTextureMap(TextureStack.back(), UnavailableTextures, Error))
+				return false;
+
+			TextureStack.pop_back();
+		}
+		return true;
+	}
+
+	const bool Next = !strcmp(Action, "NEXT");
+	if (!Next && strcmp(Action, "START"))
+		return true;
+
+	Text += Offset;
+	char Projection[16];
+	if (sscanf(Text, "%15s%n", Projection, &Offset) != 1)
+		return true;
+
+	Text += Offset;
+	lcMeshLoaderTextureMap Map;
+	Map.Next = Next;
+	Map.Active = IsTextureBranchActive(TextureStack, UnavailableTextures);
+
+	lcVector3 (&Points)[3] = Map.Points;
+	if (sscanf(Text, "%f %f %f %f %f %f %f %f %f%n", &Points[0].x, &Points[0].y, &Points[0].z,
+		&Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Offset) != 9)
+		return true;
+
+	Text += Offset;
+	if (!strcmp(Projection, "PLANAR"))
+		Map.Type = lcMeshLoaderMaterialType::Planar;
+	else if (!strcmp(Projection, "CYLINDRICAL"))
+	{
+		if (sscanf(Text, "%f%n", &Map.Angles[0], &Offset) != 1)
+			return true;
+
+		Text += Offset;
+		Map.Type = lcMeshLoaderMaterialType::Cylindrical;
+	}
+	else if (!strcmp(Projection, "SPHERICAL"))
+	{
+		if (sscanf(Text, "%f %f%n", &Map.Angles[0], &Map.Angles[1], &Offset) != 2)
+			return true;
+
+		Text += Offset;
+		Map.Type = lcMeshLoaderMaterialType::Spherical;
+	}
+	else
+		return true;
+
+	if (!ParseTextureName(Text, Map.Name, sizeof(Map.Name), nullptr))
+		return true;
+
+	for (lcVector3& Point : Points)
+		Point = lcMul31(Point, Transform);
+
+	TextureStack.push_back(Map);
+	return true;
+}
+
+bool lcMeshLoader::FinishTextureMap(const lcMeshLoaderTextureMap& Map, const std::set<std::string>& UnavailableTextures, QString& Error)
+{
+	if (Map.Active && UnavailableTextures.count(Map.Name) && !Map.HasFallback)
+	{
+		Error = tr("Texture '%1' is unavailable and has no fallback geometry.").arg(QString::fromLatin1(Map.Name));
 
 		return false;
 	}
@@ -1423,142 +1506,11 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 			if (!strcmp(Token, "!TEXMAP"))
 			{
-				Token += 8;
+				const size_t PreviousSize = mTextureStack.size();
+				if (!LastToken && !ApplyTextureMapCommand(End + 1, CurrentTransform, mTextureStack, TextureStackStart, mUnavailableTextures, mError))
+					return false;
 
-				while (*Token && *Token <= 32)
-					Token++;
-
-				End = Token;
-				while (*End && *End > 32)
-					End++;
-				*End = 0;
-
-				bool Start = false;
-				bool Next = false;
-
-				if (!strcmp(Token, "START"))
-				{
-					Token += 6;
-					Start = true;
-				}
-				else if (!strcmp(Token, "NEXT"))
-				{
-					Token += 5;
-					Next = true;
-				}
-
-				if (Start || Next)
-				{
-					while (*Token && *Token <= 32)
-						Token++;
-
-					End = Token;
-					while (*End && *End > 32)
-						End++;
-					*End = 0;
-
-
-					if (!strcmp(Token, "PLANAR"))
-					{
-						Token += 7;
-
-						const bool Active = IsTextureBranchActive();
-						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
-
-						Map.Type = lcMeshLoaderMaterialType::Planar;
-						Map.Next = Next;
-						Map.Active = Active;
-
-						lcVector3 (&Points)[3] = Map.Points;
-
-						int NameOffset = 0;
-						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &NameOffset);
-
-						if (Parsed != 9 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
-						{
-							mTextureStack.pop_back();
-							continue;
-						}
-
-						Points[0] = lcMul31(Points[0], CurrentTransform);
-						Points[1] = lcMul31(Points[1], CurrentTransform);
-						Points[2] = lcMul31(Points[2], CurrentTransform);
-					}
-					else if (!strcmp(Token, "CYLINDRICAL"))
-					{
-						Token += 12;
-
-						const bool Active = IsTextureBranchActive();
-						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
-
-						Map.Type = lcMeshLoaderMaterialType::Cylindrical;
-						Map.Next = Next;
-						Map.Active = Active;
-
-						lcVector3 (&Points)[3] = Map.Points;
-						float& Angle = Map.Angles[0];
-
-						int NameOffset = 0;
-						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle, &NameOffset);
-
-						if (Parsed != 10 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
-						{
-							mTextureStack.pop_back();
-							continue;
-						}
-
-						Points[0] = lcMul31(Points[0], CurrentTransform);
-						Points[1] = lcMul31(Points[1], CurrentTransform);
-						Points[2] = lcMul31(Points[2], CurrentTransform);
-					}
-					else if (!strcmp(Token, "SPHERICAL"))
-					{
-						Token += 10;
-
-						const bool Active = IsTextureBranchActive();
-						lcMeshLoaderTextureMap& Map = mTextureStack.emplace_back();
-
-						Map.Type = lcMeshLoaderMaterialType::Spherical;
-						Map.Next = Next;
-						Map.Active = Active;
-
-						lcVector3(&Points)[3] = Map.Points;
-						float& Angle1 = Map.Angles[0];
-						float& Angle2 = Map.Angles[1];
-
-						int NameOffset = 0;
-						const int Parsed = sscanf(Token, "%f %f %f %f %f %f %f %f %f %f %f %n", &Points[0].x, &Points[0].y, &Points[0].z, &Points[1].x, &Points[1].y, &Points[1].z, &Points[2].x, &Points[2].y, &Points[2].z, &Angle1, &Angle2, &NameOffset);
-
-						if (Parsed != 11 || !ParseTextureName(Token + NameOffset, Map.Name, sizeof(Map.Name), nullptr))
-						{
-							mTextureStack.pop_back();
-							continue;
-						}
-
-						Points[0] = lcMul31(Points[0], CurrentTransform);
-						Points[1] = lcMul31(Points[1], CurrentTransform);
-						Points[2] = lcMul31(Points[2], CurrentTransform);
-					}
-				}
-				else if (!strcmp(Token, "FALLBACK"))
-				{
-					if (mTextureStack.size() > TextureStackStart)
-					{
-						mTextureStack.back().InFallback = true;
-						mTextureStack.back().HasFallback = true;
-					}
-				}
-				else if (!strcmp(Token, "END"))
-				{
-					if (mTextureStack.size() > TextureStackStart)
-					{
-						if (!FinishTextureMap(mTextureStack.back()))
-							return false;
-
-						mTextureStack.pop_back();
-					}
-				}
-
+				mMeshData.mHasTexmapDirectives |= mTextureStack.size() > PreviousSize;
 				continue;
 			}
 			else if (!strcmp(Token, "BFC"))
@@ -1625,11 +1577,11 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 		const bool ConsumeNext = mTextureStack.size() > TextureStackStart && mTextureStack.back().Next;
 
-		if (!IsTextureBranchActive())
+		if (!IsTextureBranchActive(mTextureStack, mUnavailableTextures))
 		{
 			if (ConsumeNext)
 			{
-				if (!FinishTextureMap(mTextureStack.back()))
+				if (!FinishTextureMap(mTextureStack.back(), mUnavailableTextures, mError))
 					return false;
 
 				mTextureStack.pop_back();
@@ -1729,7 +1681,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				lcLibraryMeshData FallbackData;
 				const lcLibraryMeshData* PrimitiveData = &Primitive->mMeshData;
 
-				if (!mUnavailableTextures.empty() && PrimitiveData->mHasTextures && !Primitive->mSubFile)
+				if (!mUnavailableTextures.empty() && (PrimitiveData->mHasTexturedGeometry || PrimitiveData->mHasTexmapDirectives) && !Primitive->mSubFile)
 				{
 					// Shared primitive data contains only the preferred branch. Reparse
 					// privately so this request cannot change other consumers' geometry.
@@ -1830,7 +1782,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			else
 			{
-				mMeshData.mHasTextures = true;
+				mMeshData.mHasTexturedGeometry = true;
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, Optimize);
 
 			}
@@ -1850,7 +1802,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetMaterial(ColorCode), WindingCCW, Points, Optimize);
 			else
 			{
-				mMeshData.mHasTextures = true;
+				mMeshData.mHasTexturedGeometry = true;
 				mMeshData.mData[MeshDataType].ProcessLine(LineType, mMeshData.GetTexturedMaterial(ColorCode, *TextureMap), WindingCCW, Points, Optimize);
 
 			}
@@ -1872,7 +1824,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 
 		if (ConsumeNext)
 		{
-			if (!FinishTextureMap(mTextureStack.back()))
+			if (!FinishTextureMap(mTextureStack.back(), mUnavailableTextures, mError))
 				return false;
 
 			mTextureStack.pop_back();
@@ -1882,7 +1834,7 @@ bool lcMeshLoader::ReadMeshData(lcFile& File, const lcMatrix44& CurrentTransform
 	}
 
 	for (size_t Index = TextureStackStart; Index < mTextureStack.size(); Index++)
-		if (!FinishTextureMap(mTextureStack[Index]))
+		if (!FinishTextureMap(mTextureStack[Index], mUnavailableTextures, mError))
 			return false;
 
 	mTextureStack.resize(TextureStackStart);

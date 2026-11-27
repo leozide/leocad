@@ -12,6 +12,8 @@
 #include "lc_synth.h"
 #include "lc_traintrack.h"
 
+quint64 lcPieceData::mConnectionsRevision = 0;
+
 lcPieceData::lcPieceData(bool IsLibraryPiece)
 	: mIsLibraryPiece(IsLibraryPiece)
 {
@@ -156,6 +158,14 @@ void lcPieceData::SetSynthInfo(lcSynthInfo* SynthInfo)
 	mSynthInfo.reset(SynthInfo);
 }
 
+void lcPieceData::SetConnections(lcConnections Connections)
+{
+	if (!mConnections.empty() || !Connections.empty())
+		mConnectionRevision = ++mConnectionsRevision;
+
+	mConnections = std::move(Connections);
+}
+
 void lcPieceData::SetMesh(lcMesh* Mesh)
 {
 	mBoundingBox = Mesh->mBoundingBox;
@@ -178,7 +188,8 @@ lcMesh* lcPieceData::GetDisplayMesh() const
 void lcPieceData::SetFailed(QString Error)
 {
 	ReleaseMesh();
-	mShadowConnections = lcShadowConnectionData();
+	SetConnections(lcConnections());
+	
 	if (!IsModel() && !IsProject())
 		SetLoadingBoundingBox();
 
@@ -297,7 +308,7 @@ void lcPieceData::Unload()
 	lcGetPiecesLibrary()->ClearPieceDataLoadError(this);
 
 	ReleaseMesh();
-	mShadowConnections = lcShadowConnectionData();
+	SetConnections(lcConnections());
 	mState = lcAssetState::Unloaded;
 	SetLoadingBoundingBox();
 	mModel = nullptr;

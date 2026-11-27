@@ -132,6 +132,22 @@ void lcView::UpdateProjectViews(const Project* Project)
 	}
 }
 
+void lcView::RefreshConnectionPlacement()
+{
+	const quint64 Revision = lcPieceData::GetConnectionsRevision();
+	
+	if (mPreviewConnectionsRevision == Revision)
+		return;
+
+	mPreviewConnectionsRevision = Revision;
+	
+	if (mTrackTool == lcTrackTool::Insert && gMainWindow->GetTool() == lcTool::Insert)
+		UpdatePiecePreview();
+	else if (IsTracking() && mTrackUpdated && mTrackButton == lcTrackButton::Left && mTrackTool == lcTrackTool::MoveXYZ &&
+		mMouseDownPiece && !mMouseDownPiece->mPieceData->GetTrainTrackInfo())
+		OnMouseMove();
+}
+
 void lcView::UpdateAllViews()
 {
 	for (lcView* View : mViews)
@@ -647,20 +663,17 @@ void lcView::UpdatePiecePreview()
 {
 	const lcPieceDataRef PreviewPieceData(gMainWindow->GetInsertPieceData());
 	lcMouseInsertPieceInfo Placement;
-
 	lcModel* ActiveModel = GetActiveModel();
-	if (mStudDragState.Model && (mStudDragState.Model != ActiveModel ||
-		mStudDragState.HistoryRevision != ActiveModel->GetCurrentHistoryRevision() ||
-		mStudDragState.InsertData != PreviewPieceData.Get()))
-		mStudDragState = lcConnectionDragState();
 
 	if (PreviewPieceData)
-		Placement = GetMouseInsertPieceInfo(false, true, PreviewPieceData, nullptr, mStudDragState);
+		Placement = GetMouseInsertPieceInfo(false, true, PreviewPieceData, nullptr, mConnectionDragState);
+	else
+		mConnectionDragState = lcConnectionDragState();
 
 	ActiveModel->SetPreviewInsertPieceInfo(std::move(Placement.Pieces));
 }
 
-lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const
+lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 
@@ -685,41 +698,51 @@ lcMouseInsertPieceInfo lcView::GetMouseInsertPieceInfo(bool IgnoreSelected, bool
 				return { TrainTracks, true };
 		}
 
-		return GetSurfacePlacement(ObjectRayTest, PieceData, MovingPiece, StudDragState);
+		return GetSurfacePlacement(ObjectRayTest, PieceData, MovingPiece, ConnectionDragState);
 	}
 
-	return GetPlacementWithoutHit(PieceData, MovingPiece, StudDragState);
+	return GetPlacementWithoutHit(ObjectRayTest, PieceData, MovingPiece, ConnectionDragState);
 }
 
-bool lcView::RetainStudPlacement(lcConnectionDragState& StudDragState, const lcPieceData* InsertData) const
+bool lcView::RetainConnectionPlacement(lcConnectionDragState& ConnectionDragState, const lcPieceData* InsertData) const
 {
 	const lcModel* ActiveModel = GetActiveModel();
 	const float DeviceScale = GetUIScale();
 	const lcVector2 Cursor(mMouseX / DeviceScale, mMouseY / DeviceScale);
 
-	if (StudDragState.Model == ActiveModel && StudDragState.Step == ActiveModel->GetCurrentStep() &&
-		StudDragState.InsertData == InsertData && StudDragState.Pair && StudDragState.IsWithinReleaseRadius(Cursor))
-		return true;
+	if (ConnectionDragState.Pair && ConnectionDragState.IsWithinReleaseRadius(Cursor))
+	{
+		ActiveModel->RefreshConnectionPlacement(ConnectionDragState, InsertData);
+		return ConnectionDragState.Pair.has_value();
+	}
 
-	StudDragState.Pair.reset();
+	ConnectionDragState.Pair.reset();
 
 	return false;
 }
 
-lcMouseInsertPieceInfo lcView::TryStudPlacement(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, const lcMatrix44& ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit, const std::optional<lcStudTurnContext>& Turn) const
+lcMouseInsertPieceInfo lcView::TryConnectionPlacement(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState, const lcMatrix44& ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit, const std::optional<lcStudTurnContext>& Turn, const lcObjectRayTest* PlacementRay) const
 {
 	lcModel* ActiveModel = GetActiveModel();
 	const float DeviceScale = GetUIScale();
 	const lcVector2 Cursor(mMouseX / DeviceScale, mMouseY / DeviceScale);
 
 	// The matcher reprojects the grip of a turned snap before checking its release radius.
-	if (StudDragState.TurnAngle == 0.0f)
-		RetainStudPlacement(StudDragState, MovingPiece ? nullptr : PieceData.Get());
+	if (ConnectionDragState.TurnAngle == 0.0f)
+		RetainConnectionPlacement(ConnectionDragState, MovingPiece ? nullptr : PieceData.Get());
 
-	const std::optional<std::pair<size_t, size_t>> PreviousPair = StudDragState.Pair;
-	const float PreviousTurn = StudDragState.TurnAngle;
+	const std::optional<std::pair<size_t, size_t>> PreviousPair = ConnectionDragState.Pair;
+	const float PreviousTurn = ConnectionDragState.TurnAngle;
 	const lcMatrix44 MovingToProposed = MovingPiece ? lcMul(lcMatrix44AffineInverse(MovingPiece->mModelWorld), ProposedTransform) : lcMatrix44Identity();
-	const lcConnectionSnapContext Context
+	std::optional<lcConnectionSnapRay> SnapRay;
+	if (PlacementRay)
+	{
+		const lcVector3 ProposedGrab = ProposedTransform.GetTranslation() - (MovingPiece ? mMouseDownGrabOffset : lcVector3(0, 0, 0));
+		const lcPiece* HitPiece = static_cast<const lcPiece*>(PlacementRay->ObjectSection.Object);
+		SnapRay = lcConnectionSnapRay{ PlacementRay->Start, PlacementRay->End, ProposedGrab, PlacementRay->Distance, HitPiece, !MovingPiece && !HasSurfaceHit };
+	}
+
+	lcConnectionSnapContext Context
 	{
 		lcMul(lcMul(mActiveSubmodelTransform, GetWorldViewMatrix()), GetProjectionMatrix()),
 		lcVector2(mWidth / DeviceScale, mHeight / DeviceScale),
@@ -727,22 +750,31 @@ lcMouseInsertPieceInfo lcView::TryStudPlacement(const lcPieceDataRef& PieceData,
 		SurfacePiece,
 		HasSurfaceHit,
 		Turn,
-		Cursor
+		Cursor,
+		SnapRay
 	};
 
+	if (MovingPiece)
+		Context.RayAtPoint = [this](const lcVector3& Point)
+		{
+			const lcVector3 Screen = ProjectPoint(lcMul31(Point, mActiveSubmodelTransform));
+			const lcObjectRayTest Ray = RayTestAt(lcVector2(Screen.x, Screen.y), true, true);
+			return lcConnectionSnapRay{ Ray.Start, Ray.End, Point, Ray.Distance, static_cast<const lcPiece*>(Ray.ObjectSection.Object), false };
+		};
+
 	const lcInsertPieceInfo ProposedInsert { PieceData.Get(), ProposedTransform, gMainWindow->mColorIndex };
-	const std::optional<lcMatrix44> Correction = ActiveModel->GetStudSnapTransform(MovingToProposed, Context, MovingPiece ? nullptr : &ProposedInsert, StudDragState);
+	const std::optional<lcMatrix44> Correction = ActiveModel->GetConnectionSnapTransform(MovingToProposed, Context, MovingPiece ? nullptr : &ProposedInsert, ConnectionDragState);
 
 	if (!Correction)
 		return lcMouseInsertPieceInfo();
 
-	StudDragState.ProposalRotation = lcMatrix33(ProposedTransform);
-	StudDragState.SnappedTransform = lcMul(ProposedTransform, *Correction);
+	ConnectionDragState.ProposalRotation = lcMatrix33(ProposedTransform);
+	ConnectionDragState.SnappedTransform = lcMul(ProposedTransform, *Correction);
 
-	if (StudDragState.TurnAngle == 0.0f && (StudDragState.Pair != PreviousPair || PreviousTurn != 0.0f))
-		StudDragState.ReleaseCenter = lcVector2(Cursor.x + StudDragState.ScreenCorrection.x, Cursor.y + StudDragState.ScreenCorrection.y);
+	if (ConnectionDragState.TurnAngle == 0.0f && (ConnectionDragState.IsClipSnap || ConnectionDragState.Pair != PreviousPair || PreviousTurn != 0.0f))
+		ConnectionDragState.ReleaseCenter = lcVector2(Cursor.x + ConnectionDragState.ScreenCorrection.x, Cursor.y + ConnectionDragState.ScreenCorrection.y);
 
-	return { { lcInsertPieceInfo{ PieceData.Get(), StudDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
+	return { { lcInsertPieceInfo{ PieceData.Get(), ConnectionDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
 }
 
 lcObjectRayTest lcView::GetReadyPieceHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, bool IgnoreSelected) const
@@ -780,7 +812,7 @@ lcObjectRayTest lcView::GetReadyPieceHit(const lcPieceDataRef& PieceData, lcPiec
 	return ObjectRayTest;
 }
 
-lcMouseInsertPieceInfo lcView::TryStudPlacementOnFace(const lcObjectRayTest& ObjectRayTest, const lcStudMatingFace& MatingFace, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, const lcMatrix33& PlacementRotation, float PlacementOffset) const
+lcMouseInsertPieceInfo lcView::TryStudPlacementOnFace(const lcObjectRayTest& ObjectRayTest, const lcStudMatingFace& MatingFace, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState, const lcMatrix33& PlacementRotation, float PlacementOffset) const
 {
 	const lcMatrix44& SurfaceTransform = ObjectRayTest.PieceRayTest.Transform;
 	const lcPiece* MousePiece = static_cast<const lcPiece*>(ObjectRayTest.ObjectSection.Object);
@@ -788,28 +820,28 @@ lcMouseInsertPieceInfo lcView::TryStudPlacementOnFace(const lcObjectRayTest& Obj
 	const lcMatrix33 GrabRotation = MovingPiece ? lcConnectionInfo::GetStudAxisRotation(PlacementRotation, lcVector3(SurfaceTransform[2])) : NoRotation;
 	const lcVector3 FacePoint = lcMul31(lcVector3(0, 0, MatingFace.PlaneZ), SurfaceTransform);
 	const lcVector3 FaceDirection = lcNormalize(lcVector3(SurfaceTransform[2]));
-	const lcConnectionType TargetType = MatingFace.IsTop ? lcConnectionType::StudMale : lcConnectionType::StudReceiver;
+	const lcStudType TargetType = MatingFace.IsTop ? lcStudType::Male : lcStudType::Female;
 
 	auto TryMatingPose = [&](const lcMatrix33& Rotation)
 	{
 		const lcMatrix33 SnapRotation = lcMul(PlacementRotation, Rotation);
 
-		if (MovingPiece && StudDragState.Pair && !lcMatrix33Similar(StudDragState.ProposalRotation, SnapRotation))
-			StudDragState.Pair.reset();
+		if (MovingPiece && ConnectionDragState.Pair && !lcMatrix33Similar(ConnectionDragState.ProposalRotation, SnapRotation))
+			ConnectionDragState.Pair.reset();
 
 		const lcVector3 GrabOffset = MovingPiece ? lcMul(mMouseDownGrabOffset, Rotation) : lcVector3(0, 0, 0);
-		const lcMatrix44 ProposedTransform = lcConnectionInfo::GetStudMatingTransform(MatingFace, SurfaceTransform, SnapRotation, GrabOffset, PlacementOffset, PieceData->GetConnectionInfo().get());
+		const lcMatrix44 ProposedTransform = lcConnectionInfo::GetStudMatingTransform(MatingFace, SurfaceTransform, SnapRotation, GrabOffset, PlacementOffset, PieceData->GetConnections());
 		std::optional<lcStudTurnContext> Turn;
 		if (MovingPiece)
 			Turn = lcStudTurnContext{ ProposedTransform.GetTranslation() - GrabOffset, FacePoint, FaceDirection, TargetType };
 
-		return TryStudPlacement(PieceData, MovingPiece, StudDragState, ProposedTransform, MousePiece, true, Turn);
+		return TryConnectionPlacement(PieceData, MovingPiece, ConnectionDragState, ProposedTransform, MousePiece, true, Turn, &ObjectRayTest);
 	};
 
 	const bool CanTryTilt = MovingPiece && !lcIsZero(GrabRotation[2] - NoRotation[2]);
-	const bool RetainedTilt = CanTryTilt && StudDragState.Pair &&
-		lcMatrix33Similar(StudDragState.ProposalRotation, lcMul(PlacementRotation, GrabRotation)) &&
-		!lcMatrix33Similar(StudDragState.ProposalRotation, PlacementRotation);
+	const bool RetainedTilt = CanTryTilt && ConnectionDragState.Pair &&
+		lcMatrix33Similar(ConnectionDragState.ProposalRotation, lcMul(PlacementRotation, GrabRotation)) &&
+		!lcMatrix33Similar(ConnectionDragState.ProposalRotation, PlacementRotation);
 	const lcMouseInsertPieceInfo Snap = TryMatingPose(RetainedTilt ? GrabRotation : NoRotation);
 	if (Snap.IsConnection || !CanTryTilt)
 		return Snap;
@@ -817,17 +849,19 @@ lcMouseInsertPieceInfo lcView::TryStudPlacementOnFace(const lcObjectRayTest& Obj
 	return TryMatingPose(RetainedTilt ? NoRotation : GrabRotation);
 }
 
-lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const
+lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const
 {
 	lcModel* ActiveModel = GetActiveModel();
-	const bool AllowStudSnap = !MovingPiece || (mTrackButton == lcTrackButton::Left && !gMainWindow->GetSeparateTransform());
+	const bool AllowConnectionSnap = !MovingPiece || (mTrackButton == lcTrackButton::Left && !gMainWindow->GetSeparateTransform());
 	const lcMatrix33 StartRotation = MovingPiece ? lcMatrix33(mMouseDownTransform) : lcMatrix33Identity();
 	const lcBoundingBox& BoundingBox = MovingPiece ? MovingPiece->GetBoundingBox() : PieceData->GetBoundingBox();
 
 	const lcMatrix44& SurfaceTransform = ObjectRayTest.PieceRayTest.Transform;
 	const lcVector3& Face = ObjectRayTest.PieceRayTest.Plane;
 	const lcPieceData* SurfacePieceData = ObjectRayTest.PieceRayTest.PieceData;
-	const lcConnectionInfo* SurfaceConnections = SurfacePieceData ? SurfacePieceData->GetConnectionInfo().get() : nullptr;
+	const lcConnections* SurfaceConnections = SurfacePieceData && !SurfacePieceData->GetConnections().empty() ?
+		&SurfacePieceData->GetConnections() : nullptr;
+	const lcPiece* MousePiece = static_cast<const lcPiece*>(ObjectRayTest.ObjectSection.Object);
 	lcVector3 Position = Face;
 	int FaceAxis = 2;
 	float FaceSign = Face.z;
@@ -844,9 +878,10 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 	}
 
 	std::optional<lcStudMatingFace> MatingFace;
+	bool HasVerticalStuds = false;
 	const lcMatrix44 ModelToSurface = lcMatrix44AffineInverse(SurfaceTransform);
 
-	if (AllowStudSnap && SurfaceConnections)
+	if (AllowConnectionSnap && SurfaceConnections)
 	{
 		const lcVector3 RayDirection = lcNormalize(ObjectRayTest.End - ObjectRayTest.Start);
 		const lcVector3 HitPoint = ObjectRayTest.Start + RayDirection * ObjectRayTest.Distance;
@@ -854,7 +889,7 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 		const lcVector3 LocalRayDirection = lcMul30(RayDirection, ModelToSurface);
 		const lcBoundingBox& SurfaceBounds = SurfacePieceData->GetBoundingBox();
 
-		MatingFace = SurfaceConnections->FindStudMatingFace(Position, LocalRayDirection, ObjectRayTest.Distance, SurfaceBounds);
+		MatingFace = lcConnectionInfo::FindStudMatingFace(*SurfaceConnections, Position, LocalRayDirection, ObjectRayTest.Distance, SurfaceBounds, HasVerticalStuds);
 		if (MatingFace)
 		{
 			FaceAxis = 2;
@@ -862,20 +897,22 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 			Position = MatingFace->Point;
 			Position.z = MatingFace->IsTop ? SurfaceBounds.Max.z : SurfaceBounds.Min.z;
 		}
-		else
+		else if (HasVerticalStuds)
 		{
 			// Follow the pointer horizontally along a side while keeping the parts level.
 			Position[FaceAxis] = Face[FaceAxis];
 			if (FaceAxis != 2)
 				Position.z = Face.z;
 		}
+		else
+			Position = Face;
 	}
 
 	const lcMatrix33 PlacementRotation = MovingPiece ? StartRotation : lcMatrix33(SurfaceTransform);
 
 	float PlacementOffset = FaceSign > 0.0f ? fabsf(BoundingBox.Min[FaceAxis]) : (FaceSign < 0.0f ? -fabsf(BoundingBox.Max[FaceAxis]) : 0.0f);
 
-	if (AllowStudSnap && SurfaceConnections && FaceSign != 0.0f)
+	if (HasVerticalStuds && FaceSign != 0.0f)
 	{
 		// Measure the moving part's extent along the contact normal in its proposed orientation.
 		const lcVector3 SurfaceAxis(SurfaceTransform[FaceAxis]);
@@ -891,8 +928,8 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 
 	Position[FaceAxis] += PlacementOffset;
 
-	const lcVector3 LocalGrabOffset = MovingPiece && AllowStudSnap ? lcMul30(mMouseDownGrabOffset, ModelToSurface) : lcVector3(0, 0, 0);
-	if (AllowStudSnap && SurfaceConnections)
+	const lcVector3 LocalGrabOffset = MovingPiece && AllowConnectionSnap ? lcMul30(mMouseDownGrabOffset, ModelToSurface) : lcVector3(0, 0, 0);
+	if (HasVerticalStuds)
 	{
 		// The contact face controls the depth. The grab offset controls motion along it.
 		for (int Axis = 0; Axis < 2; Axis++)
@@ -902,14 +939,14 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 
 	if (MatingFace)
 	{
-		lcMouseInsertPieceInfo Snap = TryStudPlacementOnFace(ObjectRayTest, *MatingFace, PieceData, MovingPiece, StudDragState, PlacementRotation, PlacementOffset);
+		lcMouseInsertPieceInfo Snap = TryStudPlacementOnFace(ObjectRayTest, *MatingFace, PieceData, MovingPiece, ConnectionDragState, PlacementRotation, PlacementOffset);
 		if (Snap.IsConnection)
 			return Snap;
 	}
-	else if (AllowStudSnap && MovingPiece)
+	if (AllowConnectionSnap)
 	{
 		lcVector3 ProposedPosition = Position;
-		if (!SurfaceConnections)
+		if (!HasVerticalStuds)
 		{
 			const lcVector3 RayDirection = lcNormalize(ObjectRayTest.End - ObjectRayTest.Start);
 			const lcVector3 HitPoint = ObjectRayTest.Start + RayDirection * ObjectRayTest.Distance;
@@ -917,11 +954,14 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 			ProposedPosition[FaceAxis] = Position[FaceAxis];
 
 			// Keep the grab point in the ordinary placement too, with the existing contact height.
-			Position.x = ProposedPosition.x;
-			Position.y = ProposedPosition.y;
+			if (MovingPiece)
+			{
+				Position.x = ProposedPosition.x;
+				Position.y = ProposedPosition.y;
+			}
 		}
 
-		lcMouseInsertPieceInfo Snap = TryStudPlacement(PieceData, MovingPiece, StudDragState, lcMatrix44(PlacementRotation, lcMul31(ProposedPosition, SurfaceTransform)), nullptr, true, std::nullopt);
+		lcMouseInsertPieceInfo Snap = TryConnectionPlacement(PieceData, MovingPiece, ConnectionDragState, lcMatrix44(PlacementRotation, lcMul31(ProposedPosition, SurfaceTransform)), MatingFace ? nullptr : MousePiece, true, std::nullopt, &ObjectRayTest);
 		if (Snap.IsConnection)
 			return Snap;
 	}
@@ -933,7 +973,7 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 	else
 		Position = ActiveModel->SnapPosition(lcMul31(Position, SurfaceTransform));
 
-	const bool UsePlacementTransform = AllowStudSnap && SurfaceConnections && FaceSign != 0.0f;
+	const bool UsePlacementTransform = HasVerticalStuds && FaceSign != 0.0f;
 	if (UsePlacementTransform)
 	{
 		// Grid rounding can change the depth on a tilted face. Keep it on the contact plane.
@@ -950,33 +990,40 @@ lcMouseInsertPieceInfo lcView::GetSurfacePlacement(const lcObjectRayTest& Object
 	return { { lcInsertPieceInfo{ PieceData.Get(), WorldMatrix, gMainWindow->mColorIndex } }, false, UsePlacementTransform };
 }
 
-lcMouseInsertPieceInfo lcView::GetPlacementWithoutHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const
+lcMouseInsertPieceInfo lcView::GetPlacementWithoutHit(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const
 {
 	lcModel* ActiveModel = GetActiveModel();
-	const bool AllowStudSnap = !MovingPiece || (mTrackButton == lcTrackButton::Left && !gMainWindow->GetSeparateTransform());
+	const bool AllowConnectionSnap = !MovingPiece || (mTrackButton == lcTrackButton::Left && !gMainWindow->GetSeparateTransform());
 	const lcMatrix33 StartRotation = MovingPiece ? lcMatrix33(mMouseDownTransform) : lcMatrix33Identity();
 	const lcBoundingBox& BoundingBox = MovingPiece ? MovingPiece->GetBoundingBox() : PieceData->GetBoundingBox();
 
-	if (!MovingPiece && RetainStudPlacement(StudDragState, PieceData.Get()))
-		return { { lcInsertPieceInfo{ PieceData.Get(), StudDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
+	const bool RetainedInsert = !MovingPiece && RetainConnectionPlacement(ConnectionDragState, PieceData.Get());
+	if (RetainedInsert && !ConnectionDragState.IsClipSnap)
+		return { { lcInsertPieceInfo{ PieceData.Get(), ConnectionDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
 
-	std::array<lcVector3, 2> ClickPoints = {{ lcVector3((float)mMouseX, (float)mMouseY, 0.0f), lcVector3((float)mMouseX, (float)mMouseY, 1.0f) }};
-	UnprojectPoints(ClickPoints.data(), 2);
-
-	if (ActiveModel != mModel)
+	const std::vector<lcConnection>& Connections = PieceData->GetConnections();
+	if (!MovingPiece && std::any_of(Connections.begin(), Connections.end(), [](const lcConnection& Connection)
 	{
-		lcMatrix44 InverseMatrix = lcMatrix44AffineInverse(mActiveSubmodelTransform);
-
-		for (lcVector3& Point : ClickPoints)
-			Point = lcMul31(Point, InverseMatrix);
+		return lcConnectionInfo::CanSnapToRay(Connection);
+	}))
+	{
+		const lcMatrix44 Proposed(StartRotation, ObjectRayTest.Start);
+		lcMouseInsertPieceInfo Snap = TryConnectionPlacement(PieceData, nullptr, ConnectionDragState, Proposed, nullptr, false, std::nullopt, &ObjectRayTest);
+		if (Snap.IsConnection)
+			return Snap;
 	}
 
-	if (MovingPiece && AllowStudSnap)
+	if (RetainedInsert && ConnectionDragState.Pair)
+		return { { lcInsertPieceInfo{ PieceData.Get(), ConnectionDragState.SnappedTransform, gMainWindow->mColorIndex } }, true, true };
+
+	const std::array<lcVector3, 2> ClickPoints = { ObjectRayTest.Start, ObjectRayTest.End };
+
+	if (MovingPiece && AllowConnectionSnap)
 	{
 		// Keep the mating depth across a face edge while the pointer remains in the release radius.
-		const bool Retained = RetainStudPlacement(StudDragState, nullptr) && lcMatrix33Similar(lcMatrix33(StudDragState.SnappedTransform), StartRotation);
-		const lcVector3 GrabStart = (Retained ? StudDragState.SnappedTransform : mMouseDownTransform).GetTranslation() - mMouseDownGrabOffset;
-		const lcVector3 DragNormal = Retained ? StudDragState.Stationary[StudDragState.Pair->second].Connection.Direction : lcVector3(0, 0, 1);
+		const bool Retained = RetainConnectionPlacement(ConnectionDragState, nullptr) && lcMatrix33Similar(lcMatrix33(ConnectionDragState.SnappedTransform), StartRotation);
+		const lcVector3 GrabStart = (Retained ? ConnectionDragState.SnappedTransform : mMouseDownTransform).GetTranslation() - mMouseDownGrabOffset;
+		const lcVector3 DragNormal = Retained ? ConnectionDragState.Stationary[ConnectionDragState.Pair->second].Connection.Direction : lcVector3(0, 0, 1);
 		const lcVector3 ViewDirection = lcMul30(GetWorldCameraDirection(), lcMatrix44AffineInverse(mActiveSubmodelTransform));
 		lcVector3 ProposedPosition;
 
@@ -986,15 +1033,15 @@ lcMouseInsertPieceInfo lcView::GetPlacementWithoutHit(const lcPieceDataRef& Piec
 			ProposedPosition = lcMul31(UnprojectPoint(lcVector3((float)mMouseX, (float)mMouseY, 0.9f)), lcMatrix44AffineInverse(mActiveSubmodelTransform));
 		}
 
-		lcMouseInsertPieceInfo Snap = TryStudPlacement(PieceData, MovingPiece, StudDragState, lcMatrix44(StartRotation, ProposedPosition + mMouseDownGrabOffset), nullptr, false, std::nullopt);
+		lcMouseInsertPieceInfo Snap = TryConnectionPlacement(PieceData, MovingPiece, ConnectionDragState, lcMatrix44(StartRotation, ProposedPosition + mMouseDownGrabOffset), nullptr, false, std::nullopt, &ObjectRayTest);
 		if (Snap.IsConnection)
 			return Snap;
 
-		StudDragState.Pair.reset();
+		ConnectionDragState.Pair.reset();
 	}
 
 	lcVector3 Intersection;
-	const lcVector3 GrabOffset = MovingPiece && AllowStudSnap ? mMouseDownGrabOffset : lcVector3(0, 0, 0);
+	const lcVector3 GrabOffset = MovingPiece && AllowConnectionSnap ? mMouseDownGrabOffset : lcVector3(0, 0, 0);
 
 	if (lcLineSegmentPlaneIntersection(&Intersection, ClickPoints[0], ClickPoints[1], lcVector4(0, 0, 1, BoundingBox.Min.z)))
 	{
@@ -1066,10 +1113,15 @@ void lcView::GetRayUnderPointer(lcVector3& Start, lcVector3& End) const
 
 lcObjectRayTest lcView::RayTest(bool PiecesOnly, bool IgnoreSelected) const
 {
+	return RayTestAt(lcVector2(static_cast<float>(mMouseX), static_cast<float>(mMouseY)), PiecesOnly, IgnoreSelected);
+}
+
+lcObjectRayTest lcView::RayTestAt(const lcVector2& Screen, bool PiecesOnly, bool IgnoreSelected) const
+{
 	lcVector3 StartEnd[2] =
 	{
-		lcVector3((float)mMouseX, (float)mMouseY, 0.0f),
-		lcVector3((float)mMouseX, (float)mMouseY, 1.0f)
+		lcVector3(Screen.x, Screen.y, 0.0f),
+		lcVector3(Screen.x, Screen.y, 1.0f)
 	};
 
 	UnprojectPoints(StartEnd, 2);
@@ -2357,7 +2409,7 @@ float lcView::GetOverlayScale() const
 
 void lcView::BeginDrag(lcDragState DragState)
 {
-	mStudDragState = lcConnectionDragState();
+	mConnectionDragState = lcConnectionDragState();
 	mDragState = DragState;
 	UpdateTrackTool();
 }
@@ -2383,7 +2435,7 @@ void lcView::EndDrag(bool Accept)
 		}
 	}
 
-	mStudDragState = lcConnectionDragState();
+	mConnectionDragState = lcConnectionDragState();
 	mDragState = lcDragState::None;
 	UpdateTrackTool();
 
@@ -2933,7 +2985,7 @@ void lcView::UpdateTrackTool()
 	}
 
 	if (mTrackTool == lcTrackTool::Insert && NewTrackTool != lcTrackTool::Insert)
-		mStudDragState = lcConnectionDragState();
+		mConnectionDragState = lcConnectionDragState();
 
 	mTrackTool = NewTrackTool;
 	mTrackToolSection = NewTrackSection;
@@ -3047,7 +3099,7 @@ lcVector3 lcView::GetTrackballPoint(int x, int y) const
 
 void lcView::StartTracking(lcTrackButton TrackButton)
 {
-	mStudDragState = lcConnectionDragState();
+	mConnectionDragState = lcConnectionDragState();
 	mTrackButton = TrackButton;
 	mTrackUpdated = false;
 	mMouseDownX = mMouseX;
@@ -3190,7 +3242,7 @@ void lcView::StopTracking(bool Accept)
 	if (mTrackButton == lcTrackButton::None)
 		return;
 
-	mStudDragState = lcConnectionDragState();
+	mConnectionDragState = lcConnectionDragState();
 
 	lcTool Tool = GetCurrentTool();
 	lcModel* ActiveModel = GetActiveModel();
@@ -3322,7 +3374,7 @@ void lcView::OnButtonDown(lcTrackButton TrackButton)
 			if (!ActiveModel->InsertPieceToolClicked())
 				break;
 
-			mStudDragState = lcConnectionDragState();
+			mConnectionDragState = lcConnectionDragState();
 
 			if ((mMouseModifiers & Qt::ControlModifier) == 0)
 				gMainWindow->SetTool(lcTool::Select);
@@ -3793,7 +3845,7 @@ void lcView::OnMouseMove()
 				}
 				else
 				{
-					const lcMouseInsertPieceInfo Placement = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceData, mMouseDownPiece, mStudDragState);
+					const lcMouseInsertPieceInfo Placement = GetMouseInsertPieceInfo(true, false, mMouseDownPiece->mPieceData, mMouseDownPiece, mConnectionDragState);
 
 					if (!Placement.Pieces.empty())
 						ActiveModel->UpdateFreeMoveTool(mMouseDownPiece, mMouseDownTransform, Placement.Pieces.back().Transform, Placement.IsConnection, mTrackButton != lcTrackButton::Left, Placement.UsePlacementTransform);

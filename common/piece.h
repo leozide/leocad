@@ -153,6 +153,7 @@ public:
 
 	QString GetName() const override;
 	bool IsVisible(lcStep Step) const;
+	bool IsVisibleInEditor(lcStep Step) const;
 	bool IsVisibleInSubModel() const;
 
 	bool AreTrainTrackConnectionsVisible() const

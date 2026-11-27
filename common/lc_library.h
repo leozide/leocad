@@ -236,10 +236,11 @@ public:
 
 	// Opens an owned include on the reading thread, positioned at zero, or returns an error.
 	// Piece lookup preserves official-first search order; callers decide whether missing includes are fatal.
-	lcResult<lcOpenedLibraryFile> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive);
-	lcResult<lcOpenedLibraryFile> OpenPieceDataFile(const char* PieceName);
+	lcResult<lcOpenedLibraryFile> OpenPrimitiveFile(const lcLibraryPrimitive* Primitive) const;
+	lcResult<lcOpenedLibraryFile> OpenPieceDataFile(const char* PieceName) const;
 
 	// Reads a normalized entry from the optional bundled Shadow archive.
+	QString GetShadowPath(const lcFileSource& Source) const;
 	bool ReadShadowFile(const QString& FileName, lcMemFile& File) const;
 
 	// Worker builds poll this shutdown flag without consulting live UI state.
@@ -308,8 +309,7 @@ protected:
 
 	// Publishes current results on the UI thread; the loader rejects stale requests first.
 	// A successful piece result may have no mesh when its geometry is empty.
-	bool PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, lcShadowConnectionData ShadowConnections, QString Error);
-	void InheritPieceConnections(lcPieceData* PieceData);
+	bool PublishPieceDataMesh(lcPieceData* PieceData, std::unique_ptr<lcMesh> Mesh, lcConnections Connections, QString Error);
 	bool PublishSynthMesh(lcPiece* Piece, std::unique_ptr<lcMesh> Mesh, QString Error);
 
 	// Applies decoded pixels or a decode failure; upload scheduling and retries stay in the loader.
@@ -317,7 +317,7 @@ protected:
 
 	// Opens a resolved source on the reading thread, positioned at zero.
 	// Caller owns the file; archive replacement requires draining workers first.
-	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSource& Source);
+	lcResult<std::unique_ptr<lcFile>> OpenFile(const lcFileSource& Source) const;
 
 	// Loads an external project, rejecting recursive include cycles.
 	lcResult<Project*> LoadExternalProject(const QFileInfo& FileInfo, bool Preview, bool DeferModelMeshRequests);

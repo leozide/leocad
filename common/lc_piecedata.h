@@ -58,24 +58,20 @@ public:
 		mTrainTrackInfo = TrainTrackInfo;
 	}
 
-	const std::shared_ptr<const lcConnectionInfo>& GetConnectionInfo() const
+	const lcConnections& GetConnections() const
 	{
-		return mConnectionInfo;
+		return mConnections;
 	}
 
-	void SetConnectionInfo(std::shared_ptr<const lcConnectionInfo> ConnectionInfo)
+	void SetConnections(lcConnections Connections);
+	quint64 GetConnectionRevision() const
 	{
-		mConnectionInfo = std::move(ConnectionInfo);
+		return mConnectionRevision;
 	}
 
-	const lcShadowConnectionData& GetShadowConnections() const
+	static quint64 GetConnectionsRevision()
 	{
-		return mShadowConnections;
-	}
-
-	void SetShadowConnections(lcShadowConnectionData ShadowConnections)
-	{
-		mShadowConnections = std::move(ShadowConnections);
+		return mConnectionsRevision;
 	}
 
 	lcMesh* GetMesh() const
@@ -245,10 +241,12 @@ protected:
 	std::string mPatternParentId;
 	std::shared_ptr<lcSynthInfo> mSynthInfo;
 	lcTrainTrackInfo* mTrainTrackInfo = nullptr;
-	std::shared_ptr<const lcConnectionInfo> mConnectionInfo;
-	lcShadowConnectionData mShadowConnections;
+	lcConnections mConnections;
 
 private:
+	// Asset publication and placement both run on the owning UI thread.
+	static quint64 mConnectionsRevision;
+	quint64 mConnectionRevision = 0;
 	static bool HasDecorationDescription(const char* Description);
 
 };

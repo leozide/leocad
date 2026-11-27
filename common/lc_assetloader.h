@@ -94,7 +94,7 @@ private:
 		lcPieceDataRef PieceData;
 		lcPieceSourceSnapshot Source;
 		std::unique_ptr<lcMesh> StagedMesh;
-		lcShadowConnectionData ShadowConnections;
+		lcConnections Connections;
 		bool EmptyGeometry = false;
 		bool SaveCache = false;
 		QString Error;

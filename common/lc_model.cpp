@@ -1375,7 +1375,7 @@ void lcModel::GetScene(lcScene* Scene, const lcCamera* ViewCamera, bool AllowHig
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+		if (Piece->IsVisibleInEditor(mCurrentStep))
 		{
 			if (Piece->IsFocused())
 				FocusPiece = Piece.get();
@@ -1417,7 +1417,7 @@ void lcModel::AddSubModelRenderMeshes(lcScene* Scene, const lcMatrix44& WorldMat
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		const bool Visible = Editing ? (Piece->IsSelected() || Piece->IsVisible(mCurrentStep)) : Piece->IsVisibleInSubModel();
+		const bool Visible = Editing ? Piece->IsVisibleInEditor(mCurrentStep) : Piece->IsVisibleInSubModel();
 
 		if (Visible)
 		{
@@ -1858,7 +1858,7 @@ lcResult<void> lcModel::SaveStepImages(const QString& BaseName, bool AddStepSuff
 void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if ((Piece->IsSelected() || Piece->IsVisible(mCurrentStep)) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
+		if (Piece->IsVisibleInEditor(mCurrentStep) && (!ObjectRayTest.IgnoreSelected || !Piece->IsSelected()))
 			Piece->RayTest(ObjectRayTest);
 
 	if (ObjectRayTest.PiecesOnly)
@@ -1876,7 +1876,7 @@ void lcModel::RayTest(lcObjectRayTest& ObjectRayTest) const
 void lcModel::BoxTest(lcObjectBoxTest& ObjectBoxTest) const
 {
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+		if (Piece->IsVisibleInEditor(mCurrentStep))
 			Piece->BoxTest(ObjectBoxTest);
 
 	for (const std::unique_ptr<lcCamera>& Camera : mCameras)
@@ -2012,7 +2012,7 @@ void lcModel::InvertPieceSelection()
 	AddSelectionHistory([this]()
 	{
 		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-			if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+			if (Piece->IsVisibleInEditor(mCurrentStep))
 				Piece->SetSelected(!Piece->IsSelected());
 	});
 }
@@ -3164,7 +3164,7 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece.get() == TrackPiece || !Piece->mPieceData->GetTrainTrackInfo() || !Piece->IsVisible(mCurrentStep) || (IgnoreSelected && Piece->IsSelected()))
+		if (Piece.get() == TrackPiece || !Piece->mPieceData->GetTrainTrackInfo() || !Piece->IsVisibleInEditor(mCurrentStep) || (IgnoreSelected && Piece->IsSelected()))
 			continue;
 
 		for (int ConnectionIndex = 0; ConnectionIndex < ConnectionCount; ConnectionIndex++)
@@ -3175,72 +3175,181 @@ void lcModel::UpdateTrainTrackConnections(lcPiece* TrackPiece, bool IgnoreSelect
 	TrackPiece->SetTrainTrackConnections(std::move(Connections));
 }
 
-std::optional<lcMatrix44> lcModel::GetStudSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
+namespace
+{
+	using ConnectionEndpoint = lcConnectionDragState::Endpoint;
+
+	void AddConnectionEndpoints(std::vector<ConnectionEndpoint>& Endpoints, const lcPiece* Piece, const lcPieceData* PieceData, const lcMatrix44& Transform)
+	{
+		const lcConnections& Connections = PieceData->GetConnections();
+		for (size_t Index = 0; Index < Connections.size(); Index++)
+		{
+			const lcConnectionPoint Point(Connections[Index], Transform);
+			const lcVector3& Position = Point.Position;
+			if (std::isfinite(Position.x) && std::isfinite(Position.y) && std::isfinite(Position.z))
+				Endpoints.push_back({ Piece, Point, std::nullopt, PieceData, Index });
+		}
+	}
+
+	std::vector<ConnectionEndpoint> GetMovingConnectionEndpoints(const lcModel& Model, const lcPieceData* InsertData, const lcMatrix44& InsertTransform)
+	{
+		std::vector<ConnectionEndpoint> Endpoints;
+		if (InsertData)
+			AddConnectionEndpoints(Endpoints, nullptr, InsertData, InsertTransform);
+		else
+		{
+			for (const std::unique_ptr<lcPiece>& Piece : Model.GetPieces())
+				if (Piece->IsSelected())
+					AddConnectionEndpoints(Endpoints, Piece.get(), Piece->mPieceData.Get(), Piece->mModelWorld);
+		}
+
+		return Endpoints;
+	}
+}
+
+bool lcModel::HasConnectionPlacementContext(const lcConnectionDragState& DragState, const lcPieceData* InsertData) const
+{
+	// Selection changes can expose pieces from another step in the editor.
+	const quint64 HistoryRevision = mUndoHistory.empty() ? 0 : mUndoHistory.front()->Revision;
+	return DragState.Model == this && DragState.Step == mCurrentStep && DragState.InsertData == InsertData && DragState.HistoryRevision == HistoryRevision;
+}
+
+std::unordered_map<const lcPieceData*, quint64> lcModel::GetConnectionSourceRevisions(const lcPieceData* InsertData) const
+{
+	std::unordered_map<const lcPieceData*, quint64> Revisions;
+	if (InsertData)
+		Revisions.try_emplace(InsertData, InsertData->GetConnectionRevision());
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+	{
+		if (Piece->IsVisibleInEditor(mCurrentStep))
+		{
+			const lcPieceData* PieceData = Piece->mPieceData.Get();
+			Revisions.try_emplace(PieceData, PieceData->GetConnectionRevision());
+		}
+	}
+
+	return Revisions;
+}
+
+bool lcModel::IsConnectionPlacementCurrent(const lcConnectionDragState& DragState, const lcPieceData* InsertData) const
+{
+	return HasConnectionPlacementContext(DragState, InsertData) &&
+		(DragState.ConnectionsRevision == lcPieceData::GetConnectionsRevision() || DragState.SourceRevisions == GetConnectionSourceRevisions(InsertData));
+}
+
+void lcModel::RefreshConnectionPlacement(lcConnectionDragState& DragState, const lcPieceData* InsertData) const
+{
+	const quint64 ConnectionsRevision = lcPieceData::GetConnectionsRevision();
+	const bool SameContext = HasConnectionPlacementContext(DragState, InsertData);
+	if (SameContext && DragState.ConnectionsRevision == ConnectionsRevision)
+		return;
+
+	std::unordered_map<const lcPieceData*, quint64> SourceRevisions = GetConnectionSourceRevisions(InsertData);
+	if (SameContext && DragState.SourceRevisions == SourceRevisions)
+	{
+		DragState.ConnectionsRevision = ConnectionsRevision;
+		return;
+	}
+
+	using EndpointId = lcConnectionDragState::EndpointId;
+	std::optional<EndpointId> RetainedTarget;
+	if (SameContext && DragState.Pair && DragState.MovingConnection && DragState.Pair->second < DragState.Stationary.size())
+	{
+		const EndpointId Target = DragState.Stationary[DragState.Pair->second].GetId();
+		auto IsSourceUnchanged = [&](const EndpointId& Endpoint)
+		{
+			const auto Previous = DragState.SourceRevisions.find(Endpoint.PieceData);
+			const auto Current = SourceRevisions.find(Endpoint.PieceData);
+			return Previous != DragState.SourceRevisions.end() && Current != SourceRevisions.end() && Previous->second == Current->second;
+		};
+		if (IsSourceUnchanged(Target) && IsSourceUnchanged(*DragState.MovingConnection))
+			RetainedTarget = Target;
+	}
+
+	if (!SameContext)
+		DragState = lcConnectionDragState();
+
+	DragState.Model = this;
+	DragState.Step = mCurrentStep;
+	DragState.InsertData = InsertData;
+	DragState.HistoryRevision = mUndoHistory.empty() ? 0 : mUndoHistory.front()->Revision;
+	DragState.ConnectionsRevision = ConnectionsRevision;
+	DragState.SourceRevisions = std::move(SourceRevisions);
+	DragState.Pair.reset();
+	DragState.Stationary.clear();
+	DragState.StationaryReach = 0.0f;
+
+	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
+		if (Piece->IsVisibleInEditor(mCurrentStep) && (InsertData || !Piece->IsSelected()))
+			AddConnectionEndpoints(DragState.Stationary, Piece.get(), Piece->mPieceData.Get(), Piece->mModelWorld);
+
+	for (const ConnectionEndpoint& Stationary : DragState.Stationary)
+		DragState.StationaryReach = lcMax(DragState.StationaryReach, Stationary.Connection.Reach);
+
+	std::stable_sort(DragState.Stationary.begin(), DragState.Stationary.end(), [](const ConnectionEndpoint& A, const ConnectionEndpoint& B)
+	{
+		return A.Connection.Position.x < B.Connection.Position.x;
+	});
+
+	if (RetainedTarget)
+	{
+		std::vector<ConnectionEndpoint> Moving = GetMovingConnectionEndpoints(*this, InsertData, DragState.SnappedTransform);
+		const auto MovingMatch = std::find_if(Moving.cbegin(), Moving.cend(), [&](const ConnectionEndpoint& Endpoint)
+		{
+			return Endpoint.GetId() == *DragState.MovingConnection;
+		});
+		const auto TargetMatch = std::find_if(DragState.Stationary.cbegin(), DragState.Stationary.cend(), [&](const ConnectionEndpoint& Endpoint)
+		{
+			return Endpoint.GetId() == *RetainedTarget;
+		});
+
+		if (MovingMatch != Moving.cend() && TargetMatch != DragState.Stationary.cend())
+		{
+			DragState.Pair = std::make_pair(static_cast<size_t>(MovingMatch - Moving.cbegin()), static_cast<size_t>(TargetMatch - DragState.Stationary.cbegin()));
+			if (lcConnectionInfo::IsSnapSeated(Moving, DragState))
+				return;
+
+			DragState.Pair.reset();
+		}
+	}
+
+	DragState.MovingConnection.reset();
+	DragState.TurnAngle = 0.0f;
+	DragState.IsClipSnap = false;
+	DragState.ReleaseRadius = lcConnectionDragState::DefaultReleaseRadius;
+}
+
+std::optional<lcMatrix44> lcModel::GetConnectionSnapTransform(const lcMatrix44& MovingToProposed, const lcConnectionSnapContext& Context, const lcInsertPieceInfo* InsertPiece, lcConnectionDragState& DragState) const
 {
 	if (Context.LogicalViewportSize.x <= 0.0f || Context.LogicalViewportSize.y <= 0.0f)
 		return std::nullopt;
 
-	using Endpoint = lcConnectionDragState::Endpoint;
-
-	auto AddEndpoints = [](std::vector<Endpoint>& Endpoints, const lcPiece* Piece, const lcConnectionInfo& Info, const lcMatrix44& Transform)
-	{
-		for (const lcConnectionPoint& Connection : Info.GetConnections())
-		{
-			const lcVector3 Position = lcMul31(Connection.Position, Transform);
-			if (std::isfinite(Position.x) && std::isfinite(Position.y) && std::isfinite(Position.z))
-				Endpoints.push_back({ Piece, { Connection.Type, Position, lcMul30(Connection.Direction, Transform) }, std::nullopt });
-		}
-	};
-
 	const lcPieceData* InsertData = InsertPiece ? InsertPiece->PieceData : nullptr;
+	const lcMatrix44 InsertTransform = InsertPiece ? InsertPiece->Transform : lcMatrix44Identity();
+	RefreshConnectionPlacement(DragState, InsertData);
+	std::vector<ConnectionEndpoint> Moving = GetMovingConnectionEndpoints(*this, InsertData, InsertTransform);
 
-	std::vector<Endpoint> MovingEndpoints;
-
-	if (InsertPiece)
-	{
-		if (const lcConnectionInfo* Info = InsertPiece->PieceData->GetConnectionInfo().get())
-			AddEndpoints(MovingEndpoints, nullptr, *Info, InsertPiece->Transform);
-	}
-	else
-	{
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo().get();
-
-			if (Info && Piece->IsVisible(mCurrentStep) && Piece->IsSelected())
-				AddEndpoints(MovingEndpoints, Piece.get(), *Info, Piece->mModelWorld);
-		}
-	}
-
-	if (MovingEndpoints.empty())
+	if (Moving.empty())
 	{
 		DragState.Pair.reset();
+		DragState.MovingConnection.reset();
 		return std::nullopt;
 	}
 
-	if (DragState.Model != this || DragState.Step != mCurrentStep || DragState.InsertData != InsertData)
+	const std::optional<lcMatrix44> Correction = lcConnectionInfo::FindSnap(Moving, MovingToProposed, Context, DragState);
+	if (DragState.Pair && DragState.Pair->first < Moving.size())
+		DragState.MovingConnection = Moving[DragState.Pair->first].GetId();
+	else
 	{
-		DragState = lcConnectionDragState();
-		DragState.Model = this;
-		DragState.Step = mCurrentStep;
-		DragState.InsertData = InsertData;
-		DragState.HistoryRevision = InsertData ? GetCurrentHistoryRevision() : 0;
-
-		for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		{
-			const lcConnectionInfo* Info = Piece->mPieceData->GetConnectionInfo().get();
-
-			if (Info && Piece->IsVisible(mCurrentStep) && (InsertPiece || !Piece->IsSelected()))
-				AddEndpoints(DragState.Stationary, Piece.get(), *Info, Piece->mModelWorld);
-		}
-
-		std::stable_sort(DragState.Stationary.begin(), DragState.Stationary.end(), [](const Endpoint& A, const Endpoint& B)
-		{
-			return A.Connection.Position.x < B.Connection.Position.x;
-		});
+		DragState.Pair.reset();
+		DragState.MovingConnection.reset();
 	}
 
-	return lcConnectionInfo::FindStudSnap(MovingEndpoints, MovingToProposed, Context, DragState);
+	if (InsertPiece && Correction)
+		DragState.SnappedTransform = lcMul(lcMul(InsertTransform, MovingToProposed), *Correction);
+
+	return Correction;
 }
 
 std::vector<lcInsertPieceInfo> lcModel::GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform, const lcTrainTrackSnapContext& Context, float SnapDistance)
@@ -4789,7 +4898,7 @@ bool lcModel::GetVisiblePiecesBoundingBox(lcVector3& Min, lcVector3& Max) const
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
 	{
-		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+		if (Piece->IsVisibleInEditor(mCurrentStep))
 		{
 			Piece->CompareBoundingBox(Min, Max);
 			Valid = true;
@@ -4817,7 +4926,7 @@ std::vector<lcVector3> lcModel::GetPiecesBoundingBoxPoints(lcGeometryBoundsMode 
 	}
 
 	for (const std::unique_ptr<lcPiece>& Piece : mPieces)
-		if (Piece->IsSelected() || Piece->IsVisible(mCurrentStep))
+		if (Piece->IsVisibleInEditor(mCurrentStep))
 			Piece->SubModelAddBoundingBoxPoints(lcMatrix44Identity(), Points, Mode);
 
 	return Points;

@@ -399,7 +399,7 @@ void lcAssetLoader::ProcessPieceCompletion(Completion& Completed)
 
 	RequestedPiece->Error = Completed.PieceResult.Error;
 	RequestedPiece->EmptyGeometry = Completed.PieceResult.EmptyGeometry;
-	RequestedPiece->ShadowConnections = std::move(Completed.PieceResult.ShadowConnections);
+	RequestedPiece->Connections = std::move(Completed.PieceResult.Connections);
 
 	if (RequestedPiece->Error.isEmpty() && Completed.PieceResult.Mesh)
 	{
@@ -672,7 +672,7 @@ bool lcAssetLoader::RetryPieceWithTextureFallback(const std::shared_ptr<PieceReq
 	qWarning().noquote() << tr("Retrying '%1' with TEXMAP fallback: %2").arg(RequestedPiece->Source.FileName, RequestedPiece->Error);
 
 	RequestedPiece->StagedMesh.reset();
-	RequestedPiece->ShadowConnections = lcShadowConnectionData();
+	RequestedPiece->Connections = lcConnections();
 	RequestedPiece->Error.clear();
 	RequestedPiece->SaveCache = false;
 	RequestedPiece->State = RequestState::Queued;
@@ -699,7 +699,7 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 	if (LoadError.isEmpty() && RequestedPiece->SaveCache && RequestedPiece->StagedMesh)
 		mLibrary->SaveBuiltPieceDataCache(RequestedPiece->Source, *RequestedPiece->StagedMesh);
 
-	const bool Loaded = mLibrary->PublishPieceDataMesh(PieceData, std::move(RequestedPiece->StagedMesh), std::move(RequestedPiece->ShadowConnections), LoadError);
+	const bool Loaded = mLibrary->PublishPieceDataMesh(PieceData, std::move(RequestedPiece->StagedMesh), std::move(RequestedPiece->Connections), LoadError);
 
 	if (!Loaded)
 		CancelUnusedTextureRequests();
@@ -1102,7 +1102,7 @@ void lcAssetLoader::DiscardPieceRequest(std::shared_ptr<PieceRequest> Request)
 	if (!HasOutstandingWork)
 	{
 		Request->StagedMesh.reset();
-		Request->ShadowConnections = lcShadowConnectionData();
+		Request->Connections = lcConnections();
 		Request->PieceData.Reset();
 	}
 
@@ -1170,7 +1170,7 @@ void lcAssetLoader::PauseQueuedWork()
 			continue;
 
 		RequestedPiece->StagedMesh.reset();
-		RequestedPiece->ShadowConnections = lcShadowConnectionData();
+		RequestedPiece->Connections = lcConnections();
 		RequestedPiece->State = RequestState::Queued;
 	}
 

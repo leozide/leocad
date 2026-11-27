@@ -1304,6 +1304,11 @@ bool lcPiece::IsVisible(lcStep Step) const
 	return !mHidden && (mStepShow <= Step) && (mStepHide > Step || mStepHide == LC_STEP_MAX);
 }
 
+bool lcPiece::IsVisibleInEditor(lcStep Step) const
+{
+	return IsSelected() || IsVisible(Step);
+}
+
 bool lcPiece::IsVisibleInSubModel() const
 {
 	return (mStepHide == LC_STEP_MAX) && !mHidden;

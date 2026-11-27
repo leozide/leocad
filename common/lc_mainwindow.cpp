@@ -1074,6 +1074,9 @@ void lcMainWindow::UpdateAssets()
 
 	UpdateTimeline(false, true);
 
+	if (lcView* View = GetActiveView())
+		View->RefreshConnectionPlacement();
+
 	lcView::UpdateProjectViews(Project);
 
 	const std::vector<lcPieceDataRef> RequiredPieceData = Project->GetRequiredPieceData();

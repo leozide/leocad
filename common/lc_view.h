@@ -311,9 +311,10 @@ public:
 	float GetOverlayScale() const;
 	lcVector3 GetMoveDirection(const lcVector3& Direction, bool Relative) const;
 	void UpdatePiecePreview();
+	void RefreshConnectionPlacement();
 	bool ShouldDrawInsertPreview() const;
 	std::vector<lcInsertPieceInfo> GetTrainTrackSnapInfo(lcPiece* MovingPiece, const lcMatrix44& MovingTransform) const;
-	lcMouseInsertPieceInfo GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
+	lcMouseInsertPieceInfo GetMouseInsertPieceInfo(bool IgnoreSelected, bool AllowNewPieces, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const;
 	lcVector3 GetCameraLightInsertPosition() const;
 	void GetRayUnderPointer(lcVector3& Start, lcVector3& End) const;
 	lcObjectRayTest RayTest(bool PiecesOnly, bool IgnoreSelected) const;
@@ -395,7 +396,8 @@ protected:
 	lcCursor mCursor = lcCursor::Default;
 
 	lcDragState mDragState;
-	lcConnectionDragState mStudDragState;
+	lcConnectionDragState mConnectionDragState;
+	quint64 mPreviewConnectionsRevision = 0;
 	bool mTrackToolFromOverlay;
 	quint32 mTrackToolSection = ~0U;
 	lcMatrix44 mMouseDownTransform;
@@ -435,9 +437,10 @@ protected:
 
 private:
 	lcObjectRayTest GetReadyPieceHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, bool IgnoreSelected) const;
-	bool RetainStudPlacement(lcConnectionDragState& StudDragState, const lcPieceData* InsertData) const;
-	lcMouseInsertPieceInfo TryStudPlacement(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, const lcMatrix44& ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit, const std::optional<lcStudTurnContext>& Turn) const;
-	lcMouseInsertPieceInfo TryStudPlacementOnFace(const lcObjectRayTest& ObjectRayTest, const lcStudMatingFace& MatingFace, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState, const lcMatrix33& PlacementRotation, float PlacementOffset) const;
-	lcMouseInsertPieceInfo GetSurfacePlacement(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
-	lcMouseInsertPieceInfo GetPlacementWithoutHit(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& StudDragState) const;
+	bool RetainConnectionPlacement(lcConnectionDragState& ConnectionDragState, const lcPieceData* InsertData) const;
+	lcMouseInsertPieceInfo TryConnectionPlacement(const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState, const lcMatrix44& ProposedTransform, const lcPiece* SurfacePiece, bool HasSurfaceHit, const std::optional<lcStudTurnContext>& Turn, const lcObjectRayTest* PlacementRay) const;
+	lcObjectRayTest RayTestAt(const lcVector2& Screen, bool PiecesOnly, bool IgnoreSelected) const;
+	lcMouseInsertPieceInfo TryStudPlacementOnFace(const lcObjectRayTest& ObjectRayTest, const lcStudMatingFace& MatingFace, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState, const lcMatrix33& PlacementRotation, float PlacementOffset) const;
+	lcMouseInsertPieceInfo GetSurfacePlacement(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const;
+	lcMouseInsertPieceInfo GetPlacementWithoutHit(const lcObjectRayTest& ObjectRayTest, const lcPieceDataRef& PieceData, lcPiece* MovingPiece, lcConnectionDragState& ConnectionDragState) const;
 };

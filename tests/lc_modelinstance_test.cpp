@@ -5,6 +5,7 @@
 #include "lc_commandline.h"
 #include "lc_colors.h"
 #include "lc_connectioninfo.h"
+#include "lc_connectionloader.h"
 #include "lc_context.h"
 #include "lc_findreplacewidget.h"
 #include "lc_library.h"
@@ -73,17 +74,24 @@ class lcModelInstanceTests : public QObject
 	Q_OBJECT
 
 private slots:
-	void ConnectionPartParsing();
-	void ConnectionPartRejectsInvalidData();
-	void ConnectionArchiveLoadAndValidation();
+	void ConnectionCompatibility();
+	void ConnectionPlacementRefreshesPublishedConnections();
+	void SlidingConnectionOccupancy();
+	void ConnectionRayPrefersNearerConnector();
+	void ConnectionRayBreaksTranslationTiesConsistently();
+	void GenericConnectionRetainsOrientation();
+	void AxleConnectionPlacementThroughBore();
+	void TechnicPinConnectionPlacementThroughBore();
 	void PatternConnectionsPublishWithMesh();
-	void ShadowConnectionsPublishWithMesh();
-	void ShadowConnectionsWithCachedMesh();
-	void ShadowConnectionsLargeGrid();
-	void ShadowConnectionsDeepReferences();
+	void ConnectionsPublishWithMesh();
+	void ConnectionsWithCachedMesh();
+	void ConnectionsLargeGrid();
+	void ConnectionsDeepReferences();
 	void StudDragAcceptance_data();
 	void StudDragAcceptance();
 	void StudDragOccupiedContact();
+	void StudDragIncludesSelectedPieceOutsideStep();
+	void ConnectionInsertionTracksEditorVisibility();
 	void StudDragShallowViewRetention();
 	void StudDragTurnsForMoreContacts();
 	void StudDragTurnStaysOnFace();
@@ -212,50 +220,104 @@ QByteArray lcModelInstanceTests::CreateAddonArchive(const QByteArray& Name, cons
 	return Zip;
 }
 
-class lcModelInstanceTestConnectionInfo : public lcConnectionInfo
+void lcModelInstanceTests::ConnectionCompatibility()
 {
-public:
-	using lcConnectionInfo::ParsePart;
-};
+	using Profile = lcCylinderConnection::SectionProfile;
+	using Caps = lcCylinderConnection::CylinderCaps;
 
-void lcModelInstanceTests::ConnectionPartParsing()
-{
-	const QByteArray Data = R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[10,20,30],"direction":[0,-1,0]}]})";
-	std::vector<lcConnectionPoint> Connections;
-	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(Data, "3009.dat", 1, Connections));
-	QCOMPARE(static_cast<int>(Connections.size()), 1);
-	QCOMPARE(Connections[0].Type, lcConnectionType::StudMale);
-	QCOMPARE(Connections[0].Position.x, 10.0f);
-	QCOMPARE(Connections[0].Position.y, 30.0f);
-	QCOMPARE(Connections[0].Position.z, -20.0f);
-	QCOMPARE(Connections[0].Direction.x, 0.0f);
-	QCOMPARE(Connections[0].Direction.y, 0.0f);
-	QCOMPARE(Connections[0].Direction.z, 1.0f);
+	const auto Check = [](const lcConnection& First, const lcConnection& Second, bool Expected)
+	{
+		QCOMPARE(First.IsCompatibleWith(Second), Expected);
+		QCOMPARE(Second.IsCompatibleWith(First), Expected);
+	};
+	lcConnection Male, Female;
+	Male.Shape = lcCylinderConnection{ { { Profile::Round, 8, 2 }, { Profile::Round, 6, 16 }, { Profile::FlexPrevious, 6.25f, 2 } },
+		lcConnectionGender::Male, Caps::A };
+	Female.Shape = lcCylinderConnection{ { { Profile::Round, 8, 2 }, { Profile::Round, 6, 16 }, { Profile::Round, 8, 2 } },
+		lcConnectionGender::Female, Caps::None, true, true };
+	Check(Male, Female, true);
 
-	QVERIFY(lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[]})", "3009.dat", 0, Connections));
-	QVERIFY(Connections.empty());
-}
+	lcConnection Axle;
+	Axle.Shape = lcCylinderConnection{ { { Profile::Axle, 6, 80 } }, lcConnectionGender::Male, Caps::None, true, true };
+	Check(Axle, Female, true);
+	const std::vector<lcConnectionMating> AxleMatings = Axle.GetMatings(Female);
+	QCOMPARE(AxleMatings.size(), size_t(2));
+	for (const lcConnectionMating& Mating : AxleMatings)
+	{
+		QVERIFY(Mating.TravelOnFirst);
+		QCOMPARE(Mating.Travel, 30.0f);
+	}
+	std::get<lcCylinderConnection>(Female.Shape).Sections[0].Radius = 5.5f;
+	Check(Axle, Female, false);
+	std::get<lcCylinderConnection>(Female.Shape).Sections[0].Radius = 8.0f;
+	std::get<lcCylinderConnection>(Female.Shape).Sections[1].Radius = 7.0f;
+	Check(Axle, Female, false);
+	std::get<lcCylinderConnection>(Female.Shape).Sections[1].Radius = 6.0f;
 
-void lcModelInstanceTests::ConnectionPartRejectsInvalidData()
-{
-	std::vector<lcConnectionPoint> Connections;
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":2,"connections":[]})", "3009.dat", 0, Connections));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"variants":[],"connections":[]})", "3009.dat", 0, Connections));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[0,0,0],"direction":[0,0,0]}]})", "3009.dat", 1, Connections));
-	QVERIFY(!lcModelInstanceTestConnectionInfo::ParsePart(R"({"part":"3009.dat","version":3,"connections":[{"type":"stud_male","position":[0,0,1e999],"direction":[0,-1,0]}]})", "3009.dat", 1, Connections));
-}
+	std::get<lcCylinderConnection>(Female.Shape).Sections[1].Profile = Profile::Axle;
+	Check(Male, Female, false);
+	std::get<lcCylinderConnection>(Female.Shape).Sections[1].Profile = Profile::Round;
+	Female.Scale.z = 1.2f;
+	Check(Male, Female, false);
+	Female.Scale.z = 1.0f;
+	std::get<lcCylinderConnection>(Female.Shape).Caps = Caps::Both;
+	Check(Male, Female, false);
+	Check(Male, Male, false);
 
-void lcModelInstanceTests::ConnectionArchiveLoadAndValidation()
-{
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	QVERIFY(Library->LoadBuiltinPieceLibrary());
+	Male.Shape = lcCylinderConnection{ { { Profile::Round, 6, 4 } }, lcConnectionGender::Male, Caps::A };
+	Female.Shape = lcCylinderConnection{ { { Profile::Square, 6, 20 } }, lcConnectionGender::Female, Caps::B };
+	Check(Male, Female, true);
+	Female.Scale.x = 0.9f;
+	Check(Male, Female, false);
+	Female.Scale.x = 1.0f;
 
-	const lcPieceData* PieceData = Library->FindPieceData("3009.dat", nullptr);
-	QVERIFY(PieceData);
+	lcConnection Clip, Bar;
+	Clip.Shape = lcClipConnection{ 4, 8, true, true };
+	Bar.Shape = lcCylinderConnection{ { { Profile::Round, 5, 2 }, { Profile::Round, 4, 80 }, { Profile::Round, 5, 2 } },
+		lcConnectionGender::Male, Caps::Both, true };
+	Check(Clip, Bar, true);
+	std::get<lcCylinderConnection>(Bar.Shape).Sections[1].Length = 7;
+	Check(Clip, Bar, false);
+	std::get<lcCylinderConnection>(Bar.Shape).Sections[1].Length = 80;
+	std::get<lcCylinderConnection>(Bar.Shape).Gender = lcConnectionGender::Female;
+	Check(Clip, Bar, false);
+	Check(Clip, Clip, false);
 
-	const lcConnectionInfo* ConnectionInfo = PieceData->GetConnectionInfo().get();
-	QVERIFY(ConnectionInfo);
-	QCOMPARE(static_cast<int>(ConnectionInfo->GetConnections().size()), 12);
+	lcConnection Fork, Finger;
+	Fork.Group = Finger.Group = "lckHng";
+	Fork.Shape = lcFingersConnection{ { 4.5f, 8, 4.5f }, 6 };
+	Finger.Shape = lcFingersConnection{ { 8 }, 6 };
+	Check(Fork, Finger, true);
+	std::get<lcFingersConnection>(Finger.Shape).Widths.front() = 7;
+	Check(Fork, Finger, false);
+	std::get<lcFingersConnection>(Finger.Shape).Widths.front() = 8;
+	Finger.Group = "other";
+	Check(Fork, Finger, false);
+	Check(Fork, Male, false);
+	Check(Fork, Clip, false);
+
+	using Bounds = lcGenericConnection::Bounds;
+	lcConnection Ball, Socket;
+	Ball.Group = Socket.Group = "techBallJnt";
+	Ball.Shape = lcGenericConnection{ Bounds::Sphere, lcVector3(12.7f, 0, 0), lcConnectionGender::Male, "shape", "free" };
+	Socket.Shape = lcGenericConnection{ Bounds::Sphere, lcVector3(12.7f, 0, 0), lcConnectionGender::Female, "size", "free" };
+	// Authored frames do not affect compatibility.
+	Ball.Frame = lcMatrix44Translation(lcVector3(300, -100, 90));
+	Check(Ball, Socket, true);
+	std::get<lcGenericConnection>(Socket.Shape).Dimensions.x = 8;
+	Check(Ball, Socket, false);
+	std::get<lcGenericConnection>(Socket.Shape).MatchRule = "shape";
+	Check(Ball, Socket, true);
+	std::get<lcGenericConnection>(Socket.Shape).BoundsShape = Bounds::Cube;
+	Check(Ball, Socket, false);
+	std::get<lcGenericConnection>(Socket.Shape).MatchRule = "group";
+	std::get<lcGenericConnection>(Ball.Shape).MatchRule = "group";
+	Check(Ball, Socket, true);
+	Socket.Group = "other";
+	Check(Ball, Socket, false);
+	Check(Ball, Male, false);
+	Check(Ball, Clip, false);
+	Check(Ball, Fork, false);
 }
 
 void lcModelInstanceTests::PatternConnectionsPublishWithMesh()
@@ -277,32 +339,41 @@ void lcModelInstanceTests::PatternConnectionsPublishWithMesh()
 	QVERIFY(QDir(Directory.path()).mkpath("parts"));
 	QVERIFY(QDir(Directory.path()).mkpath("p"));
 
-	for (const QString& Name : { QStringLiteral("3009.dat"), QStringLiteral("3009p01.dat"), QStringLiteral("3009p01d01.dat") })
+	const QByteArray Geometry = "0 Connection test\n3 16 0 0 0 1 0 0 0 1 0\n";
+	const QByteArray Reference = "1 16 12 0 0 1 0 0 0 1 0 0 0 1 body.dat\n";
+	const QByteArray Patch = "0 !LDCAD SNAP_CYL [secs=R 6 4]\n";
+	const std::map<QString, QByteArray> Files = {
+		{ "parts/3009.dat", Geometry + Reference },
+		{ "parts/3009p01.dat", Geometry },
+		{ "parts/3009p01d01.dat", Geometry + Reference },
+		{ "p/body.dat", Geometry },
+		{ "shadow.zip", CreateAddonArchive("p/body.dat", Patch, 0100644, Patch.size(), false, false) }
+	};
+	for (const auto& [Name, Content] : Files)
 	{
-		QFile File(Directory.filePath(QStringLiteral("parts/") + Name));
+		QFile File(Directory.filePath(Name));
 		QVERIFY(File.open(QIODevice::WriteOnly));
-		QVERIFY(File.write("0 Connection test\n3 16 0 0 0 1 0 0 0 1 0\n") > 0);
+		QCOMPARE(File.write(Content), static_cast<qint64>(Content.size()));
 	}
 
 	lcPiecesLibrary* Library = Scope.Library.get();
 	QVERIFY(Library->Load(Directory.path(), false, false));
 	const lcPieceData* Base = Library->FindPieceData("3009.dat", nullptr);
-	const lcPieceData* Parent = Library->FindPieceData("3009p01.dat", nullptr);
 	const lcPieceDataRef Variant = Library->AcquirePieceData("3009p01d01.dat", nullptr, lcAcquirePieceDataFlag::None);
+	const lcPieceDataRef Parent = Library->AcquirePieceData("3009p01.dat", nullptr, lcAcquirePieceDataFlag::None);
 	QVERIFY(Base && Parent && Variant);
-	QVERIFY(Base->GetConnectionInfo());
-	QVERIFY(!Parent->GetConnectionInfo());
-	QVERIFY(!Variant->GetConnectionInfo());
-	QCOMPARE(Variant->GetPatternParentId(), std::string("3009P01.DAT"));
-
+	QVERIFY(Variant->GetConnections().empty());
 	QVERIFY(Library->WaitForPieceData(Variant));
-	QCOMPARE(Variant->GetConnectionInfo().get(), Base->GetConnectionInfo().get());
-	QVERIFY(!Parent->GetConnectionInfo());
-	QVERIFY(!Parent->GetMesh());
+	QCOMPARE(Variant->GetConnections().size(), size_t(1));
+	QCOMPARE(Variant->GetConnections().front().Frame.GetTranslation().x, 12.0f);
+
+	QVERIFY(Library->WaitForPieceData(Parent));
+	QVERIFY(Parent->GetMesh());
+	QVERIFY(Parent->GetConnections().empty());
 	QVERIFY(!Base->GetMesh());
 }
 
-void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
+void lcModelInstanceTests::ConnectionsPublishWithMesh()
 {
 	struct ScopedLibrary
 	{
@@ -327,7 +398,7 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 			"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 shadow-test.png\n"
 			"0 !: 1 16 10 0 0 1 0 0 0 1 0 0 0 1 s\\body.dat\n"
 			"0 !TEXMAP FALLBACK\n"
-			"1 16 10 0 0 1 0 0 0 1 0 0 0 1 s\\body.dat\n"
+			"1 16 70 0 0 1 0 0 0 1 0 0 0 1 s\\body.dat\n"
 			"0 !TEXMAP END\n"
 			"0 !LDCAD SNAP_CLEAR [id=discard]\n"
 			"0 !LDCAD SNAP_INCL [ref=pin.dat] [id=duplicate] [grid=C 2 1 20 0]\n"
@@ -353,53 +424,60 @@ void lcModelInstanceTests::ShadowConnectionsPublishWithMesh()
 
 	lcPiecesLibrary* Library = Scope.Library.get();
 	QVERIFY(Library->Load(Directory.path(), false, false));
+	lcDiskFile PreferredFile(Directory.filePath("parts/shape.dat"));
+	QVERIFY(PreferredFile.Open(QIODevice::ReadOnly));
+	const lcConnections Preferred = lcConnectionLoader(*Library).Load(PreferredFile, QStringLiteral("parts/shape.dat"), {});
+	QCOMPARE(Preferred.size(), size_t(7));
+	QCOMPARE(Preferred.front().Frame.GetTranslation().x, 9.0f);
+
 	const lcPieceDataRef Piece = Library->AcquirePieceData("shape.dat", nullptr, lcAcquirePieceDataFlag::None);
 	QVERIFY(Piece);
 	QVERIFY(Library->WaitForPieceData(Piece));
 
-	const lcShadowConnectionData& Shadow = Piece->GetShadowConnections();
-	QVERIFY(Shadow.HasDefinitions);
-	QCOMPARE(static_cast<int>(Shadow.Connections.size()), 7);
-	const lcShadowConnection& Inherited = Shadow.Connections[0];
-	QCOMPARE(Inherited.Frame.GetTranslation().x, 9.0f);
+	// The primary branch is at X=10. Only the fallback at X=70 is rendered.
+	QVERIFY(Piece->GetBoundingBox().Min.x > 60.0f);
+	const lcConnections& Connections = Piece->GetConnections();
+	QCOMPARE(static_cast<int>(Connections.size()), 7);
+	const lcConnection& Inherited = Connections[0];
+	QCOMPARE(Inherited.Frame.GetTranslation().x, 69.0f);
 	QCOMPARE(Inherited.Frame.GetTranslation().z, -4.0f);
 	QCOMPARE(Inherited.Frame.Determinant(), 1.0f);
 	QCOMPARE(Inherited.Scale.y, 1.0f);
 	QCOMPARE(Inherited.Scale.z, 2.0f);
-	const lcShadowCylinder* Cylinder = std::get_if<lcShadowCylinder>(&Inherited.Shape);
+	const lcCylinderConnection* Cylinder = std::get_if<lcCylinderConnection>(&Inherited.Shape);
 	QVERIFY(Cylinder);
-	QCOMPARE(Cylinder->Gender, lcShadowGender::Female);
-	QCOMPARE(Cylinder->Ends, lcShadowCylinder::Caps::B);
+	QCOMPARE(Cylinder->Gender, lcConnectionGender::Female);
+	QCOMPARE(Cylinder->Caps, lcCylinderConnection::CylinderCaps::B);
 	QCOMPARE(static_cast<int>(Cylinder->Sections.size()), 2);
-	QCOMPARE(Cylinder->Sections[1].Shape, lcShadowCylinder::Profile::FlexPrevious);
+	QCOMPARE(Cylinder->Sections[1].Profile, lcCylinderConnection::SectionProfile::FlexPrevious);
 	QCOMPARE(Cylinder->Sections[1].Radius, 6.25f);
 
-	const lcShadowConnection& Clip = Shadow.Connections[1];
-	QVERIFY(std::get<lcShadowClip>(Clip.Shape).Centered);
+	const lcConnection& Clip = Connections[1];
+	QVERIFY(std::get<lcClipConnection>(Clip.Shape).Centered);
 	QCOMPARE(Clip.Frame.Determinant(), -1.0f);
-	QCOMPARE(Clip.Frame.GetTranslation().x, 10.0f);
-	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().x, -3.0f);
-	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().x, 3.0f);
-	QCOMPARE(Shadow.Connections[2].Frame.GetTranslation().z, -9.0f);
-	QCOMPARE(Shadow.Connections[3].Frame.GetTranslation().z, -9.0f);
-	QVERIFY(std::get<lcShadowCylinder>(Shadow.Connections[2].Shape).Sliding);
-	const lcShadowFingers& Fingers = std::get<lcShadowFingers>(Shadow.Connections[4].Shape);
+	QCOMPARE(Clip.Frame.GetTranslation().x, 70.0f);
+	QCOMPARE(Connections[2].Frame.GetTranslation().x, -3.0f);
+	QCOMPARE(Connections[3].Frame.GetTranslation().x, 3.0f);
+	QCOMPARE(Connections[2].Frame.GetTranslation().z, -9.0f);
+	QCOMPARE(Connections[3].Frame.GetTranslation().z, -9.0f);
+	QVERIFY(std::get<lcCylinderConnection>(Connections[2].Shape).Sliding);
+	const lcFingersConnection& Fingers = std::get<lcFingersConnection>(Connections[4].Shape);
 	QVERIFY(Fingers.Centered);
-	QCOMPARE(Fingers.FirstGender, lcShadowGender::Female);
+	QCOMPARE(Fingers.FirstGender, lcConnectionGender::Female);
 	QCOMPARE(Fingers.Widths[1], 8.0f);
-	const lcShadowGenericConnector& Generic = std::get<lcShadowGenericConnector>(Shadow.Connections[5].Shape);
-	QCOMPARE(Generic.Shape, lcShadowGenericConnector::Bounds::Sphere);
+	const lcGenericConnection& Generic = std::get<lcGenericConnection>(Connections[5].Shape);
+	QCOMPARE(Generic.BoundsShape, lcGenericConnection::Bounds::Sphere);
 	QCOMPARE(Generic.Dimensions.x, 8.0f);
-	QCOMPARE(Generic.Match, QByteArray("size"));
-	QCOMPARE(Generic.Placement, QByteArray("free"));
-	const lcShadowGenericConnector& Box = std::get<lcShadowGenericConnector>(Shadow.Connections[6].Shape);
-	QCOMPARE(Box.Shape, lcShadowGenericConnector::Bounds::Box);
+	QCOMPARE(Generic.MatchRule, QByteArray("size"));
+	QCOMPARE(Generic.PlacementMode, QByteArray("free"));
+	const lcGenericConnection& Box = std::get<lcGenericConnection>(Connections[6].Shape);
+	QCOMPARE(Box.BoundsShape, lcGenericConnection::Bounds::Box);
 	QCOMPARE(Box.Dimensions.x, 1.0f);
 	QCOMPARE(Box.Dimensions.y, 3.0f);
 	QCOMPARE(Box.Dimensions.z, 2.0f);
 }
 
-void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
+void lcModelInstanceTests::ConnectionsWithCachedMesh()
 {
 	class CacheLibrary : public lcPiecesLibrary
 	{
@@ -451,8 +529,7 @@ void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
 		const lcPieceDataRef Piece = Scope.Library->AcquirePieceData("root.dat", nullptr, lcAcquirePieceDataFlag::None);
 		QVERIFY(Piece);
 		QVERIFY(Scope.Library->WaitForPieceData(Piece));
-		QVERIFY(Piece->GetShadowConnections().HasDefinitions);
-		QCOMPARE(static_cast<int>(Piece->GetShadowConnections().Connections.size()), 2);
+		QCOMPARE(static_cast<int>(Piece->GetConnections().size()), 2);
 	}
 	Scope.Library->Unload();
 
@@ -461,15 +538,14 @@ void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
 	QVERIFY(Piece);
 	const lcPieceBuildResult Cached = Scope.Library->BuildPieceData(Scope.Library->SnapshotPieceDataSource(Piece));
 	QVERIFY(Cached.FromCache);
-	QVERIFY(Cached.ShadowConnections.HasDefinitions);
-	QCOMPARE(static_cast<int>(Cached.ShadowConnections.Connections.size()), 2);
-	const lcMatrix44& Frame = Cached.ShadowConnections.Connections.front().Frame;
+	QCOMPARE(static_cast<int>(Cached.Connections.size()), 2);
+	const lcMatrix44& Frame = Cached.Connections.front().Frame;
 	QCOMPARE(Frame.GetTranslation().y, 3.0f);
 	QCOMPARE(Frame.GetTranslation().z, -8.0f);
 	QCOMPARE(Frame[2][0], 0.0f);
 	QCOMPARE(Frame[2][1], 0.0f);
 	QCOMPARE(Frame[2][2], 1.0f);
-	const lcShadowConnection& Skewed = Cached.ShadowConnections.Connections.back();
+	const lcConnection& Skewed = Cached.Connections.back();
 	QCOMPARE(Skewed.Frame.GetTranslation().x, 11.822f);
 	const lcVector3 Axial = lcVector3(Skewed.Frame[2]) * Skewed.Scale.z;
 	QCOMPARE(Axial.x, 0.911f);
@@ -477,7 +553,7 @@ void lcModelInstanceTests::ShadowConnectionsWithCachedMesh()
 	QCOMPARE(Axial.z, 0.288f);
 }
 
-void lcModelInstanceTests::ShadowConnectionsLargeGrid()
+void lcModelInstanceTests::ConnectionsLargeGrid()
 {
 	lcPiecesLibrary Library(lcStudStyle::Plain, false);
 	const QByteArray Grid = "0 !LDCAD SNAP_CLP [id=grid] [grid=100001 1 20 0]\n";
@@ -487,19 +563,19 @@ void lcModelInstanceTests::ShadowConnectionsLargeGrid()
 	lcMemFile File;
 	File.WriteBuffer(Grid.constData(), Grid.size());
 	{
-		const lcShadowConnectionData Shadow = lcLoadShadowConnections(Library, File, QStringLiteral("parts/grid.dat"));
-		QCOMPARE(Shadow.Connections.size(), size_t(100001));
-		QCOMPARE(Shadow.Connections.back().Frame.GetTranslation().x, 2000000.0f);
+		lcConnections Connections = lcConnectionLoader(Library).Load(File, QStringLiteral("parts/grid.dat"), {});
+		QCOMPARE(Connections.size(), size_t(100001));
+		QCOMPARE(Connections.back().Frame.GetTranslation().x, 2000000.0f);
 	}
 
 	File.Seek(0, SEEK_END);
 	File.WriteBuffer(ClearGrid.constData(), ClearGrid.size());
-	const lcShadowConnectionData Cleared = lcLoadShadowConnections(Library, File, QStringLiteral("parts/grid.dat"));
-	QCOMPARE(Cleared.Connections.size(), size_t(1));
-	QVERIFY(std::holds_alternative<lcShadowCylinder>(Cleared.Connections.front().Shape));
+	lcConnections Cleared = lcConnectionLoader(Library).Load(File, QStringLiteral("parts/grid.dat"), {});
+	QCOMPARE(Cleared.size(), size_t(1));
+	QVERIFY(std::holds_alternative<lcCylinderConnection>(Cleared.front().Shape));
 }
 
-void lcModelInstanceTests::ShadowConnectionsDeepReferences()
+void lcModelInstanceTests::ConnectionsDeepReferences()
 {
 	struct ScopedLibrary
 	{
@@ -535,9 +611,51 @@ void lcModelInstanceTests::ShadowConnectionsDeepReferences()
 	QVERIFY(Scope.Library->Load(Directory.path(), false, false));
 	lcDiskFile File(Directory.filePath("parts/root.dat"));
 	QVERIFY(File.Open(QIODevice::ReadOnly));
-	const lcShadowConnectionData Shadow = lcLoadShadowConnections(*Scope.Library, File, QStringLiteral("parts/root.dat"));
-	QCOMPARE(Shadow.Connections.size(), size_t(1));
-	QCOMPARE(Shadow.Connections.front().Frame.GetTranslation().x, static_cast<float>(Depth));
+	lcConnections Connections = lcConnectionLoader(*Scope.Library).Load(File, QStringLiteral("parts/root.dat"), {});
+	QCOMPARE(Connections.size(), size_t(1));
+	QCOMPARE(Connections.front().Frame.GetTranslation().x, static_cast<float>(Depth));
+}
+
+static std::vector<lcPieceDataRef> LoadStudFixtures()
+{
+	lcPiecesLibrary* Library = lcGetPiecesLibrary();
+	if (!Library->FindPieceData("4186.dat", nullptr) && !Library->LoadBuiltinPieceLibrary())
+		return {};
+
+	const std::array<std::tuple<const char*, int, int>, 4> Parts = {{
+		{ "3005.dat", 1, 1 }, { "3004.dat", 2, 1 }, { "3001.dat", 4, 2 }, { "4186.dat", 48, 48 }
+	}};
+	std::vector<lcPieceDataRef> Refs;
+	for (const auto& [Name, Width, Height] : Parts)
+	{
+		const lcPieceDataRef Piece = Library->AcquirePieceData(Name, nullptr, lcAcquirePieceDataFlag::None);
+		if (!Piece || !Library->WaitForPieceData(Piece))
+			return {};
+
+		const QByteArray Grid = " [grid=C " + QByteArray::number(Width) + " C " + QByteArray::number(Height) + " 20 20]\n";
+		QByteArray Shadow = "0 !LDCAD SNAP_CYL [secs=R 6 4]" + Grid;
+		if (Width != 48)
+			Shadow += "0 !LDCAD SNAP_CYL [gender=F] [secs=S 6 20] [pos=0 24 0]" + Grid;
+
+		lcMemFile File;
+		File.WriteBuffer(Shadow.constData(), Shadow.size());
+		lcConnections Connections = lcConnectionLoader(*Library).Load(File, QString::fromLatin1(Name), {});
+		Piece->SetConnections(std::move(Connections));
+		Refs.push_back(Piece);
+	}
+	return Refs;
+}
+
+static lcConnectionDragState::Endpoint StudEndpoint(const lcPiece* Piece, lcStudType Type, const lcVector3& Position)
+{
+	using Profile = lcCylinderConnection::SectionProfile;
+	using Caps = lcCylinderConnection::CylinderCaps;
+	static const lcConnection Stud{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Round, 6, 4 } }, lcConnectionGender::Male, Caps::A, false, false, lcStudType::Male } };
+	static const lcConnection Receiver{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Square, 6, 20 } }, lcConnectionGender::Female, Caps::B, false, false, lcStudType::Female } };
+
+	return { Piece, lcConnectionPoint(Type == lcStudType::Male ? Stud : Receiver, lcMatrix44Translation(Position)), std::nullopt };
 }
 
 struct lcModelInstanceTestStudProject
@@ -560,6 +678,765 @@ struct lcModelInstanceTestStudProject
 		gMouseShortcuts = PreviousShortcuts;
 	}
 };
+
+void lcModelInstanceTests::ConnectionPlacementRefreshesPublishedConnections()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+	const QByteArray Geometry = "0 Placement test\n4 16 -10 0 -10 10 0 -10 10 0 10 -10 0 10\n";
+	const QByteArray ClipGeometry = "0 Open clip\n"
+		"4 16 -10 0 -10 -5 0 -10 -5 0 10 -10 0 10\n"
+		"4 16 5 0 -10 10 0 -10 10 0 10 5 0 10\n"
+		"0 !LDCAD SNAP_CLP [center=true]\n";
+	// The bar lies along LeoCAD X, and the clip's authored axis is +Z.
+	const QByteArray Patch = "0 !LDCAD SNAP_CYL [secs=R 4 80] [caps=two] [center=true] [slide=true] [ori=0 -1 0 1 0 0 0 0 1]\n";
+	const std::map<QString, QByteArray> Files = {
+		{ "parts/bar.dat", Geometry + "4 16 -40 0 -10 -15 0 -10 -15 0 10 -40 0 10\n" },
+		{ "parts/plain.dat", Geometry },
+		{ "parts/late.dat", Geometry },
+		{ "parts/unused.dat", Geometry + "0 !LDCAD SNAP_GEN [group=unused]\n" },
+		{ "parts/clip.dat", ClipGeometry },
+		{ "parts/covered.dat", ClipGeometry +
+			"4 16 -10 -10 -10 10 -10 -10 10 -10 10 -10 -10 10\n"
+			"4 16 -10 -10 -5.5 10 -10 -5.5 10 10 -5.5 -10 10 -5.5\n" },
+		{ "shadow.zip", CreateAddonArchive("parts/bar.dat", Patch, 0100644, Patch.size(), false, false) }
+	};
+	for (const auto& [Name, Content] : Files)
+	{
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Content), static_cast<qint64>(Content.size()));
+	}
+
+	QVERIFY(Scope.Library->Load(Directory.path(), false, false));
+	const lcPieceDataRef Clip = Scope.Library->AcquirePieceData("clip.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Clip && Scope.Library->WaitForPieceData(Clip));
+
+	lcModelInstanceTestStudProject ProjectScope;
+	lcModel* Model = ProjectScope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 bar.dat\n"
+		"1 16 80 0 0 1 0 0 0 1 0 0 0 1 clip.dat\n"
+		"1 16 80 -10 0 1 0 0 0 1 0 0 0 1 plain.dat\n"
+		"1 16 160 0 0 1 0 0 0 1 0 0 0 1 covered.dat\n"
+		"1 16 -55 0 0 1 0 0 0 1 0 0 0 1 late.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &ProjectScope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(5));
+	lcPiece* Bar = Model->GetPieces()[0].get();
+	lcPiece* MovingClip = Model->GetPieces()[1].get();
+	lcPiece* Blocker = Model->GetPieces()[2].get();
+	lcPiece* Late = Model->GetPieces()[4].get();
+	Blocker->SetHidden(true);
+	MovingClip->SetSelected(true);
+	QVERIFY(Bar->mPieceData->GetConnections().empty());
+
+	const lcVector3 Proposal(3, 5, 0);
+	const lcConnectionSnapContext Context{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), Bar, true
+	};
+	const lcMatrix44 Move = lcMatrix44Translation(Proposal - MovingClip->mModelWorld.GetTranslation());
+	const lcInsertPieceInfo Insert{ Clip.Get(), lcMatrix44Translation(Proposal), lcGetColorIndex(16) };
+	lcConnectionDragState InsertState, DragState;
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, InsertState));
+	QVERIFY(!Model->GetConnectionSnapTransform(Move, Context, nullptr, DragState));
+	QVERIFY(Scope.Library->WaitForPieceData(Bar->mPieceData));
+	QVERIFY(Model->EnsureAssetsReady());
+
+	const std::optional<lcMatrix44> InsertCorrection = Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, InsertState);
+	const std::optional<lcMatrix44> DragCorrection = Model->GetConnectionSnapTransform(Move, Context, nullptr, DragState);
+	QVERIFY(InsertCorrection && DragCorrection);
+	const lcMatrix44 Seated = lcMul(Insert.Transform, *InsertCorrection);
+	QVERIFY(lcLengthSquared(lcMul31(Proposal, *DragCorrection) - Seated.GetTranslation()) < 0.001f);
+	QVERIFY(lcLengthSquared(Seated.GetTranslation() - lcVector3(3, 0, 0)) < 0.001f);
+	QVERIFY(fabsf(Seated[2].x) > 0.99f);
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	Window.SetTool(lcTool::Insert);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(600, 600);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(0, 0, 200), lcVector3(0, 0, 0), lcVector3(0, 1, 0));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+	auto PointAt = [View](const lcVector3& Position)
+	{
+		const lcVector3 Point = View->ProjectPoint(Position);
+		View->SetMousePosition(qRound(Point.x), qRound(Point.y));
+	};
+
+	// The authored bar extends past the test mesh and the clip has an open throat.
+	PointAt(lcVector3(25, 2, 0));
+	QVERIFY(!View->FindObjectUnderPointer(true, false).Object);
+	lcConnectionDragState BarRayState;
+	const lcMouseInsertPieceInfo ClipOnBar = View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState);
+	QVERIFY(ClipOnBar.IsConnection);
+	const lcMatrix44& ClipTransform = ClipOnBar.Pieces.front().Transform;
+	QVERIFY(fabsf(ClipTransform.GetTranslation().x - 25.0f) < 1.0f);
+	QVERIFY(fabsf(ClipTransform.GetTranslation().y) < 0.001f);
+	QVERIFY(fabsf(ClipTransform[2].x) > 0.99f);
+
+	PointAt(lcVector3(26, 2, 0));
+	QVERIFY(!View->FindObjectUnderPointer(true, false).Object);
+	const lcMouseInsertPieceInfo Following = View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState);
+	QVERIFY(Following.IsConnection);
+	QVERIFY(Following.Pieces.front().Transform.GetTranslation().x > ClipTransform.GetTranslation().x + 0.3f);
+
+	PointAt(lcVector3(26, 3.7f, 0));
+	QVERIFY(View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState).IsConnection);
+	PointAt(lcVector3(26, 4.3f, 0));
+	lcConnectionDragState FreshOutside;
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, FreshOutside).IsConnection);
+	const lcMouseInsertPieceInfo Retained = View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState);
+	QVERIFY(Retained.IsConnection);
+
+	const lcPieceDataRef Unused = Scope.Library->AcquirePieceData("unused.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Unused && Scope.Library->WaitForPieceData(Unused));
+	QVERIFY(!Unused->GetConnections().empty());
+	QVERIFY(Model->IsConnectionPlacementCurrent(BarRayState, Clip.Get()));
+	QVERIFY(View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState).IsConnection);
+
+	QVERIFY(Scope.Library->WaitForPieceData(Late->mPieceData));
+	lcConnection LateClip = Clip->GetConnections().front();
+	const lcMatrix33 AlongBar = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f);
+	LateClip.Frame = lcMatrix44(AlongBar, lcVector3(20, 0, 0));
+	Late->mPieceData->SetConnections(lcConnections{ LateClip });
+	QVERIFY(!Model->IsConnectionPlacementCurrent(BarRayState, Clip.Get()));
+	const lcMouseInsertPieceInfo AfterPublication = View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState);
+	QVERIFY(AfterPublication.IsConnection);
+	QVERIFY(lcLengthSquared(AfterPublication.Pieces.front().Transform.GetTranslation() - Retained.Pieces.front().Transform.GetTranslation()) < 0.001f);
+	QVERIFY(BarRayState.Pair && BarRayState.Stationary[BarRayState.Pair->second].Piece == Bar);
+
+	LateClip.Frame.SetTranslation(lcVector3(81, 0, 0));
+	Late->mPieceData->SetConnections(lcConnections{ LateClip });
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, BarRayState).IsConnection);
+	Late->mPieceData->SetConnections(lcConnections());
+
+	for (const lcVector3& Miss : { lcVector3(45, 0, 0), lcVector3(25, 6, 0) })
+	{
+		PointAt(Miss);
+		lcConnectionDragState MissState;
+		QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Clip, nullptr, MissState).IsConnection);
+	}
+
+	PointAt(lcVector3(80, 2, 0));
+	QVERIFY(!View->FindObjectUnderPointer(true, false).Object);
+	lcConnectionDragState ClipRayState;
+	const lcMouseInsertPieceInfo BarInClip = View->GetMouseInsertPieceInfo(false, true, Bar->mPieceData, nullptr, ClipRayState);
+	QVERIFY(BarInClip.IsConnection);
+	const lcMatrix44& BarTransform = BarInClip.Pieces.front().Transform;
+	QVERIFY(fabsf(BarTransform.GetTranslation().x - 80.0f) < 0.001f);
+	QVERIFY(fabsf(BarTransform[0].z) > 0.99f);
+
+	PointAt(lcVector3(85.5f, 0, 0));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(MovingClip));
+	lcConnectionDragState RimState;
+	QVERIFY(View->GetMouseInsertPieceInfo(false, true, Bar->mPieceData, nullptr, RimState).IsConnection);
+
+	PointAt(lcVector3(160, 0, 0));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Model->GetPieces()[3].get()));
+	lcConnectionDragState CoveredState;
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Bar->mPieceData, nullptr, CoveredState).IsConnection);
+
+	Camera.SetViewpoint(lcVector3(160, -200, 0), lcVector3(160, 0, 0), lcVector3(0, 0, 1));
+	View->SetCamera(&Camera, true);
+	PointAt(lcVector3(160, 0, 0));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Model->GetPieces()[3].get()));
+	lcConnectionDragState SideCoverState;
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Bar->mPieceData, nullptr, SideCoverState).IsConnection);
+	Camera.SetViewpoint(lcVector3(0, 0, 200), lcVector3(0, 0, 0), lcVector3(0, 1, 0));
+	View->SetCamera(&Camera, true);
+
+	PointAt(lcVector3(80, 2, 0));
+	Blocker->SetHidden(false);
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Blocker));
+	lcConnectionDragState BlockedState;
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Bar->mPieceData, nullptr, BlockedState).IsConnection);
+	Blocker->SetHidden(true);
+
+	const lcVector3 Screen = View->ProjectPoint(lcVector3(3, 0, 0));
+	View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+
+	const lcPieceDataRef Plain = Scope.Library->AcquirePieceData("plain.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Plain && Scope.Library->WaitForPieceData(Plain));
+	Window.SetInsertPieceData(Plain.Get());
+	View->UpdatePiecePreview();
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Model->GetPreviewInsertPieceInfo().front().Transform), lcMatrix33Identity()));
+
+	Window.SetInsertPieceData(Clip.Get());
+	View->OnMouseMove();
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
+	const lcMatrix44 Preview = Model->GetPreviewInsertPieceInfo().front().Transform;
+	QVERIFY(fabsf(Preview[2].x) > 0.99f);
+
+	lcConnections Published = Bar->mPieceData->GetConnections();
+	Bar->mPieceData->SetConnections(lcConnections());
+	View->RefreshConnectionPlacement();
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Model->GetPreviewInsertPieceInfo().front().Transform), lcMatrix33Identity()));
+
+	Bar->mPieceData->SetConnections(std::move(Published));
+	View->RefreshConnectionPlacement();
+	QCOMPARE(Model->GetPreviewInsertPieceInfo().size(), size_t(1));
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Model->GetPreviewInsertPieceInfo().front().Transform), lcMatrix33(Preview)));
+	QVERIFY(lcLengthSquared(Preview.GetTranslation() - Seated.GetTranslation()) < 1.0f);
+	View->OnLeftButtonDown();
+	View->OnLeftButtonUp();
+	QCOMPARE(Model->GetPieces().size(), size_t(6));
+	QVERIFY(lcMatrix33Similar(lcMatrix33(Model->GetPieces().back()->mModelWorld), lcMatrix33(Preview)));
+
+	Model->SetSelectionAndFocusAction({ Bar }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	PointAt(lcVector3(-30, 0, 0));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Bar));
+	View->OnMouseMove();
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	PointAt(lcVector3(50, 0, 0));
+	QVERIFY(!View->FindObjectUnderPointer(true, true).Object);
+	View->OnMouseMove();
+	QVERIFY(fabsf(Bar->mModelWorld[0].z) > 0.99f);
+	QVERIFY(fabsf(Bar->mModelWorld.GetTranslation().x - 80.0f) < 0.001f);
+
+	PointAt(lcVector3(130, 0, 0));
+	View->OnMouseMove();
+	QVERIFY(fabsf(Bar->mModelWorld[0].x) > 0.99f);
+	View->StopTracking(false);
+}
+
+void lcModelInstanceTests::SlidingConnectionOccupancy()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	using Profile = lcCylinderConnection::SectionProfile;
+	using Caps = lcCylinderConnection::CylinderCaps;
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Round, 4, 80 } }, lcConnectionGender::Male, Caps::Both, true, true } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcMatrix33 AlongX = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f);
+	lcPiece BarPiece, ClipPiece, MovingBarPiece, MovingClipPiece;
+	const Endpoint SeatedClip{ &ClipPiece, lcConnectionPoint(Clip, lcMatrix44(AlongX, lcVector3(-13, 0, 0))), std::nullopt };
+	const Endpoint SeatedBar{ &BarPiece, lcConnectionPoint(Bar, lcMatrix44(AlongX, lcVector3(0, 0, 0))), std::nullopt };
+	const lcConnectionSnapContext Context{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), &BarPiece, true
+	};
+
+	lcConnectionDragState State;
+	State.Stationary = { SeatedClip, SeatedBar };
+	State.StationaryReach = SeatedBar.Connection.Reach;
+
+	for (float X : { -13.0f, -7.0f, -4.0f })
+	{
+		std::vector<Endpoint> Moving{
+			Endpoint{ &MovingClipPiece, lcConnectionPoint(Clip, lcMatrix44(AlongX, lcVector3(X, 2, 0))), std::nullopt }
+		};
+		const std::optional<lcMatrix44> Correction = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State);
+		QCOMPARE(Correction.has_value(), X == -4.0f);
+	}
+
+	std::vector<Endpoint> SecondBar{
+		Endpoint{ &MovingBarPiece, lcConnectionPoint(Bar, lcMatrix44(AlongX, lcVector3(-30, 2, 0))), std::nullopt }
+	};
+	QVERIFY(!lcConnectionInfo::FindSnap(SecondBar, lcMatrix44Identity(), Context, State));
+
+	// A clip already attached to a moving bar also reserves its span.
+	lcConnectionDragState DragState;
+	DragState.Stationary = { SeatedClip };
+	std::vector<Endpoint> MovingAssembly{
+		Endpoint{ &MovingBarPiece, lcConnectionPoint(Bar, lcMatrix44(AlongX, lcVector3(0, 2, 0))), std::nullopt },
+		Endpoint{ &MovingClipPiece, lcConnectionPoint(Clip, lcMatrix44(AlongX, lcVector3(-13, 2, 0))), std::nullopt }
+	};
+	QVERIFY(!lcConnectionInfo::FindSnap(MovingAssembly, lcMatrix44Identity(), Context, DragState));
+	QVERIFY(lcConnectionInfo::FindSnap(MovingAssembly, lcMatrix44Translation(lcVector3(-9, 0, 0)), Context, DragState));
+}
+
+void lcModelInstanceTests::ConnectionRayPrefersNearerConnector()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	using Profile = lcCylinderConnection::SectionProfile;
+	using Caps = lcCylinderConnection::CylinderCaps;
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Round, 4, 80 } }, lcConnectionGender::Male, Caps::None, true, true } };
+	const lcConnection Bore{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Round, 4, 20 } }, lcConnectionGender::Female, Caps::None, true, true } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcVector3 RayStart(0, 0, 100);
+	const lcConnectionSnapContext Context{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 300)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), nullptr, false, std::nullopt, lcVector2(100, 100),
+		lcConnectionSnapRay{ RayStart, lcVector3(0, 0, -150), RayStart, 250.0f, nullptr, true }
+	};
+	lcPiece ClipPiece, BorePiece;
+	for (bool ClipInFront : { true, false })
+	{
+		const lcMatrix44 Rear = lcMatrix44Translation(lcVector3(0, 0, -80));
+		lcConnectionDragState State;
+		State.Stationary = {
+			Endpoint{ &ClipPiece, lcConnectionPoint(Clip, ClipInFront ? lcMatrix44Identity() : Rear), std::nullopt },
+			Endpoint{ &BorePiece, lcConnectionPoint(Bore, ClipInFront ? Rear : lcMatrix44Identity()), std::nullopt }
+		};
+		State.StationaryReach = 10.0f;
+		std::vector<Endpoint> Moving{ Endpoint{ nullptr, lcConnectionPoint(Bar, lcMatrix44Translation(RayStart)), std::nullopt } };
+		QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State));
+		QVERIFY(State.Pair);
+		QCOMPARE(State.Stationary[State.Pair->second].Piece, ClipInFront ? &ClipPiece : &BorePiece);
+	}
+
+	lcConnectionDragState OffsetState;
+	OffsetState.Stationary = {
+		Endpoint{ &ClipPiece, lcConnectionPoint(Clip, lcMatrix44Translation(lcVector3(0, 0, -80))), std::nullopt },
+		Endpoint{ &BorePiece, lcConnectionPoint(Bore, lcMatrix44Translation(lcVector3(8, 0, 0))), std::nullopt }
+	};
+	OffsetState.StationaryReach = 10.0f;
+	std::vector<Endpoint> Moving{ Endpoint{ nullptr, lcConnectionPoint(Bar, lcMatrix44Translation(RayStart)), std::nullopt } };
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, OffsetState));
+	QVERIFY(OffsetState.Pair);
+	QCOMPARE(OffsetState.Stationary[OffsetState.Pair->second].Piece, &ClipPiece);
+
+	lcPiece FirstBarPiece, SecondBarPiece;
+	std::vector<Endpoint> Assembly{
+		Endpoint{ &FirstBarPiece, lcConnectionPoint(Bar, lcMatrix44Translation(RayStart + lcVector3(12, 0, 0))), std::nullopt },
+		Endpoint{ &SecondBarPiece, lcConnectionPoint(Bar, lcMatrix44Translation(RayStart + lcVector3(1, 0, 0))), std::nullopt }
+	};
+	const lcMatrix33 AlongX = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f);
+	std::vector<Endpoint> OrientedAssembly{
+		Endpoint{ &FirstBarPiece, lcConnectionPoint(Bar, lcMatrix44(AlongX, RayStart + lcVector3(0, -4.5f, 0))), std::nullopt },
+		Endpoint{ &SecondBarPiece, lcConnectionPoint(Bar, lcMatrix44Translation(RayStart + lcVector3(0, 4.5f, 28))), std::nullopt }
+	};
+	for (const Endpoint& Target : {
+		Endpoint{ &ClipPiece, lcConnectionPoint(Clip, lcMatrix44Identity()), std::nullopt },
+		Endpoint{ &BorePiece, lcConnectionPoint(Bore, lcMatrix44Identity()), std::nullopt } })
+	{
+		lcConnectionDragState AssemblyState;
+		AssemblyState.Stationary = { Target };
+		AssemblyState.StationaryReach = Target.Connection.Reach;
+		const std::optional<lcMatrix44> Snap = lcConnectionInfo::FindSnap(Assembly, lcMatrix44Identity(), Context, AssemblyState);
+		QVERIFY(Snap && AssemblyState.Pair);
+		QCOMPARE(AssemblyState.Pair->first, size_t(1));
+		QCOMPARE(Snap->GetTranslation().x, -1.0f);
+
+		if (Target.Piece == &ClipPiece)
+		{
+			AssemblyState.Pair = std::make_pair(size_t(0), size_t(0));
+			QVERIFY(lcConnectionInfo::FindSnap(Assembly, lcMatrix44Identity(), Context, AssemblyState));
+			QCOMPARE(AssemblyState.Pair->first, size_t(0));
+		}
+
+		lcConnectionDragState OrientedState;
+		OrientedState.Stationary = { Target };
+		OrientedState.StationaryReach = Target.Connection.Reach;
+		const std::optional<lcMatrix44> OrientedSnap = lcConnectionInfo::FindSnap(OrientedAssembly, lcMatrix44Identity(), Context, OrientedState);
+		QVERIFY(OrientedSnap && OrientedState.Pair);
+		QCOMPARE(OrientedState.Pair->first, size_t(1));
+		QVERIFY(lcMatrix33Similar(lcMatrix33(*OrientedSnap), lcMatrix33Identity()));
+	}
+
+	const lcMatrix33 NearSideOn = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f - 0.001f);
+	lcConnectionDragState SideOnState;
+	SideOnState.Stationary = { Endpoint{ &BorePiece, lcConnectionPoint(Bore, lcMatrix44(NearSideOn, lcVector3(-12, 0, 0))), std::nullopt } };
+	SideOnState.StationaryReach = 10.0f;
+	lcConnectionSnapContext SideOnContext = Context;
+	SideOnContext.PlacementRay->HitDistance = FLT_MAX;
+	QVERIFY(!lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), SideOnContext, SideOnState));
+
+	SideOnContext.PlacementRay->End.z = -2500.0f;
+	SideOnContext.ModelToClip = lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 2601));
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), SideOnContext, SideOnState));
+
+	lcConnection OvalBar = Bar, OvalBore = Bore, OvalClip = Clip;
+	OvalBar.Scale.x = OvalBore.Scale.x = OvalClip.Scale.x = 2.0f;
+	for (const lcVector3& Offset : { lcVector3(0, 6, 0), lcVector3(6, 0, 0) })
+	{
+		lcConnectionDragState OvalState;
+		OvalState.Stationary = {
+			Endpoint{ &BorePiece, lcConnectionPoint(OvalBore, lcMatrix44Identity()), std::nullopt },
+			Endpoint{ &ClipPiece, lcConnectionPoint(OvalClip, lcMatrix44Translation(Offset + lcVector3(0, 0, -80))), std::nullopt }
+		};
+		OvalState.StationaryReach = 10.0f;
+		lcConnectionSnapContext OvalContext = Context;
+		OvalContext.Cursor.x += Offset.x;
+		OvalContext.Cursor.y += Offset.y;
+		OvalContext.PlacementRay->Start += Offset;
+		OvalContext.PlacementRay->End += Offset;
+		OvalContext.PlacementRay->ProposedGrab += Offset;
+		std::vector<Endpoint> OvalMoving{ Endpoint{ nullptr, lcConnectionPoint(OvalBar, lcMatrix44Translation(RayStart + Offset)), std::nullopt } };
+		QVERIFY(lcConnectionInfo::FindSnap(OvalMoving, lcMatrix44Identity(), OvalContext, OvalState));
+		QVERIFY(OvalState.Pair);
+		QCOMPARE(OvalState.Stationary[OvalState.Pair->second].Piece, Offset.x != 0.0f ? &BorePiece : &ClipPiece);
+	}
+}
+
+void lcModelInstanceTests::ConnectionRayBreaksTranslationTiesConsistently()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	using Profile = lcCylinderConnection::SectionProfile;
+	using Caps = lcCylinderConnection::CylinderCaps;
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+		lcCylinderConnection{ { { Profile::Round, 4, 10 } }, lcConnectionGender::Male, Caps::Both, true, true } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcVector3 RayStart(0, 0, 100);
+	const lcConnectionSnapContext Context{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 300)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), nullptr, false, std::nullopt, lcVector2(100, 100),
+		lcConnectionSnapRay{ RayStart, lcVector3(0, 0, -150), RayStart, 250.0f, nullptr, false }
+	};
+
+	lcPiece ClipPiece, FirstBar, SecondBar, ThirdBar;
+	const std::array<lcPiece*, 3> Pieces{ &FirstBar, &SecondBar, &ThirdBar };
+	const std::array<float, 3> Tilt{ LC_PI / 3.0f, LC_PI / 4.0f, 0.0f };
+	std::vector<Endpoint> Moving;
+	for (size_t Index = 0; Index < Pieces.size(); Index++)
+	{
+		const float Azimuth = Index * 2.0f * LC_PI / 3.0f;
+		const lcVector3 Radial(cosf(Azimuth), sinf(Azimuth), 0.0f);
+		const float Distance = sqrtf(100.0f + Index * 0.007f);
+		const lcMatrix33 Rotation = lcMatrix33FromAxisAngle(Radial, Tilt[Index]);
+		Moving.push_back(Endpoint{ Pieces[Index], lcConnectionPoint(Bar, lcMatrix44(Rotation, RayStart + Distance * Radial)), std::nullopt });
+	}
+
+	for (bool Reverse : { false, true })
+	{
+		if (Reverse)
+			std::reverse(Moving.begin(), Moving.end());
+
+		lcConnectionDragState State;
+		State.Stationary = { Endpoint{ &ClipPiece, lcConnectionPoint(Clip, lcMatrix44Identity()), std::nullopt } };
+		QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State));
+		QVERIFY(State.Pair);
+		QCOMPARE(Moving[State.Pair->first].Piece, &SecondBar);
+	}
+}
+
+void lcModelInstanceTests::GenericConnectionRetainsOrientation()
+{
+	using Endpoint = lcConnectionDragState::Endpoint;
+	lcPiece MovingPiece, TargetPiece;
+	const lcConnectionSnapContext Context{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(200, 200), lcVector3(0, 0, -1), &TargetPiece, true
+	};
+	const lcVector3 Offset(3, 0, 0);
+	const lcMatrix33 Rotation = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f);
+	for (bool RetainOnMoving : { false, true })
+	{
+		lcConnection MovingConnector, TargetConnector;
+		lcGenericConnection Male, Female;
+		Female.Gender = lcConnectionGender::Female;
+		(RetainOnMoving ? Male : Female).PlacementMode = "retain";
+		MovingConnector.Shape = Male;
+		TargetConnector.Shape = Female;
+		lcConnectionDragState State;
+		State.Stationary = { Endpoint{ &TargetPiece, lcConnectionPoint(TargetConnector, lcMatrix44Identity()), std::nullopt } };
+		std::vector<Endpoint> Moving{
+			Endpoint{ &MovingPiece, lcConnectionPoint(MovingConnector, lcMatrix44(Rotation, Offset)), std::nullopt }
+		};
+		const std::optional<lcMatrix44> Correction = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State);
+		QVERIFY(Correction);
+		QVERIFY(lcMatrix33Similar(lcMatrix33(*Correction), lcMatrix33Identity()));
+		QVERIFY(lcLengthSquared(Correction->GetTranslation() + Offset) < 0.0001f);
+	}
+}
+
+void lcModelInstanceTests::AxleConnectionPlacementThroughBore()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	// Use the authored 3705 and 4019 profiles with simple meshes that leave
+	// the bore open and make the shaft easy to grab close to its end.
+	const QByteArray Gear = "0 !LDCAD SNAP_CLEAR\n"
+		"0 !LDCAD SNAP_CYL [gender=F] [caps=none] [secs=A 6 20] [center=true] [slide=true] [ori=1 0 0 0 0 1 0 -1 0]\n";
+	const std::map<QString, QByteArray> Files = {
+		{ "parts/4019.dat", "0 Gear with an open bore\n"
+			"4 16 -20 -20 -10 20 -20 -10 20 -5 -10 -20 -5 -10\n"
+			"4 16 -20 5 -10 20 5 -10 20 20 -10 -20 20 -10\n"
+			"4 16 -20 -5 -10 -5 -5 -10 -5 5 -10 -20 5 -10\n"
+			"4 16 5 -5 -10 20 -5 -10 20 5 -10 5 5 -10\n" },
+		{ "parts/3705.dat", "0 Axle\n"
+			"4 16 -40 -3 -3 40 -3 -3 40 3 -3 -40 3 -3\n"
+			"0 !LDCAD SNAP_CYL [gender=M] [caps=none] [secs=A 6 80] [center=true] [slide=true] [ori=0 -1 0 1 0 0 0 0 1]\n" },
+		{ "parts/blocker.dat", "0 Solid plate\n4 16 -10 -10 0 10 -10 0 10 10 0 -10 10 0\n" },
+		{ "shadow.zip", CreateAddonArchive("parts/4019.dat", Gear, 0100644, Gear.size(), false, false) }
+	};
+	for (const auto& [Name, Data] : Files)
+	{
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Data), static_cast<qint64>(Data.size()));
+	}
+
+	QVERIFY(Scope.Library->Load(Directory.path(), false, false));
+	lcModelInstanceTestStudProject ProjectScope;
+	lcModel* Model = ProjectScope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 -60 0 1 0 0 0 1 0 0 0 1 4019.dat\n"
+		"1 16 65 -60 0 1 0 0 0 1 0 0 0 1 3705.dat\n"
+		"1 16 18 -76 -80 1 0 0 0 1 0 0 0 1 blocker.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &ProjectScope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(3));
+	QVERIFY(Model->EnsureAssetsReady());
+	lcPiece* Shaft = Model->GetPieces()[1].get();
+	lcPiece* Blocker = Model->GetPieces()[2].get();
+	Blocker->SetHidden(true);
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 900);
+	lcCamera Camera(true);
+	Camera.SetViewpoint(lcVector3(45, -200, 100), lcVector3(0, 0, 60), lcVector3(0, 0, 1));
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	View->SetCamera(&Camera, true);
+
+	auto PointAt = [View](const lcVector3& Point)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	};
+	const lcVector3 Bore(0, 0, 60);
+	const lcVector3 Axis(0, 1, 0);
+	PointAt(Bore);
+	QVERIFY(!View->RayTest(true, false).ObjectSection.Object);
+
+	lcConnectionDragState InsertState;
+	const lcMouseInsertPieceInfo Preview = View->GetMouseInsertPieceInfo(false, true, Shaft->mPieceData, nullptr, InsertState);
+	QVERIFY(Preview.IsConnection);
+	QVERIFY(lcLengthSquared(Preview.Pieces.front().Transform.GetTranslation() - Bore) < 0.01f);
+	QVERIFY(fabsf(lcDot(lcVector3(Preview.Pieces.front().Transform[0]), Axis)) > 0.999f);
+
+	PointAt(Bore + lcVector3(0, 0, 10));
+	lcConnectionDragState FreshState;
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Shaft->mPieceData, nullptr, FreshState).IsConnection);
+
+	Blocker->SetHidden(false);
+	PointAt(Bore);
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Blocker));
+	FreshState = lcConnectionDragState();
+	QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Shaft->mPieceData, nullptr, FreshState).IsConnection);
+	Blocker->SetHidden(true);
+
+	const lcVector3 Eye(45, -200, 100);
+	Camera.SetViewpoint(Bore + (Eye - Bore) * 0.3f, Bore, lcVector3(0, 0, 1));
+	View->SetCamera(&Camera, true);
+	const lcVector3 NearRim = Bore + lcVector3(0, 0, 3.5f);
+	PointAt(NearRim);
+	FreshState = lcConnectionDragState();
+	QVERIFY(View->GetMouseInsertPieceInfo(false, true, Shaft->mPieceData, nullptr, FreshState).IsConnection);
+	Camera.SetViewpoint(Eye, Bore, lcVector3(0, 0, 1));
+	View->SetCamera(&Camera, true);
+
+	PointAt(lcVector3(29, -3, 60));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Shaft));
+	Model->SetSelectionAndFocusAction({ Shaft }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	View->OnMouseMove();
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+
+	PointAt(Bore);
+	View->OnMouseMove();
+	QVERIFY(fabsf(lcDot(lcVector3(Shaft->mModelWorld[0]), Axis)) > 0.999f);
+	const lcVector3 Offset = Shaft->mModelWorld.GetTranslation() - Bore;
+	QVERIFY(lcLengthSquared(lcCross(Offset, Axis)) < 0.01f);
+	QVERIFY(fabsf(lcDot(Offset, Axis)) <= 30.01f);
+	View->StopTracking(false);
+}
+
+void lcModelInstanceTests::TechnicPinConnectionPlacementThroughBore()
+{
+	struct ScopedLibrary
+	{
+		lcPiecesLibrary* Previous = gApplication->mLibrary;
+		std::unique_ptr<lcPiecesLibrary> Library = std::make_unique<lcPiecesLibrary>(lcStudStyle::Plain, false);
+		ScopedLibrary() { gApplication->mLibrary = Library.get(); }
+		~ScopedLibrary()
+		{
+			Library.reset();
+			gApplication->mLibrary = Previous;
+		}
+	} Scope;
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("parts"));
+	QVERIFY(QDir(Directory.path()).mkpath("p"));
+
+	// Use the authored alias, axle-pin profile, and seven-hole grid with
+	// simple geometry that keeps the bores open to the picking ray.
+	QByteArray Brick = "0 Technic Brick 1 x 8 with Holes\n"
+		"0 !LDCAD SNAP_INCL [ref=connhole.dat] [pos=0 10 0] [ori=1 0 0 0 0 1 0 -1 0] [grid=C 7 1 20 0]\n";
+	for (int Face : { -10, 10 })
+	{
+		auto Quad = [&Brick, Face](int Left, int Right, int Top, int Bottom)
+		{
+			const QByteArray X1 = QByteArray::number(Left), X2 = QByteArray::number(Right);
+			const QByteArray Y1 = QByteArray::number(Top), Y2 = QByteArray::number(Bottom), Z = QByteArray::number(Face);
+			Brick += "4 16 " + X1 + ' ' + Y1 + ' ' + Z + ' ' + X2 + ' ' + Y1 + ' ' + Z + ' ' +
+				X2 + ' ' + Y2 + ' ' + Z + ' ' + X1 + ' ' + Y2 + ' ' + Z + '\n';
+		};
+
+		Quad(-80, 80, 0, 4);
+		Quad(-80, 80, 16, 24);
+		Quad(-80, -66, 4, 16);
+		for (int X = -60; X < 60; X += 20)
+			Quad(X + 6, X + 14, 4, 16);
+		Quad(66, 80, 4, 16);
+	}
+
+	Brick += "4 16 -80 0 -10 -80 0 10 80 0 10 80 0 -10\n";
+
+	const QByteArray Hole = "0 !LDCAD SNAP_CYL [id=connhole] [gender=F] [caps=none] [secs=R 8 2 R 6 16 R 8 2] [center=true] [slide=true]\n";
+	const std::map<QString, QByteArray> Files = {
+		{ "parts/3702.dat", Brick },
+		{ "parts/6562.dat", "0 =Technic Axle Pin\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 3749.dat\n" },
+		{ "parts/3705.dat", "0 Technic Axle 4\n"
+			"4 16 -40 -3 -3 40 -3 -3 40 3 -3 -40 3 -3\n"
+			"0 !LDCAD SNAP_CYL [gender=M] [caps=none] [secs=A 6 80] [center=true] [slide=true] [ori=0 -1 0 1 0 0 0 0 1]\n" },
+		{ "parts/3749.dat", "0 Technic Axle Pin\n"
+			"4 16 -20 -4 -4 20 -4 -4 20 4 -4 -20 4 -4\n"
+			"0 !LDCAD SNAP_CLEAR\n"
+			"0 !LDCAD SNAP_CYL [gender=M] [caps=none] [secs=L_ 6.25 2 R 6 16 R 8 2 A 6 20] [center=true] [slide=true] [ori=0 -1 0 1 0 0 0 0 1]\n" },
+		{ "shadow.zip", CreateAddonArchive("p/connhole.dat", Hole, 0100644, Hole.size(), false, false) }
+	};
+	for (const auto& [Name, Data] : Files)
+	{
+		QFile File(Directory.filePath(Name));
+		QVERIFY(File.open(QIODevice::WriteOnly));
+		QCOMPARE(File.write(Data), static_cast<qint64>(Data.size()));
+	}
+
+	QVERIFY(Scope.Library->Load(Directory.path(), false, false));
+	lcModelInstanceTestStudProject ProjectScope;
+	lcModel* Model = ProjectScope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 -60 0 1 0 0 0 1 0 0 0 1 3702.dat\n"
+		"1 16 105 -50 0 1 0 0 0 1 0 0 0 1 6562.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &ProjectScope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+	QVERIFY(Model->EnsureAssetsReady());
+	lcPiece* Pin = Model->GetPieces()[1].get();
+	const std::vector<lcConnection>& Pins = Pin->mPieceData->GetConnections();
+	const std::vector<lcConnection>& Holes = Model->GetPieces()[0]->mPieceData->GetConnections();
+	QCOMPARE(Pins.size(), size_t(1));
+	QCOMPARE(Holes.size(), size_t(7));
+	QVERIFY(Pins.front().IsCompatibleWith(Holes.front()));
+	const lcPieceDataRef Axle = Scope.Library->AcquirePieceData("3705.dat", nullptr, lcAcquirePieceDataFlag::None);
+	QVERIFY(Axle && Scope.Library->WaitForPieceData(Axle));
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcView* View = Window.GetActiveView();
+	View->SetSize(1200, 900);
+	lcCamera Camera(true);
+	Camera.SetProjection(lcCameraProjection::Orthographic);
+	const lcVector3 Bore(20, 0, 50);
+
+	auto PointAt = [View](const lcVector3& Point)
+	{
+		const lcVector3 Screen = View->ProjectPoint(Point);
+		View->SetMousePosition(qRound(Screen.x), qRound(Screen.y));
+	};
+	auto CheckSeat = [&Bore](const lcMatrix44& Transform, float Side)
+	{
+		const lcVector3 Shoulder = Bore + lcVector3(0, Side * 10.0f, 0);
+		const lcVector3 Position = Transform.GetTranslation();
+		QVERIFY2(lcLengthSquared(Position - Shoulder) < 0.01f,
+			qPrintable(QStringLiteral("Expected side %1, got position (%2, %3, %4)").arg(Side).arg(Position.x).arg(Position.y).arg(Position.z)));
+		// The axle half faces out of the brick and the round pin seats in it.
+		QVERIFY(Side * Transform[0].y > 0.999f);
+	};
+
+	for (float Side : { 1.0f, -1.0f })
+	{
+		Camera.SetViewpoint(Bore + lcVector3(25, Side * 240, 30), Bore, lcVector3(0, 0, 1));
+		View->SetCamera(&Camera, true);
+		PointAt(Bore);
+		QVERIFY(!View->RayTest(true, false).ObjectSection.Object);
+
+		lcConnectionDragState InsertState;
+		const lcMouseInsertPieceInfo Preview = View->GetMouseInsertPieceInfo(false, true, Pin->mPieceData, nullptr, InsertState);
+		QVERIFY(Preview.IsConnection);
+		CheckSeat(Preview.Pieces.front().Transform, Side);
+
+		lcConnectionDragState AxleState;
+		const lcMouseInsertPieceInfo AxlePreview = View->GetMouseInsertPieceInfo(false, true, Axle, nullptr, AxleState);
+		QVERIFY(AxlePreview.IsConnection);
+		const lcMatrix44 AxleTransform = AxlePreview.Pieces.front().Transform;
+		QVERIFY(lcLengthSquared(AxleTransform.GetTranslation() - Bore) < 0.1f);
+		QVERIFY(fabsf(AxleTransform[0].y) > 0.999f);
+
+		const lcConnectionSnapContext SlideContext{
+			lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+			lcVector2(200, 200), lcVector3(0, 0, -1), Model->GetPieces()[0].get(), true
+		};
+		lcInsertPieceInfo Slide = AxlePreview.Pieces.front();
+		const lcVector3 SlidPosition = Bore + lcVector3(0, Side * 17.0f, 0);
+		Slide.Transform.SetTranslation(SlidPosition + lcVector3(0, 0, 1));
+		lcConnectionDragState SlideState;
+		const std::optional<lcMatrix44> Correction = Model->GetConnectionSnapTransform(lcMatrix44Identity(), SlideContext, &Slide, SlideState);
+		QVERIFY(Correction);
+		QVERIFY(lcLengthSquared(lcMul31(Slide.Transform.GetTranslation(), *Correction) - SlidPosition) < 0.01f);
+	}
+
+	PointAt(lcVector3(122, -4, 50));
+	QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Pin));
+	Model->SetSelectionAndFocusAction({ Pin }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	Window.SetTool(lcTool::Select);
+	View->OnMouseMove();
+	View->OnLeftButtonDown();
+	QVERIFY(View->IsTracking());
+	PointAt(Bore);
+	View->OnMouseMove();
+	CheckSeat(Pin->mModelWorld, -1.0f);
+	View->StopTracking(false);
+
+	// The solid top obscures the side openings from above.
+	for (float Side : { 0.0f, 25.0f, -25.0f })
+	{
+		Camera.SetViewpoint(Bore + lcVector3(0, Side, 240), Bore, lcVector3(0, 1, 0));
+		View->SetCamera(&Camera, true);
+		PointAt(Bore);
+		QCOMPARE(View->FindObjectUnderPointer(true, false).Object, static_cast<lcObject*>(Model->GetPieces()[0].get()));
+		lcConnectionDragState TopState;
+		QVERIFY(!View->GetMouseInsertPieceInfo(false, true, Pin->mPieceData, nullptr, TopState).IsConnection);
+	}
+}
 
 void lcModelInstanceTests::StudDragAcceptance_data()
 {
@@ -589,9 +1466,8 @@ void lcModelInstanceTests::StudDragAcceptance()
 
 	lcModelInstanceTestStudProject Scope;
 
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("3005.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	lcModel* Model = Scope.Current.GetMainModel();
 	const bool MixedOrientation = Finish == QStringLiteral("mixed-orientation");
@@ -609,7 +1485,7 @@ void lcModelInstanceTests::StudDragAcceptance()
 	Model->LoadLDraw(Buffer, &Scope.Current);
 	QCOMPARE(Model->GetPieces().size(), MixedOrientation || LowerFace ? size_t(3) : size_t(2));
 	lcPiece* Moving = Model->GetPieces()[1].get();
-	QVERIFY(Moving->mPieceData->GetConnectionInfo());
+	QVERIFY(!Moving->mPieceData->GetConnections().empty());
 	QVERIFY(Model->EnsureAssetsReady());
 
 	lcMainWindow Window;
@@ -692,9 +1568,8 @@ void lcModelInstanceTests::StudDragAcceptance()
 
 void lcModelInstanceTests::StudDragOccupiedContact()
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("3001.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	Project Project;
 	lcModel* Model = Project.GetMainModel();
@@ -713,18 +1588,100 @@ void lcModelInstanceTests::StudDragOccupiedContact()
 		lcVector2(1200, 1200), lcVector3(0, 0, -1), nullptr, false
 	};
 	lcConnectionDragState State;
-	QVERIFY(!Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-80, 0, 0)), Context, nullptr, State));
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Translation(lcVector3(-80, 0, 0)), Context, nullptr, State));
 
-	const std::optional<lcMatrix44> FreePair = Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State);
+	const std::optional<lcMatrix44> FreePair = Model->GetConnectionSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State);
 	QVERIFY(FreePair);
 	QVERIFY(lcLength(FreePair->GetTranslation()) < 0.001f);
 }
 
+void lcModelInstanceTests::StudDragIncludesSelectedPieceOutsideStep()
+{
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
+
+	Project Project;
+	lcModel* Model = Project.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat\n"
+		"1 16 100 -24 0 1 0 0 0 1 0 0 0 1 3005.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Project);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+
+	lcPiece* Moving = Model->GetPieces()[1].get();
+	Moving->SetStepShow(Model->GetCurrentStep() + 1);
+	Moving->SetSelected(true);
+	QVERIFY(!Moving->IsVisible(Model->GetCurrentStep()));
+
+	const lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(600, 600), lcVector3(0, 0, -1), Model->GetPieces()[0].get(), true
+	};
+	const lcMatrix44 Proposed = lcMatrix44Translation(lcVector3(-99, 0, 0));
+	lcConnectionDragState State;
+	const std::optional<lcMatrix44> Correction = Model->GetConnectionSnapTransform(Proposed, Context, nullptr, State);
+	QVERIFY(Correction);
+	QVERIFY(lcLengthSquared(Correction->GetTranslation() - lcVector3(-1, 0, 0)) < 0.001f);
+
+	Moving->SetSelected(false);
+	QVERIFY(!Model->GetConnectionSnapTransform(Proposed, Context, nullptr, State));
+}
+
+void lcModelInstanceTests::ConnectionInsertionTracksEditorVisibility()
+{
+	lcModelInstanceTestStudProject Scope;
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat\n"
+		"1 16 0 -24 0 1 0 0 0 1 0 0 0 1 3005.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(2));
+
+	lcPiece* Target = Model->GetPieces()[0].get();
+	lcPiece* Occupant = Model->GetPieces()[1].get();
+	const lcStep NextStep = Model->GetCurrentStep() + 1;
+	Target->SetStepShow(NextStep);
+	Occupant->SetStepShow(NextStep);
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+
+	const lcConnectionSnapContext Context
+	{
+		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
+		lcVector2(600, 600), lcVector3(0, 0, -1), Target, true
+	};
+	const lcInsertPieceInfo Insert{ Target->mPieceData.Get(), lcMatrix44Translation(lcVector3(0, 0, 24)), lcGetColorIndex(16) };
+	lcConnectionDragState State;
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+
+	Model->SetSelectionAndFocusAction({ Target }, nullptr, LC_PIECE_SECTION_POSITION, lcSelectionMode::Single);
+	QVERIFY(!Model->IsConnectionPlacementCurrent(State, Insert.PieceData));
+	QVERIFY(Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+
+	Model->AddToSelectionAction({ Occupant });
+	QVERIFY(!Model->IsConnectionPlacementCurrent(State, Insert.PieceData));
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+
+	Model->RemoveFromSelectionAction({ Occupant });
+	QVERIFY(Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+
+	Model->ClearSelectionAction();
+	QVERIFY(!Model->IsConnectionPlacementCurrent(State, Insert.PieceData));
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+}
+
 void lcModelInstanceTests::StudDragShallowViewRetention()
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("3005.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	Project Project;
 	lcModel* Model = Project.GetMainModel();
@@ -745,31 +1702,30 @@ void lcModelInstanceTests::StudDragShallowViewRetention()
 	};
 
 	lcConnectionDragState State;
-	QVERIFY(Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	QVERIFY(Model->GetConnectionSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
 	Context.SurfacePiece = nullptr;
 	Context.HasSurfaceHit = false;
 
 	// Ten units along the mating plane exceed the camera-depth limit in this view.
 	const lcMatrix44 AlongPlane = lcMatrix44Translation(lcVector3(-90, 0, 0));
-	const std::optional<lcMatrix44> Retained = Model->GetStudSnapTransform(AlongPlane, Context, nullptr, State);
+	const std::optional<lcMatrix44> Retained = Model->GetConnectionSnapTransform(AlongPlane, Context, nullptr, State);
 	QVERIFY(Retained);
 	QVERIFY(lcLength(Retained->GetTranslation() - lcVector3(-10, 0, 0)) < 0.001f);
 
 	lcConnectionDragState FreshState;
-	QVERIFY(!Model->GetStudSnapTransform(AlongPlane, Context, nullptr, FreshState));
-	QVERIFY(!Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-79, 0, 0)), Context, nullptr, State));
+	QVERIFY(!Model->GetConnectionSnapTransform(AlongPlane, Context, nullptr, FreshState));
+	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Translation(lcVector3(-79, 0, 0)), Context, nullptr, State));
 
-	QVERIFY(Model->GetStudSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
+	QVERIFY(Model->GetConnectionSnapTransform(lcMatrix44Translation(lcVector3(-100, 0, 0)), Context, nullptr, State));
 	Context.HasSurfaceHit = true;
-	QVERIFY(!Model->GetStudSnapTransform(AlongPlane, Context, nullptr, State));
+	QVERIFY(!Model->GetConnectionSnapTransform(AlongPlane, Context, nullptr, State));
 }
 
 void lcModelInstanceTests::StudDragTurnsForMoreContacts()
 {
 	lcModelInstanceTestStudProject Scope;
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("3001.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	lcModel* Model = Scope.Current.GetMainModel();
 	// The two bricks from snap.ldr, with the red one offset so it can be grabbed clear of the target.
@@ -783,20 +1739,21 @@ void lcModelInstanceTests::StudDragTurnsForMoreContacts()
 	const lcPiece* Target = Model->GetPieces()[0].get();
 	const lcMatrix44 TargetTransform = Target->mModelWorld;
 	lcPiece* Moving = Model->GetPieces()[1].get();
-	const lcConnectionInfo* Info = Moving->mPieceData->GetConnectionInfo().get();
-	QVERIFY(Info);
+	const std::vector<lcConnection>& Connections = Moving->mPieceData->GetConnections();
 
 	auto CountContacts = [&](const lcMatrix44& Pose)
 	{
 		int Count = 0;
-		for (const lcConnectionPoint& Receiver : Info->GetConnections())
+		for (const lcConnection& Connection : Connections)
 		{
-			if (Receiver.Type != lcConnectionType::StudReceiver)
+			const lcConnectionPoint Receiver(Connection, lcMatrix44Identity());
+			if (Receiver.Type != lcStudType::Female)
 				continue;
 
-			for (const lcConnectionPoint& Stud : Info->GetConnections())
+			for (const lcConnection& Other : Connections)
 			{
-				if (Stud.Type == lcConnectionType::StudMale &&
+				const lcConnectionPoint Stud(Other, lcMatrix44Identity());
+				if (Stud.Type == lcStudType::Male &&
 					lcLengthSquared(lcMul31(Receiver.Position, Pose) - lcMul31(Stud.Position, TargetTransform)) < 0.0001f)
 				{
 					Count++;
@@ -861,13 +1818,13 @@ void lcModelInstanceTests::StudDragTurnsForMoreContacts()
 		lcMul(lcMatrix44LookAt(lcVector3(190, 60, 300), lcVector3(190, 60, 0), lcVector3(0, 1, 0)),
 			lcMatrix44Ortho(-100, 100, -100, 100, 1, 400)),
 		lcVector2(600, 600), lcVector3(0, 0, -1), Model->GetPieces()[0].get(), true,
-		lcStudTurnContext{ Seated.GetTranslation(), TargetTransform.GetTranslation(), lcVector3(0, 0, 1), lcConnectionType::StudMale },
+		lcStudTurnContext{ Seated.GetTranslation(), TargetTransform.GetTranslation(), lcVector3(0, 0, 1), lcStudType::Male },
 		lcVector2(300, 300)
 	};
 	Model->GetPieces()[1]->SetSelected(true);
 	lcConnectionDragState State;
 	const lcMatrix44 MovingToSeated = lcMul(lcMatrix44AffineInverse(Start), Seated);
-	const std::optional<lcMatrix44> Correction = Model->GetStudSnapTransform(MovingToSeated, Context, nullptr, State);
+	const std::optional<lcMatrix44> Correction = Model->GetConnectionSnapTransform(MovingToSeated, Context, nullptr, State);
 	QVERIFY(Correction);
 	QVERIFY(lcMatrix33Similar(lcMatrix33(*Correction), lcMatrix33Identity()));
 	QVERIFY(lcLengthSquared(Correction->GetTranslation()) < 0.0001f);
@@ -882,15 +1839,15 @@ void lcModelInstanceTests::StudDragTurnStaysOnFace()
 	const lcVector3 Bottom(0, 0, -8);
 	std::vector<Endpoint> Moving
 	{
-		{ &MovingPiece, { lcConnectionType::StudReceiver, Top, Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudMale, lcVector3(0, 0, 8), Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudMale, lcVector3(20, 0, 8), Normal }, std::nullopt }
+		StudEndpoint(&MovingPiece, lcStudType::Female, Top),
+		StudEndpoint(&MovingPiece, lcStudType::Male, lcVector3(0, 0, 8)),
+		StudEndpoint(&MovingPiece, lcStudType::Male, lcVector3(20, 0, 8))
 	};
 	const std::vector<Endpoint> Stationary
 	{
-		{ &TargetPiece, { lcConnectionType::StudMale, Top, Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudReceiver, Bottom, Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudReceiver, lcVector3(17.3205f, 10, -8), Normal }, std::nullopt }
+		StudEndpoint(&TargetPiece, lcStudType::Male, Top),
+		StudEndpoint(&TargetPiece, lcStudType::Female, Bottom),
+		StudEndpoint(&TargetPiece, lcStudType::Female, lcVector3(17.3205f, 10, -8))
 	};
 
 	const lcVector3 Eye(0, -94, 34.2f);
@@ -898,26 +1855,26 @@ void lcModelInstanceTests::StudDragTurnStaysOnFace()
 	{
 		lcMul(lcMatrix44LookAt(Eye, Top, Normal), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
 		lcVector2(110, 110), lcNormalize(-Eye), &TargetPiece, true,
-		lcStudTurnContext{ Top, Top, Normal, lcConnectionType::StudMale }, lcVector2(55, 55)
+		lcStudTurnContext{ Top, Top, Normal, lcStudType::Male }, lcVector2(55, 55)
 	};
 	lcConnectionDragState TopState;
 	TopState.Stationary = Stationary;
-	const std::optional<lcMatrix44> TopSnap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, TopState);
+	const std::optional<lcMatrix44> TopSnap = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, TopState);
 	QVERIFY(TopSnap);
 	QCOMPARE(TopState.TurnAngle, 0.0f);
 	QVERIFY(lcLengthSquared(TopSnap->GetTranslation()) < 0.0001f);
 
 	// The same contacts can turn when the receiver face is actually hovered.
-	Context.Turn = lcStudTurnContext{ Top, Bottom, Normal, lcConnectionType::StudReceiver };
+	Context.Turn = lcStudTurnContext{ Top, Bottom, Normal, lcStudType::Female };
 	lcConnectionDragState BottomState;
 	BottomState.Stationary = Stationary;
-	const std::optional<lcMatrix44> BottomSnap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, BottomState);
+	const std::optional<lcMatrix44> BottomSnap = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, BottomState);
 	QVERIFY(BottomSnap);
 	QVERIFY(fabsf(BottomState.TurnAngle - LC_PI / 6.0f) < 0.001f);
 	QVERIFY(fabsf(BottomSnap->GetTranslation().z + 16.0f) < 0.001f);
 
-	Context.Turn = lcStudTurnContext{ Top, Top, Normal, lcConnectionType::StudMale };
-	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, BottomState));
+	Context.Turn = lcStudTurnContext{ Top, Top, Normal, lcStudType::Male };
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, BottomState));
 	QCOMPARE(BottomState.TurnAngle, 0.0f);
 }
 
@@ -930,23 +1887,23 @@ void lcModelInstanceTests::StudDragTurnRespectsScreenLimits()
 	const lcVector3 GrabPoint(20, 0, 0);
 	std::vector<Endpoint> Moving
 	{
-		{ &MovingPiece, { lcConnectionType::StudReceiver, Origin, Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudReceiver, GrabPoint, Normal }, std::nullopt }
+		StudEndpoint(&MovingPiece, lcStudType::Female, Origin),
+		StudEndpoint(&MovingPiece, lcStudType::Female, GrabPoint)
 	};
 	const std::vector<Endpoint> Stationary
 	{
-		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(17.3205f, 10, 0), Normal }, std::nullopt }
+		StudEndpoint(&TargetPiece, lcStudType::Male, Origin),
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(17.3205f, 10, 0))
 	};
 	lcConnectionSnapContext Context
 	{
 		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
 		lcVector2(600, 600), lcVector3(0, 0, -1), &TargetPiece, true,
-		lcStudTurnContext{ GrabPoint, Origin, Normal, lcConnectionType::StudMale }, lcVector2(360, 300)
+		lcStudTurnContext{ GrabPoint, Origin, Normal, lcStudType::Male }, lcVector2(360, 300)
 	};
 	lcConnectionDragState State;
 	State.Stationary = Stationary;
-	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, State));
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State));
 	QCOMPARE(State.TurnAngle, 0.0f);
 	const std::optional<std::pair<size_t, size_t>> OriginalPair = State.Pair;
 
@@ -956,19 +1913,19 @@ void lcModelInstanceTests::StudDragTurnRespectsScreenLimits()
 	Context.Turn->GrabPoint = GrabPoint + CursorMove;
 	Context.Cursor = lcVector2(115, 100);
 	const lcMatrix44 Proposal = lcMatrix44Translation(CursorMove);
-	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, State));
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, Proposal, Context, State));
 	QCOMPARE(State.TurnAngle, 0.0f);
 	QVERIFY(State.Pair == OriginalPair);
 
 	lcConnectionDragState FreshState;
 	FreshState.Stationary = Stationary;
-	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, FreshState));
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, Proposal, Context, FreshState));
 	QVERIFY(fabsf(FreshState.TurnAngle - LC_PI / 6.0f) < 0.001f);
 
 	const lcVector3 CloserMove = Stationary[1].Connection.Position - GrabPoint;
 	Context.Turn->GrabPoint = GrabPoint + CloserMove;
 	Context.Cursor = lcVector2(100 + Context.Turn->GrabPoint.x, 100 + Context.Turn->GrabPoint.y);
-	QVERIFY(lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Translation(CloserMove), Context, State));
+	QVERIFY(lcConnectionInfo::FindSnap(Moving, lcMatrix44Translation(CloserMove), Context, State));
 	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
 	QVERIFY(State.Pair != OriginalPair);
 }
@@ -982,22 +1939,22 @@ void lcModelInstanceTests::StudDragTurnRetainsAtSnappedGrab()
 	const lcVector3 GrabPoint(10, -40, 0);
 	std::vector<Endpoint> Moving
 	{
-		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(10, 0, 0), Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(10, 20, 0), Normal }, std::nullopt }
+		StudEndpoint(&MovingPiece, lcStudType::Female, lcVector3(10, 0, 0)),
+		StudEndpoint(&MovingPiece, lcStudType::Female, lcVector3(10, 20, 0))
 	};
 	lcConnectionDragState State;
 	State.Stationary =
 	{
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(-10, 17.3205f, 0), Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt }
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(-10, 17.3205f, 0)),
+		StudEndpoint(&TargetPiece, lcStudType::Male, Origin)
 	};
 	lcConnectionSnapContext Context
 	{
 		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
 		lcVector2(200, 200), lcVector3(0, 0, -1), &TargetPiece, true,
-		lcStudTurnContext{ GrabPoint, Origin, Normal, lcConnectionType::StudMale }, lcVector2(106, 60)
+		lcStudTurnContext{ GrabPoint, Origin, Normal, lcStudType::Male }, lcVector2(106, 60)
 	};
-	const std::optional<lcMatrix44> Snap = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, State);
+	const std::optional<lcMatrix44> Snap = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, State);
 	QVERIFY(Snap);
 	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
 	QCOMPARE(State.ReleaseRadius, lcConnectionDragState::DefaultReleaseRadius);
@@ -1010,7 +1967,7 @@ void lcModelInstanceTests::StudDragTurnRetainsAtSnappedGrab()
 	Context.Turn->GrabPoint = GrabPoint + CursorMove;
 	Context.Cursor = lcVector2(121, 65);
 	const lcMatrix44 Proposal = lcMatrix44Translation(CursorMove);
-	const std::optional<lcMatrix44> Retained = lcConnectionInfo::FindStudSnap(Moving, Proposal, Context, State);
+	const std::optional<lcMatrix44> Retained = lcConnectionInfo::FindSnap(Moving, Proposal, Context, State);
 	QVERIFY(Retained);
 	QVERIFY(fabsf(State.TurnAngle - LC_PI / 6.0f) < 0.001f);
 	QVERIFY(lcLengthSquared(lcMul31(Context.Turn->GrabPoint, *Retained) - SnappedGrab) < 0.0001f);
@@ -1019,9 +1976,8 @@ void lcModelInstanceTests::StudDragTurnRetainsAtSnappedGrab()
 void lcModelInstanceTests::StudDragTurnRetainsInAngledView()
 {
 	lcModelInstanceTestStudProject Scope;
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("4186.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	lcModel* Model = Scope.Current.GetMainModel();
 	QBuffer Buffer;
@@ -1107,27 +2063,27 @@ void lcModelInstanceTests::StudDragTurnLimitsAlternateTranslation()
 	const lcVector3 Normal(0, 0, 1);
 	std::vector<Endpoint> Moving
 	{
-		{ &MovingPiece, { lcConnectionType::StudReceiver, Origin, Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(20, 0, 0), Normal }, std::nullopt },
-		{ &MovingPiece, { lcConnectionType::StudReceiver, lcVector3(40, 0, 0), Normal }, std::nullopt }
+		StudEndpoint(&MovingPiece, lcStudType::Female, Origin),
+		StudEndpoint(&MovingPiece, lcStudType::Female, lcVector3(20, 0, 0)),
+		StudEndpoint(&MovingPiece, lcStudType::Female, lcVector3(40, 0, 0))
 	};
 	const std::vector<Endpoint> Stationary
 	{
-		{ &TargetPiece, { lcConnectionType::StudMale, Origin, Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(0, 10, 0), Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(17.3205f, 10, 0), Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(20, 10, 0), Normal }, std::nullopt },
-		{ &TargetPiece, { lcConnectionType::StudMale, lcVector3(40, 10, 0), Normal }, std::nullopt }
+		StudEndpoint(&TargetPiece, lcStudType::Male, Origin),
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(0, 10, 0)),
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(17.3205f, 10, 0)),
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(20, 10, 0)),
+		StudEndpoint(&TargetPiece, lcStudType::Male, lcVector3(40, 10, 0))
 	};
 	lcConnectionSnapContext Context
 	{
 		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 200)),
 		lcVector2(1000, 1000), lcVector3(0, 0, -1), &TargetPiece, true,
-		lcStudTurnContext{ Origin, Origin, Normal, lcConnectionType::StudMale }, lcVector2(500, 500)
+		lcStudTurnContext{ Origin, Origin, Normal, lcStudType::Male }, lcVector2(500, 500)
 	};
 	lcConnectionDragState CloseState;
 	CloseState.Stationary = Stationary;
-	const std::optional<lcMatrix44> Turned = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, CloseState);
+	const std::optional<lcMatrix44> Turned = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, CloseState);
 	QVERIFY(Turned);
 	QVERIFY(fabsf(CloseState.TurnAngle - LC_PI / 6.0f) < 0.001f);
 	QVERIFY(lcLengthSquared(Turned->GetTranslation()) < 0.0001f);
@@ -1137,7 +2093,7 @@ void lcModelInstanceTests::StudDragTurnLimitsAlternateTranslation()
 	Context.Cursor = lcVector2(100, 100);
 	lcConnectionDragState FarState;
 	FarState.Stationary = Stationary;
-	const std::optional<lcMatrix44> Translated = lcConnectionInfo::FindStudSnap(Moving, lcMatrix44Identity(), Context, FarState);
+	const std::optional<lcMatrix44> Translated = lcConnectionInfo::FindSnap(Moving, lcMatrix44Identity(), Context, FarState);
 	QVERIFY(Translated);
 	QCOMPARE(FarState.TurnAngle, 0.0f);
 	QVERIFY(lcLengthSquared(Translated->GetTranslation() - lcVector3(0, 10, 0)) < 0.0001f);
@@ -1145,9 +2101,8 @@ void lcModelInstanceTests::StudDragTurnLimitsAlternateTranslation()
 
 void lcModelInstanceTests::StudDragBaseplateBenchmark()
 {
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("4186.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	Project Project;
 	lcModel* Model = Project.GetMainModel();
@@ -1157,10 +2112,9 @@ void lcModelInstanceTests::StudDragBaseplateBenchmark()
 	Model->LoadLDraw(Buffer, &Project);
 	QCOMPARE(Model->GetPieces().size(), size_t(1));
 	lcPiece* Baseplate = Model->GetPieces()[0].get();
-	const lcConnectionInfo* Info = Baseplate->mPieceData->GetConnectionInfo().get();
-	QVERIFY(Info);
-	QCOMPARE(Info->GetConnections().size(), size_t(2304));
-	lcPieceData* Brick = Library->FindPieceData("3005.dat", nullptr);
+	const std::vector<lcConnection>& Connections = Baseplate->mPieceData->GetConnections();
+	QCOMPARE(Connections.size(), size_t(2304));
+	lcPieceData* Brick = FixtureParts[0].Get();
 	QVERIFY(Brick);
 
 	const lcConnectionSnapContext Context
@@ -1177,10 +2131,10 @@ void lcModelInstanceTests::StudDragBaseplateBenchmark()
 		Matches = 0;
 		for (size_t Index = 0; Index < Samples; Index++)
 		{
-			const lcVector3 Position = Info->GetConnections()[Index * 23].Position;
+			const lcVector3 Position = Connections[Index * 23].Frame.GetTranslation();
 			Insert.Transform.SetTranslation(Position + lcVector3(0.5f, 0, 24));
 			State.Pair.reset();
-			Matches += Model->GetStudSnapTransform(lcMatrix44Identity(), Context, &Insert, State).has_value();
+			Matches += Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State).has_value();
 		}
 	}
 	QCOMPARE(Matches, Samples);
@@ -1189,9 +2143,8 @@ void lcModelInstanceTests::StudDragBaseplateBenchmark()
 void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
 {
 	lcModelInstanceTestStudProject Scope;
-	lcPiecesLibrary* Library = lcGetPiecesLibrary();
-	if (!Library->FindPieceData("4186.dat", nullptr))
-		QVERIFY(Library->LoadBuiltinPieceLibrary());
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
 
 	lcModel* Model = Scope.Current.GetMainModel();
 	QBuffer Buffer;
@@ -1200,9 +2153,7 @@ void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
 	QVERIFY(Buffer.open(QIODevice::ReadOnly));
 	Model->LoadLDraw(Buffer, &Scope.Current);
 	QCOMPARE(Model->GetPieces().size(), size_t(2));
-	const lcConnectionInfo* Info = Model->GetPieces()[0]->mPieceData->GetConnectionInfo().get();
-	QVERIFY(Info);
-	QCOMPARE(Info->GetConnections().size(), size_t(2304));
+	QCOMPARE(Model->GetPieces()[0]->mPieceData->GetConnections().size(), size_t(2304));
 	QVERIFY(Model->EnsureAssetsReady());
 	lcPiece* Moving = Model->GetPieces()[1].get();
 
@@ -1231,7 +2182,7 @@ void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
 	std::array<QPoint, 100> CursorPositions;
 	for (size_t Index = 0; Index < CursorPositions.size(); Index++)
 	{
-		const lcVector3 Screen = View->ProjectPoint(Info->GetConnections()[Index * 23].Position);
+		const lcVector3 Screen = View->ProjectPoint(Model->GetPieces()[0]->mPieceData->GetConnections()[Index * 23].Frame.GetTranslation());
 		CursorPositions[Index] = QPoint(qRound(Screen.x), qRound(Screen.y));
 	}
 
@@ -1246,10 +2197,10 @@ void lcModelInstanceTests::StudDragBaseplateViewBenchmark()
 	}
 
 	const lcVector3 Opening = lcMul31(lcVector3(0, 0, -24), Moving->mModelWorld);
-	const std::vector<lcConnectionPoint>& Connections = Info->GetConnections();
-	QVERIFY(std::any_of(Connections.begin(), Connections.end(), [&Opening](const lcConnectionPoint& Connection)
+	const std::vector<lcConnection>& Connections = Model->GetPieces()[0]->mPieceData->GetConnections();
+	QVERIFY(std::any_of(Connections.begin(), Connections.end(), [&Opening](const lcConnection& Connection)
 	{
-		return lcLengthSquared(Opening - Connection.Position) < 0.0001f;
+		return lcLengthSquared(Opening - Connection.Frame.GetTranslation()) < 0.0001f;
 	}));
 	View->StopTracking(false);
 }
@@ -1601,7 +2552,7 @@ void lcModelInstanceTests::TexmapFallbackBranches()
 		std::unique_ptr<lcMesh> Mesh(Data.CreateMesh(nullptr));
 
 		QVERIFY(Mesh);
-		QCOMPARE(Data.mHasTextures, Textured);
+		QCOMPARE(Data.mHasTexturedGeometry, Textured);
 		QCOMPARE(Mesh->mBoundingBox.Max.x, Maximum);
 	};
 
@@ -1873,7 +2824,22 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 		return File.open(QIODevice::WriteOnly) && File.write(Text) == Text.size();
 	};
 
-	QVERIFY(Write("parts/test.dat", "0 Test\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 mapped.dat\n"));
+	QVERIFY(Write("parts/test.dat",
+		"0 Test\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 mapped.dat\n"
+		"1 16 0 0 0 1 0 0 0 1 0 0 0 1 edgeparent.dat\n"));
+	QVERIFY(Write("p/edgeparent.dat", "0 Shared parent\n1 16 0 0 0 1 0 0 0 1 0 0 0 1 edges.dat\n"));
+	QVERIFY(Write("p/edges.dat",
+		"0 Edge-only primitive\n"
+		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n"
+		"2 24 30 0 0 31 0 0\n"
+		"0 !LDCAD SNAP_CLP [pos=30 0 0]\n"
+		"0 !TEXMAP FALLBACK\n"
+		"2 24 60 0 0 61 0 0\n"
+		"0 !LDCAD SNAP_CLP [pos=60 0 0]\n"
+		"0 !TEXMAP END\n"));
+	const QByteArray Shadow = "0 Shadow test\n";
+	QVERIFY(Write("shadow.zip", CreateAddonArchive("parts/test.dat", Shadow, 0100644, Shadow.size(), false, false)));
 	QVERIFY(Write("p/mapped.dat",
 		"0 Mapped primitive\n"
 		"0 !TEXMAP START PLANAR 0 0 0 1 0 0 0 1 0 missing.png\n"
@@ -1922,12 +2888,19 @@ void lcModelInstanceTests::TexmapFallbackIncludes()
 	QVERIFY(Piece->GetMesh());
 	QCOMPARE(Piece->GetMesh()->mNumTexturedVertices, 0);
 	QCOMPARE(Piece->GetMesh()->mBoundingBox.Max.x, 21.0f);
+	const lcMesh* Mesh = Piece->GetMesh();
+	float MaxVertexX = 0.0f;
+	for (int Index = 0; Index < Mesh->mNumVertices; Index++)
+		MaxVertexX = lcMax(MaxVertexX, static_cast<const lcVertex*>(Mesh->mVertexData)[Index].Position.x);
+	QCOMPARE(MaxVertexX, 61.0f);
+	QCOMPARE(Piece->GetConnections().size(), size_t(1));
+	QCOMPARE(Piece->GetConnections().front().Frame.GetTranslation().x, 60.0f);
 
 	// The shared primitive cache must still hold its original textured branch.
 	lcLibraryPrimitive* Primitive = Library->FindPrimitive("MAPPED.DAT");
 
 	QVERIFY(Primitive);
-	QVERIFY(Primitive->mMeshData.mHasTextures);
+	QVERIFY(Primitive->mMeshData.mHasTexturedGeometry);
 
 	lcPieceDataRef Cycle = Library->AcquirePieceData("cycle.dat", nullptr, lcAcquirePieceDataFlag::None);
 
@@ -3065,8 +4038,14 @@ void lcModelInstanceTests::TrainTrackConnectionVisibility()
 	Model->SetTemporaryStep(3);
 	Model->UpdateTrainTrackConnections(First, false);
 	QVERIFY(!First->IsTrainTrackConnected(0));
-	Model->SetTemporaryStep(2);
+
 	Second->SetSelected(true);
+	Model->UpdateTrainTrackConnections(First, false);
+	QVERIFY(First->IsTrainTrackConnected(0));
+	Model->UpdateTrainTrackConnections(First, true);
+	QVERIFY(!First->IsTrainTrackConnected(0));
+
+	Model->SetTemporaryStep(2);
 	Model->UpdateTrainTrackConnections(First, true);
 	QVERIFY(!First->IsTrainTrackConnected(0));
 	Model->UpdateTrainTrackConnections(First, false);
@@ -4652,8 +5631,8 @@ void lcModelInstanceTests::RepeatedInstances()
 	View->SetMousePosition(600, 300);
 	const lcVector3 WorldFallback = View->UnprojectPoint(lcVector3(600, 300, 0.9f));
 	const lcVector3 LocalFallback = lcMul31(WorldFallback, lcMatrix44AffineInverse(View->GetActiveSubmodelTransform()));
-	lcConnectionDragState StudDragState;
-	const lcMouseInsertPieceInfo Insert = View->GetMouseInsertPieceInfo(false, true, Leaf->mPieceData, nullptr, StudDragState);
+	lcConnectionDragState ConnectionDragState;
+	const lcMouseInsertPieceInfo Insert = View->GetMouseInsertPieceInfo(false, true, Leaf->mPieceData, nullptr, ConnectionDragState);
 	QCOMPARE(Insert.Pieces.size(), size_t(1));
 	QVERIFY(lcLength(Insert.Pieces[0].Transform.GetTranslation() - LocalFallback) < 0.01f);
 

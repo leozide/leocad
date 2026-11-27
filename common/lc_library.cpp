@@ -112,6 +112,7 @@ void lcPiecesLibrary::Unload()
 	mTextureDiskEntries.clear();
 	mShadowArchiveEntries.clear();
 	mShadowZipFile.reset();
+	mArchiveCheckSum = ArchiveCheckSum();
 
 	for (std::map<QString, int>& Entries : mTextureArchiveEntries)
 		Entries.clear();
@@ -608,7 +609,10 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 {
 	Unload();
 
-	if (OpenArchive(LibraryPath, lcZipFileType::Official))
+	QString UnofficialFileName;
+	const bool Archive = OpenArchive(LibraryPath, lcZipFileType::Official);
+
+	if (Archive)
 	{
 		if (OfficialLibrary)
 			mOfficialPieceCount = static_cast<int>(mPieceManager->GetLibraryPieceDataCount());
@@ -616,12 +620,10 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 		LoadColors();
 
 		mLibraryDir = QFileInfo(LibraryPath).absoluteDir();
-		QString UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
+		UnofficialFileName = mLibraryDir.absoluteFilePath(QLatin1String("ldrawunf.zip"));
 
 		if (!OpenArchive(UnofficialFileName, lcZipFileType::Unofficial))
 			UnofficialFileName.clear();
-
-		ReadArchiveDescriptions(LibraryPath, UnofficialFileName);
 	}
 	else
 	{
@@ -634,6 +636,10 @@ bool lcPiecesLibrary::Load(const QString& LibraryPath, bool ShowProgress, bool O
 	}
 
 	LoadShadowArchive(LibraryPath);
+
+	if (Archive)
+		ReadArchiveDescriptions(LibraryPath, UnofficialFileName);
+
 	UpdateStudStyleSource();
 	lcLoadDefaultCategories();
 	lcSynthInit();
@@ -768,6 +774,11 @@ void lcPiecesLibrary::LoadShadowArchive(const QString& LibraryPath)
 
 	if (!ShadowZipFile->OpenRead(QDir::cleanPath(ShadowFileName)))
 		return;
+
+	const QFileInfo ShadowInfo(ShadowFileName);
+
+	mArchiveCheckSum.ShadowSize = ShadowInfo.size();
+	mArchiveCheckSum.ShadowLastModified = ShadowInfo.lastModified().toMSecsSinceEpoch();
 
 	for (quint32 FileIdx = 0; FileIdx < ShadowZipFile->mFiles.size(); FileIdx++)
 	{
@@ -930,8 +941,6 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 {
 	QFileInfo OfficialInfo(OfficialFileName);
 	QFileInfo UnofficialInfo(UnofficialFileName);
-	const QString ShadowFileName = QFileInfo(OfficialFileName).absoluteDir().absoluteFilePath(QLatin1String("shadow.zip"));
-	QFileInfo ShadowInfo(ShadowFileName);
 
 	mArchiveCheckSum.OfficialSize = OfficialInfo.size();
 	mArchiveCheckSum.OfficialLastModified = OfficialInfo.lastModified().toMSecsSinceEpoch();
@@ -946,9 +955,6 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 		mArchiveCheckSum.UnofficialSize = 0;
 		mArchiveCheckSum.UnofficialLastModified = 0;
 	}
-
-	mArchiveCheckSum.ShadowSize = ShadowInfo.exists() ? ShadowInfo.size() : 0;
-	mArchiveCheckSum.ShadowLastModified = ShadowInfo.exists() ? ShadowInfo.lastModified().toMSecsSinceEpoch() : 0;
 
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 

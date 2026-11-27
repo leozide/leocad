@@ -2258,7 +2258,6 @@ void lcModel::EndHistorySequence(const QString& Description)
 		std::unique_ptr<lcModelHistoryEntry> ModelHistoryEntry = std::make_unique<lcModelHistoryEntry>(lcModelHistoryEntry());
 
 		ModelHistoryEntry->Description = Description;
-		ModelHistoryEntry->Revision = mNextHistoryRevision++;
 		ModelHistoryEntry->HistorySequence = std::move(mHistorySequence);
 
 		mUndoHistory.insert(mUndoHistory.begin(), std::move(ModelHistoryEntry));
@@ -2273,6 +2272,9 @@ void lcModel::EndHistorySequence(const QString& Description)
 
 		mHistorySequence.clear();
 	}
+
+	// A merged edit changes the model even when it keeps the same undo entry.
+	mUndoHistory.front()->Revision = mNextHistoryRevision++;
 
 	mRedoHistory.clear();
 

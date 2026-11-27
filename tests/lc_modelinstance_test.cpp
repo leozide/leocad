@@ -94,6 +94,7 @@ private slots:
 	void StudDragOccupiedContact();
 	void StudDragIncludesSelectedPieceOutsideStep();
 	void ConnectionInsertionTracksEditorVisibility();
+	void ConnectionInsertionRefreshesAfterMergedMoves();
 	void StudDragShallowViewRetention();
 	void StudDragTurnsForMoreContacts();
 	void StudDragTurnStaysOnFace();
@@ -725,7 +726,8 @@ void lcModelInstanceTests::ConnectionsWithArchiveCacheInvalidation()
 	}
 
 	Library.Unload();
-	QVERIFY(Write(ShadowPath, MakeShadowArchive(true)));
+	const QByteArray ChangedArchive = MakeShadowArchive(true);
+	QVERIFY(Write(ShadowPath, ChangedArchive));
 	QVERIFY(Library.Load(LibraryPath, false, true));
 	const lcPieceData* Brick = Library.FindPieceData("3001.dat", nullptr);
 	QVERIFY(Brick);
@@ -733,6 +735,51 @@ void lcModelInstanceTests::ConnectionsWithArchiveCacheInvalidation()
 	QVERIFY(!Invalidated.FromCache);
 	QCOMPARE(Invalidated.Connections.size(), size_t(8));
 	QCOMPARE(std::get<lcCylinderConnection>(Invalidated.Connections.front().Shape).Sections.front().Radius, 7.0f);
+
+	Library.Unload();
+	const QDateTime ShadowModified = QFileInfo(ShadowPath).lastModified();
+	auto ReplaceShadow = [&](const QByteArray& Bytes)
+	{
+		QFile File(ShadowPath);
+		if (!File.open(QIODevice::WriteOnly) || File.write(Bytes) != Bytes.size() || !File.flush())
+			return false;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+		return File.setFileTime(ShadowModified, QFileDevice::FileModificationTime);
+#else
+		Q_UNUSED(ShadowModified);
+		return true;
+#endif
+	};
+	QVERIFY(ReplaceShadow(QByteArray(ChangedArchive.size(), 'x')));
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	{
+		const lcPieceDataRef Piece = Library.AcquirePieceData("3001.dat", nullptr, lcAcquirePieceDataFlag::None);
+		QVERIFY(Piece);
+		QVERIFY(Library.WaitForPieceData(Piece));
+		QVERIFY(Piece->GetConnections().empty());
+	}
+	Library.Unload();
+
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	Brick = Library.FindPieceData("3001.dat", nullptr);
+	QVERIFY(Brick);
+	const lcPieceBuildResult WithoutShadow = Library.BuildPieceData(Library.SnapshotPieceDataSource(Brick));
+	QVERIFY(WithoutShadow.FromCache);
+	QVERIFY(WithoutShadow.Connections.empty());
+	Library.Unload();
+
+	QVERIFY(ReplaceShadow(ChangedArchive));
+	QCOMPARE(QFileInfo(ShadowPath).size(), static_cast<qint64>(ChangedArchive.size()));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+	QCOMPARE(QFileInfo(ShadowPath).lastModified(), ShadowModified);
+#endif
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	Brick = Library.FindPieceData("3001.dat", nullptr);
+	QVERIFY(Brick);
+	const lcPieceBuildResult Recovered = Library.BuildPieceData(Library.SnapshotPieceDataSource(Brick));
+	QVERIFY(!Recovered.FromCache);
+	QCOMPARE(Recovered.Connections.size(), size_t(8));
 
 	const QString UnpackedPath = Directory.filePath("unpacked");
 	QVERIFY(QDir().mkpath(QDir(UnpackedPath).filePath("parts")));
@@ -1886,6 +1933,45 @@ void lcModelInstanceTests::ConnectionInsertionTracksEditorVisibility()
 	Model->ClearSelectionAction();
 	QVERIFY(!Model->IsConnectionPlacementCurrent(State, Insert.PieceData));
 	QVERIFY(!Model->GetConnectionSnapTransform(lcMatrix44Identity(), Context, &Insert, State));
+}
+
+void lcModelInstanceTests::ConnectionInsertionRefreshesAfterMergedMoves()
+{
+	lcModelInstanceTestStudProject Scope;
+	const std::vector<lcPieceDataRef> FixtureParts = LoadStudFixtures();
+	QCOMPARE(FixtureParts.size(), size_t(4));
+
+	lcModel* Model = Scope.Current.GetMainModel();
+	QBuffer Buffer;
+	Buffer.setData("1 16 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat\n");
+	QVERIFY(Buffer.open(QIODevice::ReadOnly));
+	Model->LoadLDraw(Buffer, &Scope.Current);
+	QCOMPARE(Model->GetPieces().size(), size_t(1));
+
+	lcMainWindow Window;
+	Window.CreateWidgets();
+	Window.SetCurrentModelTab(Model, false);
+	lcPiece* Target = Model->GetPieces()[0].get();
+	const lcPieceData* InsertData = Target->mPieceData.Get();
+	Target->SetSelected(true);
+	const lcModelTransformFlags Flags = lcModelTransformFlag::Checkpoint | lcModelTransformFlag::FirstMove;
+
+	Model->MoveSelectedObjects(lcVector3(0, 10, 0), Flags, lcModelHistoryEditMerge::KeyboardMove);
+	lcConnectionDragState State;
+	Model->RefreshConnectionPlacement(State, InsertData);
+	QVERIFY(!State.Stationary.empty());
+	QCOMPARE(State.Stationary.front().Connection.Position.y, 10.0f);
+
+	Model->MoveSelectedObjects(lcVector3(0, 50, 0), Flags, lcModelHistoryEditMerge::KeyboardMove);
+	QVERIFY(!Model->IsConnectionPlacementCurrent(State, InsertData));
+	Model->RefreshConnectionPlacement(State, InsertData);
+	QVERIFY(!State.Stationary.empty());
+	QCOMPARE(State.Stationary.front().Connection.Position.y, 60.0f);
+
+	Model->UndoAction();
+	QCOMPARE(Target->mModelWorld.GetTranslation().y, 0.0f);
+	Model->RedoAction();
+	QCOMPARE(Target->mModelWorld.GetTranslation().y, 60.0f);
 }
 
 void lcModelInstanceTests::StudDragShallowViewRetention()

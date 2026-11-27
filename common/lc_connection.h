@@ -63,8 +63,8 @@ struct lcGenericConnection
 	// parameter order of the Shadow declaration.
 	lcVector3 Dimensions = lcVector3(0.0f, 0.0f, 0.0f);
 	lcConnectionGender Gender = lcConnectionGender::Male;
-	QByteArray MatchRule = "shape";
-	QByteArray PlacementMode;
+	std::string MatchRule = "shape";
+	std::string PlacementMode;
 
 	lcVector3 GetScaledDimensions(const lcVector3& Scale) const;
 };
@@ -88,7 +88,7 @@ struct lcConnection
 	// Apply Scale along the connector's local axes first. The connector axis is +Z.
 	lcMatrix44 Frame = lcMatrix44Identity();
 	lcVector3 Scale = lcVector3(1.0f, 1.0f, 1.0f);
-	QByteArray Group;
+	std::string Group;
 	std::variant<lcCylinderConnection, lcClipConnection, lcFingersConnection, lcGenericConnection> Shape;
 
 	float GetAxialReach() const;
@@ -97,3 +97,6 @@ struct lcConnection
 };
 
 using lcConnections = std::vector<lcConnection>;
+
+bool lcSaveConnections(lcFile& File, const lcConnections& Connections);
+bool lcLoadConnections(lcFile& File, lcConnections& Connections);

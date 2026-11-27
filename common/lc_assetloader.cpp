@@ -697,7 +697,7 @@ void lcAssetLoader::CompletePieceRequest(const std::shared_ptr<PieceRequest>& Re
 		LoadError = tr("Could not load piece '%1'.").arg(RequestedPiece->Source.FileName);
 
 	if (LoadError.isEmpty() && RequestedPiece->SaveCache && RequestedPiece->StagedMesh)
-		mLibrary->SaveBuiltPieceDataCache(RequestedPiece->Source, *RequestedPiece->StagedMesh);
+		mLibrary->SaveBuiltPieceDataCache(RequestedPiece->Source, *RequestedPiece->StagedMesh, RequestedPiece->Connections);
 
 	const bool Loaded = mLibrary->PublishPieceDataMesh(PieceData, std::move(RequestedPiece->StagedMesh), std::move(RequestedPiece->Connections), LoadError);
 

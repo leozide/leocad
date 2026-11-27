@@ -468,8 +468,8 @@ void lcModelInstanceTests::ConnectionsPublishWithMesh()
 	const lcGenericConnection& Generic = std::get<lcGenericConnection>(Connections[5].Shape);
 	QCOMPARE(Generic.BoundsShape, lcGenericConnection::Bounds::Sphere);
 	QCOMPARE(Generic.Dimensions.x, 8.0f);
-	QCOMPARE(Generic.MatchRule, QByteArray("size"));
-	QCOMPARE(Generic.PlacementMode, QByteArray("free"));
+	QCOMPARE(Generic.MatchRule, std::string("size"));
+	QCOMPARE(Generic.PlacementMode, std::string("free"));
 	const lcGenericConnection& Box = std::get<lcGenericConnection>(Connections[6].Shape);
 	QCOMPARE(Box.BoundsShape, lcGenericConnection::Bounds::Box);
 	QCOMPARE(Box.Dimensions.x, 1.0f);

@@ -24,8 +24,8 @@
 #include "lc_string.h"
 
 // Cache payloads use Qt compression with checksum validation.
-constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0115;
-constexpr qint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
+constexpr quint32 LC_LIBRARY_CACHE_VERSION = 0x0117;
+constexpr quint32 LC_LIBRARY_MESH_CACHE_VERSION = 2;
 
 enum class lcLibrarySourceType
 {
@@ -930,20 +930,25 @@ void lcPiecesLibrary::ReadArchiveDescriptions(const QString& OfficialFileName, c
 {
 	QFileInfo OfficialInfo(OfficialFileName);
 	QFileInfo UnofficialInfo(UnofficialFileName);
+	const QString ShadowFileName = QFileInfo(OfficialFileName).absoluteDir().absoluteFilePath(QLatin1String("shadow.zip"));
+	QFileInfo ShadowInfo(ShadowFileName);
 
-	mArchiveCheckSum[0] = OfficialInfo.size();
-	mArchiveCheckSum[1] = OfficialInfo.lastModified().toMSecsSinceEpoch();
+	mArchiveCheckSum.OfficialSize = OfficialInfo.size();
+	mArchiveCheckSum.OfficialLastModified = OfficialInfo.lastModified().toMSecsSinceEpoch();
 
 	if (!UnofficialFileName.isEmpty())
 	{
-		mArchiveCheckSum[2] = UnofficialInfo.size();
-		mArchiveCheckSum[3] = UnofficialInfo.lastModified().toMSecsSinceEpoch();
+		mArchiveCheckSum.UnofficialSize = UnofficialInfo.size();
+		mArchiveCheckSum.UnofficialLastModified = UnofficialInfo.lastModified().toMSecsSinceEpoch();
 	}
 	else
 	{
-		mArchiveCheckSum[2] = 0;
-		mArchiveCheckSum[3] = 0;
+		mArchiveCheckSum.UnofficialSize = 0;
+		mArchiveCheckSum.UnofficialLastModified = 0;
 	}
+
+	mArchiveCheckSum.ShadowSize = ShadowInfo.exists() ? ShadowInfo.size() : 0;
+	mArchiveCheckSum.ShadowLastModified = ShadowInfo.exists() ? ShadowInfo.lastModified().toMSecsSinceEpoch() : 0;
 
 	QString IndexFileName = QFileInfo(QDir(mCachePath), QLatin1String("index")).absoluteFilePath();
 
@@ -1262,10 +1267,10 @@ bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFil
 
 	if (Type == CacheType::Archive)
 	{
-		qint64 CacheCheckSum[4];
+		ArchiveCheckSum CacheCheckSum;
 
-		if (File.read(reinterpret_cast<char*>(CacheCheckSum), sizeof(CacheCheckSum)) != sizeof(CacheCheckSum) ||
-			memcmp(CacheCheckSum, mArchiveCheckSum, sizeof(CacheCheckSum)))
+		if (File.read(reinterpret_cast<char*>(&CacheCheckSum), sizeof(CacheCheckSum)) != sizeof(CacheCheckSum) ||
+			memcmp(&CacheCheckSum, &mArchiveCheckSum, sizeof(CacheCheckSum)))
 			return false;
 	}
 
@@ -1291,7 +1296,7 @@ bool lcPiecesLibrary::ReadCacheFile(const QString& FileName, lcMemFile& CacheFil
 	return true;
 }
 
-bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const qint64 (&ArchiveCheckSum)[4])
+bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const ArchiveCheckSum& ArchiveCheckSum)
 {
 	if (CacheFile.GetLength() > static_cast<size_t>(std::numeric_limits<int>::max()))
 		return false;
@@ -1308,7 +1313,7 @@ bool lcPiecesLibrary::WriteCacheFile(const QString& FileName, const lcMemFile& C
 		File.write(reinterpret_cast<const char*>(&CacheFlags), sizeof(CacheFlags)) != sizeof(CacheFlags))
 		return false;
 
-	if (Type == CacheType::Archive && File.write(reinterpret_cast<const char*>(ArchiveCheckSum), sizeof(ArchiveCheckSum)) != sizeof(ArchiveCheckSum))
+	if (Type == CacheType::Archive && File.write(reinterpret_cast<const char*>(&ArchiveCheckSum), sizeof(ArchiveCheckSum)) != sizeof(ArchiveCheckSum))
 		return false;
 
 	const quint32 UncompressedSize = static_cast<quint32>(CacheFile.GetLength());
@@ -1847,9 +1852,12 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 			{
 				Result.Mesh.reset(new lcMesh);
 
-				Result.FromCache = Result.Mesh->FileLoad(CacheData);
+				Result.FromCache = Result.Mesh->FileLoad(CacheData) && lcLoadConnections(CacheData, Result.Connections);
 				if (!Result.FromCache)
+				{
 					Result.Mesh.reset();
+					Result.Connections.clear();
+				}
 			}
 		}
 	}
@@ -1946,16 +1954,8 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 		}
 	}
 
-	if (!Source.InlineModel && mShadowZipFile && !ShouldCancelLoading())
+	if (!Result.FromCache && !Source.InlineModel && mShadowZipFile && !ShouldCancelLoading())
 	{
-		// A cached mesh has not opened the piece file yet.
-		if (Result.FromCache)
-		{
-			lcResult<std::unique_ptr<lcFile>> File = OpenFile(PieceFileSource);
-			if (File)
-				PieceFile = std::move(File.value());
-		}
-
 		if (PieceFile)
 			Result.Connections = lcConnectionLoader(*this).Load(*PieceFile, RelativePartPath, Source.UnavailableTextures);
 	}
@@ -1966,7 +1966,7 @@ lcPieceBuildResult lcPiecesLibrary::BuildPieceData(const lcPieceSourceSnapshot& 
 	return Result;
 }
 
-void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh)
+void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh, const lcConnections& Connections)
 {
 	Q_ASSERT(QThread::currentThread() == thread());
 
@@ -1977,10 +1977,10 @@ void lcPiecesLibrary::SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Sourc
 
 	const qint32 Flags = MeshCacheSettingsKey(Source.StudStyle, Source.StudCylinderColorEnabled);
 
-	if (MeshData->WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(*MeshData))
+	if (MeshData->WriteBuffer((char*)&Flags, sizeof(Flags)) != sizeof(Flags) || !Mesh.FileSave(*MeshData) || !lcSaveConnections(*MeshData, Connections))
 		return;
 
-	const qint64 ArchiveCheckSum[4] = { mArchiveCheckSum[0], mArchiveCheckSum[1], mArchiveCheckSum[2], mArchiveCheckSum[3] };
+	const ArchiveCheckSum ArchiveCheckSum = mArchiveCheckSum;
 
 	mCacheWrites.erase(std::remove_if(mCacheWrites.begin(), mCacheWrites.end(), [](const QFuture<void>& Write)
 	{

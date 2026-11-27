@@ -299,7 +299,7 @@ protected:
 	lcPieceBuildResult BuildPieceData(const lcPieceSourceSnapshot& Source);
 
 	// Serializes geometry on the UI thread; compression and atomic writes run in the global pool.
-	void SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh);
+	void SaveBuiltPieceDataCache(const lcPieceSourceSnapshot& Source, lcMesh& Mesh, const lcConnections& Connections = lcConnections());
 
 	// Returns private decoded pixels/errors without GL upload or publication.
 	lcTextureBuildResult BuildTextureData(const lcFileSource& Source);
@@ -338,10 +338,20 @@ protected:
 		Directory = 0x0002
 	};
 
+	struct ArchiveCheckSum
+	{
+		qint64 OfficialSize;
+		qint64 OfficialLastModified;
+		qint64 UnofficialSize;
+		qint64 UnofficialLastModified;
+		qint64 ShadowSize;
+		qint64 ShadowLastModified;
+	};
+
 	// Reads/writes Qt-compressed caches with version, size and payload checksum validation.
 	// Archive caches also validate source archive sizes and modification times.
 	bool ReadCacheFile(const QString& FileName, lcMemFile& CacheFile, CacheType Type);
-	static bool WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const qint64 (&ArchiveCheckSum)[4]);
+	static bool WriteCacheFile(const QString& FileName, const lcMemFile& CacheFile, CacheType Type, const ArchiveCheckSum& ArchiveCheckSum);
 
 	// Restores/saves descriptions and patterned parent IDs in library index order.
 	bool LoadCacheIndex(const QString& FileName);
@@ -413,9 +423,9 @@ protected:
 	std::map<QString, QString> mTextureDiskEntries;
 	std::map<QString, int> mTextureArchiveEntries[static_cast<int>(lcZipFileType::Count)];
 
-	// Cache location and official/unofficial archive size/timestamp validation data.
+	// Cache location and official/unofficial/shadow archive size/timestamp validation data.
 	QString mCachePath;
-	qint64 mArchiveCheckSum[4];
+	ArchiveCheckSum mArchiveCheckSum{};
 	std::vector<QFuture<void>> mCacheWrites;
 
 	// Shared GPU buffers, placeholder geometry and deferred repacking state.

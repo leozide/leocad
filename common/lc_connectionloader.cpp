@@ -27,7 +27,7 @@ lcConnections lcConnectionLoader::Load(lcFile& File, const QString& FilePath, co
 
 		lcCylinderConnection* Cylinder = std::get_if<lcCylinderConnection>(&Connection.Shape);
 		
-		if (Cylinder && Connection.Group.isEmpty() && Cylinder->Sections.size() == 1 && !Cylinder->Centered)
+		if (Cylinder && Connection.Group.empty() && Cylinder->Sections.size() == 1 && !Cylinder->Centered)
 		{
 			const lcCylinderConnection::Section& Section = Cylinder->Sections.front();
 			using Profile = lcCylinderConnection::SectionProfile;
@@ -264,8 +264,8 @@ bool lcConnectionLoader::ReadGeneric(const QByteArray& Kind, const lcConnectionP
 	Generic.BoundsShape = BoundingShape->second.first;
 	Generic.Dimensions = lcVector3(Dimensions[0], Dimensions[1], Dimensions[2]);
 	Generic.Gender = ReadGender(Values, "gender");
-	Generic.MatchRule = GetProperty(Values, "match", LegacySphere ? "size" : "shape").toLower();
-	Generic.PlacementMode = GetProperty(Values, "placement", LegacySphere ? "free" : "").toLower();
+	Generic.MatchRule = GetProperty(Values, "match", LegacySphere ? "size" : "shape").toLower().toStdString();
+	Generic.PlacementMode = GetProperty(Values, "placement", LegacySphere ? "free" : "").toLower().toStdString();
 	Item.Data.Shape = std::move(Generic);
 	
 	return true;
@@ -580,7 +580,7 @@ void lcConnectionLoader::ReadConnectionDirective(const QByteArray& Line, lcConne
 		return;
 	}
 
-	Item.Data.Group = GetProperty(Values, "group");
+	Item.Data.Group = GetProperty(Values, "group").toStdString();
 	
 	if (!Id.isEmpty())
 		Item.Ids.push_back(Id);

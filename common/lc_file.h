@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits>
+#include <string>
 #include "lc_math.h"
 
 #define LC_FOURCC(ch0, ch1, ch2, ch3) (quint32)((quint32)(quint8)(ch0) | ((quint32)(quint8)(ch1) << 8) | \
@@ -175,6 +177,23 @@ public:
 		return String;
 	}
 
+	bool ReadString(std::string& String)
+	{
+		quint32 Size;
+
+		if (ReadU32(&Size, 1) != 1)
+			return false;
+
+		const long Position = GetPosition();
+
+		if (Position < 0 || static_cast<size_t>(Position) > GetLength() || Size > GetLength() - static_cast<size_t>(Position))
+			return false;
+
+		String.resize(Size);
+
+		return ReadBuffer(String.data(), Size) == Size;
+	}
+
 	void WriteU8(const quint8& Value)
 	{
 		Write8(&Value, 1);
@@ -285,6 +304,16 @@ public:
 		QByteArray Data = String.toUtf8();
 		WriteU32(static_cast<quint32>(Data.size()));
 		WriteBuffer(Data, Data.size());
+	}
+
+	bool WriteString(const std::string& String)
+	{
+		if (String.size() > std::numeric_limits<quint32>::max())
+			return false;
+
+		const quint32 Size = static_cast<quint32>(String.size());
+
+		return WriteU32(&Size, 1) == 1 && WriteBuffer(String.data(), String.size()) == String.size();
 	}
 
 protected:

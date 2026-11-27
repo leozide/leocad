@@ -184,11 +184,6 @@ public:
 		if (ReadU32(&Size, 1) != 1)
 			return false;
 
-		const long Position = GetPosition();
-
-		if (Position < 0 || static_cast<size_t>(Position) > GetLength() || Size > GetLength() - static_cast<size_t>(Position))
-			return false;
-
 		String.resize(Size);
 
 		return ReadBuffer(String.data(), Size) == Size;
@@ -452,7 +447,7 @@ protected:
 
 		return BytesWritten / 4;
 #else
-		return WriteBuffer(Buffer, Count * 4);
+		return WriteBuffer(Buffer, Count * 4) / 4;
 #endif
 	}
 
@@ -479,7 +474,7 @@ protected:
 
 		return BytesWritten / 8;
 #else
-		return WriteBuffer(Buffer, Count * 8);
+		return WriteBuffer(Buffer, Count * 8) / 8;
 #endif
 	}
 };

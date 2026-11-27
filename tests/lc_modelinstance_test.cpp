@@ -76,6 +76,7 @@ class lcModelInstanceTests : public QObject
 private slots:
 	void ConnectionCompatibility();
 	void ConnectionPlacementRefreshesPublishedConnections();
+	void FileIntegerWriteCounts();
 	void SlidingConnectionOccupancy();
 	void ConnectionRayPrefersNearerConnector();
 	void ConnectionRayBreaksTranslationTiesConsistently();
@@ -85,6 +86,7 @@ private slots:
 	void PatternConnectionsPublishWithMesh();
 	void ConnectionsPublishWithMesh();
 	void ConnectionsWithCachedMesh();
+	void ConnectionsWithArchiveCacheInvalidation();
 	void ConnectionsLargeGrid();
 	void ConnectionsDeepReferences();
 	void StudDragAcceptance_data();
@@ -178,6 +180,7 @@ private slots:
 
 private:
 	static QByteArray CreateAddonArchive(const QByteArray& Name, const QByteArray& Data, quint32 Mode, quint32 DeclaredSize, bool BadCrc, bool Deflated);
+	static QByteArray CreateArchive(const std::map<QByteArray, QByteArray>& Files);
 	void SeparateRotations(lcMainWindow* Window, lcModel* Model);
 	void CameraContexts(lcMainWindow* Window, lcView* View, lcModel* Main, lcModel* A, lcModel* B);
 };
@@ -216,6 +219,55 @@ QByteArray lcModelInstanceTests::CreateAddonArchive(const QByteArray& Name, cons
 	Stream.writeRawData(Name.constData(), Name.size());
 	const quint32 CentralSize = static_cast<quint32>(Zip.size()) - CentralOffset;
 	Stream << quint32(0x06054b50) << quint16(0) << quint16(0) << quint16(1) << quint16(1)
+		<< CentralSize << CentralOffset << quint16(0);
+	return Zip;
+}
+
+QByteArray lcModelInstanceTests::CreateArchive(const std::map<QByteArray, QByteArray>& Files)
+{
+	struct Entry
+	{
+		QByteArray Name;
+		QByteArray Data;
+		quint32 Crc;
+		quint32 Offset;
+	};
+
+	QByteArray Zip;
+	QDataStream Stream(&Zip, QIODevice::WriteOnly);
+	Stream.setByteOrder(QDataStream::LittleEndian);
+	std::vector<Entry> Entries;
+
+	for (const auto& [Name, Data] : Files)
+	{
+		quint32 Crc = 0xffffffff;
+		for (unsigned char Byte : Data)
+		{
+			Crc ^= Byte;
+			for (int Bit = 0; Bit < 8; Bit++)
+				Crc = (Crc >> 1) ^ (0xedb88320u & (0u - (Crc & 1u)));
+		}
+		Crc ^= 0xffffffff;
+
+		const quint32 Offset = static_cast<quint32>(Zip.size());
+		Stream << quint32(0x04034b50) << quint16(20) << quint16(0) << quint16(0) << quint32(0)
+			<< Crc << quint32(Data.size()) << quint32(Data.size()) << quint16(Name.size()) << quint16(0);
+		Stream.writeRawData(Name.constData(), Name.size());
+		Stream.writeRawData(Data.constData(), Data.size());
+		Entries.push_back({ Name, Data, Crc, Offset });
+	}
+
+	const quint32 CentralOffset = static_cast<quint32>(Zip.size());
+	for (const Entry& Item : Entries)
+	{
+		Stream << quint32(0x02014b50) << quint16(0x0314) << quint16(20) << quint16(0) << quint16(0) << quint32(0)
+			<< Item.Crc << quint32(Item.Data.size()) << quint32(Item.Data.size()) << quint16(Item.Name.size())
+			<< quint16(0) << quint16(0) << quint16(0) << quint16(0) << (quint32(0100644) << 16) << Item.Offset;
+		Stream.writeRawData(Item.Name.constData(), Item.Name.size());
+	}
+
+	const quint32 CentralSize = static_cast<quint32>(Zip.size()) - CentralOffset;
+	Stream << quint32(0x06054b50) << quint16(0) << quint16(0) << quint16(Entries.size()) << quint16(Entries.size())
 		<< CentralSize << CentralOffset << quint16(0);
 	return Zip;
 }
@@ -553,6 +605,164 @@ void lcModelInstanceTests::ConnectionsWithCachedMesh()
 	QCOMPARE(Axial.z, 0.288f);
 }
 
+void lcModelInstanceTests::ConnectionsWithArchiveCacheInvalidation()
+{
+	class CacheLibrary : public lcPiecesLibrary
+	{
+	public:
+		explicit CacheLibrary(const QString& CachePath) : lcPiecesLibrary(lcStudStyle::Plain, false) { mCachePath = CachePath; }
+		using lcPiecesLibrary::BuildPieceData;
+		using lcPiecesLibrary::SnapshotPieceDataSource;
+		using lcPiecesLibrary::Unload;
+	};
+
+	QTemporaryDir Directory;
+	QVERIFY(Directory.isValid());
+	QVERIFY(QDir(Directory.path()).mkpath("cache"));
+
+	const QByteArray Brick3001 =
+		"0 Brick 2 x 4\n"
+		"1 16 -20 0 0 1 0 0 0 1 0 0 0 1 stug-2x2.dat\n"
+		"1 16 20 0 0 1 0 0 0 1 0 0 0 1 stug-2x2.dat\n";
+	const QByteArray StudSubpart =
+		"1 16 10 0 10 1 0 0 0 1 0 0 0 1 stud.dat\n"
+		"1 16 -10 0 10 1 0 0 0 1 0 0 0 1 stud.dat\n"
+		"1 16 10 0 -10 1 0 0 0 1 0 0 0 1 stud.dat\n"
+		"1 16 -10 0 -10 1 0 0 0 1 0 0 0 1 stud.dat\n";
+	const QByteArray Triangle = "0 Test piece\n3 16 0 0 0 1 0 0 0 1 0\n";
+	const QByteArray OfficialArchive = CreateArchive({
+		{ "ldraw/parts/3001.dat", Brick3001 },
+		{ "ldraw/p/stug-2x2.dat", StudSubpart },
+		{ "ldraw/p/stud.dat", Triangle },
+		{ "ldraw/parts/3701.dat", Triangle },
+		{ "ldraw/parts/cachefixture.dat", Triangle }
+	});
+
+	auto MakeShadowArchive = [](bool ChangedStud)
+	{
+		const QByteArray Stud = ChangedStud
+			? "0 Stud primitive\n0 !LDCAD SNAP_CYL [id=stud] [gender=M] [caps=one] [secs=R 7 4]\n0 changed\n"
+			: "0 Stud primitive\n0 !LDCAD SNAP_CYL [id=stud] [gender=M] [caps=one] [secs=R 6 4]\n";
+		const QByteArray Hole = "0 !LDCAD SNAP_CYL [id=hole] [gender=F] [caps=none] [secs=R 8 2 R 6 16 R 8 2] [center=true] [slide=true]\n";
+		const QByteArray Brick3701 =
+			"0 LDCad shadow info for Technic Brick 1 x 4 with Holes\n"
+			"0 !LDCAD SNAP_INCL [ref=connhole.dat] [pos=0 10 0] [ori=1 0 0 0 0 1 0 -1 0] [grid=C 3 1 20 0]\n"
+			"0 !LDCAD SNAP_CYL [gender=F] [caps=one] [secs=S 6 4] [pos=0 24 0] [grid=C 4 1 20 0]\n";
+		const QByteArray CacheFixture =
+			"0 Cache-focused connections\n"
+			"0 !LDCAD SNAP_CYL [id=removed] [secs=R 2 3] [pos=1 0 0]\n"
+			"0 !LDCAD SNAP_CLEAR [id=removed]\n"
+			"0 !LDCAD SNAP_CYL [id=kept] [secs=R 6 4] [pos=0 8 0]\n"
+			"0 !LDCAD SNAP_INCL [ref=scaled.dat] [pos=10 0 0] [ori=-1 0 0 0 1 0 0 0 1] [scale=2 1 2] [grid=2 1 20 0]\n";
+		const QByteArray Scaled = "0 !LDCAD SNAP_CYL [secs=R 6 4] [scale=ROnly] [pos=1 0 0]\n";
+		return CreateArchive({
+			{ "p/stud.dat", Stud },
+			{ "parts/3701.dat", Brick3701 },
+			{ "p/connhole.dat", Hole },
+			{ "parts/cachefixture.dat", CacheFixture },
+			{ "p/scaled.dat", Scaled }
+		});
+	};
+
+	const QString LibraryPath = Directory.filePath("library.bin");
+	const QString ShadowPath = Directory.filePath("shadow.zip");
+	auto Write = [](const QString& Path, const QByteArray& Data)
+	{
+		QFile File(Path);
+		return File.open(QIODevice::WriteOnly) && File.write(Data) == Data.size();
+	};
+	QVERIFY(Write(LibraryPath, OfficialArchive));
+	QVERIFY(Write(ShadowPath, MakeShadowArchive(false)));
+
+	lcPiecesLibrary* PreviousLibrary = gApplication->mLibrary;
+	CacheLibrary Library(Directory.filePath("cache"));
+	gApplication->mLibrary = &Library;
+	struct RestoreLibrary
+	{
+		lcPiecesLibrary*& Slot;
+		lcPiecesLibrary* Previous;
+		~RestoreLibrary() { Slot = Previous; }
+	} Restore{ gApplication->mLibrary, PreviousLibrary };
+
+	const std::array<const char*, 3> PieceNames = { "3001.dat", "3701.dat", "cachefixture.dat" };
+	std::map<std::string, lcConnections> ColdConnections;
+
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	for (const char* Name : PieceNames)
+	{
+		const lcPieceDataRef Piece = Library.AcquirePieceData(Name, nullptr, lcAcquirePieceDataFlag::None);
+		QVERIFY(Piece);
+		QVERIFY(Library.WaitForPieceData(Piece));
+		ColdConnections[Name] = Piece->GetConnections();
+	}
+	QCOMPARE(ColdConnections["3001.dat"].size(), size_t(8));
+	QCOMPARE(ColdConnections["3701.dat"].size(), size_t(7));
+
+	const lcConnections& FixtureConnections = ColdConnections["cachefixture.dat"];
+	QCOMPARE(FixtureConnections.size(), size_t(3));
+	QCOMPARE(std::get<lcCylinderConnection>(FixtureConnections[0].Shape).Sections.front().Radius, 6.0f);
+	QCOMPARE(FixtureConnections[1].Scale.x, 2.0f);
+	QCOMPARE(FixtureConnections[1].Scale.y, 2.0f);
+	QVERIFY(fabsf(FixtureConnections[1].Frame.Determinant() - 1.0f) < 0.001f);
+	QVERIFY(fabsf(FixtureConnections[1].Frame.GetTranslation().x - FixtureConnections[2].Frame.GetTranslation().x) > 19.0f);
+
+	Library.Unload();
+	QVERIFY(QFileInfo(Directory.filePath("cache/3001.dat")).exists());
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	for (const char* Name : PieceNames)
+	{
+		const lcPieceData* Piece = Library.FindPieceData(Name, nullptr);
+		QVERIFY(Piece);
+		const lcPieceBuildResult Warm = Library.BuildPieceData(Library.SnapshotPieceDataSource(Piece));
+		QVERIFY2(Warm.FromCache, Name);
+		lcMemFile Serialized;
+		QVERIFY(lcSaveConnections(Serialized, Warm.Connections));
+		const QByteArray WarmBytes(reinterpret_cast<const char*>(Serialized.mBuffer), static_cast<int>(Serialized.GetLength()));
+		lcMemFile ColdSerialized;
+		QVERIFY(lcSaveConnections(ColdSerialized, ColdConnections[Name]));
+		const QByteArray ColdBytes(reinterpret_cast<const char*>(ColdSerialized.mBuffer), static_cast<int>(ColdSerialized.GetLength()));
+		QCOMPARE(WarmBytes, ColdBytes);
+	}
+
+	Library.Unload();
+	QVERIFY(Write(ShadowPath, MakeShadowArchive(true)));
+	QVERIFY(Library.Load(LibraryPath, false, true));
+	const lcPieceData* Brick = Library.FindPieceData("3001.dat", nullptr);
+	QVERIFY(Brick);
+	const lcPieceBuildResult Invalidated = Library.BuildPieceData(Library.SnapshotPieceDataSource(Brick));
+	QVERIFY(!Invalidated.FromCache);
+	QCOMPARE(Invalidated.Connections.size(), size_t(8));
+	QCOMPARE(std::get<lcCylinderConnection>(Invalidated.Connections.front().Shape).Sections.front().Radius, 7.0f);
+
+	const QString UnpackedPath = Directory.filePath("unpacked");
+	QVERIFY(QDir().mkpath(QDir(UnpackedPath).filePath("parts")));
+	QVERIFY(QDir().mkpath(QDir(UnpackedPath).filePath("p")));
+	const QByteArray UnpackedStud = "0 !LDCAD SNAP_CYL [id=stud] [gender=M] [caps=one] [secs=R 6 4]\n";
+	QVERIFY(Write(QDir(UnpackedPath).filePath("parts/3001.dat"), Brick3001));
+	QVERIFY(Write(QDir(UnpackedPath).filePath("p/stug-2x2.dat"), StudSubpart));
+	QVERIFY(Write(QDir(UnpackedPath).filePath("p/stud.dat"), Triangle + UnpackedStud));
+	QVERIFY(Write(QDir(UnpackedPath).filePath("shadow.zip"), CreateArchive({ { "parts/unrelated.dat", "0 unrelated\n" } })));
+	QVERIFY(Library.Load(UnpackedPath, false, false));
+	{
+		const lcPieceDataRef Piece = Library.AcquirePieceData("3001.dat", nullptr, lcAcquirePieceDataFlag::None);
+		QVERIFY(Piece);
+		QVERIFY(Library.WaitForPieceData(Piece));
+		QCOMPARE(Piece->GetConnections().size(), size_t(8));
+		QCOMPARE(std::get<lcCylinderConnection>(Piece->GetConnections().front().Shape).Sections.front().Radius, 6.0f);
+	}
+	Library.Unload();
+	const QByteArray ModifiedUnpackedStud = Triangle + "0 !LDCAD SNAP_CYL [id=stud] [gender=M] [caps=one] [secs=R 7 4]\n0 edited dependency\n";
+	QVERIFY(Write(QDir(UnpackedPath).filePath("p/stud.dat"), ModifiedUnpackedStud));
+	QVERIFY(Library.Load(UnpackedPath, false, false));
+	{
+		const lcPieceDataRef Piece = Library.AcquirePieceData("3001.dat", nullptr, lcAcquirePieceDataFlag::None);
+		QVERIFY(Piece);
+		QVERIFY(Library.WaitForPieceData(Piece));
+		QCOMPARE(Piece->GetConnections().size(), size_t(8));
+		QCOMPARE(std::get<lcCylinderConnection>(Piece->GetConnections().front().Shape).Sections.front().Radius, 7.0f);
+	}
+}
+
 void lcModelInstanceTests::ConnectionsLargeGrid()
 {
 	lcPiecesLibrary Library(lcStudStyle::Plain, false);
@@ -650,9 +860,9 @@ static lcConnectionDragState::Endpoint StudEndpoint(const lcPiece* Piece, lcStud
 {
 	using Profile = lcCylinderConnection::SectionProfile;
 	using Caps = lcCylinderConnection::CylinderCaps;
-	static const lcConnection Stud{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	static const lcConnection Stud{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Round, 6, 4 } }, lcConnectionGender::Male, Caps::A, false, false, lcStudType::Male } };
-	static const lcConnection Receiver{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	static const lcConnection Receiver{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Square, 6, 20 } }, lcConnectionGender::Female, Caps::B, false, false, lcStudType::Female } };
 
 	return { Piece, lcConnectionPoint(Type == lcStudType::Male ? Stud : Receiver, lcMatrix44Translation(Position)), std::nullopt };
@@ -927,9 +1137,9 @@ void lcModelInstanceTests::SlidingConnectionOccupancy()
 	using Endpoint = lcConnectionDragState::Endpoint;
 	using Profile = lcCylinderConnection::SectionProfile;
 	using Caps = lcCylinderConnection::CylinderCaps;
-	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Round, 4, 80 } }, lcConnectionGender::Male, Caps::Both, true, true } };
-	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(), lcClipConnection{ 4, 8, true, false } };
 	const lcMatrix33 AlongX = lcMatrix33FromAxisAngle(lcVector3(0, 1, 0), LC_PI * 0.5f);
 	lcPiece BarPiece, ClipPiece, MovingBarPiece, MovingClipPiece;
 	const Endpoint SeatedClip{ &ClipPiece, lcConnectionPoint(Clip, lcMatrix44(AlongX, lcVector3(-13, 0, 0))), std::nullopt };
@@ -973,11 +1183,11 @@ void lcModelInstanceTests::ConnectionRayPrefersNearerConnector()
 	using Endpoint = lcConnectionDragState::Endpoint;
 	using Profile = lcCylinderConnection::SectionProfile;
 	using Caps = lcCylinderConnection::CylinderCaps;
-	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Round, 4, 80 } }, lcConnectionGender::Male, Caps::None, true, true } };
-	const lcConnection Bore{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	const lcConnection Bore{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Round, 4, 20 } }, lcConnectionGender::Female, Caps::None, true, true } };
-	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(), lcClipConnection{ 4, 8, true, false } };
 	const lcVector3 RayStart(0, 0, 100);
 	const lcConnectionSnapContext Context{
 		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 300)),
@@ -1089,9 +1299,9 @@ void lcModelInstanceTests::ConnectionRayBreaksTranslationTiesConsistently()
 	using Endpoint = lcConnectionDragState::Endpoint;
 	using Profile = lcCylinderConnection::SectionProfile;
 	using Caps = lcCylinderConnection::CylinderCaps;
-	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(),
+	const lcConnection Bar{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(),
 		lcCylinderConnection{ { { Profile::Round, 4, 10 } }, lcConnectionGender::Male, Caps::Both, true, true } };
-	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), QByteArray(), lcClipConnection{ 4, 8, true, false } };
+	const lcConnection Clip{ lcMatrix44Identity(), lcVector3(1, 1, 1), std::string(), lcClipConnection{ 4, 8, true, false } };
 	const lcVector3 RayStart(0, 0, 100);
 	const lcConnectionSnapContext Context{
 		lcMul(lcMatrix44Translation(lcVector3(0, 0, -100)), lcMatrix44Ortho(-100, 100, -100, 100, 1, 300)),
@@ -2950,13 +3160,18 @@ void lcModelInstanceTests::MeshCacheBackgroundWrite()
 		using lcPiecesLibrary::SaveBuiltPieceDataCache;
 		using lcPiecesLibrary::mArchiveCheckSum;
 		using lcPiecesLibrary::mCacheWrites;
+		void SetArchiveCheckSum(qint64 Value)
+		{
+			mArchiveCheckSum = { Value, Value, Value, Value, Value, Value };
+		}
+		void SetOfficialArchiveSize(qint64 Value) { mArchiveCheckSum.OfficialSize = Value; }
 	};
 
 	QTemporaryDir Directory;
 	QVERIFY(Directory.isValid());
 	QSemaphore Started, Resume;
 	CacheLibrary Library;
-	std::fill(std::begin(Library.mArchiveCheckSum), std::end(Library.mArchiveCheckSum), 17);
+	Library.SetArchiveCheckSum(17);
 
 	// Hold the writer to prove queuing neither compresses nor writes on the caller.
 	QThreadPool* Pool = QThreadPool::globalInstance();
@@ -3003,27 +3218,48 @@ void lcModelInstanceTests::MeshCacheBackgroundWrite()
 	Existing.close();
 
 	// The job owns serialized bytes and a checksum snapshot, not the live mesh/library data.
-	Library.mArchiveCheckSum[0] = 18;
+	Library.SetOfficialArchiveSize(18);
 	Resume.release();
 	Library.mCacheWrites.front().waitForFinished();
 	lcMemFile Data;
 	QVERIFY(!Library.ReadArchiveCacheFile(Source.CachePath, Data));
-	Library.mArchiveCheckSum[0] = 17;
+	Library.SetOfficialArchiveSize(17);
 	QVERIFY(Library.ReadArchiveCacheFile(Source.CachePath, Data));
 	Data.ReadU32(); // Mesh settings precede the existing mesh file format.
 	lcMesh Restored;
 	QVERIFY(Restored.FileLoad(Data));
+	lcConnections RestoredConnections;
+	QVERIFY(lcLoadConnections(Data, RestoredConnections));
+	QVERIFY(RestoredConnections.empty());
 	QCOMPARE(Restored.mNumVertices, quint32(24));
 	Restored.FinalizeSections();
 
 	// Destruction drains queued writes without needing the UI event loop.
 	{
 		CacheLibrary DrainingLibrary;
-		std::fill(std::begin(DrainingLibrary.mArchiveCheckSum), std::end(DrainingLibrary.mArchiveCheckSum), 17);
+		DrainingLibrary.SetArchiveCheckSum(17);
 		Source.CachePath = Directory.filePath("drained.cache");
 		DrainingLibrary.SaveBuiltPieceDataCache(Source, Restored);
 	}
 	QVERIFY(Library.ReadArchiveCacheFile(Source.CachePath, Data));
+}
+
+void lcModelInstanceTests::FileIntegerWriteCounts()
+{
+	const std::array<quint32, 2> Values32 = { 0x12345678u, 0x9abcdef0u };
+	const std::array<quint64, 2> Values64 = { 0x0123456789abcdefull, 0xfedcba9876543210ull };
+	lcMemFile File;
+	QCOMPARE(File.WriteU32(Values32.data(), Values32.size()), Values32.size());
+	QCOMPARE(File.WriteU64(Values64.data(), Values64.size()), Values64.size());
+	File.Seek(0, SEEK_SET);
+	std::array<quint32, 2> Read32{};
+	std::array<quint64, 2> Read64{};
+	QCOMPARE(File.ReadU32(Read32.data(), Read32.size()), Read32.size());
+	QCOMPARE(File.ReadU64(Read64.data(), Read64.size()), Read64.size());
+	QCOMPARE(Read32[0], Values32[0]);
+	QCOMPARE(Read32[1], Values32[1]);
+	QCOMPARE(Read64[0], Values64[0]);
+	QCOMPARE(Read64[1], Values64[1]);
 }
 
 void lcModelInstanceTests::MeshCacheValidation_data()
